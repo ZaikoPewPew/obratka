@@ -1,3 +1,20 @@
 {
-  "count": 2345
+  "count": 2345,
+  "items": [
+    {
+      "avatar": "/startup-placeholder.svg",
+      "title": "Quibi",
+      "description": "Short-form video, long shutdown"
+    },
+    {
+      "avatar": "/startup-placeholder.svg",
+      "title": "Theranos",
+      "description": "Diagnostics that never shipped"
+    },
+    {
+      "avatar": "/startup-placeholder.svg",
+      "title": "WeWork",
+      "description": "Office space, IPO dreams"
+    }
+  ]
 }

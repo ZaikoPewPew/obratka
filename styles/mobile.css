@@ -22,7 +22,7 @@
 
   .mobile-top {
     position: relative;
-    z-index: 2;
+    z-index: 4;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -101,5 +101,13 @@
     flex: 1 1 72px;
     width: auto;
     min-width: 0;
+  }
+
+  /* Одна «точка» приземления на узком экране — карточки по очереди */
+  .startup-fall__item--slot-0,
+  .startup-fall__item--slot-2 {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
   }
 }

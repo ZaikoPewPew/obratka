@@ -3,6 +3,8 @@ import { getLocale, getStrings, getStartups } from "./i18n.js";
 import { createLogo } from "./components/logo/Logo.js";
 import { createWaitlistCounter } from "./components/waitlist-counter/WaitlistCounter.js";
 import { createApplyCard } from "./components/apply-card/ApplyCard.js";
+import { createStartupFallItem } from "./components/startup-card/StartupCard.js";
+import { initStartupRainPhysics } from "./startup-rain-physics.js";
 
 function mountLogos(brandName) {
   document.querySelectorAll('[data-mount="logo"]').forEach((node) => {
@@ -56,6 +58,18 @@ function mountSiteFooter(t) {
   });
 }
 
+function mountStartupFall() {
+  const { items = [] } = getStartups();
+  document.querySelectorAll('[data-mount="startup-fall"]').forEach((node) => {
+    const layer = document.createElement("div");
+    layer.className = "startup-fall";
+    items.forEach((item, i) => {
+      layer.append(createStartupFallItem(item, i));
+    });
+    node.replaceWith(layer);
+  });
+}
+
 function mountApplyCards(t) {
   const desktopCard = createApplyCard({ t });
   const mobileCard = createApplyCard({ t, modifier: "apply-card apply-card--mobile" });
@@ -75,8 +89,15 @@ function init() {
 
   mountLogos(t.brandName);
   mountTimerSlot(t, locale);
+  mountStartupFall();
   mountApplyCards(t);
   mountSiteFooter(t);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      initStartupRainPhysics();
+    });
+  });
 
   document.title = t.metaTitle;
 }
