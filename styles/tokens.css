@@ -1,0 +1,15 @@
+/**
+ * Граница между «мобилкой» и десктопом.
+ * Меняйте одно число — оба файла (desktop/mobile) остаются согласованы.
+ */
+:root {
+  /* Для стилей внутри блоков. Сами @media — литералы 768px / 767px в desktop.css и mobile.css */
+  --breakpoint-min-desktop: 768px;
+
+  --font-family: "Montserrat", system-ui, sans-serif;
+  --desktop-component-padding: 16px;
+
+  /* Бейдж «таймер» / счётчик в шапке */
+  --timer-badge-bg: #f3f4f7;
+  --timer-dot-fill: #00c023;
+}

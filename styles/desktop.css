@@ -1,0 +1,123 @@
+/* Видимость лейаутов: по умолчанию десктоп; мобилка — в mobile.css */
+
+.layout-desktop {
+  display: block;
+}
+
+.desktop-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #ffffff;
+  color: #111111;
+}
+
+.desktop-top {
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: var(--desktop-component-padding);
+  flex-shrink: 0;
+}
+
+.desktop-top__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.desktop-logo {
+  display: block;
+  flex-shrink: 0;
+  align-self: flex-start;
+  border-radius: 14px;
+}
+
+.desktop-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  min-height: 0;
+}
+
+/* Слот «таймер» в шапке — бейдж счётчика стартапов */
+.desktop-timer.desktop-counter {
+  box-sizing: border-box;
+  margin-top: 0;
+  width: max-content;
+  min-width: 305px;
+  max-width: 100%;
+  height: 51px;
+  padding: 12px 24px;
+  border-radius: 500px;
+  background: var(--timer-badge-bg, #f3f4f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ряд «точка + текст»: только здесь gap — как в Figma Auto Layout */
+.desktop-counter__inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.desktop-counter__pointer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 9px;
+  height: 9px;
+  line-height: 0;
+}
+
+.desktop-counter__pointer svg {
+  display: block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  overflow: visible;
+}
+
+.desktop-counter__dot {
+  fill: var(--timer-dot-fill, #00c023);
+  transform-origin: center;
+  animation: desktop-counter-dot-blink 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop-counter__dot {
+    animation: none;
+  }
+}
+
+@keyframes desktop-counter-dot-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.28;
+  }
+}
+
+.desktop-counter__text {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 170%;
+  text-align: center;
+  color: #000;
+}

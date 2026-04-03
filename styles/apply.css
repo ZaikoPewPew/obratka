@@ -1,0 +1,193 @@
+/* Центральный блок заявки */
+
+.apply-card {
+  box-sizing: border-box;
+  width: 530px;
+  min-height: 398px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.apply-card__title {
+  margin: 0 0 12px;
+  max-width: 100%;
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 40px;
+  text-align: center;
+  color: #242426;
+  line-height: 1.15;
+}
+
+.apply-card__subtitle {
+  margin: 0 0 32px;
+  max-width: 100%;
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 170%;
+  text-align: center;
+  color: #797979;
+}
+
+.apply-card__cta {
+  box-sizing: border-box;
+  margin: 0 0 24px;
+  border: none;
+  border-radius: 16px;
+  padding: 24px;
+  width: 450px;
+  height: 75px;
+  background: #242426;
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 170%;
+  text-align: center;
+  color: #fff;
+  cursor: pointer;
+}
+
+.apply-card__divider {
+  margin: 0 0 24px;
+}
+
+/* DividerOr */
+.divider-or {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 450px;
+}
+
+.divider-or__line {
+  flex: 0 0 196px;
+  width: 196px;
+  height: 1px;
+  background: rgba(36, 36, 38, 0.2);
+}
+
+.divider-or__label {
+  flex-shrink: 0;
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 170%;
+  text-align: center;
+  color: #242426;
+}
+
+/* Email + аватарки */
+.email-field-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 450px;
+  height: 123px;
+  box-sizing: border-box;
+}
+
+.email-input-shell {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: 450px;
+  height: 75px;
+  padding: 24px;
+  border-radius: 16px;
+  background: #f3f4f7;
+}
+
+.email-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 170%;
+  color: #242426;
+}
+
+.email-input::placeholder {
+  color: #797979;
+}
+
+.email-input-shell:has(.email-input__submit:not([hidden])) .email-input {
+  padding-right: 40px;
+}
+
+.email-input__submit {
+  position: absolute;
+  top: 50%;
+  right: 24px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.email-avatars {
+  display: flex;
+  align-items: center;
+  width: 450px;
+  height: 32px;
+}
+
+.email-avatars__stack {
+  display: flex;
+  flex-shrink: 0;
+  width: 113px;
+  height: 32px;
+  align-items: center;
+}
+
+.email-avatars__avatar {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px #fff;
+}
+
+.email-avatars__avatar:not(:first-child) {
+  margin-left: -5px;
+}
+
+.email-avatars__avatar:nth-child(1) {
+  z-index: 4;
+}
+.email-avatars__avatar:nth-child(2) {
+  z-index: 3;
+}
+.email-avatars__avatar:nth-child(3) {
+  z-index: 2;
+}
+.email-avatars__avatar:nth-child(4) {
+  z-index: 1;
+}
+
+.email-avatars__caption {
+  margin: 0 0 0 8px;
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 170%;
+  color: #242426;
+}

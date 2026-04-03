@@ -1,0 +1,35 @@
+{
+  "defaultLocale": "ru",
+  "supportedLocales": ["ru", "en"],
+  "timerEnd": "2026-12-31T23:59:59.000Z",
+  "locales": {
+    "ru": {
+      "metaTitle": "Memento — waitlist",
+      "brandName": "Memento",
+      "timerPrefix": "До старта:",
+      "timerDaySuffix": "д",
+      "timerBadge": "Сейчас в базе {count} стартапов",
+      "applyTitle": "База данных из 2,345 провалившихся стартапа",
+      "applySubtitle": "Деньги, даты и причины смерти",
+      "ctaPrimary": "Получить ранний доступ за 490 ₽",
+      "dividerOr": "или",
+      "emailPlaceholder": "your@email.com",
+      "emailSubmitAria": "Отправить email",
+      "foundersWaiting": "123+ фаундера ждут релиза"
+    },
+    "en": {
+      "metaTitle": "Memento — waitlist",
+      "brandName": "Memento",
+      "timerPrefix": "Until launch:",
+      "timerDaySuffix": "d",
+      "timerBadge": "{count} startups in the database",
+      "applyTitle": "A database of failed startups",
+      "applySubtitle": "Money, dates and causes of death",
+      "ctaPrimary": "Get early access for ₽490",
+      "dividerOr": "or",
+      "emailPlaceholder": "your@email.com",
+      "emailSubmitAria": "Submit email",
+      "foundersWaiting": "123+ founders waiting for the release"
+    }
+  }
+}
