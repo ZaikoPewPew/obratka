@@ -1,8 +1,14 @@
 import logoUrl from "../logo.svg?url";
-import { getLocale, getStrings, getStartups } from "./i18n.js";
+import { getLocale, getStrings, getStartups, setLocale } from "./i18n.js";
+import { getFormattedStartupCount } from "./components/startup-count/startupCount.js";
 import { createLogo } from "./components/logo/Logo.js";
+import { createLocaleToggleButton } from "./components/locale-toggle/LocaleToggle.js";
 import { createWaitlistCounter } from "./components/waitlist-counter/WaitlistCounter.js";
-import { createApplyCard } from "./components/apply-card/ApplyCard.js";
+import {
+  createApplyCard,
+  createApplyCardForm,
+  createApplyCardHero,
+} from "./components/apply-card/ApplyCard.js";
 import {
   createAmbientFallLayer,
   createStartupFallItem,
@@ -20,25 +26,46 @@ function mountLogos(brandName) {
       width: w,
       height: h,
       className,
+      useMaskHover: className === "desktop-logo",
     });
     node.replaceWith(img);
   });
 }
 
-/** Слот data-mount="timer": бейдж счётчика стартапов (позже можно подключить живой таймер/счётчик). */
-function mountTimerSlot(t, locale) {
-  const { count } = getStartups();
-  const formatted = count.toLocaleString(locale === "ru" ? "ru-RU" : "en-US");
-  const text = t.timerBadge.replace("{count}", formatted);
+/** Слот data-mount="header-actions": кнопка языка + бейдж счётчика (8px между ними). */
+function mountHeaderActions(t, locale) {
+  const formatted = getFormattedStartupCount(locale);
+  const nextLocale = locale === "ru" ? "en" : "ru";
 
-  document.querySelectorAll('[data-mount="timer"]').forEach((node) => {
-    const variant = node.dataset.timerVariant || "desktop";
-    const className =
-      variant === "mobile"
-        ? "mobile-timer desktop-counter"
-        : "desktop-timer desktop-counter";
-    const el = createWaitlistCounter({ text, className });
-    node.replaceWith(el);
+  document.querySelectorAll('[data-mount="header-actions"]').forEach((node) => {
+    const variant = node.dataset.headerVariant || "desktop";
+    const isMobile = variant === "mobile";
+    const actions = document.createElement("div");
+    actions.className = isMobile
+      ? "header-actions header-actions--mobile"
+      : "header-actions header-actions--desktop";
+
+    const langBtn = createLocaleToggleButton({
+      ariaLabel: t.langSwitchAria,
+      onClick: () => setLocale(nextLocale),
+      variant: isMobile ? "mobile" : "desktop",
+    });
+
+    const timerClass = isMobile
+      ? "mobile-timer desktop-counter"
+      : "desktop-timer desktop-counter";
+    const timer = createWaitlistCounter({
+      template: t.timerBadge,
+      countFormatted: formatted,
+      className: timerClass,
+    });
+
+    if (isMobile) {
+      actions.append(timer, langBtn);
+    } else {
+      actions.append(langBtn, timer);
+    }
+    node.replaceWith(actions);
   });
 }
 
@@ -84,15 +111,20 @@ function mountStartupFall() {
   });
 }
 
-function mountApplyCards(t) {
-  const desktopCard = createApplyCard({ t });
-  const mobileCard = createApplyCard({ t, modifier: "apply-card apply-card--mobile" });
+function mountApplyCards(t, locale) {
+  const desktopMount = document.querySelector('.layout-desktop [data-mount="apply-card"]');
+  if (desktopMount) {
+    desktopMount.replaceWith(createApplyCard({ t, locale }));
+  }
 
-  const mounts = document.querySelectorAll('[data-mount="apply-card"]');
-  mounts.forEach((node, i) => {
-    const card = i === 0 ? desktopCard : mobileCard;
-    node.replaceWith(card);
-  });
+  const heroMount = document.querySelector('.layout-mobile [data-mount="apply-hero"]');
+  const formMount = document.querySelector('.layout-mobile [data-mount="apply-form"]');
+  if (heroMount) {
+    heroMount.replaceWith(createApplyCardHero({ t, locale }));
+  }
+  if (formMount) {
+    formMount.replaceWith(createApplyCardForm({ t }));
+  }
 }
 
 function init() {
@@ -102,10 +134,10 @@ function init() {
   const t = getStrings(locale);
 
   mountLogos(t.brandName);
-  mountTimerSlot(t, locale);
+  mountHeaderActions(t, locale);
   mountStartupFallBack();
   mountStartupFall();
-  mountApplyCards(t);
+  mountApplyCards(t, locale);
   mountSiteFooter(t);
 
   requestAnimationFrame(() => {

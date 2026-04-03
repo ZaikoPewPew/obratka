@@ -68,32 +68,79 @@ function barrierBodiesFromRects(rects) {
     const cy = r.top + r.height / 2;
     return Bodies.rectangle(cx, cy, r.width, r.height, {
       isStatic: true,
-      friction: 0.38,
-      frictionStatic: 0.55,
-      restitution: 0.22,
+      friction: 0.35,
+      frictionStatic: 0.5,
+      restitution: 0.38,
       label: "barrier",
       plugin: { barrier: true },
     });
   });
 }
 
+/** Боковые стенки зоны падения (локальные координаты слоя).
+ * Верхнюю границу не делаем статическим телом: при спавне y≈−52 нижняя грань тела
+ * всё ещё может пересекать полосу у y=0 — Matter зажимает карточки и они «замирают».
+ * Верх — только барьер заголовка формы + collisionStart. */
+function edgeWallBodiesFromFallRect(fr) {
+  const w = fr.width;
+  const h = fr.height;
+  const t = 36;
+  const wallOpts = {
+    isStatic: true,
+    friction: 0.28,
+    frictionStatic: 0.45,
+    restitution: 0.42,
+  };
+  return [
+    Bodies.rectangle(-t / 2, h / 2, t, h + t * 3, { ...wallOpts, label: "wall-left" }),
+    Bodies.rectangle(w + t / 2, h / 2, t, h + t * 3, { ...wallOpts, label: "wall-right" }),
+  ];
+}
+
 /**
+ * «Крыша» формы: по вертикали — только заголовок, по горизонтали — вся карточка заявки.
+ * Узкий h1 даёт rect уже карточки стартапа — боковые колонки дождя не пересекали барьер.
+ *
  * @param {DOMRect} fallRect
  * @param {HTMLElement} applyCard
  */
 function collectBarrierRects(fallRect, applyCard) {
-  return BARRIER_SELECTORS.map((sel) => applyCard.querySelector(sel))
-    .filter(Boolean)
-    .map((el) => {
-      const r = el.getBoundingClientRect();
-      return {
-        left: r.left - fallRect.left,
-        top: r.top - fallRect.top,
-        width: r.width,
-        height: r.height,
-      };
-    })
-    .filter((b) => b.width > 0 && b.height > 0);
+  const title = applyCard.querySelector(BARRIER_SELECTORS[0]);
+  if (!title) {
+    return [];
+  }
+  const tr = title.getBoundingClientRect();
+  const cr = applyCard.getBoundingClientRect();
+  if (tr.width <= 0 || tr.height <= 0) {
+    return [];
+  }
+  return [
+    {
+      left: cr.left - fallRect.left,
+      top: tr.top - fallRect.top,
+      width: cr.width,
+      height: tr.height,
+    },
+  ];
+}
+
+/**
+ * Отскок в сторону от края: левый слот — вправо, правый — влево, центр — от середины экрана.
+ * @param {import('matter-js').Body} body
+ * @param {number} fallWidth
+ * @param {number} strength
+ */
+function bounceKickX(body, fallWidth, strength) {
+  const slot = body._slot;
+  const j = (Math.random() - 0.5) * 0.5;
+  if (slot === 0) {
+    return strength + j;
+  }
+  if (slot === 2) {
+    return -strength + j;
+  }
+  const cx = fallWidth / 2;
+  return (body.position.x < cx ? strength : -strength) * 0.9 + j;
 }
 
 /**
@@ -168,7 +215,10 @@ export function initStartupRainPhysics() {
 
       const barrierRects = collectBarrierRects(fallRect0, applyCard);
       const barriers = barrierBodiesFromRects(barrierRects);
-      Composite.add(world, barriers);
+      const edgeWalls = edgeWallBodiesFromFallRect(fallRect0);
+      /** @type {import('matter-js').Body[]} */
+      let staticBodies = [...barriers, ...edgeWalls];
+      Composite.add(world, staticBodies);
 
       /** @type {import('matter-js').Body[]} */
       const cardBodies = [];
@@ -245,27 +295,53 @@ export function initStartupRainPhysics() {
       }
 
       Events.on(engine, "collisionStart", ({ pairs }) => {
+        const frW = fallLayer.getBoundingClientRect().width;
         for (let p = 0; p < pairs.length; p++) {
           const pair = pairs[p];
           const a = pair.bodyA;
           const b = pair.bodyB;
           const cardBody = a.label === "startup-card" ? a : b.label === "startup-card" ? b : null;
-          const barBody = a.label === "barrier" ? a : b.label === "barrier" ? b : null;
-          if (cardBody && barBody && cardBody._itemEl) {
+          const other = cardBody === a ? b : a;
+          if (!cardBody || !cardBody._itemEl || !other) {
+            continue;
+          }
+
+          if (other.label === "barrier") {
             flashSplash(cardBody._itemEl);
-            // Удар сверху по «крыше»: лёгкий сдвиг, чтобы не залипать плоской гранью по центру
-            const hitsFromAbove = cardBody.position.y + cardH * 0.32 < barBody.position.y;
-            if (hitsFromAbove) {
-              const sx = cardBody._slot === 1 ? 2.4 : 1.5;
+            Sleeping.set(cardBody, false);
+            const n = pair.collision?.normal;
+            const barrierTop = other.bounds.min.y;
+            const cardBottom = cardBody.position.y + cardH / 2;
+            /** Нормаль коллизии: при ударе сверху по «крыше» ось направлена вверх (отрицательный y). */
+            const normalSaysTopHit = n && n.y < -0.06;
+            const geomSaysTopHit =
+              cardBottom <= barrierTop + 18 || cardBody.position.y + cardH * 0.28 < other.position.y;
+            if (normalSaysTopHit || geomSaysTopHit) {
+              const kick = bounceKickX(cardBody, frW, cardBody._slot === 1 ? 2.35 : 2.05);
               Body.setVelocity(cardBody, {
-                x: cardBody.velocity.x + (Math.random() - 0.5) * sx,
-                y: Math.max(cardBody.velocity.y, 0.35) + Math.random() * 0.35,
+                x: cardBody.velocity.x * 0.35 + kick,
+                y: Math.max(cardBody.velocity.y, 0.42) + Math.random() * 0.35,
               });
               Body.setAngularVelocity(
                 cardBody,
                 cardBody.angularVelocity + (Math.random() - 0.5) * (cardBody._slot === 1 ? 0.14 : 0.08),
               );
             }
+            continue;
+          }
+
+          if (other.label === "wall-left") {
+            Body.setVelocity(cardBody, {
+              x: Math.max(cardBody.velocity.x, 0) * 0.25 + 1.85 + Math.random() * 0.35,
+              y: cardBody.velocity.y,
+            });
+            continue;
+          }
+          if (other.label === "wall-right") {
+            Body.setVelocity(cardBody, {
+              x: Math.min(cardBody.velocity.x, 0) * 0.25 - 1.85 - Math.random() * 0.35,
+              y: cardBody.velocity.y,
+            });
           }
         }
       });
@@ -320,8 +396,6 @@ export function initStartupRainPhysics() {
         }
       });
 
-      let barrierComposite = barriers;
-
       function rebuildBarriers() {
         const fr = fallLayer.getBoundingClientRect();
         const mainEl = fallLayer.closest("main");
@@ -329,10 +403,12 @@ export function initStartupRainPhysics() {
         if (!ac) {
           return;
         }
-        Composite.remove(world, barrierComposite);
+        Composite.remove(world, staticBodies);
         const rects = collectBarrierRects(fr, ac);
-        barrierComposite = barrierBodiesFromRects(rects);
-        Composite.add(world, barrierComposite);
+        const nextBarriers = barrierBodiesFromRects(rects);
+        const nextWalls = edgeWallBodiesFromFallRect(fr);
+        staticBodies = [...nextBarriers, ...nextWalls];
+        Composite.add(world, staticBodies);
       }
 
       let resizeT = 0;

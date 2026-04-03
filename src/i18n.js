@@ -25,6 +25,25 @@ export function getLocale() {
   return locales.defaultLocale;
 }
 
+/**
+ * Сохраняет локаль и перезагружает страницу с ?lang=…
+ * @param {string} next
+ */
+export function setLocale(next) {
+  const supported = locales.supportedLocales;
+  if (!supported.includes(next)) {
+    return;
+  }
+  try {
+    window.localStorage.setItem(STORAGE_KEY, next);
+  } catch {
+    /* ignore */
+  }
+  const url = new URL(window.location.href);
+  url.searchParams.set("lang", next);
+  window.location.href = url.toString();
+}
+
 export function getStrings(locale = getLocale()) {
   const block = locales.locales[locale];
   if (block) {

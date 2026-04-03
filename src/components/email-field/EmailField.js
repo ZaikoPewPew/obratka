@@ -11,12 +11,14 @@ function isValidEmail(value) {
 }
 
 /** Простые плейсхолдер-аватарки (локально, без запросов) */
-function createAvatarStack() {
+function createAvatarStack(count = 4) {
   const colors = ["#6b8cae", "#8f7a9a", "#7a9a8a", "#9a8a7a"];
+  const n = Math.min(Math.max(0, Math.floor(count)), colors.length);
   const stack = document.createElement("div");
-  stack.className = "email-avatars__stack";
+  stack.className =
+    n === 2 ? "email-avatars__stack email-avatars__stack--pair" : "email-avatars__stack";
 
-  for (let i = 0; i < 4; i += 1) {
+  for (let i = 0; i < n; i += 1) {
     const av = document.createElement("span");
     av.className = "email-avatars__avatar";
     av.style.background = colors[i];
@@ -27,7 +29,7 @@ function createAvatarStack() {
 
 /**
  * Инпут email + кнопка при вводе; ниже — аватарки и текст.
- * @param {{ placeholder: string; foundersText: string; submitAria: string; invalidEmailMessage: string; className?: string }} opts
+ * @param {{ placeholder: string; foundersText: string; submitAria: string; invalidEmailMessage: string; className?: string; avatarCount?: number }} opts
  * @returns {HTMLDivElement}
  */
 export function createEmailField({
@@ -36,6 +38,7 @@ export function createEmailField({
   submitAria,
   invalidEmailMessage,
   className = "email-field-block",
+  avatarCount = 4,
 }) {
   const root = document.createElement("div");
   root.className = className;
@@ -110,6 +113,56 @@ export function createEmailField({
   input.addEventListener("input", onInput);
   input.addEventListener("blur", onBlur);
 
+  /** Мобилка: при открытии клавиатуры держим поле в видимой области (visualViewport + scrollIntoView). */
+  input.addEventListener(
+    "focus",
+    () => {
+      if (window.matchMedia("(min-width: 768px)").matches) {
+        return;
+      }
+
+      const scrollTarget = shell;
+
+      const scrollIntoComfort = () => {
+        scrollTarget.scrollIntoView({
+          block: "center",
+          behavior: "smooth",
+        });
+      };
+
+      scrollIntoComfort();
+      requestAnimationFrame(scrollIntoComfort);
+      setTimeout(scrollIntoComfort, 350);
+
+      const vv = window.visualViewport;
+      if (!vv) {
+        return;
+      }
+
+      const onViewportChange = () => {
+        const rect = scrollTarget.getBoundingClientRect();
+        const viewBottom = vv.offsetTop + vv.height;
+        const pad = 16;
+        if (rect.bottom > viewBottom - pad) {
+          const delta = rect.bottom - (viewBottom - pad);
+          window.scrollBy({ top: delta, behavior: "smooth" });
+        }
+      };
+
+      onViewportChange();
+      vv.addEventListener("resize", onViewportChange);
+      vv.addEventListener("scroll", onViewportChange);
+
+      const stop = () => {
+        vv.removeEventListener("resize", onViewportChange);
+        vv.removeEventListener("scroll", onViewportChange);
+        input.removeEventListener("blur", stop);
+      };
+      input.addEventListener("blur", stop);
+    },
+    { passive: true },
+  );
+
   submit.addEventListener("click", () => {
     syncValidityMessage();
     const v = input.value.trim();
@@ -132,7 +185,7 @@ export function createEmailField({
   const row = document.createElement("div");
   row.className = "email-avatars";
 
-  const stack = createAvatarStack();
+  const stack = createAvatarStack(avatarCount);
   const caption = document.createElement("p");
   caption.className = "email-avatars__caption";
   caption.textContent = foundersText;

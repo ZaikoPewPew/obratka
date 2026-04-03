@@ -2,7 +2,10 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+    />
     <title>Memento — waitlist</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -28,7 +31,7 @@
             data-logo-class="desktop-logo"
           ></div>
           <div class="desktop-top__right">
-            <div data-mount="timer"></div>
+            <div data-mount="header-actions"></div>
           </div>
         </header>
 
@@ -72,19 +75,27 @@
     <div class="layout-mobile" aria-hidden="true">
       <main class="mobile-root">
         <header class="mobile-top">
+          <div data-mount="header-actions" data-header-variant="mobile"></div>
+        </header>
+
+        <section class="mobile-hero">
           <div
             data-mount="logo"
-            data-width="48"
-            data-height="24"
+            data-width="57"
+            data-height="29"
             data-logo-class="mobile-logo"
           ></div>
-          <div data-mount="timer" data-timer-variant="mobile"></div>
-        </header>
-        <div class="mobile-center">
-          <div data-mount="apply-card"></div>
+          <div data-mount="apply-hero"></div>
+        </section>
+
+        <div class="mobile-stage">
+          <div data-mount="startup-fall-back"></div>
+          <div data-mount="startup-fall"></div>
         </div>
-        <div data-mount="startup-fall-back"></div>
-        <div data-mount="startup-fall"></div>
+
+        <section class="mobile-bottom">
+          <div data-mount="apply-form"></div>
+        </section>
         <div class="water-waves" aria-hidden="true">
           <div class="water-waves__layer water-waves__layer--back">
             <svg

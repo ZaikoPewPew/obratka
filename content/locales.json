@@ -9,16 +9,19 @@
       "timerPrefix": "До старта:",
       "timerDaySuffix": "д",
       "timerBadge": "Сейчас в базе {count} стартапов",
-      "applyTitle": "База данных из 2,345 провалившихся стартапа",
+      "applyTitle": "База данных из {count} провалившихся стартапа",
       "applySubtitle": "Деньги, даты и причины смерти",
-      "ctaPrimary": "Получить ранний доступ за 490 ₽",
+      "ctaPrimary": "Получить ранний доступ за {price}",
+      "ctaPrimaryMobile": "Получить доступ за {price}",
+      "ctaAccessPrice": "490 ₽",
       "dividerOr": "или",
       "emailPlaceholder": "your@email.com",
       "emailInvalidHint": "Введите email в формате name@domain.com",
       "emailSubmitAria": "Отправить email",
       "foundersWaiting": "123+ фаундера ждут релиза",
       "footerCopyright": "© 2026 memento",
-      "footerContacts": "Контакты"
+      "footerContacts": "Контакты",
+      "langSwitchAria": "Переключить на английский"
     },
     "en": {
       "metaTitle": "Memento — waitlist",
@@ -26,16 +29,19 @@
       "timerPrefix": "Until launch:",
       "timerDaySuffix": "d",
       "timerBadge": "{count} startups in the database",
-      "applyTitle": "A database of failed startups",
+      "applyTitle": "A database of {count} failed startups",
       "applySubtitle": "Money, dates and causes of death",
-      "ctaPrimary": "Get early access for ₽490",
+      "ctaPrimary": "Get early access for {price}",
+      "ctaPrimaryMobile": "Get access for {price}",
+      "ctaAccessPrice": "$9",
       "dividerOr": "or",
       "emailPlaceholder": "your@email.com",
       "emailInvalidHint": "Enter an email like name@domain.com",
       "emailSubmitAria": "Submit email",
       "foundersWaiting": "123+ founders waiting for the release",
       "footerCopyright": "© 2026 memento",
-      "footerContacts": "Contacts"
+      "footerContacts": "Contacts",
+      "langSwitchAria": "Switch to Russian"
     }
   }
 }

@@ -1,9 +1,11 @@
+import { fillCountTemplate } from "../startup-count/startupCount.js";
+
 /**
  * Бейдж «сейчас в базе …» с мигающей точкой.
- * @param {{ text: string; className?: string }} opts
+ * @param {{ template: string; countFormatted: string; className?: string }} opts
  * @returns {HTMLDivElement}
  */
-export function createWaitlistCounter({ text, className = "" }) {
+export function createWaitlistCounter({ template, countFormatted, className = "" }) {
   const root = document.createElement("div");
   root.className = className;
   root.setAttribute("role", "status");
@@ -23,7 +25,7 @@ export function createWaitlistCounter({ text, className = "" }) {
 
   const label = document.createElement("span");
   label.className = "desktop-counter__text";
-  label.textContent = text;
+  fillCountTemplate(label, template, countFormatted);
 
   inner.append(pointer, label);
   root.append(inner);

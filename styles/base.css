@@ -15,6 +15,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Число стартапов в заголовке и бейдже — одно форматирование из `startupCount.js` */
+.startup-count {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
 .layout-desktop,
 .layout-mobile {
   min-height: 100vh;

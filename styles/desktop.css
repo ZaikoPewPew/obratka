@@ -34,6 +34,45 @@
   flex-shrink: 0;
 }
 
+/* Кнопка языка + счётчик: 8px между кнопкой и бейджем */
+.header-actions--desktop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.locale-toggle {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 51px;
+  height: 51px;
+  padding: 12px;
+  margin: 0;
+  border: none;
+  border-radius: 500px;
+  background: #f3f4f7;
+  cursor: pointer;
+  color: inherit;
+}
+
+.locale-toggle:hover {
+  opacity: 0.92;
+}
+
+.locale-toggle:focus-visible {
+  outline: 2px solid #242426;
+  outline-offset: 2px;
+}
+
+.locale-toggle svg {
+  display: block;
+  flex-shrink: 0;
+}
+
 .desktop-logo {
   display: block;
   flex-shrink: 0;
@@ -41,6 +80,22 @@
   width: 47px;
   height: 24px;
   border-radius: 14px;
+}
+
+/* Маска + заливка: точный hover #F9392A без правки SVG */
+.desktop-logo__fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  background-color: #242426;
+  -webkit-mask: var(--logo-mask-url) center / contain no-repeat;
+  mask: var(--logo-mask-url) center / contain no-repeat;
+  transition: background-color 0.2s ease;
+}
+
+.desktop-logo:hover .desktop-logo__fill {
+  background-color: #f9392a;
 }
 
 .desktop-center {

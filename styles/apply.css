@@ -47,6 +47,22 @@
   text-align: center;
   color: #fff;
   cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.apply-card__cta:hover {
+  background: #3d3d42;
+  color: #fafafa;
+}
+
+.apply-card__cta:active {
+  background: #1c1c1e;
+  color: #f0f0f0;
+}
+
+.apply-card__cta:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 3px;
 }
 
 .apply-card__divider {
