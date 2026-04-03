@@ -12,6 +12,7 @@
   }
 
   .mobile-root {
+    position: relative;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -20,6 +21,8 @@
   }
 
   .mobile-top {
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -53,11 +56,19 @@
   }
 
   .mobile-center {
+    position: relative;
+    z-index: 2;
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 0;
+  }
+
+  .mobile-root .water-waves {
+    left: 50%;
+    width: 100vw;
+    margin-left: -50vw;
   }
 
   .mobile-root .site-footer {
