@@ -3,7 +3,10 @@ import { getLocale, getStrings, getStartups } from "./i18n.js";
 import { createLogo } from "./components/logo/Logo.js";
 import { createWaitlistCounter } from "./components/waitlist-counter/WaitlistCounter.js";
 import { createApplyCard } from "./components/apply-card/ApplyCard.js";
-import { createStartupFallItem } from "./components/startup-card/StartupCard.js";
+import {
+  createAmbientFallLayer,
+  createStartupFallItem,
+} from "./components/startup-card/StartupCard.js";
 import { initStartupRainPhysics } from "./startup-rain-physics.js";
 
 function mountLogos(brandName) {
@@ -58,12 +61,23 @@ function mountSiteFooter(t) {
   });
 }
 
+function mountStartupFallBack() {
+  const { items = [] } = getStartups();
+  document.querySelectorAll('[data-mount="startup-fall-back"]').forEach((node) => {
+    const layer = document.createElement("div");
+    layer.className = "startup-fall-back";
+    layer.append(createAmbientFallLayer(items));
+    node.replaceWith(layer);
+  });
+}
+
 function mountStartupFall() {
   const { items = [] } = getStartups();
+  const doubled = items.length ? [...items, ...items] : [];
   document.querySelectorAll('[data-mount="startup-fall"]').forEach((node) => {
     const layer = document.createElement("div");
     layer.className = "startup-fall";
-    items.forEach((item, i) => {
+    doubled.forEach((item, i) => {
       layer.append(createStartupFallItem(item, i));
     });
     node.replaceWith(layer);
@@ -89,6 +103,7 @@ function init() {
 
   mountLogos(t.brandName);
   mountTimerSlot(t, locale);
+  mountStartupFallBack();
   mountStartupFall();
   mountApplyCards(t);
   mountSiteFooter(t);

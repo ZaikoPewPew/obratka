@@ -49,7 +49,74 @@
   text-overflow: ellipsis;
 }
 
-/* Слой дождя: по умолчанию под волнами; в режиме физики — над формой, капли бьются о блоки apply-card */
+/* Фон: много мелких карточек, размытие, без физики — за формой и под волнами */
+.startup-fall-back {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  filter: blur(7px);
+  -webkit-filter: blur(7px);
+  opacity: 0.78;
+}
+
+.startup-fall-back__item {
+  position: absolute;
+  top: 0;
+  left: calc(var(--amb-x, 8%) + var(--amb-xoff, 0px));
+  width: 168px;
+  max-width: min(168px, 46vw);
+  will-change: transform;
+  animation: startup-back-fall var(--amb-dur, 56s) linear infinite;
+  animation-delay: var(--amb-delay, 0s);
+}
+
+@keyframes startup-back-fall {
+  0% {
+    transform: translate3d(0, var(--amb-y0, -28vh), 0) rotate(var(--amb-r0, -5deg));
+    opacity: 0.22;
+  }
+  12% {
+    opacity: 0.55;
+  }
+  22% {
+    opacity: 0.78;
+  }
+  100% {
+    transform: translate3d(var(--amb-dx, 0), 122vh, 0) rotate(var(--amb-r1, 4deg));
+    opacity: 0.18;
+  }
+}
+
+.startup-card--ambient {
+  width: 168px;
+  max-width: min(168px, 42vw);
+  height: 46px;
+  min-height: 46px;
+  padding: 8px 10px;
+  border-radius: 14px;
+}
+
+.startup-card--ambient .startup-card__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.startup-card--ambient .startup-card__body {
+  margin-left: 8px;
+}
+
+.startup-card--ambient .startup-card__title {
+  font-size: 12px;
+}
+
+.startup-card--ambient .startup-card__description {
+  font-size: 10px;
+}
+
+/* Слой дождя: по умолчанию под волнами; физика z-index 1 — под водой (2) и формой (3) */
 .startup-fall {
   --startup-fall-duration: 12s;
 
@@ -61,7 +128,7 @@
 }
 
 .startup-fall--physics {
-  z-index: 3;
+  z-index: 1;
 }
 
 .startup-fall__item {
@@ -91,14 +158,6 @@
   transform-origin: 50% 80%;
   animation: startup-rain-a var(--startup-fall-duration) linear infinite;
   will-change: transform, opacity;
-}
-
-.startup-fall__item--tilt-b .startup-fall__track {
-  animation-name: startup-rain-b;
-}
-
-.startup-fall__item--tilt-c .startup-fall__track {
-  animation-name: startup-rain-c;
 }
 
 .startup-fall__item--d1 .startup-fall__track,
@@ -181,44 +240,6 @@
   }
 }
 
-@keyframes startup-rain-b {
-  0% {
-    transform: translate3d(-10px, -135vh, 0) rotate(11deg);
-    opacity: 1;
-  }
-  78% {
-    transform: translate3d(5px, 4vh, 0) rotate(3deg);
-    opacity: 1;
-  }
-  86% {
-    transform: translate3d(0, 14vh, 0) rotate(-1deg);
-    opacity: 0.82;
-  }
-  100% {
-    transform: translate3d(-3px, 48vh, 0) rotate(-5deg);
-    opacity: 0;
-  }
-}
-
-@keyframes startup-rain-c {
-  0% {
-    transform: translate3d(4px, -135vh, 0) rotate(-8deg);
-    opacity: 1;
-  }
-  78% {
-    transform: translate3d(-6px, 4vh, 0) rotate(5deg);
-    opacity: 1;
-  }
-  86% {
-    transform: translate3d(0, 14vh, 0) rotate(-2deg);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translate3d(4px, 48vh, 0) rotate(6deg);
-    opacity: 0;
-  }
-}
-
 @keyframes startup-splash-ring {
   0%,
   76% {
@@ -271,6 +292,11 @@
     animation: none !important;
     opacity: 0 !important;
   }
+
+  .startup-fall-back {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 /* JS-физика (Matter.js): позиции left/top/transform задаёт скрипт */
@@ -278,10 +304,52 @@
   bottom: auto;
   right: auto;
   margin-left: 0;
+  width: 300px;
+  max-width: min(300px, calc(100vw - 16px));
   transform-origin: 50% 50%;
   pointer-events: auto;
   cursor: grab;
   touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.startup-fall--physics .startup-card {
+  width: 100%;
+  max-width: 300px;
+  height: 80px;
+  min-height: 80px;
+  padding: 16px;
+  border-radius: 20px;
+}
+
+.startup-fall--physics .startup-card__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+}
+
+.startup-fall--physics .startup-card__body {
+  margin-left: 12px;
+}
+
+.startup-fall--physics .startup-card__title {
+  font-size: 16px;
+}
+
+.startup-fall--physics .startup-card__description {
+  font-size: 14px;
+}
+
+.startup-fall--physics .startup-card,
+.startup-fall--physics .startup-card * {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.startup-fall--physics .startup-card img {
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 .startup-fall--physics .startup-fall__item:active {

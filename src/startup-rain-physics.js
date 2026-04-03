@@ -4,13 +4,8 @@
 
 import Matter from "matter-js";
 
-const BARRIER_SELECTORS = [
-  ".apply-card__title",
-  ".apply-card__subtitle",
-  ".apply-card__cta",
-  ".apply-card__divider",
-  ".email-input-shell",
-];
+/** Столкновения только с «крышей» — заголовок блока заявки */
+const BARRIER_SELECTORS = [".apply-card__title"];
 
 const {
   Engine,
@@ -25,6 +20,10 @@ const {
   Sleeping,
 } = Matter;
 
+/** Одинаковая стартовая вертикальная скорость падения (случай только по горизонтали). */
+const CARD_FALL_VY = 0.32;
+const CARD_FALL_VX_JITTER = 0.4;
+
 /**
  * @param {DOMRect} fallRect
  * @param {number} slot
@@ -33,17 +32,29 @@ const {
  */
 function spawnCoords(fallRect, slot, cardW, index) {
   const w = fallRect.width;
-  let x;
+  const pad = Math.max(4, Math.min(32, w * 0.02));
+  /** Горизонтальный разброс у краёв (две «волны» карточек не в одной точке) */
+  const sideSpread = Math.min(88, w * 0.14) + Math.random() * Math.min(64, w * 0.1);
+  const centerSpread = Math.min(170, w * 0.26);
+  const row = index % 3;
+  const wave = Math.floor(index / 3);
+
+  const clampCenter = (cx) => Math.max(cardW / 2 + 2, Math.min(w - cardW / 2 - 2, cx));
+
+  let centerX;
   if (slot === 0) {
-    x = Math.max(4, Math.min(32, w * 0.02));
+    const leftEdge = pad + Math.random() * sideSpread;
+    centerX = leftEdge + cardW / 2;
   } else if (slot === 1) {
-    x = (w - cardW) / 2;
+    centerX = w / 2 + (Math.random() - 0.5) * centerSpread;
   } else {
-    x = w - cardW - Math.max(4, Math.min(32, w * 0.02));
+    const leftEdge = w - cardW - pad - Math.random() * sideSpread;
+    centerX = leftEdge + cardW / 2;
   }
+
   return {
-    x: x + cardW / 2 + (Math.random() - 0.5) * 14,
-    y: -60 - index * 90 - Math.random() * 70,
+    x: clampCenter(centerX + (Math.random() - 0.5) * 22),
+    y: -52 - row * 94 - wave * 62 - Math.random() * 88,
   };
 }
 
@@ -57,9 +68,9 @@ function barrierBodiesFromRects(rects) {
     const cy = r.top + r.height / 2;
     return Bodies.rectangle(cx, cy, r.width, r.height, {
       isStatic: true,
-      friction: 0.95,
-      frictionStatic: 1,
-      restitution: 0.05,
+      friction: 0.38,
+      frictionStatic: 0.55,
+      restitution: 0.22,
       label: "barrier",
       plugin: { barrier: true },
     });
@@ -121,6 +132,12 @@ export function initStartupRainPhysics() {
 
       fallLayer.classList.add("startup-fall--physics");
 
+      function blockTextDrag(e) {
+        e.preventDefault();
+      }
+      fallLayer.addEventListener("selectstart", blockTextDrag);
+      fallLayer.addEventListener("dragstart", blockTextDrag);
+
       const items = Array.from(fallLayer.querySelectorAll(".startup-fall__item"));
       const fallRect0 = fallLayer.getBoundingClientRect();
       const first = items[0];
@@ -161,13 +178,21 @@ export function initStartupRainPhysics() {
         const slot = i % 3;
         const { x, y } = spawnCoords(fallRect0, slot, cardW, i);
         const body = Bodies.rectangle(x, y, cardW, cardH, {
-          friction: 0.65,
+          friction: 0.52,
           frictionAir: 0.018,
-          restitution: 0.12,
+          restitution: 0.14,
           density: 0.0022,
           label: "startup-card",
         });
         body._itemEl = itemEl;
+        body._slot = slot;
+        const tilt = slot === 1 ? 0.42 : 0.22;
+        Body.setAngle(body, (Math.random() - 0.5) * tilt);
+        Body.setAngularVelocity(body, (Math.random() - 0.5) * (slot === 1 ? 0.07 : 0.04));
+        Body.setVelocity(body, {
+          x: (Math.random() - 0.5) * CARD_FALL_VX_JITTER,
+          y: CARD_FALL_VY,
+        });
         cardBodies.push(body);
         Composite.add(world, body);
       }
@@ -225,9 +250,22 @@ export function initStartupRainPhysics() {
           const a = pair.bodyA;
           const b = pair.bodyB;
           const cardBody = a.label === "startup-card" ? a : b.label === "startup-card" ? b : null;
-          const isBar = a.label === "barrier" || b.label === "barrier";
-          if (cardBody && isBar && cardBody._itemEl) {
+          const barBody = a.label === "barrier" ? a : b.label === "barrier" ? b : null;
+          if (cardBody && barBody && cardBody._itemEl) {
             flashSplash(cardBody._itemEl);
+            // Удар сверху по «крыше»: лёгкий сдвиг, чтобы не залипать плоской гранью по центру
+            const hitsFromAbove = cardBody.position.y + cardH * 0.32 < barBody.position.y;
+            if (hitsFromAbove) {
+              const sx = cardBody._slot === 1 ? 2.4 : 1.5;
+              Body.setVelocity(cardBody, {
+                x: cardBody.velocity.x + (Math.random() - 0.5) * sx,
+                y: Math.max(cardBody.velocity.y, 0.35) + Math.random() * 0.35,
+              });
+              Body.setAngularVelocity(
+                cardBody,
+                cardBody.angularVelocity + (Math.random() - 0.5) * (cardBody._slot === 1 ? 0.14 : 0.08),
+              );
+            }
           }
         }
       });
@@ -259,9 +297,13 @@ export function initStartupRainPhysics() {
             const slot = i % 3;
             const { x, y } = spawnCoords(fr, slot, cardW, i);
             Body.setPosition(body, { x, y });
-            Body.setVelocity(body, { x: (Math.random() - 0.5) * 0.6, y: 0.2 });
-            Body.setAngularVelocity(body, 0);
-            Body.setAngle(body, (Math.random() - 0.5) * 0.15);
+            Body.setVelocity(body, {
+              x: (Math.random() - 0.5) * CARD_FALL_VX_JITTER,
+              y: CARD_FALL_VY,
+            });
+            const tilt = slot === 1 ? 0.4 : 0.2;
+            Body.setAngularVelocity(body, (Math.random() - 0.5) * (slot === 1 ? 0.08 : 0.05));
+            Body.setAngle(body, (Math.random() - 0.5) * tilt);
             Sleeping.set(body, false);
             itemEl.style.opacity = "1";
             continue;
@@ -306,6 +348,8 @@ export function initStartupRainPhysics() {
       active = {
         cleanup: () => {
           Runner.stop(runner);
+          fallLayer.removeEventListener("selectstart", blockTextDrag);
+          fallLayer.removeEventListener("dragstart", blockTextDrag);
           document.removeEventListener("mousemove", onClientPointer);
           document.removeEventListener("touchmove", onClientPointer);
           document.removeEventListener("touchstart", onClientPointer);
