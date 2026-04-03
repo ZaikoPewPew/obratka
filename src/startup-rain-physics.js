@@ -20,20 +20,62 @@ const {
   Sleeping,
 } = Matter;
 
-/** Одинаковая стартовая вертикальная скорость падения (случай только по горизонтали). */
-const CARD_FALL_VY = 0.32;
-const CARD_FALL_VX_JITTER = 0.4;
+/** Старт без заметного «выстрела»: разгон только за счёт гравитации. */
+const CARD_FALL_VY_START = 0;
+const CARD_FALL_VX_JITTER = 0.1;
+
+/** Нижний край карточки при спавне должен быть выше y=0, иначе пересечение со стенами — резкий скачок. */
+const SPAWN_TOP_CLEAR = 16;
+
+/** Постоянно медленное падение: жёсткий потолок скорости (без «пушек» от столкновений). */
+const CARD_MAX_SPEED = 2.15;
+/** Выше — иначе все карточки визуально крутятся почти одинаково (срез угловой скорости). */
+const CARD_MAX_ANGULAR = 0.38;
+
+/** Не давать повторно «выстреливать» отскоком от крыши на каждом кадре контакта. */
+const BARRIER_KICK_COOLDOWN_MS = 160;
+
+/**
+ * Начальный угол (рад): широкий случайный разброс + сдвиг по индексу/слоту — не «одинаковый полёт».
+ * ~±38° базово + до ~±15° от фазы.
+ * @param {number} index
+ * @param {0 | 2} slot
+ */
+function spawnCardAngleRad(index, slot) {
+  const wide = (Math.random() - 0.5) * 1.32;
+  const phase = index * 0.51 + slot * 0.73;
+  return wide + Math.sin(phase) * 0.28 + (index % 3 - 1) * 0.12;
+}
+
+/**
+ * Начальная угловая скорость: разная по карточкам, заметное вращение при падении.
+ * @param {number} index
+ * @param {0 | 2} slot
+ */
+function spawnCardAngularVel(index, slot) {
+  return (
+    (Math.random() - 0.5) * 0.11 +
+    Math.sin(index * 0.88 + slot * 1.4) * 0.045 +
+    (slot === 0 ? 0.018 : -0.018)
+  );
+}
 
 /**
  * Спавн только слева/справа от `.apply-card`, без центральной колонки (нет падений на «крышу»).
+ * Горизонталь: отдельная «полоса» на каждый индекс в колонке — иначе случайный x даёт наслоение и взрыв солвера.
+ * Вертикаль: центр считается от cardH, нижний край всегда выше y=0.
+ *
  * @param {DOMRect} fallRect
  * @param {HTMLElement} applyCard
  * @param {0 | 2} slot — Matter: левый / правый край для отскока
  * @param {number} cardW
+ * @param {number} cardH
  * @param {number} index — индекс тела (0..perSide-1 слева, perSide.. справа)
  * @param {number} perSide
+ * @param {{ staggerRight?: boolean }} [opts]
  */
-function spawnCoords(fallRect, applyCard, slot, cardW, index, perSide) {
+function spawnCoords(fallRect, applyCard, slot, cardW, cardH, index, perSide, opts = {}) {
+  const { staggerRight = true } = opts;
   const w = fallRect.width;
   const pad = Math.max(4, Math.min(32, w * 0.02));
   const gap = 16;
@@ -47,29 +89,41 @@ function spawnCoords(fallRect, applyCard, slot, cardW, index, perSide) {
 
   const clampCenter = (cx) => Math.max(cardW / 2 + 2, Math.min(w - cardW / 2 - 2, cx));
 
-  let centerX;
+  let minCX;
+  let maxCX;
   if (slot === 0) {
-    const maxCX = acl - gap - cardW / 2;
-    const minCX = cardW / 2 + pad;
-    if (maxCX > minCX + 12) {
-      centerX = minCX + Math.random() * (maxCX - minCX);
-    } else {
-      centerX = clampCenter(cardW / 2 + pad + Math.random() * Math.min(56, w * 0.08));
-    }
+    maxCX = acl - gap - cardW / 2;
+    minCX = cardW / 2 + pad;
   } else {
-    const minCX = acr + gap + cardW / 2;
-    const maxCX = w - cardW / 2 - pad;
-    if (maxCX > minCX + 12) {
-      centerX = minCX + Math.random() * (maxCX - minCX);
-    } else {
-      centerX = clampCenter(w - cardW / 2 - pad - Math.random() * Math.min(56, w * 0.08));
-    }
+    minCX = acr + gap + cardW / 2;
+    maxCX = w - cardW / 2 - pad;
   }
 
-  return {
-    x: clampCenter(centerX + (Math.random() - 0.5) * 14),
-    y: -48 - row * 92 - wave * 52 - Math.random() * 76,
-  };
+  let centerX;
+  const range = maxCX - minCX;
+  if (range < 12) {
+    centerX = clampCenter((minCX + maxCX) / 2);
+  } else if (range < cardW * 1.1) {
+    const frac = (colIndex + 0.5) / perSide - 0.5;
+    centerX = clampCenter((minCX + maxCX) / 2 + frac * Math.min(range * 0.35, cardW * 0.4));
+  } else {
+    const lo = minCX + (colIndex / perSide) * range;
+    const hi = minCX + ((colIndex + 1) / perSide) * range;
+    const inner = Math.min(10, (hi - lo) * 0.12);
+    centerX = (lo + hi) / 2 + (Math.random() - 0.5) * Math.max(0, hi - lo - 2 * inner);
+  }
+
+  centerX = clampCenter(centerX);
+
+  /** Фиксированный шаг по центру — без random по Y, иначе «пачка» и рваные интервалы. */
+  const vertStep = Math.max(132, cardH + 40);
+  const maxBottom = -SPAWN_TOP_CLEAR;
+  const baseCenterY = maxBottom - cardH / 2;
+  /** Правая колонка на полшага ниже — не 4+4 в одних горизонталях, а ровное чередование. */
+  const sideStagger = staggerRight && slot === 2 ? vertStep * 0.5 : 0;
+  const y = baseCenterY - row * vertStep - wave * 50 - sideStagger;
+
+  return { x: centerX, y };
 }
 
 /**
@@ -82,9 +136,9 @@ function barrierBodiesFromRects(rects) {
     const cy = r.top + r.height / 2;
     return Bodies.rectangle(cx, cy, r.width, r.height, {
       isStatic: true,
-      friction: 0.35,
-      frictionStatic: 0.5,
-      restitution: 0.38,
+      friction: 0.42,
+      frictionStatic: 0.55,
+      restitution: 0.22,
       label: "barrier",
       plugin: { barrier: true },
     });
@@ -92,18 +146,16 @@ function barrierBodiesFromRects(rects) {
 }
 
 /** Боковые стенки зоны падения (локальные координаты слоя).
- * Верхнюю границу не делаем статическим телом: при спавне y≈−52 нижняя грань тела
- * всё ещё может пересекать полосу у y=0 — Matter зажимает карточки и они «замирают».
- * Верх — только барьер заголовка формы + collisionStart. */
+ * Верхнюю границу не делаем статическим телом. Спавн задаётся так, чтобы нижний край карточки был выше y=0. */
 function edgeWallBodiesFromFallRect(fr) {
   const w = fr.width;
   const h = fr.height;
   const t = 36;
   const wallOpts = {
     isStatic: true,
-    friction: 0.28,
-    frictionStatic: 0.45,
-    restitution: 0.42,
+    friction: 0.32,
+    frictionStatic: 0.5,
+    restitution: 0.24,
   };
   return [
     Bodies.rectangle(-t / 2, h / 2, t, h + t * 3, { ...wallOpts, label: "wall-left" }),
@@ -146,7 +198,7 @@ function collectBarrierRects(fallRect, applyCard) {
  */
 function bounceKickX(body, fallWidth, strength) {
   const slot = body._slot;
-  const j = (Math.random() - 0.5) * 0.5;
+  const j = (Math.random() - 0.5) * 0.12;
   if (slot === 0) {
     return strength + j;
   }
@@ -155,6 +207,26 @@ function bounceKickX(body, fallWidth, strength) {
   }
   const cx = fallWidth / 2;
   return (body.position.x < cx ? strength : -strength) * 0.85 + j;
+}
+
+/**
+ * Сглаживает редкие всплески скорости от солвера / карта о карту.
+ * @param {import('matter-js').Body} body
+ */
+function clampCardVelocity(body) {
+  let vx = body.velocity.x;
+  let vy = body.velocity.y;
+  const sp = Math.hypot(vx, vy);
+  if (sp > CARD_MAX_SPEED && sp > 1e-6) {
+    const k = CARD_MAX_SPEED / sp;
+    vx *= k;
+    vy *= k;
+    Body.setVelocity(body, { x: vx, y: vy });
+  }
+  const av = body.angularVelocity;
+  if (Math.abs(av) > CARD_MAX_ANGULAR) {
+    Body.setAngularVelocity(body, Math.sign(av) * CARD_MAX_ANGULAR);
+  }
 }
 
 /**
@@ -224,8 +296,8 @@ export function initStartupRainPhysics() {
         velocityIterations: 8,
       });
 
-      engine.gravity.y = 0.42;
-      engine.gravity.scale = 0.00062;
+      engine.gravity.y = 0.36;
+      engine.gravity.scale = 0.00044;
 
       const world = engine.world;
 
@@ -242,22 +314,25 @@ export function initStartupRainPhysics() {
       for (let i = 0; i < items.length; i++) {
         const itemEl = items[i];
         const slot = i < perSide ? 0 : 2;
-        const { x, y } = spawnCoords(fallRect0, applyCard, slot, cardW, i, perSide);
+        const { x, y } = spawnCoords(fallRect0, applyCard, slot, cardW, cardH, i, perSide, {
+          staggerRight: true,
+        });
         const body = Bodies.rectangle(x, y, cardW, cardH, {
-          friction: 0.52,
-          frictionAir: 0.018,
-          restitution: 0.14,
+          friction: 0.58,
+          frictionAir: 0.048,
+          restitution: 0.06,
           density: 0.0022,
+          /** Иначе Matter усыпляет карточку на «полке» / у стены — потом рывок при пробуждении. */
+          sleepThreshold: 0,
           label: "startup-card",
         });
         body._itemEl = itemEl;
         body._slot = slot;
-        const tilt = 0.24;
-        Body.setAngle(body, (Math.random() - 0.5) * tilt);
-        Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.045);
+        Body.setAngle(body, spawnCardAngleRad(i, slot));
+        Body.setAngularVelocity(body, spawnCardAngularVel(i, slot));
         Body.setVelocity(body, {
           x: (Math.random() - 0.5) * CARD_FALL_VX_JITTER,
-          y: CARD_FALL_VY,
+          y: CARD_FALL_VY_START,
         });
         cardBodies.push(body);
         Composite.add(world, body);
@@ -333,31 +408,45 @@ export function initStartupRainPhysics() {
             const geomSaysTopHit =
               cardBottom <= barrierTop + 18 || cardBody.position.y + cardH * 0.28 < other.position.y;
             if (normalSaysTopHit || geomSaysTopHit) {
-              const kick = bounceKickX(cardBody, frW, 2.12);
+              const now = performance.now();
+              if (
+                cardBody._barrierKickAt != null &&
+                now - cardBody._barrierKickAt < BARRIER_KICK_COOLDOWN_MS
+              ) {
+                continue;
+              }
+              cardBody._barrierKickAt = now;
+              /** Раньше ~2.1 по x — визуально в ~7 раз быстрее падения, отсюда «рывок». */
+              const kick = bounceKickX(cardBody, frW, 0.32);
+              const vx0 = cardBody.velocity.x;
+              const vy0 = cardBody.velocity.y;
               Body.setVelocity(cardBody, {
-                x: cardBody.velocity.x * 0.35 + kick,
-                y: Math.max(cardBody.velocity.y, 0.42) + Math.random() * 0.35,
+                x: vx0 * 0.72 + kick * 0.42,
+                y: Math.max(vy0, 0.06) * 0.55 + 0.08 + Math.random() * 0.06,
               });
               Body.setAngularVelocity(
                 cardBody,
-                cardBody.angularVelocity + (Math.random() - 0.5) * 0.09,
+                cardBody.angularVelocity * 0.55 + (Math.random() - 0.5) * 0.08,
               );
+              clampCardVelocity(cardBody);
             }
             continue;
           }
 
           if (other.label === "wall-left") {
             Body.setVelocity(cardBody, {
-              x: Math.max(cardBody.velocity.x, 0) * 0.25 + 1.85 + Math.random() * 0.35,
+              x: Math.max(cardBody.velocity.x, 0) * 0.45 + 0.32 + Math.random() * 0.12,
               y: cardBody.velocity.y,
             });
+            clampCardVelocity(cardBody);
             continue;
           }
           if (other.label === "wall-right") {
             Body.setVelocity(cardBody, {
-              x: Math.min(cardBody.velocity.x, 0) * 0.25 - 1.85 - Math.random() * 0.35,
+              x: Math.min(cardBody.velocity.x, 0) * 0.45 - 0.32 - Math.random() * 0.12,
               y: cardBody.velocity.y,
             });
+            clampCardVelocity(cardBody);
           }
         }
       });
@@ -392,21 +481,24 @@ export function initStartupRainPhysics() {
               continue;
             }
             const slot = i < perSide ? 0 : 2;
-            const { x, y } = spawnCoords(fr, ac, slot, cardW, i, perSide);
+            const { x, y } = spawnCoords(fr, ac, slot, cardW, cardH, i, perSide, {
+              staggerRight: true,
+            });
             Body.setPosition(body, { x, y });
             Body.setVelocity(body, {
               x: (Math.random() - 0.5) * CARD_FALL_VX_JITTER,
-              y: CARD_FALL_VY,
+              y: CARD_FALL_VY_START,
             });
-            const tilt = 0.22;
-            Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.052);
-            Body.setAngle(body, (Math.random() - 0.5) * tilt);
+            Body.setAngle(body, spawnCardAngleRad(i, slot));
+            Body.setAngularVelocity(body, spawnCardAngularVel(i, slot));
             Sleeping.set(body, false);
             itemEl.style.opacity = "1";
             continue;
           }
 
           itemEl.style.opacity = String(opacity);
+
+          clampCardVelocity(body);
 
           const deg = body.angle * (180 / Math.PI);
           const x = body.position.x - cardW / 2;
