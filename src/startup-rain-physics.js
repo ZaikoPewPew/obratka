@@ -25,36 +25,50 @@ const CARD_FALL_VY = 0.32;
 const CARD_FALL_VX_JITTER = 0.4;
 
 /**
+ * Спавн только слева/справа от `.apply-card`, без центральной колонки (нет падений на «крышу»).
  * @param {DOMRect} fallRect
- * @param {number} slot
+ * @param {HTMLElement} applyCard
+ * @param {0 | 2} slot — Matter: левый / правый край для отскока
  * @param {number} cardW
- * @param {number} index
+ * @param {number} index — индекс тела (0..perSide-1 слева, perSide.. справа)
+ * @param {number} perSide
  */
-function spawnCoords(fallRect, slot, cardW, index) {
+function spawnCoords(fallRect, applyCard, slot, cardW, index, perSide) {
   const w = fallRect.width;
   const pad = Math.max(4, Math.min(32, w * 0.02));
-  /** Горизонтальный разброс у краёв (две «волны» карточек не в одной точке) */
-  const sideSpread = Math.min(88, w * 0.14) + Math.random() * Math.min(64, w * 0.1);
-  const centerSpread = Math.min(170, w * 0.26);
-  const row = index % 3;
-  const wave = Math.floor(index / 3);
+  const gap = 16;
+  const ac = applyCard.getBoundingClientRect();
+  const acl = ac.left - fallRect.left;
+  const acr = ac.right - fallRect.left;
+
+  const colIndex = index < perSide ? index : index - perSide;
+  const row = colIndex % perSide;
+  const wave = Math.floor(colIndex / perSide);
 
   const clampCenter = (cx) => Math.max(cardW / 2 + 2, Math.min(w - cardW / 2 - 2, cx));
 
   let centerX;
   if (slot === 0) {
-    const leftEdge = pad + Math.random() * sideSpread;
-    centerX = leftEdge + cardW / 2;
-  } else if (slot === 1) {
-    centerX = w / 2 + (Math.random() - 0.5) * centerSpread;
+    const maxCX = acl - gap - cardW / 2;
+    const minCX = cardW / 2 + pad;
+    if (maxCX > minCX + 12) {
+      centerX = minCX + Math.random() * (maxCX - minCX);
+    } else {
+      centerX = clampCenter(cardW / 2 + pad + Math.random() * Math.min(56, w * 0.08));
+    }
   } else {
-    const leftEdge = w - cardW - pad - Math.random() * sideSpread;
-    centerX = leftEdge + cardW / 2;
+    const minCX = acr + gap + cardW / 2;
+    const maxCX = w - cardW / 2 - pad;
+    if (maxCX > minCX + 12) {
+      centerX = minCX + Math.random() * (maxCX - minCX);
+    } else {
+      centerX = clampCenter(w - cardW / 2 - pad - Math.random() * Math.min(56, w * 0.08));
+    }
   }
 
   return {
-    x: clampCenter(centerX + (Math.random() - 0.5) * 22),
-    y: -52 - row * 94 - wave * 62 - Math.random() * 88,
+    x: clampCenter(centerX + (Math.random() - 0.5) * 14),
+    y: -48 - row * 92 - wave * 52 - Math.random() * 76,
   };
 }
 
@@ -125,7 +139,7 @@ function collectBarrierRects(fallRect, applyCard) {
 }
 
 /**
- * Отскок в сторону от края: левый слот — вправо, правый — влево, центр — от середины экрана.
+ * Отскок в сторону от края: левая колонка — вправо, правая — влево (центрального слота нет).
  * @param {import('matter-js').Body} body
  * @param {number} fallWidth
  * @param {number} strength
@@ -140,7 +154,7 @@ function bounceKickX(body, fallWidth, strength) {
     return -strength + j;
   }
   const cx = fallWidth / 2;
-  return (body.position.x < cx ? strength : -strength) * 0.9 + j;
+  return (body.position.x < cx ? strength : -strength) * 0.85 + j;
 }
 
 /**
@@ -178,6 +192,8 @@ export function initStartupRainPhysics() {
       }
 
       fallLayer.classList.add("startup-fall--physics");
+
+      const perSide = Number(fallLayer.dataset.physicsPerSide) || 4;
 
       function blockTextDrag(e) {
         e.preventDefault();
@@ -225,8 +241,8 @@ export function initStartupRainPhysics() {
 
       for (let i = 0; i < items.length; i++) {
         const itemEl = items[i];
-        const slot = i % 3;
-        const { x, y } = spawnCoords(fallRect0, slot, cardW, i);
+        const slot = i < perSide ? 0 : 2;
+        const { x, y } = spawnCoords(fallRect0, applyCard, slot, cardW, i, perSide);
         const body = Bodies.rectangle(x, y, cardW, cardH, {
           friction: 0.52,
           frictionAir: 0.018,
@@ -236,9 +252,9 @@ export function initStartupRainPhysics() {
         });
         body._itemEl = itemEl;
         body._slot = slot;
-        const tilt = slot === 1 ? 0.42 : 0.22;
+        const tilt = 0.24;
         Body.setAngle(body, (Math.random() - 0.5) * tilt);
-        Body.setAngularVelocity(body, (Math.random() - 0.5) * (slot === 1 ? 0.07 : 0.04));
+        Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.045);
         Body.setVelocity(body, {
           x: (Math.random() - 0.5) * CARD_FALL_VX_JITTER,
           y: CARD_FALL_VY,
@@ -317,14 +333,14 @@ export function initStartupRainPhysics() {
             const geomSaysTopHit =
               cardBottom <= barrierTop + 18 || cardBody.position.y + cardH * 0.28 < other.position.y;
             if (normalSaysTopHit || geomSaysTopHit) {
-              const kick = bounceKickX(cardBody, frW, cardBody._slot === 1 ? 2.35 : 2.05);
+              const kick = bounceKickX(cardBody, frW, 2.12);
               Body.setVelocity(cardBody, {
                 x: cardBody.velocity.x * 0.35 + kick,
                 y: Math.max(cardBody.velocity.y, 0.42) + Math.random() * 0.35,
               });
               Body.setAngularVelocity(
                 cardBody,
-                cardBody.angularVelocity + (Math.random() - 0.5) * (cardBody._slot === 1 ? 0.14 : 0.08),
+                cardBody.angularVelocity + (Math.random() - 0.5) * 0.09,
               );
             }
             continue;
@@ -370,15 +386,20 @@ export function initStartupRainPhysics() {
           }
 
           if (top > fr.height + cardH + 24 || opacity <= 0.03) {
-            const slot = i % 3;
-            const { x, y } = spawnCoords(fr, slot, cardW, i);
+            const mainEl = fallLayer.closest("main");
+            const ac = mainEl?.querySelector(".apply-card");
+            if (!ac) {
+              continue;
+            }
+            const slot = i < perSide ? 0 : 2;
+            const { x, y } = spawnCoords(fr, ac, slot, cardW, i, perSide);
             Body.setPosition(body, { x, y });
             Body.setVelocity(body, {
               x: (Math.random() - 0.5) * CARD_FALL_VX_JITTER,
               y: CARD_FALL_VY,
             });
-            const tilt = slot === 1 ? 0.4 : 0.2;
-            Body.setAngularVelocity(body, (Math.random() - 0.5) * (slot === 1 ? 0.08 : 0.05));
+            const tilt = 0.22;
+            Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.052);
             Body.setAngle(body, (Math.random() - 0.5) * tilt);
             Sleeping.set(body, false);
             itemEl.style.opacity = "1";

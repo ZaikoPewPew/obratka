@@ -56,11 +56,13 @@
   border-radius: 500px;
   background: #f3f4f7;
   cursor: pointer;
-  color: inherit;
+  color: #242426;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .locale-toggle:hover {
-  opacity: 0.92;
+  background: #242426;
+  color: #ffffff;
 }
 
 .locale-toggle:focus-visible {
@@ -80,6 +82,8 @@
   width: 47px;
   height: 24px;
   border-radius: 14px;
+  text-decoration: none;
+  color: inherit;
 }
 
 /* Маска + заливка: точный hover #F9392A без правки SVG */

@@ -12,6 +12,7 @@ import {
 import {
   createAmbientFallLayer,
   createStartupFallItem,
+  PHYSICS_CARDS_PER_SIDE,
 } from "./components/startup-card/StartupCard.js";
 import { initStartupRainPhysics } from "./startup-rain-physics.js";
 
@@ -100,12 +101,18 @@ function mountStartupFallBack() {
 
 function mountStartupFall() {
   const { items = [] } = getStartups();
-  const doubled = items.length ? [...items, ...items] : [];
+  const pool = items.length ? items : [];
+  const total = PHYSICS_CARDS_PER_SIDE * 2;
+  const list =
+    pool.length > 0
+      ? Array.from({ length: total }, (_, i) => pool[i % pool.length])
+      : [];
   document.querySelectorAll('[data-mount="startup-fall"]').forEach((node) => {
     const layer = document.createElement("div");
     layer.className = "startup-fall";
-    doubled.forEach((item, i) => {
-      layer.append(createStartupFallItem(item, i));
+    layer.dataset.physicsPerSide = String(PHYSICS_CARDS_PER_SIDE);
+    list.forEach((item, i) => {
+      layer.append(createStartupFallItem(item, i, { perSide: PHYSICS_CARDS_PER_SIDE }));
     });
     node.replaceWith(layer);
   });

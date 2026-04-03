@@ -40,16 +40,21 @@ export function createStartupCard(item, options = {}) {
 /** Разные углы наклона при падении (медленный дождь). */
 const TILT_VARIANTS = ["tilt-a", "tilt-b", "tilt-c"];
 
+/** Сколько карточек с каждой стороны от блока заявки (центр без физики — только слоты 0 и 2). */
+export const PHYSICS_CARDS_PER_SIDE = 4;
+
 /**
  * Обёртка для анимации падения в воду: трек + всплеск.
  * @param {{ avatar: string; title: string; description: string }} item
  * @param {number} index
+ * @param {{ perSide?: number }} [options]
  * @returns {HTMLDivElement}
  */
-export function createStartupFallItem(item, index) {
+export function createStartupFallItem(item, index, options = {}) {
+  const perSide = options.perSide ?? PHYSICS_CARDS_PER_SIDE;
   const tilt = TILT_VARIANTS[index % TILT_VARIANTS.length];
-  const delaySlot = index % 3;
-  const slot = index % 3;
+  const delaySlot = index % perSide;
+  const slot = index < perSide ? 0 : 2;
 
   const itemEl = document.createElement("div");
   itemEl.className = `startup-fall__item startup-fall__item--${tilt} startup-fall__item--d${delaySlot} startup-fall__item--slot-${slot}`;

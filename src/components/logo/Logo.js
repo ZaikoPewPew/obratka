@@ -12,20 +12,31 @@ export function createLogo({
   useMaskHover = false,
 }) {
   if (useMaskHover) {
-    const wrap = document.createElement("span");
+    const a = document.createElement("a");
     if (className) {
-      wrap.className = className;
+      a.className = className;
     }
-    wrap.setAttribute("role", "img");
-    wrap.setAttribute("aria-label", alt);
-    wrap.style.setProperty("--logo-mask-url", `url(${JSON.stringify(src)})`);
+    a.setAttribute("aria-label", alt);
+    if (typeof window !== "undefined") {
+      a.href = `${window.location.pathname}${window.location.search}` || "/";
+      a.addEventListener("click", (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) {
+          return;
+        }
+        e.preventDefault();
+        window.location.reload();
+      });
+    } else {
+      a.href = "/";
+    }
+    a.style.setProperty("--logo-mask-url", `url(${JSON.stringify(src)})`);
 
     const fill = document.createElement("span");
     fill.className = "desktop-logo__fill";
     fill.setAttribute("aria-hidden", "true");
 
-    wrap.append(fill);
-    return wrap;
+    a.append(fill);
+    return a;
   }
 
   const img = document.createElement("img");
