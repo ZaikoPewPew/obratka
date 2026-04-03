@@ -24,11 +24,14 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0;
   }
 
   .mobile-logo {
     display: block;
+    width: 48px;
+    height: 24px;
+    object-fit: contain;
     border-radius: 12px;
     flex-shrink: 0;
   }
@@ -55,6 +58,10 @@
     align-items: center;
     justify-content: center;
     min-height: 0;
+  }
+
+  .mobile-root .site-footer {
+    padding: 0;
   }
 
   .apply-card--mobile {

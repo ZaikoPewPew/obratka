@@ -14,8 +14,11 @@
       "ctaPrimary": "Получить ранний доступ за 490 ₽",
       "dividerOr": "или",
       "emailPlaceholder": "your@email.com",
+      "emailInvalidHint": "Введите email в формате name@domain.com",
       "emailSubmitAria": "Отправить email",
-      "foundersWaiting": "123+ фаундера ждут релиза"
+      "foundersWaiting": "123+ фаундера ждут релиза",
+      "footerCopyright": "© 2026 memento",
+      "footerContacts": "Контакты"
     },
     "en": {
       "metaTitle": "Memento — waitlist",
@@ -28,8 +31,11 @@
       "ctaPrimary": "Get early access for ₽490",
       "dividerOr": "or",
       "emailPlaceholder": "your@email.com",
+      "emailInvalidHint": "Enter an email like name@domain.com",
       "emailSubmitAria": "Submit email",
-      "foundersWaiting": "123+ founders waiting for the release"
+      "foundersWaiting": "123+ founders waiting for the release",
+      "footerCopyright": "© 2026 memento",
+      "footerContacts": "Contacts"
     }
   }
 }

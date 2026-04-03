@@ -19,3 +19,39 @@ body {
 .layout-mobile {
   min-height: 100vh;
 }
+
+.site-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-top: auto;
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 16px 16px;
+}
+
+.site-footer__copy,
+.site-footer__contacts {
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 170%;
+  color: #242426;
+}
+
+.site-footer__contacts {
+  text-align: right;
+  text-decoration: none;
+}
+
+.site-footer__contacts:hover {
+  opacity: 0.85;
+}
+
+.site-footer__contacts:focus-visible {
+  outline: 2px solid rgba(36, 36, 38, 0.35);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

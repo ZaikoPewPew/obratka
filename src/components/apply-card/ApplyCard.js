@@ -5,7 +5,7 @@ import { createEmailField } from "../email-field/EmailField.js";
 /**
  * Центральный блок заявки (530×398 по макету).
  * @param {object} opts
- * @param {{ applyTitle: string; applySubtitle: string; ctaPrimary: string; dividerOr: string; emailPlaceholder: string; foundersWaiting: string; emailSubmitAria: string }} opts.t
+ * @param {{ applyTitle: string; applySubtitle: string; ctaPrimary: string; dividerOr: string; emailPlaceholder: string; emailInvalidHint: string; foundersWaiting: string; emailSubmitAria: string }} opts.t
  * @param {string} [opts.modifier]
  * @returns {HTMLDivElement}
  */
@@ -35,6 +35,7 @@ export function createApplyCard({ t, modifier = "" }) {
     placeholder: t.emailPlaceholder,
     foundersText: t.foundersWaiting,
     submitAria: t.emailSubmitAria,
+    invalidEmailMessage: t.emailInvalidHint,
     className: "apply-card__email email-field-block",
   });
 

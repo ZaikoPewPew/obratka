@@ -67,7 +67,16 @@
   flex: 0 0 196px;
   width: 196px;
   height: 1px;
-  background: rgba(36, 36, 38, 0.2);
+  border: none;
+}
+
+/* Сплошной #242426 у «или», к краю — 0% непрозрачности */
+.divider-or__line--start {
+  background: linear-gradient(to left, #242426 0%, rgba(36, 36, 38, 0) 100%);
+}
+
+.divider-or__line--end {
+  background: linear-gradient(to right, #242426 0%, rgba(36, 36, 38, 0) 100%);
 }
 
 .divider-or__label {
@@ -100,6 +109,26 @@
   padding: 24px;
   border-radius: 16px;
   background: #f3f4f7;
+  box-shadow: 0 0 0 1px transparent;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.email-input-shell:focus-within {
+  background: #eceef3;
+  box-shadow: 0 0 0 1px rgba(36, 36, 38, 0.12);
+}
+
+.email-input-shell--filled:not(.email-input-shell--invalid) {
+  background: #eceef3;
+}
+
+.email-input-shell--invalid {
+  background: #fff8f8;
+  box-shadow: 0 0 0 1px rgba(200, 60, 60, 0.45);
+}
+
+.email-input-shell--invalid:focus-within {
+  box-shadow: 0 0 0 1px rgba(200, 60, 60, 0.55);
 }
 
 .email-input {
@@ -138,6 +167,26 @@
   border: none;
   background: transparent;
   cursor: pointer;
+  opacity: 1;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.email-input__submit:hover {
+  opacity: 0.85;
+}
+
+.email-input__submit:active {
+  transform: translateY(-50%) scale(0.94);
+}
+
+.email-input__submit:focus-visible {
+  outline: 2px solid rgba(36, 36, 38, 0.35);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.email-input__submit[hidden] {
+  display: none !important;
 }
 
 .email-avatars {
@@ -169,16 +218,16 @@
 }
 
 .email-avatars__avatar:nth-child(1) {
-  z-index: 4;
+  z-index: 1;
 }
 .email-avatars__avatar:nth-child(2) {
-  z-index: 3;
-}
-.email-avatars__avatar:nth-child(3) {
   z-index: 2;
 }
+.email-avatars__avatar:nth-child(3) {
+  z-index: 3;
+}
 .email-avatars__avatar:nth-child(4) {
-  z-index: 1;
+  z-index: 4;
 }
 
 .email-avatars__caption {

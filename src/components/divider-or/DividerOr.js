@@ -8,7 +8,7 @@ export function createDividerOr({ text, className = "divider-or" }) {
   root.className = className;
 
   const line1 = document.createElement("span");
-  line1.className = "divider-or__line";
+  line1.className = "divider-or__line divider-or__line--start";
   line1.setAttribute("aria-hidden", "true");
 
   const label = document.createElement("span");
@@ -16,7 +16,7 @@ export function createDividerOr({ text, className = "divider-or" }) {
   label.textContent = text;
 
   const line2 = document.createElement("span");
-  line2.className = "divider-or__line";
+  line2.className = "divider-or__line divider-or__line--end";
   line2.setAttribute("aria-hidden", "true");
 
   root.append(line1, label, line2);

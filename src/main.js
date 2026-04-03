@@ -37,6 +37,25 @@ function mountTimerSlot(t, locale) {
   });
 }
 
+function mountSiteFooter(t) {
+  document.querySelectorAll('[data-mount="site-footer"]').forEach((node) => {
+    const footer = document.createElement("footer");
+    footer.className = "site-footer";
+
+    const copy = document.createElement("span");
+    copy.className = "site-footer__copy";
+    copy.textContent = t.footerCopyright;
+
+    const contacts = document.createElement("a");
+    contacts.className = "site-footer__contacts";
+    contacts.href = "#";
+    contacts.textContent = t.footerContacts;
+
+    footer.append(copy, contacts);
+    node.replaceWith(footer);
+  });
+}
+
 function mountApplyCards(t) {
   const desktopCard = createApplyCard({ t });
   const mobileCard = createApplyCard({ t, modifier: "apply-card apply-card--mobile" });
@@ -57,6 +76,7 @@ function init() {
   mountLogos(t.brandName);
   mountTimerSlot(t, locale);
   mountApplyCards(t);
+  mountSiteFooter(t);
 
   document.title = t.metaTitle;
 }
