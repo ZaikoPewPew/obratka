@@ -15,6 +15,8 @@ import {
   PHYSICS_CARDS_PER_SIDE,
 } from "./components/startup-card/StartupCard.js";
 import { initStartupRainPhysics } from "./startup-rain-physics.js";
+import { saveSubscriber } from "./api/subscribers.js";
+import { fireEmailSubmitConfetti } from "./utils/emailSubmitConfetti.js";
 
 function mountLogos(brandName) {
   document.querySelectorAll('[data-mount="logo"]').forEach((node) => {
@@ -146,6 +148,27 @@ function init() {
   mountStartupFall();
   mountApplyCards(t, locale);
   mountSiteFooter(t);
+
+  document.addEventListener("email-submit", async (e) => {
+    const email = e.detail?.value;
+    if (!email || !(e.target instanceof Element)) {
+      return;
+    }
+    const source = e.target.closest(".access-modal") ? "buy_intent" : "email_form";
+    const shell = e.target.closest(".email-input-shell");
+    const input = e.target.closest("input.email-input");
+
+    const ok = await saveSubscriber(email, source);
+    if (ok) {
+      fireEmailSubmitConfetti(shell);
+      if (input) {
+        input.value = "";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    } else if (shell) {
+      shell.classList.add("email-input-shell--invalid");
+    }
+  });
 
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {

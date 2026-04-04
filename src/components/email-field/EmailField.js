@@ -1,5 +1,3 @@
-import { fireEmailSubmitConfetti } from "../../utils/emailSubmitConfetti.js";
-
 const SUBMIT_SVG = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <path d="M9.99999 11L5.99999 15M5.99999 15L9.99999 19M5.99999 15H17C18.1046 15 19 14.107 19 13.0025C19 10.0901 19 4.92333 19 4" stroke="#242426" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`;
@@ -128,7 +126,6 @@ export function createEmailField({
     }
     shell.classList.remove("email-input-shell--invalid");
     syncAriaInvalid();
-    fireEmailSubmitConfetti(shell);
     input.dispatchEvent(
       new CustomEvent("email-submit", { bubbles: true, detail: { value: v } }),
     );
