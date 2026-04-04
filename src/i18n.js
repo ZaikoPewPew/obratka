@@ -1,3 +1,4 @@
+import founderAvatars from "../content/founder-avatars.json";
 import locales from "../content/locales.json";
 import startups from "../content/startups.json";
 
@@ -61,4 +62,33 @@ export function getConfig() {
 /** Данные для слота «таймер» в шапке (счётчик стартапов из JSON). */
 export function getStartups() {
   return startups;
+}
+
+/** Пути для unavatar.io (без домена), напр. `github/username` — см. content/founder-avatars.json */
+export function getFounderAvatarSources() {
+  const list = founderAvatars.sources;
+  return Array.isArray(list) ? list : [];
+}
+
+let shuffledAvatarSourcesCache = null;
+
+/** Сколько аватарок максимум в блоке (десктоп / модалка); из пула берётся случайное подмножество. */
+function getFounderAvatarPickCount() {
+  const n = founderAvatars.pickCount;
+  return typeof n === "number" && n > 0 ? Math.floor(n) : 4;
+}
+
+/** Случайный набор из пула на загрузку страницы (десктоп / мобилка / модалка совпадают). */
+export function getFounderAvatarSourcesForPage() {
+  if (shuffledAvatarSourcesCache) {
+    return shuffledAvatarSourcesCache;
+  }
+  const pool = [...getFounderAvatarSources()];
+  for (let i = pool.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const k = Math.min(getFounderAvatarPickCount(), pool.length);
+  shuffledAvatarSourcesCache = pool.slice(0, k);
+  return shuffledAvatarSourcesCache;
 }

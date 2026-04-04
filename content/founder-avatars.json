@@ -1,0 +1,29 @@
+{
+  "pickCount": 4,
+  "sources": [
+    "github/octocat",
+    "github/vercel",
+    "github/sindresorhus",
+    "github/gaearon",
+    "github/yyx990803",
+    "github/rauchg",
+    "github/mdo",
+    "github/tj",
+    "github/jashkenas",
+    "github/paulirish",
+    "github/addyosmani",
+    "github/torvalds",
+    "github/defunkt",
+    "github/mojombo",
+    "github/pjhyett",
+    "github/wycats",
+    "github/schacon",
+    "github/dhh",
+    "github/fabpot",
+    "github/isaacs",
+    "github/substack",
+    "github/feross",
+    "github/sstephenson",
+    "github/holman"
+  ]
+}

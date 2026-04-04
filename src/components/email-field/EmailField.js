@@ -1,13 +1,34 @@
 import { EMAIL_MAX_LENGTH, isValidEmail } from "../../utils/emailValidation.js";
 
+const UNAVATAR_BASE = "https://unavatar.io/";
+
 const SUBMIT_SVG = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <path d="M9.99999 11L5.99999 15M5.99999 15L9.99999 19M5.99999 15H17C18.1046 15 19 14.107 19 13.0025C19 10.0901 19 4.92333 19 4" stroke="#242426" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`;
 
-/** Простые плейсхолдер-аватарки (локально, без запросов) */
-function createAvatarStack(count = 4) {
-  const colors = ["#6b8cae", "#8f7a9a", "#7a9a8a", "#9a8a7a"];
-  const n = Math.min(Math.max(0, Math.floor(count)), colors.length);
+const FALLBACK_COLORS = ["#6b8cae", "#8f7a9a", "#7a9a8a", "#9a8a7a"];
+
+/** Путь после unavatar.io/, напр. github/octocat или закодированный email */
+function unavatarSrc(source) {
+  const trimmed = String(source).replace(/^\/+/, "");
+  const path = trimmed
+    .split("/")
+    .map((seg) => encodeURIComponent(seg))
+    .join("/");
+  return `${UNAVATAR_BASE}${path}`;
+}
+
+/**
+ * @param {number} count
+ * @param {string[]} [sources] — если заданы, картинки с unavatar.io; иначе цветные круги
+ */
+function createAvatarStack(count = 4, sources = []) {
+  const colors = FALLBACK_COLORS;
+  const useRemote = Array.isArray(sources) && sources.length > 0;
+  const max = useRemote
+    ? Math.min(count, sources.length)
+    : Math.min(Math.max(0, Math.floor(count)), colors.length);
+  const n = useRemote ? Math.min(Math.max(0, Math.floor(count)), max) : max;
   const stack = document.createElement("div");
   stack.className =
     n === 2 ? "email-avatars__stack email-avatars__stack--pair" : "email-avatars__stack";
@@ -15,7 +36,32 @@ function createAvatarStack(count = 4) {
   for (let i = 0; i < n; i += 1) {
     const av = document.createElement("span");
     av.className = "email-avatars__avatar";
-    av.style.background = colors[i];
+    if (useRemote) {
+      av.classList.add("email-avatars__avatar--photo");
+      const img = document.createElement("img");
+      img.src = unavatarSrc(sources[i]);
+      img.alt = "";
+      img.width = 32;
+      img.height = 32;
+      img.decoding = "async";
+      img.loading = "lazy";
+      img.referrerPolicy = "no-referrer";
+      function revealPhoto() {
+        av.classList.add("email-avatars__avatar--photo-ready");
+      }
+      img.addEventListener("load", revealPhoto);
+      if (img.complete && img.naturalWidth > 0) {
+        revealPhoto();
+      }
+      img.addEventListener("error", () => {
+        img.remove();
+        av.classList.remove("email-avatars__avatar--photo", "email-avatars__avatar--photo-ready");
+        av.style.background = colors[i % colors.length];
+      });
+      av.append(img);
+    } else {
+      av.style.background = colors[i];
+    }
     stack.appendChild(av);
   }
   return stack;
@@ -23,7 +69,7 @@ function createAvatarStack(count = 4) {
 
 /**
  * Инпут email + кнопка при вводе; ниже — аватарки и текст.
- * @param {{ placeholder: string; foundersText: string; submitAria: string; invalidEmailMessage?: string; invalidCaption?: string; className?: string; avatarCount?: number; showFoundersRow?: boolean }} opts
+ * @param {{ placeholder: string; foundersText: string; submitAria: string; invalidEmailMessage?: string; invalidCaption?: string; className?: string; avatarCount?: number; avatarSources?: string[]; showFoundersRow?: boolean }} opts
  * @returns {HTMLDivElement}
  */
 export function createEmailField({
@@ -34,6 +80,7 @@ export function createEmailField({
   invalidCaption = "",
   className = "email-field-block",
   avatarCount = 4,
+  avatarSources,
   showFoundersRow = true,
 }) {
   const root = document.createElement("div");
@@ -198,7 +245,7 @@ export function createEmailField({
     foundersRow = document.createElement("div");
     foundersRow.className = "email-avatars";
 
-    const stack = createAvatarStack(avatarCount);
+    const stack = createAvatarStack(avatarCount, avatarSources);
     foundersCaption = document.createElement("p");
     foundersCaption.className = "email-avatars__caption";
     foundersCaption.textContent = foundersText;

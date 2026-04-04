@@ -30,7 +30,7 @@
       "emailInvalidCaption": "Так ты в их числе не окажешься",
       "emailSubmitCooldown": "Подождите пару секунд перед повторной отправкой",
       "emailSubmitAria": "Отправить email",
-      "foundersWaiting": "123+ фаундера ждут релиза",
+      "foundersWaiting": "{foundersCount}+ фаундера ждут релиза",
       "footerCopyright": "© 2026 memento",
       "footerContacts": "Контакты",
       "langSwitchAria": "Переключить на английский"
@@ -62,7 +62,7 @@
       "emailInvalidCaption": "You won't be on that list",
       "emailSubmitCooldown": "Please wait a few seconds before submitting again",
       "emailSubmitAria": "Submit email",
-      "foundersWaiting": "123+ founders waiting for the release",
+      "foundersWaiting": "{foundersCount}+ founders waiting for the release",
       "footerCopyright": "© 2026 memento",
       "footerContacts": "Contacts",
       "langSwitchAria": "Switch to Russian"

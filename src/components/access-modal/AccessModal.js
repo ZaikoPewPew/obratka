@@ -1,3 +1,5 @@
+import { getFounderAvatarSourcesForPage } from "../../i18n.js";
+import { formatFoundersWaiting } from "../../utils/foundersTicker.js";
 import { createEmailField } from "../email-field/EmailField.js";
 import { fillCountTemplate, getFormattedStartupCount } from "../startup-count/startupCount.js";
 
@@ -116,11 +118,12 @@ function buildAccessModal(t, locale) {
 
   const emailBlock = createEmailField({
     placeholder: t.emailPlaceholder,
-    foundersText: t.foundersWaiting,
+    foundersText: formatFoundersWaiting(t.foundersWaiting),
     submitAria: t.emailSubmitAria,
     invalidCaption: t.emailInvalidCaption,
     className: "access-modal__email email-field-block email-field-block--compact",
     avatarCount: 4,
+    avatarSources: getFounderAvatarSourcesForPage(),
   });
 
   panel.append(header, benefits, emailBlock);

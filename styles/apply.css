@@ -229,6 +229,26 @@
   box-shadow: 0 0 0 4px #fff;
 }
 
+.email-avatars__avatar--photo {
+  overflow: hidden;
+  padding: 0;
+  background: #f3f4f7;
+}
+
+.email-avatars__avatar--photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.email-avatars__avatar--photo-ready img {
+  opacity: 1;
+}
+
 .email-avatars__avatar:not(:first-child) {
   margin-left: -5px;
 }
