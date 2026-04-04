@@ -255,7 +255,7 @@ function init() {
     }
 
     emailSubmitInFlight = true;
-    /** @type {{ ok: boolean }} */
+    /** @type {{ ok: boolean; newSubscriber?: boolean }} */
     let saveResult = { ok: false };
     try {
       saveResult = await saveSubscriber(email, source);
@@ -265,7 +265,9 @@ function init() {
     }
 
     if (saveResult.ok) {
-      markWaitlistSubmittedInBrowser();
+      if (saveResult.newSubscriber) {
+        markWaitlistSubmittedInBrowser();
+      }
       fireEmailSubmitConfetti(shell);
       if (input) {
         input.value = "";
