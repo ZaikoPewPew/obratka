@@ -281,3 +281,16 @@
   color: #c43c3c;
   font-weight: 500;
 }
+
+/* Явно как у текста подписи (p.email-avatars__caption), без отличий от «фаундера ждут…» */
+.email-avatars__caption .email-avatars__founders-num {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  text-transform: inherit;
+  font-variant-numeric: tabular-nums;
+}

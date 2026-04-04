@@ -1,3 +1,8 @@
+import {
+  fillFoundersCaption,
+  getFoundersDisplayNumber,
+  isFoundersCountAnimationDone,
+} from "../../utils/foundersCountDisplay.js";
 import { EMAIL_MAX_LENGTH, isValidEmail } from "../../utils/emailValidation.js";
 
 const UNAVATAR_BASE = "https://unavatar.io/";
@@ -69,7 +74,7 @@ function createAvatarStack(count = 4, sources = []) {
 
 /**
  * Инпут email + кнопка при вводе; ниже — аватарки и текст.
- * @param {{ placeholder: string; foundersText: string; submitAria: string; invalidEmailMessage?: string; invalidCaption?: string; className?: string; avatarCount?: number; avatarSources?: string[]; showFoundersRow?: boolean }} opts
+ * @param {{ placeholder: string; foundersText: string; submitAria: string; invalidEmailMessage?: string; invalidCaption?: string; className?: string; avatarCount?: number; avatarSources?: string[]; showFoundersRow?: boolean }} opts — foundersText: шаблон с `{foundersCount}` из locales
  * @returns {HTMLDivElement}
  */
 export function createEmailField({
@@ -124,7 +129,8 @@ export function createEmailField({
       foundersCaption.textContent = errText;
       foundersCaption.classList.add("email-avatars__caption--error");
     } else {
-      foundersCaption.textContent = foundersText;
+      const n = isFoundersCountAnimationDone() ? getFoundersDisplayNumber() : 0;
+      fillFoundersCaption(foundersCaption, foundersText, n);
       foundersCaption.classList.remove("email-avatars__caption--error");
     }
   }
@@ -248,7 +254,12 @@ export function createEmailField({
     const stack = createAvatarStack(avatarCount, avatarSources);
     foundersCaption = document.createElement("p");
     foundersCaption.className = "email-avatars__caption";
-    foundersCaption.textContent = foundersText;
+    foundersCaption.dataset.foundersTemplate = foundersText;
+    fillFoundersCaption(
+      foundersCaption,
+      foundersText,
+      isFoundersCountAnimationDone() ? getFoundersDisplayNumber() : 0,
+    );
 
     foundersRow.append(stack, foundersCaption);
     root.append(foundersRow);

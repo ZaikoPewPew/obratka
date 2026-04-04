@@ -15,7 +15,8 @@ import {
   PHYSICS_CARDS_PER_SIDE,
 } from "./components/startup-card/StartupCard.js";
 import { initStartupRainPhysics } from "./startup-rain-physics.js";
-import { saveSubscriber } from "./api/subscribers.js";
+import { fetchSubscribersCount, saveSubscriber } from "./api/subscribers.js";
+import { setDbSubscriberCountAndRefresh } from "./utils/foundersCountDisplay.js";
 import { fireEmailSubmitConfetti } from "./utils/emailSubmitConfetti.js";
 import { isValidEmail } from "./utils/emailValidation.js";
 
@@ -159,6 +160,12 @@ function init() {
   mountStartupFall();
   mountApplyCards(t, locale);
   mountSiteFooter(t);
+
+  fetchSubscribersCount().then((count) => {
+    setDbSubscriberCountAndRefresh(
+      count !== null && Number.isFinite(count) && count >= 0 ? count : undefined,
+    );
+  });
 
   document.addEventListener("email-submit", async (e) => {
     const email = e.detail?.value;

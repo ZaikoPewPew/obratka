@@ -1,5 +1,4 @@
 import { getFounderAvatarSourcesForPage } from "../../i18n.js";
-import { formatFoundersWaiting } from "../../utils/foundersTicker.js";
 import { attachAccessModalToCta } from "../access-modal/AccessModal.js";
 import { createCtaButton } from "../cta-button/CtaButton.js";
 import { createDividerOr } from "../divider-or/DividerOr.js";
@@ -44,7 +43,7 @@ export function createApplyCard({ t, locale, modifier = "" }) {
 
   const emailBlock = createEmailField({
     placeholder: t.emailPlaceholder,
-    foundersText: formatFoundersWaiting(t.foundersWaiting),
+    foundersText: t.foundersWaiting,
     submitAria: t.emailSubmitAria,
     invalidCaption: t.emailInvalidCaption,
     className: "apply-card__email email-field-block",
@@ -98,7 +97,7 @@ export function createApplyCardForm({ t, locale }) {
 
   const emailBlock = createEmailField({
     placeholder: t.emailPlaceholder,
-    foundersText: formatFoundersWaiting(t.foundersWaiting),
+    foundersText: t.foundersWaiting,
     submitAria: t.emailSubmitAria,
     invalidCaption: t.emailInvalidCaption,
     className: "apply-card__email email-field-block",
