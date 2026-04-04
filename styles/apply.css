@@ -134,16 +134,18 @@
   box-shadow: 0 0 0 1px rgba(36, 36, 38, 0.12);
 }
 
-.email-input-shell--filled:not(.email-input-shell--invalid) {
+.email-input-shell--filled:not(.email-input-shell--invalid):not(.email-input-shell--server-message) {
   background: #eceef3;
 }
 
-.email-input-shell--invalid {
+.email-input-shell--invalid,
+.email-input-shell--server-message {
   background: #fff8f8;
   box-shadow: 0 0 0 1px rgba(200, 60, 60, 0.45);
 }
 
-.email-input-shell--invalid:focus-within {
+.email-input-shell--invalid:focus-within,
+.email-input-shell--server-message:focus-within {
   box-shadow: 0 0 0 1px rgba(200, 60, 60, 0.55);
 }
 

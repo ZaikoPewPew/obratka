@@ -279,16 +279,19 @@
     box-shadow: 0 0 0 1px rgba(36, 36, 38, 0.12);
   }
 
-  .mobile-apply-form .email-input-shell--filled:not(.email-input-shell--invalid) {
+  .mobile-apply-form
+    .email-input-shell--filled:not(.email-input-shell--invalid):not(.email-input-shell--server-message) {
     background: #eceef3;
   }
 
-  .mobile-apply-form .email-input-shell--invalid {
+  .mobile-apply-form .email-input-shell--invalid,
+  .mobile-apply-form .email-input-shell--server-message {
     background: #fff8f8;
     box-shadow: 0 0 0 1px rgba(200, 60, 60, 0.45);
   }
 
-  .mobile-apply-form .email-input-shell--invalid:focus-within {
+  .mobile-apply-form .email-input-shell--invalid:focus-within,
+  .mobile-apply-form .email-input-shell--server-message:focus-within {
     box-shadow: 0 0 0 1px rgba(200, 60, 60, 0.55);
   }
 

@@ -7,11 +7,11 @@ const SUPABASE_ANON_KEY = import.meta.env.SUPABASE_ANON_KEY;
  * Сохраняет email в таблицу `subscribers` (PostgREST).
  * @param {string} email
  * @param {string} source — например `email_form` | `buy_intent`
- * @returns {Promise<boolean>}
+ * @returns {Promise<{ ok: boolean; conflict?: boolean }>}
  */
 export async function saveSubscriber(email, source) {
   if (!isValidEmail(email)) {
-    return false;
+    return { ok: false };
   }
   const normalized = normalizeEmail(email);
 
@@ -24,7 +24,7 @@ export async function saveSubscriber(email, source) {
         "[subscribers] Задайте SUPABASE_URL и SUPABASE_ANON_KEY в `.env` (см. `.env.example`).",
       );
     }
-    return false;
+    return { ok: false };
   }
 
   const res = await fetch(`${base}/rest/v1/subscribers`, {
@@ -38,7 +38,13 @@ export async function saveSubscriber(email, source) {
     body: JSON.stringify({ email: normalized, source }),
   });
 
-  return res.ok;
+  if (res.ok) {
+    return { ok: true };
+  }
+  if (res.status === 409) {
+    return { ok: false, conflict: true };
+  }
+  return { ok: false };
 }
 
 function parseCountFromContentRange(header) {

@@ -23,8 +23,57 @@ import { isValidEmail } from "./utils/emailValidation.js";
 /** Минимальный интервал между запросами подписки с одной вкладки (анти-спам). */
 const EMAIL_SUBMIT_MIN_GAP_MS = 4000;
 
+/** После успешной подписки блокируем повтор с этого браузера (не секрет, только UX). */
+const WAITLIST_SUBMITTED_STORAGE_KEY = "memento.waitlistSubmitted";
+
 let emailSubmitInFlight = false;
 let emailSubmitNextAllowedAt = 0;
+
+function isWaitlistSubmittedInBrowser() {
+  try {
+    return window.localStorage.getItem(WAITLIST_SUBMITTED_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markWaitlistSubmittedInBrowser() {
+  try {
+    window.localStorage.setItem(WAITLIST_SUBMITTED_STORAGE_KEY, "1");
+  } catch {
+    /* ignore */
+  }
+}
+
+function interpolateSeconds(template, seconds) {
+  return String(template || "").replace(/\{seconds\}/g, String(seconds));
+}
+
+/** Красная подпись под полем, как при кулдауне; через `input` восстанавливается штатный текст. */
+function flashEmailFieldCaptionError(input, message) {
+  const block = input?.closest(".email-field-block");
+  const caption = block?.querySelector(".email-avatars__caption");
+  if (!caption || !message) {
+    return;
+  }
+  caption.textContent = message;
+  caption.classList.add("email-avatars__caption--error");
+  window.setTimeout(() => {
+    input?.dispatchEvent(new Event("input", { bubbles: true }));
+  }, 2800);
+}
+
+/** Ошибка от API (409, сеть и т.д.): подпись + рамка до следующего ввода в поле. */
+function showEmailSubmitServerMessage(shell, input, message) {
+  shell.classList.add("email-input-shell--server-message");
+  const block = input.closest(".email-field-block");
+  const caption = block?.querySelector(".email-avatars__caption");
+  if (caption && message) {
+    caption.textContent = message;
+    caption.classList.add("email-avatars__caption--error");
+  }
+  input.setAttribute("aria-invalid", "true");
+}
 
 function mountLogos(brandName) {
   document.querySelectorAll('[data-mount="logo"]').forEach((node) => {
@@ -190,36 +239,41 @@ function init() {
     if (emailSubmitInFlight) {
       return;
     }
+
+    if (isWaitlistSubmittedInBrowser()) {
+      flashEmailFieldCaptionError(input, t.emailAlreadySubmitted);
+      return;
+    }
+
     if (now < emailSubmitNextAllowedAt) {
-      const block = input?.closest(".email-field-block");
-      const caption = block?.querySelector(".email-avatars__caption");
-      if (caption && t.emailSubmitCooldown) {
-        caption.textContent = t.emailSubmitCooldown;
-        caption.classList.add("email-avatars__caption--error");
-        window.setTimeout(() => {
-          input?.dispatchEvent(new Event("input", { bubbles: true }));
-        }, 2800);
-      }
+      const waitSec = Math.max(1, Math.ceil((emailSubmitNextAllowedAt - now) / 1000));
+      flashEmailFieldCaptionError(
+        input,
+        interpolateSeconds(t.emailSubmitCooldown, waitSec),
+      );
       return;
     }
 
     emailSubmitInFlight = true;
-    let ok = false;
+    /** @type {{ ok: boolean; conflict?: boolean }} */
+    let saveResult = { ok: false };
     try {
-      ok = await saveSubscriber(email, source);
+      saveResult = await saveSubscriber(email, source);
     } finally {
       emailSubmitInFlight = false;
       emailSubmitNextAllowedAt = Date.now() + EMAIL_SUBMIT_MIN_GAP_MS;
     }
 
-    if (ok) {
+    if (saveResult.ok) {
+      markWaitlistSubmittedInBrowser();
       fireEmailSubmitConfetti(shell);
       if (input) {
         input.value = "";
         input.dispatchEvent(new Event("input", { bubbles: true }));
       }
-    } else if (shell) {
-      shell.classList.add("email-input-shell--invalid");
+    } else if (!saveResult.ok && shell && input) {
+      const msg = saveResult.conflict ? t.emailDuplicateInDb : t.emailSubmitFailed;
+      showEmailSubmitServerMessage(shell, input, msg || t.emailSubmitFailed);
     }
   });
 

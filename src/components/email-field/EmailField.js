@@ -117,7 +117,8 @@ export function createEmailField({
 
   function syncAriaInvalid() {
     const invalid = shell.classList.contains("email-input-shell--invalid");
-    input.setAttribute("aria-invalid", invalid ? "true" : "false");
+    const serverMsg = shell.classList.contains("email-input-shell--server-message");
+    input.setAttribute("aria-invalid", invalid || serverMsg ? "true" : "false");
   }
 
   /** Подпись под аватарками: соц.текст или короткая красная фраза при невалидном email (после blur/submit). */
@@ -143,6 +144,7 @@ export function createEmailField({
 
   function onInput() {
     syncSubmit();
+    shell.classList.remove("email-input-shell--server-message");
     const v = input.value.trim();
     if (v.length === 0 || isValidEmail(input.value)) {
       shell.classList.remove("email-input-shell--invalid");
@@ -175,6 +177,7 @@ export function createEmailField({
       return;
     }
     shell.classList.remove("email-input-shell--invalid");
+    shell.classList.remove("email-input-shell--server-message");
     syncAriaInvalid();
     syncFoundersCaption();
     input.dispatchEvent(
