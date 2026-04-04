@@ -1,0 +1,220 @@
+/* Модалка «Полный доступ» (десктоп, открывается с CTA карточки) */
+
+.access-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  background: rgba(36, 36, 38, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.access-modal__backdrop.access-modal__backdrop--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.access-modal {
+  box-sizing: border-box;
+  width: 514px;
+  max-width: calc(100vw - 48px);
+  padding: 32px;
+  border-radius: 40px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex-shrink: 0;
+  box-shadow: 0 24px 80px rgba(36, 36, 38, 0.18);
+  opacity: 0;
+  transform: translateY(14px) scale(0.97);
+  transform-origin: center center;
+  transition:
+    opacity 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.access-modal__backdrop--open .access-modal {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .access-modal__backdrop,
+  .access-modal {
+    transition-duration: 0.01ms;
+    transition-delay: 0s;
+  }
+
+  .access-modal {
+    transform: none;
+  }
+
+  .access-modal__backdrop--open .access-modal {
+    transform: none;
+  }
+}
+
+.access-modal__header {
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  max-width: 450px;
+  align-self: center;
+  min-height: 61px;
+  flex-shrink: 0;
+}
+
+.access-modal__head-text {
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  min-height: 61px;
+  max-width: 402px;
+}
+
+.access-modal__title {
+  margin: 0;
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.2;
+  color: #242426;
+}
+
+.access-modal__subtitle {
+  margin: 8px 0 0;
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 170%;
+  color: #797979;
+}
+
+.access-modal__close {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 9px;
+  border: none;
+  border-radius: 392px;
+  background: #f3f4f7;
+  cursor: pointer;
+  color: #242426;
+  transition: background-color 0.2s ease;
+}
+
+.access-modal__close:hover {
+  background: #e8eaef;
+}
+
+.access-modal__close:focus-visible {
+  outline: 2px solid rgba(36, 36, 38, 0.35);
+  outline-offset: 2px;
+}
+
+.access-modal__close svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+.access-modal__benefits {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 450px;
+  align-self: center;
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.access-modal__benefit {
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+}
+
+.access-modal__benefit-icon {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 12px;
+  border-radius: 16px;
+  background: #f3f4f7;
+}
+
+.access-modal__benefit-icon svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.access-modal__benefit-text {
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.access-modal__benefit-title {
+  width: 100%;
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 170%;
+  color: #242426;
+}
+
+.access-modal__benefit-title .startup-count {
+  font-weight: 500;
+}
+
+.access-modal__benefit-sub {
+  margin: 0;
+  width: 100%;
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 170%;
+  color: #797979;
+}
+
+.access-modal__email {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 450px;
+  align-self: center;
+  margin-top: 24px;
+  flex-shrink: 0;
+}
+
+.email-field-block.email-field-block--compact {
+  height: auto;
+  gap: 0;
+}

@@ -11,6 +11,7 @@
     "vite": "^6.2.0"
   },
   "dependencies": {
+    "canvas-confetti": "^1.9.4",
     "matter-js": "^0.20.0"
   }
 }

@@ -1,3 +1,4 @@
+import { attachAccessModalToCta } from "../access-modal/AccessModal.js";
 import { createCtaButton } from "../cta-button/CtaButton.js";
 import { createDividerOr } from "../divider-or/DividerOr.js";
 import { createEmailField } from "../email-field/EmailField.js";
@@ -46,6 +47,8 @@ export function createApplyCard({ t, locale, modifier = "" }) {
     invalidEmailMessage: t.emailInvalidHint,
     className: "apply-card__email email-field-block",
   });
+
+  attachAccessModalToCta(cta, t, locale);
 
   card.append(title, subtitle, cta, divider, emailBlock);
   return card;

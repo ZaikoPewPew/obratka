@@ -1,3 +1,5 @@
+import { fireEmailSubmitConfetti } from "../../utils/emailSubmitConfetti.js";
+
 const SUBMIT_SVG = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <path d="M9.99999 11L5.99999 15M5.99999 15L9.99999 19M5.99999 15H17C18.1046 15 19 14.107 19 13.0025C19 10.0901 19 4.92333 19 4" stroke="#242426" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`;
@@ -29,7 +31,7 @@ function createAvatarStack(count = 4) {
 
 /**
  * Инпут email + кнопка при вводе; ниже — аватарки и текст.
- * @param {{ placeholder: string; foundersText: string; submitAria: string; invalidEmailMessage: string; className?: string; avatarCount?: number }} opts
+ * @param {{ placeholder: string; foundersText: string; submitAria: string; invalidEmailMessage: string; className?: string; avatarCount?: number; showFoundersRow?: boolean }} opts
  * @returns {HTMLDivElement}
  */
 export function createEmailField({
@@ -39,6 +41,7 @@ export function createEmailField({
   invalidEmailMessage,
   className = "email-field-block",
   avatarCount = 4,
+  showFoundersRow = true,
 }) {
   const root = document.createElement("div");
   root.className = className;
@@ -113,6 +116,30 @@ export function createEmailField({
   input.addEventListener("input", onInput);
   input.addEventListener("blur", onBlur);
 
+  function performEmailSubmit() {
+    syncValidityMessage();
+    const v = input.value.trim();
+    if (!v) return;
+    if (!isValidEmail(input.value)) {
+      shell.classList.add("email-input-shell--invalid");
+      syncAriaInvalid();
+      input.reportValidity();
+      return;
+    }
+    shell.classList.remove("email-input-shell--invalid");
+    syncAriaInvalid();
+    fireEmailSubmitConfetti(shell);
+    input.dispatchEvent(
+      new CustomEvent("email-submit", { bubbles: true, detail: { value: v } }),
+    );
+  }
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    performEmailSubmit();
+  });
+
   /** Мобилка: при открытии клавиатуры держим поле в видимой области (visualViewport + scrollIntoView). */
   input.addEventListener(
     "focus",
@@ -163,35 +190,24 @@ export function createEmailField({
     { passive: true },
   );
 
-  submit.addEventListener("click", () => {
-    syncValidityMessage();
-    const v = input.value.trim();
-    if (!v) return;
-    if (!isValidEmail(input.value)) {
-      shell.classList.add("email-input-shell--invalid");
-      syncAriaInvalid();
-      input.reportValidity();
-      return;
-    }
-    shell.classList.remove("email-input-shell--invalid");
-    syncAriaInvalid();
-    input.dispatchEvent(
-      new CustomEvent("email-submit", { bubbles: true, detail: { value: v } }),
-    );
-  });
+  submit.addEventListener("click", performEmailSubmit);
 
   shell.append(input, submit);
 
-  const row = document.createElement("div");
-  row.className = "email-avatars";
+  root.append(shell);
 
-  const stack = createAvatarStack(avatarCount);
-  const caption = document.createElement("p");
-  caption.className = "email-avatars__caption";
-  caption.textContent = foundersText;
+  if (showFoundersRow) {
+    const row = document.createElement("div");
+    row.className = "email-avatars";
 
-  row.append(stack, caption);
-  root.append(shell, row);
+    const stack = createAvatarStack(avatarCount);
+    const caption = document.createElement("p");
+    caption.className = "email-avatars__caption";
+    caption.textContent = foundersText;
+
+    row.append(stack, caption);
+    root.append(row);
+  }
 
   syncSubmit();
   syncAriaInvalid();
