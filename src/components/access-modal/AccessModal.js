@@ -118,9 +118,9 @@ function buildAccessModal(t, locale) {
     placeholder: t.emailPlaceholder,
     foundersText: t.foundersWaiting,
     submitAria: t.emailSubmitAria,
-    invalidEmailMessage: t.emailInvalidHint,
+    invalidCaption: t.emailInvalidCaption,
     className: "access-modal__email email-field-block email-field-block--compact",
-    showFoundersRow: false,
+    avatarCount: 4,
   });
 
   panel.append(header, benefits, emailBlock);

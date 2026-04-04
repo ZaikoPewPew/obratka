@@ -256,3 +256,8 @@
   line-height: 170%;
   color: #242426;
 }
+
+.email-avatars__caption--error {
+  color: #c43c3c;
+  font-weight: 500;
+}

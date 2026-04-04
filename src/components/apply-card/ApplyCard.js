@@ -13,7 +13,7 @@ function ctaWithPrice(t, mobile) {
 /**
  * Центральный блок заявки (530×398 по макету).
  * @param {object} opts
- * @param {{ applyTitle: string; applySubtitle: string; ctaPrimary: string; dividerOr: string; emailPlaceholder: string; emailInvalidHint: string; foundersWaiting: string; emailSubmitAria: string }} opts.t
+ * @param {{ applyTitle: string; applySubtitle: string; ctaPrimary: string; dividerOr: string; emailPlaceholder: string; emailInvalidCaption: string; foundersWaiting: string; emailSubmitAria: string }} opts.t
  * @param {string} opts.locale
  * @param {string} [opts.modifier]
  * @returns {HTMLDivElement}
@@ -44,7 +44,7 @@ export function createApplyCard({ t, locale, modifier = "" }) {
     placeholder: t.emailPlaceholder,
     foundersText: t.foundersWaiting,
     submitAria: t.emailSubmitAria,
-    invalidEmailMessage: t.emailInvalidHint,
+    invalidCaption: t.emailInvalidCaption,
     className: "apply-card__email email-field-block",
   });
 
@@ -75,8 +75,9 @@ export function createApplyCardHero({ t, locale }) {
 
 /**
  * Мобилка: CTA, разделитель, email (нижний блок у края экрана).
+ * CTA открывает ту же модалку «Полный доступ», что и на десктопе.
  */
-export function createApplyCardForm({ t }) {
+export function createApplyCardForm({ t, locale }) {
   const wrap = document.createElement("div");
   wrap.className = "mobile-apply-form";
 
@@ -84,6 +85,8 @@ export function createApplyCardForm({ t }) {
     text: ctaWithPrice(t, true),
     className: "apply-card__cta",
   });
+
+  attachAccessModalToCta(cta, t, locale);
 
   const divider = createDividerOr({
     text: t.dividerOr,
@@ -94,7 +97,7 @@ export function createApplyCardForm({ t }) {
     placeholder: t.emailPlaceholder,
     foundersText: t.foundersWaiting,
     submitAria: t.emailSubmitAria,
-    invalidEmailMessage: t.emailInvalidHint,
+    invalidCaption: t.emailInvalidCaption,
     className: "apply-card__email email-field-block",
     avatarCount: 2,
   });

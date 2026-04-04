@@ -1,4 +1,4 @@
-/* Модалка «Полный доступ» (десктоп, открывается с CTA карточки) */
+/* Модалка «Полный доступ» (десктоп и мобилка ≤767px, CTA карточки / mobile-apply-form) */
 
 .access-modal__backdrop {
   position: fixed;
@@ -214,7 +214,141 @@
   flex-shrink: 0;
 }
 
+.access-modal__email.email-field-block--compact .email-input-shell {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+}
+
+.access-modal__email.email-field-block--compact .email-avatars {
+  width: 100%;
+  max-width: none;
+}
+
+.access-modal__email.email-field-block--compact .email-avatars__avatar {
+  box-shadow: 0 0 0 2px #fff;
+}
+
 .email-field-block.email-field-block--compact {
   height: auto;
-  gap: 0;
+  gap: 16px;
+}
+
+/* ——— Мобилка: нижний sheet на всю ширину, без боковых отступов; снизу 16px + safe-area ——— */
+@media (max-width: 767px) {
+  .access-modal__backdrop {
+    align-items: flex-end;
+    justify-content: stretch;
+    padding: 0;
+  }
+
+  .access-modal {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 20px 16px max(16px, env(safe-area-inset-bottom, 0px));
+    border-radius: 24px 24px 0 0;
+    max-height: min(92dvh, 900px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: 0 -12px 48px rgba(36, 36, 38, 0.14);
+  }
+
+  .access-modal__header {
+    max-width: none;
+    min-height: 0;
+    align-self: stretch;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #fff;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+  }
+
+  .access-modal__head-text {
+    max-width: none;
+    min-height: 0;
+  }
+
+  .access-modal__title {
+    font-size: 22px;
+    line-height: 1.25;
+    padding-right: 4px;
+  }
+
+  .access-modal__subtitle {
+    margin-top: 6px;
+    line-height: 170%;
+  }
+
+  .access-modal__benefits {
+    max-width: none;
+    align-self: stretch;
+    margin-top: 20px;
+    gap: 10px;
+  }
+
+  .access-modal__benefit {
+    min-height: 44px;
+  }
+
+  .access-modal__benefit-icon {
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .access-modal__benefit-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .access-modal__benefit-text {
+    min-height: 44px;
+  }
+
+  .access-modal__email {
+    max-width: none;
+    align-self: stretch;
+    margin-top: 20px;
+  }
+
+  .access-modal__email.email-field-block--compact .email-input-shell {
+    height: 56px;
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  /* Четыре аватарки в разметке, на sheet показываем две — как на мобильной форме */
+  .access-modal__email.email-field-block--compact .email-avatars__stack .email-avatars__avatar:nth-child(n + 3) {
+    display: none;
+  }
+
+  .access-modal__email.email-field-block--compact .email-avatars__stack {
+    width: 59px;
+  }
+}
+
+@media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
+  .access-modal {
+    transform: translateY(100%);
+    transform-origin: bottom center;
+  }
+
+  .access-modal__backdrop--open .access-modal {
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+  .access-modal {
+    transform: none;
+  }
+
+  .access-modal__backdrop--open .access-modal {
+    transform: none;
+  }
 }

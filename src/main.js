@@ -17,6 +17,13 @@ import {
 import { initStartupRainPhysics } from "./startup-rain-physics.js";
 import { saveSubscriber } from "./api/subscribers.js";
 import { fireEmailSubmitConfetti } from "./utils/emailSubmitConfetti.js";
+import { isValidEmail } from "./utils/emailValidation.js";
+
+/** Минимальный интервал между запросами подписки с одной вкладки (анти-спам). */
+const EMAIL_SUBMIT_MIN_GAP_MS = 4000;
+
+let emailSubmitInFlight = false;
+let emailSubmitNextAllowedAt = 0;
 
 function mountLogos(brandName) {
   document.querySelectorAll('[data-mount="logo"]').forEach((node) => {
@@ -74,6 +81,10 @@ function mountHeaderActions(t, locale) {
 
 function mountSiteFooter(t) {
   document.querySelectorAll('[data-mount="site-footer"]').forEach((node) => {
+    if (node.closest(".layout-mobile")) {
+      node.remove();
+      return;
+    }
     const footer = document.createElement("footer");
     footer.className = "site-footer";
 
@@ -132,7 +143,7 @@ function mountApplyCards(t, locale) {
     heroMount.replaceWith(createApplyCardHero({ t, locale }));
   }
   if (formMount) {
-    formMount.replaceWith(createApplyCardForm({ t }));
+    formMount.replaceWith(createApplyCardForm({ t, locale }));
   }
 }
 
@@ -158,7 +169,42 @@ function init() {
     const shell = e.target.closest(".email-input-shell");
     const input = e.target.closest("input.email-input");
 
-    const ok = await saveSubscriber(email, source);
+    if (!isValidEmail(email)) {
+      if (shell) {
+        shell.classList.add("email-input-shell--invalid");
+      }
+      if (input) {
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      return;
+    }
+
+    const now = Date.now();
+    if (emailSubmitInFlight) {
+      return;
+    }
+    if (now < emailSubmitNextAllowedAt) {
+      const block = input?.closest(".email-field-block");
+      const caption = block?.querySelector(".email-avatars__caption");
+      if (caption && t.emailSubmitCooldown) {
+        caption.textContent = t.emailSubmitCooldown;
+        caption.classList.add("email-avatars__caption--error");
+        window.setTimeout(() => {
+          input?.dispatchEvent(new Event("input", { bubbles: true }));
+        }, 2800);
+      }
+      return;
+    }
+
+    emailSubmitInFlight = true;
+    let ok = false;
+    try {
+      ok = await saveSubscriber(email, source);
+    } finally {
+      emailSubmitInFlight = false;
+      emailSubmitNextAllowedAt = Date.now() + EMAIL_SUBMIT_MIN_GAP_MS;
+    }
+
     if (ok) {
       fireEmailSubmitConfetti(shell);
       if (input) {

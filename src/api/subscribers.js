@@ -1,3 +1,5 @@
+import { isValidEmail, normalizeEmail } from "../utils/emailValidation.js";
+
 const SUPABASE_URL = import.meta.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.SUPABASE_ANON_KEY;
 
@@ -8,6 +10,11 @@ const SUPABASE_ANON_KEY = import.meta.env.SUPABASE_ANON_KEY;
  * @returns {Promise<boolean>}
  */
 export async function saveSubscriber(email, source) {
+  if (!isValidEmail(email)) {
+    return false;
+  }
+  const normalized = normalizeEmail(email);
+
   const base = String(SUPABASE_URL || "").replace(/\/$/, "");
   const key = String(SUPABASE_ANON_KEY || "").trim();
 
@@ -28,7 +35,7 @@ export async function saveSubscriber(email, source) {
       Authorization: `Bearer ${key}`,
       Prefer: "return=minimal",
     },
-    body: JSON.stringify({ email, source }),
+    body: JSON.stringify({ email: normalized, source }),
   });
 
   return res.ok;
