@@ -118,7 +118,7 @@
 
 /* Слой дождя: по умолчанию под волнами; физика z-index 1 — под водой (2) и формой (3) */
 .startup-fall {
-  --startup-fall-duration: 12s;
+  --startup-fall-duration: 11s;
 
   position: absolute;
   inset: 0;

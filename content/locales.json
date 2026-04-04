@@ -11,7 +11,7 @@
       "timerBadge": "Сейчас в базе {count} стартапов",
       "applyTitle": "База данных из {count} провалившихся стартапа",
       "applySubtitle": "Деньги, даты и причины смерти",
-      "ctaPrimary": "Получить ранний доступ за {price}",
+      "ctaPrimary": "Получить доступ сразу за {price}",
       "ctaPrimaryMobile": "Получить доступ за {price}",
       "ctaAccessPrice": "490 ₽",
       "dividerOr": "или",

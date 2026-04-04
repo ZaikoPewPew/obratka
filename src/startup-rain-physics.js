@@ -28,7 +28,7 @@ const CARD_FALL_VX_JITTER = 0.1;
 const SPAWN_TOP_CLEAR = 16;
 
 /** Постоянно медленное падение: жёсткий потолок скорости (без «пушек» от столкновений). */
-const CARD_MAX_SPEED = 2.15;
+const CARD_MAX_SPEED = 2.37;
 /** Выше — иначе все карточки визуально крутятся почти одинаково (срез угловой скорости). */
 const CARD_MAX_ANGULAR = 0.38;
 
@@ -296,8 +296,8 @@ export function initStartupRainPhysics() {
         velocityIterations: 8,
       });
 
-      engine.gravity.y = 0.36;
-      engine.gravity.scale = 0.00044;
+      engine.gravity.y = 0.396;
+      engine.gravity.scale = 0.000484;
 
       const world = engine.world;
 
@@ -559,5 +559,29 @@ export function initStartupRainPhysics() {
     }
   }
 
-  setup();
+  const desktopMq = window.matchMedia("(min-width: 768px)");
+
+  function syncPhysicsToViewport() {
+    if (!desktopMq.matches) {
+      if (active) {
+        active.cleanup();
+        active = null;
+      }
+      return;
+    }
+    setup();
+  }
+
+  let syncMqT = 0;
+  function onDesktopMqChange() {
+    window.clearTimeout(syncMqT);
+    if (!desktopMq.matches) {
+      syncPhysicsToViewport();
+      return;
+    }
+    syncMqT = window.setTimeout(syncPhysicsToViewport, 100);
+  }
+
+  syncPhysicsToViewport();
+  desktopMq.addEventListener("change", onDesktopMqChange);
 }
