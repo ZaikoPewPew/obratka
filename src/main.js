@@ -255,7 +255,7 @@ function init() {
     }
 
     emailSubmitInFlight = true;
-    /** @type {{ ok: boolean; conflict?: boolean }} */
+    /** @type {{ ok: boolean }} */
     let saveResult = { ok: false };
     try {
       saveResult = await saveSubscriber(email, source);
@@ -271,9 +271,8 @@ function init() {
         input.value = "";
         input.dispatchEvent(new Event("input", { bubbles: true }));
       }
-    } else if (!saveResult.ok && shell && input) {
-      const msg = saveResult.conflict ? t.emailDuplicateInDb : t.emailSubmitFailed;
-      showEmailSubmitServerMessage(shell, input, msg || t.emailSubmitFailed);
+    } else if (shell && input) {
+      showEmailSubmitServerMessage(shell, input, t.emailSubmitFailed);
     }
   });
 

@@ -7,7 +7,7 @@ const SUPABASE_ANON_KEY = import.meta.env.SUPABASE_ANON_KEY;
  * Сохраняет email в таблицу `subscribers` (PostgREST).
  * @param {string} email
  * @param {string} source — например `email_form` | `buy_intent`
- * @returns {Promise<{ ok: boolean; conflict?: boolean }>}
+ * @returns {Promise<{ ok: boolean }>} — `ok: true` и при 201, и при 409 (дубликат), чтобы UI не отличал «уже в базе».
  */
 export async function saveSubscriber(email, source) {
   if (!isValidEmail(email)) {
@@ -38,11 +38,8 @@ export async function saveSubscriber(email, source) {
     body: JSON.stringify({ email: normalized, source }),
   });
 
-  if (res.ok) {
+  if (res.ok || res.status === 409) {
     return { ok: true };
-  }
-  if (res.status === 409) {
-    return { ok: false, conflict: true };
   }
   return { ok: false };
 }
