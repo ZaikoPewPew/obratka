@@ -1,6 +1,6 @@
 /**
  * Карточка стартапа (аватар + заголовок + описание).
- * @param {{ avatar: string; title: string; description: string }} item — данные из content/startups.json
+ * @param {{ avatar: string; title: string; description: string }} item — из `itemsRu` / `itemsWorld` в content/startups.json
  * @param {{ variant?: 'default' | 'ambient' }} [options]
  * @returns {HTMLDivElement}
  */
@@ -71,6 +71,31 @@ export function createStartupFallItem(item, index, options = {}) {
   return itemEl;
 }
 
+/**
+ * Обновить данные карточки в уже смонтированном `.startup-fall__item` (цикл пула при респавне).
+ * @param {HTMLElement} itemEl
+ * @param {{ avatar: string; title: string; description: string }} item
+ */
+export function setStartupFallItemContent(itemEl, item) {
+  const card = itemEl.querySelector(".startup-card");
+  if (!card) {
+    return;
+  }
+  const img = card.querySelector(".startup-card__avatar");
+  const titleEl = card.querySelector(".startup-card__title");
+  const descEl = card.querySelector(".startup-card__description");
+  if (img) {
+    img.src = item.avatar;
+    img.alt = item.title;
+  }
+  if (titleEl) {
+    titleEl.textContent = item.title;
+  }
+  if (descEl) {
+    descEl.textContent = item.description;
+  }
+}
+
 /** Сколько фоновых карточек (передний план — отдельно, см. mountStartupFall). */
 const AMBIENT_COUNT = 9;
 
@@ -114,7 +139,7 @@ export function createAmbientFallItem(item) {
 }
 
 /**
- * @param {Array<{ avatar: string; title: string; description: string }>} items
+ * @param {Array<{ avatar: string; title: string; description: string }>} items — пул для текущей локали
  * @returns {DocumentFragment}
  */
 export function createAmbientFallLayer(items) {
@@ -123,7 +148,7 @@ export function createAmbientFallLayer(items) {
     return frag;
   }
   for (let i = 0; i < AMBIENT_COUNT; i++) {
-    const item = items[Math.floor(Math.random() * items.length)];
+    const item = items[i % items.length];
     frag.append(createAmbientFallItem(item));
   }
   return frag;

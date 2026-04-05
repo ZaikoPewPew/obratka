@@ -1,10 +1,127 @@
 {
-  "count": 2345,
-  "items": [
+  "count": 2353,
+  "itemsRu": [
     {
-      "avatar": "/coub.png",
+      "avatar": "/Coub.jpg",
       "title": "Coub",
       "description": "Создавайте и смотрите видео на ходу"
+    }
+  ],
+  "itemsWorld": [
+    {
+      "avatar": "/Clubhouse.jpg",
+      "title": "Clubhouse",
+      "description": "Social audio app"
+    },
+    {
+      "avatar": "/Coub.jpg",
+      "title": "Coub",
+      "description": "Video streaming platform"
+    },
+    {
+      "avatar": "/Vine.jpg",
+      "title": "Vine",
+      "description": "Platform to share short looping video clips"
+    },
+    {
+      "avatar": "/Musical.ly.jpg",
+      "title": "Musical.ly",
+      "description": "Video-based social network"
+    },
+    {
+      "avatar": "/Houseparty.jpg",
+      "title": "Houseparty",
+      "description": "Video-based social media app"
+    },
+    {
+      "avatar": "/Google%20Code.jpg",
+      "title": "Google Code",
+      "description": "Project collaboration platform for developers"
+    },
+    {
+      "avatar": "/Goo.gl.jpg",
+      "title": "Goo.gl",
+      "description": "URL-shortening tool"
+    },
+    {
+      "avatar": "/Google%20Play%20Music.jpg",
+      "title": "Google Play Music",
+      "description": "Audio streaming service"
+    },
+    {
+      "avatar": "/Google%20Tango.jpg",
+      "title": "Google Tango",
+      "description": "Augmented Reality computing platform"
+    },
+    {
+      "avatar": "/Pets.com.jpg",
+      "title": "Pets.com",
+      "description": "Pet supply e-Commerce"
+    },
+    {
+      "avatar": "/Wing.ae.jpg",
+      "title": "Wing.ae",
+      "description": "Highly efficient delivery service"
+    },
+    {
+      "avatar": "/Kanava%20AI.jpg",
+      "title": "Kanava AI",
+      "description": "Supply Chain and Logistics"
+    },
+    {
+      "avatar": "/BiteSight.jpg",
+      "title": "BiteSight",
+      "description": "Videos of food"
+    },
+    {
+      "avatar": "/Lysto.jpg",
+      "title": "Lysto",
+      "description": "Sales, AI"
+    },
+    {
+      "avatar": "/Rubber%20Ducky%20Labs.jpg",
+      "title": "Rubber Ducky Labs",
+      "description": "Engineering, Product and Design"
+    },
+    {
+      "avatar": "/YaYa.jpg",
+      "title": "YaYa",
+      "description": "Sports and education"
+    },
+    {
+      "avatar": "/Avalon%20Books.jpg",
+      "title": "Avalon Books",
+      "description": "Book publisher for romance and mystery novels"
+    },
+    {
+      "avatar": "/Amazon%20Test%20Drive.jpg",
+      "title": "Amazon Test Drive",
+      "description": "App tester service"
+    },
+    {
+      "avatar": "/Ozone.jpg",
+      "title": "Ozone",
+      "description": "Collaborative video editor"
+    },
+    {
+      "avatar": "/Cache.jpg",
+      "title": "Cache",
+      "description": "Online convenience stores on DoorDash"
+    },
+    {
+      "avatar": "/Kodda.jpg",
+      "title": "Kodda",
+      "description": "Consumer Health and Wellness"
+    },
+    {
+      "avatar": "/Caucus.jpg",
+      "title": "Caucus",
+      "description": "Government"
+    },
+    {
+      "avatar": "/Fileforge.jpg",
+      "title": "Fileforge",
+      "description": "Engineering, Product and Design"
     }
   ]
 }

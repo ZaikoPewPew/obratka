@@ -75,6 +75,76 @@
   flex-shrink: 0;
 }
 
+.locale-toggle--open,
+.locale-toggle--open:hover {
+  background: #242426;
+  color: #ffffff;
+}
+
+.locale-dropdown {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.locale-dropdown__panel {
+  position: fixed;
+  z-index: 200;
+  box-sizing: border-box;
+  width: 156px;
+  min-height: 183px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #242426;
+  color: #ffffff;
+}
+
+.locale-dropdown__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 124px;
+}
+
+.locale-dropdown__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 124px;
+  min-height: 16px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  color: #ffffff;
+  text-align: left;
+}
+
+.locale-dropdown__option-label {
+  flex: 1;
+  min-width: 0;
+  color: #ffffff;
+  transition: color 0.15s ease;
+}
+
+.locale-dropdown__option:hover .locale-dropdown__option-label {
+  color: #9a9a9e;
+}
+
+.locale-dropdown__check {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
 .desktop-logo {
   display: block;
   flex-shrink: 0;

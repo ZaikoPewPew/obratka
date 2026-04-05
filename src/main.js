@@ -1,15 +1,18 @@
 import logoUrl from "../logo.svg?url";
 import {
   getLocale,
-  getNextLocale,
   getStrings,
   getStartups,
+  getSupportedLocales,
   LOCALE_NATIVE_NAMES,
   setLocale,
 } from "./i18n.js";
 import { getFormattedStartupCount } from "./components/startup-count/startupCount.js";
 import { createLogo } from "./components/logo/Logo.js";
-import { createLocaleToggleButton } from "./components/locale-toggle/LocaleToggle.js";
+import {
+  createDesktopLocaleDropdown,
+  createMobileLocaleSheet,
+} from "./components/locale-toggle/LocaleToggle.js";
 import { createWaitlistCounter } from "./components/waitlist-counter/WaitlistCounter.js";
 import {
   createApplyCard,
@@ -111,9 +114,8 @@ function mountLogos(brandName) {
 /** Слот data-mount="header-actions": бейдж счётчика + кнопка языка (8px между ними; кнопка справа). */
 function mountHeaderActions(t, locale) {
   const formatted = getFormattedStartupCount(locale);
-  const nextLocale = getNextLocale(locale);
-  const nextNative = LOCALE_NATIVE_NAMES[nextLocale] || nextLocale;
-  const langAria = String(t.langSwitchAria || "").replace(/\{next\}/g, nextNative);
+  const langMenuAria = String(t.langMenuButtonAria || "Language");
+  const closeSheetAria = String(t.accessModalCloseAria || "Close");
 
   document.querySelectorAll('[data-mount="header-actions"]').forEach((node) => {
     const variant = node.dataset.headerVariant || "desktop";
@@ -123,11 +125,30 @@ function mountHeaderActions(t, locale) {
       ? "header-actions header-actions--mobile"
       : "header-actions header-actions--desktop";
 
-    const langBtn = createLocaleToggleButton({
-      ariaLabel: langAria,
-      onClick: () => setLocale(nextLocale),
-      variant: isMobile ? "mobile" : "desktop",
-    });
+    const langControl = isMobile
+      ? createMobileLocaleSheet({
+          currentLocale: locale,
+          supportedLocales: getSupportedLocales(),
+          nativeNames: LOCALE_NATIVE_NAMES,
+          buttonAriaLabel: langMenuAria,
+          closeSheetAria,
+          onSelect: (code) => {
+            if (code !== locale) {
+              setLocale(code);
+            }
+          },
+        })
+      : createDesktopLocaleDropdown({
+          currentLocale: locale,
+          supportedLocales: getSupportedLocales(),
+          nativeNames: LOCALE_NATIVE_NAMES,
+          buttonAriaLabel: langMenuAria,
+          onSelect: (code) => {
+            if (code !== locale) {
+              setLocale(code);
+            }
+          },
+        });
 
     const timerClass = isMobile
       ? "mobile-timer desktop-counter"
@@ -138,7 +159,7 @@ function mountHeaderActions(t, locale) {
       className: timerClass,
     });
 
-    actions.append(timer, langBtn);
+    actions.append(timer, langControl);
     node.replaceWith(actions);
   });
 }
@@ -191,6 +212,9 @@ function mountStartupFall() {
     list.forEach((item, i) => {
       layer.append(createStartupFallItem(item, i, { perSide: PHYSICS_CARDS_PER_SIDE }));
     });
+    if (pool.length > 0) {
+      layer._startupPool = pool;
+    }
     node.replaceWith(layer);
   });
 }

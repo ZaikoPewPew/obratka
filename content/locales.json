@@ -1,6 +1,6 @@
 {
-  "defaultLocale": "ru",
-  "supportedLocales": ["ru", "en", "de", "fr", "pt", "es"],
+  "defaultLocale": "en",
+  "supportedLocales": ["en", "ru", "de", "fr", "pt", "es"],
   "timerEnd": "2026-12-31T23:59:59.000Z",
   "locales": {
     "ru": {
@@ -35,7 +35,8 @@
       "foundersWaiting": "{foundersCount}+ фаундера ждут релиза",
       "footerCopyright": "© 2026 memento",
       "footerContacts": "Контакты",
-      "langSwitchAria": "Переключить на {next}"
+      "langSwitchAria": "Переключить на {next}",
+      "langMenuButtonAria": "Язык"
     },
     "en": {
       "metaTitle": "Memento — waitlist",
@@ -69,7 +70,8 @@
       "foundersWaiting": "{foundersCount}+ founders waiting for the release",
       "footerCopyright": "© 2026 memento",
       "footerContacts": "Contacts",
-      "langSwitchAria": "Switch to {next}"
+      "langSwitchAria": "Switch to {next}",
+      "langMenuButtonAria": "Language"
     },
     "de": {
       "metaTitle": "Memento — Warteliste",
@@ -103,7 +105,8 @@
       "foundersWaiting": "{foundersCount}+ Gründer warten auf den Launch",
       "footerCopyright": "© 2026 memento",
       "footerContacts": "Kontakt",
-      "langSwitchAria": "Wechseln zu {next}"
+      "langSwitchAria": "Wechseln zu {next}",
+      "langMenuButtonAria": "Sprache"
     },
     "fr": {
       "metaTitle": "Memento — liste d'attente",
@@ -137,7 +140,8 @@
       "foundersWaiting": "{foundersCount}+ fondateurs attendent le lancement",
       "footerCopyright": "© 2026 memento",
       "footerContacts": "Contact",
-      "langSwitchAria": "Passer à {next}"
+      "langSwitchAria": "Passer à {next}",
+      "langMenuButtonAria": "Langue"
     },
     "pt": {
       "metaTitle": "Memento — lista de espera",
@@ -171,7 +175,8 @@
       "foundersWaiting": "{foundersCount}+ fundadores aguardando o lançamento",
       "footerCopyright": "© 2026 memento",
       "footerContacts": "Contato",
-      "langSwitchAria": "Mudar para {next}"
+      "langSwitchAria": "Mudar para {next}",
+      "langMenuButtonAria": "Idioma"
     },
     "es": {
       "metaTitle": "Memento — lista de espera",
@@ -205,7 +210,8 @@
       "foundersWaiting": "{foundersCount}+ fundadores esperando el lanzamiento",
       "footerCopyright": "© 2026 memento",
       "footerContacts": "Contacto",
-      "langSwitchAria": "Cambiar a {next}"
+      "langSwitchAria": "Cambiar a {next}",
+      "langMenuButtonAria": "Idioma"
     }
   }
 }

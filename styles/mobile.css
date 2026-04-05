@@ -395,4 +395,128 @@
       height: 28px;
     }
   }
+
+  body.locale-sheet-open {
+    overflow: hidden;
+  }
+
+  .locale-sheet {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .locale-sheet__overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 220;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    background: rgba(36, 36, 38, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s ease;
+  }
+
+  /* В document.body — вне .mobile-top, иначе контекст наложения шапки проигрывает hero/форме */
+  .locale-sheet__overlay--portal {
+    z-index: 10000;
+  }
+
+  .locale-sheet__overlay--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .locale-sheet__spacer {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .locale-sheet__panel {
+    flex-shrink: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 24px 16px calc(24px + env(safe-area-inset-bottom, 0));
+    border-radius: 24px 24px 0 0;
+    background: #ffffff;
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .locale-sheet__overlay--visible .locale-sheet__panel {
+    transform: translateY(0);
+  }
+
+  .locale-sheet__list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .locale-sheet__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: var(--font-family);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #242426;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .locale-sheet__row-label {
+    flex: 1;
+    min-width: 0;
+    color: inherit;
+  }
+
+  .locale-sheet__row-check {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+  }
+
+  .locale-toggle--mobile.locale-toggle--open,
+  .locale-toggle--mobile.locale-toggle--open:hover {
+    background: #242426;
+    color: #ffffff;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .locale-sheet__overlay,
+    .locale-sheet__panel {
+      transition-duration: 0.01ms;
+    }
+
+    .locale-sheet__overlay--visible .locale-sheet__panel {
+      transform: none;
+    }
+  }
 }

@@ -4,6 +4,8 @@
 
 import Matter from "matter-js";
 
+import { setStartupFallItemContent } from "./components/startup-card/StartupCard.js";
+
 /** Столкновения только с «крышей» — заголовок блока заявки */
 const BARRIER_SELECTORS = [".apply-card__title"];
 
@@ -29,6 +31,13 @@ const SPAWN_TOP_CLEAR = 16;
 
 /** Постоянно медленное падение: жёсткий потолок скорости (без «пушек» от столкновений). */
 const CARD_MAX_SPEED = 2.37;
+/** Индивидуальный потолок скорости задаётся на теле как `body._maxSpeed` в этом диапазоне. */
+const CARD_SPEED_MIN = 1.88;
+const CARD_SPEED_MAX = 2.37;
+
+/** Случайный интервал между карточками в потоке (центр выше верхней соседней). */
+const SPAWN_GAP_MIN = 64;
+const SPAWN_GAP_MAX = 200;
 /** Выше — иначе все карточки визуально крутятся почти одинаково (срез угловой скорости). */
 const CARD_MAX_ANGULAR = 0.38;
 
@@ -61,31 +70,31 @@ function spawnCardAngularVel(index, slot) {
 }
 
 /**
- * Спавн только слева/справа от `.apply-card`, без центральной колонки (нет падений на «крышу»).
- * Горизонталь: отдельная «полоса» на каждый индекс в колонке — иначе случайный x даёт наслоение и взрыв солвера.
- * Вертикаль: центр считается от cardH, нижний край всегда выше y=0.
- *
+ * Базовая линия спавна: центр карточки так, что нижний край чуть выше верхней границы слоя.
+ * @param {number} cardH
+ */
+function baseSpawnCenterY(cardH) {
+  const maxBottom = -SPAWN_TOP_CLEAR;
+  return maxBottom - cardH / 2;
+}
+
+/**
+ * Горизонталь только слева/справа от `.apply-card`; полоса по `laneIndex` в колонке.
  * @param {DOMRect} fallRect
  * @param {HTMLElement} applyCard
- * @param {0 | 2} slot — Matter: левый / правый край для отскока
+ * @param {0 | 2} slot
  * @param {number} cardW
  * @param {number} cardH
- * @param {number} index — индекс тела (0..perSide-1 слева, perSide.. справа)
+ * @param {number} laneIndex — 0..perSide-1 внутри стороны
  * @param {number} perSide
- * @param {{ staggerRight?: boolean }} [opts]
  */
-function spawnCoords(fallRect, applyCard, slot, cardW, cardH, index, perSide, opts = {}) {
-  const { staggerRight = true } = opts;
+function spawnCenterX(fallRect, applyCard, slot, cardW, cardH, laneIndex, perSide) {
   const w = fallRect.width;
   const pad = Math.max(4, Math.min(32, w * 0.02));
   const gap = 16;
   const ac = applyCard.getBoundingClientRect();
   const acl = ac.left - fallRect.left;
   const acr = ac.right - fallRect.left;
-
-  const colIndex = index < perSide ? index : index - perSide;
-  const row = colIndex % perSide;
-  const wave = Math.floor(colIndex / perSide);
 
   const clampCenter = (cx) => Math.max(cardW / 2 + 2, Math.min(w - cardW / 2 - 2, cx));
 
@@ -104,26 +113,65 @@ function spawnCoords(fallRect, applyCard, slot, cardW, cardH, index, perSide, op
   if (range < 12) {
     centerX = clampCenter((minCX + maxCX) / 2);
   } else if (range < cardW * 1.1) {
-    const frac = (colIndex + 0.5) / perSide - 0.5;
+    const frac = (laneIndex + 0.5) / perSide - 0.5;
     centerX = clampCenter((minCX + maxCX) / 2 + frac * Math.min(range * 0.35, cardW * 0.4));
   } else {
-    const lo = minCX + (colIndex / perSide) * range;
-    const hi = minCX + ((colIndex + 1) / perSide) * range;
+    const lo = minCX + (laneIndex / perSide) * range;
+    const hi = minCX + ((laneIndex + 1) / perSide) * range;
     const inner = Math.min(10, (hi - lo) * 0.12);
     centerX = (lo + hi) / 2 + (Math.random() - 0.5) * Math.max(0, hi - lo - 2 * inner);
   }
 
-  centerX = clampCenter(centerX);
+  return { x: clampCenter(centerX) };
+}
 
-  /** Фиксированный шаг по центру — без random по Y, иначе «пачка» и рваные интервалы. */
-  const vertStep = Math.max(132, cardH + 40);
-  const maxBottom = -SPAWN_TOP_CLEAR;
-  const baseCenterY = maxBottom - cardH / 2;
-  /** Правая колонка на полшага ниже — не 4+4 в одних горизонталях, а ровное чередование. */
-  const sideStagger = staggerRight && slot === 2 ? vertStep * 0.5 : 0;
-  const y = baseCenterY - row * vertStep - wave * 50 - sideStagger;
+/**
+ * Вертикальные позиции при старте: «лестница» со случайными интервалами, порядок по дорожкам перемешан.
+ * @param {number} count
+ * @param {number} baseCenterY
+ * @param {number} sideStagger — сдвиг правой колонки (полшага потока)
+ */
+function distributeInitialStreamYs(count, baseCenterY, sideStagger) {
+  const ys = [];
+  let cursor = baseCenterY + sideStagger;
+  for (let i = 0; i < count; i++) {
+    const g = SPAWN_GAP_MIN + Math.random() * (SPAWN_GAP_MAX - SPAWN_GAP_MIN);
+    cursor -= g;
+    ys.push(cursor);
+  }
+  for (let i = ys.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = ys[i];
+    ys[i] = ys[j];
+    ys[j] = t;
+  }
+  return ys;
+}
 
-  return { x: centerX, y };
+/**
+ * Следующая позиция по потоку: выше верхней точки всех соседей по стороне (кроме себя).
+ * @param {number} cardH
+ * @param {import('matter-js').Body[]} peerBodies
+ * @param {import('matter-js').Body | null} selfBody
+ * @param {number} baseCenterY
+ */
+function nextStreamCenterY(cardH, peerBodies, selfBody, baseCenterY) {
+  let minTop = Infinity;
+  let n = 0;
+  for (let p = 0; p < peerBodies.length; p++) {
+    const b = peerBodies[p];
+    if (b === selfBody) {
+      continue;
+    }
+    const top = b.position.y - cardH / 2;
+    minTop = Math.min(minTop, top);
+    n++;
+  }
+  const gap = SPAWN_GAP_MIN + Math.random() * (SPAWN_GAP_MAX - SPAWN_GAP_MIN);
+  if (n === 0 || !Number.isFinite(minTop)) {
+    return baseCenterY - Math.random() * (cardH + 100);
+  }
+  return minTop - gap - cardH / 2;
 }
 
 /**
@@ -216,9 +264,10 @@ function bounceKickX(body, fallWidth, strength) {
 function clampCardVelocity(body) {
   let vx = body.velocity.x;
   let vy = body.velocity.y;
+  const cap = typeof body._maxSpeed === "number" ? body._maxSpeed : CARD_MAX_SPEED;
   const sp = Math.hypot(vx, vy);
-  if (sp > CARD_MAX_SPEED && sp > 1e-6) {
-    const k = CARD_MAX_SPEED / sp;
+  if (sp > cap && sp > 1e-6) {
+    const k = cap / sp;
     vx *= k;
     vy *= k;
     Body.setVelocity(body, { x: vx, y: vy });
@@ -227,6 +276,34 @@ function clampCardVelocity(body) {
   if (Math.abs(av) > CARD_MAX_ANGULAR) {
     Body.setAngularVelocity(body, Math.sign(av) * CARD_MAX_ANGULAR);
   }
+}
+
+/** Длительность CSS «пузырь + карточка» (см. startup-card.css). */
+const SPAWN_POP_DURATION_MS = 500;
+
+/**
+ * Пузырёк «лопнул» — карточка выезжает (класс снимается после анимации).
+ * @param {HTMLElement} itemEl `.startup-fall__item`
+ */
+function triggerStartupCardSpawnPop(itemEl) {
+  if (!itemEl) {
+    return;
+  }
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+  const prev = itemEl._spawnPopTimerId;
+  if (prev != null) {
+    window.clearTimeout(prev);
+  }
+  itemEl.classList.remove("startup-fall__item--spawn-pop");
+  requestAnimationFrame(() => {
+    itemEl.classList.add("startup-fall__item--spawn-pop");
+    itemEl._spawnPopTimerId = window.setTimeout(() => {
+      itemEl.classList.remove("startup-fall__item--spawn-pop");
+      itemEl._spawnPopTimerId = undefined;
+    }, SPAWN_POP_DURATION_MS);
+  });
 }
 
 /**
@@ -311,15 +388,22 @@ export function initStartupRainPhysics() {
       /** @type {import('matter-js').Body[]} */
       const cardBodies = [];
 
+      const baseY0 = baseSpawnCenterY(cardH);
+      const vertStep = Math.max(132, cardH + 40);
+      const leftYs = distributeInitialStreamYs(perSide, baseY0, 0);
+      const rightYs = distributeInitialStreamYs(perSide, baseY0, vertStep * 0.5);
+      /** @type {Array<{ avatar: string; title: string; description: string }> | undefined} */
+      const startupPool = fallLayer._startupPool;
+
       for (let i = 0; i < items.length; i++) {
         const itemEl = items[i];
         const slot = i < perSide ? 0 : 2;
-        const { x, y } = spawnCoords(fallRect0, applyCard, slot, cardW, cardH, i, perSide, {
-          staggerRight: true,
-        });
+        const laneIndex = i < perSide ? i : i - perSide;
+        const y = slot === 0 ? leftYs[laneIndex] : rightYs[laneIndex];
+        const { x } = spawnCenterX(fallRect0, applyCard, slot, cardW, cardH, laneIndex, perSide);
         const body = Bodies.rectangle(x, y, cardW, cardH, {
           friction: 0.58,
-          frictionAir: 0.048,
+          frictionAir: 0.038 + Math.random() * 0.022,
           restitution: 0.06,
           density: 0.0022,
           /** Иначе Matter усыпляет карточку на «полке» / у стены — потом рывок при пробуждении. */
@@ -328,6 +412,9 @@ export function initStartupRainPhysics() {
         });
         body._itemEl = itemEl;
         body._slot = slot;
+        body._maxSpeed = CARD_SPEED_MIN + Math.random() * (CARD_SPEED_MAX - CARD_SPEED_MIN);
+        body._poolIndex =
+          startupPool && startupPool.length > 0 ? i % startupPool.length : 0;
         Body.setAngle(body, spawnCardAngleRad(i, slot));
         Body.setAngularVelocity(body, spawnCardAngularVel(i, slot));
         Body.setVelocity(body, {
@@ -336,6 +423,11 @@ export function initStartupRainPhysics() {
         });
         cardBodies.push(body);
         Composite.add(world, body);
+      }
+
+      if (startupPool && startupPool.length > 0) {
+        /** Следующий индекс в `items` после начальных 0…N−1 карточек (глобальный порядок без дублей подряд). */
+        fallLayer._startupSeq = cardBodies.length;
       }
 
       const mouse = Mouse.create(fallLayer);
@@ -481,10 +573,12 @@ export function initStartupRainPhysics() {
               continue;
             }
             const slot = i < perSide ? 0 : 2;
-            const { x, y } = spawnCoords(fr, ac, slot, cardW, cardH, i, perSide, {
-              staggerRight: true,
-            });
-            Body.setPosition(body, { x, y });
+            const laneIndex = i < perSide ? i : i - perSide;
+            const baseY = baseSpawnCenterY(cardH);
+            const peers = cardBodies.filter((_, j) => (j < perSide ? 0 : 2) === slot);
+            const centerY = nextStreamCenterY(cardH, peers, body, baseY);
+            const { x } = spawnCenterX(fr, ac, slot, cardW, cardH, laneIndex, perSide);
+            Body.setPosition(body, { x, y: centerY });
             Body.setVelocity(body, {
               x: (Math.random() - 0.5) * CARD_FALL_VX_JITTER,
               y: CARD_FALL_VY_START,
@@ -493,6 +587,18 @@ export function initStartupRainPhysics() {
             Body.setAngularVelocity(body, spawnCardAngularVel(i, slot));
             Sleeping.set(body, false);
             itemEl.style.opacity = "1";
+            const pool = fallLayer._startupPool;
+            if (pool && pool.length > 0 && itemEl) {
+              const seq =
+                typeof fallLayer._startupSeq === "number"
+                  ? fallLayer._startupSeq
+                  : cardBodies.length;
+              fallLayer._startupSeq = seq + 1;
+              const idx = seq % pool.length;
+              body._poolIndex = idx;
+              setStartupFallItemContent(itemEl, pool[idx]);
+            }
+            triggerStartupCardSpawnPop(itemEl);
             continue;
           }
 
@@ -534,6 +640,14 @@ export function initStartupRainPhysics() {
       const runner = Runner.create();
       Runner.run(runner, engine);
 
+      /** @type {ReturnType<typeof setTimeout>[]} */
+      const initialSpawnPopTimers = [];
+      items.forEach((el, idx) => {
+        initialSpawnPopTimers.push(
+          window.setTimeout(() => triggerStartupCardSpawnPop(el), 48 + idx * 62),
+        );
+      });
+
       active = {
         cleanup: () => {
           Runner.stop(runner);
@@ -544,9 +658,17 @@ export function initStartupRainPhysics() {
           document.removeEventListener("touchstart", onClientPointer);
           window.removeEventListener("resize", onResize);
           window.clearTimeout(resizeT);
+          for (const tid of initialSpawnPopTimers) {
+            window.clearTimeout(tid);
+          }
           World.clear(engine.world, false);
           fallLayer.classList.remove("startup-fall--physics");
           for (const itemEl of items) {
+            if (itemEl._spawnPopTimerId != null) {
+              window.clearTimeout(itemEl._spawnPopTimerId);
+              itemEl._spawnPopTimerId = undefined;
+            }
+            itemEl.classList.remove("startup-fall__item--spawn-pop");
             itemEl.style.left = "";
             itemEl.style.top = "";
             itemEl.style.transform = "";
