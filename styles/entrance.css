@@ -1,0 +1,28 @@
+/* Проявление «из растворения»: blur → чёткость, снизу вверх (порядок задержек — в main.js) */
+
+@keyframes page-entrance-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+    filter: blur(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.reveal-on-load {
+  animation: page-entrance-reveal 1.05s cubic-bezier(0.19, 1, 0.22, 1) backwards;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-on-load {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}

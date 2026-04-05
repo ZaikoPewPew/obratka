@@ -98,6 +98,20 @@ export function createDesktopLocaleDropdown({
   root.append(btn, panel);
 
   let docListenerAttached = false;
+  /** @type {ReturnType<typeof window.setTimeout> | null} */
+  let closePanelTimer = null;
+  const PANEL_CLOSE_MS = 320;
+
+  function desktopPanelCloseMs() {
+    try {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        return 0;
+      }
+    } catch {
+      /* ignore */
+    }
+    return PANEL_CLOSE_MS;
+  }
 
   function positionPanel() {
     const rect = btn.getBoundingClientRect();
@@ -124,10 +138,26 @@ export function createDesktopLocaleDropdown({
     }
   }
 
+  function detachDocListeners() {
+    if (!docListenerAttached) {
+      return;
+    }
+    docListenerAttached = false;
+    document.removeEventListener("click", onDocClick, true);
+    document.removeEventListener("keydown", onKeydown, true);
+    window.removeEventListener("resize", onResizeOrScroll);
+    window.removeEventListener("scroll", onResizeOrScroll, true);
+  }
+
   function open() {
+    if (closePanelTimer) {
+      clearTimeout(closePanelTimer);
+      closePanelTimer = null;
+    }
     btn.classList.add("locale-toggle--open");
     btn.setAttribute("aria-expanded", "true");
     panel.hidden = false;
+    panel.classList.remove("locale-dropdown__panel--visible");
     positionPanel();
     if (!docListenerAttached) {
       docListenerAttached = true;
@@ -136,8 +166,9 @@ export function createDesktopLocaleDropdown({
       window.addEventListener("resize", onResizeOrScroll);
       window.addEventListener("scroll", onResizeOrScroll, true);
     }
-    queueMicrotask(() => {
+    requestAnimationFrame(() => {
       positionPanel();
+      panel.classList.add("locale-dropdown__panel--visible");
     });
   }
 
@@ -145,24 +176,30 @@ export function createDesktopLocaleDropdown({
     if (panel.hidden) {
       return;
     }
+    const wasOpen = panel.classList.contains("locale-dropdown__panel--visible");
+    if (!wasOpen && closePanelTimer) {
+      return;
+    }
     btn.classList.remove("locale-toggle--open");
     btn.setAttribute("aria-expanded", "false");
-    panel.hidden = true;
-    if (docListenerAttached) {
-      docListenerAttached = false;
-      document.removeEventListener("click", onDocClick, true);
-      document.removeEventListener("keydown", onKeydown, true);
-      window.removeEventListener("resize", onResizeOrScroll);
-      window.removeEventListener("scroll", onResizeOrScroll, true);
+    panel.classList.remove("locale-dropdown__panel--visible");
+    if (closePanelTimer) {
+      clearTimeout(closePanelTimer);
     }
+    const ms = desktopPanelCloseMs();
+    closePanelTimer = window.setTimeout(() => {
+      closePanelTimer = null;
+      panel.hidden = true;
+      detachDocListeners();
+    }, ms);
   }
 
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
-    if (panel.hidden) {
-      open();
-    } else {
+    if (panel.classList.contains("locale-dropdown__panel--visible")) {
       close();
+    } else {
+      open();
     }
   });
 

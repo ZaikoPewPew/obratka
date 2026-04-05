@@ -86,6 +86,7 @@
   flex-shrink: 0;
 }
 
+/* Панель «вылупляется» из правого верхнего угла (у кнопки языка): только X + scale, без диагонали */
 .locale-dropdown__panel {
   position: fixed;
   z-index: 200;
@@ -96,6 +97,35 @@
   border-radius: 16px;
   background: #242426;
   color: #ffffff;
+  transform-origin: top right;
+  opacity: 0;
+  transform: translateX(14px) scale(0.78);
+  visibility: hidden;
+  pointer-events: none;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  transition:
+    opacity 0.22s cubic-bezier(0.25, 0.9, 0.32, 1),
+    transform 0.3s cubic-bezier(0.25, 0.9, 0.32, 1),
+    visibility 0s linear 0.3s;
+}
+
+.locale-dropdown__panel.locale-dropdown__panel--visible {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 0.22s cubic-bezier(0.25, 0.9, 0.32, 1),
+    transform 0.3s cubic-bezier(0.25, 0.9, 0.32, 1),
+    visibility 0s linear 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .locale-dropdown__panel,
+  .locale-dropdown__panel.locale-dropdown__panel--visible {
+    transition-duration: 0.01ms;
+    transition-delay: 0s;
+  }
 }
 
 .locale-dropdown__list {

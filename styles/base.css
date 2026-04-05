@@ -26,6 +26,17 @@ body {
   min-height: 100vh;
 }
 
+@keyframes water-waves-rise {
+  from {
+    opacity: 0;
+    transform: translateY(42%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Волны у нижнего края (полная ширина, не выше 276px) */
 .water-waves {
   position: absolute;
@@ -38,6 +49,12 @@ body {
   pointer-events: none;
   /* Над слоем физики (z-index 1), под формой (3) */
   z-index: 2;
+}
+
+/* Десктоп: волны выезжают снизу вверх (на мобилке блок скрыт в mobile.css) */
+.layout-desktop .water-waves {
+  animation: water-waves-rise 1.15s cubic-bezier(0.19, 1, 0.22, 1) both;
+  animation-delay: 0.22s;
 }
 
 .water-waves__layer {
@@ -78,6 +95,12 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .water-waves__svg {
     animation: none;
+  }
+
+  .layout-desktop .water-waves {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 }
 

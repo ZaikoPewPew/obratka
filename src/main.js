@@ -68,6 +68,85 @@ function interpolateSeconds(template, seconds) {
   return String(template || "").replace(/\{seconds\}/g, String(seconds));
 }
 
+/**
+ * Волна снизу вверх: сначала нижняя часть экрана, затем выше; внутри карточки — от email к заголовку.
+ * Визуально — «выплывание» из лёгкого размытия (см. styles/entrance.css).
+ */
+function initEntranceAnimations() {
+  if (
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    return;
+  }
+
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
+  const baseMs = 48;
+  const stepMs = 78;
+  let index = 0;
+
+  /** @param {Element | null | undefined} el */
+  function reveal(el) {
+    if (!el || !(el instanceof Element)) {
+      return;
+    }
+    el.classList.add("reveal-on-load");
+    el.style.setProperty("--reveal-delay", `${baseMs + index * stepMs}ms`);
+    index += 1;
+  }
+
+  if (!isMobile) {
+    const layout = document.querySelector(".layout-desktop");
+    if (!layout || getComputedStyle(layout).display === "none") {
+      return;
+    }
+
+    const top = layout.querySelector(".desktop-top");
+    const footer = layout.querySelector(".site-footer");
+    const card = layout.querySelector(".apply-card:not(.apply-card--mobile)");
+
+    if (footer) {
+      for (const child of footer.children) {
+        reveal(child);
+      }
+    }
+    if (card) {
+      for (const child of [...card.children].reverse()) {
+        reveal(child);
+      }
+    }
+    reveal(top?.querySelector(".header-actions--desktop .desktop-timer"));
+    reveal(top?.querySelector(".header-actions--desktop .locale-dropdown"));
+    reveal(top?.querySelector(".desktop-logo"));
+    return;
+  }
+
+  const layout = document.querySelector(".layout-mobile");
+  if (!layout || getComputedStyle(layout).display === "none") {
+    return;
+  }
+
+  const header = layout.querySelector(".header-actions--mobile");
+  const hero = layout.querySelector(".mobile-hero");
+  const heroCard = hero?.querySelector(".apply-card--hero");
+  const form = layout.querySelector(".mobile-apply-form");
+
+  if (form) {
+    for (const child of [...form.children].reverse()) {
+      reveal(child);
+    }
+  }
+  reveal(layout.querySelector(".mobile-stage__logos"));
+  if (heroCard) {
+    for (const child of [...heroCard.children].reverse()) {
+      reveal(child);
+    }
+  }
+  reveal(hero?.querySelector(".mobile-logo"));
+  reveal(header?.querySelector(".mobile-timer"));
+  reveal(header?.querySelector(".locale-sheet"));
+}
+
 /** Красная подпись под полем, как при кулдауне; через `input` восстанавливается штатный текст. */
 function flashEmailFieldCaptionError(input, message) {
   const block = input?.closest(".email-field-block");
@@ -320,6 +399,7 @@ function init() {
 
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
+      initEntranceAnimations();
       initStartupRainPhysics();
     });
   });
