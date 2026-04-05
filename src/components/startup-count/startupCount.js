@@ -6,9 +6,19 @@ import { getStartups } from "../../i18n.js";
  * @param {string} locale
  * @returns {string}
  */
+const LOCALE_TO_BCP47 = {
+  ru: "ru-RU",
+  en: "en-US",
+  de: "de-DE",
+  fr: "fr-FR",
+  pt: "pt-BR",
+  es: "es-ES",
+};
+
 export function getFormattedStartupCount(locale) {
   const { count } = getStartups();
-  return count.toLocaleString(locale === "ru" ? "ru-RU" : "en-US");
+  const tag = LOCALE_TO_BCP47[locale] || "en-US";
+  return count.toLocaleString(tag);
 }
 
 /**

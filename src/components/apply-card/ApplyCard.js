@@ -12,7 +12,7 @@ function ctaWithPrice(t, mobile) {
 }
 
 /**
- * Центральный блок заявки (530×398 по макету).
+ * Центральный блок заявки (ширина — `styles/apply.css` `--apply-card-width`, min-height 398).
  * @param {object} opts
  * @param {{ applyTitle: string; applySubtitle: string; ctaPrimary: string; dividerOr: string; emailPlaceholder: string; emailInvalidCaption: string; foundersWaiting: string; emailSubmitAria: string }} opts.t
  * @param {string} opts.locale

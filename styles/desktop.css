@@ -34,7 +34,7 @@
   flex-shrink: 0;
 }
 
-/* Кнопка языка + счётчик: 8px между кнопкой и бейджем */
+/* Счётчик + кнопка языка: 8px между бейджем и кнопкой (кнопка справа) */
 .header-actions--desktop {
   display: flex;
   align-items: center;
@@ -120,6 +120,12 @@
 .desktop-center .apply-card {
   pointer-events: auto;
   margin-top: var(--apply-card-lift);
+}
+
+/* Заголовок: 2 строки на десктопе — перенос из applyTitle после {count}; мобилка без pre-line (\\n → пробел) */
+.layout-desktop .apply-card > .apply-card__title {
+  white-space: pre-line;
+  min-height: calc(2 * 1.15 * 1em);
 }
 
 /* Слот «таймер» в шапке — бейдж счётчика стартапов */

@@ -4,9 +4,36 @@ import startups from "../content/startups.json";
 
 const STORAGE_KEY = "memento.locale";
 
+/** Самоназвание языка для aria-label кнопки смены (следующий язык в цикле). */
+export const LOCALE_NATIVE_NAMES = {
+  ru: "Русский",
+  en: "English",
+  de: "Deutsch",
+  fr: "Français",
+  pt: "Português",
+  es: "Español",
+};
+
 /**
- * Текущая локаль: ?lang=en|ru, затем localStorage, затем defaultLocale.
- * Новые языки — добавить в content/locales.json (supportedLocales + блок locales).
+ * Следующая локаль в порядке `supportedLocales` (цикл).
+ * @param {string} current
+ * @returns {string}
+ */
+export function getNextLocale(current) {
+  const list = locales.supportedLocales;
+  let i = list.indexOf(current);
+  if (i < 0) {
+    i = list.indexOf(locales.defaultLocale);
+  }
+  if (i < 0) {
+    i = 0;
+  }
+  return list[(i + 1) % list.length];
+}
+
+/**
+ * Текущая локаль: ?lang=… из supportedLocales, затем localStorage, затем defaultLocale.
+ * Новые языки — в content/locales.json (supportedLocales + блок locales).
  */
 export function getLocale() {
   const supported = locales.supportedLocales;

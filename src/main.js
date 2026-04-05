@@ -1,5 +1,12 @@
 import logoUrl from "../logo.svg?url";
-import { getLocale, getStrings, getStartups, setLocale } from "./i18n.js";
+import {
+  getLocale,
+  getNextLocale,
+  getStrings,
+  getStartups,
+  LOCALE_NATIVE_NAMES,
+  setLocale,
+} from "./i18n.js";
 import { getFormattedStartupCount } from "./components/startup-count/startupCount.js";
 import { createLogo } from "./components/logo/Logo.js";
 import { createLocaleToggleButton } from "./components/locale-toggle/LocaleToggle.js";
@@ -18,28 +25,37 @@ import { initStartupRainPhysics } from "./startup-rain-physics.js";
 import { fetchSubscribersCount, saveSubscriber } from "./api/subscribers.js";
 import { setDbSubscriberCountAndRefresh } from "./utils/foundersCountDisplay.js";
 import { fireEmailSubmitConfetti } from "./utils/emailSubmitConfetti.js";
-import { isValidEmail } from "./utils/emailValidation.js";
+import { isValidEmail, normalizeEmail } from "./utils/emailValidation.js";
 
 /** Минимальный интервал между запросами подписки с одной вкладки (анти-спам). */
 const EMAIL_SUBMIT_MIN_GAP_MS = 4000;
 
-/** После успешной подписки блокируем повтор с этого браузера (не секрет, только UX). */
+/** Нормализованный email последней успешной вставки (201); повтор того же адреса — без лишнего POST. */
 const WAITLIST_SUBMITTED_STORAGE_KEY = "memento.waitlistSubmitted";
 
 let emailSubmitInFlight = false;
 let emailSubmitNextAllowedAt = 0;
 
-function isWaitlistSubmittedInBrowser() {
+/** @returns {string | null} нормализованный email или null (нет / legacy «1»). */
+function getWaitlistSubmittedEmail() {
   try {
-    return window.localStorage.getItem(WAITLIST_SUBMITTED_STORAGE_KEY) === "1";
+    const v = window.localStorage.getItem(WAITLIST_SUBMITTED_STORAGE_KEY);
+    if (!v) {
+      return null;
+    }
+    if (v === "1") {
+      window.localStorage.removeItem(WAITLIST_SUBMITTED_STORAGE_KEY);
+      return null;
+    }
+    return normalizeEmail(v);
   } catch {
-    return false;
+    return null;
   }
 }
 
-function markWaitlistSubmittedInBrowser() {
+function markWaitlistSubmittedEmail(email) {
   try {
-    window.localStorage.setItem(WAITLIST_SUBMITTED_STORAGE_KEY, "1");
+    window.localStorage.setItem(WAITLIST_SUBMITTED_STORAGE_KEY, normalizeEmail(email));
   } catch {
     /* ignore */
   }
@@ -92,10 +108,12 @@ function mountLogos(brandName) {
   });
 }
 
-/** Слот data-mount="header-actions": кнопка языка + бейдж счётчика (8px между ними). */
+/** Слот data-mount="header-actions": бейдж счётчика + кнопка языка (8px между ними; кнопка справа). */
 function mountHeaderActions(t, locale) {
   const formatted = getFormattedStartupCount(locale);
-  const nextLocale = locale === "ru" ? "en" : "ru";
+  const nextLocale = getNextLocale(locale);
+  const nextNative = LOCALE_NATIVE_NAMES[nextLocale] || nextLocale;
+  const langAria = String(t.langSwitchAria || "").replace(/\{next\}/g, nextNative);
 
   document.querySelectorAll('[data-mount="header-actions"]').forEach((node) => {
     const variant = node.dataset.headerVariant || "desktop";
@@ -106,7 +124,7 @@ function mountHeaderActions(t, locale) {
       : "header-actions header-actions--desktop";
 
     const langBtn = createLocaleToggleButton({
-      ariaLabel: t.langSwitchAria,
+      ariaLabel: langAria,
       onClick: () => setLocale(nextLocale),
       variant: isMobile ? "mobile" : "desktop",
     });
@@ -120,11 +138,7 @@ function mountHeaderActions(t, locale) {
       className: timerClass,
     });
 
-    if (isMobile) {
-      actions.append(timer, langBtn);
-    } else {
-      actions.append(langBtn, timer);
-    }
+    actions.append(timer, langBtn);
     node.replaceWith(actions);
   });
 }
@@ -240,7 +254,9 @@ function init() {
       return;
     }
 
-    if (isWaitlistSubmittedInBrowser()) {
+    const normalizedEmail = normalizeEmail(email);
+    const lockedEmail = getWaitlistSubmittedEmail();
+    if (lockedEmail && normalizedEmail === lockedEmail) {
       flashEmailFieldCaptionError(input, t.emailAlreadySubmitted);
       return;
     }
@@ -266,7 +282,7 @@ function init() {
 
     if (saveResult.ok) {
       if (saveResult.newSubscriber) {
-        markWaitlistSubmittedInBrowser();
+        markWaitlistSubmittedEmail(email);
       }
       fireEmailSubmitConfetti(shell);
       if (input) {
