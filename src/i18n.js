@@ -1,5 +1,6 @@
 import founderAvatars from "../content/founder-avatars.json";
 import locales from "../content/locales.json";
+import privacyPolicy from "../content/privacy-policy.json";
 import startups from "../content/startups.json";
 
 const STORAGE_KEY = "memento.locale";
@@ -79,6 +80,20 @@ export function getStrings(locale = getLocale()) {
     return block;
   }
   return locales.locales[locales.defaultLocale];
+}
+
+/**
+ * HTML-текст политики конфиденциальности для текущей локали (см. `content/privacy-policy.json`).
+ * @param {string} [locale=getLocale()]
+ * @returns {string}
+ */
+export function getPrivacyPolicyHtml(locale = getLocale()) {
+  const block = privacyPolicy[locale];
+  if (block && typeof block.html === "string") {
+    return block.html;
+  }
+  const fallback = privacyPolicy[locales.defaultLocale];
+  return typeof fallback?.html === "string" ? fallback.html : "";
 }
 
 export function getConfig() {

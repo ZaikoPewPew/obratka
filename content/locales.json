@@ -34,6 +34,8 @@
       "emailSubmitAria": "Отправить email",
       "foundersWaiting": "{foundersCount}+ фаундера ждут релиза",
       "footerCopyright": "© 2026 memento",
+      "footerPrivacyPolicy": "Политика конфиденциальности",
+      "privacyPolicyTitle": "Политика конфиденциальности",
       "footerContacts": "Контакты",
       "langSwitchAria": "Переключить на {next}",
       "langMenuButtonAria": "Язык"
@@ -69,6 +71,8 @@
       "emailSubmitAria": "Submit email",
       "foundersWaiting": "{foundersCount}+ founders waiting for the release",
       "footerCopyright": "© 2026 memento",
+      "footerPrivacyPolicy": "Privacy Policy",
+      "privacyPolicyTitle": "Privacy Policy",
       "footerContacts": "Contacts",
       "langSwitchAria": "Switch to {next}",
       "langMenuButtonAria": "Language"
@@ -104,6 +108,8 @@
       "emailSubmitAria": "E-Mail absenden",
       "foundersWaiting": "{foundersCount}+ Gründer warten auf den Launch",
       "footerCopyright": "© 2026 memento",
+      "footerPrivacyPolicy": "Datenschutz",
+      "privacyPolicyTitle": "Datenschutzerklärung",
       "footerContacts": "Kontakt",
       "langSwitchAria": "Wechseln zu {next}",
       "langMenuButtonAria": "Sprache"
@@ -139,6 +145,8 @@
       "emailSubmitAria": "Envoyer l'email",
       "foundersWaiting": "{foundersCount}+ fondateurs attendent le lancement",
       "footerCopyright": "© 2026 memento",
+      "footerPrivacyPolicy": "Confidentialité",
+      "privacyPolicyTitle": "Politique de confidentialité",
       "footerContacts": "Contact",
       "langSwitchAria": "Passer à {next}",
       "langMenuButtonAria": "Langue"
@@ -174,6 +182,8 @@
       "emailSubmitAria": "Enviar email",
       "foundersWaiting": "{foundersCount}+ fundadores aguardando o lançamento",
       "footerCopyright": "© 2026 memento",
+      "footerPrivacyPolicy": "Privacidade",
+      "privacyPolicyTitle": "Política de privacidade",
       "footerContacts": "Contato",
       "langSwitchAria": "Mudar para {next}",
       "langMenuButtonAria": "Idioma"
@@ -209,6 +219,8 @@
       "emailSubmitAria": "Enviar email",
       "foundersWaiting": "{foundersCount}+ fundadores esperando el lanzamiento",
       "footerCopyright": "© 2026 memento",
+      "footerPrivacyPolicy": "Privacidad",
+      "privacyPolicyTitle": "Política de privacidad",
       "footerContacts": "Contacto",
       "langSwitchAria": "Cambiar a {next}",
       "langMenuButtonAria": "Idioma"

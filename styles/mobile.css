@@ -181,12 +181,15 @@
     flex: 1 1 0;
     min-height: 0;
     width: 100%;
-    margin: 0;
+    margin: 16px 0 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    box-sizing: border-box;
+    /* Нижний отступ + safe area (после перестановки блок с картинкой внизу экрана) */
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
   }
 
   .mobile-stage__logos {
@@ -207,15 +210,14 @@
     position: relative;
     z-index: 4;
     flex-shrink: 0;
-    margin-top: 16px;
+    margin-top: 0;
     width: calc(100% + 32px);
     max-width: none;
     margin-left: -16px;
     margin-right: -16px;
     padding-left: 16px;
     padding-right: 16px;
-    /* Нижний отступ + safe area (футера на мобилке нет) */
-    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+    padding-bottom: 0;
     box-sizing: border-box;
   }
 
@@ -339,7 +341,7 @@
       line-height: 1.45;
     }
 
-    .mobile-bottom {
+    .mobile-stage {
       margin-top: 8px;
     }
 

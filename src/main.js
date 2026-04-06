@@ -7,6 +7,7 @@ import {
   LOCALE_NATIVE_NAMES,
   setLocale,
 } from "./i18n.js";
+import { attachPrivacyPolicyPanel } from "./components/privacy-policy/PrivacyPolicyPanel.js";
 import { getFormattedStartupCount } from "./components/startup-count/startupCount.js";
 import { createLogo } from "./components/logo/Logo.js";
 import {
@@ -243,7 +244,7 @@ function mountHeaderActions(t, locale) {
   });
 }
 
-function mountSiteFooter(t) {
+function mountSiteFooter(t, locale) {
   document.querySelectorAll('[data-mount="site-footer"]').forEach((node) => {
     if (node.closest(".layout-mobile")) {
       node.remove();
@@ -256,13 +257,24 @@ function mountSiteFooter(t) {
     copy.className = "site-footer__copy";
     copy.textContent = t.footerCopyright;
 
+    const links = document.createElement("div");
+    links.className = "site-footer__links";
+
+    const privacy = document.createElement("a");
+    privacy.className = "site-footer__contacts";
+    privacy.href = "#";
+    privacy.textContent = t.footerPrivacyPolicy;
+
     const contacts = document.createElement("a");
     contacts.className = "site-footer__contacts";
     contacts.href = "#";
     contacts.textContent = t.footerContacts;
 
-    footer.append(copy, contacts);
+    links.append(privacy, contacts);
+    footer.append(copy, links);
     node.replaceWith(footer);
+
+    attachPrivacyPolicyPanel(privacy, t, locale);
   });
 }
 
@@ -325,7 +337,7 @@ function init() {
   mountStartupFallBack();
   mountStartupFall();
   mountApplyCards(t, locale);
-  mountSiteFooter(t);
+  mountSiteFooter(t, locale);
 
   fetchSubscribersCount().then((count) => {
     setDbSubscriberCountAndRefresh(
