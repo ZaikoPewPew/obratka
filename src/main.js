@@ -1,3 +1,4 @@
+import { inject, track } from "@vercel/analytics";
 import logoUrl from "../logo.svg?url";
 import {
   getLocale,
@@ -12,6 +13,7 @@ import { getFormattedStartupCount } from "./components/startup-count/startupCoun
 import { createLogo } from "./components/logo/Logo.js";
 import {
   createDesktopLocaleDropdown,
+  createMobileHeaderMenu,
   createMobileLocaleSheet,
 } from "./components/locale-toggle/LocaleToggle.js";
 import { createWaitlistCounter } from "./components/waitlist-counter/WaitlistCounter.js";
@@ -31,6 +33,8 @@ import { setDbSubscriberCountAndRefresh } from "./utils/foundersCountDisplay.js"
 import { fireEmailSubmitConfetti } from "./utils/emailSubmitConfetti.js";
 import { isValidEmail, normalizeEmail } from "./utils/emailValidation.js";
 
+inject();
+
 /** Минимальный интервал между запросами подписки с одной вкладки (анти-спам). */
 const EMAIL_SUBMIT_MIN_GAP_MS = 4000;
 
@@ -39,6 +43,20 @@ const WAITLIST_SUBMITTED_STORAGE_KEY = "memento.waitlistSubmitted";
 
 let emailSubmitInFlight = false;
 let emailSubmitNextAllowedAt = 0;
+let hasTrackedEmailInputFocus = false;
+
+/**
+ * Безопасный вызов кастомных событий Vercel Analytics (не ломает UX, если события недоступны по тарифу).
+ * @param {string} name
+ * @param {Record<string, string | number | boolean>} [properties]
+ */
+function safeTrack(name, properties = {}) {
+  try {
+    track(name, properties);
+  } catch {
+    /* ignore */
+  }
+}
 
 /** @returns {string | null} нормализованный email или null (нет / legacy «1»). */
 function getWaitlistSubmittedEmail() {
@@ -145,7 +163,7 @@ function initEntranceAnimations() {
   }
   reveal(hero?.querySelector(".mobile-logo"));
   reveal(header?.querySelector(".mobile-timer"));
-  reveal(header?.querySelector(".locale-sheet"));
+  reveal(header?.querySelector(".mobile-header-menu"));
 }
 
 /** Красная подпись под полем, как при кулдауне; через `input` восстанавливается штатный текст. */
@@ -196,6 +214,31 @@ function mountHeaderActions(t, locale) {
   const formatted = getFormattedStartupCount(locale);
   const langMenuAria = String(t.langMenuButtonAria || "Language");
   const closeSheetAria = String(t.accessModalCloseAria || "Close");
+  const hiddenPrivacyTrigger = document.createElement("button");
+  hiddenPrivacyTrigger.type = "button";
+  hiddenPrivacyTrigger.style.display = "none";
+  attachPrivacyPolicyPanel(hiddenPrivacyTrigger, t, locale);
+  document.body.appendChild(hiddenPrivacyTrigger);
+  const hiddenLocaleSheet = createMobileLocaleSheet({
+    currentLocale: locale,
+    supportedLocales: getSupportedLocales(),
+    nativeNames: LOCALE_NATIVE_NAMES,
+    buttonAriaLabel: langMenuAria,
+    closeSheetAria,
+    onSelect: (code) => {
+      if (code !== locale) {
+        safeTrack("locale_change", {
+          from: locale,
+          to: code,
+          control: "mobile_sheet",
+          path: window.location.pathname,
+        });
+        setLocale(code);
+      }
+    },
+  });
+  hiddenLocaleSheet.style.display = "none";
+  document.body.appendChild(hiddenLocaleSheet);
 
   document.querySelectorAll('[data-mount="header-actions"]').forEach((node) => {
     const variant = node.dataset.headerVariant || "desktop";
@@ -206,16 +249,32 @@ function mountHeaderActions(t, locale) {
       : "header-actions header-actions--desktop";
 
     const langControl = isMobile
-      ? createMobileLocaleSheet({
-          currentLocale: locale,
-          supportedLocales: getSupportedLocales(),
-          nativeNames: LOCALE_NATIVE_NAMES,
+      ? createMobileHeaderMenu({
           buttonAriaLabel: langMenuAria,
-          closeSheetAria,
-          onSelect: (code) => {
-            if (code !== locale) {
-              setLocale(code);
+          closeAriaLabel: String(t.mobileMenuCloseAria || t.accessModalCloseAria || "Close"),
+          languageLabel: String(t.mobileMenuLanguage || "Сменить язык"),
+          contactsLabel: String(t.mobileMenuContacts || t.footerContacts || "Контакты"),
+          termsLabel: String(t.mobileMenuTerms || "Термзы"),
+          onLanguageClick: () => {
+            const localeSheetBtn = hiddenLocaleSheet.querySelector("button.locale-toggle--mobile");
+            if (localeSheetBtn instanceof HTMLButtonElement) {
+              localeSheetBtn.click();
             }
+          },
+          onContactsClick: () => {
+            safeTrack("contacts_menu_click", {
+              locale,
+              placement: "mobile_header_menu",
+              path: window.location.pathname,
+            });
+          },
+          onTermsClick: () => {
+            safeTrack("terms_menu_click", {
+              locale,
+              placement: "mobile_header_menu",
+              path: window.location.pathname,
+            });
+            hiddenPrivacyTrigger.click();
           },
         })
       : createDesktopLocaleDropdown({
@@ -225,6 +284,12 @@ function mountHeaderActions(t, locale) {
           buttonAriaLabel: langMenuAria,
           onSelect: (code) => {
             if (code !== locale) {
+              safeTrack("locale_change", {
+                from: locale,
+                to: code,
+                control: "desktop_dropdown",
+                path: window.location.pathname,
+              });
               setLocale(code);
             }
           },
@@ -354,6 +419,12 @@ function init() {
     const shell = e.target.closest(".email-input-shell");
     const input = e.target.closest("input.email-input");
 
+    safeTrack("email_submit_attempt", {
+      source,
+      locale,
+      path: window.location.pathname,
+    });
+
     if (!isValidEmail(email)) {
       if (shell) {
         shell.classList.add("email-input-shell--invalid");
@@ -396,6 +467,12 @@ function init() {
     }
 
     if (saveResult.ok) {
+      safeTrack("email_submit_success", {
+        source,
+        locale,
+        is_new: Boolean(saveResult.newSubscriber),
+        path: window.location.pathname,
+      });
       if (saveResult.newSubscriber) {
         markWaitlistSubmittedEmail(email);
       }
@@ -405,9 +482,57 @@ function init() {
         input.dispatchEvent(new Event("input", { bubbles: true }));
       }
     } else if (shell && input) {
+      safeTrack("email_submit_failed", {
+        source,
+        locale,
+        path: window.location.pathname,
+      });
       showEmailSubmitServerMessage(shell, input, t.emailSubmitFailed);
     }
   });
+
+  document.addEventListener("click", (e) => {
+    const target = e.target instanceof Element ? e.target : null;
+    if (!target) {
+      return;
+    }
+    const cta = target.closest("button.apply-card__cta");
+    if (cta) {
+      safeTrack("cta_click", {
+        placement: cta.closest(".mobile-apply-form") ? "mobile_form" : "desktop_card",
+        locale,
+        path: window.location.pathname,
+      });
+      return;
+    }
+    const submit = target.closest("button.email-input__submit");
+    if (submit) {
+      safeTrack("email_submit_button_click", {
+        source: submit.closest(".access-modal") ? "buy_intent" : "email_form",
+        locale,
+        path: window.location.pathname,
+      });
+    }
+  });
+
+  document.addEventListener(
+    "focusin",
+    (e) => {
+      const target = e.target instanceof Element ? e.target : null;
+      if (!target || hasTrackedEmailInputFocus) {
+        return;
+      }
+      if (target.matches("input.email-input")) {
+        hasTrackedEmailInputFocus = true;
+        safeTrack("email_input_focus", {
+          source: target.closest(".access-modal") ? "buy_intent" : "email_form",
+          locale,
+          path: window.location.pathname,
+        });
+      }
+    },
+    true,
+  );
 
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {

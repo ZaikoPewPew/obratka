@@ -38,7 +38,11 @@
       "privacyPolicyTitle": "Политика конфиденциальности",
       "footerContacts": "Контакты",
       "langSwitchAria": "Переключить на {next}",
-      "langMenuButtonAria": "Язык"
+      "langMenuButtonAria": "Язык",
+      "mobileMenuCloseAria": "Закрыть меню",
+      "mobileMenuLanguage": "Сменить язык",
+      "mobileMenuContacts": "Контакты",
+      "mobileMenuTerms": "Термзы"
     },
     "en": {
       "metaTitle": "Memento — waitlist",
@@ -75,7 +79,11 @@
       "privacyPolicyTitle": "Privacy Policy",
       "footerContacts": "Contacts",
       "langSwitchAria": "Switch to {next}",
-      "langMenuButtonAria": "Language"
+      "langMenuButtonAria": "Language",
+      "mobileMenuCloseAria": "Close menu",
+      "mobileMenuLanguage": "Change language",
+      "mobileMenuContacts": "Contacts",
+      "mobileMenuTerms": "Terms"
     },
     "de": {
       "metaTitle": "Memento — Warteliste",
@@ -112,7 +120,11 @@
       "privacyPolicyTitle": "Datenschutzerklärung",
       "footerContacts": "Kontakt",
       "langSwitchAria": "Wechseln zu {next}",
-      "langMenuButtonAria": "Sprache"
+      "langMenuButtonAria": "Sprache",
+      "mobileMenuCloseAria": "Menü schließen",
+      "mobileMenuLanguage": "Sprache ändern",
+      "mobileMenuContacts": "Kontakt",
+      "mobileMenuTerms": "AGB"
     },
     "fr": {
       "metaTitle": "Memento — liste d'attente",
@@ -149,7 +161,11 @@
       "privacyPolicyTitle": "Politique de confidentialité",
       "footerContacts": "Contact",
       "langSwitchAria": "Passer à {next}",
-      "langMenuButtonAria": "Langue"
+      "langMenuButtonAria": "Langue",
+      "mobileMenuCloseAria": "Fermer le menu",
+      "mobileMenuLanguage": "Changer de langue",
+      "mobileMenuContacts": "Contact",
+      "mobileMenuTerms": "Conditions"
     },
     "pt": {
       "metaTitle": "Memento — lista de espera",
@@ -186,7 +202,11 @@
       "privacyPolicyTitle": "Política de privacidade",
       "footerContacts": "Contato",
       "langSwitchAria": "Mudar para {next}",
-      "langMenuButtonAria": "Idioma"
+      "langMenuButtonAria": "Idioma",
+      "mobileMenuCloseAria": "Fechar menu",
+      "mobileMenuLanguage": "Mudar idioma",
+      "mobileMenuContacts": "Contato",
+      "mobileMenuTerms": "Termos"
     },
     "es": {
       "metaTitle": "Memento — lista de espera",
@@ -223,7 +243,11 @@
       "privacyPolicyTitle": "Política de privacidad",
       "footerContacts": "Contacto",
       "langSwitchAria": "Cambiar a {next}",
-      "langMenuButtonAria": "Idioma"
+      "langMenuButtonAria": "Idioma",
+      "mobileMenuCloseAria": "Cerrar menú",
+      "mobileMenuLanguage": "Cambiar idioma",
+      "mobileMenuContacts": "Contacto",
+      "mobileMenuTerms": "Términos"
     }
   }
 }

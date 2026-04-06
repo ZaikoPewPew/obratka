@@ -6,6 +6,14 @@ const LANG_ICON_MOBILE_SVG = `<svg width="19" height="19" viewBox="0 0 19 19" fi
   <path d="M9.41136 16.4707C13.3098 16.4707 16.4702 13.3103 16.4702 9.41185C16.4702 5.51337 13.3098 2.35303 9.41136 2.35303M9.41136 16.4707C5.51288 16.4707 2.35254 13.3103 2.35254 9.41185C2.35254 5.51337 5.51288 2.35303 9.41136 2.35303M9.41136 16.4707C7.4232 14.4236 6.27411 12.0041 6.27411 9.41185C6.27411 6.8196 7.4232 4.40013 9.41136 2.35303M9.41136 16.4707C11.3995 14.4236 12.5486 12.0041 12.5486 9.41185C12.5486 6.8196 11.3995 4.40013 9.41136 2.35303M15.6859 7.05891H3.13685M15.6859 11.7648H3.13685" stroke="currentColor" stroke-width="0.79167" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`;
 
+const MOBILE_MENU_ICON_SVG = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M3.1377 5.49023H15.6867M3.1377 9.4118H15.6867M3.1377 13.3334H15.6867" stroke="currentColor" stroke-width="1.01961" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`;
+
+const MOBILE_MENU_CLOSE_SVG = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M4.70605 4.70605L14.1178 14.1178M14.1178 4.70605L4.70605 14.1178" stroke="#242426" stroke-width="1.01961" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`;
+
 const CHECK_SVG = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <path d="M12.9997 4.6665L5.99967 11.6665L3.33301 8.99984" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" />
 </svg>`;
@@ -364,6 +372,195 @@ export function createMobileLocaleSheet({
   });
 
   spacer.addEventListener("click", () => {
+    close();
+  });
+
+  return root;
+}
+
+/**
+ * Мобилка: кнопка-меню (бургер) + выпадающий список действий.
+ * @param {{
+ *   buttonAriaLabel: string;
+ *   closeAriaLabel?: string;
+ *   languageLabel: string;
+ *   contactsLabel: string;
+ *   termsLabel: string;
+ *   onLanguageClick: () => void;
+ *   onContactsClick?: () => void;
+ *   onTermsClick?: () => void;
+ * }} opts
+ * @returns {HTMLDivElement}
+ */
+export function createMobileHeaderMenu({
+  buttonAriaLabel,
+  closeAriaLabel = "Close menu",
+  languageLabel,
+  contactsLabel,
+  termsLabel,
+  onLanguageClick,
+  onContactsClick = () => {},
+  onTermsClick = () => {},
+}) {
+  const MENU_ANIMATION_MS = 260;
+  const root = document.createElement("div");
+  root.className = "mobile-header-menu";
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "locale-toggle locale-toggle--mobile";
+  btn.setAttribute("aria-label", buttonAriaLabel);
+  btn.setAttribute("aria-haspopup", "menu");
+  btn.setAttribute("aria-expanded", "false");
+  btn.innerHTML = MOBILE_MENU_ICON_SVG;
+
+  const overlay = document.createElement("div");
+  overlay.className = "mobile-header-menu__overlay mobile-header-menu__overlay--portal";
+  overlay.setAttribute("aria-hidden", "true");
+  overlay.hidden = true;
+
+  const shell = document.createElement("div");
+  shell.className = "mobile-header-menu__shell";
+
+  const header = document.createElement("div");
+  header.className = "mobile-header-menu__header";
+
+  const closeButton = document.createElement("button");
+  closeButton.type = "button";
+  closeButton.className = "mobile-header-menu__close";
+  closeButton.setAttribute("aria-label", closeAriaLabel);
+  closeButton.innerHTML = MOBILE_MENU_CLOSE_SVG;
+
+  const menu = document.createElement("div");
+  menu.className = "mobile-header-menu__panel";
+  menu.setAttribute("role", "menu");
+
+  const languageButton = document.createElement("button");
+  languageButton.type = "button";
+  languageButton.className = "mobile-header-menu__item";
+  languageButton.setAttribute("role", "menuitem");
+  languageButton.textContent = languageLabel;
+
+  const contactsButton = document.createElement("button");
+  contactsButton.type = "button";
+  contactsButton.className = "mobile-header-menu__item";
+  contactsButton.setAttribute("role", "menuitem");
+  contactsButton.textContent = contactsLabel;
+
+  const termsButton = document.createElement("button");
+  termsButton.type = "button";
+  termsButton.className = "mobile-header-menu__item";
+  termsButton.setAttribute("role", "menuitem");
+  termsButton.textContent = termsLabel;
+
+  menu.append(languageButton, contactsButton, termsButton);
+  header.appendChild(closeButton);
+  shell.append(header, menu);
+  overlay.appendChild(shell);
+  root.append(btn);
+  document.body.appendChild(overlay);
+
+  let listenersAttached = false;
+  let closingTimer = null;
+
+  function detachListeners() {
+    if (!listenersAttached) {
+      return;
+    }
+    listenersAttached = false;
+    document.removeEventListener("keydown", onKeydown, true);
+  }
+
+  function menuAnimationMs() {
+    try {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        return 0;
+      }
+    } catch {
+      /* ignore */
+    }
+    return MENU_ANIMATION_MS;
+  }
+
+  function onKeydown(e) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      close();
+    }
+  }
+
+  function open() {
+    if (closingTimer) {
+      clearTimeout(closingTimer);
+      closingTimer = null;
+    }
+    btn.classList.add("locale-toggle--open");
+    btn.setAttribute("aria-expanded", "true");
+    overlay.hidden = false;
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.classList.add("mobile-header-menu-open");
+    requestAnimationFrame(() => {
+      overlay.classList.add("mobile-header-menu__overlay--visible");
+      menu.classList.add("mobile-header-menu__panel--visible");
+    });
+    if (!listenersAttached) {
+      listenersAttached = true;
+      document.addEventListener("keydown", onKeydown, true);
+    }
+  }
+
+  function close(onClosed) {
+    if (overlay.hidden) {
+      if (typeof onClosed === "function") {
+        onClosed();
+      }
+      return;
+    }
+    btn.classList.remove("locale-toggle--open");
+    btn.setAttribute("aria-expanded", "false");
+    overlay.classList.remove("mobile-header-menu__overlay--visible");
+    menu.classList.remove("mobile-header-menu__panel--visible");
+    if (closingTimer) {
+      clearTimeout(closingTimer);
+    }
+    closingTimer = window.setTimeout(() => {
+      overlay.hidden = true;
+      overlay.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("mobile-header-menu-open");
+      detachListeners();
+      closingTimer = null;
+      if (typeof onClosed === "function") {
+        onClosed();
+      }
+    }, menuAnimationMs());
+  }
+
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (overlay.hidden) {
+      open();
+    } else {
+      close();
+    }
+  });
+
+  languageButton.addEventListener("click", (e) => {
+    e.stopPropagation();
+    close(onLanguageClick);
+  });
+
+  contactsButton.addEventListener("click", (e) => {
+    e.stopPropagation();
+    close(onContactsClick);
+  });
+
+  termsButton.addEventListener("click", (e) => {
+    e.stopPropagation();
+    close(onTermsClick);
+  });
+
+  closeButton.addEventListener("click", (e) => {
+    e.stopPropagation();
     close();
   });
 

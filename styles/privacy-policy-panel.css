@@ -142,3 +142,30 @@
 .privacy-panel__body strong {
   font-weight: 600;
 }
+
+@media (max-width: 767px) {
+  .privacy-panel__backdrop {
+    justify-content: stretch;
+    align-items: flex-end;
+    z-index: 10020;
+  }
+
+  .privacy-panel {
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    bottom: auto;
+    width: 100%;
+    max-width: 100%;
+    height: min(84vh, 760px);
+    max-height: 100dvh;
+    padding: 24px 16px calc(24px + env(safe-area-inset-bottom, 0px));
+    border-radius: 24px 24px 0 0;
+    transform: translateY(100%);
+  }
+
+  .privacy-panel__backdrop--open .privacy-panel {
+    transform: translateY(0);
+  }
+}
