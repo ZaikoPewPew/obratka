@@ -45,6 +45,8 @@ const HOVER_SOUND_SRC = "/sounds/hover.wav";
 const CLICK_SOUND_SRC = "/sounds/click.wav";
 const POP_SOUND_SRC = "/sounds/pop.wav";
 const DESKTOP_MEDIA_QUERY = "(min-width: 768px)";
+const CONTACT_EMAIL = "vlad.kveasy@gmail.com";
+const CONTACT_MAILTO = `mailto:${CONTACT_EMAIL}`;
 
 let emailSubmitInFlight = false;
 let emailSubmitNextAllowedAt = 0;
@@ -467,6 +469,7 @@ function mountHeaderActions(t, locale) {
               placement: "mobile_header_menu",
               path: window.location.pathname,
             });
+            window.location.href = CONTACT_MAILTO;
           },
           onTermsClick: () => {
             safeTrack("terms_menu_click", {
@@ -532,7 +535,7 @@ function mountSiteFooter(t, locale) {
 
     const contacts = document.createElement("a");
     contacts.className = "site-footer__contacts";
-    contacts.href = "#";
+    contacts.href = CONTACT_MAILTO;
     contacts.textContent = t.footerContacts;
 
     links.append(contacts, privacy);

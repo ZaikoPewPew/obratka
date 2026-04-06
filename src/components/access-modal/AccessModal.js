@@ -105,6 +105,17 @@ function buildAccessModal(t, locale) {
   mediaPlaceholder.className = "access-modal__media-placeholder";
   mediaPlaceholder.setAttribute("aria-hidden", "true");
 
+  const mediaVideo = document.createElement("video");
+  mediaVideo.className = "access-modal__media-video";
+  mediaVideo.src = "/video/video.mov";
+  mediaVideo.autoplay = true;
+  mediaVideo.muted = true;
+  mediaVideo.loop = true;
+  mediaVideo.playsInline = true;
+  mediaVideo.preload = "metadata";
+  mediaVideo.setAttribute("aria-hidden", "true");
+  mediaPlaceholder.append(mediaVideo);
+
   const content = document.createElement("div");
   content.className = "access-modal__content";
 

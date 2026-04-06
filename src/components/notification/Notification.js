@@ -8,11 +8,7 @@ let hideTimerId = null;
 let viewportListenersAttached = false;
 
 function mobileTopOffsetPx() {
-  try {
-    return window.matchMedia("(max-width: 767px)").matches ? 16 : 67;
-  } catch {
-    return window.innerWidth <= 767 ? 16 : 67;
-  }
+  return 16;
 }
 
 function syncNotificationTop(node) {

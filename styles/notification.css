@@ -1,7 +1,8 @@
 .notification-toast {
   position: fixed;
-  top: 67px;
-  left: 16px;
+  top: 16px;
+  left: 50%;
+  --notification-toast-offset-x: -50%;
   z-index: 260;
   box-sizing: border-box;
   width: 350px;
@@ -13,7 +14,7 @@
   align-items: center;
   justify-content: space-between;
   opacity: 0;
-  transform: translateY(-120%);
+  transform: translate(var(--notification-toast-offset-x), -120%);
   pointer-events: none;
   transition:
     opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1),
@@ -22,7 +23,7 @@
 
 .notification-toast--visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate(var(--notification-toast-offset-x), 0);
 }
 
 .notification-toast__text {
@@ -59,6 +60,7 @@
     top: 16px;
     left: 16px;
     right: 16px;
+    --notification-toast-offset-x: 0;
     width: auto;
     max-width: none;
   }

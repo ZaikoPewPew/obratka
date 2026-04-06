@@ -191,6 +191,12 @@ export function createEmailField({
     performEmailSubmit();
   });
 
+  // На мобильном не даем кнопке забрать фокус у input,
+  // чтобы клавиатура не закрывалась автоматически при отправке.
+  submit.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+  });
+
   /** Мобилка: при открытии клавиатуры держим поле в видимой области (visualViewport + scrollIntoView). */
   input.addEventListener(
     "focus",
