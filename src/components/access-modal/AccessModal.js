@@ -98,6 +98,16 @@ function buildAccessModal(t, locale) {
 
   header.append(headText, closeBtn);
 
+  const body = document.createElement("div");
+  body.className = "access-modal__body";
+
+  const mediaPlaceholder = document.createElement("div");
+  mediaPlaceholder.className = "access-modal__media-placeholder";
+  mediaPlaceholder.setAttribute("aria-hidden", "true");
+
+  const content = document.createElement("div");
+  content.className = "access-modal__content";
+
   const benefits = document.createElement("div");
   benefits.className = "access-modal__benefits";
 
@@ -109,10 +119,10 @@ function buildAccessModal(t, locale) {
   }
 
   benefits.append(
-    createBenefitRow(ICON_EARLY, t.accessModalBenefitEarlyTitle, t.accessModalBenefitEarlySubtitle),
     row1,
-    createBenefitRow(ICON_FLAME, t.accessModalBenefit2Title, t.accessModalBenefit2Subtitle),
     createBenefitRow(ICON_SEARCH, t.accessModalBenefit3Title, t.accessModalBenefit3Subtitle),
+    createBenefitRow(ICON_FLAME, t.accessModalBenefit2Title, t.accessModalBenefit2Subtitle),
+    createBenefitRow(ICON_EARLY, t.accessModalBenefitEarlyTitle, t.accessModalBenefitEarlySubtitle),
   );
 
   const emailBlock = createEmailField({
@@ -125,7 +135,17 @@ function buildAccessModal(t, locale) {
     avatarSources: getFounderAvatarSourcesForPage(),
   });
 
-  panel.append(header, benefits, emailBlock);
+  const emailTitle = document.createElement("h3");
+  emailTitle.className = "access-modal__email-title";
+  emailTitle.textContent = t.accessModalEmailTitle || "Оставь свой email";
+
+  const emailSection = document.createElement("div");
+  emailSection.className = "access-modal__email-section";
+  emailSection.append(emailTitle, emailBlock);
+
+  content.append(benefits, emailSection);
+  body.append(mediaPlaceholder, content);
+  panel.append(header, body);
   backdrop.append(panel);
 
   let lastFocus = null;

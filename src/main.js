@@ -32,6 +32,7 @@ import { fetchSubscribersCount, saveSubscriber } from "./api/subscribers.js";
 import { setDbSubscriberCountAndRefresh } from "./utils/foundersCountDisplay.js";
 import { fireEmailSubmitConfetti } from "./utils/emailSubmitConfetti.js";
 import { isValidEmail, normalizeEmail } from "./utils/emailValidation.js";
+import { showNotification } from "./components/notification/Notification.js";
 
 inject();
 
@@ -478,6 +479,9 @@ function init() {
         markWaitlistSubmittedEmail(email);
       }
       fireEmailSubmitConfetti(shell);
+      showNotification({
+        message: String(t.notificationEmailSubmitted || "Email submitted successfully"),
+      });
       if (input) {
         input.value = "";
         input.dispatchEvent(new Event("input", { bubbles: true }));
