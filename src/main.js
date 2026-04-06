@@ -143,12 +143,14 @@ function playPopSound() {
  */
 function initDesktopHoverSound() {
   const selectors = [
+    ".layout-desktop .desktop-logo",
     ".layout-desktop .apply-card__cta",
     ".layout-desktop .site-footer__contacts",
     ".layout-desktop .site-footer__privacy",
     ".layout-desktop .locale-dropdown .locale-toggle",
     ".locale-dropdown__option",
     ".access-modal .access-modal__close",
+    ".privacy-panel .access-modal__close",
   ];
   const interactiveSelector = selectors.join(", ");
 
@@ -193,6 +195,8 @@ function initDesktopHoverSound() {
  */
 function initDesktopClickSound() {
   const selectors = [
+    ".layout-desktop .desktop-logo",
+    ".layout-desktop .desktop-logo__fill",
     ".layout-desktop .apply-card__cta",
     ".layout-desktop .site-footer__contacts",
     ".layout-desktop .site-footer__privacy",
@@ -201,6 +205,7 @@ function initDesktopClickSound() {
     ".layout-desktop .locale-dropdown .locale-toggle",
     ".locale-dropdown__option",
     ".access-modal .access-modal__close",
+    ".privacy-panel .access-modal__close",
   ];
   const interactiveSelector = selectors.join(", ");
 
