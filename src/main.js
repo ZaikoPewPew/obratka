@@ -99,6 +99,9 @@ function ensureClickAudio() {
 }
 
 function playClickSound() {
+  if (!isDesktopViewport()) {
+    return;
+  }
   const audio = ensureClickAudio();
   try {
     audio.currentTime = 0;
@@ -150,6 +153,9 @@ function initDesktopHoverSound() {
   const interactiveSelector = selectors.join(", ");
 
   const onFirstPointerDown = () => {
+    if (!isDesktopViewport()) {
+      return;
+    }
     const audio = ensureHoverAudio();
     if (hoverAudioReady) {
       return;
@@ -191,13 +197,6 @@ function initDesktopClickSound() {
     ".layout-desktop .site-footer__contacts",
     ".layout-desktop .site-footer__privacy",
     ".layout-desktop .email-input-shell",
-    ".layout-mobile .apply-card__cta",
-    ".layout-mobile .email-input-shell",
-    ".mobile-header-menu .locale-toggle--mobile",
-    ".mobile-header-menu__item",
-    ".mobile-header-menu__close",
-    ".locale-sheet .locale-toggle--mobile",
-    ".locale-sheet__row",
     ".access-modal .email-input-shell",
     ".layout-desktop .locale-dropdown .locale-toggle",
     ".locale-dropdown__option",
@@ -206,6 +205,9 @@ function initDesktopClickSound() {
   const interactiveSelector = selectors.join(", ");
 
   const onFirstPointerDown = () => {
+    if (!isDesktopViewport()) {
+      return;
+    }
     const audio = ensureClickAudio();
     if (clickAudioReady) {
       return;

@@ -1,8 +1,5 @@
 import confetti from "canvas-confetti";
 
-/** Согласовано с `.layout-desktop` и брейкпоинтом проекта */
-const DESKTOP_MQ = "(min-width: 768px)";
-
 /** Выше `.access-modal__backdrop` (200) */
 const CONFETTI_Z = 320;
 
@@ -45,20 +42,15 @@ function syncLayerSize() {
 }
 
 /**
- * Конфетти после успешной отправки email; только десктоп (viewport ≥768px).
- * @param {HTMLElement} anchorEl — центр взрыва (обычно `.email-input-shell`)
+ * Конфетти после успешной отправки email (десктоп + мобилка).
+ * @param {HTMLElement | null} anchorEl — центр взрыва (обычно `.email-input-shell`)
  */
 export function fireEmailSubmitConfetti(anchorEl) {
-  if (!window.matchMedia(DESKTOP_MQ).matches) {
-    return;
-  }
-
   ensureLayer();
   const { dpr, cssW, cssH } = syncLayerSize();
-
-  const rect = anchorEl.getBoundingClientRect();
-  const x = (rect.left + rect.width / 2) / cssW;
-  const y = (rect.top + rect.height / 2) / cssH;
+  const rect = anchorEl?.getBoundingClientRect?.();
+  const x = rect ? (rect.left + rect.width / 2) / cssW : 0.5;
+  const y = rect ? (rect.top + rect.height / 2) / cssH : 0.62;
 
   const intensity = Math.min(1.08, Math.max(0.88, cssW / 1200));
 

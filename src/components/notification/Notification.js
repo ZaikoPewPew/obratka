@@ -5,6 +5,34 @@ const SUCCESS_ICON = `
 `;
 
 let hideTimerId = null;
+let viewportListenersAttached = false;
+
+function mobileTopOffsetPx() {
+  try {
+    return window.matchMedia("(max-width: 767px)").matches ? 16 : 67;
+  } catch {
+    return window.innerWidth <= 767 ? 16 : 67;
+  }
+}
+
+function syncNotificationTop(node) {
+  if (!(node instanceof HTMLElement)) {
+    return;
+  }
+  const viewportTop = Math.max(0, Math.round(window.visualViewport?.offsetTop || 0));
+  node.style.top = `${mobileTopOffsetPx() + viewportTop}px`;
+}
+
+function ensureViewportListeners(node) {
+  if (viewportListenersAttached) {
+    return;
+  }
+  viewportListenersAttached = true;
+  const sync = () => syncNotificationTop(node);
+  window.addEventListener("resize", sync, { passive: true });
+  window.visualViewport?.addEventListener("resize", sync, { passive: true });
+  window.visualViewport?.addEventListener("scroll", sync, { passive: true });
+}
 
 function ensureNotificationNode() {
   let node = document.querySelector(".notification-toast");
@@ -26,6 +54,8 @@ function ensureNotificationNode() {
 
   node.append(text, icon);
   document.body.append(node);
+  syncNotificationTop(node);
+  ensureViewportListeners(node);
   return node;
 }
 
@@ -39,6 +69,7 @@ export function showNotification({ message, durationMs = 2800 }) {
   }
 
   const node = ensureNotificationNode();
+  syncNotificationTop(node);
   const text = node.querySelector(".notification-toast__text");
   if (text) {
     text.textContent = message;
