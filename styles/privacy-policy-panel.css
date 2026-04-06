@@ -12,7 +12,8 @@
   background: rgba(36, 36, 38, 0.45);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  /* Чуть дольше затемнение при закрытии — плавнее уход */
+  transition: opacity 0.48s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .privacy-panel__backdrop.privacy-panel__backdrop--open {
@@ -29,7 +30,8 @@
   max-width: calc(100vw - 32px);
   height: 852px;
   max-height: calc(100vh - 32px);
-  padding: 32px;
+  /* Справа 8px: скроллбар ближе к правому краю панели */
+  padding: 32px 8px 32px 32px;
   border-radius: 40px;
   background: #fff;
   display: flex;
@@ -38,10 +40,11 @@
   flex-shrink: 0;
   box-shadow: 0 24px 80px rgba(36, 36, 38, 0.18);
   opacity: 0;
-  transform: translateX(18px);
+  transform: translateX(22px);
+  /* Вход быстрее; выход с тем же easing — дольше и мягче на обоих концах */
   transition:
-    opacity 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.52s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.58s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .privacy-panel__backdrop--open .privacy-panel {
@@ -71,7 +74,7 @@
   align-items: center;
   justify-content: flex-start;
   gap: 8px;
-  width: 450px;
+  width: 100%;
   max-width: 100%;
   height: 40px;
   flex-shrink: 0;
@@ -81,7 +84,7 @@
   flex: 1;
   margin: 0;
   min-width: 0;
-  text-align: right;
+  text-align: left;
   font-family: var(--font-family);
   font-weight: 400;
   font-size: 32px;
@@ -102,6 +105,31 @@
   font-size: 16px;
   line-height: 170%;
   color: #242426;
+}
+
+.privacy-panel__body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.privacy-panel__body::-webkit-scrollbar-track {
+  margin: 4px 0;
+  background: transparent;
+}
+
+.privacy-panel__body::-webkit-scrollbar-thumb {
+  border-radius: 100px;
+  background: rgba(36, 36, 38, 0.22);
+}
+
+.privacy-panel__body::-webkit-scrollbar-thumb:hover {
+  background: rgba(36, 36, 38, 0.32);
+}
+
+@supports (scrollbar-width: thin) {
+  .privacy-panel__body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(36, 36, 38, 0.28) transparent;
+  }
 }
 
 .privacy-panel__body p {

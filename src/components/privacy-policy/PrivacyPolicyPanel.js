@@ -5,7 +5,8 @@ const CLOSE_SVG = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" x
   <path d="M4.70605 4.70605L14.1178 14.1178M14.1178 4.70605L4.70605 14.1178" stroke="#242426" stroke-width="1.01961" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`;
 
-const PANEL_CLOSE_FALLBACK_MS = 400;
+/** Дольше, чем transition панели и бэкдропа (см. privacy-policy-panel.css) */
+const PANEL_CLOSE_FALLBACK_MS = 720;
 
 /**
  * @param {object} t
@@ -40,7 +41,7 @@ function buildPrivacyPolicyPanel(t, locale) {
   title.className = "privacy-panel__title";
   title.textContent = t.privacyPolicyTitle;
 
-  header.append(closeBtn, title);
+  header.append(title, closeBtn);
 
   const body = document.createElement("div");
   body.className = "privacy-panel__body";
@@ -85,18 +86,19 @@ function buildPrivacyPolicyPanel(t, locale) {
         return;
       }
       finished = true;
-      backdrop.removeEventListener("transitionend", onTransitionEnd);
+      panel.removeEventListener("transitionend", onTransitionEnd);
       clearTimeout(fallbackId);
       teardownAfterClose();
     };
 
     const onTransitionEnd = (e) => {
-      if (e.target === backdrop && e.propertyName === "opacity") {
+      /* transform на панели завершается последним (дольше, чем opacity бэкдропа) */
+      if (e.target === panel && e.propertyName === "transform") {
         finish();
       }
     };
 
-    backdrop.addEventListener("transitionend", onTransitionEnd);
+    panel.addEventListener("transitionend", onTransitionEnd);
     const fallbackId = window.setTimeout(finish, PANEL_CLOSE_FALLBACK_MS);
   }
 
