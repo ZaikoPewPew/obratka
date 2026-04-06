@@ -107,8 +107,8 @@ body {
 .site-footer {
   position: relative;
   z-index: 3;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: flex-end;
   gap: 16px;
   margin-top: auto;
@@ -119,7 +119,8 @@ body {
 }
 
 .site-footer__copy,
-.site-footer__contacts {
+.site-footer__contacts,
+.site-footer__privacy {
   font-family: var(--font-family);
   font-weight: 400;
   font-size: 16px;
@@ -128,22 +129,28 @@ body {
 }
 
 .site-footer__links {
-  display: flex;
-  align-items: flex-end;
-  gap: 16px;
-  flex-shrink: 0;
+  display: contents;
 }
 
 .site-footer__contacts {
+  justify-self: center;
+  text-align: center;
+  text-decoration: none;
+}
+
+.site-footer__privacy {
+  justify-self: end;
   text-align: right;
   text-decoration: none;
 }
 
-.site-footer__contacts:hover {
+.site-footer__contacts:hover,
+.site-footer__privacy:hover {
   opacity: 0.85;
 }
 
-.site-footer__contacts:focus-visible {
+.site-footer__contacts:focus-visible,
+.site-footer__privacy:focus-visible {
   outline: 2px solid rgba(36, 36, 38, 0.35);
   outline-offset: 2px;
   border-radius: 2px;

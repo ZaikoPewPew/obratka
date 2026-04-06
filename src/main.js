@@ -41,10 +41,201 @@ const EMAIL_SUBMIT_MIN_GAP_MS = 4000;
 
 /** Нормализованный email последней успешной вставки (201); повтор того же адреса — без лишнего POST. */
 const WAITLIST_SUBMITTED_STORAGE_KEY = "memento.waitlistSubmitted";
+const HOVER_SOUND_SRC = "/sounds/hover.wav";
+const CLICK_SOUND_SRC = "/sounds/click.wav";
+const POP_SOUND_SRC = "/sounds/pop.wav";
+const DESKTOP_MEDIA_QUERY = "(min-width: 768px)";
 
 let emailSubmitInFlight = false;
 let emailSubmitNextAllowedAt = 0;
 let hasTrackedEmailInputFocus = false;
+let hoverAudio = null;
+let hoverAudioReady = false;
+let clickAudio = null;
+let clickAudioReady = false;
+let popAudio = null;
+
+function isDesktopViewport() {
+  try {
+    return window.matchMedia(DESKTOP_MEDIA_QUERY).matches;
+  } catch {
+    return window.innerWidth >= 768;
+  }
+}
+
+function ensureHoverAudio() {
+  if (!hoverAudio) {
+    hoverAudio = new Audio(HOVER_SOUND_SRC);
+    hoverAudio.preload = "auto";
+    hoverAudio.volume = 0.02;
+  }
+  return hoverAudio;
+}
+
+function playHoverSound() {
+  if (!isDesktopViewport()) {
+    return;
+  }
+  const audio = ensureHoverAudio();
+  try {
+    audio.currentTime = 0;
+    const p = audio.play();
+    if (p && typeof p.catch === "function") {
+      p.catch(() => {});
+    }
+    hoverAudioReady = true;
+  } catch {
+    /* ignore */
+  }
+}
+
+function ensureClickAudio() {
+  if (!clickAudio) {
+    clickAudio = new Audio(CLICK_SOUND_SRC);
+    clickAudio.preload = "auto";
+    clickAudio.volume = 0.1;
+  }
+  return clickAudio;
+}
+
+function playClickSound() {
+  const audio = ensureClickAudio();
+  try {
+    audio.currentTime = 0;
+    const p = audio.play();
+    if (p && typeof p.catch === "function") {
+      p.catch(() => {});
+    }
+    clickAudioReady = true;
+  } catch {
+    /* ignore */
+  }
+}
+
+function ensurePopAudio() {
+  if (!popAudio) {
+    popAudio = new Audio(POP_SOUND_SRC);
+    popAudio.preload = "auto";
+    popAudio.volume = 0.1;
+  }
+  return popAudio;
+}
+
+function playPopSound() {
+  const audio = ensurePopAudio();
+  try {
+    audio.currentTime = 0;
+    const p = audio.play();
+    if (p && typeof p.catch === "function") {
+      p.catch(() => {});
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Десктоп hover-звук для интерактивных элементов шапки/карточки/футера.
+ * Делегирование нужно, чтобы покрывать динамически созданные узлы (например, пункты языков).
+ */
+function initDesktopHoverSound() {
+  const selectors = [
+    ".layout-desktop .apply-card__cta",
+    ".layout-desktop .site-footer__contacts",
+    ".layout-desktop .site-footer__privacy",
+    ".layout-desktop .locale-dropdown .locale-toggle",
+    ".locale-dropdown__option",
+    ".access-modal .access-modal__close",
+  ];
+  const interactiveSelector = selectors.join(", ");
+
+  const onFirstPointerDown = () => {
+    const audio = ensureHoverAudio();
+    if (hoverAudioReady) {
+      return;
+    }
+    const p = audio.play();
+    if (p && typeof p.then === "function") {
+      p.then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        hoverAudioReady = true;
+      }).catch(() => {});
+    }
+  };
+
+  document.addEventListener("pointerdown", onFirstPointerDown, { once: true, passive: true });
+  document.addEventListener("mouseover", (event) => {
+    if (!(event.target instanceof Element)) {
+      return;
+    }
+    const target = event.target.closest(interactiveSelector);
+    if (!target) {
+      return;
+    }
+    const previous = event.relatedTarget;
+    if (previous instanceof Node && target.contains(previous)) {
+      return;
+    }
+    playHoverSound();
+  });
+}
+
+/**
+ * Десктоп click-звук для CTA/футера/языка и пунктов выбора языка.
+ * capture=true нужен, чтобы поймать клики по пунктам, где есть stopPropagation().
+ */
+function initDesktopClickSound() {
+  const selectors = [
+    ".layout-desktop .apply-card__cta",
+    ".layout-desktop .site-footer__contacts",
+    ".layout-desktop .site-footer__privacy",
+    ".layout-desktop .email-input-shell",
+    ".layout-mobile .apply-card__cta",
+    ".layout-mobile .email-input-shell",
+    ".mobile-header-menu .locale-toggle--mobile",
+    ".mobile-header-menu__item",
+    ".mobile-header-menu__close",
+    ".locale-sheet .locale-toggle--mobile",
+    ".locale-sheet__row",
+    ".access-modal .email-input-shell",
+    ".layout-desktop .locale-dropdown .locale-toggle",
+    ".locale-dropdown__option",
+    ".access-modal .access-modal__close",
+  ];
+  const interactiveSelector = selectors.join(", ");
+
+  const onFirstPointerDown = () => {
+    const audio = ensureClickAudio();
+    if (clickAudioReady) {
+      return;
+    }
+    const p = audio.play();
+    if (p && typeof p.then === "function") {
+      p.then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        clickAudioReady = true;
+      }).catch(() => {});
+    }
+  };
+
+  document.addEventListener("pointerdown", onFirstPointerDown, { once: true, passive: true });
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (!(event.target instanceof Element)) {
+        return;
+      }
+      const target = event.target.closest(interactiveSelector);
+      if (!target) {
+        return;
+      }
+      playClickSound();
+    },
+    true,
+  );
+}
 
 /**
  * Безопасный вызов кастомных событий Vercel Analytics (не ломает UX, если события недоступны по тарифу).
@@ -328,7 +519,7 @@ function mountSiteFooter(t, locale) {
     links.className = "site-footer__links";
 
     const privacy = document.createElement("a");
-    privacy.className = "site-footer__contacts";
+    privacy.className = "site-footer__privacy";
     privacy.href = "#";
     privacy.textContent = t.footerPrivacyPolicy;
 
@@ -337,7 +528,7 @@ function mountSiteFooter(t, locale) {
     contacts.href = "#";
     contacts.textContent = t.footerContacts;
 
-    links.append(privacy, contacts);
+    links.append(contacts, privacy);
     footer.append(copy, links);
     node.replaceWith(footer);
 
@@ -405,6 +596,8 @@ function init() {
   mountStartupFall();
   mountApplyCards(t, locale);
   mountSiteFooter(t, locale);
+  initDesktopHoverSound();
+  initDesktopClickSound();
 
   fetchSubscribersCount().then((count) => {
     setDbSubscriberCountAndRefresh(
@@ -479,6 +672,7 @@ function init() {
         markWaitlistSubmittedEmail(email);
       }
       fireEmailSubmitConfetti(shell);
+      playPopSound();
       showNotification({
         message: String(t.notificationEmailSubmitted || "Email submitted successfully"),
       });
