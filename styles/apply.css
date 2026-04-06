@@ -285,7 +285,10 @@
 
 .email-avatars__caption--error {
   color: #c43c3c;
-  font-weight: 500;
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 170%;
 }
 
 /* Явно как у текста подписи (p.email-avatars__caption), без отличий от «фаундера ждут…» */
