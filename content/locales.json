@@ -40,6 +40,7 @@
       "langSwitchAria": "Переключить на {next}",
       "langMenuButtonAria": "Язык",
       "mobileMenuCloseAria": "Закрыть меню",
+      "mobileMenuTitle": "Политика конфиденциальности",
       "mobileMenuLanguage": "Сменить язык",
       "mobileMenuContacts": "Контакты",
       "mobileMenuTerms": "Термзы"
@@ -81,6 +82,7 @@
       "langSwitchAria": "Switch to {next}",
       "langMenuButtonAria": "Language",
       "mobileMenuCloseAria": "Close menu",
+      "mobileMenuTitle": "Privacy Policy",
       "mobileMenuLanguage": "Change language",
       "mobileMenuContacts": "Contacts",
       "mobileMenuTerms": "Terms"
@@ -122,6 +124,7 @@
       "langSwitchAria": "Wechseln zu {next}",
       "langMenuButtonAria": "Sprache",
       "mobileMenuCloseAria": "Menü schließen",
+      "mobileMenuTitle": "Datenschutzerklärung",
       "mobileMenuLanguage": "Sprache ändern",
       "mobileMenuContacts": "Kontakt",
       "mobileMenuTerms": "AGB"
@@ -163,6 +166,7 @@
       "langSwitchAria": "Passer à {next}",
       "langMenuButtonAria": "Langue",
       "mobileMenuCloseAria": "Fermer le menu",
+      "mobileMenuTitle": "Politique de confidentialité",
       "mobileMenuLanguage": "Changer de langue",
       "mobileMenuContacts": "Contact",
       "mobileMenuTerms": "Conditions"
@@ -204,6 +208,7 @@
       "langSwitchAria": "Mudar para {next}",
       "langMenuButtonAria": "Idioma",
       "mobileMenuCloseAria": "Fechar menu",
+      "mobileMenuTitle": "Política de privacidade",
       "mobileMenuLanguage": "Mudar idioma",
       "mobileMenuContacts": "Contato",
       "mobileMenuTerms": "Termos"
@@ -245,6 +250,7 @@
       "langSwitchAria": "Cambiar a {next}",
       "langMenuButtonAria": "Idioma",
       "mobileMenuCloseAria": "Cerrar menú",
+      "mobileMenuTitle": "Política de privacidad",
       "mobileMenuLanguage": "Cambiar idioma",
       "mobileMenuContacts": "Contacto",
       "mobileMenuTerms": "Términos"

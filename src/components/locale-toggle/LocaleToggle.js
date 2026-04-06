@@ -383,6 +383,7 @@ export function createMobileLocaleSheet({
  * @param {{
  *   buttonAriaLabel: string;
  *   closeAriaLabel?: string;
+ *   title: string;
  *   languageLabel: string;
  *   contactsLabel: string;
  *   termsLabel: string;
@@ -395,6 +396,7 @@ export function createMobileLocaleSheet({
 export function createMobileHeaderMenu({
   buttonAriaLabel,
   closeAriaLabel = "Close menu",
+  title,
   languageLabel,
   contactsLabel,
   termsLabel,
@@ -425,6 +427,10 @@ export function createMobileHeaderMenu({
   const header = document.createElement("div");
   header.className = "mobile-header-menu__header";
 
+  const titleEl = document.createElement("h2");
+  titleEl.className = "mobile-header-menu__title";
+  titleEl.textContent = title;
+
   const closeButton = document.createElement("button");
   closeButton.type = "button";
   closeButton.className = "mobile-header-menu__close";
@@ -454,7 +460,7 @@ export function createMobileHeaderMenu({
   termsButton.textContent = termsLabel;
 
   menu.append(languageButton, contactsButton, termsButton);
-  header.appendChild(closeButton);
+  header.append(titleEl, closeButton);
   shell.append(header, menu);
   overlay.appendChild(shell);
   root.append(btn);

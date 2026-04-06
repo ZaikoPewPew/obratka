@@ -252,6 +252,7 @@ function mountHeaderActions(t, locale) {
       ? createMobileHeaderMenu({
           buttonAriaLabel: langMenuAria,
           closeAriaLabel: String(t.mobileMenuCloseAria || t.accessModalCloseAria || "Close"),
+          title: String(t.mobileMenuTitle || t.privacyPolicyTitle || "Menu"),
           languageLabel: String(t.mobileMenuLanguage || "Сменить язык"),
           contactsLabel: String(t.mobileMenuContacts || t.footerContacts || "Контакты"),
           termsLabel: String(t.mobileMenuTerms || "Термзы"),
