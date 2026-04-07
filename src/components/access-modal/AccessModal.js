@@ -107,8 +107,8 @@ function buildAccessModal(t, locale) {
 
   const mediaVideo = document.createElement("video");
   mediaVideo.className = "access-modal__media-video";
-  mediaVideo.src = "/video/video.mov";
-  mediaVideo.poster = "/video/video-poster.jpg";
+  mediaVideo.src = "/assets/video/video.mov";
+  mediaVideo.poster = "/assets/images/video-posters/video-poster.jpg";
   mediaVideo.autoplay = true;
   mediaVideo.muted = true;
   mediaVideo.loop = true;

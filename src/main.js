@@ -1,5 +1,5 @@
 import { inject, track } from "@vercel/analytics";
-import logoUrl from "../logo.svg?url";
+import logoUrl from "./assets/brand/logo.svg?url";
 import {
   getLocale,
   getStrings,
@@ -33,6 +33,7 @@ import { setDbSubscriberCountAndRefresh } from "./utils/foundersCountDisplay.js"
 import { fireEmailSubmitConfetti } from "./utils/emailSubmitConfetti.js";
 import { isValidEmail, normalizeEmail } from "./utils/emailValidation.js";
 import { showNotification } from "./components/notification/Notification.js";
+import { initMobileHaptics } from "./utils/mobileHaptics.js";
 
 inject();
 
@@ -608,6 +609,7 @@ function init() {
   mountSiteFooter(t, locale);
   initDesktopHoverSound();
   initDesktopClickSound();
+  initMobileHaptics();
 
   fetchSubscribersCount().then((count) => {
     setDbSubscriberCountAndRefresh(
