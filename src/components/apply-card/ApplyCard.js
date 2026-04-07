@@ -12,6 +12,29 @@ function ctaWithPrice(t, mobile) {
 }
 
 /**
+ * Двухстрочный текст CTA: основной заголовок + спокойная вторичная подпись.
+ * @param {HTMLButtonElement} cta
+ * @param {string} mainText
+ * @param {string} subText
+ */
+function setCtaText(cta, mainText, subText) {
+  cta.textContent = "";
+  const main = document.createElement("span");
+  main.className = "apply-card__cta-main";
+  main.textContent = mainText;
+  cta.append(main);
+
+  const secondary = String(subText || "").trim();
+  if (!secondary) {
+    return;
+  }
+  const sub = document.createElement("span");
+  sub.className = "apply-card__cta-sub";
+  sub.textContent = secondary;
+  cta.append(sub);
+}
+
+/**
  * Центральный блок заявки (ширина — `styles/apply.css` `--apply-card-width`, min-height 398).
  * @param {object} opts
  * @param {{ applyTitle: string; applySubtitle: string; ctaPrimary: string; dividerOr: string; emailPlaceholder: string; emailInvalidCaption: string; foundersWaiting: string; emailSubmitAria: string }} opts.t
@@ -35,6 +58,7 @@ export function createApplyCard({ t, locale, modifier = "" }) {
     text: ctaWithPrice(t, false),
     className: "apply-card__cta",
   });
+  setCtaText(cta, ctaWithPrice(t, false), String(t.ctaSecondary || ""));
 
   const divider = createDividerOr({
     text: t.dividerOr,
@@ -87,6 +111,7 @@ export function createApplyCardForm({ t, locale }) {
     text: ctaWithPrice(t, true),
     className: "apply-card__cta",
   });
+  setCtaText(cta, ctaWithPrice(t, true), String(t.ctaSecondary || ""));
 
   attachAccessModalToCta(cta, t, locale);
 

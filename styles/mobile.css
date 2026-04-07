@@ -217,10 +217,20 @@
     box-sizing: border-box;
     width: 100%;
     max-width: none;
-    height: 53px;
-    padding: 16px 24px;
+    min-height: 68px;
+    padding: 12px 20px;
     margin: 0 0 24px;
     border-radius: 16px;
+    gap: 2px;
+  }
+
+  .mobile-apply-form .apply-card__cta-main {
+    font-size: 15px;
+  }
+
+  .mobile-apply-form .apply-card__cta-sub {
+    font-size: 11px;
+    line-height: 1.25;
   }
 
   .mobile-apply-form .apply-card__divider {
@@ -341,8 +351,8 @@
     }
 
     .mobile-apply-form .apply-card__cta {
-      height: 48px;
-      padding: 14px 20px;
+      min-height: 64px;
+      padding: 10px 16px;
       margin-bottom: 12px;
     }
 
