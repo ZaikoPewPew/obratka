@@ -648,7 +648,21 @@ function init() {
     const normalizedEmail = normalizeEmail(email);
     const lockedEmail = getWaitlistSubmittedEmail();
     if (lockedEmail && normalizedEmail === lockedEmail) {
-      flashEmailFieldCaptionError(input, t.emailAlreadySubmitted);
+      safeTrack("email_submit_success", {
+        source,
+        locale,
+        is_new: false,
+        path: window.location.pathname,
+      });
+      fireEmailSubmitConfetti(shell);
+      playPopSound();
+      showNotification({
+        message: String(t.notificationEmailSubmitted || "Email submitted successfully"),
+      });
+      if (input) {
+        input.value = "";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
       return;
     }
 
