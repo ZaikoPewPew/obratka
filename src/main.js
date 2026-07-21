@@ -1,15 +1,13 @@
-import { inject, track } from "@vercel/analytics";
+import { getFormattedDisplayCount } from "./config.js";
 import logoUrl from "./assets/brand/logo.svg?url";
 import {
   getLocale,
   getStrings,
-  getStartups,
   getSupportedLocales,
   LOCALE_NATIVE_NAMES,
   setLocale,
 } from "./i18n.js";
 import { attachPrivacyPolicyPanel } from "./components/privacy-policy/PrivacyPolicyPanel.js";
-import { getFormattedStartupCount } from "./components/startup-count/startupCount.js";
 import { createLogo } from "./components/logo/Logo.js";
 import {
   createDesktopLocaleDropdown,
@@ -22,243 +20,21 @@ import {
   createApplyCardForm,
   createApplyCardHero,
 } from "./components/apply-card/ApplyCard.js";
-import {
-  createAmbientFallLayer,
-  createStartupFallItem,
-  PHYSICS_CARDS_PER_SIDE,
-} from "./components/startup-card/StartupCard.js";
-import { initStartupRainPhysics } from "./startup-rain-physics.js";
 import { fetchSubscribersCount, saveSubscriber } from "./api/subscribers.js";
 import { setDbSubscriberCountAndRefresh } from "./utils/foundersCountDisplay.js";
-import { fireEmailSubmitConfetti } from "./utils/emailSubmitConfetti.js";
 import { isValidEmail, normalizeEmail } from "./utils/emailValidation.js";
 import { showNotification } from "./components/notification/Notification.js";
-import { initMobileHaptics } from "./utils/mobileHaptics.js";
-
-inject();
 
 /** Минимальный интервал между запросами подписки с одной вкладки (анти-спам). */
 const EMAIL_SUBMIT_MIN_GAP_MS = 4000;
 
 /** Нормализованный email последней успешной вставки (201); повтор того же адреса — без лишнего POST. */
 const WAITLIST_SUBMITTED_STORAGE_KEY = "memento.waitlistSubmitted";
-const HOVER_SOUND_SRC = "/sounds/hover.wav";
-const CLICK_SOUND_SRC = "/sounds/click.wav";
-const POP_SOUND_SRC = "/sounds/pop.wav";
-const DESKTOP_MEDIA_QUERY = "(min-width: 768px)";
 const CONTACT_EMAIL = "vlad.kveasy@gmail.com";
 const CONTACT_MAILTO = `mailto:${CONTACT_EMAIL}`;
 
 let emailSubmitInFlight = false;
 let emailSubmitNextAllowedAt = 0;
-let hasTrackedEmailInputFocus = false;
-let hoverAudio = null;
-let hoverAudioReady = false;
-let clickAudio = null;
-let clickAudioReady = false;
-let popAudio = null;
-
-function isDesktopViewport() {
-  try {
-    return window.matchMedia(DESKTOP_MEDIA_QUERY).matches;
-  } catch {
-    return window.innerWidth >= 768;
-  }
-}
-
-function ensureHoverAudio() {
-  if (!hoverAudio) {
-    hoverAudio = new Audio(HOVER_SOUND_SRC);
-    hoverAudio.preload = "auto";
-    hoverAudio.volume = 0.02;
-  }
-  return hoverAudio;
-}
-
-function playHoverSound() {
-  if (!isDesktopViewport()) {
-    return;
-  }
-  const audio = ensureHoverAudio();
-  try {
-    audio.currentTime = 0;
-    const p = audio.play();
-    if (p && typeof p.catch === "function") {
-      p.catch(() => {});
-    }
-    hoverAudioReady = true;
-  } catch {
-    /* ignore */
-  }
-}
-
-function ensureClickAudio() {
-  if (!clickAudio) {
-    clickAudio = new Audio(CLICK_SOUND_SRC);
-    clickAudio.preload = "auto";
-    clickAudio.volume = 0.1;
-  }
-  return clickAudio;
-}
-
-function playClickSound() {
-  if (!isDesktopViewport()) {
-    return;
-  }
-  const audio = ensureClickAudio();
-  try {
-    audio.currentTime = 0;
-    const p = audio.play();
-    if (p && typeof p.catch === "function") {
-      p.catch(() => {});
-    }
-    clickAudioReady = true;
-  } catch {
-    /* ignore */
-  }
-}
-
-function ensurePopAudio() {
-  if (!popAudio) {
-    popAudio = new Audio(POP_SOUND_SRC);
-    popAudio.preload = "auto";
-    popAudio.volume = 0.1;
-  }
-  return popAudio;
-}
-
-function playPopSound() {
-  const audio = ensurePopAudio();
-  try {
-    audio.currentTime = 0;
-    const p = audio.play();
-    if (p && typeof p.catch === "function") {
-      p.catch(() => {});
-    }
-  } catch {
-    /* ignore */
-  }
-}
-
-/**
- * Десктоп hover-звук для интерактивных элементов шапки/карточки/футера.
- * Делегирование нужно, чтобы покрывать динамически созданные узлы (например, пункты языков).
- */
-function initDesktopHoverSound() {
-  const selectors = [
-    ".layout-desktop .desktop-logo",
-    ".layout-desktop .apply-card__cta",
-    ".layout-desktop .site-footer__contacts",
-    ".layout-desktop .site-footer__privacy",
-    ".layout-desktop .locale-dropdown .locale-toggle",
-    ".locale-dropdown__option",
-    ".access-modal .access-modal__close",
-    ".privacy-panel .access-modal__close",
-  ];
-  const interactiveSelector = selectors.join(", ");
-
-  const onFirstPointerDown = () => {
-    if (!isDesktopViewport()) {
-      return;
-    }
-    const audio = ensureHoverAudio();
-    if (hoverAudioReady) {
-      return;
-    }
-    const p = audio.play();
-    if (p && typeof p.then === "function") {
-      p.then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        hoverAudioReady = true;
-      }).catch(() => {});
-    }
-  };
-
-  document.addEventListener("pointerdown", onFirstPointerDown, { once: true, passive: true });
-  document.addEventListener("mouseover", (event) => {
-    if (!(event.target instanceof Element)) {
-      return;
-    }
-    const target = event.target.closest(interactiveSelector);
-    if (!target) {
-      return;
-    }
-    const previous = event.relatedTarget;
-    if (previous instanceof Node && target.contains(previous)) {
-      return;
-    }
-    playHoverSound();
-  });
-}
-
-/**
- * Десктоп click-звук для CTA/футера/языка и пунктов выбора языка.
- * capture=true нужен, чтобы поймать клики по пунктам, где есть stopPropagation().
- */
-function initDesktopClickSound() {
-  const selectors = [
-    ".layout-desktop .desktop-logo",
-    ".layout-desktop .desktop-logo__fill",
-    ".layout-desktop .apply-card__cta",
-    ".layout-desktop .site-footer__contacts",
-    ".layout-desktop .site-footer__privacy",
-    ".layout-desktop .email-input-shell",
-    ".access-modal .email-input-shell",
-    ".layout-desktop .locale-dropdown .locale-toggle",
-    ".locale-dropdown__option",
-    ".access-modal .access-modal__close",
-    ".privacy-panel .access-modal__close",
-  ];
-  const interactiveSelector = selectors.join(", ");
-
-  const onFirstPointerDown = () => {
-    if (!isDesktopViewport()) {
-      return;
-    }
-    const audio = ensureClickAudio();
-    if (clickAudioReady) {
-      return;
-    }
-    const p = audio.play();
-    if (p && typeof p.then === "function") {
-      p.then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        clickAudioReady = true;
-      }).catch(() => {});
-    }
-  };
-
-  document.addEventListener("pointerdown", onFirstPointerDown, { once: true, passive: true });
-  document.addEventListener(
-    "click",
-    (event) => {
-      if (!(event.target instanceof Element)) {
-        return;
-      }
-      const target = event.target.closest(interactiveSelector);
-      if (!target) {
-        return;
-      }
-      playClickSound();
-    },
-    true,
-  );
-}
-
-/**
- * Безопасный вызов кастомных событий Vercel Analytics (не ломает UX, если события недоступны по тарифу).
- * @param {string} name
- * @param {Record<string, string | number | boolean>} [properties]
- */
-function safeTrack(name, properties = {}) {
-  try {
-    track(name, properties);
-  } catch {
-    /* ignore */
-  }
-}
 
 /** @returns {string | null} нормализованный email или null (нет / legacy «1»). */
 function getWaitlistSubmittedEmail() {
@@ -357,7 +133,6 @@ function initEntranceAnimations() {
       reveal(child);
     }
   }
-  reveal(layout.querySelector(".mobile-stage__logos"));
   if (heroCard) {
     for (const child of [...heroCard.children].reverse()) {
       reveal(child);
@@ -413,7 +188,7 @@ function mountLogos(brandName) {
 
 /** Слот data-mount="header-actions": бейдж счётчика + кнопка языка (8px между ними; кнопка справа). */
 function mountHeaderActions(t, locale) {
-  const formatted = getFormattedStartupCount(locale);
+  const formatted = getFormattedDisplayCount(locale);
   const langMenuAria = String(t.langMenuButtonAria || "Language");
   const closeSheetAria = String(t.accessModalCloseAria || "Close");
   const hiddenPrivacyTrigger = document.createElement("button");
@@ -429,12 +204,6 @@ function mountHeaderActions(t, locale) {
     closeSheetAria,
     onSelect: (code) => {
       if (code !== locale) {
-        safeTrack("locale_change", {
-          from: locale,
-          to: code,
-          control: "mobile_sheet",
-          path: window.location.pathname,
-        });
         setLocale(code);
       }
     },
@@ -465,19 +234,9 @@ function mountHeaderActions(t, locale) {
             }
           },
           onContactsClick: () => {
-            safeTrack("contacts_menu_click", {
-              locale,
-              placement: "mobile_header_menu",
-              path: window.location.pathname,
-            });
             window.location.href = CONTACT_MAILTO;
           },
           onTermsClick: () => {
-            safeTrack("terms_menu_click", {
-              locale,
-              placement: "mobile_header_menu",
-              path: window.location.pathname,
-            });
             hiddenPrivacyTrigger.click();
           },
         })
@@ -488,12 +247,6 @@ function mountHeaderActions(t, locale) {
           buttonAriaLabel: langMenuAria,
           onSelect: (code) => {
             if (code !== locale) {
-              safeTrack("locale_change", {
-                from: locale,
-                to: code,
-                control: "desktop_dropdown",
-                path: window.location.pathname,
-              });
               setLocale(code);
             }
           },
@@ -547,38 +300,6 @@ function mountSiteFooter(t, locale) {
   });
 }
 
-function mountStartupFallBack() {
-  const { items = [] } = getStartups();
-  document.querySelectorAll('[data-mount="startup-fall-back"]').forEach((node) => {
-    const layer = document.createElement("div");
-    layer.className = "startup-fall-back";
-    layer.append(createAmbientFallLayer(items));
-    node.replaceWith(layer);
-  });
-}
-
-function mountStartupFall() {
-  const { items = [] } = getStartups();
-  const pool = items.length ? items : [];
-  const total = PHYSICS_CARDS_PER_SIDE * 2;
-  const list =
-    pool.length > 0
-      ? Array.from({ length: total }, (_, i) => pool[i % pool.length])
-      : [];
-  document.querySelectorAll('[data-mount="startup-fall"]').forEach((node) => {
-    const layer = document.createElement("div");
-    layer.className = "startup-fall";
-    layer.dataset.physicsPerSide = String(PHYSICS_CARDS_PER_SIDE);
-    list.forEach((item, i) => {
-      layer.append(createStartupFallItem(item, i, { perSide: PHYSICS_CARDS_PER_SIDE }));
-    });
-    if (pool.length > 0) {
-      layer._startupPool = pool;
-    }
-    node.replaceWith(layer);
-  });
-}
-
 function mountApplyCards(t, locale) {
   const desktopMount = document.querySelector('.layout-desktop [data-mount="apply-card"]');
   if (desktopMount) {
@@ -603,13 +324,8 @@ function init() {
 
   mountLogos(t.brandName);
   mountHeaderActions(t, locale);
-  mountStartupFallBack();
-  mountStartupFall();
   mountApplyCards(t, locale);
   mountSiteFooter(t, locale);
-  initDesktopHoverSound();
-  initDesktopClickSound();
-  initMobileHaptics();
 
   fetchSubscribersCount().then((count) => {
     setDbSubscriberCountAndRefresh(
@@ -625,12 +341,6 @@ function init() {
     const source = e.target.closest(".access-modal") ? "buy_intent" : "email_form";
     const shell = e.target.closest(".email-input-shell");
     const input = e.target.closest("input.email-input");
-
-    safeTrack("email_submit_attempt", {
-      source,
-      locale,
-      path: window.location.pathname,
-    });
 
     if (!isValidEmail(email)) {
       if (shell) {
@@ -650,14 +360,6 @@ function init() {
     const normalizedEmail = normalizeEmail(email);
     const lockedEmail = getWaitlistSubmittedEmail();
     if (lockedEmail && normalizedEmail === lockedEmail) {
-      safeTrack("email_submit_success", {
-        source,
-        locale,
-        is_new: false,
-        path: window.location.pathname,
-      });
-      fireEmailSubmitConfetti(shell);
-      playPopSound();
       showNotification({
         message: String(t.notificationEmailSubmitted || "Email submitted successfully"),
       });
@@ -688,17 +390,9 @@ function init() {
     }
 
     if (saveResult.ok) {
-      safeTrack("email_submit_success", {
-        source,
-        locale,
-        is_new: Boolean(saveResult.newSubscriber),
-        path: window.location.pathname,
-      });
       if (saveResult.newSubscriber) {
         markWaitlistSubmittedEmail(email);
       }
-      fireEmailSubmitConfetti(shell);
-      playPopSound();
       showNotification({
         message: String(t.notificationEmailSubmitted || "Email submitted successfully"),
       });
@@ -707,62 +401,13 @@ function init() {
         input.dispatchEvent(new Event("input", { bubbles: true }));
       }
     } else if (shell && input) {
-      safeTrack("email_submit_failed", {
-        source,
-        locale,
-        path: window.location.pathname,
-      });
       showEmailSubmitServerMessage(shell, input, t.emailSubmitFailed);
     }
   });
 
-  document.addEventListener("click", (e) => {
-    const target = e.target instanceof Element ? e.target : null;
-    if (!target) {
-      return;
-    }
-    const cta = target.closest("button.apply-card__cta");
-    if (cta) {
-      safeTrack("cta_click", {
-        placement: cta.closest(".mobile-apply-form") ? "mobile_form" : "desktop_card",
-        locale,
-        path: window.location.pathname,
-      });
-      return;
-    }
-    const submit = target.closest("button.email-input__submit");
-    if (submit) {
-      safeTrack("email_submit_button_click", {
-        source: submit.closest(".access-modal") ? "buy_intent" : "email_form",
-        locale,
-        path: window.location.pathname,
-      });
-    }
-  });
-
-  document.addEventListener(
-    "focusin",
-    (e) => {
-      const target = e.target instanceof Element ? e.target : null;
-      if (!target || hasTrackedEmailInputFocus) {
-        return;
-      }
-      if (target.matches("input.email-input")) {
-        hasTrackedEmailInputFocus = true;
-        safeTrack("email_input_focus", {
-          source: target.closest(".access-modal") ? "buy_intent" : "email_form",
-          locale,
-          path: window.location.pathname,
-        });
-      }
-    },
-    true,
-  );
-
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       initEntranceAnimations();
-      initStartupRainPhysics();
     });
   });
 

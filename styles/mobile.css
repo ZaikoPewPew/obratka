@@ -9,21 +9,6 @@
     display: none !important;
   }
 
-  /* Пока десктоп скрыт — не держим CSS-анимации в фоне (меньше рывков при resize) */
-  .layout-desktop .water-waves__svg {
-    animation: none !important;
-  }
-
-  .layout-desktop .startup-fall-back__item {
-    animation: none !important;
-  }
-
-  .layout-desktop .startup-fall__track,
-  .layout-desktop .startup-fall__splash,
-  .layout-desktop .startup-fall__splash::after {
-    animation: none !important;
-  }
-
   .layout-mobile {
     display: block;
     min-height: 100vh;
@@ -34,7 +19,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    /* Одна экранная колонна без вертикального скролла: «сжимаемая» зона — картинка в .mobile-stage */
+    /* Одна экранная колонна без вертикального скролла */
     min-height: 100vh;
     min-height: 100dvh;
     height: 100vh;
@@ -42,8 +27,8 @@
     padding: 16px;
     padding-bottom: 16px;
     box-sizing: border-box;
-    background: #ffffff;
-    color: #111111;
+    background: var(--color-surface);
+    color: var(--color-text-strong);
     overflow-x: clip;
     justify-content: center;
     /* Центрируем основной блок; при очень низкой высоте допускаем прокрутку */
@@ -81,7 +66,7 @@
     height: 40px;
     padding: 8px 12px 8px 14px;
     border-radius: 500px;
-    background: var(--timer-badge-bg, #f3f4f7);
+    background: var(--color-surface-muted);
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -107,7 +92,7 @@
     font-size: 14px;
     line-height: 1.25;
     text-align: left;
-    color: #000;
+    color: var(--color-black);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -167,7 +152,7 @@
     font-size: 24px;
     line-height: 1.2;
     text-align: center;
-    color: #242426;
+    color: var(--color-text);
   }
 
   .apply-card--hero .apply-card__subtitle {
@@ -176,15 +161,7 @@
     font-size: 14px;
     line-height: 170%;
     text-align: center;
-    color: #797979;
-  }
-
-  .mobile-stage {
-    display: none !important;
-  }
-
-  .mobile-stage__logos {
-    display: none !important;
+    color: var(--color-text-muted);
   }
 
   /* На всю ширину экрана: компенсируем padding у .mobile-root */
@@ -263,30 +240,30 @@
     height: 56px;
     padding: 16px;
     border-radius: 16px;
-    background: #f3f4f7;
+    background: var(--color-surface-muted);
     box-shadow: 0 0 0 1px transparent;
     transition: background 0.2s ease, box-shadow 0.2s ease;
   }
 
   .mobile-apply-form .email-input-shell:focus-within {
-    background: #eceef3;
-    box-shadow: 0 0 0 1px rgba(36, 36, 38, 0.12);
+    background: var(--color-surface-muted-hover);
+    box-shadow: 0 0 0 1px var(--color-border-subtle);
   }
 
   .mobile-apply-form
     .email-input-shell--filled:not(.email-input-shell--invalid):not(.email-input-shell--server-message) {
-    background: #eceef3;
+    background: var(--color-surface-muted-hover);
   }
 
   .mobile-apply-form .email-input-shell--invalid,
   .mobile-apply-form .email-input-shell--server-message {
-    background: #fff8f8;
-    box-shadow: 0 0 0 1px rgba(200, 60, 60, 0.45);
+    background: var(--color-error-surface);
+    box-shadow: 0 0 0 1px var(--color-error-border);
   }
 
   .mobile-apply-form .email-input-shell--invalid:focus-within,
   .mobile-apply-form .email-input-shell--server-message:focus-within {
-    box-shadow: 0 0 0 1px rgba(200, 60, 60, 0.55);
+    box-shadow: 0 0 0 1px var(--color-error-border-strong);
   }
 
   .mobile-apply-form .email-avatars {
@@ -295,17 +272,11 @@
   }
 
   .mobile-apply-form .email-avatars__avatar {
-    box-shadow: 0 0 0 2px #f3f4f7;
+    box-shadow: 0 0 0 2px var(--color-surface-muted);
   }
 
   .mobile-apply-form .email-avatars__stack--pair {
     width: 59px;
-  }
-
-  .mobile-root .water-waves,
-  .mobile-stage .startup-fall-back,
-  .mobile-stage .startup-fall {
-    display: none;
   }
 
   /* Низкий экран: плотнее центр-блок */
@@ -397,7 +368,7 @@
     flex-direction: column;
     justify-content: flex-end;
     box-sizing: border-box;
-    background: rgba(36, 36, 38, 0.45);
+    background: var(--color-overlay);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.28s ease;
@@ -430,7 +401,7 @@
     box-sizing: border-box;
     padding: 24px 16px calc(24px + env(safe-area-inset-bottom, 0px));
     border-radius: 24px 24px 0 0;
-    background: #ffffff;
+    background: var(--color-surface);
     transform: translateY(100%);
     transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   }
@@ -466,7 +437,7 @@
     font-weight: 500;
     font-size: 14px;
     line-height: 1.7;
-    color: #242426;
+    color: var(--color-text);
     text-align: left;
     -webkit-tap-highlight-color: transparent;
   }
@@ -494,7 +465,7 @@
     position: fixed;
     inset: 0;
     z-index: 10000;
-    background: #ffffff;
+    background: var(--color-surface);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease;
@@ -541,7 +512,7 @@
     font-weight: 400;
     font-size: 24px;
     line-height: 1;
-    color: #242426;
+    color: var(--color-text);
   }
 
   .mobile-header-menu__close {
@@ -555,7 +526,7 @@
     padding: 9px;
     border: none;
     border-radius: 392px;
-    background: #f3f4f7;
+    background: var(--color-surface-muted);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transform: scale(0.94);
@@ -610,7 +581,7 @@
     font-weight: 400;
     font-size: 24px;
     line-height: 1.2;
-    color: #242426;
+    color: var(--color-text);
     text-align: left;
     -webkit-tap-highlight-color: transparent;
     opacity: 0;
@@ -642,14 +613,14 @@
   }
 
   .mobile-header-menu__item:focus-visible {
-    outline: 2px solid rgba(36, 36, 38, 0.35);
+    outline: 2px solid var(--color-focus-ring);
     outline-offset: 1px;
   }
 
   .locale-toggle--mobile.locale-toggle--open,
   .locale-toggle--mobile.locale-toggle--open:hover {
-    background: #242426;
-    color: #ffffff;
+    background: var(--color-accent);
+    color: var(--color-on-accent);
   }
 
   @media (prefers-reduced-motion: reduce) {

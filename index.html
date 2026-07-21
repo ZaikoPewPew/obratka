@@ -22,10 +22,10 @@
     <link rel="stylesheet" href="/styles/access-modal.css" />
     <link rel="stylesheet" href="/styles/privacy-policy-panel.css" />
     <link rel="stylesheet" href="/styles/notification.css" />
-    <link rel="stylesheet" href="/styles/startup-card.css" />
     <link rel="stylesheet" href="/styles/mobile.css" />
   </head>
   <body>
+    <!-- Десктопный лейаут (показывается от 768px). -->
     <div class="layout-desktop" aria-hidden="false">
       <main class="desktop-root">
         <header class="desktop-top">
@@ -43,40 +43,11 @@
         <div class="desktop-center">
           <div data-mount="apply-card"></div>
         </div>
-        <div data-mount="startup-fall-back"></div>
-        <div data-mount="startup-fall"></div>
-        <div class="water-waves" aria-hidden="true">
-          <div class="water-waves__layer water-waves__layer--back">
-            <svg
-              class="water-waves__svg"
-              viewBox="0 0 2400 276"
-              preserveAspectRatio="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill="#F3F4F7"
-                d="M0,176 C200,104 400,248 600,176 C800,104 1000,248 1200,176 C1400,104 1600,248 1800,176 C2000,104 2200,248 2400,176 L2400,276 L0,276 Z"
-              />
-            </svg>
-          </div>
-          <div class="water-waves__layer water-waves__layer--front">
-            <svg
-              class="water-waves__svg"
-              viewBox="0 0 2400 276"
-              preserveAspectRatio="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill="rgba(230, 230, 230, 0.41)"
-                d="M0,192 C240,136 420,236 600,192 C780,136 960,236 1200,192 C1440,136 1620,236 1800,192 C1980,136 2160,236 2400,192 L2400,276 L0,276 Z"
-              />
-            </svg>
-          </div>
-        </div>
         <div data-mount="site-footer"></div>
       </main>
     </div>
 
+    <!-- Мобильный лейаут (показывается до 767px). -->
     <div class="layout-mobile" aria-hidden="true">
       <main class="mobile-root">
         <header class="mobile-top">
@@ -96,51 +67,10 @@
         <section class="mobile-bottom">
           <div data-mount="apply-form"></div>
         </section>
-
-        <div class="mobile-stage">
-          <img
-            class="mobile-stage__logos"
-            src="/assets/images/ui/st-logos.png"
-            alt=""
-            width="662"
-            height="335"
-            decoding="async"
-            fetchpriority="low"
-          />
-          <div data-mount="startup-fall-back"></div>
-          <div data-mount="startup-fall"></div>
-        </div>
-        <div class="water-waves" aria-hidden="true">
-          <div class="water-waves__layer water-waves__layer--back">
-            <svg
-              class="water-waves__svg"
-              viewBox="0 0 2400 276"
-              preserveAspectRatio="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill="#F3F4F7"
-                d="M0,176 C200,104 400,248 600,176 C800,104 1000,248 1200,176 C1400,104 1600,248 1800,176 C2000,104 2200,248 2400,176 L2400,276 L0,276 Z"
-              />
-            </svg>
-          </div>
-          <div class="water-waves__layer water-waves__layer--front">
-            <svg
-              class="water-waves__svg"
-              viewBox="0 0 2400 276"
-              preserveAspectRatio="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill="rgba(230, 230, 230, 0.41)"
-                d="M0,192 C240,136 420,236 600,192 C780,136 960,236 1200,192 C1440,136 1620,236 1800,192 C1980,136 2160,236 2400,192 L2400,276 L0,276 Z"
-              />
-            </svg>
-          </div>
-        </div>
       </main>
     </div>
 
+    <!-- Точка входа приложения: монтирует все интерактивные компоненты. -->
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

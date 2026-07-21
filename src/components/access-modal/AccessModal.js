@@ -1,6 +1,7 @@
+import { getFormattedDisplayCount } from "../../config.js";
 import { getFounderAvatarSourcesForPage } from "../../i18n.js";
 import { createEmailField } from "../email-field/EmailField.js";
-import { fillCountTemplate, getFormattedStartupCount } from "../startup-count/startupCount.js";
+import { fillCountTemplate } from "../../utils/countTemplate.js";
 
 const CLOSE_SVG = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <path d="M4.70605 4.70605L14.1178 14.1178M14.1178 4.70605L4.70605 14.1178" stroke="#242426" stroke-width="1.01961" stroke-linecap="round" stroke-linejoin="round" />
@@ -123,7 +124,7 @@ function buildAccessModal(t, locale) {
   const benefits = document.createElement("div");
   benefits.className = "access-modal__benefits";
 
-  const countFormatted = getFormattedStartupCount(locale);
+  const countFormatted = getFormattedDisplayCount(locale);
   const row1 = createBenefitRow(ICON_FOLDER, "", t.accessModalBenefit1Subtitle);
   const benefit1Title = row1.querySelector(".access-modal__benefit-title");
   if (benefit1Title) {

@@ -9,7 +9,7 @@
   align-items: flex-start;
   padding: 0;
   box-sizing: border-box;
-  background: rgba(36, 36, 38, 0.45);
+  background: var(--color-overlay);
   opacity: 0;
   pointer-events: none;
   /* Чуть дольше затемнение при закрытии — плавнее уход */
@@ -30,14 +30,14 @@
   max-width: calc(100vw - 32px);
   height: 852px;
   max-height: calc(100vh - 32px);
-  padding: 32px;
-  border-radius: 40px;
-  background: #fff;
+  padding: var(--space-8);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
   display: flex;
   flex-direction: column;
   align-items: stretch;
   flex-shrink: 0;
-  box-shadow: 0 24px 80px rgba(36, 36, 38, 0.18);
+  box-shadow: var(--shadow-modal);
   opacity: 0;
   transform: translateX(22px);
   /* Вход быстрее; выход с тем же easing — дольше и мягче на обоих концах */
@@ -72,7 +72,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 8px;
+  gap: var(--space-2);
   width: 100%;
   max-width: 100%;
   height: 40px;
@@ -88,7 +88,7 @@
   font-weight: 400;
   font-size: 24px;
   line-height: 1;
-  color: #242426;
+  color: var(--color-text);
 }
 
 .privacy-panel__body {
@@ -96,14 +96,14 @@
   width: 100%;
   flex: 1;
   min-height: 0;
-  margin-top: 16px;
+  margin-top: var(--space-4);
   overflow-x: hidden;
   overflow-y: auto;
   font-family: var(--font-family);
   font-weight: 400;
   font-size: 16px;
   line-height: 170%;
-  color: #242426;
+  color: var(--color-text);
 }
 
 .privacy-panel__body::-webkit-scrollbar {

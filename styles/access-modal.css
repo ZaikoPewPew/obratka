@@ -7,9 +7,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: var(--space-6);
   box-sizing: border-box;
-  background: rgba(36, 36, 38, 0.45);
+  background: var(--color-overlay);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
@@ -27,14 +27,14 @@
   max-width: calc(100vw - 48px);
   max-height: calc(100vh - 48px);
   overflow: auto;
-  padding: 32px;
-  border-radius: 40px;
-  background: #fff;
+  padding: var(--space-8);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
   display: flex;
   flex-direction: column;
   align-items: stretch;
   flex-shrink: 0;
-  box-shadow: 0 24px 80px rgba(36, 36, 38, 0.18);
+  box-shadow: var(--shadow-modal);
   opacity: 0;
   transform: translateY(14px) scale(0.97);
   transform-origin: center center;
@@ -69,7 +69,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-2);
   width: 100%;
   align-self: stretch;
   min-height: 61px;
@@ -87,10 +87,10 @@
 .access-modal__body {
   box-sizing: border-box;
   width: 100%;
-  margin-top: 24px;
+  margin-top: var(--space-6);
   display: flex;
   align-items: stretch;
-  gap: 24px;
+  gap: var(--space-6);
   flex: 1;
   min-height: 0;
 }
@@ -100,8 +100,8 @@
   width: 362px;
   height: 450px;
   flex: 0 0 362px;
-  border-radius: 16px;
-  background: #f3f4f7;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
   overflow: hidden;
 }
 
@@ -129,7 +129,7 @@
   font-weight: 400;
   font-size: 24px;
   line-height: 1.2;
-  color: #242426;
+  color: var(--color-text);
 }
 
 .access-modal__subtitle {
@@ -138,7 +138,7 @@
   font-weight: 400;
   font-size: 14px;
   line-height: 170%;
-  color: #797979;
+  color: var(--color-text-muted);
 }
 
 .access-modal__close {
@@ -152,19 +152,19 @@
   margin: 0;
   padding: 9px;
   border: none;
-  border-radius: 392px;
-  background: #f3f4f7;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
   cursor: pointer;
-  color: #242426;
+  color: var(--color-text);
   transition: background-color 0.2s ease;
 }
 
 .access-modal__close:hover {
-  background: #e8eaef;
+  background: var(--color-surface-muted-active);
 }
 
 .access-modal__close:focus-visible {
-  outline: 2px solid rgba(36, 36, 38, 0.35);
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -181,7 +181,7 @@
   margin-top: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
   flex-shrink: 0;
   margin-bottom: auto;
 }
@@ -196,14 +196,14 @@
   font-weight: 400;
   font-size: 24px;
   line-height: 1.2;
-  color: #242426;
+  color: var(--color-text);
 }
 
 .access-modal__benefit {
   box-sizing: border-box;
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--space-2);
   width: 100%;
   min-height: 48px;
 }
@@ -217,8 +217,8 @@
   width: 48px;
   height: 48px;
   padding: 12px;
-  border-radius: 16px;
-  background: #f3f4f7;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
 }
 
 .access-modal__benefit-icon svg {
@@ -243,10 +243,10 @@
   font-weight: 500;
   font-size: 14px;
   line-height: 170%;
-  color: #242426;
+  color: var(--color-text);
 }
 
-.access-modal__benefit-title .startup-count {
+.access-modal__benefit-title .count-value {
   font-weight: 500;
 }
 
@@ -257,7 +257,7 @@
   font-weight: 400;
   font-size: 12px;
   line-height: 170%;
-  color: #797979;
+  color: var(--color-text-muted);
 }
 
 .access-modal__email {
@@ -281,7 +281,7 @@
 }
 
 .access-modal__email.email-field-block--compact .email-avatars__avatar {
-  box-shadow: 0 0 0 2px #fff;
+  box-shadow: 0 0 0 2px var(--color-surface);
 }
 
 .email-field-block.email-field-block--compact {
@@ -308,7 +308,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    box-shadow: 0 -12px 48px rgba(36, 36, 38, 0.14);
+    box-shadow: var(--shadow-sheet);
   }
 
   .access-modal__header {
@@ -320,7 +320,7 @@
     z-index: 5;
     width: 100vw;
     max-width: 100vw;
-    background: #fff;
+    background: var(--color-surface);
     margin: 0 calc(50% - 50vw) 4px;
     padding:
       max(12px, env(safe-area-inset-top, 0px))
@@ -344,9 +344,9 @@
     width: 100%;
     height: 180px;
     margin-bottom: 0;
-    border-radius: 16px;
+    border-radius: var(--radius-md);
     overflow: hidden;
-    background: #f3f4f7;
+    background: var(--color-surface-muted);
     flex: none;
   }
 
@@ -409,7 +409,7 @@
   .access-modal__email.email-field-block--compact .email-input-shell {
     height: 56px;
     padding: 16px;
-    border-radius: 16px;
+    border-radius: var(--radius-md);
   }
 
   /* Четыре аватарки в разметке, на sheet показываем две — как на мобильной форме */

@@ -1,4 +1,4 @@
-import { fillCountTemplate } from "../startup-count/startupCount.js";
+import { fillCountTemplate } from "../../utils/countTemplate.js";
 
 /**
  * Бейдж «сейчас в базе …» с мигающей точкой.

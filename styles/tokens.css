@@ -1,15 +1,67 @@
 /**
- * Граница между «мобилкой» и десктопом.
- * Меняйте одно число — оба файла (desktop/mobile) остаются согласованы.
+ * Единый источник дизайн-токенов проекта.
+ * Все компонентные стили ссылаются на эти переменные (см. styles/*.css).
  */
 :root {
-  /* Для стилей внутри блоков. Сами @media — литералы 768px / 767px в desktop.css и mobile.css */
+  /* Брейкпоинт desktop/mobile. Сами @media — литералы 768px / 767px в desktop.css и mobile.css */
   --breakpoint-min-desktop: 768px;
 
+  /* Типографика */
   --font-family: "Montserrat", system-ui, sans-serif;
-  --desktop-component-padding: 16px;
 
-  /* Бейдж «таймер» / счётчик в шапке */
-  --timer-badge-bg: #f3f4f7;
-  --timer-dot-fill: #00c023;
+  /* Цвета: текст */
+  --color-text: #242426;
+  --color-text-strong: #111111;
+  --color-text-muted: #797979;
+  --color-text-subtle: #9a9a9e;
+  --color-black: #000000;
+
+  /* Цвета: поверхности */
+  --color-surface: #ffffff;
+  --color-surface-muted: #f3f4f7;
+  --color-surface-muted-hover: #eceef3;
+  --color-surface-muted-active: #e8eaef;
+
+  /* Цвета: акцент (тёмные интерактивные элементы — кнопки, панели) */
+  --color-accent: #242426;
+  --color-accent-hover: #3d3d42;
+  --color-accent-active: #1c1c1e;
+  --color-on-accent: #ffffff;
+  --color-on-accent-hover: #fafafa;
+  --color-on-accent-active: #f0f0f0;
+
+  /* Цвета: статусы */
+  --color-error: #c43c3c;
+  --color-error-surface: #fff8f8;
+  --color-success: #00c023;
+  --color-logo-hover: #f9392a;
+
+  /* Цвета: служебные (overlay, обводки, границы) */
+  --color-overlay: rgba(36, 36, 38, 0.45);
+  --color-focus-ring: rgba(36, 36, 38, 0.35);
+  --color-focus-ring-on-accent: rgba(255, 255, 255, 0.55);
+  --color-border-subtle: rgba(36, 36, 38, 0.12);
+  --color-error-border: rgba(200, 60, 60, 0.45);
+  --color-error-border-strong: rgba(200, 60, 60, 0.55);
+
+  /* Тени */
+  --shadow-card: 0 16px 48px rgba(0, 0, 0, 0.2);
+  --shadow-modal: 0 24px 80px rgba(36, 36, 38, 0.18);
+  --shadow-sheet: 0 -12px 48px rgba(36, 36, 38, 0.14);
+
+  /* Скругления */
+  --radius-sm: 2px;
+  --radius-md: 16px;
+  --radius-lg: 40px;
+  --radius-pill: 500px;
+
+  /* Отступы */
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Алиас для совместимости: общий отступ десктопных блоков */
+  --desktop-component-padding: var(--space-4);
 }

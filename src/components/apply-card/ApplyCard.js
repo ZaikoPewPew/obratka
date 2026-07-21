@@ -3,7 +3,8 @@ import { attachAccessModalToCta } from "../access-modal/AccessModal.js";
 import { createCtaButton } from "../cta-button/CtaButton.js";
 import { createDividerOr } from "../divider-or/DividerOr.js";
 import { createEmailField } from "../email-field/EmailField.js";
-import { fillCountTemplate, getFormattedStartupCount } from "../startup-count/startupCount.js";
+import { getFormattedDisplayCount } from "../../config.js";
+import { fillCountTemplate } from "../../utils/countTemplate.js";
 
 function ctaWithPrice(t, mobile) {
   const template = mobile ? (t.ctaPrimaryMobile ?? t.ctaPrimary) : t.ctaPrimary;
@@ -48,7 +49,7 @@ export function createApplyCard({ t, locale, modifier = "" }) {
 
   const title = document.createElement("h1");
   title.className = "apply-card__title";
-  fillCountTemplate(title, t.applyTitle, getFormattedStartupCount(locale));
+  fillCountTemplate(title, t.applyTitle, getFormattedDisplayCount(locale));
 
   const subtitle = document.createElement("p");
   subtitle.className = "apply-card__subtitle";
@@ -81,7 +82,7 @@ export function createApplyCard({ t, locale, modifier = "" }) {
 }
 
 /**
- * Мобилка: только заголовок + подзаголовок (барьер для Matter.js остаётся в `.apply-card`).
+ * Мобилка: только заголовок + подзаголовок.
  */
 export function createApplyCardHero({ t, locale }) {
   const card = document.createElement("div");
@@ -89,7 +90,7 @@ export function createApplyCardHero({ t, locale }) {
 
   const title = document.createElement("h1");
   title.className = "apply-card__title";
-  fillCountTemplate(title, t.applyTitle, getFormattedStartupCount(locale));
+  fillCountTemplate(title, t.applyTitle, getFormattedDisplayCount(locale));
 
   const subtitle = document.createElement("p");
   subtitle.className = "apply-card__subtitle";

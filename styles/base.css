@@ -15,8 +15,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Число стартапов в заголовке и бейдже — одно форматирование из `startupCount.js` */
-.startup-count {
+/* Число в заголовке и бейдже — одно форматирование из `utils/countTemplate.js` */
+.count-value {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -26,96 +26,18 @@ body {
   min-height: 100vh;
 }
 
-@keyframes water-waves-rise {
-  from {
-    opacity: 0;
-    transform: translateY(42%);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Волны у нижнего края (полная ширина, не выше 276px) */
-.water-waves {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 276px;
-  max-height: 276px;
-  overflow: hidden;
-  pointer-events: none;
-  /* Над слоем физики (z-index 1), под формой (3) */
-  z-index: 2;
-}
-
-/* Десктоп: волны выезжают снизу вверх (на мобилке блок скрыт в mobile.css) */
-.layout-desktop .water-waves {
-  animation: water-waves-rise 1.15s cubic-bezier(0.19, 1, 0.22, 1) both;
-  animation-delay: 0.22s;
-}
-
-.water-waves__layer {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
-.water-waves__layer--front {
-  z-index: 1;
-}
-
-.water-waves__svg {
-  display: block;
-  width: 200%;
-  height: 100%;
-  min-height: 276px;
-  will-change: transform;
-}
-
-.water-waves__layer--back .water-waves__svg {
-  animation: water-waves-slide 14s linear infinite;
-}
-
-.water-waves__layer--front .water-waves__svg {
-  animation: water-waves-slide 22s linear infinite reverse;
-}
-
-@keyframes water-waves-slide {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .water-waves__svg {
-    animation: none;
-  }
-
-  .layout-desktop .water-waves {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
-}
-
 .site-footer {
   position: relative;
   z-index: 3;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: flex-end;
-  gap: 16px;
+  gap: var(--space-4);
   margin-top: auto;
   flex-shrink: 0;
   width: 100%;
   box-sizing: border-box;
-  padding: 0 16px 16px;
+  padding: 0 var(--space-4) var(--space-4);
 }
 
 .site-footer__copy,
@@ -125,7 +47,7 @@ body {
   font-weight: 400;
   font-size: 16px;
   line-height: 170%;
-  color: #242426;
+  color: var(--color-text);
 }
 
 .site-footer__links {
@@ -151,7 +73,7 @@ body {
 
 .site-footer__contacts:focus-visible,
 .site-footer__privacy:focus-visible {
-  outline: 2px solid rgba(36, 36, 38, 0.35);
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
 }

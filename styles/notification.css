@@ -7,9 +7,9 @@
   box-sizing: border-box;
   width: 350px;
   height: 56px;
-  padding: 16px;
-  border-radius: 16px;
-  background: #242426;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -37,7 +37,7 @@
   font-weight: 400;
   font-size: 14px;
   line-height: 24px;
-  color: #fff;
+  color: var(--color-on-accent);
 }
 
 .notification-toast__icon {
