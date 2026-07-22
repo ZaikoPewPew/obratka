@@ -31,7 +31,7 @@ ViewBox делений совпадает с `--shell-review-slider-width` / tra
 
 После submit: email (`your@email.com`), «или поделитесь», Telegram / Скачать.  
 Без автофокуса на инпут.  
-`onDoneChange(true)` включает reveal PDF на `review-screen`.
+`onDoneChange(true, { answers, portfolioName })` включает reveal PDF на `review-screen` и заполняет лист трактовками из `buildReportSections`.
 
 Скачать → `shareReviewPdf`. Telegram → `t.me/share`. Email → `mailto:`.
 

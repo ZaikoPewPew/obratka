@@ -1,8 +1,7 @@
 import { getStrings } from "../../i18n.js";
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
-
-/** Запас к --url-screen-transition-duration в tokens.css */
-const CLOSE_FALLBACK_MS = 700;
+import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
+import { buildReportSections } from "../../utils/reviewReport.js";
 
 const BRAND_MARK_SVG = `
   <svg class="review-screen__brand-mark" width="44" height="30" viewBox="0 0 44 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -22,7 +21,13 @@ const BRAND_MARK_SVG = `
  *   root: HTMLElement;
  *   open: () => void;
  *   close: () => Promise<void>;
- *   setReportReveal: (active: boolean) => void;
+ *   setReportReveal: (
+ *     active: boolean,
+ *     payload?: {
+ *       answers?: import("../../utils/reviewReport.js").ReviewAnswers | null;
+ *       portfolioName?: string;
+ *     },
+ *   ) => void;
  * }}
  */
 export function createReviewScreen({ content }) {
@@ -54,22 +59,21 @@ export function createReviewScreen({ content }) {
   const reportSheet = document.createElement("div");
   reportSheet.className = "review-screen__report-sheet";
 
+  const reportEyebrow = document.createElement("p");
+  reportEyebrow.className = "review-screen__report-eyebrow";
+  reportEyebrow.textContent = t.brandName;
+
   const reportTitle = document.createElement("p");
   reportTitle.className = "review-screen__report-title";
   reportTitle.textContent = t.reportDocumentTitle;
 
-  const reportLines = document.createElement("div");
-  reportLines.className = "review-screen__report-lines";
-  for (let i = 0; i < 8; i += 1) {
-    const line = document.createElement("span");
-    line.className = "review-screen__report-line";
-    if (i % 3 === 0) {
-      line.classList.add("review-screen__report-line--short");
-    }
-    reportLines.append(line);
-  }
+  const reportSubtitle = document.createElement("p");
+  reportSubtitle.className = "review-screen__report-subtitle";
 
-  reportSheet.append(reportTitle, reportLines);
+  const reportBody = document.createElement("div");
+  reportBody.className = "review-screen__report-body";
+
+  reportSheet.append(reportEyebrow, reportTitle, reportSubtitle, reportBody);
   report.append(reportSheet);
 
   const noise = document.createElement("span");
@@ -93,9 +97,51 @@ export function createReviewScreen({ content }) {
   let closing = false;
 
   /**
-   * @param {boolean} active
+   * @param {import("../../utils/reviewReport.js").ReviewAnswers | null | undefined} answers
+   * @param {string} [portfolioName]
    */
-  function setReportReveal(active) {
+  function fillReportSheet(answers, portfolioName) {
+    const strings = getStrings();
+    reportEyebrow.textContent = strings.brandName;
+    reportTitle.textContent = strings.reportDocumentTitle;
+    reportSubtitle.textContent =
+      portfolioName?.trim() || strings.brandName;
+
+    reportBody.replaceChildren();
+    if (!answers) return;
+
+    const sections = buildReportSections(answers, strings);
+    for (const section of sections) {
+      const block = document.createElement("section");
+      block.className = "review-screen__report-section";
+
+      const heading = document.createElement("h3");
+      heading.className = "review-screen__report-section-title";
+      heading.textContent = section.title;
+
+      const body = document.createElement("p");
+      body.className = "review-screen__report-section-body";
+      body.textContent = section.body;
+
+      block.append(heading, body);
+      reportBody.append(block);
+    }
+  }
+
+  /**
+   * @param {boolean} active
+   * @param {{
+   *   answers?: import("../../utils/reviewReport.js").ReviewAnswers | null;
+   *   portfolioName?: string;
+   * }} [payload]
+   */
+  function setReportReveal(active, payload = {}) {
+    if (active) {
+      fillReportSheet(payload.answers, payload.portfolioName);
+    } else {
+      reportBody.replaceChildren();
+      reportSubtitle.textContent = "";
+    }
     root.classList.toggle("review-screen--report", active);
   }
 
@@ -154,7 +200,7 @@ export function createReviewScreen({ content }) {
       };
 
       root.addEventListener("transitionend", onTransitionEnd);
-      const fallbackId = window.setTimeout(finish, CLOSE_FALLBACK_MS);
+      const fallbackId = window.setTimeout(finish, getScreenCloseFallbackMs());
     });
   }
 

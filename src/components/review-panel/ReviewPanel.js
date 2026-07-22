@@ -2,15 +2,13 @@ import { formatString, getStrings } from "../../i18n.js";
 import { answersFromFormData } from "../../utils/reviewReport.js";
 import { shareReviewPdf } from "../../utils/shareReviewPdf.js";
 import { isValidEmail } from "../../utils/emailValidation.js";
+import {
+  getMotionAdvanceDelayMs,
+  getMotionReveal,
+} from "../../utils/motionTokens.js";
 
 const ADVICE_MIN_LEN = 100;
 const ADVICE_MAX_LEN = 1000;
-const AUTO_ADVANCE_MS = 360;
-/** Совпадает с --url-screen-reveal-duration / --shell-review-step-duration */
-const STEP_DURATION_MS = 720;
-const STEP_SHIFT_PX = 18;
-const STEP_BLUR_PX = 8;
-const STEP_EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
 
 const CHECKBOX_IDLE_PATH =
   "M4 6C4 4.89543 4.89543 4 6 4H18C19.1046 4 20 4.89543 20 6V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V6Z";
@@ -418,7 +416,13 @@ function createStep(content) {
 /**
  * @param {{
  *   getPortfolioName?: () => string;
- *   onDoneChange?: (done: boolean) => void;
+ *   onDoneChange?: (
+ *     done: boolean,
+ *     payload?: {
+ *       answers?: import("../../utils/reviewReport.js").ReviewAnswers | null;
+ *       portfolioName?: string;
+ *     },
+ *   ) => void;
  * }} [options]
  * @returns {{
  *   root: HTMLElement;
@@ -832,15 +836,93 @@ export function createReviewPanel(options = {}) {
     form.hidden = false;
     top.hidden = false;
     done.hidden = true;
+    root.classList.remove("review-panel--to-done");
+    root.style.minHeight = "";
+    form.style.opacity = "";
+    form.style.transform = "";
+    form.style.filter = "";
+    top.style.opacity = "";
+    top.style.transform = "";
+    top.style.filter = "";
+    done.style.opacity = "";
+    done.style.transform = "";
+    done.style.filter = "";
     onDoneChange?.(false);
   }
 
-  function showDone() {
+  function notifyReportReveal(active) {
+    if (!active) {
+      onDoneChange?.(false);
+      return;
+    }
+    onDoneChange?.(true, {
+      answers: submittedAnswers,
+      portfolioName: getPortfolioName(),
+    });
+  }
+
+  /**
+   * Финальный вопрос → done + PDF.
+   * Form/top сразу уходят из потока (иначе flex-скачок), done входит на --motion-reveal-*.
+   * @returns {Promise<void>}
+   */
+  async function showDone() {
     clearAdvanceTimer();
+    if (!done.hidden && form.hidden) {
+      notifyReportReveal(true);
+      return;
+    }
+
+    if (prefersReducedMotion()) {
+      form.hidden = true;
+      top.hidden = true;
+      done.hidden = false;
+      notifyReportReveal(true);
+      return;
+    }
+
+    transitioning = true;
+    const { durationMs, shiftPx, blurPx, easing } = getMotionReveal();
+
+    /* Фиксируем высоту панели, чтобы не схлопнулась между hide form и enter done */
+    root.style.minHeight = `${root.getBoundingClientRect().height}px`;
+    root.classList.add("review-panel--to-done");
+
     form.hidden = true;
     top.hidden = true;
     done.hidden = false;
-    onDoneChange?.(true);
+    notifyReportReveal(true);
+
+    const enter = done.animate(
+      [
+        {
+          opacity: 0,
+          transform: `translateY(${shiftPx}px)`,
+          filter: `blur(${blurPx}px)`,
+        },
+        { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
+      ],
+      {
+        duration: durationMs,
+        easing,
+        fill: /** @type {FillMode} */ ("both"),
+      },
+    );
+
+    try {
+      await enter.finished;
+    } finally {
+      if (typeof enter.commitStyles === "function") {
+        enter.commitStyles();
+      }
+      enter.cancel();
+      done.style.opacity = "";
+      done.style.transform = "";
+      done.style.filter = "";
+      root.style.minHeight = "";
+      root.classList.remove("review-panel--to-done");
+      transitioning = false;
+    }
   }
 
   /**
@@ -862,8 +944,9 @@ export function createReviewPanel(options = {}) {
    * @returns {Promise<void>}
    */
   function animateSteps(from, to, direction) {
-    const leaveY = direction > 0 ? -STEP_SHIFT_PX : STEP_SHIFT_PX;
-    const enterY = direction > 0 ? STEP_SHIFT_PX : -STEP_SHIFT_PX;
+    const { durationMs, shiftPx, blurPx, easing } = getMotionReveal();
+    const leaveY = direction > 0 ? -shiftPx : shiftPx;
+    const enterY = direction > 0 ? shiftPx : -shiftPx;
 
     to.hidden = false;
     to.setAttribute("aria-hidden", "false");
@@ -873,8 +956,8 @@ export function createReviewPanel(options = {}) {
     from.classList.add("review-panel__step--leaving");
 
     const timing = {
-      duration: STEP_DURATION_MS,
-      easing: STEP_EASING,
+      duration: durationMs,
+      easing,
       fill: /** @type {FillMode} */ ("forwards"),
     };
 
@@ -884,7 +967,7 @@ export function createReviewPanel(options = {}) {
         {
           opacity: 0,
           transform: `translateY(${leaveY}px)`,
-          filter: `blur(${STEP_BLUR_PX}px)`,
+          filter: `blur(${blurPx}px)`,
         },
       ],
       timing,
@@ -895,7 +978,7 @@ export function createReviewPanel(options = {}) {
         {
           opacity: 0,
           transform: `translateY(${enterY}px)`,
-          filter: `blur(${STEP_BLUR_PX}px)`,
+          filter: `blur(${blurPx}px)`,
         },
         { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
       ],
@@ -990,7 +1073,7 @@ export function createReviewPanel(options = {}) {
     advanceTimer = window.setTimeout(() => {
       advanceTimer = null;
       void goNext({ force: true });
-    }, AUTO_ADVANCE_MS);
+    }, getMotionAdvanceDelayMs());
   }
 
   async function goBack() {
@@ -1135,6 +1218,7 @@ export function createReviewPanel(options = {}) {
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
+    if (transitioning) return;
     if (!steps[currentStep]?.validate()) {
       showStepError(true);
       focusActiveStep();
@@ -1149,7 +1233,7 @@ export function createReviewPanel(options = {}) {
     }
 
     submittedAnswers = answers;
-    showDone();
+    void showDone();
   });
 
   function syncEmailSubmit() {
@@ -1216,6 +1300,8 @@ export function createReviewPanel(options = {}) {
     clearAdvanceTimer();
     transitioning = false;
     body.classList.remove("review-panel__body--animating");
+    root.classList.remove("review-panel--to-done");
+    root.style.minHeight = "";
     form.reset();
     clearAllSelections();
     adviceInput.value = "";

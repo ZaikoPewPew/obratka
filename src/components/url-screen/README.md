@@ -16,19 +16,19 @@
 
 ## Появление (motion)
 
-При `open()` корень получает `.url-screen--open`. Элементы входят staggered:
+При `open()` корень получает `.url-screen--open`. Элементы входят staggered через общий слой `--motion-*` / `motion-reveal`:
 
 | Элемент | Эффект | Токен задержки |
 |---------|--------|----------------|
-| Visual | fade + slide up + blur | `--url-screen-reveal-delay-visual` |
-| Title | то же | `--url-screen-reveal-delay-title` |
-| Field | то же | `--url-screen-reveal-delay-field` |
-| Platforms text | то же | `--url-screen-reveal-delay-platforms` |
-| Avatars | scale + fade (по очереди) | delay platforms + n × `--url-screen-reveal-avatar-stagger` |
-| Brand mark | scale + fade | `--url-screen-reveal-delay-brand` |
+| Visual | fade + slide up + blur | `--url-screen-reveal-delay-visual` → `--motion-delay-1` |
+| Title | то же | `--url-screen-reveal-delay-title` → `--motion-delay-2` |
+| Field | то же | `--url-screen-reveal-delay-field` → `--motion-delay-3` |
+| Platforms text | то же | `--url-screen-reveal-delay-platforms` → `--motion-delay-4` |
+| Avatars | scale + fade (по очереди) | platforms + n × `--motion-stagger` |
+| Brand mark | scale + fade | `--url-screen-reveal-delay-brand` → `--motion-delay-5` |
 
-Токены длительности/blur/shift: `--url-screen-reveal-*` в `styles/tokens.css`.  
-Стили: `styles/iframe-shell.css` (`@keyframes url-screen-reveal`).  
+Правки «ощущения» анимации — в `--motion-reveal-*` / `--ease-reveal` (`styles/tokens.css`).  
+Keyframes: `styles/entrance.css`. Экранные задержки можно тюнить через `--url-screen-reveal-delay-*`.  
 `prefers-reduced-motion: reduce` — анимации отключаются.
 
 ## Стили

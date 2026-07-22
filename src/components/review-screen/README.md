@@ -12,7 +12,7 @@ Split-экран как у `url-screen`: слева опросник (`review-pa
 |--------|------------|
 | `open()` | Показать экран, запустить mesh, сбросить reveal отчёта |
 | `close()` | Закрытие с transition (как url-screen) |
-| `setReportReveal(active)` | Финальный шаг: PDF-лист выезжает, лого уезжает вверх |
+| `setReportReveal(active, payload?)` | Финальный шаг: PDF-лист выезжает, лого уезжает вверх. `payload.answers` + `portfolioName` заполняют лист теми же секциями, что и печатный PDF (`buildReportSections`) |
 
 Монтаж: `main.js` кладёт `reviewPanel.root` в `content`, `onDoneChange` → `setReportReveal`.
 
@@ -25,7 +25,8 @@ Split-экран как у `url-screen`: слева опросник (`review-pa
 3. `report` — лист отчёта (скрыт до финала)  
 4. `brand` — логотип  
 
-Фон листа: `--shell-review-report-bg` → `--color-surface-muted` (`#F3F4F7`).
+Лист: eyebrow (бренд) → заголовок → имя портфолио → секции трактовок (грейд, ясность, структура, метрики, визуал, вердикт, совет).  
+Фон: `--shell-review-report-bg` → `--color-surface-muted` (`#F3F4F7`).
 
 ## Motion финала
 

@@ -26,6 +26,14 @@ alwaysApply: true
 
 `--control-*`, `--shell-*`, `--frame-*`, `--recall-*`. Аватар и кнопка «Заметки»: `--radius-xs` (= 8px).
 
+## Motion
+
+Общий язык появления: `--motion-*`, `--ease-reveal` в `tokens.css`; keyframes/утилиты в `styles/entrance.css`.
+
+- CSS: `animation-name: motion-reveal` / `motion-reveal-scale` (не дублировать keyframes в компонентах).
+- Экранные задержки — алиасы (`--url-screen-reveal-delay-*` → `--motion-delay-*`).
+- JS (WAAPI / close fallback): `src/utils/motionTokens.js`, без хардкода ms/px/easing.
+
 ## Примеры
 
 ```css

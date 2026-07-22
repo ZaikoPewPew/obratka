@@ -22,7 +22,7 @@
 
 ## Motion
 
-При переносе стилей с `url-screen` унаследовать staggered reveal (`--url-screen-reveal-*` → `--brand-screen-reveal-*`). Эталон поведения: `src/components/url-screen/README.md`.
+При переносе стилей с `url-screen` унаследовать staggered reveal (`--motion-*`, алиасы `--url-screen-reveal-*` → при необходимости `--brand-screen-reveal-*`). Эталон поведения: `src/components/url-screen/README.md`.
 
 ## Стили
 

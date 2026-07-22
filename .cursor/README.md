@@ -10,8 +10,9 @@
 | Правило токенов | `.cursor/rules/design-tokens.mdc` |
 | Локали ru/en (+ расширение) | `content/locales.json`, `src/i18n.js` |
 | Правило i18n | `.cursor/rules/i18n.mdc` |
+| Правило экранов / флоу | `.cursor/rules/screens.mdc` |
 | Оболочка iframe + панель | `styles/iframe-shell.css`, `index.html`, `src/main.js` |
-| Url-screen reveal (stagger) | токены `--url-screen-reveal-*`, keyframes в `iframe-shell.css` |
+| Url-screen / shared reveal | токены `--motion-*` (+ алиасы `--url-screen-reveal-*`), keyframes в `entrance.css`, JS: `motionTokens.js` |
 | Шрифт (self-host) | `@fontsource/montserrat` → импорт в `src/main.js` |
 
 ## Экраны (флоу)

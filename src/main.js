@@ -20,6 +20,7 @@ import {
   resolvePortfolioEmbed,
 } from "./utils/portfolioEmbed.js";
 import { resolvePortfolioMeta } from "./utils/portfolioMeta.js";
+import { getMotionFocusDelayMs } from "./utils/motionTokens.js";
 import brandLogoUrl from "./assets/brand/logo.svg";
 
 const SESSION_SECONDS = 5;
@@ -45,13 +46,13 @@ let embedPlan = null;
 /** @type {string} */
 let portfolioName = getStrings().brandName;
 
-/** @type {(done: boolean) => void} */
+/** @type {ReturnType<typeof createReviewScreen>["setReportReveal"]} */
 let setReviewReportReveal = () => {};
 
 const reviewPanel = createReviewPanel({
   getPortfolioName: () => portfolioName,
-  onDoneChange: (done) => {
-    setReviewReportReveal(done);
+  onDoneChange: (done, payload) => {
+    setReviewReportReveal(done, payload);
   },
 });
 const reviewScreen = createReviewScreen({
@@ -222,7 +223,7 @@ function openReview() {
 
   window.setTimeout(() => {
     reviewPanel.focus();
-  }, 700);
+  }, getMotionFocusDelayMs());
 }
 
 async function closeReview() {

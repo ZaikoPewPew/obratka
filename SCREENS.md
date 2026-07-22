@@ -152,7 +152,7 @@ content/
 ### Motion на url-screen (эталон)
 
 Staggered reveal при `.url-screen--open`: visual → title → field → platforms/avatars → brand.  
-Токены `--url-screen-reveal-*`. Тот же паттерн стоит перенести на referral / auth / onboarding через `brand-screen-shell`.
+Токены `--motion-*` (алиасы `--url-screen-reveal-*`). Тот же паттерн стоит перенести на referral / auth / onboarding через `brand-screen-shell`.
 
 ## i18n
 

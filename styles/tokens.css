@@ -139,9 +139,39 @@
 
   /* Движение */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
   --duration-fast: 120ms;
   --duration-normal: 320ms;
   --duration-slow: 450ms;
+
+  /*
+   * Общий motion-язык (экраны, stagger, шаги опроса, PDF).
+   * Экранные токены (--url-screen-*, --shell-*) — алиасы на эти значения.
+   */
+  --motion-reveal-duration: 900ms;
+  --motion-reveal-ease: var(--ease-reveal);
+  --motion-reveal-shift: 12px;
+  --motion-reveal-blur: 5px;
+  --motion-reveal-scale-from: 0.96;
+  --motion-screen-duration: 600ms;
+  --motion-screen-ease: var(--ease-reveal);
+  --motion-screen-shift: 8px;
+  --motion-stagger: 60ms;
+  --motion-delay-1: 50ms;
+  --motion-delay-2: 110ms;
+  --motion-delay-3: 200ms;
+  --motion-delay-4: 290ms;
+  --motion-delay-5: 380ms;
+  /* Пауза после выбора до смены шага */
+  --motion-advance-delay: 280ms;
+  /* Фокус первого контрола после open экрана */
+  --motion-focus-delay: 720ms;
+  /* Медленный «feature»-ход (PDF-лист / уезд лого) */
+  --motion-feature-duration: 1600ms;
+  --motion-feature-fade-duration: var(--motion-reveal-duration);
+  --motion-feature-ease: var(--ease-reveal);
+  /* JS close fallback ≈ screen duration + запас */
+  --motion-screen-close-fallback: 700ms;
 
   /* Слои */
   --z-base: 1;
@@ -202,10 +232,10 @@
   --shell-review-hint-gap: var(--space-1);
   --shell-review-stage-offset: var(--space-12);
   --shell-review-body-min-height: 360px;
-  --shell-review-step-duration: var(--url-screen-reveal-duration);
-  --shell-review-step-ease: var(--url-screen-reveal-ease);
-  --shell-review-step-shift: var(--url-screen-reveal-shift);
-  --shell-review-step-blur: var(--url-screen-reveal-blur);
+  --shell-review-step-duration: var(--motion-reveal-duration);
+  --shell-review-step-ease: var(--motion-reveal-ease);
+  --shell-review-step-shift: var(--motion-reveal-shift);
+  --shell-review-step-blur: var(--motion-reveal-blur);
   --shell-review-control-height: 75px;
   --shell-review-control-padding-x: var(--space-6);
   --shell-review-control-padding-y: var(--space-6);
@@ -285,16 +315,33 @@
   --shell-review-report-height: 722px;
   --shell-review-report-radius: var(--radius-md);
   --shell-review-report-bg: var(--color-surface-muted);
-  --shell-review-report-line-bg: var(--color-surface-muted-hover);
-  --shell-review-report-line-short: 62%;
+  --shell-review-report-padding-x: var(--space-6);
+  --shell-review-report-padding-y: var(--space-8);
+  --shell-review-report-eyebrow-size: var(--font-size-xs);
+  --shell-review-report-eyebrow-weight: var(--font-weight-medium);
+  --shell-review-report-eyebrow-color: var(--color-text-muted);
+  --shell-review-report-eyebrow-tracking: 0.04em;
+  --shell-review-report-title-size: var(--font-size-lg);
+  --shell-review-report-title-weight: var(--font-weight-medium);
+  --shell-review-report-subtitle-size: var(--font-size-sm);
+  --shell-review-report-subtitle-color: var(--color-text-muted);
+  --shell-review-report-header-gap: var(--space-2);
+  --shell-review-report-body-gap: var(--space-5);
+  --shell-review-report-body-offset: var(--space-6);
+  --shell-review-report-section-gap: var(--space-2);
+  --shell-review-report-section-title-size: var(--font-size-sm);
+  --shell-review-report-section-title-weight: var(--font-weight-semibold);
+  --shell-review-report-section-body-size: var(--font-size-xs);
+  --shell-review-report-section-body-color: var(--palette-gray-800);
+  --shell-review-report-section-line-height: var(--line-height-loose);
   --shell-review-report-shift-hidden: calc(100% + var(--space-6));
   --shell-review-report-shift-shown: 22%;
-  --shell-review-report-duration: 1600ms;
-  --shell-review-report-fade-duration: 700ms;
-  --shell-review-report-ease: var(--ease-out);
+  --shell-review-report-duration: var(--motion-feature-duration);
+  --shell-review-report-fade-duration: var(--motion-feature-fade-duration);
+  --shell-review-report-ease: var(--motion-feature-ease);
   --shell-review-brand-top: 40px;
-  --shell-review-brand-motion-duration: 1600ms;
-  --shell-review-brand-motion-ease: var(--ease-out);
+  --shell-review-brand-motion-duration: var(--motion-feature-duration);
+  --shell-review-brand-motion-ease: var(--motion-feature-ease);
   --shell-review-z-glow: 0;
   --shell-review-z-noise: 1;
   --shell-review-z-report: 2;
@@ -303,23 +350,24 @@
   /* Экран ввода ссылки (Figma 408:2133) */
   --url-screen-padding: var(--space-4);
   --url-screen-gap: var(--space-4);
-  --url-screen-transition-duration: 520ms;
-  --url-screen-transition-ease: var(--ease-out);
-  --url-screen-exit-shift: 10px;
-  /* Появление элементов при open (stagger) */
-  --url-screen-reveal-duration: 720ms;
-  --url-screen-reveal-ease: var(--ease-out);
-  --url-screen-reveal-shift: 18px;
-  --url-screen-reveal-blur: 8px;
-  --url-screen-reveal-delay-visual: 40ms;
-  --url-screen-reveal-delay-title: 90ms;
-  --url-screen-reveal-delay-field: 170ms;
-  --url-screen-reveal-delay-platforms: 250ms;
-  --url-screen-reveal-delay-brand: 320ms;
-  --url-screen-reveal-avatar-stagger: 45ms;
-  --shell-enter-duration: 560ms;
-  --shell-enter-ease: var(--ease-out);
-  --shell-enter-shift: 8px;
+  --url-screen-transition-duration: var(--motion-screen-duration);
+  --url-screen-transition-ease: var(--motion-screen-ease);
+  --url-screen-exit-shift: var(--motion-screen-shift);
+  /* Появление элементов при open (stagger) — алиасы общего motion */
+  --url-screen-reveal-duration: var(--motion-reveal-duration);
+  --url-screen-reveal-ease: var(--motion-reveal-ease);
+  --url-screen-reveal-shift: var(--motion-reveal-shift);
+  --url-screen-reveal-blur: var(--motion-reveal-blur);
+  --url-screen-reveal-scale-from: var(--motion-reveal-scale-from);
+  --url-screen-reveal-delay-visual: var(--motion-delay-1);
+  --url-screen-reveal-delay-title: var(--motion-delay-2);
+  --url-screen-reveal-delay-field: var(--motion-delay-3);
+  --url-screen-reveal-delay-platforms: var(--motion-delay-4);
+  --url-screen-reveal-delay-brand: var(--motion-delay-5);
+  --url-screen-reveal-avatar-stagger: var(--motion-stagger);
+  --shell-enter-duration: var(--motion-screen-duration);
+  --shell-enter-ease: var(--motion-screen-ease);
+  --shell-enter-shift: var(--motion-screen-shift);
   --url-screen-form-width: 500px;
   --url-screen-form-gap: var(--space-6);
   --url-screen-field-gap: var(--space-4);
@@ -350,7 +398,7 @@
   --url-screen-visual-radius: var(--radius-xl);
 
   /* Экран опросника (layout как url-screen) */
-  --review-screen-reveal-delay-panel: 90ms;
+  --review-screen-reveal-delay-panel: var(--motion-delay-2);
 
   /* Mesh wash (Paper Shaders): цвета и параметры читаются из токенов */
   --url-screen-mesh-1: var(--palette-glow-peach);

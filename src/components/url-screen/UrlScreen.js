@@ -5,9 +5,7 @@ import {
   googleFaviconUrl,
   normalizePortfolioUrl,
 } from "../../utils/portfolioMeta.js";
-
-/** Запас к --url-screen-transition-duration в tokens.css */
-const CLOSE_FALLBACK_MS = 700;
+import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
 
 /** Платформы в стеке иконок под полем URL (Framer → Dprofile → Behance → Notion). */
 const PLATFORM_ICONS = Object.freeze([
@@ -239,7 +237,7 @@ export function createUrlScreen({ onSubmit }) {
       };
 
       root.addEventListener("transitionend", onTransitionEnd);
-      const fallbackId = window.setTimeout(finish, CLOSE_FALLBACK_MS);
+      const fallbackId = window.setTimeout(finish, getScreenCloseFallbackMs());
     });
   }
 

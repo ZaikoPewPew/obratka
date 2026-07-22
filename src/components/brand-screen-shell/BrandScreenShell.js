@@ -1,7 +1,5 @@
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
-
-/** Запас к --url-screen-transition-duration / --brand-screen-transition-duration */
-const CLOSE_FALLBACK_MS = 700;
+import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
 
 /**
  * Общий split-каркас: левый слот + правый brand visual (эталон — UrlScreen).
@@ -116,7 +114,7 @@ export function createBrandScreenShell({
       };
 
       root.addEventListener("transitionend", onTransitionEnd);
-      const fallbackId = window.setTimeout(finish, CLOSE_FALLBACK_MS);
+      const fallbackId = window.setTimeout(finish, getScreenCloseFallbackMs());
     });
   }
 

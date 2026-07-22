@@ -1,11 +1,15 @@
-/* Проявление «из растворения»: blur → чёткость, снизу вверх (порядок задержек — в main.js) */
+/**
+ * Общий motion-слой: keyframes + утилиты.
+ * Источник правды по значениям — `--motion-*` / `--ease-*` в tokens.css.
+ */
 
-@keyframes page-entrance-reveal {
+@keyframes motion-reveal {
   from {
     opacity: 0;
-    transform: translateY(22px);
-    filter: blur(7px);
+    transform: translateY(var(--motion-reveal-shift));
+    filter: blur(var(--motion-reveal-blur));
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -13,12 +17,47 @@
   }
 }
 
+@keyframes motion-reveal-scale {
+  from {
+    opacity: 0;
+    transform: scale(var(--motion-reveal-scale-from));
+    filter: blur(var(--motion-reveal-blur));
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Утилиты: повесить класс + задать --reveal-delay (или animation-delay) */
+.motion-reveal,
+.motion-reveal-scale {
+  animation-duration: var(--motion-reveal-duration);
+  animation-timing-function: var(--motion-reveal-ease);
+  animation-fill-mode: both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+.motion-reveal {
+  animation-name: motion-reveal;
+}
+
+.motion-reveal-scale {
+  animation-name: motion-reveal-scale;
+}
+
+/* Legacy alias (landing / optional) */
 .reveal-on-load {
-  animation: page-entrance-reveal 1.05s cubic-bezier(0.19, 1, 0.22, 1) backwards;
+  animation: motion-reveal var(--motion-reveal-duration) var(--motion-reveal-ease)
+    backwards;
   animation-delay: var(--reveal-delay, 0ms);
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .motion-reveal,
+  .motion-reveal-scale,
   .reveal-on-load {
     animation: none;
     opacity: 1;
