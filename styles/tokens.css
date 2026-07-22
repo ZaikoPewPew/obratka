@@ -1,67 +1,258 @@
 /**
- * Единый источник дизайн-токенов проекта.
- * Все компонентные стили ссылаются на эти переменные (см. styles/*.css).
+ * Дизайн-токены «Обратка».
+ * Единый источник правды для цветов, типографики, отступов и прочего.
+ *
+ * Как устроено:
+ * 1. Примитивы (--palette-*, --raw-*) — сырые значения, не использовать в компонентах.
+ * 2. Семантика (--color-*, --font-*, --space-*, …) — то, на что ссылаются стили.
+ * 3. Тема — переопределение семантики через [data-theme="…"] / .theme-…,
+ *    без правок в компонентных CSS.
+ *
+ * Документация для агента: .cursor/rules/design-tokens.mdc
  */
-:root {
-  /* Брейкпоинт desktop/mobile. Сами @media — литералы 768px / 767px в desktop.css и mobile.css */
-  --breakpoint-min-desktop: 768px;
 
-  /* Типографика */
-  --font-family: "Montserrat", system-ui, sans-serif;
+/* -------------------------------------------------------------------------- */
+/* Примитивы                                                                  */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  /* Палитра */
+  --palette-white: #ffffff;
+  --palette-black: #000000;
+  --palette-gray-50: #fafafa;
+  --palette-gray-100: #f3f4f7;
+  --palette-gray-150: #eceef3;
+  --palette-gray-200: #e8eaef;
+  --palette-gray-400: #9a9a9e;
+  --palette-gray-500: #797979;
+  --palette-gray-800: #3d3d42;
+  --palette-gray-900: #242426;
+  --palette-gray-950: #1c1c1e;
+  --palette-ink: #111111;
+  --palette-red: #c43c3c;
+  --palette-red-soft: #fff8f8;
+  --palette-green: #00c023;
+  --palette-brand-hot: #f9392a;
+
+  /* Шрифтовые семейства (сырьё). Единственный UI-шрифт — Montserrat (self-host @fontsource). */
+  --font-montserrat: "Montserrat", sans-serif;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Семантика: тема по умолчанию (светлая)                                     */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  /* Цвета: фон и поверхности */
+  --color-bg: var(--palette-white);
+  --color-surface: var(--palette-white);
+  --color-surface-muted: var(--palette-gray-100);
+  --color-surface-muted-hover: var(--palette-gray-150);
+  --color-surface-muted-active: var(--palette-gray-200);
 
   /* Цвета: текст */
-  --color-text: #242426;
-  --color-text-strong: #111111;
-  --color-text-muted: #797979;
-  --color-text-subtle: #9a9a9e;
-  --color-black: #000000;
+  --color-text: var(--palette-gray-900);
+  --color-text-strong: var(--palette-ink);
+  --color-text-muted: var(--palette-gray-500);
+  --color-text-subtle: var(--palette-gray-400);
+  --color-black: var(--palette-black);
 
-  /* Цвета: поверхности */
-  --color-surface: #ffffff;
-  --color-surface-muted: #f3f4f7;
-  --color-surface-muted-hover: #eceef3;
-  --color-surface-muted-active: #e8eaef;
-
-  /* Цвета: акцент (тёмные интерактивные элементы — кнопки, панели) */
-  --color-accent: #242426;
-  --color-accent-hover: #3d3d42;
-  --color-accent-active: #1c1c1e;
-  --color-on-accent: #ffffff;
-  --color-on-accent-hover: #fafafa;
+  /* Цвета: акцент (кнопки CTA, тёмные контролы) */
+  --color-accent: var(--palette-gray-900);
+  --color-accent-hover: var(--palette-gray-800);
+  --color-accent-active: var(--palette-gray-950);
+  --color-on-accent: var(--palette-white);
+  --color-on-accent-hover: var(--palette-gray-50);
   --color-on-accent-active: #f0f0f0;
 
   /* Цвета: статусы */
-  --color-error: #c43c3c;
-  --color-error-surface: #fff8f8;
-  --color-success: #00c023;
-  --color-logo-hover: #f9392a;
+  --color-error: var(--palette-red);
+  --color-error-surface: var(--palette-red-soft);
+  --color-success: var(--palette-green);
+  --color-logo-hover: var(--palette-brand-hot);
 
-  /* Цвета: служебные (overlay, обводки, границы) */
+  /* Цвета: границы и фокус */
+  --color-border: var(--palette-gray-100);
+  --color-border-subtle: rgba(36, 36, 38, 0.12);
   --color-overlay: rgba(36, 36, 38, 0.45);
   --color-focus-ring: rgba(36, 36, 38, 0.35);
   --color-focus-ring-on-accent: rgba(255, 255, 255, 0.55);
-  --color-border-subtle: rgba(36, 36, 38, 0.12);
   --color-error-border: rgba(200, 60, 60, 0.45);
   --color-error-border-strong: rgba(200, 60, 60, 0.55);
+
+  /* Типографика */
+  --font-family: var(--font-montserrat);
+  --font-family-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-md: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 22px;
+  --font-size-2xl: 28px;
+
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.3;
+  --line-height-normal: 1.4;
+  --line-height-relaxed: 1.6;
+  --line-height-loose: 1.7;
+
+  /* Отступы (4px-сетка) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Скругления */
+  --radius-xs: 8px;
+  --radius-sm: 2px;
+  --radius-md: 16px;
+  --radius-lg: 40px;
+  --radius-pill: 500px;
 
   /* Тени */
   --shadow-card: 0 16px 48px rgba(0, 0, 0, 0.2);
   --shadow-modal: 0 24px 80px rgba(36, 36, 38, 0.18);
   --shadow-sheet: 0 -12px 48px rgba(36, 36, 38, 0.14);
 
-  /* Скругления */
-  --radius-sm: 2px;
-  --radius-md: 16px;
-  --radius-lg: 40px;
-  --radius-pill: 500px;
+  /* Движение */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 120ms;
+  --duration-normal: 320ms;
+  --duration-slow: 450ms;
 
-  /* Отступы */
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-6: 24px;
-  --space-8: 32px;
+  /* Слои */
+  --z-base: 1;
+  --z-sticky: 50;
+  --z-modal: 200;
+  --z-toast: 300;
 
-  /* Алиас для совместимости: общий отступ десктопных блоков */
+  /* Брейкпоинты (для документации; в @media — литералы) */
+  --breakpoint-min-desktop: 768px;
+  --breakpoint-controls-stack: 640px;
+
+  /* Размеры контрольной панели / iframe-shell */
+  --shell-padding: var(--space-4);
+  --shell-gap: var(--space-2);
+  --control-bar-height: 55px;
+  --control-bar-padding-x: var(--space-3);
+  --control-avatar-size: 36px;
+  --control-avatar-radius: var(--radius-xs);
+  --control-person-gap: 10px;
+  --control-name-font-size: var(--font-size-base);
+  --control-name-font-weight: var(--font-weight-regular);
+  --control-name-color: var(--color-black);
+  --control-timer-font-size: var(--font-size-base);
+  --control-timer-font-weight: var(--font-weight-regular);
+  --control-timer-color: var(--color-black);
+  --control-btn-height: 36px;
+  --control-btn-padding-x: 14px;
+  --control-btn-radius: var(--radius-xs);
+  --control-icon-btn-size: 32px;
+  --control-icon-btn-padding: 7px;
+  --control-icon-size: 18px;
+  --control-mobile-name-max-width: 220px;
+  --frame-border-color: var(--color-border);
+  --frame-bg: var(--color-surface-muted);
+  --frame-blur: 12px;
+  --frame-locked-overlay: color-mix(
+    in srgb,
+    var(--color-surface-muted) 72%,
+    transparent
+  );
+  --shell-review-gap: var(--space-2);
+  --shell-review-radius: var(--radius-md);
+  --shell-review-width: 50%;
+  --shell-review-duration: 1100ms;
+  --shell-review-ease: cubic-bezier(0.33, 1, 0.68, 1);
+  --shell-review-panel-delay: 160ms;
+  --shell-review-padding: var(--space-5);
+  --shell-review-section-gap: var(--space-6);
+  --shell-review-field-gap: var(--space-3);
+  --shell-review-option-gap: var(--space-2);
+  --shell-review-scale-gap: var(--space-1);
+  --shell-review-option-padding-y: var(--space-2);
+  --shell-review-option-padding-x: var(--space-3);
+  --shell-review-option-radius: var(--radius-xs);
+  --shell-review-input-height: 40px;
+  --shell-review-submit-height: 40px;
+  --shell-review-section-padding: var(--space-6);
+  --shell-review-section-radius: var(--radius-md);
+  --shell-review-control-height: 75px;
+  --shell-review-control-padding-x: var(--space-6);
+  --shell-review-control-padding-y: var(--space-6);
+  --shell-review-control-font-size: var(--font-size-base);
+  --shell-review-control-font-weight: var(--font-weight-medium);
+  --shell-review-control-line-height: var(--line-height-loose);
+  --shell-review-control-bg: var(--color-surface-muted);
+  --shell-review-control-text: var(--color-text-muted);
+  --shell-review-control-active-bg: var(--color-accent);
+  --shell-review-control-active-text: var(--color-on-accent);
+  --shell-review-scale-size: 40px;
+  --shell-review-scale-padding-x: var(--space-3);
+  --shell-review-scale-font-size: var(--font-size-md);
+  --shell-review-submit-bg: var(--color-accent);
+  --shell-review-submit-text: var(--color-on-accent);
+  --shell-review-submit-hover-bg: var(--color-accent-hover);
+  --shell-review-submit-hover-text: var(--color-on-accent-hover);
+  --shell-review-submit-active-bg: var(--color-accent-active);
+  --shell-review-submit-active-text: var(--color-on-accent-active);
+  --shell-review-progress-height: 6px;
+  --shell-review-progress-radius: var(--radius-pill);
+  --shell-review-progress-track: var(--color-surface);
+  --shell-review-progress-fill: var(--color-accent);
+  --url-modal-width: 480px;
+  --url-modal-padding: var(--space-8);
+  --url-modal-input-height: 56px;
+  --url-modal-btn-height: 56px;
+
+  /* Совместимость со старыми стилями */
   --desktop-component-padding: var(--space-4);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Тема: тёмная (заготовка — переопределяйте семантику, не компоненты)        */
+/* -------------------------------------------------------------------------- */
+
+[data-theme="dark"] {
+  --color-bg: #121214;
+  --color-surface: #1a1a1d;
+  --color-surface-muted: #242428;
+  --color-surface-muted-hover: #2c2c31;
+  --color-surface-muted-active: #333339;
+
+  --color-text: #e8e8ea;
+  --color-text-strong: #ffffff;
+  --color-text-muted: #a0a0a6;
+  --color-text-subtle: #7a7a80;
+  --color-black: #ffffff;
+
+  --color-accent: #e8e8ea;
+  --color-accent-hover: #ffffff;
+  --color-accent-active: #d0d0d4;
+  --color-on-accent: #121214;
+  --color-on-accent-hover: #1a1a1d;
+  --color-on-accent-active: #242428;
+
+  --color-border: #2c2c31;
+  --color-border-subtle: rgba(255, 255, 255, 0.12);
+  --color-overlay: rgba(0, 0, 0, 0.55);
+  --color-focus-ring: rgba(255, 255, 255, 0.35);
+  --color-focus-ring-on-accent: rgba(0, 0, 0, 0.45);
+
+  --shadow-card: 0 16px 48px rgba(0, 0, 0, 0.45);
+  --shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.5);
+  --shadow-sheet: 0 -12px 48px rgba(0, 0, 0, 0.4);
+
+  --frame-border-color: var(--color-border);
 }

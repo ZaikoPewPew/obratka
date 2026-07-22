@@ -1,76 +1,156 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>Memento — waitlist</title>
+    <title>Обратка</title>
     <link rel="icon" href="/assets/svg/favicon.svg" type="image/svg+xml" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;1,400&display=swap"
-      rel="stylesheet"
-    />
     <link rel="stylesheet" href="/styles/tokens.css" />
     <link rel="stylesheet" href="/styles/base.css" />
-    <link rel="stylesheet" href="/styles/entrance.css" />
-    <link rel="stylesheet" href="/styles/desktop.css" />
-    <link rel="stylesheet" href="/styles/apply.css" />
-    <link rel="stylesheet" href="/styles/access-modal.css" />
-    <link rel="stylesheet" href="/styles/privacy-policy-panel.css" />
-    <link rel="stylesheet" href="/styles/notification.css" />
-    <link rel="stylesheet" href="/styles/mobile.css" />
+    <link rel="stylesheet" href="/styles/iframe-shell.css" />
   </head>
   <body>
-    <!-- Десктопный лейаут (показывается от 768px). -->
-    <div class="layout-desktop" aria-hidden="false">
-      <main class="desktop-root">
-        <header class="desktop-top">
-          <div
-            data-mount="logo"
-            data-width="47"
-            data-height="24"
-            data-logo-class="desktop-logo"
-          ></div>
-          <div class="desktop-top__right">
-            <div data-mount="header-actions"></div>
-          </div>
-        </header>
-
-        <div class="desktop-center">
-          <div data-mount="apply-card"></div>
+    <main class="iframe-shell">
+      <header
+        class="iframe-shell__controls"
+        data-i18n-aria="controlsAria"
+        aria-label="Управление айфреймом"
+      >
+        <div class="iframe-shell__actions">
+          <button
+            type="button"
+            class="iframe-shell__btn iframe-shell__btn--icon"
+            data-action="frame-back"
+            data-i18n-aria="frameBackButton"
+            data-i18n-title="frameBackButtonTitle"
+            title="Назад"
+          >
+            <svg
+              class="iframe-shell__btn-icon"
+              width="18"
+              height="18"
+              viewBox="0 0 18 18"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M8.25 13.5L3.75 9L8.25 4.5M3.75 9H14.25"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="iframe-shell__btn iframe-shell__btn--icon"
+            data-action="frame-forward"
+            data-i18n-aria="frameForwardButton"
+            data-i18n-title="frameForwardButtonTitle"
+            title="Вперёд"
+          >
+            <svg
+              class="iframe-shell__btn-icon"
+              width="18"
+              height="18"
+              viewBox="0 0 18 18"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M9.75 13.5L14.25 9L9.75 4.5M14.25 9H3.75"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="iframe-shell__btn iframe-shell__btn--icon"
+            data-action="reload-frame"
+            data-i18n-aria="reloadFrameButton"
+            data-i18n-title="reloadFrameButtonTitle"
+            title="Обновить фрейм"
+          >
+            <svg
+              class="iframe-shell__btn-icon"
+              width="18"
+              height="18"
+              viewBox="0 0 18 18"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M15.7383 4.5V7.5H12.75M15.7383 7.5L13.2426 4.75736C10.8995 2.41421 7.1005 2.41421 4.75736 4.75736C2.41421 7.1005 2.41421 10.8995 4.75736 13.2426C7.1005 15.5858 10.8995 15.5858 13.2426 13.2426C13.8305 12.6547 14.2709 11.9752 14.5638 11.25"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
         </div>
-        <div data-mount="site-footer"></div>
-      </main>
-    </div>
 
-    <!-- Мобильный лейаут (показывается до 767px). -->
-    <div class="layout-mobile" aria-hidden="true">
-      <main class="mobile-root">
-        <header class="mobile-top">
-          <div data-mount="header-actions" data-header-variant="mobile"></div>
-        </header>
+        <div
+          class="iframe-shell__timer"
+          role="timer"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <span class="iframe-shell__timer-value" data-timer>00:00:00</span>
+        </div>
 
-        <section class="mobile-hero">
-          <div
-            data-mount="logo"
-            data-width="57"
-            data-height="29"
-            data-logo-class="mobile-logo"
-          ></div>
-          <div data-mount="apply-hero"></div>
+        <div class="iframe-shell__person">
+          <span
+            class="iframe-shell__name"
+            data-portfolio-name
+            data-i18n="brandName"
+          >Обратка</span>
+          <img
+            class="iframe-shell__avatar iframe-shell__avatar--brand"
+            data-portfolio-avatar
+            data-i18n-aria="brandLogoAlt"
+            alt="Обратка"
+            width="36"
+            height="36"
+          />
+        </div>
+      </header>
+
+      <div class="iframe-shell__workspace" data-workspace>
+        <section
+          class="iframe-shell__frame"
+          data-i18n-aria="frameAria"
+          aria-label="Портфолио"
+          data-frame
+        >
+          <iframe
+            id="portfolio-frame"
+            class="iframe-shell__iframe"
+            src="about:blank"
+            title="Портфолио"
+            loading="eager"
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
         </section>
 
-        <section class="mobile-bottom">
-          <div data-mount="apply-form"></div>
-        </section>
-      </main>
-    </div>
+        <aside
+          class="iframe-shell__review"
+          data-review
+          data-i18n-aria="reviewPanelAria"
+          aria-label="Опросник ревью"
+          aria-labelledby="review-panel-title"
+          aria-hidden="true"
+        ></aside>
+      </div>
+    </main>
 
-    <!-- Точка входа приложения: монтирует все интерактивные компоненты. -->
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

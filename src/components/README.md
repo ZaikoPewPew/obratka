@@ -13,5 +13,7 @@
 - `logo/Logo.js` — рендер логотипа с параметрами размера/классов.
 - `notification/Notification.js` — всплывающие уведомления успеха/ошибки.
 - `privacy-policy/PrivacyPolicyPanel.js` — панель политики конфиденциальности.
+- `review-panel/ReviewPanel.js` — опросник ревью после истечения таймера.
+- `url-modal/UrlModal.js` — модалка ввода ссылки на портфолио.
 - `timer/Timer.js` — таймер обратного отсчёта.
 - `waitlist-counter/WaitlistCounter.js` — счётчик подписчиков waitlist.
