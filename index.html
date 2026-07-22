@@ -138,6 +138,27 @@
             loading="eager"
             referrerpolicy="no-referrer-when-downgrade"
           ></iframe>
+
+          <div
+            class="iframe-shell__external"
+            data-external-viewer
+            hidden
+            aria-hidden="true"
+          >
+            <div class="iframe-shell__external-card">
+              <p
+                class="iframe-shell__external-title"
+                data-i18n="embedBlockedTitle"
+              >Этот сайт нельзя показать во фрейме</p>
+              <p class="iframe-shell__external-body" data-external-body></p>
+              <button
+                type="button"
+                class="iframe-shell__external-open"
+                data-action="open-external"
+                data-i18n="embedBlockedOpen"
+              >Открыть портфолио</button>
+            </div>
+          </div>
         </section>
 
         <aside

@@ -8,5 +8,6 @@
 - `emailValidation.js` — валидация и нормализация email.
 - `foundersCountDisplay.js` — обновление отображаемого числа подписчиков/основателей.
 - `portfolioMeta.js` — нормализация URL портфолио, favicon и подтягивание названия.
+- `portfolioEmbed.js` — стратегия показа URL: Figma/YouTube embed, iframe или внешняя вкладка.
 - `reviewReport.js` — сводка ответов ревью → тексты трактовок для PDF.
 - `shareReviewPdf.js` — печатный документ отчёта (сохранение как PDF).

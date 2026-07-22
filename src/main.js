@@ -15,6 +15,9 @@ import {
 } from "./i18n.js";
 import { createReviewPanel } from "./components/review-panel/ReviewPanel.js";
 import { createUrlModal } from "./components/url-modal/UrlModal.js";
+import {
+  resolvePortfolioEmbed,
+} from "./utils/portfolioEmbed.js";
 import { resolvePortfolioMeta } from "./utils/portfolioMeta.js";
 import brandLogoUrl from "./assets/brand/logo.svg";
 
@@ -25,6 +28,9 @@ const TIMER_TICK_MS = 10;
 const workspace = document.querySelector("[data-workspace]");
 const frameWrap = document.querySelector("[data-frame]");
 const frame = document.querySelector("#portfolio-frame");
+const externalViewer = document.querySelector("[data-external-viewer]");
+const externalBodyEl = document.querySelector("[data-external-body]");
+const openExternalBtn = document.querySelector('[data-action="open-external"]');
 const timerEl = document.querySelector("[data-timer]");
 const avatarEl = document.querySelector("[data-portfolio-avatar]");
 const nameEl = document.querySelector("[data-portfolio-name]");
@@ -35,6 +41,8 @@ const frameForwardBtn = document.querySelector('[data-action="frame-forward"]');
 
 /** @type {string | null} */
 let portfolioUrl = null;
+/** @type {import("./utils/portfolioEmbed.js").PortfolioEmbedPlan | null} */
+let embedPlan = null;
 /** @type {string} */
 let portfolioName = getStrings().brandName;
 
@@ -71,6 +79,49 @@ function syncLocaleDependentAttrs() {
   if (frame) {
     frame.title = formatString(t.iframeTitle, { name: portfolioName });
   }
+
+  if (externalBodyEl && embedPlan?.mode === "external") {
+    externalBodyEl.textContent = formatString(t.embedBlockedBody, {
+      host: embedPlan.hostLabel,
+    });
+  }
+}
+
+function openPortfolioExternally() {
+  if (!embedPlan?.openUrl) return;
+  window.open(embedPlan.openUrl, "_blank", "noopener,noreferrer");
+}
+
+/**
+ * @param {import("./utils/portfolioEmbed.js").PortfolioEmbedPlan} plan
+ */
+function applyEmbedPlan(plan) {
+  embedPlan = plan;
+
+  if (!frame || !frameWrap || !externalViewer) return;
+
+  const isExternal = plan.mode === "external";
+  frameWrap.classList.toggle("iframe-shell__frame--external", isExternal);
+  externalViewer.hidden = !isExternal;
+  externalViewer.setAttribute("aria-hidden", isExternal ? "false" : "true");
+
+  if (isExternal) {
+    frame.removeAttribute("allow");
+    frame.removeAttribute("allowfullscreen");
+    frame.src = "about:blank";
+    syncLocaleDependentAttrs();
+    return;
+  }
+
+  if (plan.allowFullscreen) {
+    frame.setAttribute("allow", "fullscreen");
+    frame.setAttribute("allowfullscreen", "");
+  } else {
+    frame.removeAttribute("allow");
+    frame.removeAttribute("allowfullscreen");
+  }
+
+  frame.src = plan.frameSrc || "about:blank";
 }
 
 function showBrandChrome() {
@@ -127,12 +178,19 @@ function setPortfolioAvatar(primary, fallbacks = []) {
   tryNext();
 }
 
-async function applyPortfolio(url) {
+/**
+ * @param {string} url
+ * @param {{ openExternal?: boolean }} [options]
+ */
+async function applyPortfolio(url, options = {}) {
   portfolioUrl = url;
   const requestId = ++metaRequestId;
+  const plan = resolvePortfolioEmbed(url);
 
-  if (frame) {
-    frame.src = url;
+  applyEmbedPlan(plan);
+
+  if (options.openExternal && plan.mode === "external") {
+    openPortfolioExternally();
   }
 
   const meta = await resolvePortfolioMeta(url);
@@ -197,26 +255,39 @@ function startTimer() {
 }
 
 function navigateFrame(action) {
-  if (!frame || !portfolioUrl) return;
+  if (!frame || !portfolioUrl || !embedPlan) return;
+
+  if (embedPlan.mode === "external") {
+    openPortfolioExternally();
+    return;
+  }
 
   try {
     action(frame.contentWindow);
   } catch {
-    frame.src = portfolioUrl;
+    frame.src = embedPlan.frameSrc || portfolioUrl;
   }
 }
 
 const urlModal = createUrlModal({
   onSubmit: async (url) => {
     closeReview();
-    await applyPortfolio(url);
+    await applyPortfolio(url, { openExternal: true });
     startTimer();
   },
 });
 
 document.body.append(urlModal.backdrop);
 
+openExternalBtn?.addEventListener("click", () => {
+  openPortfolioExternally();
+});
+
 frameReloadBtn?.addEventListener("click", () => {
+  if (embedPlan?.mode === "external") {
+    openPortfolioExternally();
+    return;
+  }
   navigateFrame((win) => win?.location.reload());
 });
 

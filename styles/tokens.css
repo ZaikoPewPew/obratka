@@ -165,6 +165,13 @@
   --frame-border-color: var(--color-border);
   --frame-bg: var(--color-surface-muted);
   --frame-blur: 12px;
+  --frame-external-max-width: 420px;
+  --frame-external-gap: var(--space-4);
+  --frame-external-padding: var(--space-8);
+  --frame-external-title-size: var(--font-size-lg);
+  --frame-external-body-size: var(--font-size-md);
+  --frame-external-btn-height: 48px;
+  --frame-external-btn-padding-x: var(--space-6);
   --frame-locked-overlay: color-mix(
     in srgb,
     var(--color-surface-muted) 72%,
