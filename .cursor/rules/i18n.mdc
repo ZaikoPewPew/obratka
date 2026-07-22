@@ -1,0 +1,34 @@
+---
+description: i18n — весь UI через content/locales.json (ru/en, расширяемо)
+alwaysApply: true
+---
+
+# Локализация (i18n)
+
+Источник правды: `content/locales.json`. API: `src/i18n.js`.
+
+## Языки
+
+- Сейчас: `ru` (default), `en`.
+- Новый язык: добавить код в `supportedLocales` + полный блок ключей в `locales`, имя в `LOCALE_NATIVE_NAMES`.
+- Переключение: `?lang=`, `localStorage` (`obratka.locale`), кнопка `data-action="lang"`.
+
+## Жёсткое правило
+
+Весь **видимый интерфейс сайта** (кнопки, aria-label, title, модалки, `document.title`) — только через строки локалей:
+
+- в разметке: `data-i18n`, `data-i18n-aria`, `data-i18n-title` + вызов `applyDocumentI18n()`;
+- динамический текст: `getStrings()` / `formatString()`;
+- запрещён хардкод UI-строк в JS/CSS без ключа в `locales.json` (имена людей/URL портфолио — данные, не UI-copy).
+
+## Добавление ключа
+
+1. Ключ в `ru` и `en` (и во всех `supportedLocales`).
+2. Разметка или `formatString(t.key, vars)`.
+3. Не оставлять язык «наполовину» переведённым.
+
+## Пример
+
+```html
+<button data-i18n="notesButton" data-i18n-title="notesButtonTitle">Заметки</button>
+```

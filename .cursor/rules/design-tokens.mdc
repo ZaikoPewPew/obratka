@@ -1,0 +1,41 @@
+---
+description: Дизайн-токены — все UI-сущности только через tokens.css, темы через data-theme
+alwaysApply: true
+---
+
+# Дизайн-токены (обязательно)
+
+Источник правды: `styles/tokens.css`. Единственный UI-шрифт: **Montserrat** (`--font-family`).
+
+## Слои
+
+1. **Примитивы** (`--palette-*`, `--font-montserrat`) — сырые значения. Не использовать в компонентах.
+2. **Семантика** (`--color-*`, `--space-*`, `--font-*`, `--radius-*`, …) — только их в UI.
+3. **Тема** — `[data-theme="…"]` в `tokens.css`, без правок компонентных CSS.
+
+## Жёсткое правило
+
+Любая **новая или существующая** сущность (кнопка, панель, модалка, текст, отступ, цвет, радиус, тень, z-index, размер контрола) должна быть **полностью на токенах**:
+
+- сначала токен в `styles/tokens.css`;
+- в `styles/*.css` / инлайне — только `var(--…)`;
+- запрещены сырые `#hex`, `rgba(…)`, «магические» `px`/`rem` в компонентах (исключение: литералы в `@media` брейкпоинтах; one-off сразу выносится в токен);
+- не добавлять другие шрифты в стек UI — только Montserrat.
+
+## Оболочка
+
+`--control-*`, `--shell-*`, `--frame-*`, `--recall-*`. Аватар и кнопка «Заметки»: `--radius-xs` (= 8px).
+
+## Примеры
+
+```css
+/* ❌ */
+.btn { background: #f3f4f7; border-radius: 8px; font-family: system-ui; }
+
+/* ✅ */
+.btn {
+  background: var(--color-surface-muted);
+  border-radius: var(--control-btn-radius);
+  font-family: var(--font-family);
+}
+```

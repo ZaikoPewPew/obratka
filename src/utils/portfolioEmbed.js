@@ -1,54 +1,18 @@
 /**
  * Как показать портфолио: iframe, Figma/YouTube embed или внешняя вкладка.
- * Сайты с X-Frame-Options / CSP frame-ancestors нельзя «прокинуть» во фрейм.
+ * Каталог хостов: embedHosts.js / content/embed-hosts.md
  */
+
+import { findExternalEmbedHost } from "./embedHosts.js";
+
+export {
+  findExternalEmbedHost,
+  hostMatchesSuffix,
+  isKnownExternalOnlyHost,
+  EXTERNAL_EMBED_HOSTS,
+} from "./embedHosts.js";
 
 const FIGMA_EMBED_HOST = "obratka";
-
-/** Хосты, которые стабильно запрещают встраивание в чужой iframe. */
-const EXTERNAL_HOST_SUFFIXES = [
-  "behance.net",
-  "dribbble.com",
-  "linkedin.com",
-  "instagram.com",
-  "facebook.com",
-  "fb.com",
-  "twitter.com",
-  "x.com",
-  "pinterest.com",
-  "medium.com",
-  "notion.so",
-  "notion.site",
-  "docs.google.com",
-  "drive.google.com",
-  "sheets.google.com",
-  "slides.google.com",
-  "miro.com",
-  "whimsical.com",
-  "adobe.com",
-  "portfolio.adobe.com",
-];
-
-/**
- * @param {string} hostname
- * @param {string} suffix
- * @returns {boolean}
- */
-function hostMatchesSuffix(hostname, suffix) {
-  const host = hostname.replace(/^www\./i, "").toLowerCase();
-  const needle = suffix.replace(/^www\./i, "").toLowerCase();
-  return host === needle || host.endsWith(`.${needle}`);
-}
-
-/**
- * @param {string} hostname
- * @returns {boolean}
- */
-export function isKnownExternalOnlyHost(hostname) {
-  return EXTERNAL_HOST_SUFFIXES.some((suffix) =>
-    hostMatchesSuffix(hostname, suffix),
-  );
-}
 
 /**
  * @param {URLSearchParams} from
@@ -128,7 +92,9 @@ export function toYouTubeEmbedUrl(href) {
     if (url.pathname === "/watch") {
       videoId = url.searchParams.get("v");
     } else {
-      const embedMatch = url.pathname.match(/^\/(?:embed|shorts|live)\/([^/]+)/i);
+      const embedMatch = url.pathname.match(
+        /^\/(?:embed|shorts|live)\/([^/]+)/i,
+      );
       if (embedMatch) videoId = embedMatch[1];
     }
   }
@@ -155,7 +121,7 @@ export function toYouTubeEmbedUrl(href) {
  */
 export function resolvePortfolioEmbed(portfolioUrl) {
   const url = new URL(portfolioUrl);
-  const hostLabel = url.hostname.replace(/^www\./i, "");
+  const hostnameLabel = url.hostname.replace(/^www\./i, "");
 
   const figmaEmbed = toFigmaEmbedUrl(portfolioUrl);
   if (figmaEmbed) {
@@ -164,7 +130,7 @@ export function resolvePortfolioEmbed(portfolioUrl) {
       openUrl: portfolioUrl,
       frameSrc: figmaEmbed,
       allowFullscreen: true,
-      hostLabel,
+      hostLabel: "Figma",
     };
   }
 
@@ -175,17 +141,18 @@ export function resolvePortfolioEmbed(portfolioUrl) {
       openUrl: portfolioUrl,
       frameSrc: youtubeEmbed,
       allowFullscreen: true,
-      hostLabel,
+      hostLabel: "YouTube",
     };
   }
 
-  if (isKnownExternalOnlyHost(url.hostname)) {
+  const external = findExternalEmbedHost(url.hostname);
+  if (external) {
     return {
       mode: "external",
       openUrl: portfolioUrl,
       frameSrc: null,
       allowFullscreen: false,
-      hostLabel,
+      hostLabel: external.label,
     };
   }
 
@@ -194,6 +161,6 @@ export function resolvePortfolioEmbed(portfolioUrl) {
     openUrl: portfolioUrl,
     frameSrc: portfolioUrl,
     allowFullscreen: false,
-    hostLabel,
+    hostLabel: hostnameLabel,
   };
 }

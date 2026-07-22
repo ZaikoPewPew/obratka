@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "steps": [
+    {
+      "id": "role",
+      "type": "single",
+      "required": true,
+      "labelKey": "onboardingStepRoleLabel",
+      "options": [
+        {
+          "value": "product-designer",
+          "labelKey": "onboardingStepRoleProduct"
+        },
+        {
+          "value": "visual-designer",
+          "labelKey": "onboardingStepRoleVisual"
+        },
+        {
+          "value": "other",
+          "labelKey": "onboardingStepRoleOther"
+        }
+      ]
+    },
+    {
+      "id": "goal",
+      "type": "single",
+      "required": true,
+      "labelKey": "onboardingStepGoalLabel",
+      "options": [
+        {
+          "value": "give-reviews",
+          "labelKey": "onboardingStepGoalGive"
+        },
+        {
+          "value": "get-reviews",
+          "labelKey": "onboardingStepGoalGet"
+        },
+        {
+          "value": "both",
+          "labelKey": "onboardingStepGoalBoth"
+        }
+      ]
+    }
+  ]
+}

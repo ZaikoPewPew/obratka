@@ -63,17 +63,18 @@
 | Путь | Назначение |
 |------|------------|
 | `README.md` | Быстрый старт и ссылки на документацию |
+| `SCREENS.md` | Архитектура продуктовых экранов (referral → home) |
 | `mobile.md` | Спецификация мобильного UI (отступы 16px, типографика, форма) |
-| `index.html` | Два лейаута, слоты `data-mount`, подключение CSS/JS |
+| `index.html` | Оболочка iframe-сессии, слоты `data-*`, подключение CSS/JS |
 | `styles/tokens.css` | Единый источник дизайн-токенов |
 | `styles/base.css` | Сброс, футер |
-| `styles/desktop.css` | Десктопный лейаут |
-| `styles/mobile.css` | Мобильный лейаут и переопределения |
-| `styles/apply.css` | Карточка заявки |
-| `src/main.js` | Монтирование компонентов, i18n, отправка формы |
-| `src/config.js` | Общие константы (отображаемое число счётчика) |
+| `styles/iframe-shell.css` | Оболочка сессии + url-screen |
+| `src/main.js` | Точка входа (сессия + url-screen; app-флоу — позже) |
+| `src/app/` | Флоу экранов и сессия пользователя (каркас) |
+| `src/config.js` | Общие константы |
 | `src/i18n.js`, `content/locales.json` | Локализация |
-| `src/api/subscribers.js` | Сохранение подписчика в Supabase |
+| `content/onboarding.json` | Шаги онбординга |
+| `src/api/` | Supabase + stubs auth/referrals/portfolios |
 | `vite.config.js` | Сборка Vite, префиксы env для Supabase |
 
 ## Что можно допилить без кода

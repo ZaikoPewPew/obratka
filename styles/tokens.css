@@ -33,6 +33,14 @@
   --palette-red-soft: #fff8f8;
   --palette-green: #00c023;
   --palette-brand-hot: #f9392a;
+  --palette-glow-blue: #8bb5ff;
+  --palette-glow-cyan: #e1fbff;
+  --palette-glow-azure: #0094ff;
+  --palette-glow-peach: #fdeeee;
+  --palette-glow-lilac: #f0ebff;
+  --palette-glow-mist: #e8f4ff;
+  --palette-glow-sky: #d7ebff;
+  --palette-notion-amber: #ffad00;
 
   /* Шрифтовые семейства (сырьё). Единственный UI-шрифт — Montserrat (self-host @fontsource). */
   --font-montserrat: "Montserrat", sans-serif;
@@ -95,6 +103,7 @@
   --font-size-lg: 18px;
   --font-size-xl: 22px;
   --font-size-2xl: 28px;
+  --font-size-3xl: 32px;
 
   --line-height-tight: 1.2;
   --line-height-snug: 1.3;
@@ -117,6 +126,7 @@
   --radius-xs: 8px;
   --radius-sm: 2px;
   --radius-md: 16px;
+  --radius-xl: 24px;
   --radius-lg: 40px;
   --radius-pill: 500px;
 
@@ -152,6 +162,8 @@
   --control-name-font-size: var(--font-size-base);
   --control-name-font-weight: var(--font-weight-regular);
   --control-name-color: var(--color-black);
+  /* Не подходить вплотную к таймеру; одна строка + ellipsis */
+  --control-name-max-width: 200px;
   --control-timer-font-size: var(--font-size-base);
   --control-timer-font-weight: var(--font-weight-regular);
   --control-timer-color: var(--color-black);
@@ -161,7 +173,7 @@
   --control-icon-btn-size: 32px;
   --control-icon-btn-padding: 7px;
   --control-icon-size: 18px;
-  --control-mobile-name-max-width: 220px;
+  --control-mobile-name-max-width: 160px;
   --frame-border-color: var(--color-border);
   --frame-bg: var(--color-surface-muted);
   --frame-blur: 12px;
@@ -218,10 +230,66 @@
   --shell-review-progress-radius: var(--radius-pill);
   --shell-review-progress-track: var(--color-surface);
   --shell-review-progress-fill: var(--color-accent);
-  --url-modal-width: 480px;
-  --url-modal-padding: var(--space-8);
-  --url-modal-input-height: 56px;
-  --url-modal-btn-height: 56px;
+
+  /* Экран ввода ссылки (Figma 408:2133) */
+  --url-screen-padding: var(--space-4);
+  --url-screen-gap: var(--space-4);
+  --url-screen-transition-duration: 520ms;
+  --url-screen-transition-ease: var(--ease-out);
+  --url-screen-exit-shift: 10px;
+  /* Появление элементов при open (stagger) */
+  --url-screen-reveal-duration: 720ms;
+  --url-screen-reveal-ease: var(--ease-out);
+  --url-screen-reveal-shift: 18px;
+  --url-screen-reveal-blur: 8px;
+  --url-screen-reveal-delay-visual: 40ms;
+  --url-screen-reveal-delay-title: 90ms;
+  --url-screen-reveal-delay-field: 170ms;
+  --url-screen-reveal-delay-platforms: 250ms;
+  --url-screen-reveal-delay-brand: 320ms;
+  --url-screen-reveal-avatar-stagger: 45ms;
+  --shell-enter-duration: 560ms;
+  --shell-enter-ease: var(--ease-out);
+  --shell-enter-shift: 8px;
+  --url-screen-form-width: 500px;
+  --url-screen-form-gap: var(--space-6);
+  --url-screen-field-gap: var(--space-4);
+  --url-screen-title-size: var(--font-size-3xl);
+  --url-screen-title-weight: var(--font-weight-regular);
+  --url-screen-input-height: 75px;
+  --url-screen-input-padding-x: var(--space-6);
+  --url-screen-input-radius: var(--radius-md);
+  --url-screen-input-icon-size: 24px;
+  --url-screen-platforms-gap: var(--space-2);
+  --url-screen-avatar-size: 32px;
+  --url-screen-avatar-radius: var(--radius-md);
+  --url-screen-avatar-fill: var(--color-surface-muted);
+  --url-screen-avatar-ring: var(--color-bg);
+  --url-screen-avatar-stroke: 4px;
+  --url-screen-avatar-overlap: 5px;
+  --url-screen-avatar-stack-width: 113px;
+  --url-screen-avatar-logo-size: calc(var(--url-screen-avatar-size) / 1.5);
+  --url-screen-avatar-framer-bg: var(--palette-black);
+  --url-screen-avatar-notion-bg: var(--palette-notion-amber);
+  --url-screen-brand-width: 44px;
+  --url-screen-brand-height: 30px;
+  --url-screen-brand-fill: var(--palette-white);
+  --url-screen-noise-color: var(--palette-gray-100);
+  --url-screen-noise-opacity: 1;
+  --url-screen-noise-size: 256px;
+  --url-screen-visual-mobile-min-height: 180px;
+  --url-screen-visual-radius: var(--radius-xl);
+  /* Mesh wash (Paper Shaders): цвета и параметры читаются из токенов */
+  --url-screen-mesh-1: var(--palette-glow-peach);
+  --url-screen-mesh-2: var(--palette-glow-lilac);
+  --url-screen-mesh-3: var(--palette-glow-sky);
+  --url-screen-mesh-4: var(--palette-glow-blue);
+  --url-screen-mesh-distortion: 0.8;
+  --url-screen-mesh-swirl: 0.2;
+  --url-screen-mesh-grain-mixer: 0.15;
+  --url-screen-mesh-grain-overlay: 0.08;
+  --url-screen-mesh-speed: 0.25;
+  --url-screen-visual-wash: var(--palette-glow-mist);
 
   /* Совместимость со старыми стилями */
   --desktop-component-padding: var(--space-4);
@@ -262,4 +330,10 @@
   --shadow-sheet: 0 -12px 48px rgba(0, 0, 0, 0.4);
 
   --frame-border-color: var(--color-border);
+
+  --url-screen-mesh-1: #1a1520;
+  --url-screen-mesh-2: #5b4a8a;
+  --url-screen-mesh-3: #2a4a6e;
+  --url-screen-mesh-4: #8bb5ff;
+  --url-screen-visual-wash: #16141c;
 }

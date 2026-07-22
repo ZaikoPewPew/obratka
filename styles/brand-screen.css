@@ -1,0 +1,10 @@
+/* Brand-screen: общие стили split-экранов (referral / auth / onboarding / url).
+ *
+ * Пока правила живут в styles/iframe-shell.css под .url-screen
+ * (включая staggered reveal --url-screen-reveal-*).
+ * При реализации BrandScreenShell — перенести сюда как .brand-screen
+ * и подключить в index.html. Токены: styles/tokens.css (--url-screen-* →
+ * алиасы --brand-screen-*; reveal тоже).
+ *
+ * См. SCREENS.md и src/components/brand-screen-shell/README.md.
+ */

@@ -14,14 +14,14 @@ import {
   getStrings,
 } from "./i18n.js";
 import { createReviewPanel } from "./components/review-panel/ReviewPanel.js";
-import { createUrlModal } from "./components/url-modal/UrlModal.js";
+import { createUrlScreen } from "./components/url-screen/UrlScreen.js";
 import {
   resolvePortfolioEmbed,
 } from "./utils/portfolioEmbed.js";
 import { resolvePortfolioMeta } from "./utils/portfolioMeta.js";
 import brandLogoUrl from "./assets/brand/logo.svg";
 
-const SESSION_SECONDS = 10;
+const SESSION_SECONDS = 60;
 const SESSION_TOTAL_MS = SESSION_SECONDS * 1000;
 const TIMER_TICK_MS = 10;
 
@@ -173,6 +173,11 @@ function setPortfolioAvatar(primary, fallbacks = []) {
 
   avatarEl.onerror = tryNext;
   avatarEl.onload = () => {
+    // 1×1 / пустые заглушки части CDN — считаем провалом и пробуем следующий кандидат.
+    if (avatarEl.naturalWidth < 8 || avatarEl.naturalHeight < 8) {
+      tryNext();
+      return;
+    }
     avatarEl.classList.remove("iframe-shell__avatar--broken");
   };
   tryNext();
@@ -269,15 +274,32 @@ function navigateFrame(action) {
   }
 }
 
-const urlModal = createUrlModal({
+const shell = document.querySelector(".iframe-shell");
+
+/**
+ * Показать оболочку сессии ревью под уходящим экраном ссылки.
+ */
+function enterSessionShell() {
+  if (!shell) return;
+  shell.hidden = false;
+  shell.classList.remove("iframe-shell--entered");
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      shell.classList.add("iframe-shell--entered");
+    });
+  });
+}
+
+const urlScreen = createUrlScreen({
   onSubmit: async (url) => {
+    enterSessionShell();
     closeReview();
     await applyPortfolio(url, { openExternal: true });
     startTimer();
   },
 });
 
-document.body.append(urlModal.backdrop);
+document.body.append(urlScreen.root);
 
 openExternalBtn?.addEventListener("click", () => {
   openPortfolioExternally();
@@ -302,4 +324,8 @@ frameForwardBtn?.addEventListener("click", () => {
 applyDocumentI18n();
 showBrandChrome();
 renderTimer();
-urlModal.open();
+if (shell) {
+  shell.hidden = true;
+  shell.classList.remove("iframe-shell--entered");
+}
+urlScreen.open();
