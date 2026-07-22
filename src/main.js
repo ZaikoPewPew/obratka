@@ -14,6 +14,7 @@ import {
   getStrings,
 } from "./i18n.js";
 import { createReviewPanel } from "./components/review-panel/ReviewPanel.js";
+import { createReviewScreen } from "./components/review-screen/ReviewScreen.js";
 import { createUrlScreen } from "./components/url-screen/UrlScreen.js";
 import {
   resolvePortfolioEmbed,
@@ -21,11 +22,10 @@ import {
 import { resolvePortfolioMeta } from "./utils/portfolioMeta.js";
 import brandLogoUrl from "./assets/brand/logo.svg";
 
-const SESSION_SECONDS = 60;
+const SESSION_SECONDS = 5;
 const SESSION_TOTAL_MS = SESSION_SECONDS * 1000;
 const TIMER_TICK_MS = 10;
 
-const workspace = document.querySelector("[data-workspace]");
 const frameWrap = document.querySelector("[data-frame]");
 const frame = document.querySelector("#portfolio-frame");
 const externalViewer = document.querySelector("[data-external-viewer]");
@@ -34,7 +34,6 @@ const openExternalBtn = document.querySelector('[data-action="open-external"]');
 const timerEl = document.querySelector("[data-timer]");
 const avatarEl = document.querySelector("[data-portfolio-avatar]");
 const nameEl = document.querySelector("[data-portfolio-name]");
-const reviewMount = document.querySelector("[data-review]");
 const frameReloadBtn = document.querySelector('[data-action="reload-frame"]');
 const frameBackBtn = document.querySelector('[data-action="frame-back"]');
 const frameForwardBtn = document.querySelector('[data-action="frame-forward"]');
@@ -46,16 +45,26 @@ let embedPlan = null;
 /** @type {string} */
 let portfolioName = getStrings().brandName;
 
+/** @type {(done: boolean) => void} */
+let setReviewReportReveal = () => {};
+
 const reviewPanel = createReviewPanel({
   getPortfolioName: () => portfolioName,
+  onDoneChange: (done) => {
+    setReviewReportReveal(done);
+  },
 });
-if (reviewMount) {
-  reviewMount.append(reviewPanel.root);
-}
+const reviewScreen = createReviewScreen({
+  content: reviewPanel.root,
+});
+setReviewReportReveal = reviewScreen.setReportReveal;
+document.body.append(reviewScreen.root);
 
 let remainingMs = SESSION_TOTAL_MS;
 let timerId = null;
 let sessionEnded = false;
+/** Таймер уже запущен в текущей сессии (для external — после кнопки). */
+let sessionStarted = false;
 /** @type {number} */
 let metaRequestId = 0;
 
@@ -204,25 +213,24 @@ async function applyPortfolio(url, options = {}) {
 }
 
 function openReview() {
-  if (!workspace || !frameWrap || !reviewMount) return;
+  if (!frameWrap) return;
 
   frameWrap.classList.add("iframe-shell__frame--locked");
-  workspace.classList.add("iframe-shell__workspace--reviewing");
-  reviewMount.setAttribute("aria-hidden", "false");
+  reviewPanel.reset();
   reviewPanel.open();
+  reviewScreen.open();
 
   window.setTimeout(() => {
     reviewPanel.focus();
   }, 700);
 }
 
-function closeReview() {
-  if (!workspace || !frameWrap || !reviewMount) return;
+async function closeReview() {
+  if (!frameWrap) return;
 
-  workspace.classList.remove("iframe-shell__workspace--reviewing");
   frameWrap.classList.remove("iframe-shell__frame--locked");
-  reviewMount.setAttribute("aria-hidden", "true");
   reviewPanel.close();
+  await reviewScreen.close();
   reviewPanel.reset();
 }
 
@@ -251,12 +259,32 @@ function stopTimer() {
   }
 }
 
+/** Сбросить таймер на полный срок без запуска (ждём кнопку во external). */
+function armSession() {
+  stopTimer();
+  remainingMs = SESSION_TOTAL_MS;
+  sessionEnded = false;
+  sessionStarted = false;
+  renderTimer();
+}
+
 function startTimer() {
   stopTimer();
   remainingMs = SESSION_TOTAL_MS;
   sessionEnded = false;
+  sessionStarted = true;
   renderTimer();
   timerId = window.setInterval(tick, TIMER_TICK_MS);
+}
+
+/**
+ * Кнопка во фрейме: открыть портфолио снаружи и стартовать таймер один раз.
+ */
+function startExternalSession() {
+  openPortfolioExternally();
+  if (!sessionStarted && !sessionEnded) {
+    startTimer();
+  }
 }
 
 function navigateFrame(action) {
@@ -293,8 +321,12 @@ function enterSessionShell() {
 const urlScreen = createUrlScreen({
   onSubmit: async (url) => {
     enterSessionShell();
-    closeReview();
-    await applyPortfolio(url, { openExternal: true });
+    await closeReview();
+    await applyPortfolio(url);
+    if (embedPlan?.mode === "external") {
+      armSession();
+      return;
+    }
     startTimer();
   },
 });
@@ -302,7 +334,7 @@ const urlScreen = createUrlScreen({
 document.body.append(urlScreen.root);
 
 openExternalBtn?.addEventListener("click", () => {
-  openPortfolioExternally();
+  startExternalSession();
 });
 
 frameReloadBtn?.addEventListener("click", () => {

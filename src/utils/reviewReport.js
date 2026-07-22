@@ -4,7 +4,7 @@
  */
 
 /**
- * @typedef {'junior' | 'mid' | 'senior'} Grade
+ * @typedef {'junior' | 'mid' | 'senior' | 'lead' | 'head'} Grade
  * @typedef {'mess' | 'clear'} Structure
  * @typedef {'none' | 'nominal' | 'strong'} Metrics
  * @typedef {'yes' | 'maybe' | 'no'} Hire
@@ -99,6 +99,10 @@ export function buildReportSections(answers, t) {
  */
 function gradeText(grade, t) {
   switch (grade) {
+    case "head":
+      return t.reportGradeHead;
+    case "lead":
+      return t.reportGradeLead;
     case "senior":
       return t.reportGradeSenior;
     case "mid":
@@ -177,7 +181,13 @@ function hireText(hire, t) {
  * @returns {value is Grade}
  */
 function isGrade(value) {
-  return value === "junior" || value === "mid" || value === "senior";
+  return (
+    value === "junior" ||
+    value === "mid" ||
+    value === "senior" ||
+    value === "lead" ||
+    value === "head"
+  );
 }
 
 /**

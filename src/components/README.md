@@ -17,7 +17,8 @@
 ### Сессия ревью (есть)
 
 - `url-screen/UrlScreen.js` — полноэкранный ввод ссылки на портфолио (эталон visual для brand-shell).
-- `review-panel/ReviewPanel.js` — опросник ревью после истечения таймера.
+- `review-screen/ReviewScreen.js` — полноэкранный опросник после таймера (split + report reveal).
+- `review-panel/ReviewPanel.js` — шаги опроса, слайдеры, финал с шарингом PDF.
 
 ### Прочее
 

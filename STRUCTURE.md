@@ -6,7 +6,7 @@
 
 - `README.md` — быстрый старт, переменные окружения, команды запуска.
 - `PROJECT.md` — архитектурное описание проекта и организационные заметки.
-- `SCREENS.md` — **архитектура продуктовых экранов** (referral → auth → onboarding → home) и связь с url/iframe.
+- `SCREENS.md` — **архитектура продуктовых экранов** (referral → auth → onboarding → home) + url / iframe / review.
 - `mobile.md` — детальная спецификация мобильного макета и QA-чеклист.
 - `STRUCTURE.md` — текущий навигационный документ по структуре.
 - `index.html` — HTML-каркас оболочки iframe-сессии.

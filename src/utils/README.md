@@ -12,5 +12,5 @@
 - `portfolioEmbed.js` — стратегия показа URL: Figma/YouTube embed, iframe или внешняя вкладка.
 - `meshGradientWash.js` — WebGL mesh-градиент (Paper Shaders) с палитрой из CSS-токенов.
 - `portfolioEmbed.test.js` / `portfolioMeta.test.js` — фикстуры embed и meta (`npm test`).
-- `reviewReport.js` — сводка ответов ревью → тексты трактовок для PDF.
-- `shareReviewPdf.js` — печатный документ отчёта (сохранение как PDF).
+- `reviewReport.js` — сводка ответов ревью → тексты трактовок для PDF (`grade` включает lead/head).
+- `shareReviewPdf.js` — печатный документ отчёта (сохранение как PDF через print dialog).

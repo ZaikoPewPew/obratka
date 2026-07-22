@@ -23,7 +23,8 @@ referral-screen  →  auth-screen  →  onboarding-screen  →  home-screen
 | 3 | `onboarding-screen` | Вопросы профиля + навигация по шагам |
 | 4 | `home-screen` | Главная: очередь портфолио на ревью |
 | — | `url-screen` | Уже есть: «Ссылка на портфолио» перед сессией |
-| — | `iframe-shell` | Уже есть: таймер + портфолио + опросник |
+| — | `iframe-shell` | Уже есть: таймер + портфолио |
+| — | `review-screen` + `review-panel` | Уже есть: опрос после таймера, финал с PDF |
 
 Вход с `?ref=` может префиллить referral-экран. Повторный визит с сессией пропускает шаги 1–3 и открывает `home-screen` (логика в `src/app/flow.js`).
 
@@ -68,7 +69,12 @@ src/components/
     README.md
     HomeScreen.js
   url-screen/UrlScreen.js           ← эталон (есть)
-  review-panel/…                    ← есть
+  review-screen/                    ← есть: split + report reveal
+    README.md
+    ReviewScreen.js
+  review-panel/                     ← есть: шаги опроса + done
+    README.md
+    ReviewPanel.js
 
 styles/
   brand-screen.css                  ← общие стили split-экранов (вынести из iframe-shell)
@@ -158,6 +164,7 @@ Staggered reveal при `.url-screen--open`: visual → title → field → plat
 | `auth*` | Вход/регистрация, поля, ошибки, CTA |
 | `onboarding*` | Прогресс, next/back, ошибки шага |
 | `home*` | Заголовок очереди, пустое состояние, CTA «добавить» |
+| `review*` / `report*` | Опрос ревью, done-экран, тексты PDF-отчёта |
 
 Контент вопросов онбординга — в `content/onboarding.json` (как структура ревью), не хардкод в JS.
 
@@ -166,7 +173,7 @@ Staggered reveal при `.url-screen--open`: visual → title → field → plat
 - `src/app/flow.js` — какой экран показать, переходы `next` / `back`, skip при наличии сессии/флагов онбординга.
 - `src/app/session.js` — `getSession` / `setSession` / `clearSession` (localStorage или Supabase); stub без реального API.
 
-Пока `main.js` продолжает открывать только `urlScreen`. Подключение флоу — когда готовы экраны 1–4.
+Пока `main.js` открывает `urlScreen` и после таймера — `reviewScreen` / `reviewPanel`. Подключение флоу 1–4 — когда готовы экраны referral → home.
 
 ## API (будущее)
 

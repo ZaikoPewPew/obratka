@@ -7,4 +7,5 @@
 
 Новый язык: код в `supportedLocales` + полный набор ключей в `locales` + имя в `LOCALE_NATIVE_NAMES` (`src/i18n.js`).
 
-Экраны и ключи `referral*` / `auth*` / `onboarding*` / `home*`: [`SCREENS.md`](../SCREENS.md).
+Экраны и ключи `referral*` / `auth*` / `onboarding*` / `home*` / `review*` / `report*`: [`SCREENS.md`](../SCREENS.md).  
+Опрос ревью: [`src/components/review-panel/README.md`](../src/components/review-panel/README.md).
