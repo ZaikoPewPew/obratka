@@ -1576,10 +1576,21 @@ body {
   outline-offset: 2px;
 }
 
-.auth-screen__provider:disabled,
-.auth-screen__provider--busy {
+.auth-screen__provider:disabled:not(.auth-screen__provider--busy) {
   opacity: var(--auth-screen-provider-busy-opacity);
+  cursor: not-allowed;
+}
+
+.auth-screen__provider--busy {
   cursor: wait;
+}
+
+.auth-screen__provider--busy .auth-screen__provider-icon {
+  display: none;
+}
+
+.auth-screen__provider--busy .auth-screen__provider-loader {
+  display: block;
 }
 
 .auth-screen__provider-error {
@@ -1600,6 +1611,32 @@ body {
 .auth-screen__provider-icon--google {
   width: var(--auth-screen-icon-google);
   height: var(--auth-screen-icon-google);
+}
+
+.auth-screen__provider-loader {
+  display: none;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: var(--auth-screen-provider-loader-size);
+  height: var(--auth-screen-provider-loader-size);
+  animation-name: motion-spin;
+  animation-duration: var(--auth-screen-provider-loader-duration);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.auth-screen__provider-loader-track,
+.auth-screen__provider-loader-arc {
+  fill: none;
+  stroke-width: var(--auth-screen-provider-loader-stroke);
+}
+
+.auth-screen__provider-loader-track {
+  stroke: var(--auth-screen-provider-loader-track);
+}
+
+.auth-screen__provider-loader-arc {
+  stroke: var(--auth-screen-provider-loader-arc);
 }
 
 .auth-screen__provider-label {

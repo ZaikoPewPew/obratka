@@ -65,6 +65,13 @@ const GOOGLE_ICON_SVG = `
 </svg>
 `;
 
+const PROVIDER_LOADER_SVG = `
+<svg class="auth-screen__provider-loader" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <circle class="auth-screen__provider-loader-track" cx="14" cy="14" r="11" />
+  <path class="auth-screen__provider-loader-arc" d="M25 14a11 11 0 0 0-11-11" stroke-linecap="round" />
+</svg>
+`;
+
 /**
  * Экран регистрации: split как url-screen; форма — как старый PDF/done
  * (заголовок → email → разделитель → Telegram / Google).
@@ -170,12 +177,14 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
   const telegramBtn = document.createElement("button");
   telegramBtn.type = "button";
   telegramBtn.className = "auth-screen__provider";
-  telegramBtn.innerHTML = `${TELEGRAM_ICON_SVG}<span class="auth-screen__provider-label">${t.authTelegram}</span>`;
+  telegramBtn.setAttribute("aria-label", t.authTelegram);
+  telegramBtn.innerHTML = `${TELEGRAM_ICON_SVG}${PROVIDER_LOADER_SVG}<span class="auth-screen__provider-label">${t.authTelegram}</span>`;
 
   const googleBtn = document.createElement("button");
   googleBtn.type = "button";
   googleBtn.className = "auth-screen__provider";
-  googleBtn.innerHTML = `${GOOGLE_ICON_SVG}<span class="auth-screen__provider-label">${t.authGoogle}</span>`;
+  googleBtn.setAttribute("aria-label", t.authGoogle);
+  googleBtn.innerHTML = `${GOOGLE_ICON_SVG}${PROVIDER_LOADER_SVG}<span class="auth-screen__provider-label">${t.authGoogle}</span>`;
 
   actions.append(telegramBtn, googleBtn);
   form.append(field, divider, actions, providerError);
@@ -272,6 +281,10 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
     telegramBtn.disabled = busy || googleBusy;
     googleBtn.disabled = googleBusy || busy;
     telegramBtn.setAttribute("aria-busy", busy ? "true" : "false");
+    telegramBtn.setAttribute(
+      "aria-label",
+      busy ? t.authProviderConnecting : t.authTelegram,
+    );
     telegramBtn.classList.toggle("auth-screen__provider--busy", busy);
   }
 
@@ -283,6 +296,10 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
     googleBtn.disabled = busy || telegramBusy;
     telegramBtn.disabled = telegramBusy || busy;
     googleBtn.setAttribute("aria-busy", busy ? "true" : "false");
+    googleBtn.setAttribute(
+      "aria-label",
+      busy ? t.authProviderConnecting : t.authGoogle,
+    );
     googleBtn.classList.toggle("auth-screen__provider--busy", busy);
   }
 
@@ -388,7 +405,7 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
   });
 
   telegramBtn.addEventListener("click", async () => {
-    if (telegramBusy) return;
+    if (telegramBusy || googleBusy) return;
     setProviderError(null);
     setTelegramBusy(true);
     try {

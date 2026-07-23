@@ -557,6 +557,117 @@
   background: var(--color-surface-muted-active);
 }
 
+/* Skeleton: топбар + карточки, пока грузится лента */
+.home-screen__skeleton-bone,
+.home-screen__skeleton-line,
+.home-screen--loading .home-screen__chip--submit,
+.home-screen--loading .home-screen__chip--balance .home-screen__chip-value,
+.home-screen--loading .home-screen__chip--icon,
+.home-screen--loading .home-screen__profile,
+.home-screen--loading .home-screen__aside-panel {
+  background-color: var(--home-screen-skeleton-base);
+  background-image: linear-gradient(
+    90deg,
+    var(--home-screen-skeleton-base) 0%,
+    var(--home-screen-skeleton-shine) 45%,
+    var(--home-screen-skeleton-base) 90%
+  );
+  background-size: 200% 100%;
+  background-position: right;
+  animation-name: motion-skeleton-shimmer;
+  animation-duration: var(--home-screen-skeleton-duration);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.home-screen__skeleton-line {
+  display: block;
+  height: var(--home-screen-skeleton-line-height);
+  border-radius: var(--radius-xs);
+}
+
+.home-screen__skeleton-line--name {
+  width: var(--home-screen-skeleton-line-name-width);
+}
+
+.home-screen__skeleton-line--role {
+  width: var(--home-screen-skeleton-line-role-width);
+}
+
+.home-screen__card--skeleton {
+  pointer-events: none;
+  cursor: default;
+}
+
+.home-screen__card--skeleton:hover,
+.home-screen__card--skeleton:active {
+  --home-screen-card-surface: var(--home-screen-card-bg);
+}
+
+.home-screen__card--skeleton .home-screen__preview {
+  background: transparent;
+}
+
+.home-screen__card--skeleton .home-screen__badge {
+  border: none;
+  box-shadow: none;
+}
+
+.home-screen__card--skeleton .home-screen__card-count {
+  min-width: var(--home-screen-count-height);
+  background: transparent;
+  color: transparent;
+}
+
+.home-screen--loading .home-screen__footer {
+  display: none;
+}
+
+.home-screen--loading .home-screen__top-actions {
+  pointer-events: none;
+}
+
+.home-screen--loading .home-screen__chip--submit {
+  color: transparent;
+  pointer-events: none;
+}
+
+.home-screen--loading .home-screen__chip--submit .home-screen__chip-icon,
+.home-screen--loading .home-screen__chip--submit .home-screen__chip-label {
+  opacity: 0;
+}
+
+.home-screen--loading .home-screen__chip--balance .home-screen__chip-value {
+  display: inline-block;
+  min-width: var(--home-screen-skeleton-balance-width);
+  color: transparent;
+  border-radius: var(--radius-xs);
+}
+
+.home-screen--loading .home-screen__chip--icon,
+.home-screen--loading .home-screen__profile {
+  color: transparent;
+}
+
+.home-screen--loading .home-screen__chip--icon .home-screen__chip-icon,
+.home-screen--loading .home-screen__profile-img,
+.home-screen--loading .home-screen__profile-letter {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-screen__skeleton-bone,
+  .home-screen__skeleton-line,
+  .home-screen--loading .home-screen__chip--submit,
+  .home-screen--loading .home-screen__chip--balance .home-screen__chip-value,
+  .home-screen--loading .home-screen__chip--icon,
+  .home-screen--loading .home-screen__profile,
+  .home-screen--loading .home-screen__aside-panel {
+    animation: none;
+    background-image: none;
+  }
+}
+
 /* Desktop: лента ровно по центру экрана; aside слева вплотную к ней */
 @media (min-width: 960px) {
   .home-screen__body {

@@ -5,6 +5,7 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 ## Поведение
 
 Очередь: общая лента из Supabase (`portfolios` + `reviews`).  
+При `open` сначала skeleton (топбар + 5 карточек), затем данные с `motion-reveal` stagger.  
 Клик по чужой карточке → `onOpenPortfolio` → `/review`.  
 Своя карточка видна, но без открытия на ревью.  
 Уже отревьюенные тобой и `done` (собрали целевое число ревью) в ленте не показываются.  
@@ -47,6 +48,6 @@ topbar поверх контента (`position: absolute`), не сдвигае
 ## Стили / i18n
 
 `styles/home-screen.css`, токены `--home-screen-*`.  
-Ключи: `homeTitle`, `homeListAria`, `homeEmpty`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeCardProgress`, `homeCardOwnTitle`, `homeCardOwnAria`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitCost`, `homeAddCoins*`, `homeResetSession*`.
+Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeEmpty`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeCardProgress`, `homeCardOwnTitle`, `homeCardOwnAria`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitCost`, `homeAddCoins*`, `homeResetSession*`.
 
 См. [`SCREENS.md`](../../../SCREENS.md).

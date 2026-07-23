@@ -441,6 +441,8 @@ const urlScreen = createUrlScreen({
       go("home", { replace: true });
       throw new Error("url.submit_locked");
     }
+    /* URL сразу; persist в фоне — done-UI на url-screen не ждёт сеть. */
+    syncRoute("success", { replace: true });
     try {
       await spendSubmitCost();
       await submitPortfolio(url);
@@ -448,8 +450,6 @@ const urlScreen = createUrlScreen({
       go("home", { replace: true });
       throw new Error("url.submit_failed");
     }
-    /* Done UI остаётся на url-screen (как quiz → done), без скачка на success. */
-    syncRoute("success", { replace: true });
   },
   onExit: () => {
     go("home", { replace: true });

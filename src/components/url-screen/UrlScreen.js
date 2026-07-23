@@ -602,15 +602,12 @@ export function createUrlScreen({ onSubmit, onExit }) {
       showPreviewStub();
     }
 
-    void (async () => {
-      try {
-        await Promise.resolve(onSubmit(normalized));
-        await showDone();
-      } catch {
-        submitting = false;
-        submit.disabled = false;
-      }
-    })();
+    /* Done сразу — сеть не блокирует ощущение отправки. */
+    void showDone();
+    void Promise.resolve(onSubmit(normalized)).catch(() => {
+      submitting = false;
+      submit.disabled = false;
+    });
   });
 
   exitBtn.addEventListener("click", () => {

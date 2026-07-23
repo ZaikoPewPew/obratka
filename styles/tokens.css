@@ -393,6 +393,13 @@
   --home-screen-count-bg: var(--color-surface);
   --home-screen-footer-gap: var(--space-2);
   --home-screen-hint-size: var(--font-size-sm);
+  --home-screen-skeleton-base: var(--color-surface-muted-active);
+  --home-screen-skeleton-shine: var(--color-surface);
+  --home-screen-skeleton-duration: 1.4s;
+  --home-screen-skeleton-line-name-width: 42%;
+  --home-screen-skeleton-line-role-width: 58%;
+  --home-screen-skeleton-line-height: var(--space-3);
+  --home-screen-skeleton-balance-width: var(--space-8);
 
   /* Auth (стиль старого PDF/done: divider + provider buttons) */
   --auth-screen-divider-height: 27px;
@@ -413,6 +420,11 @@
   --auth-screen-icon-tg-width: 29px;
   --auth-screen-icon-tg-height: 28px;
   --auth-screen-icon-google: 28px;
+  --auth-screen-provider-loader-size: 28px;
+  --auth-screen-provider-loader-stroke: 2.5px;
+  --auth-screen-provider-loader-track: var(--color-border);
+  --auth-screen-provider-loader-arc: var(--color-text);
+  --auth-screen-provider-loader-duration: 700ms;
   --shell-review-report-width: 527px;
   --shell-review-report-height: 722px;
   --shell-review-report-radius: var(--radius-md);

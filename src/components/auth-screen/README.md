@@ -20,6 +20,8 @@ Path: **`/registration`**. Split как `url-screen`; форма — стиль 
   `onSuccess({ type: 'telegram', userId, email?, telegramId?, username?, … })`.
 - **Google** → `signInWithGoogle()` (Supabase `signInWithOAuth`) → редирект на Google → возврат на корень приложения →  
   `completeOAuthFromUrl()` в `main.js` → сессия + профиль → `onboarding` / `home`.
+- Пока ждём провайдера: на кнопке иконка → спиннер (`.auth-screen__provider--busy`),  
+  `aria-busy` + `authProviderConnecting`.
 - Happy-path: `onboarding` (или `home`, если `onboardingDone`).
 
 ## Env / Dashboard
@@ -43,6 +45,7 @@ Path: **`/registration`**. Split как `url-screen`; форма — стиль 
 ## i18n
 
 `authWelcomeTitle`, `authEmail*`, `authDividerOr`, `authTelegram`, `authGoogle`,  
+`authProviderConnecting`,  
 `authTelegramError`, `authTelegramCancelled`, `authTelegramNotConfigured`,  
 `authGoogleError`, `authGoogleCancelled`, `authGoogleNotConfigured`.
 

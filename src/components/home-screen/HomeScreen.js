@@ -19,6 +19,9 @@ import plusIconUrl from "../../assets/home/plus.svg";
 /** Сколько монет даёт dev-кнопка на главной. */
 const DEV_CREDIT_AMOUNT = 10;
 
+/** Сколько skeleton-карточек показывать, пока грузится лента. */
+const SKELETON_CARD_COUNT = 5;
+
 /**
  * @typedef {{
  *   id: string;
@@ -226,6 +229,9 @@ export function createHomeScreen({
 
   /** @type {HomePortfolioItem[]} */
   let items = [];
+  let loading = false;
+  /** Показать stagger-reveal при смене skeleton → контент. */
+  let revealItems = false;
 
   function showProfileLetter(letter) {
     const initial = letter && letter !== "?" ? letter : "?";
@@ -289,7 +295,10 @@ export function createHomeScreen({
     const t = getStrings();
     title.textContent = t.homeTitle;
     markImg.alt = t.brandLogoAlt;
-    list.setAttribute("aria-label", t.homeListAria);
+    list.setAttribute(
+      "aria-label",
+      loading ? t.homeListLoadingAria : t.homeListAria,
+    );
     empty.textContent = t.homeEmpty;
     addLabel.textContent = t.homeAddPortfolio;
     addBtn.setAttribute("aria-label", t.homeAddPortfolio);
@@ -320,6 +329,87 @@ export function createHomeScreen({
     }
 
     syncProfileAvatar();
+  }
+
+  /**
+   * @returns {HTMLLIElement}
+   */
+  function createSkeletonCard() {
+    const li = document.createElement("li");
+    li.className = "home-screen__item home-screen__item--skeleton";
+    li.setAttribute("aria-hidden", "true");
+
+    const card = document.createElement("div");
+    card.className = "home-screen__card home-screen__card--skeleton";
+
+    const preview = document.createElement("div");
+    preview.className = "home-screen__preview home-screen__skeleton-bone";
+
+    const meta = document.createElement("div");
+    meta.className = "home-screen__card-meta";
+
+    const person = document.createElement("div");
+    person.className = "home-screen__card-person";
+
+    const badges = document.createElement("div");
+    badges.className = "home-screen__card-badges";
+
+    const platform = document.createElement("span");
+    platform.className =
+      "home-screen__badge home-screen__badge--platform home-screen__skeleton-bone";
+
+    const avatar = document.createElement("span");
+    avatar.className =
+      "home-screen__badge home-screen__badge--avatar home-screen__skeleton-bone";
+
+    badges.append(platform, avatar);
+
+    const text = document.createElement("div");
+    text.className = "home-screen__card-text";
+
+    const nameBone = document.createElement("span");
+    nameBone.className =
+      "home-screen__skeleton-line home-screen__skeleton-line--name";
+
+    const roleBone = document.createElement("span");
+    roleBone.className =
+      "home-screen__skeleton-line home-screen__skeleton-line--role";
+
+    text.append(nameBone, roleBone);
+    person.append(badges, text);
+
+    const count = document.createElement("span");
+    count.className = "home-screen__card-count home-screen__skeleton-bone";
+
+    meta.append(person, count);
+    card.append(preview, meta);
+    li.append(card);
+    return li;
+  }
+
+  function renderSkeleton() {
+    list.replaceChildren();
+    empty.hidden = true;
+    for (let i = 0; i < SKELETON_CARD_COUNT; i += 1) {
+      list.append(createSkeletonCard());
+    }
+  }
+
+  /**
+   * @param {boolean} next
+   */
+  function setLoading(next) {
+    loading = next;
+    root.classList.toggle("home-screen--loading", loading);
+    root.setAttribute("aria-busy", loading ? "true" : "false");
+    const t = getStrings();
+    list.setAttribute(
+      "aria-label",
+      loading ? t.homeListLoadingAria : t.homeListAria,
+    );
+    if (loading) {
+      renderSkeleton();
+    }
   }
 
   /**
@@ -476,10 +566,20 @@ export function createHomeScreen({
   function renderList() {
     list.replaceChildren();
     empty.hidden = items.length > 0;
+    list.setAttribute("aria-label", getStrings().homeListAria);
 
-    for (const item of items) {
-      list.append(createCard(item));
+    for (const [index, item] of items.entries()) {
+      const li = createCard(item);
+      if (revealItems) {
+        li.classList.add("motion-reveal");
+        li.style.setProperty(
+          "--reveal-delay",
+          `calc(var(--motion-stagger) * ${index})`,
+        );
+      }
+      list.append(li);
     }
+    revealItems = false;
   }
 
   /**
@@ -494,6 +594,10 @@ export function createHomeScreen({
     await refreshWalletFromServer();
     syncCopy();
     const next = await listPortfoliosForReview();
+    revealItems = loading;
+    loading = false;
+    root.classList.remove("home-screen--loading");
+    root.setAttribute("aria-busy", "false");
     setItems(next);
   }
 
@@ -501,7 +605,7 @@ export function createHomeScreen({
     root.hidden = false;
     root.classList.remove("home-screen--open");
     syncCopy();
-    renderList();
+    setLoading(true);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         root.classList.add("home-screen--open");
@@ -514,7 +618,10 @@ export function createHomeScreen({
    * @returns {Promise<void>}
    */
   function close() {
-    root.classList.remove("home-screen--open");
+    root.classList.remove("home-screen--open", "home-screen--loading");
+    loading = false;
+    revealItems = false;
+    root.setAttribute("aria-busy", "false");
     root.hidden = true;
     return Promise.resolve();
   }

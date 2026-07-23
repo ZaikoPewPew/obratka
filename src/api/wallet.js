@@ -43,13 +43,12 @@ function writeBalanceLocal(next) {
  */
 async function writeBalance(next) {
   const value = writeBalanceLocal(next);
-  try {
-    await updateMyProfile({ balance: value });
-  } catch (err) {
+  /* Persist не блокирует UI — локальный баланс уже обновлён. */
+  void updateMyProfile({ balance: value }).catch((err) => {
     if (import.meta.env.DEV) {
       console.warn("[wallet] persist balance failed", err);
     }
-  }
+  });
   return value;
 }
 

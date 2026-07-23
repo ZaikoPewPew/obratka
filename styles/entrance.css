@@ -44,6 +44,19 @@
   }
 }
 
+@keyframes motion-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/** Shimmer для skeleton-заглушек (home и др.). */
+@keyframes motion-skeleton-shimmer {
+  to {
+    background-position: left;
+  }
+}
+
 /* Утилиты: повесить класс + задать --reveal-delay (или animation-delay) */
 .motion-reveal,
 .motion-reveal-scale {
@@ -76,5 +89,9 @@
     opacity: 1;
     transform: none;
     filter: none;
+  }
+
+  .auth-screen__provider-loader {
+    animation: none;
   }
 }
