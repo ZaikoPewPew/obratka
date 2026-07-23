@@ -1,4 +1,4 @@
-import { signInWithTelegram } from "../../api/auth.js";
+import { signInWithGoogle, signInWithTelegram } from "../../api/auth.js";
 import { getStrings } from "../../i18n.js";
 import { isValidEmail } from "../../utils/emailValidation.js";
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
@@ -23,6 +23,10 @@ import {
  *   photoUrl?: string | null;
  * } | {
  *   type: 'google';
+ *   userId: string;
+ *   email?: string | null;
+ *   firstName?: string | null;
+ *   photoUrl?: string | null;
  * }} AuthResult
  */
 
@@ -206,6 +210,7 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
 
   let closing = false;
   let telegramBusy = false;
+  let googleBusy = false;
 
   function setError(visible) {
     error.hidden = !visible;
@@ -245,13 +250,40 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
   }
 
   /**
+   * @param {unknown} err
+   * @returns {string}
+   */
+  function googleErrorMessage(err) {
+    const code = err instanceof Error ? err.message : String(err || "");
+    if (code === "google_cancelled" || code === "access_denied") {
+      return t.authGoogleCancelled;
+    }
+    if (code === "supabase_not_configured") {
+      return t.authGoogleNotConfigured;
+    }
+    return t.authGoogleError;
+  }
+
+  /**
    * @param {boolean} busy
    */
   function setTelegramBusy(busy) {
     telegramBusy = busy;
-    telegramBtn.disabled = busy;
+    telegramBtn.disabled = busy || googleBusy;
+    googleBtn.disabled = googleBusy || busy;
     telegramBtn.setAttribute("aria-busy", busy ? "true" : "false");
     telegramBtn.classList.toggle("auth-screen__provider--busy", busy);
+  }
+
+  /**
+   * @param {boolean} busy
+   */
+  function setGoogleBusy(busy) {
+    googleBusy = busy;
+    googleBtn.disabled = busy || telegramBusy;
+    telegramBtn.disabled = telegramBusy || busy;
+    googleBtn.setAttribute("aria-busy", busy ? "true" : "false");
+    googleBtn.classList.toggle("auth-screen__provider--busy", busy);
   }
 
   function syncSubmitVisibility() {
@@ -301,9 +333,22 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
         setError(false);
         setProviderError(null);
         setTelegramBusy(false);
+        setGoogleBusy(false);
         input.value = "";
         input.placeholder = t.authEmailPlaceholder;
         syncSubmitVisibility();
+
+        try {
+          const pending = window.sessionStorage.getItem(
+            "obratka.authProviderError",
+          );
+          if (pending) {
+            window.sessionStorage.removeItem("obratka.authProviderError");
+            setProviderError(googleErrorMessage(new Error(pending)));
+          }
+        } catch {
+          /* ignore */
+        }
       },
     });
   }
@@ -371,9 +416,20 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
     }
   });
 
-  googleBtn.addEventListener("click", () => {
+  googleBtn.addEventListener("click", async () => {
+    if (googleBusy || telegramBusy) return;
     setProviderError(null);
-    finish({ type: "google" });
+    setGoogleBusy(true);
+    try {
+      await signInWithGoogle();
+      // Browser redirects to Google; busy stays until navigation.
+    } catch (err) {
+      setProviderError(googleErrorMessage(err));
+      if (import.meta.env.DEV) {
+        console.warn("[auth] google sign-in failed", err);
+      }
+      setGoogleBusy(false);
+    }
   });
 
   return { root, open, close, setMode };

@@ -18,10 +18,11 @@ Path: **`/registration`**. Split как `url-screen`; форма — стиль 
 - Email → `onSuccess({ type: 'email', email })` (пока без Supabase email auth).
 - **Telegram** → Login Widget popup → Edge Function `telegram-auth` → `supabase.auth.setSession` →  
   `onSuccess({ type: 'telegram', userId, email?, telegramId?, username?, … })`.
-- Google — stub → `onSuccess({ type: 'google' })`.
-- Happy-path в `main.js`: `onboarding` (или `home`, если `onboardingDone`).
+- **Google** → `signInWithGoogle()` (Supabase `signInWithOAuth`) → редирект на Google → возврат на корень приложения →  
+  `completeOAuthFromUrl()` в `main.js` → сессия + профиль → `onboarding` / `home`.
+- Happy-path: `onboarding` (или `home`, если `onboardingDone`).
 
-## Env
+## Env / Dashboard
 
 См. `.env.example` и `supabase/functions/telegram-auth/README.md`:
 
@@ -29,10 +30,21 @@ Path: **`/registration`**. Split как `url-screen`; форма — стиль 
 - `TELEGRAM_BOT_ID` (число до `:` в токене BotFather)
 - секрет `TELEGRAM_BOT_TOKEN` только в Edge Function secrets
 
+### Google (Supabase Auth → Providers → Google)
+
+1. [Google Cloud Console](https://console.cloud.google.com/) → OAuth client (Web):
+   - Authorized JavaScript origins: `http://localhost:5173`, `https://zaikopewpew.github.io`
+   - Authorized redirect URI: `https://<project-ref>.supabase.co/auth/v1/callback`
+2. Client ID + Secret → Supabase Dashboard → Authentication → Providers → Google.
+3. Redirect URLs в Supabase (Authentication → URL Configuration):
+   - `http://localhost:5173/`
+   - `https://zaikopewpew.github.io/obratka/`
+
 ## i18n
 
 `authWelcomeTitle`, `authEmail*`, `authDividerOr`, `authTelegram`, `authGoogle`,  
-`authTelegramError`, `authTelegramCancelled`, `authTelegramNotConfigured`.
+`authTelegramError`, `authTelegramCancelled`, `authTelegramNotConfigured`,  
+`authGoogleError`, `authGoogleCancelled`, `authGoogleNotConfigured`.
 
 ## Стили
 

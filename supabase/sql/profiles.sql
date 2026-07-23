@@ -47,6 +47,7 @@ set search_path = public
 as $$
 declare
   meta jsonb := coalesce(new.raw_user_meta_data, '{}'::jsonb);
+  app_meta jsonb := coalesce(new.raw_app_meta_data, '{}'::jsonb);
   tg_id bigint;
 begin
   begin
@@ -66,17 +67,22 @@ begin
   )
   values (
     new.id,
-    coalesce(meta->>'provider', 'email'),
+    coalesce(
+      nullif(meta->>'provider', ''),
+      nullif(app_meta->>'provider', ''),
+      'email'
+    ),
     nullif(
       coalesce(
         meta->>'full_name',
+        meta->>'name',
         meta->>'first_name',
         meta->>'username',
         split_part(coalesce(new.email, ''), '@', 1)
       ),
       ''
     ),
-    coalesce(meta->>'avatar_url', meta->>'photo_url'),
+    coalesce(meta->>'avatar_url', meta->>'photo_url', meta->>'picture'),
     tg_id,
     nullif(meta->>'username', ''),
     new.email

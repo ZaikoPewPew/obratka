@@ -176,6 +176,9 @@ export function createHomeScreen({
   const body = document.createElement("div");
   body.className = "home-screen__body";
 
+  const cluster = document.createElement("div");
+  cluster.className = "home-screen__cluster";
+
   const feed = document.createElement("div");
   feed.className = "home-screen__feed";
 
@@ -208,7 +211,8 @@ export function createHomeScreen({
   asidePanel.className = "home-screen__aside-panel";
   aside.append(asidePanel);
 
-  body.append(aside, feed);
+  cluster.append(aside, feed);
+  body.append(cluster);
   root.append(title, topbar, body);
 
   /** @type {HomePortfolioItem[]} */

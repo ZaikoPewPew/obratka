@@ -7,7 +7,7 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 Очередь: mock seed (`Наринэ`, `Janelle`) + поданные URL из localStorage (`obratka.submittedPortfolios`).  
 Клик по карточке → `onOpenPortfolio` → `/review`.  
 CTA «Закинуть своё» — в топбаре слева от баланса. Dev-кнопки — под лентой.  
-Лента по центру экрана; на десктопе слева от неё fixed-панель (отступ `--home-screen-aside-gap`).
+Лента по центру экрана; на десктопе слева от неё sticky-панель (верх вровень с первой карточкой, отступ `--home-screen-aside-gap`).
 
 Профиль в шапке: `session.avatarUrl` (Telegram `photo_url`), иначе unavatar по email.  
 Баланс: `profiles.balance` из Supabase → сессия (`refreshWalletFromServer` при open/refresh).

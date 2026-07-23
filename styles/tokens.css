@@ -363,24 +363,20 @@
   --home-screen-aside-radius: var(--radius-xl);
   --home-screen-aside-bg: var(--color-surface-muted);
   --home-screen-aside-gap: var(--space-4);
-  --home-screen-aside-fixed-top: calc(
-    var(--home-screen-topbar-height) + var(--home-screen-body-padding)
-  );
-  --home-screen-aside-fixed-left: calc(
-    50% - (var(--home-screen-feed-width) / 2) - var(--home-screen-aside-gap) -
-      var(--home-screen-aside-width)
-  );
+  --home-screen-aside-sticky-top: 0px;
   --home-screen-card-padding: var(--space-2);
   --home-screen-card-gap: var(--space-2);
   --home-screen-card-radius: var(--radius-xl);
   --home-screen-card-bg: var(--color-surface-muted);
+  --home-screen-card-bg-hover: var(--color-surface-muted-hover);
+  --home-screen-card-bg-active: var(--color-surface-muted-active);
   --home-screen-preview-height: 250px;
   --home-screen-preview-radius: var(--radius-md);
   --home-screen-badge-size: 52px;
   --home-screen-badge-radius: var(--radius-md);
   --home-screen-badge-overlap: calc(var(--space-4) * -1);
   --home-screen-badge-ring: 3px;
-  --home-screen-badge-ring-color: var(--color-surface-muted);
+  --home-screen-badge-ring-color: var(--home-screen-card-bg);
   --home-screen-meta-gap: 13px;
   --home-screen-meta-text-gap: var(--space-1);
   --home-screen-meta-font-size: var(--font-size-base);

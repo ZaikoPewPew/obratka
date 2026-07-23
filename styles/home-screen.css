@@ -260,9 +260,20 @@
   overflow: auto;
 }
 
+.home-screen__cluster {
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--home-screen-aside-gap);
+  width: 100%;
+  max-width: var(--home-screen-feed-width);
+  min-width: 0;
+}
+
 .home-screen__feed {
   box-sizing: border-box;
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: var(--home-screen-feed-gap);
   width: 100%;
@@ -301,7 +312,8 @@
   padding: var(--home-screen-card-padding);
   border: none;
   border-radius: var(--home-screen-card-radius);
-  background: var(--home-screen-card-bg);
+  --home-screen-card-surface: var(--home-screen-card-bg);
+  background: var(--home-screen-card-surface);
   color: var(--color-text);
   font-family: var(--font-family);
   text-align: left;
@@ -309,11 +321,11 @@
 }
 
 .home-screen__card:hover {
-  background: var(--color-surface-muted-hover);
+  --home-screen-card-surface: var(--home-screen-card-bg-hover);
 }
 
 .home-screen__card:active {
-  background: var(--color-surface-muted-active);
+  --home-screen-card-surface: var(--home-screen-card-bg-active);
 }
 
 .home-screen__card:focus-visible {
@@ -406,7 +418,7 @@
   overflow: visible;
   border: none;
   box-shadow: 0 0 0 var(--home-screen-badge-ring)
-    var(--home-screen-badge-ring-color);
+    var(--home-screen-card-surface, var(--home-screen-badge-ring-color));
 }
 
 .home-screen__badge--avatar .home-screen__badge-img {
@@ -504,15 +516,32 @@
   background: var(--color-surface-muted-active);
 }
 
-/* Desktop: панель слева от ленты, fixed */
+/* Desktop: панель слева от ленты, sticky — верх вровень с первой карточкой */
 @media (min-width: 960px) {
+  .home-screen__cluster {
+    width: calc(
+      var(--home-screen-aside-width) + var(--home-screen-aside-gap) +
+        var(--home-screen-feed-width)
+    );
+    max-width: none;
+    /* Симметричный padding справа, чтобы колонка ленты оставалась по центру экрана */
+    padding-inline-end: calc(
+      var(--home-screen-aside-width) + var(--home-screen-aside-gap)
+    );
+  }
+
   .home-screen__aside {
     display: block;
-    position: fixed;
-    top: var(--home-screen-aside-fixed-top);
-    left: var(--home-screen-aside-fixed-left);
-    z-index: 0;
+    position: sticky;
+    top: var(--home-screen-aside-sticky-top);
+    flex-shrink: 0;
+    align-self: flex-start;
     width: var(--home-screen-aside-width);
-    pointer-events: none;
+  }
+
+  .home-screen__feed {
+    flex: 0 0 var(--home-screen-feed-width);
+    width: var(--home-screen-feed-width);
+    max-width: var(--home-screen-feed-width);
   }
 }

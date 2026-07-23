@@ -50,8 +50,8 @@ function mapUser(raw) {
           ? Number(meta.telegram_id)
           : undefined,
     username: meta.username ?? null,
-    firstName: meta.first_name ?? meta.full_name ?? null,
-    photoUrl: meta.photo_url ?? meta.avatar_url ?? null,
+    firstName: meta.first_name ?? meta.full_name ?? meta.name ?? null,
+    photoUrl: meta.photo_url ?? meta.avatar_url ?? meta.picture ?? null,
   };
 }
 
@@ -143,6 +143,146 @@ export async function completeTelegramSignIn(telegramUser) {
     throw new Error("telegram_auth_no_user");
   }
 
+  return {
+    user,
+    accessToken: data.session?.access_token,
+    refreshToken: data.session?.refresh_token,
+  };
+}
+
+/**
+ * Absolute redirect URL after Google OAuth (Site URL / Redirect URLs in Supabase).
+ * Root of the app so `resolveEntryScreen` picks onboarding/home after session is set.
+ * @returns {string}
+ */
+export function getAuthRedirectUrl() {
+  const base = String(import.meta.env.BASE_URL || "/");
+  let basePath = base.startsWith("/") ? base : `/${base}`;
+  if (!basePath.endsWith("/")) basePath = `${basePath}/`;
+  return `${window.location.origin}${basePath}`;
+}
+
+/**
+ * Strip OAuth query/hash leftovers without a full navigation.
+ */
+function cleanOAuthParamsFromUrl() {
+  const url = new URL(window.location.href);
+  const keys = ["code", "state", "error", "error_code", "error_description"];
+  let changed = false;
+  for (const key of keys) {
+    if (url.searchParams.has(key)) {
+      url.searchParams.delete(key);
+      changed = true;
+    }
+  }
+  if (url.hash && /(access_token|error|refresh_token)=/.test(url.hash)) {
+    url.hash = "";
+    changed = true;
+  }
+  if (changed) {
+    const next = `${url.pathname}${url.search}${url.hash}`;
+    window.history.replaceState(window.history.state, "", next);
+  }
+}
+
+/**
+ * Google OAuth (PKCE) via Supabase Auth. Redirects the browser to Google.
+ * @returns {Promise<void>}
+ */
+export async function signInWithGoogle() {
+  if (!isSupabaseConfigured()) {
+    throw new Error("supabase_not_configured");
+  }
+  const supabase = getSupabase();
+  if (!supabase) {
+    throw new Error("supabase_not_configured");
+  }
+
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: getAuthRedirectUrl(),
+      queryParams: {
+        prompt: "select_account",
+      },
+    },
+  });
+
+  if (error) {
+    if (import.meta.env.DEV) {
+      console.warn("[auth] google signInWithOAuth failed", error);
+    }
+    throw new Error(error.message || "google_oauth_failed");
+  }
+}
+
+/**
+ * Complete Google (or other OAuth) return: exchange `?code=` (PKCE) or hash tokens.
+ * Returns null when the URL is not an OAuth callback.
+ * @returns {Promise<AuthSession | null>}
+ */
+export async function completeOAuthFromUrl() {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+
+  const url = new URL(window.location.href);
+  const errorParam = url.searchParams.get("error");
+  const code = url.searchParams.get("code");
+  const hashParams = new URLSearchParams(
+    url.hash.startsWith("#") ? url.hash.slice(1) : url.hash,
+  );
+  const hashError = hashParams.get("error");
+  const accessToken = hashParams.get("access_token");
+  const refreshToken = hashParams.get("refresh_token");
+
+  if (errorParam || hashError) {
+    cleanOAuthParamsFromUrl();
+    const codeName = errorParam || hashError || "google_oauth_failed";
+    if (codeName === "access_denied") {
+      throw new Error("google_cancelled");
+    }
+    throw new Error(codeName);
+  }
+
+  if (!code && !accessToken) {
+    return null;
+  }
+
+  if (code) {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    cleanOAuthParamsFromUrl();
+    if (error) {
+      if (import.meta.env.DEV) {
+        console.warn("[auth] exchangeCodeForSession failed", error);
+      }
+      throw new Error(error.message || "google_session_failed");
+    }
+    const user = data.user ? mapUser(data.user) : null;
+    if (!user?.userId) {
+      throw new Error("google_auth_no_user");
+    }
+    return {
+      user,
+      accessToken: data.session?.access_token,
+      refreshToken: data.session?.refresh_token,
+    };
+  }
+
+  const { data, error } = await supabase.auth.setSession({
+    access_token: accessToken,
+    refresh_token: refreshToken || "",
+  });
+  cleanOAuthParamsFromUrl();
+  if (error) {
+    if (import.meta.env.DEV) {
+      console.warn("[auth] setSession from hash failed", error);
+    }
+    throw new Error(error.message || "google_session_failed");
+  }
+  const user = data.user ? mapUser(data.user) : null;
+  if (!user?.userId) {
+    throw new Error("google_auth_no_user");
+  }
   return {
     user,
     accessToken: data.session?.access_token,

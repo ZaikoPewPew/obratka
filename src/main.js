@@ -19,6 +19,7 @@ import {
 } from "./app/flow.js";
 import { createAppRouter } from "./app/router.js";
 import { getSession, setSession, clearSession } from "./app/session.js";
+import { completeOAuthFromUrl } from "./api/auth.js";
 import { submitPortfolio, clearSubmittedPortfolios } from "./api/portfolios.js";
 import { fetchMyProfile } from "./api/profiles.js";
 import {
@@ -482,55 +483,79 @@ const onboardingScreen = createOnboardingScreen({
   },
 });
 
+/**
+ * Persist Supabase user into app session (OAuth return / provider login).
+ * @param {{
+ *   userId: string;
+ *   email?: string | null;
+ *   telegramId?: number;
+ *   username?: string | null;
+ *   firstName?: string | null;
+ *   photoUrl?: string | null;
+ * }} user
+ * @param {'google' | 'telegram'} provider
+ * @returns {Promise<import("./app/session.js").AppSession>}
+ */
+async function applyProviderUser(user, provider) {
+  const session = getSession() ?? {};
+  /** @type {import("./app/session.js").AppSession} */
+  let next = {
+    ...session,
+    userId: user.userId,
+    email: user.email ?? session.email,
+    balance: typeof session.balance === "number" ? session.balance : 0,
+    displayName: user.firstName ?? null,
+    avatarUrl: user.photoUrl ?? null,
+    ...(provider === "telegram"
+      ? {
+          telegramId: user.telegramId,
+          telegramUsername: user.username ?? null,
+        }
+      : {}),
+  };
+
+  const profile = await fetchMyProfile();
+  if (profile) {
+    next = {
+      ...next,
+      userId: profile.id || next.userId,
+      email: profile.email ?? next.email,
+      displayName: profile.display_name ?? next.displayName,
+      avatarUrl: profile.avatar_url ?? next.avatarUrl,
+      telegramId: profile.telegram_id ?? next.telegramId,
+      telegramUsername: profile.telegram_username ?? next.telegramUsername,
+      balance:
+        typeof profile.balance === "number" ? profile.balance : next.balance,
+      onboardingDone: Boolean(profile.onboarding_done),
+      role: profile.role ?? next.role,
+      grade: profile.grade ?? next.grade,
+    };
+  }
+
+  setSession(next);
+  return next;
+}
+
 const authScreen = createAuthScreen({
   onSuccess: async (result) => {
-    const session = getSession() ?? {};
-    const userId =
-      result.type === "telegram" && result.userId
-        ? result.userId
-        : (session.userId ?? `local-${Date.now()}`);
-    const email =
-      result.type === "email"
-        ? result.email
-        : result.type === "telegram" && result.email
-          ? result.email
-          : session.email;
-
-    /** @type {import("./app/session.js").AppSession} */
-    let next = {
-      ...session,
-      userId,
-      email,
-      balance: typeof session.balance === "number" ? session.balance : 0,
-      ...(result.type === "telegram"
-        ? {
-            telegramId: result.telegramId,
-            telegramUsername: result.username ?? null,
-            displayName: result.firstName ?? null,
-            avatarUrl: result.photoUrl ?? null,
-          }
-        : {}),
-    };
-
-    if (result.type === "telegram") {
-      const profile = await fetchMyProfile();
-      if (profile) {
-        next = {
-          ...next,
-          userId: profile.id || next.userId,
-          email: profile.email ?? next.email,
-          displayName: profile.display_name ?? next.displayName,
-          avatarUrl: profile.avatar_url ?? next.avatarUrl,
-          telegramId: profile.telegram_id ?? next.telegramId,
-          telegramUsername: profile.telegram_username ?? next.telegramUsername,
-          balance:
-            typeof profile.balance === "number" ? profile.balance : next.balance,
-          onboardingDone: Boolean(profile.onboarding_done),
-          role: profile.role ?? next.role,
-          grade: profile.grade ?? next.grade,
-        };
+    if (result.type === "telegram" || result.type === "google") {
+      const next = await applyProviderUser(result, result.type);
+      if (next.onboardingDone) {
+        go("home", { handoff: true });
+        return;
       }
+      go("onboarding", { handoff: true });
+      return;
     }
+
+    const session = getSession() ?? {};
+    /** @type {import("./app/session.js").AppSession} */
+    const next = {
+      ...session,
+      userId: session.userId ?? `local-${Date.now()}`,
+      email: result.type === "email" ? result.email : session.email,
+      balance: typeof session.balance === "number" ? session.balance : 0,
+    };
 
     setSession(next);
     if (next.onboardingDone) {
@@ -728,4 +753,24 @@ if (shell) {
   shell.classList.remove("iframe-shell--entered");
 }
 
-appRouter.start();
+void (async () => {
+  try {
+    const oauthSession = await completeOAuthFromUrl();
+    if (oauthSession) {
+      await applyProviderUser(oauthSession.user, "google");
+    }
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.warn("[auth] oauth callback failed", err);
+    }
+    try {
+      window.sessionStorage.setItem(
+        "obratka.authProviderError",
+        err instanceof Error ? err.message : "google_oauth_failed",
+      );
+    } catch {
+      /* ignore quota / private mode */
+    }
+  }
+  appRouter.start();
+})();
