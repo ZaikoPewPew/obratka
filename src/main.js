@@ -18,12 +18,20 @@ import {
   resolveEntryScreen,
 } from "./app/flow.js";
 import { createAppRouter } from "./app/router.js";
+import { getSession, setSession, clearSession } from "./app/session.js";
+import { submitPortfolio, clearSubmittedPortfolios } from "./api/portfolios.js";
+import {
+  awardReviewReward,
+  canSubmitPortfolio,
+  spendSubmitCost,
+} from "./api/wallet.js";
 import { createReviewPanel } from "./components/review-panel/ReviewPanel.js";
 import { createReviewScreen } from "./components/review-screen/ReviewScreen.js";
 import { createAuthScreen } from "./components/auth-screen/AuthScreen.js";
 import { createHomeScreen } from "./components/home-screen/HomeScreen.js";
 import { createOnboardingScreen } from "./components/onboarding-screen/OnboardingScreen.js";
 import { createReferralScreen } from "./components/referral-screen/ReferralScreen.js";
+import { createSuccessScreen } from "./components/success-screen/SuccessScreen.js";
 import { createUrlScreen } from "./components/url-screen/UrlScreen.js";
 import {
   resolvePortfolioEmbed,
@@ -62,6 +70,8 @@ let setReviewReportReveal = () => {};
 let activeRouteId = null;
 /** @type {boolean} */
 let pendingHandoff = false;
+/** @type {import("./components/success-screen/successPresets.js").SuccessPresetId} */
+let pendingSuccessPreset = "generic";
 
 /** @type {ReturnType<typeof createAppRouter> | null} */
 let appRouter = null;
@@ -99,18 +109,10 @@ const reviewPanel = createReviewPanel({
   onReportReveal: (active, payload) => {
     setReviewReportReveal(active, payload);
   },
-  onDoneChange: (done) => {
-    if (done) {
-      if (activeRouteId !== "done") syncRoute("done");
-      return;
-    }
-    if (activeRouteId === "done") syncRoute("quiz");
-  },
-  onExit: () => {
-    go("url", { replace: true });
-  },
-  onNextCase: () => {
-    go("url", { replace: true });
+  onComplete: () => {
+    awardReviewReward();
+    pendingSuccessPreset = "quizComplete";
+    go("done");
   },
 });
 const reviewScreen = createReviewScreen({
@@ -118,6 +120,18 @@ const reviewScreen = createReviewScreen({
 });
 setReviewReportReveal = reviewScreen.setReportReveal;
 document.body.append(reviewScreen.root);
+
+const successScreen = createSuccessScreen({
+  onPrimary: () => {
+    pendingSuccessPreset = "generic";
+    go("home", { replace: true });
+  },
+  onSecondary: () => {
+    pendingSuccessPreset = "generic";
+    go("home", { replace: true });
+  },
+});
+document.body.append(successScreen.root);
 
 let remainingMs = SESSION_TOTAL_MS;
 let timerId = null;
@@ -274,6 +288,13 @@ async function applyPortfolio(url, options = {}) {
 function openReview() {
   if (!frameWrap) return;
 
+  void homeScreen.close();
+  void urlScreen.close();
+  void onboardingScreen.close({ handoff: true });
+  void authScreen.close({ handoff: true });
+  void referralScreen.close({ handoff: true });
+  void successScreen.close();
+
   frameWrap.classList.add("iframe-shell__frame--locked");
   reviewPanel.reset();
   reviewPanel.open();
@@ -386,43 +407,82 @@ function leaveSessionShell() {
 
 const urlScreen = createUrlScreen({
   onSubmit: async (url) => {
+    if (!canSubmitPortfolio()) {
+      go("home", { replace: true });
+      return;
+    }
+    try {
+      spendSubmitCost();
+      await submitPortfolio(url);
+    } catch {
+      go("home", { replace: true });
+      return;
+    }
+    pendingSuccessPreset = "portfolioSubmitted";
+    go("done", { replace: true });
+  },
+});
+
+const homeScreen = createHomeScreen({
+  onOpenPortfolio: async (item) => {
     enterSessionShell();
     await closeReview();
-    await applyPortfolio(url);
-    syncRoute("review");
-    void urlScreen.close({ handoff: true });
+    await applyPortfolio(item.url);
+    go("review");
+    void homeScreen.close();
     if (embedPlan?.mode === "external") {
       armSession();
       return;
     }
     startTimer();
   },
-});
-
-const homeScreen = createHomeScreen({
-  onOpenPortfolio: async () => {
-    go("url", { replace: true });
-  },
   onAddPortfolio: async () => {
+    if (!canSubmitPortfolio()) return;
     go("url");
+  },
+  onResetSession: async () => {
+    clearSession();
+    clearSubmittedPortfolios();
+    stopTimer();
+    portfolioUrl = null;
+    embedPlan = null;
+    portfolioName = getStrings().brandName;
+    pendingSuccessPreset = "generic";
+    leaveSessionShell();
+    await closeReview();
+    go("referral", { replace: true });
   },
 });
 
 const onboardingScreen = createOnboardingScreen({
   onComplete: async () => {
-    go("home", { replace: true });
+    const session = getSession() ?? {};
+    setSession({ ...session, onboardingDone: true });
+    go("home", { replace: true, handoff: true });
   },
 });
 
 const authScreen = createAuthScreen({
-  onSuccess: async () => {
-    // Онбординг/home пока stub — в продуктовом флоу идём на портфолио.
-    go("url", { handoff: true });
+  onSuccess: async (result) => {
+    const session = getSession() ?? {};
+    setSession({
+      ...session,
+      userId: session.userId ?? `local-${Date.now()}`,
+      email: result.type === "email" ? result.email : session.email,
+      balance: typeof session.balance === "number" ? session.balance : 0,
+    });
+    if (session.onboardingDone) {
+      go("home", { handoff: true });
+      return;
+    }
+    go("onboarding", { handoff: true });
   },
 });
 
 const referralScreen = createReferralScreen({
-  onSubmit: async () => {
+  onSubmit: async (referral) => {
+    const session = getSession() ?? {};
+    setSession({ ...session, referralCode: referral });
     go("auth", { handoff: true });
   },
 });
@@ -441,9 +501,13 @@ document.body.append(
  */
 async function applyRoute(id, opts = {}) {
   const handoff = Boolean(opts.handoff);
-  const accessible = resolveAccessibleRoute(id, {
+  let accessible = resolveAccessibleRoute(id, {
     hasPortfolio: Boolean(portfolioUrl),
   });
+
+  if (accessible === "url" && !canSubmitPortfolio()) {
+    accessible = "home";
+  }
 
   if (accessible !== id) {
     syncRoute(accessible, { replace: true });
@@ -454,9 +518,12 @@ async function applyRoute(id, opts = {}) {
   const closeOpts = handoff ? { handoff: true } : {};
   const openOpts = handoff ? { handoff: true } : {};
 
-  const isReviewWorkspace = id === "review" || id === "quiz" || id === "done";
+  const isReviewWorkspace = id === "review" || id === "quiz";
   const isBrandHandoff =
-    handoff && (id === "referral" || id === "auth" || id === "url");
+    handoff &&
+    (id === "referral" || id === "auth" || id === "onboarding" || id === "url");
+  /** Brand → home: открыть home снизу, brand уходит fade (не instant handoff). */
+  const isHomeReveal = id === "home" && handoff;
 
   /**
    * @param {import("./app/routes.js").AppRouteId} target
@@ -473,15 +540,19 @@ async function applyRoute(id, opts = {}) {
       return;
     }
     if (target === "onboarding") {
-      onboardingScreen.open();
+      onboardingScreen.open(openOpts);
       return;
     }
     if (target === "home") {
-      homeScreen.open();
+      void homeScreen.open();
       return;
     }
     if (target === "url") {
       urlScreen.open("", openOpts);
+      return;
+    }
+    if (target === "done") {
+      successScreen.open({ preset: pendingSuccessPreset });
     }
   }
 
@@ -490,9 +561,10 @@ async function applyRoute(id, opts = {}) {
     const closers = [];
     if (id !== "referral") closers.push(referralScreen.close(closeOpts));
     if (id !== "auth") closers.push(authScreen.close(closeOpts));
-    if (id !== "onboarding") closers.push(onboardingScreen.close());
+    if (id !== "onboarding") closers.push(onboardingScreen.close(closeOpts));
     if (id !== "home") closers.push(homeScreen.close());
     if (id !== "url") closers.push(urlScreen.close(closeOpts));
+    if (id !== "done") closers.push(successScreen.close());
     await Promise.all(closers);
   }
 
@@ -504,11 +576,6 @@ async function applyRoute(id, opts = {}) {
 
     frameWrap?.classList.add("iframe-shell__frame--locked");
     reviewScreen.open();
-    reviewPanel.open();
-    if (id === "done") {
-      reviewPanel.openDone();
-      return;
-    }
     reviewPanel.reset();
     reviewPanel.open();
     window.setTimeout(() => {
@@ -527,6 +594,20 @@ async function applyRoute(id, opts = {}) {
     return;
   }
 
+  // Onboarding → home: home снизу/поверх с fade-in, brand уходит fade-out.
+  if (isHomeReveal) {
+    const opening = homeScreen.open();
+    await Promise.all([
+      opening,
+      referralScreen.close({}),
+      authScreen.close({}),
+      onboardingScreen.close({}),
+      urlScreen.close({}),
+      successScreen.close(),
+    ]);
+    return;
+  }
+
   await closeOthers();
   openTarget(id);
 }
@@ -537,7 +618,12 @@ appRouter = createAppRouter({
     pendingHandoff = false;
 
     if (!location.id) {
-      const entry = resolveEntryScreen({});
+      const session = getSession();
+      const entry = resolveEntryScreen({
+        hasSession: Boolean(session),
+        onboardingDone: Boolean(session?.onboardingDone),
+        referralDone: Boolean(session?.referralCode),
+      });
       const search = Object.fromEntries(location.search.entries());
       go(entry, { replace: true, search });
       return;

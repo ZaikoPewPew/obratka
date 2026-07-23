@@ -9,9 +9,10 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `brand-screen-shell/` | — | каркас API |
 | `referral-screen/` | `/referral` | UI |
 | `auth-screen/` | `/registration` | UI |
-| `onboarding-screen/` | `/onboarding` | stub |
-| `home-screen/` | `/home` | stub |
-| `url-screen/` | `/portfolio` | UI (эталон split) |
+| `onboarding-screen/` | `/onboarding` | UI (min) |
+| `home-screen/` | `/home` | UI (hub + mock) |
+| `url-screen/` | `/portfolio` | UI (подача своего) |
+| `success-screen/` | `/done` | UI (пресеты) |
 
 ## Ревью и квиз
 
@@ -19,7 +20,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 |--------|------|------|
 | iframe-shell (`index.html` + `main.js`) | `/review` | Просмотр портфолио + таймер |
 | `review-screen/` | `/quiz` | Оболочка квиза + PDF reveal |
-| `review-panel/` | `/quiz`, `/quiz/done` | Шаги опроса + done |
+| `review-panel/` | `/quiz` | Шаги опроса → `onComplete` |
 
 ## Прочее (legacy waitlist / общие)
 

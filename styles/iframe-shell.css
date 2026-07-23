@@ -296,6 +296,8 @@ body {
 
 .review-panel__top {
   flex-shrink: 0;
+  align-self: stretch;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -382,10 +384,10 @@ body {
   flex-direction: column;
   flex: 1 1 auto;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: safe center;
   min-height: 0;
   gap: var(--space-4);
-  padding: var(--shell-review-stage-offset) 0 0;
+  padding: 0;
 }
 
 .review-panel__form--advice {
@@ -490,6 +492,7 @@ body {
 .review-panel__choice {
   box-sizing: border-box;
   position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -501,6 +504,7 @@ body {
   border-radius: var(--shell-review-option-radius);
   background: var(--shell-review-control-bg);
   cursor: pointer;
+  pointer-events: auto;
   transition:
     background-color var(--duration-fast) ease,
     color var(--duration-fast) ease;
@@ -975,7 +979,7 @@ body {
   box-sizing: border-box;
   position: fixed;
   inset: 0;
-  z-index: var(--z-modal);
+  z-index: var(--z-review);
   width: 100%;
   height: 100%;
   min-height: 100dvh;
@@ -999,17 +1003,14 @@ body {
   display: none;
 }
 
-.review-screen--open .review-screen__panel,
 .review-screen--open .review-screen__visual,
-.review-screen--open .review-screen__brand-mark {
+.review-screen--open .review-screen__brand-mark,
+.review-screen--open .review-panel__top,
+.review-screen--open .review-panel__stage,
+.review-screen--open .review-panel__footer {
   animation-duration: var(--motion-reveal-duration);
   animation-timing-function: var(--motion-reveal-ease);
   animation-fill-mode: both;
-}
-
-.review-screen--open .review-screen__panel {
-  animation-name: motion-reveal;
-  animation-delay: var(--review-screen-reveal-delay-panel);
 }
 
 .review-screen--open .review-screen__visual {
@@ -1020,6 +1021,21 @@ body {
 .review-screen--open .review-screen__brand-mark {
   animation-name: motion-reveal-scale;
   animation-delay: var(--url-screen-reveal-delay-brand);
+}
+
+.review-screen--open .review-panel__top {
+  animation-name: motion-reveal;
+  animation-delay: var(--review-panel-reveal-delay-top);
+}
+
+.review-screen--open .review-panel__stage {
+  animation-name: motion-reveal;
+  animation-delay: var(--review-panel-reveal-delay-stage);
+}
+
+.review-screen--open .review-panel__footer:not([hidden]) {
+  animation-name: motion-reveal;
+  animation-delay: var(--review-panel-reveal-delay-footer);
 }
 
 .review-screen__layout {
@@ -1033,10 +1049,13 @@ body {
 
 .review-screen__panel {
   box-sizing: border-box;
+  position: relative;
+  z-index: 1;
   min-width: 0;
   min-height: 0;
   height: 100%;
   overflow: visible;
+  pointer-events: auto;
 }
 
 .review-screen__visual {
@@ -1247,7 +1266,8 @@ body {
 }
 
 .url-screen[hidden] {
-  display: none;
+  display: none !important;
+  pointer-events: none;
 }
 
 .url-screen--open .url-screen__title,
@@ -1742,11 +1762,16 @@ body {
   .url-screen--open .url-screen__avatar,
   .url-screen--open .auth-screen__divider,
   .url-screen--open .auth-screen__actions,
+  .url-screen--open.onboarding-screen .review-panel__top,
+  .url-screen--open.onboarding-screen .review-panel__stage,
+  .url-screen--open.onboarding-screen .review-panel__footer,
   .url-screen--handoff.url-screen--open .url-screen__visual,
   .url-screen--handoff.url-screen--open .url-screen__brand-mark,
-  .review-screen--open .review-screen__panel,
   .review-screen--open .review-screen__visual,
-  .review-screen--open .review-screen__brand-mark {
+  .review-screen--open .review-screen__brand-mark,
+  .review-screen--open .review-panel__top,
+  .review-screen--open .review-panel__stage,
+  .review-screen--open .review-panel__footer {
     animation: none;
     opacity: 1;
     transform: none;
@@ -1805,4 +1830,48 @@ body {
   .iframe-shell__name {
     max-width: var(--control-mobile-name-max-width);
   }
+}
+
+/* Onboarding: тот же review-panel layout, что у квиза (top full-bleed, stage centered). */
+.onboarding-screen .url-screen__form-pane {
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+}
+
+.onboarding-screen .review-panel {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  margin: 0;
+  align-self: stretch;
+}
+
+.onboarding-screen .review-panel__body {
+  min-height: 0;
+}
+
+/* Onboarding open/handoff: top и stage целиком — как title/field на auth */
+.url-screen--open.onboarding-screen .review-panel__top,
+.url-screen--open.onboarding-screen .review-panel__stage,
+.url-screen--open.onboarding-screen .review-panel__footer {
+  animation-duration: var(--motion-reveal-duration);
+  animation-timing-function: var(--motion-reveal-ease);
+  animation-fill-mode: both;
+}
+
+.url-screen--open.onboarding-screen .review-panel__top {
+  animation-name: motion-reveal;
+  animation-delay: var(--review-panel-reveal-delay-top);
+}
+
+.url-screen--open.onboarding-screen .review-panel__stage {
+  animation-name: motion-reveal;
+  animation-delay: var(--review-panel-reveal-delay-stage);
+}
+
+.url-screen--open.onboarding-screen .review-panel__footer:not([hidden]) {
+  animation-name: motion-reveal;
+  animation-delay: var(--review-panel-reveal-delay-footer);
 }

@@ -1,39 +1,16 @@
-# `review-panel` — квиз (опросник)
+# `review-panel` — шаги квиза
 
-Левая колонка `review-screen`. Paths: **`/quiz`**, финал **`/quiz/done`**.
+Левая панель опроса после таймера ревью. Финал квиза — **не** здесь: `onComplete` → `success-screen` (`/done`, preset `quizComplete`).
 
-## Файл
+## API
 
-- `ReviewPanel.js` — `createReviewPanel({ getPortfolioName?, onReportReveal?, onExit?, onNextCase?, onDoneChange? })`
-  → `{ root, form, open, close, reset, focus, openDone }`.
+- `ReviewPanel.js` — `createReviewPanel({ getPortfolioName?, onReportReveal?, onComplete? })`
+  → `{ root, form, open, close, reset, focus }`.
 
-## Шаги (8)
+## Флоу
 
-| # | Поле | UI |
-|---|------|-----|
-| 1 | `grade` | radio: junior → head |
-| 2 | `context` | слайдер 1–5 |
-| 3 | `structure` | radio |
-| 4 | `metrics` | radio |
-| 5 | `visual` | слайдер 1–10 |
-| 6 | `pain` | checkbox + «Продолжить» |
-| 7 | `hire` | radio |
-| 8 | `advice` | textarea, min 100 / max 1000 |
+Submit последнего шага → `onComplete(answers)` → в `main.js`: `awardReviewReward()` + `go("done")`.
 
-Auto-advance на одиночных radio/слайдерах.
+На последнем шаге (advice) по-прежнему `onReportReveal` для PDF-листа справа.
 
-Шаг 8: `onReportReveal(true, …)` — PDF справа.  
-Submit → done + `onDoneChange(true)` → URL `/quiz/done`.
-
-## Финал (done)
-
-«Готово, спасибо за обратку!» + **Выйти** / **Следующий кейс** → `onExit` / `onNextCase` → обычно `go("url")`.
-
-`openDone()` — для deep link `/quiz/done`.
-
-## i18n / стили
-
-Ключи `review*`, `report*` в `locales.json`.  
-`.review-panel*` + `--shell-review-*`.
-
-Утилиты: `reviewReport.js`, `shareReviewPdf.js`.
+См. [`review-screen/README.md`](../review-screen/README.md), [`success-screen/README.md`](../success-screen/README.md), [`SCREENS.md`](../../../SCREENS.md).

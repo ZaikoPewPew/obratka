@@ -1,9 +1,13 @@
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
 import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
+import {
+  closeBrandScreen,
+  openBrandScreen,
+} from "../../utils/brandScreenTransition.js";
 
 /**
  * Общий split-каркас: левый слот + правый brand visual (эталон — UrlScreen).
- * Stub: разметка и open/close; стили пока завязаны на классы url-screen / будущий brand-screen.
+ * Open/close + handoff — через brandScreenTransition (классы url-screen).
  *
  * @param {{
  *   labelledById: string;
@@ -12,8 +16,8 @@ import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
  * }} opts
  * @returns {{
  *   root: HTMLElement;
- *   open: () => void;
- *   close: () => Promise<void>;
+ *   open: (opts?: { handoff?: boolean }) => void;
+ *   close: (opts?: { handoff?: boolean }) => Promise<void>;
  *   setContent: (el: HTMLElement) => void;
  *   getVisualRoot: () => HTMLElement;
  * }}
@@ -47,7 +51,6 @@ export function createBrandScreenShell({
 
   const brand = document.createElement("div");
   brand.className = `${rootClassName}__brand`;
-  // Mark SVG подставляется при реализации (как в UrlScreen).
   brand.dataset.brandMark = "pending";
 
   visual.append(glow, noise, brand);
@@ -63,58 +66,28 @@ export function createBrandScreenShell({
     formPane.replaceChildren(el);
   }
 
-  function open() {
+  /**
+   * @param {{ handoff?: boolean }} [opts]
+   */
+  function open(opts = {}) {
     closing = false;
-    root.hidden = false;
-    root.classList.remove(`${rootClassName}--open`);
-    meshWash.refresh();
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        root.classList.add(`${rootClassName}--open`);
-        meshWash.setActive(true);
-      });
-    });
+    openBrandScreen({ root, meshWash, opts });
   }
 
   /**
+   * @param {{ handoff?: boolean }} [opts]
    * @returns {Promise<void>}
    */
-  function close() {
-    if (root.hidden || closing) {
-      return Promise.resolve();
-    }
-
-    if (!root.classList.contains(`${rootClassName}--open`)) {
-      meshWash.setActive(false);
-      root.hidden = true;
-      return Promise.resolve();
-    }
-
-    closing = true;
-    meshWash.setActive(false);
-    root.classList.remove(`${rootClassName}--open`);
-
-    return new Promise((resolve) => {
-      let finished = false;
-      const finish = () => {
-        if (finished) return;
-        finished = true;
-        root.removeEventListener("transitionend", onTransitionEnd);
-        window.clearTimeout(fallbackId);
-        root.hidden = true;
-        closing = false;
-        resolve();
-      };
-
-      /** @param {TransitionEvent} event */
-      const onTransitionEnd = (event) => {
-        if (event.target === root && event.propertyName === "opacity") {
-          finish();
-        }
-      };
-
-      root.addEventListener("transitionend", onTransitionEnd);
-      const fallbackId = window.setTimeout(finish, getScreenCloseFallbackMs());
+  function close(opts = {}) {
+    return closeBrandScreen({
+      root,
+      meshWash,
+      opts,
+      isClosing: () => closing,
+      setClosing: (value) => {
+        closing = value;
+      },
+      getFallbackMs: getScreenCloseFallbackMs,
     });
   }
 

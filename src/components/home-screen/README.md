@@ -1,28 +1,19 @@
-# `home-screen` — главная (очередь на ревью)
+# `home-screen` — главная (хаб)
 
-Path: **`/home`**. После onboarding: список портфолио на ревью.
+Path: **`/home`**. После onboarding: очередь портфолио на ревью, баланс (stub), CTA «подать своё».
 
-## Статус
+## Поведение
 
-**Stub** (title + empty list). Монтируется из `main.js`, deep link работает. В happy-path пока не открывается.
+Очередь: mock seed (`Наринэ`, `Janelle`) + поданные URL из localStorage (`obratka.submittedPortfolios`).  
+После «Подать своё» item появляется в списке и открывается так же, как seed (`onOpenPortfolio` → `/review`).
 
-## Визуал
+## API
 
-**Не** brand-shell. Отдельный лейаут (`styles/home-screen.css` — заготовка).
+`createHomeScreen({ onOpenPortfolio, onAddPortfolio? })` → `{ root, open, close, setItems, refresh }`.
 
-## Файл
+## Стили / i18n
 
-- `HomeScreen.js` — `createHomeScreen({ onOpenPortfolio, onAddPortfolio? })` → `{ root, open, close, setItems }`.
-
-## План
-
-1. Очередь через `src/api/portfolios.js` (mock на этапе UI).
-2. Строка: имя / host, favicon (`portfolioMeta`), статус.
-3. `onOpenPortfolio` → `/portfolio` или сразу `/review`.
-4. Empty + CTA: `homeEmpty`, `homeAddPortfolio`.
-
-## i18n
-
-`homeTitle`, `homeListAria`, `homeEmpty`, `homeAddPortfolio`.
+`styles/home-screen.css`, токены `--home-screen-*`.  
+Ключи: `homeTitle`, `homeListAria`, `homeEmpty`, `homeAddPortfolio`, `homeBalance`, `homeSubmitLocked`, `homeSubmitCost`.
 
 См. [`SCREENS.md`](../../../SCREENS.md).

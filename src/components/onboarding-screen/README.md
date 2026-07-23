@@ -1,34 +1,17 @@
 # `onboarding-screen` — онбординг
 
-Path: **`/onboarding`**. После регистрации; визуально — split как у «Ссылка на портфолио».
+Path: **`/onboarding`**. После регистрации; split url-screen + слева **те же паттерны, что у `review-panel`**.
 
-## Статус
+## UI
 
-**Stub** (title + hint + nav-заглушка). Монтируется из `main.js`, deep link работает. В happy-path после auth пока не открывается.
+Классы квиза 1:1: `review-panel__top` / `__back` / `__progress` / `__choice` / `__nav` / `__submit`, auto-advance по radio, motion шагов.
 
-## Визуал (цель)
+Тексты — `onboarding*` в `locales.json` (вместо `review*`). Шаги — [`content/onboarding.json`](../../../content/onboarding.json).
 
-| Сторона | Содержимое |
-|---------|------------|
-| Правая | mesh + бренд (как url-screen / brand-shell) |
-| Левая | вопрос шага + ответы + назад/далее + прогресс |
+## API
 
-Сейчас: `brand-screen-shell` + stub-контент (стили shell ещё не вынесены).
+`createOnboardingScreen({ onComplete })` → `{ root, open, close }`.
 
-## Файл
+Финиш → `saveOnboardingAnswers` (stub) → `onComplete(answers)`.
 
-- `OnboardingScreen.js` — `createOnboardingScreen({ onComplete })` → `{ root, open, close }`.
-
-## Данные
-
-- Шаги: [`content/onboarding.json`](../../../content/onboarding.json)
-- Схема: [`content/onboarding.md`](../../../content/onboarding.md)
-- Кнопки: `onboarding*` в `locales.json`
-
-## План
-
-1. Один вопрос на шаг; required как в `ReviewPanel`.
-2. `onComplete(answers)` → `go("home")`.
-3. Опционально `src/api/onboarding.js`.
-
-См. [`SCREENS.md`](../../../SCREENS.md).
+См. [`SCREENS.md`](../../../SCREENS.md), [`review-panel/README.md`](../review-panel/README.md).

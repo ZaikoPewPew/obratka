@@ -196,6 +196,7 @@
   --z-base: 1;
   --z-sticky: 50;
   --z-modal: 200;
+  --z-review: 210;
   --z-toast: 300;
 
   /* Брейкпоинты (для документации; в @media — литералы) */
@@ -316,6 +317,32 @@
   --shell-review-done-title-size: var(--font-size-3xl);
   --shell-review-done-title-weight: var(--font-weight-regular);
   --shell-review-done-actions-gap: var(--space-3);
+
+  /* Success screen (пресеты done) */
+  --success-screen-z: var(--z-modal);
+  --success-screen-padding: var(--space-8);
+  --success-screen-width: var(--shell-review-done-width);
+  --success-screen-gap: var(--shell-review-done-gap);
+  --success-screen-title-size: var(--shell-review-done-title-size);
+  --success-screen-title-weight: var(--shell-review-done-title-weight);
+  --success-screen-body-size: var(--font-size-base);
+  --success-screen-actions-gap: var(--shell-review-done-actions-gap);
+
+  /* Home hub */
+  --home-screen-z: var(--z-modal);
+  --home-screen-padding: var(--space-8);
+  --home-screen-content-width: 40rem;
+  --home-screen-gap: var(--space-6);
+  --home-screen-title-size: var(--font-size-3xl);
+  --home-screen-title-weight: var(--font-weight-regular);
+  --home-screen-meta-gap: var(--space-4);
+  --home-screen-balance-size: var(--font-size-base);
+  --home-screen-list-gap: var(--space-3);
+  --home-screen-item-padding-y: var(--space-4);
+  --home-screen-item-padding-x: var(--space-5);
+  --home-screen-item-radius: var(--radius-md);
+  --home-screen-hint-size: var(--font-size-sm);
+
   /* Auth (стиль старого PDF/done: divider + provider buttons) */
   --auth-screen-divider-height: 27px;
   --auth-screen-divider-line: 221px;
@@ -435,6 +462,10 @@
 
   /* Экран опросника (layout как url-screen) */
   --review-screen-reveal-delay-panel: var(--motion-delay-2);
+  /* review-panel / onboarding: top и stage целиком (не поэлементно) */
+  --review-panel-reveal-delay-top: var(--motion-delay-2);
+  --review-panel-reveal-delay-stage: var(--motion-delay-3);
+  --review-panel-reveal-delay-footer: var(--motion-delay-4);
 
   /* Mesh wash (Paper Shaders): цвета и параметры читаются из токенов */
   --url-screen-mesh-1: var(--palette-glow-peach);

@@ -6,6 +6,7 @@ const STORAGE_KEY = "obratka.session";
  *   email?: string;
  *   onboardingDone?: boolean;
  *   referralCode?: string | null;
+ *   balance?: number;
  * }} AppSession
  */
 

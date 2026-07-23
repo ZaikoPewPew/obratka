@@ -1,0 +1,100 @@
+/* Success screen: пресеты quizComplete / portfolioSubmitted / generic. */
+
+.success-screen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--success-screen-z);
+  display: grid;
+  place-items: center;
+  padding: var(--success-screen-padding);
+  background: var(--color-bg);
+  opacity: 0;
+  transform: translateY(var(--motion-reveal-shift));
+  filter: blur(var(--motion-reveal-blur));
+  transition:
+    opacity var(--motion-reveal-duration) var(--motion-reveal-ease),
+    transform var(--motion-reveal-duration) var(--motion-reveal-ease),
+    filter var(--motion-reveal-duration) var(--motion-reveal-ease);
+}
+
+.success-screen--open {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+.success-screen__card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--success-screen-gap);
+  width: min(var(--success-screen-width), 100%);
+}
+
+.success-screen__title {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-family: var(--font-family);
+  font-size: var(--success-screen-title-size);
+  font-weight: var(--success-screen-title-weight);
+  line-height: normal;
+  white-space: pre-line;
+}
+
+.success-screen__body {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-family);
+  font-size: var(--success-screen-body-size);
+  font-weight: var(--font-weight-regular);
+  line-height: normal;
+}
+
+.success-screen__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--success-screen-actions-gap);
+}
+
+.success-screen__btn {
+  min-height: var(--control-btn-height);
+  padding-inline: var(--control-btn-padding-x);
+  border-radius: var(--control-btn-radius);
+  font-family: var(--font-family);
+}
+
+.success-screen__btn--primary {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.success-screen__btn--primary:hover {
+  background: var(--color-accent-hover);
+  color: var(--color-on-accent-hover);
+}
+
+.success-screen__btn--primary:active {
+  background: var(--color-accent-active);
+  color: var(--color-on-accent-active);
+}
+
+.success-screen__btn--secondary {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.success-screen__btn--secondary:hover {
+  background: var(--color-surface-muted-hover);
+}
+
+.success-screen__btn--secondary:active {
+  background: var(--color-surface-muted-active);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .success-screen {
+    transition: none;
+    transform: none;
+    filter: none;
+  }
+}

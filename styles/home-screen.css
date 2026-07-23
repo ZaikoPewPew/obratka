@@ -1,7 +1,198 @@
-/* Home screen: очередь портфолио на ревью.
- *
- * Стили списка / пустого состояния — при реализации home-screen.
- * Только var(--…) из styles/tokens.css.
- *
- * См. SCREENS.md и src/components/home-screen/README.md.
- */
+/* Home screen: полноэкранный хаб (очередь + баланс + CTA). */
+
+.home-screen {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  z-index: var(--home-screen-z);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  font-family: var(--font-family);
+  color: var(--color-text);
+  opacity: 0;
+  transform: translateY(var(--url-screen-exit-shift));
+  pointer-events: none;
+  transition:
+    opacity var(--url-screen-transition-duration) var(--url-screen-transition-ease),
+    transform var(--url-screen-transition-duration) var(--url-screen-transition-ease);
+}
+
+.home-screen--open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.home-screen[hidden] {
+  display: none !important;
+  pointer-events: none;
+}
+
+.home-screen--open .home-screen__inner {
+  animation-name: motion-reveal;
+  animation-duration: var(--motion-reveal-duration);
+  animation-timing-function: var(--motion-reveal-ease);
+  animation-fill-mode: both;
+  animation-delay: var(--url-screen-reveal-delay-title);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-screen {
+    transition-duration: 0.01ms;
+    transition-delay: 0s;
+  }
+
+  .home-screen,
+  .home-screen--open {
+    transform: none;
+  }
+
+  .home-screen--open .home-screen__inner {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+.home-screen__inner {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-screen-gap);
+  flex: 1;
+  width: 100%;
+  max-width: var(--home-screen-content-width);
+  min-height: 0;
+  margin-inline: auto;
+  padding: var(--home-screen-padding);
+}
+
+.home-screen__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--home-screen-meta-gap);
+}
+
+.home-screen__title {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: var(--home-screen-title-size);
+  font-weight: var(--home-screen-title-weight);
+  line-height: normal;
+}
+
+.home-screen__balance {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--home-screen-balance-size);
+}
+
+.home-screen__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-screen-list-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex: 1;
+  overflow: auto;
+}
+
+.home-screen__item-btn {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: var(--home-screen-item-padding-y) var(--home-screen-item-padding-x);
+  border: none;
+  border-radius: var(--home-screen-item-radius);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-screen__item-btn:hover {
+  background: var(--color-surface-muted-hover);
+}
+
+.home-screen__item-btn:active {
+  background: var(--color-surface-muted-active);
+}
+
+.home-screen__item-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+}
+
+.home-screen__empty {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.home-screen__footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.home-screen__add {
+  align-self: flex-start;
+  min-height: var(--control-btn-height);
+  padding-inline: var(--control-btn-padding-x);
+  border-radius: var(--control-btn-radius);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: var(--font-family);
+}
+
+.home-screen__add:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  color: var(--color-on-accent-hover);
+}
+
+.home-screen__add:active:not(:disabled) {
+  background: var(--color-accent-active);
+  color: var(--color-on-accent-active);
+}
+
+.home-screen__add:disabled {
+  opacity: var(--shell-review-choice-disabled-opacity);
+  cursor: not-allowed;
+}
+
+.home-screen__reset {
+  align-self: flex-start;
+  margin-top: var(--space-4);
+  min-height: var(--control-btn-height);
+  padding-inline: var(--control-btn-padding-x);
+  border-radius: var(--control-btn-radius);
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  font-family: var(--font-family);
+}
+
+.home-screen__reset:hover {
+  background: var(--color-surface-muted-hover);
+  color: var(--color-text);
+}
+
+.home-screen__reset:active {
+  background: var(--color-surface-muted-active);
+}
+
+.home-screen__hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--home-screen-hint-size);
+}

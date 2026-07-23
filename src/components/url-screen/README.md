@@ -1,11 +1,11 @@
-# `url-screen` — ссылка на портфолио
+# `url-screen` — подача своего портфолио
 
-Path: **`/portfolio`**. Полноэкранный ввод URL перед ревью (`/review`).
+Path: **`/portfolio`**. Ввод URL со своего Home (нужен баланс ≥ cost).
 
 ## Роль
 
 **Эталон visual** для split-экранов: левая форма + правый mesh/бренд.  
-Referral / auth копируют разметку и классы `.url-screen*`; цель — общий `brand-screen-shell`.
+Referral / auth / onboarding опираются на `.url-screen*`; цель — общий `brand-screen-shell`.
 
 См. [`SCREENS.md`](../../../SCREENS.md).
 
@@ -16,22 +16,14 @@ Referral / auth копируют разметку и классы `.url-screen*`
 
 ## Поведение
 
-Submit валидного URL → `onSubmit(url)` → в `main.js`: оболочка iframe, `syncRoute("review")`, старт таймера (или arm для external).
+Submit валидного URL → `onSubmit(url)` → в `main.js`: `spendSubmitCost` + `submitPortfolio` → `go("done")` с preset `portfolioSubmitted` (без запуска review).
+
+Ревью чужого портфолио стартует с Home (`onOpenPortfolio` → `/review`), не с этого экрана.
 
 ## Motion
 
 При `open()` без handoff: `.url-screen--open`, staggered reveal (`--url-screen-reveal-delay-*` → `--motion-delay-*`).  
 С `handoff: true`: visual/brand без анимации (соседний brand-экран).
-
-| Элемент | Задержка |
-|---------|----------|
-| Visual | `--url-screen-reveal-delay-visual` |
-| Title | `--url-screen-reveal-delay-title` |
-| Field | `--url-screen-reveal-delay-field` |
-| Platforms / avatars | `--url-screen-reveal-delay-platforms` + stagger |
-| Brand | `--url-screen-reveal-delay-brand` |
-
-Keyframes: `styles/entrance.css`. `prefers-reduced-motion: reduce` — off.
 
 ## Стили
 

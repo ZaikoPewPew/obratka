@@ -8,13 +8,14 @@
 
 - `subscribers.js` — сохранение email в таблицу `subscribers` и получение количества подписчиков через RPC/HEAD fallback.
 
-### Каркас (stub, throw / пустой список)
+### Local stubs (до Supabase)
 
 | Файл | Роль |
 |------|------|
-| `auth.js` | signUp / signIn / signOut |
-| `referrals.js` | validate / redeem реферального кода |
-| `portfolios.js` | очередь портфолио на ревью для `home-screen` |
-| `onboarding.js` | сохранение ответов онбординга |
+| `portfolios.js` | mock-очередь + `submitPortfolio` stub |
+| `wallet.js` | баланс / reward / spend (`session.balance`) |
+| `onboarding.js` | `saveOnboardingAnswers` no-op |
+| `auth.js` | signUp / signIn / signOut (stub) |
+| `referrals.js` | validate / redeem (stub) |
 
-См. [`SCREENS.md`](../../SCREENS.md). Paths: `/registration` (auth), `/referral`, `/home`, `/onboarding`.
+См. [`SCREENS.md`](../../SCREENS.md).

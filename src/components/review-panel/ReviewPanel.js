@@ -400,9 +400,7 @@ function createStep(content) {
  *       submitted?: boolean;
  *     },
  *   ) => void;
- *   onExit?: () => void;
- *   onNextCase?: () => void;
- *   onDoneChange?: (done: boolean) => void;
+ *   onComplete?: (answers: Record<string, FormDataEntryValue>) => void | Promise<void>;
  * }} [options]
  * @returns {{
  *   root: HTMLElement;
@@ -411,7 +409,6 @@ function createStep(content) {
  *   close: () => void;
  *   reset: () => void;
  *   focus: () => void;
- *   openDone: () => void;
  * }}
  */
 export function createReviewPanel(options = {}) {
@@ -422,11 +419,8 @@ export function createReviewPanel(options = {}) {
       : () => getStrings().brandName;
   const onReportReveal =
     typeof options.onReportReveal === "function" ? options.onReportReveal : null;
-  const onExit = typeof options.onExit === "function" ? options.onExit : null;
-  const onNextCase =
-    typeof options.onNextCase === "function" ? options.onNextCase : null;
-  const onDoneChange =
-    typeof options.onDoneChange === "function" ? options.onDoneChange : null;
+  const onComplete =
+    typeof options.onComplete === "function" ? options.onComplete : null;
 
   const root = document.createElement("div");
   root.className = "review-panel";
@@ -713,33 +707,7 @@ export function createReviewPanel(options = {}) {
   footer.append(nextBtn, submit);
   form.append(stage, stepError, footer);
 
-  const done = document.createElement("div");
-  done.className = "review-panel__done";
-  done.hidden = true;
-
-  const doneTitle = document.createElement("h2");
-  doneTitle.className = "review-panel__done-title";
-  doneTitle.id = "review-done-title";
-  doneTitle.textContent = t.reviewDoneTitle;
-
-  const actions = document.createElement("div");
-  actions.className = "review-panel__done-actions";
-
-  const exitBtn = document.createElement("button");
-  exitBtn.type = "button";
-  exitBtn.className =
-    "iframe-shell__btn review-panel__done-btn review-panel__done-btn--exit";
-  exitBtn.textContent = t.reviewDoneExit;
-
-  const nextCaseBtn = document.createElement("button");
-  nextCaseBtn.type = "button";
-  nextCaseBtn.className =
-    "iframe-shell__btn review-panel__done-btn review-panel__done-btn--next";
-  nextCaseBtn.textContent = t.reviewDoneNextCase;
-
-  actions.append(exitBtn, nextCaseBtn);
-  done.append(doneTitle, actions);
-  root.append(heading, top, form, done);
+  root.append(heading, top, form);
 
   let currentStep = 0;
   let transitioning = false;
@@ -809,8 +777,7 @@ export function createReviewPanel(options = {}) {
   }
 
   function syncReportReveal() {
-    const onAdvice =
-      done.hidden && !form.hidden && currentStep === totalSteps - 1;
+    const onAdvice = !form.hidden && currentStep === totalSteps - 1;
 
     if (!onAdvice) {
       onReportReveal?.(false);
@@ -827,8 +794,6 @@ export function createReviewPanel(options = {}) {
   function showForm() {
     form.hidden = false;
     top.hidden = false;
-    done.hidden = true;
-    root.classList.remove("review-panel--to-done");
     root.style.minHeight = "";
     form.style.opacity = "";
     form.style.transform = "";
@@ -836,79 +801,17 @@ export function createReviewPanel(options = {}) {
     top.style.opacity = "";
     top.style.transform = "";
     top.style.filter = "";
-    done.style.opacity = "";
-    done.style.transform = "";
-    done.style.filter = "";
     onReportReveal?.(false);
-    onDoneChange?.(false);
   }
 
   /**
-   * Финальный вопрос → done; PDF-лист уезжает вниз.
-   * Form/top сразу уходят из потока (иначе flex-скачок), done входит на --motion-reveal-*.
-   * @returns {Promise<void>}
+   * Финальный submit квиза → колбэк наверх (success-screen в main.js).
+   * @param {Record<string, FormDataEntryValue>} answers
    */
-  async function showDone() {
+  function completeQuiz(answers) {
     clearAdvanceTimer();
-    if (!done.hidden && form.hidden) {
-      onReportReveal?.(false, { submitted: true });
-      onDoneChange?.(true);
-      return;
-    }
-
     onReportReveal?.(false, { submitted: true });
-    onDoneChange?.(true);
-
-    if (prefersReducedMotion()) {
-      form.hidden = true;
-      top.hidden = true;
-      done.hidden = false;
-      form.classList.remove("review-panel__form--advice");
-      return;
-    }
-
-    transitioning = true;
-    const { durationMs, shiftPx, blurPx, easing } = getMotionReveal();
-
-    /* Фиксируем высоту панели, чтобы не схлопнулась между hide form и enter done */
-    root.style.minHeight = `${root.getBoundingClientRect().height}px`;
-    root.classList.add("review-panel--to-done");
-
-    form.hidden = true;
-    top.hidden = true;
-    done.hidden = false;
-    form.classList.remove("review-panel__form--advice");
-
-    const enter = done.animate(
-      [
-        {
-          opacity: 0,
-          transform: `translateY(${shiftPx}px)`,
-          filter: `blur(${blurPx}px)`,
-        },
-        { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
-      ],
-      {
-        duration: durationMs,
-        easing,
-        fill: /** @type {FillMode} */ ("both"),
-      },
-    );
-
-    try {
-      await enter.finished;
-    } finally {
-      if (typeof enter.commitStyles === "function") {
-        enter.commitStyles();
-      }
-      enter.cancel();
-      done.style.opacity = "";
-      done.style.transform = "";
-      done.style.filter = "";
-      root.style.minHeight = "";
-      root.classList.remove("review-panel--to-done");
-      transitioning = false;
-    }
+    void onComplete?.(answers);
   }
 
   /**
@@ -924,30 +827,23 @@ export function createReviewPanel(options = {}) {
   }
 
   /**
-   * @param {HTMLElement} from
-   * @param {HTMLElement} to
+   * Смена шага: весь `review-panel__stage` целиком (вопрос + варианты).
    * @param {1 | -1} direction
+   * @param {() => void} apply
    * @returns {Promise<void>}
    */
-  function animateSteps(from, to, direction) {
+  async function animateStageChange(direction, apply) {
     const { durationMs, shiftPx, blurPx, easing } = getMotionReveal();
     const leaveY = direction > 0 ? -shiftPx : shiftPx;
     const enterY = direction > 0 ? shiftPx : -shiftPx;
-
-    to.hidden = false;
-    to.setAttribute("aria-hidden", "false");
-    to.classList.add("review-panel__step--active");
-    from.classList.remove("review-panel__step--active");
-    from.setAttribute("aria-hidden", "true");
-    from.classList.add("review-panel__step--leaving");
-
+    const halfMs = Math.max(1, Math.round(durationMs / 2));
     const timing = {
-      duration: durationMs,
+      duration: halfMs,
       easing,
       fill: /** @type {FillMode} */ ("forwards"),
     };
 
-    const leave = from.animate(
+    const leave = stage.animate(
       [
         { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
         {
@@ -958,8 +854,12 @@ export function createReviewPanel(options = {}) {
       ],
       timing,
     );
+    await leave.finished.catch(() => undefined);
+    leave.cancel();
 
-    const enter = to.animate(
+    apply();
+
+    const enter = stage.animate(
       [
         {
           opacity: 0,
@@ -970,19 +870,11 @@ export function createReviewPanel(options = {}) {
       ],
       timing,
     );
-
-    return Promise.all([leave.finished, enter.finished]).then(() => {
-      leave.cancel();
-      enter.cancel();
-      from.hidden = true;
-      from.classList.remove("review-panel__step--leaving");
-      from.style.opacity = "";
-      from.style.transform = "";
-      from.style.filter = "";
-      to.style.opacity = "";
-      to.style.transform = "";
-      to.style.filter = "";
-    });
+    await enter.finished.catch(() => undefined);
+    enter.cancel();
+    stage.style.opacity = "";
+    stage.style.transform = "";
+    stage.style.filter = "";
   }
 
   /**
@@ -993,7 +885,6 @@ export function createReviewPanel(options = {}) {
   async function goToStep(nextIndex, opts = {}) {
     const animate = opts.animate !== false && !prefersReducedMotion();
     const direction = opts.direction ?? (nextIndex >= currentStep ? 1 : -1);
-    const from = steps[currentStep]?.step;
     const to = steps[nextIndex]?.step;
     if (!to || nextIndex === currentStep) {
       syncChrome();
@@ -1003,22 +894,31 @@ export function createReviewPanel(options = {}) {
     clearAdvanceTimer();
     const prevIndex = currentStep;
     currentStep = nextIndex;
-    syncChrome();
 
-    if (!animate || !from || prevIndex === nextIndex) {
+    const applyStep = () => {
       steps.forEach((item, index) => {
+        item.step.classList.remove("review-panel__step--leaving");
+        item.step.style.opacity = "";
+        item.step.style.transform = "";
+        item.step.style.filter = "";
         setStepActive(item.step, index === currentStep);
       });
+      syncChrome();
+    };
+
+    if (!animate || prevIndex === nextIndex) {
+      applyStep();
       return;
     }
 
     transitioning = true;
     body.classList.add("review-panel__body--animating");
     try {
-      await animateSteps(from, to, direction);
+      await animateStageChange(direction, applyStep);
     } finally {
       body.classList.remove("review-panel__body--animating");
       transitioning = false;
+      applyStep();
     }
   }
 
@@ -1221,22 +1121,13 @@ export function createReviewPanel(options = {}) {
       return;
     }
 
-    void showDone();
-  });
-
-  exitBtn.addEventListener("click", () => {
-    onExit?.();
-  });
-
-  nextCaseBtn.addEventListener("click", () => {
-    onNextCase?.();
+    void completeQuiz(answers);
   });
 
   function reset() {
     clearAdvanceTimer();
     transitioning = false;
     body.classList.remove("review-panel__body--animating");
-    root.classList.remove("review-panel--to-done");
     root.style.minHeight = "";
     form.reset();
     clearAllSelections();
@@ -1258,9 +1149,6 @@ export function createReviewPanel(options = {}) {
   }
 
   function focus() {
-    if (!done.hidden) {
-      return;
-    }
     focusActiveStep();
   }
 
@@ -1273,8 +1161,5 @@ export function createReviewPanel(options = {}) {
     close,
     reset,
     focus,
-    openDone: () => {
-      void showDone();
-    },
   };
 }

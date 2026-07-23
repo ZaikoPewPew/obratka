@@ -86,8 +86,8 @@ export function resolveEntryScreen(state = {}) {
 export function resolveAccessibleRoute(id, state = {}) {
   const hasPortfolio = Boolean(state.hasPortfolio);
 
-  if (id === "review" || id === "quiz" || id === "done") {
-    if (!hasPortfolio) return "url";
+  if (id === "review" || id === "quiz") {
+    if (!hasPortfolio) return "home";
   }
 
   if (id === "home" || id === "onboarding") {

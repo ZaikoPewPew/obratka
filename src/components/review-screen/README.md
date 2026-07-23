@@ -1,6 +1,6 @@
 # `review-screen` — оболочка квиза
 
-Paths: **`/quiz`** (опрос), **`/quiz/done`** (финал).  
+Path: **`/quiz`**. Финал успеха — отдельный [`success-screen`](../success-screen/README.md) (`/done`).  
 Не путать с **`/review`** — там iframe + таймер (просмотр портфолио).
 
 Split как у `url-screen`: слева `review-panel`, справа brand visual (mesh + noise + лого + PDF-лист).
@@ -18,17 +18,16 @@ Split как у `url-screen`: слева `review-panel`, справа brand visu
 | `setReportReveal(active, payload?)` | PDF-лист; `payload.answers` + `portfolioName` → `buildReportSections` |
 
 Монтаж: `main.js` кладёт `reviewPanel.root` в `content`; `onReportReveal` → `setReportReveal`.  
-URL: `syncRoute("quiz")` при открытии опроса, `syncRoute("done")` при done.
+URL: `syncRoute("quiz")` при открытии опроса; после submit квиза — `go("done")`.
 
 ## Visual (слои)
 
 Снизу вверх (`--shell-review-z-*`): glow → noise → report → brand.
 
-На шаге advice лист выезжает; после submit — уезд + `.review-screen--done` (зелёный mesh).
+На шаге advice лист выезжает; после submit — уезд + `.review-screen--done` (зелёный mesh) до перехода на success.
 
 ## Motion / стили
 
-Токены `--shell-review-*`, `--motion-report-launch-*`. Классы в `iframe-shell.css`.  
-Подробности reveal — ниже по файлу в коде / см. историю в git.
+Токены `--shell-review-*`, `--motion-report-launch-*`. Классы в `iframe-shell.css`.
 
 См. [`review-panel/README.md`](../review-panel/README.md), [`SCREENS.md`](../../../SCREENS.md).

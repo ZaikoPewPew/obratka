@@ -14,7 +14,7 @@ describe("routes", () => {
     assert.equal(pathForRoute("url"), "/portfolio");
     assert.equal(pathForRoute("review"), "/review");
     assert.equal(pathForRoute("quiz"), "/quiz");
-    assert.equal(pathForRoute("done"), "/quiz/done");
+    assert.equal(pathForRoute("done"), "/done");
   });
 
   it("parses pathname with base", () => {
@@ -22,7 +22,7 @@ describe("routes", () => {
     assert.equal(routeIdFromPathname("/registration"), "auth");
     assert.equal(routeIdFromPathname("/obratka/portfolio", "/obratka/"), "url");
     assert.equal(routeIdFromPathname("/obratka/review", "/obratka/"), "review");
-    assert.equal(routeIdFromPathname("/obratka/quiz/done", "/obratka/"), "done");
+    assert.equal(routeIdFromPathname("/obratka/done", "/obratka/"), "done");
     assert.equal(routeIdFromPathname("/obratka/", "/obratka/"), null);
     assert.equal(routeIdFromPathname("/unknown"), null);
   });

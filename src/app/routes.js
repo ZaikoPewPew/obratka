@@ -16,8 +16,8 @@ export const ROUTE_PATHS = Object.freeze({
   review: "/review",
   /** Опрос после таймера */
   quiz: "/quiz",
-  /** Финал опроса */
-  done: "/quiz/done",
+  /** Экран успеха (пресеты: квиз, подача портфолио, generic) */
+  done: "/done",
 });
 
 /** @type {readonly AppRouteId[]} */
