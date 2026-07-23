@@ -48,7 +48,6 @@ const SEED_QUEUE = Object.freeze([
     url: "https://narinkalubluleshku-cmyk.github.io/ux-ui-2-crm-ui/",
     name: "Наринэ Туманова",
     role: "Senior Product Designer",
-    avatarUrl: "https://unavatar.io/github/gaearon",
     previewCount: 3,
     status: "pending",
   },
@@ -57,7 +56,6 @@ const SEED_QUEUE = Object.freeze([
     url: "https://janelle.page",
     name: "Janelle Jumadilova",
     role: "Product Designer",
-    avatarUrl: "https://unavatar.io/github/rauchg",
     previewCount: 3,
     status: "pending",
   },
@@ -171,7 +169,7 @@ export async function getPortfolio(id) {
 /**
  * Подача своего портфолио в очередь (local stub).
  * Появляется в списке на главной и доступно для ревью.
- * Имя/аватар — из Telegram-сессии; роль — грейд + специализация онбординга.
+ * Имя/аватар — из сессии (Google / Telegram); роль — грейд + специализация онбординга.
  *
  * @param {string} rawUrl
  * @returns {Promise<PortfolioQueueItem>}

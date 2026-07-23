@@ -100,6 +100,8 @@
   --color-overlay: rgba(36, 36, 38, 0.45);
   --color-focus-ring: rgba(36, 36, 38, 0.35);
   --color-focus-ring-on-accent: rgba(255, 255, 255, 0.55);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
   --color-error-border: rgba(200, 60, 60, 0.45);
   --color-error-border-strong: rgba(200, 60, 60, 0.55);
 
@@ -333,8 +335,7 @@
   --home-screen-bg: var(--color-bg);
   --home-screen-topbar-height: 80px;
   --home-screen-topbar-padding: var(--space-4);
-  --home-screen-topbar-radius: var(--radius-xl);
-  --home-screen-topbar-bg: transparent;
+  --home-screen-topbar-bg: none;
   --home-screen-mark-width: 44px;
   --home-screen-mark-height: 30px;
   --home-screen-chip-height: var(--space-12);
@@ -354,6 +355,9 @@
   --home-screen-submit-chip-bg-hover: var(--color-accent-hover);
   --home-screen-submit-chip-bg-active: var(--color-accent-active);
   --home-screen-profile-size: var(--space-12);
+  --home-screen-profile-letter-padding: var(--space-3);
+  --home-screen-avatar-letter-bg: var(--palette-gray-900);
+  --home-screen-avatar-letter-color: var(--palette-white);
   --home-screen-body-padding: var(--space-4);
   --home-screen-body-gap: var(--space-4);
   --home-screen-feed-width: 500px;

@@ -33,15 +33,15 @@ const DEV_CREDIT_AMOUNT = 10;
  */
 
 /**
- * @param {string} url
+ * Первая буква имени / email для letter-аватара.
+ * @param {string | null | undefined} label
  * @returns {string}
  */
-function hostFromUrl(url) {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return "";
-  }
+function initialFromLabel(label) {
+  const text = String(label || "").trim();
+  if (!text) return "?";
+  const match = text.match(/\p{L}|\p{N}/u);
+  return (match ? match[0] : text.charAt(0)).toLocaleUpperCase();
 }
 
 /**
@@ -160,7 +160,7 @@ export function createHomeScreen({
 
   const profileBtn = document.createElement("button");
   profileBtn.type = "button";
-  profileBtn.className = "home-screen__profile";
+  profileBtn.className = "home-screen__profile home-screen__profile--letter";
 
   const profileImg = document.createElement("img");
   profileImg.className = "home-screen__profile-img";
@@ -168,8 +168,15 @@ export function createHomeScreen({
   profileImg.width = 48;
   profileImg.height = 48;
   profileImg.decoding = "async";
-  profileBtn.append(profileImg);
+  profileImg.referrerPolicy = "no-referrer";
+  profileImg.hidden = true;
 
+  const profileLetter = document.createElement("span");
+  profileLetter.className = "home-screen__profile-letter";
+  profileLetter.setAttribute("aria-hidden", "true");
+  profileLetter.textContent = "?";
+
+  profileBtn.append(profileImg, profileLetter);
   topActions.append(addBtn, balanceChip, notifyBtn, profileBtn);
   topbar.append(markLink, topActions);
 
@@ -218,36 +225,48 @@ export function createHomeScreen({
   /** @type {HomePortfolioItem[]} */
   let items = [];
 
+  function showProfileLetter(letter) {
+    profileLetter.textContent = letter;
+    profileLetter.hidden = false;
+    profileImg.hidden = true;
+    profileImg.removeAttribute("src");
+    profileBtn.classList.add("home-screen__profile--letter");
+  }
+
+  function showProfilePhoto(src) {
+    profileImg.referrerPolicy = "no-referrer";
+    profileImg.onload = () => {
+      profileImg.hidden = false;
+      profileLetter.hidden = true;
+      profileBtn.classList.remove("home-screen__profile--letter");
+    };
+    profileImg.onerror = () => {
+      showProfileLetter(profileLetter.textContent || "?");
+    };
+    profileImg.src = src;
+  }
+
   function syncProfileAvatar() {
     const session = getSession();
-    const telegramAvatar =
+    const avatarUrl =
       typeof session?.avatarUrl === "string" ? session.avatarUrl.trim() : "";
-    const email = typeof session?.email === "string" ? session.email.trim() : "";
-    const src = telegramAvatar
-      ? telegramAvatar
-      : email && !email.endsWith("@t.me")
-        ? `https://unavatar.io/${encodeURIComponent(email)}`
+    const displayName =
+      typeof session?.displayName === "string"
+        ? session.displayName.trim()
         : "";
+    const email =
+      typeof session?.email === "string" ? session.email.trim() : "";
+    const letter = initialFromLabel(
+      displayName || (email.endsWith("@t.me") ? "" : email),
+    );
+    profileLetter.textContent = letter;
 
-    profileImg.referrerPolicy = "no-referrer";
-    profileImg.hidden = false;
-    profileImg.onerror = () => {
-      profileImg.hidden = true;
-      profileBtn.classList.add("home-screen__profile--empty");
-    };
-    profileImg.onload = () => {
-      profileBtn.classList.remove("home-screen__profile--empty");
-    };
-
-    if (!src) {
-      profileImg.removeAttribute("src");
-      profileImg.hidden = true;
-      profileBtn.classList.add("home-screen__profile--empty");
+    if (!avatarUrl) {
+      showProfileLetter(letter);
       return;
     }
 
-    profileBtn.classList.remove("home-screen__profile--empty");
-    profileImg.src = src;
+    showProfilePhoto(avatarUrl);
   }
 
   function syncCopy() {
@@ -330,7 +349,6 @@ export function createHomeScreen({
     const badges = document.createElement("div");
     badges.className = "home-screen__card-badges";
 
-    const host = hostFromUrl(item.url);
     const platform = document.createElement("span");
     platform.className = "home-screen__badge home-screen__badge--platform";
     const platformIcon = resolvePlatformIcon(item.url);
@@ -359,26 +377,38 @@ export function createHomeScreen({
 
     const avatar = document.createElement("span");
     avatar.className = "home-screen__badge home-screen__badge--avatar";
-    const avatarImg = document.createElement("img");
-    avatarImg.className = "home-screen__badge-img";
-    avatarImg.alt = "";
-    avatarImg.width = 52;
-    avatarImg.height = 52;
-    avatarImg.decoding = "async";
-    avatarImg.loading = "lazy";
-    avatarImg.referrerPolicy = "no-referrer";
+    const personName = item.name || item.url;
+    const letter = initialFromLabel(personName);
     const avatarSrc =
-      item.avatarUrl ||
-      (host ? `https://unavatar.io/${encodeURIComponent(host)}` : "");
+      typeof item.avatarUrl === "string" ? item.avatarUrl.trim() : "";
+
     if (avatarSrc) {
-      avatarImg.src = avatarSrc;
+      const avatarImg = document.createElement("img");
+      avatarImg.className = "home-screen__badge-img";
+      avatarImg.alt = "";
+      avatarImg.width = 52;
+      avatarImg.height = 52;
+      avatarImg.decoding = "async";
+      avatarImg.loading = "lazy";
+      avatarImg.referrerPolicy = "no-referrer";
       avatarImg.addEventListener("error", () => {
         avatarImg.remove();
-        avatar.classList.add("home-screen__badge--empty");
+        avatar.classList.add("home-screen__badge--letter");
+        const letterEl = document.createElement("span");
+        letterEl.className = "home-screen__badge-letter";
+        letterEl.textContent = letter;
+        letterEl.setAttribute("aria-hidden", "true");
+        avatar.append(letterEl);
       });
+      avatarImg.src = avatarSrc;
       avatar.append(avatarImg);
     } else {
-      avatar.classList.add("home-screen__badge--empty");
+      avatar.classList.add("home-screen__badge--letter");
+      const letterEl = document.createElement("span");
+      letterEl.className = "home-screen__badge-letter";
+      letterEl.textContent = letter;
+      letterEl.setAttribute("aria-hidden", "true");
+      avatar.append(letterEl);
     }
 
     badges.append(platform, avatar);

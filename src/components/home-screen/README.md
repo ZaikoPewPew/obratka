@@ -7,10 +7,11 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 Очередь: mock seed (`Наринэ`, `Janelle`) + поданные URL из localStorage (`obratka.submittedPortfolios`).  
 Клик по карточке → `onOpenPortfolio` → `/review`.  
 CTA «Закинуть своё» — в топбаре слева от баланса. Dev-кнопки — под лентой.  
-Лента по центру экрана; на десктопе слева от неё sticky-панель (верх вровень с первой карточкой, отступ `--home-screen-aside-gap`).
+Лента ровно по центру экрана; на десктопе слева от неё sticky-панель (прилегает с `--home-screen-aside-gap`).
+Topbar без фона (`--home-screen-topbar-bg: none`).
 
-Профиль в шапке: `session.avatarUrl` (Telegram `photo_url`), иначе unavatar по email.  
-Баланс: `profiles.balance` из Supabase → сессия (`refreshWalletFromServer` при open/refresh).
+Профиль в шапке: `session.avatarUrl` (Google / Telegram), иначе буква из `displayName`.  
+Без unavatar. Баланс: `profiles.balance` из Supabase → сессия (`refreshWalletFromServer` при open/refresh).
 
 ### Поля карточки
 
@@ -18,8 +19,8 @@ CTA «Закинуть своё» — в топбаре слева от бала
 |---------|----------|
 | Превью | thum.io / fallback |
 | Иконка площадки | Simple Icons для известных сервисов; иначе литера **W** (кастомный сайт) |
-| Аватар | `item.avatarUrl` ← Telegram `photo_url` |
-| ФИО | `item.name` ← `session.displayName` |
+| Аватар | `item.avatarUrl` (фото Google/Telegram) или буква из `item.name` |
+| ФИО | `item.name` ← `session.displayName` (для своих) / seed |
 | Роль | всегда EN Title Case: `Senior Product Designer` (`formatPortfolioRole`) |
 | Счётчик | `{current} из {total}` (`previewCount`) |
 
