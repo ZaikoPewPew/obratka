@@ -416,6 +416,8 @@ body {
 .review-panel__body {
   position: relative;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   flex: 0 0 auto;
   width: 100%;
   min-height: var(--shell-review-body-min-height);
@@ -424,6 +426,11 @@ body {
 
 .review-panel__body--animating {
   overflow: visible;
+}
+
+.review-panel__body:has(.review-panel__step--active .review-panel__scale-block) {
+  min-height: 0;
+  justify-content: center;
 }
 
 .review-panel__step {
@@ -1363,6 +1370,10 @@ body {
   width: min(var(--url-screen-form-width), 100%);
 }
 
+.url-screen__block[hidden] {
+  display: none;
+}
+
 .url-screen__title {
   margin: 0;
   font-family: var(--font-family);
@@ -1698,12 +1709,24 @@ body {
   min-width: 0;
   min-height: 0;
   border-radius: var(--url-screen-visual-radius);
-  background: var(--url-screen-visual-wash);
+  background-color: var(--url-screen-visual-wash);
+  transition: background-color var(--shell-review-mesh-done-duration)
+    var(--shell-review-brand-motion-ease);
+}
+
+.url-screen--done .url-screen__visual,
+.url-screen--done .url-screen__glow {
+  --url-screen-mesh-1: var(--shell-review-mesh-done-1);
+  --url-screen-mesh-2: var(--shell-review-mesh-done-2);
+  --url-screen-mesh-3: var(--shell-review-mesh-done-3);
+  --url-screen-mesh-4: var(--shell-review-mesh-done-4);
+  --url-screen-visual-wash: var(--shell-review-mesh-done-wash);
 }
 
 .url-screen__glow {
   position: absolute;
   inset: 0;
+  z-index: var(--shell-review-z-glow);
   overflow: hidden;
   pointer-events: none;
 }
@@ -1711,7 +1734,7 @@ body {
 .url-screen__noise {
   position: absolute;
   inset: 0;
-  z-index: var(--z-base);
+  z-index: var(--shell-review-z-noise);
   opacity: var(--url-screen-noise-opacity);
   pointer-events: none;
   /* Figma Noise: Mono, size 0.5, density 100%, #F3F4F7 */
@@ -1721,14 +1744,147 @@ body {
   background-repeat: repeat;
 }
 
+.url-screen__preview {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  z-index: var(--shell-review-z-report);
+  width: min(var(--shell-review-report-width), 120%);
+  height: var(--shell-review-report-height);
+  transform: translate(-50%, var(--shell-review-report-shift-hidden));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--shell-review-report-duration) var(--shell-review-report-ease),
+    opacity var(--shell-review-report-fade-duration) var(--shell-review-report-ease);
+}
+
+.url-screen--preview .url-screen__preview {
+  transform: translate(-50%, var(--shell-review-report-shift-shown));
+  opacity: 1;
+}
+
+.url-screen__preview-sheet {
+  box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: var(--shell-review-report-radius) var(--shell-review-report-radius) 0 0;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sheet);
+}
+
+.url-screen__preview-stub {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: var(--space-4);
+  width: 100%;
+  height: 100%;
+  padding: var(--shell-review-report-padding-y) var(--shell-review-report-padding-x);
+}
+
+.url-screen__preview-stub-title {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-snug);
+  color: var(--color-text-strong);
+}
+
+.url-screen__preview-stub-line {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-loose);
+  color: var(--color-text-muted);
+}
+
+.url-screen__done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--shell-review-done-gap);
+  width: min(var(--shell-review-done-width), 100%);
+  margin: 0 auto;
+  min-height: 0;
+  justify-content: center;
+  text-align: center;
+  padding: 0;
+}
+
+.url-screen__done[hidden] {
+  display: none;
+}
+
+.url-screen__done-title {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--shell-review-done-title-size);
+  font-weight: var(--shell-review-done-title-weight);
+  line-height: var(--line-height-snug);
+  color: var(--color-text);
+  text-align: center;
+  white-space: pre-line;
+}
+
+.url-screen__done-actions {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: var(--shell-review-done-actions-gap);
+  width: min(var(--url-screen-done-btn-width), 100%);
+}
+
+.url-screen__done-btn {
+  flex: 0 0 auto;
+  width: 100%;
+  min-height: var(--shell-review-control-height);
+  padding: var(--shell-review-control-padding-y) var(--shell-review-control-padding-x);
+  border-radius: var(--radius-md);
+  font-size: var(--shell-review-control-font-size);
+  font-weight: var(--shell-review-control-font-weight);
+  line-height: var(--shell-review-control-line-height);
+  text-align: center;
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.url-screen__done-btn:hover {
+  background: var(--color-surface-muted-hover);
+}
+
+.url-screen__done-btn:active {
+  background: var(--color-surface-muted-active);
+}
+
 .url-screen__brand {
   position: absolute;
   inset: 0;
-  z-index: var(--z-base);
+  z-index: var(--shell-review-z-brand);
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
+}
+
+.url-screen__brand-slot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition:
+    top var(--shell-review-brand-motion-duration) var(--shell-review-brand-motion-ease),
+    transform var(--shell-review-brand-motion-duration) var(--shell-review-brand-motion-ease);
+}
+
+.url-screen--preview .url-screen__brand-slot {
+  top: var(--shell-review-brand-top);
+  transform: translate(-50%, 0);
 }
 
 .url-screen__brand-mark {
@@ -1779,11 +1935,14 @@ body {
   }
 
   .review-screen__report,
-  .review-screen__brand-slot {
+  .review-screen__brand-slot,
+  .url-screen__preview,
+  .url-screen__brand-slot {
     transition-duration: 0.01ms;
   }
 
-  .review-screen__visual {
+  .review-screen__visual,
+  .url-screen__visual {
     transition-duration: 0.01ms;
   }
 }

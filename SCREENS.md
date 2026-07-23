@@ -9,7 +9,7 @@
 ```text
 referral → auth → onboarding → home
                               ├─ pick → review → quiz → /quiz/done (review-panel done)
-                              └─ submit (url) → /done (success-screen portfolioSubmitted)
+                              └─ submit (url) → done на url-screen → /done (URL sync)
 ```
 
 | Шаг | Экран | Path | Смысл |
@@ -21,7 +21,7 @@ referral → auth → onboarding → home
 | 5a | iframe-shell | `/review` | Ревью выбранного портфолио |
 | 5b | `url-screen` | `/portfolio` | Подача своего URL (нужен баланс) |
 | 6 | `review-screen` + `review-panel` | `/quiz` → `/quiz/done` | Квиз; финал слева + улет отчёта |
-| 7 | `success-screen` | `/done` | Успех подачи портфолио |
+| 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query (`?ref=`, `?lang=`) сохраняются.
 
@@ -39,7 +39,9 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 
 Смена соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
-`home-screen` / `success-screen` — отдельные полноэкранные слои.  
+`home-screen` — отдельный полноэкранный слой.  
+`url-screen` — split; при URL справа заглушка «Портфолио»; submit → done на том же экране (как quiz).  
+`success-screen` — запасной `/done` (deep link); основной submit больше не прыгает сюда.  
 `review-screen` — split для квиза (слева panel, справа visual + PDF-лист).
 
 ## Дерево файлов

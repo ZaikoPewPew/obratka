@@ -503,6 +503,7 @@ export function createReviewPanel(options = {}) {
     createChoice("grade", "junior", t.reviewGradeJunior, t.reviewGradeJuniorHint),
     createChoice("grade", "mid", t.reviewGradeMid, t.reviewGradeMidHint),
     createChoice("grade", "senior", t.reviewGradeSenior, t.reviewGradeSeniorHint),
+    createChoice("grade", "staff", t.reviewGradeStaff, t.reviewGradeStaffHint),
     createChoice("grade", "lead", t.reviewGradeLead, t.reviewGradeLeadHint),
     createChoice("grade", "head", t.reviewGradeHead, t.reviewGradeHeadHint),
   ].map((c) => c.label);
@@ -850,7 +851,7 @@ export function createReviewPanel(options = {}) {
 
   /**
    * Финальный вопрос → done слева; PDF-лист уезжает вниз справа.
-   * Form/top сразу уходят из потока (иначе flex-скачок), done входит на --motion-reveal-*.
+   * Form/top уходят на --motion-reveal-*, done входит тем же языком.
    * @param {Record<string, FormDataEntryValue> | null} [answers]
    * @returns {Promise<void>}
    */
@@ -881,10 +882,50 @@ export function createReviewPanel(options = {}) {
 
     transitioning = true;
     const { durationMs, shiftPx, blurPx, easing } = getMotionReveal();
+    const halfMs = Math.max(1, Math.round(durationMs / 2));
+    const leaveTiming = {
+      duration: halfMs,
+      easing,
+      fill: /** @type {FillMode} */ ("forwards"),
+    };
 
-    /* Фиксируем высоту панели, чтобы не схлопнулась между hide form и enter done */
+    /* Фиксируем высоту панели, чтобы не схлопнулась между leave и enter */
     root.style.minHeight = `${root.getBoundingClientRect().height}px`;
     root.classList.add("review-panel--to-done");
+
+    const leaveTargets = [top, form].filter((el) => !el.hidden);
+    const leaveAnims = leaveTargets.map((el) =>
+      el.animate(
+        [
+          {
+            opacity: 1,
+            transform: "translateY(0)",
+            filter: "blur(0px)",
+          },
+          {
+            opacity: 0,
+            transform: `translateY(${-shiftPx}px)`,
+            filter: `blur(${blurPx}px)`,
+          },
+        ],
+        leaveTiming,
+      ),
+    );
+
+    try {
+      await Promise.all(
+        leaveAnims.map((anim) => anim.finished.catch(() => undefined)),
+      );
+    } finally {
+      for (const anim of leaveAnims) {
+        anim.cancel();
+      }
+      for (const el of leaveTargets) {
+        el.style.opacity = "";
+        el.style.transform = "";
+        el.style.filter = "";
+      }
+    }
 
     form.hidden = true;
     top.hidden = true;
@@ -901,7 +942,7 @@ export function createReviewPanel(options = {}) {
         { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
       ],
       {
-        duration: durationMs,
+        duration: halfMs,
         easing,
         fill: /** @type {FillMode} */ ("both"),
       },
@@ -936,7 +977,7 @@ export function createReviewPanel(options = {}) {
   }
 
   /**
-   * Смена шага: весь `review-panel__stage` целиком (вопрос + варианты).
+   * Смена шага: `review-panel__stage` + footer (Продолжить) одной пачкой.
    * @param {1 | -1} direction
    * @param {() => void} apply
    * @returns {Promise<void>}
@@ -952,38 +993,57 @@ export function createReviewPanel(options = {}) {
       fill: /** @type {FillMode} */ ("forwards"),
     };
 
-    const leave = stage.animate(
-      [
-        { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
-        {
-          opacity: 0,
-          transform: `translateY(${leaveY}px)`,
-          filter: `blur(${blurPx}px)`,
-        },
-      ],
-      timing,
-    );
-    await leave.finished.catch(() => undefined);
-    leave.cancel();
+    /**
+     * @param {HTMLElement[]} targets
+     * @param {Keyframe[]} keyframes
+     */
+    async function runPack(targets, keyframes) {
+      if (targets.length === 0) return;
+      const anims = targets.map((el) => el.animate(keyframes, timing));
+      await Promise.all(
+        anims.map((anim) => anim.finished.catch(() => undefined)),
+      );
+      for (const anim of anims) {
+        anim.cancel();
+      }
+      for (const el of targets) {
+        el.style.opacity = "";
+        el.style.transform = "";
+        el.style.filter = "";
+      }
+    }
+
+    const leaveTargets = [stage];
+    if (!footer.hidden) {
+      leaveTargets.push(footer);
+    }
+
+    await runPack(leaveTargets, [
+      { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
+      {
+        opacity: 0,
+        transform: `translateY(${leaveY}px)`,
+        filter: `blur(${blurPx}px)`,
+      },
+    ]);
 
     apply();
 
-    const enter = stage.animate(
-      [
-        {
-          opacity: 0,
-          transform: `translateY(${enterY}px)`,
-          filter: `blur(${blurPx}px)`,
-        },
-        { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
-      ],
-      timing,
-    );
-    await enter.finished.catch(() => undefined);
-    enter.cancel();
-    stage.style.opacity = "";
-    stage.style.transform = "";
-    stage.style.filter = "";
+    const enterTargets = [stage];
+    if (!footer.hidden) {
+      /* Не дать CSS motion-reveal с --open перезапуститься поверх WAAPI. */
+      footer.style.animation = "none";
+      enterTargets.push(footer);
+    }
+
+    await runPack(enterTargets, [
+      {
+        opacity: 0,
+        transform: `translateY(${enterY}px)`,
+        filter: `blur(${blurPx}px)`,
+      },
+      { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
+    ]);
   }
 
   /**
@@ -1247,6 +1307,7 @@ export function createReviewPanel(options = {}) {
     body.classList.remove("review-panel__body--animating");
     root.classList.remove("review-panel--to-done");
     root.style.minHeight = "";
+    footer.style.animation = "";
     completedAnswers = null;
     form.reset();
     clearAllSelections();

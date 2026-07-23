@@ -2,14 +2,18 @@
 
 Path: **`/done`** (`success`). Только для **подачи своего портфолио** (и generic). Финал квиза — в `review-panel` на `/quiz/done`.
 
+## Layout
+
+Split: слева тайтл + кнопка в стиле «Выйти», справа зелёный mesh + brand (без листа — превью живёт на `url-screen`).
+
 ## Пресеты
 
 | Id | Когда | CTA |
 |----|--------|-----|
-| `portfolioSubmitted` | после подачи портфолио | На главную |
+| `portfolioSubmitted` | после подачи портфолио | Выйти (`reviewDoneExit`) |
 | `generic` | deep link / запасной | На главную |
 
-Конфиг: `successPresets.js`. Копирайт: `success*` в `locales.json`.
+Конфиг: `successPresets.js`. Копирайт: `success*` / `reviewDoneExit` в `locales.json`.
 
 ## API
 

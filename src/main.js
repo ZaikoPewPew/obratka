@@ -420,17 +420,20 @@ const urlScreen = createUrlScreen({
   onSubmit: async (url) => {
     if (!canSubmitPortfolio()) {
       go("home", { replace: true });
-      return;
+      throw new Error("url.submit_locked");
     }
     try {
       spendSubmitCost();
       await submitPortfolio(url);
     } catch {
       go("home", { replace: true });
-      return;
+      throw new Error("url.submit_failed");
     }
-    pendingSuccessPreset = "portfolioSubmitted";
-    go("success", { replace: true });
+    /* Done UI остаётся на url-screen (как quiz → done), без скачка на success. */
+    syncRoute("success", { replace: true });
+  },
+  onExit: () => {
+    go("home", { replace: true });
   },
 });
 

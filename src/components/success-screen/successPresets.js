@@ -18,8 +18,7 @@ export const SUCCESS_PRESETS = Object.freeze({
   portfolioSubmitted: Object.freeze({
     id: "portfolioSubmitted",
     titleKey: "successPortfolioTitle",
-    bodyKey: "successPortfolioBody",
-    primaryKey: "successPortfolioPrimary",
+    primaryKey: "reviewDoneExit",
   }),
   generic: Object.freeze({
     id: "generic",

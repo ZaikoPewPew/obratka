@@ -8,12 +8,20 @@
       "labelKey": "onboardingStepRoleLabel",
       "options": [
         {
+          "value": "web-designer",
+          "labelKey": "onboardingStepRoleWeb"
+        },
+        {
           "value": "product-designer",
           "labelKey": "onboardingStepRoleProduct"
         },
         {
-          "value": "visual-designer",
-          "labelKey": "onboardingStepRoleVisual"
+          "value": "emotional-designer",
+          "labelKey": "onboardingStepRoleEmotional"
+        },
+        {
+          "value": "ux-ui-designer",
+          "labelKey": "onboardingStepRoleUxUi"
         },
         {
           "value": "other",
@@ -28,16 +36,28 @@
       "labelKey": "onboardingStepGoalLabel",
       "options": [
         {
-          "value": "give-reviews",
-          "labelKey": "onboardingStepGoalGive"
+          "value": "level-up",
+          "labelKey": "onboardingStepGoalLevelUp"
+        },
+        {
+          "value": "give-feedback",
+          "labelKey": "onboardingStepGoalGiveFeedback"
+        },
+        {
+          "value": "improve-portfolio",
+          "labelKey": "onboardingStepGoalImprovePortfolio"
         },
         {
           "value": "get-reviews",
-          "labelKey": "onboardingStepGoalGet"
+          "labelKey": "onboardingStepGoalGetReviews"
         },
         {
-          "value": "both",
-          "labelKey": "onboardingStepGoalBoth"
+          "value": "find-talent",
+          "labelKey": "onboardingStepGoalFindTalent"
+        },
+        {
+          "value": "explore",
+          "labelKey": "onboardingStepGoalExplore"
         }
       ]
     }

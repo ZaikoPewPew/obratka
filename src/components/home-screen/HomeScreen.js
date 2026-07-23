@@ -2,9 +2,13 @@ import { formatString, getStrings } from "../../i18n.js";
 import { listPortfoliosForReview } from "../../api/portfolios.js";
 import {
   canSubmitPortfolio,
+  creditBalance,
   getBalance,
   SUBMIT_COST,
 } from "../../api/wallet.js";
+
+/** Сколько монет даёт dev-кнопка на главной. */
+const DEV_CREDIT_AMOUNT = 10;
 
 /**
  * @typedef {{
@@ -71,11 +75,15 @@ export function createHomeScreen({
   hint.className = "home-screen__hint";
   hint.hidden = true;
 
+  const addCoinsBtn = document.createElement("button");
+  addCoinsBtn.type = "button";
+  addCoinsBtn.className = "iframe-shell__btn home-screen__reset";
+
   const resetBtn = document.createElement("button");
   resetBtn.type = "button";
   resetBtn.className = "iframe-shell__btn home-screen__reset";
 
-  footer.append(addBtn, hint, resetBtn);
+  footer.append(addBtn, hint, addCoinsBtn, resetBtn);
 
   const inner = document.createElement("div");
   inner.className = "home-screen__inner";
@@ -91,6 +99,12 @@ export function createHomeScreen({
     list.setAttribute("aria-label", t.homeListAria);
     empty.textContent = t.homeEmpty;
     addBtn.textContent = t.homeAddPortfolio;
+    addCoinsBtn.textContent = formatString(t.homeAddCoins, {
+      amount: DEV_CREDIT_AMOUNT,
+    });
+    addCoinsBtn.title = formatString(t.homeAddCoinsTitle, {
+      amount: DEV_CREDIT_AMOUNT,
+    });
     resetBtn.textContent = t.homeResetSession;
     resetBtn.title = t.homeResetSessionTitle;
     balance.textContent = formatString(t.homeBalance, {
@@ -172,6 +186,11 @@ export function createHomeScreen({
   addBtn.addEventListener("click", () => {
     if (addBtn.disabled) return;
     void onAddPortfolio?.();
+  });
+
+  addCoinsBtn.addEventListener("click", () => {
+    creditBalance(DEV_CREDIT_AMOUNT);
+    syncCopy();
   });
 
   resetBtn.addEventListener("click", () => {

@@ -318,9 +318,9 @@
   --shell-review-done-title-weight: var(--font-weight-regular);
   --shell-review-done-actions-gap: var(--space-3);
 
-  /* Success screen (пресеты done) */
+  /* Success screen (тайтл + exit, без листа) */
   --success-screen-z: var(--z-modal);
-  --success-screen-padding: var(--space-8);
+  --success-screen-padding: var(--url-screen-padding);
   --success-screen-width: var(--shell-review-done-width);
   --success-screen-gap: var(--shell-review-done-gap);
   --success-screen-title-size: var(--shell-review-done-title-size);
@@ -447,6 +447,7 @@
   --url-screen-avatar-stroke: 4px;
   --url-screen-avatar-overlap: 5px;
   --url-screen-avatar-stack-width: 113px;
+  --url-screen-done-btn-width: var(--auth-screen-provider-width);
   --url-screen-avatar-logo-size: calc(var(--url-screen-avatar-size) / 1.5);
   --url-screen-avatar-framer-bg: var(--palette-black);
   --url-screen-avatar-notion-bg: var(--palette-notion-amber);

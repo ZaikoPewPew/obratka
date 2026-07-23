@@ -4,7 +4,7 @@
  */
 
 /**
- * @typedef {'junior' | 'mid' | 'senior' | 'lead' | 'head'} Grade
+ * @typedef {'junior' | 'mid' | 'senior' | 'staff' | 'lead' | 'head'} Grade
  * @typedef {'mess' | 'dump' | 'outline' | 'clear'} Structure
  * @typedef {'none' | 'vanity' | 'nominal' | 'solid' | 'strong'} Metrics
  * @typedef {'yes' | 'maybe' | 'no'} Hire
@@ -103,6 +103,8 @@ function gradeText(grade, t) {
       return t.reportGradeHead;
     case "lead":
       return t.reportGradeLead;
+    case "staff":
+      return t.reportGradeStaff;
     case "senior":
       return t.reportGradeSenior;
     case "mid":
@@ -204,6 +206,7 @@ function isGrade(value) {
     value === "junior" ||
     value === "mid" ||
     value === "senior" ||
+    value === "staff" ||
     value === "lead" ||
     value === "head"
   );

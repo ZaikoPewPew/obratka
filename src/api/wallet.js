@@ -44,6 +44,17 @@ export function awardReviewReward() {
 }
 
 /**
+ * Начислить монеты (dev / тестирование).
+ * @param {number} amount
+ * @returns {number} новый баланс
+ */
+export function creditBalance(amount) {
+  const n = typeof amount === "number" && Number.isFinite(amount) ? amount : 0;
+  if (n <= 0) return getBalance();
+  return writeBalance(getBalance() + n);
+}
+
+/**
  * Списать стоимость подачи портфолио.
  * @returns {number} новый баланс
  * @throws {Error} если недостаточно средств

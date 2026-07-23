@@ -173,13 +173,16 @@
 
 .home-screen__reset {
   align-self: flex-start;
-  margin-top: var(--space-4);
   min-height: var(--control-btn-height);
   padding-inline: var(--control-btn-padding-x);
   border-radius: var(--control-btn-radius);
   background: var(--color-surface-muted);
   color: var(--color-text-muted);
   font-family: var(--font-family);
+}
+
+.home-screen__hint + .home-screen__reset {
+  margin-top: var(--space-4);
 }
 
 .home-screen__reset:hover {
