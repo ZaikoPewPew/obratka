@@ -210,10 +210,16 @@ export function createHomeScreen({
 
   function syncProfileAvatar() {
     const session = getSession();
+    const telegramAvatar =
+      typeof session?.avatarUrl === "string" ? session.avatarUrl.trim() : "";
     const email = typeof session?.email === "string" ? session.email.trim() : "";
-    const src = email
-      ? `https://unavatar.io/${encodeURIComponent(email)}`
-      : "https://unavatar.io/github/octocat";
+    const src = telegramAvatar
+      ? telegramAvatar
+      : email && !email.endsWith("@t.me")
+        ? `https://unavatar.io/${encodeURIComponent(email)}`
+        : "";
+
+    profileImg.referrerPolicy = "no-referrer";
     profileImg.hidden = false;
     profileImg.onerror = () => {
       profileImg.hidden = true;
@@ -222,6 +228,15 @@ export function createHomeScreen({
     profileImg.onload = () => {
       profileBtn.classList.remove("home-screen__profile--empty");
     };
+
+    if (!src) {
+      profileImg.removeAttribute("src");
+      profileImg.hidden = true;
+      profileBtn.classList.add("home-screen__profile--empty");
+      return;
+    }
+
+    profileBtn.classList.remove("home-screen__profile--empty");
     profileImg.src = src;
   }
 
