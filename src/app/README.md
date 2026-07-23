@@ -18,7 +18,8 @@
 | Id | Path | Смысл |
 |----|------|--------|
 | `referral` | `/referral` | Реферальный код |
-| `auth` | `/registration` | Регистрация (Telegram / Google / email UI) |
+| `auth` | `/registration` | Email → code screen / Telegram / Google |
+| `authCode` | `/registration/code` | 6-digit Email OTP + resend cooldown |
 | `onboarding` | `/onboarding` | Онбординг → profiles |
 | `home` | `/home` | Главная (хаб) |
 | `url` | `/portfolio` | Подача своего портфолио |
@@ -26,20 +27,23 @@
 | `quiz` | `/quiz` | Квиз / опрос после таймера |
 | `done` | `/quiz/done` | Финал квиза (review-panel done + улет отчёта) |
 | `success` | `/done` | Успех подачи портфолио (success-screen) |
+| `banned` | `/banned` | Аккаунт заблокирован (ban-screen); escape-proof |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query вроде `?ref=` / `?lang=` сохраняются.  
-Google OAuth return обрабатывается в `main.js` до роутинга (`completeOAuthFromUrl`).
+Google OAuth return обрабатывается в `main.js` до роутинга (`completeOAuthFromUrl`); ошибка → `obratka.authProviderError` → показ на `auth`.  
+`session.banned` синкается из `profiles.banned_at` (`applyProviderUser` / `refreshSessionFromProfile`); при `true` любой маршрут → `banned`.
 
 На GitHub Pages SPA-fallback: `dist/404.html` (= копия `index.html`) из `npm run build`.
 
 ## Порядок экранов
 
 ```text
-referral → auth → onboarding → home
+referral → auth → (authCode) → onboarding → home
   home → review → quiz → /quiz/done
   home → url → /done (portfolioSubmitted)
 ```
 
+Auth-защита и Dashboard: [`auth-screen/README.md`](../components/auth-screen/README.md).  
 См. корневой [`SCREENS.md`](../../SCREENS.md).
 
 ## Правило

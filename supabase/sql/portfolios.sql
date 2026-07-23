@@ -1,5 +1,6 @@
 -- public.portfolios + public.reviews — общая очередь портфолио и факты ревью
 -- Применяется через Supabase migrations / MCP apply_migration.
+-- Depends on public.is_profile_banned() from profiles.sql (apply profiles first).
 
 create table if not exists public.portfolios (
   id uuid primary key default gen_random_uuid(),
@@ -115,7 +116,10 @@ drop policy if exists "portfolios_insert_own" on public.portfolios;
 create policy "portfolios_insert_own"
   on public.portfolios for insert
   to authenticated
-  with check (owner_id = auth.uid());
+  with check (
+    owner_id = auth.uid()
+    and not public.is_profile_banned(auth.uid())
+  );
 
 -- Счётчик/статус обновляет только security definer trigger.
 drop policy if exists "reviews_select_own" on public.reviews;
@@ -130,6 +134,7 @@ create policy "reviews_insert_own"
   to authenticated
   with check (
     reviewer_id = auth.uid()
+    and not public.is_profile_banned(auth.uid())
     and exists (
       select 1
       from public.portfolios p

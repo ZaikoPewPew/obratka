@@ -2,13 +2,14 @@
  * Path-карта экранов. Источник правды для URL ↔ id.
  * Base (`import.meta.env.BASE_URL`) учитывается в router.js.
  *
- * @typedef {'referral' | 'auth' | 'onboarding' | 'home' | 'url' | 'review' | 'quiz' | 'done' | 'success'} AppRouteId
+ * @typedef {'referral' | 'auth' | 'authCode' | 'onboarding' | 'home' | 'url' | 'review' | 'quiz' | 'done' | 'success' | 'banned'} AppRouteId
  */
 
 /** @type {Readonly<Record<AppRouteId, string>>} */
 export const ROUTE_PATHS = Object.freeze({
   referral: "/referral",
   auth: "/registration",
+  authCode: "/registration/code",
   onboarding: "/onboarding",
   home: "/home",
   url: "/portfolio",
@@ -20,6 +21,8 @@ export const ROUTE_PATHS = Object.freeze({
   done: "/quiz/done",
   /** Успех подачи своего портфолио (success-screen) */
   success: "/done",
+  /** Аккаунт заблокирован (ban-screen) */
+  banned: "/banned",
 });
 
 /** @type {readonly AppRouteId[]} */

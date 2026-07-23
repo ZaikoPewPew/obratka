@@ -11,20 +11,24 @@ describe("routes", () => {
   it("maps ids to paths", () => {
     assert.equal(pathForRoute("referral"), "/referral");
     assert.equal(pathForRoute("auth"), "/registration");
+    assert.equal(pathForRoute("authCode"), "/registration/code");
     assert.equal(pathForRoute("url"), "/portfolio");
     assert.equal(pathForRoute("review"), "/review");
     assert.equal(pathForRoute("quiz"), "/quiz");
     assert.equal(pathForRoute("done"), "/quiz/done");
     assert.equal(pathForRoute("success"), "/done");
+    assert.equal(pathForRoute("banned"), "/banned");
   });
 
   it("parses pathname with base", () => {
     assert.equal(routeIdFromPathname("/referral"), "referral");
     assert.equal(routeIdFromPathname("/registration"), "auth");
+    assert.equal(routeIdFromPathname("/registration/code"), "authCode");
     assert.equal(routeIdFromPathname("/obratka/portfolio", "/obratka/"), "url");
     assert.equal(routeIdFromPathname("/obratka/review", "/obratka/"), "review");
     assert.equal(routeIdFromPathname("/obratka/quiz/done", "/obratka/"), "done");
     assert.equal(routeIdFromPathname("/obratka/done", "/obratka/"), "success");
+    assert.equal(routeIdFromPathname("/obratka/banned", "/obratka/"), "banned");
     assert.equal(routeIdFromPathname("/obratka/", "/obratka/"), null);
     assert.equal(routeIdFromPathname("/unknown"), null);
   });

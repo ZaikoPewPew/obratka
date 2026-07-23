@@ -33,6 +33,12 @@
   --palette-red-soft: #fff8f8;
   --palette-green: #00c023;
   --palette-brand-hot: #f9392a;
+  /* Ban-screen mesh (accent #FF4837 family) */
+  --palette-ban: #ff4837;
+  --palette-glow-ban-mist: #ffe8e5;
+  --palette-glow-ban-soft: #ffb4ac;
+  --palette-glow-ban-mid: #ff6f61;
+  --palette-glow-ban-deep: #e03a2a;
   --palette-glow-blue: #8bb5ff;
   --palette-glow-cyan: #e1fbff;
   --palette-glow-azure: #0094ff;
@@ -331,6 +337,27 @@
   --success-screen-body-size: var(--font-size-base);
   --success-screen-actions-gap: var(--shell-review-done-actions-gap);
 
+  /* Ban screen (locked account — same layout as success, red mesh) */
+  --ban-screen-z: var(--z-modal);
+  --ban-screen-padding: var(--url-screen-padding);
+  --ban-screen-width: var(--shell-review-done-width);
+  --ban-screen-gap: var(--shell-review-done-gap);
+  --ban-screen-title-size: var(--shell-review-done-title-size);
+  --ban-screen-title-weight: var(--shell-review-done-title-weight);
+  --ban-screen-body-size: var(--font-size-base);
+  --ban-screen-actions-gap: var(--shell-review-done-actions-gap);
+  /* Mark with flame: same width as brand, taller; nudge keeps bottom/right with old 44×30 */
+  --ban-screen-brand-width: 44px;
+  --ban-screen-brand-height: 37px;
+  --ban-screen-brand-align-y: calc(
+    (var(--ban-screen-brand-height) - var(--url-screen-brand-height)) / -2
+  );
+  --shell-ban-mesh-1: var(--palette-glow-ban-mist);
+  --shell-ban-mesh-2: var(--palette-glow-ban-soft);
+  --shell-ban-mesh-3: var(--palette-glow-ban-mid);
+  --shell-ban-mesh-4: var(--palette-ban);
+  --shell-ban-mesh-wash: var(--palette-glow-ban-mist);
+
   /* Home hub (лента карточек + шапка) */
   --home-screen-z: var(--z-modal);
   --home-screen-bg: var(--color-bg);
@@ -424,7 +451,43 @@
   --auth-screen-provider-loader-stroke: 2.5px;
   --auth-screen-provider-loader-track: var(--color-border);
   --auth-screen-provider-loader-arc: var(--color-text);
+  --auth-screen-provider-loader-arc-telegram: var(--palette-telegram-start);
+  --auth-screen-provider-loader-track-telegram: color-mix(
+    in srgb,
+    var(--palette-telegram-start) 28%,
+    transparent
+  );
+  --auth-screen-provider-loader-track-google: color-mix(
+    in srgb,
+    var(--palette-google-blue) 22%,
+    transparent
+  );
   --auth-screen-provider-loader-duration: 700ms;
+  --auth-screen-method-locked-opacity: var(--auth-screen-provider-busy-opacity);
+  --auth-screen-otp-hint-size: var(--font-size-sm);
+  --auth-screen-otp-hint-color: var(--color-text-muted);
+  --auth-screen-otp-hint-margin-top: var(--space-3);
+  --auth-screen-otp-meta-gap: var(--space-4);
+  --auth-screen-otp-meta-margin-top: var(--space-2);
+  --auth-screen-link-size: var(--font-size-sm);
+  --auth-screen-link-weight: var(--font-weight-medium);
+  --auth-screen-link-color: var(--color-text);
+  --auth-screen-submit-busy-opacity: 0.6;
+  --auth-code-cell-radius: var(--radius-xs);
+  --auth-code-cell-gap: var(--space-3);
+  --auth-code-cell-font-size: var(--font-size-xl);
+  --auth-code-cell-font-weight: var(--font-weight-medium);
+  --auth-code-cell-bg: var(--color-surface-muted);
+  --auth-code-cell-color: var(--color-text);
+  --auth-code-cells-width: var(--url-screen-form-width);
+  --auth-code-caret-width: 2px;
+  --auth-code-caret-height: 1.1em;
+  --auth-code-caret-color: var(--color-text);
+  --auth-code-caret-blink-duration: 1s;
+  --auth-code-top-margin-bottom: 0;
+  --auth-code-resend-margin-top: var(--space-2);
+  /* Клиентский cooldown после отправки / resend OTP (anti-abuse до чужого 429). */
+  --auth-code-resend-cooldown: 60s;
   --shell-review-report-width: 527px;
   --shell-review-report-height: 722px;
   --shell-review-report-radius: var(--radius-md);
@@ -608,4 +671,10 @@
   --shell-review-mesh-done-3: #147a28;
   --shell-review-mesh-done-4: var(--palette-green);
   --shell-review-mesh-done-wash: #0e1a12;
+
+  --shell-ban-mesh-1: #2a1210;
+  --shell-ban-mesh-2: #7a2a22;
+  --shell-ban-mesh-3: #c43a2e;
+  --shell-ban-mesh-4: var(--palette-ban);
+  --shell-ban-mesh-wash: #1a0e0c;
 }

@@ -64,6 +64,14 @@ export function getScreenCloseFallbackMs() {
 }
 
 /**
+ * Cooldown кнопки «Отправить ещё раз» на экране email OTP.
+ * @returns {number}
+ */
+export function getAuthCodeResendCooldownMs() {
+  return parseCssTimeMs(readCssVar("--auth-code-resend-cooldown"), 60_000);
+}
+
+/**
  * Пауза после выбора варианта до auto-advance шага.
  * @returns {number}
  */

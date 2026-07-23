@@ -7,7 +7,7 @@
 - `countTemplate.js` — вставка отформатированного числа в текстовый шаблон (`{count}`).
 - `emailValidation.js` — валидация и нормализация email.
 - `foundersCountDisplay.js` — обновление отображаемого числа подписчиков/основателей.
-- `motionTokens.js` — чтение `--motion-*` из CSS для WAAPI / close-fallback (`getMotionReveal`, `getReportLaunchMotion`, `getReviewMeshDoneMotion`, `getScreenCloseFallbackMs`).
+- `motionTokens.js` — чтение `--motion-*` / `--auth-code-resend-cooldown` из CSS для WAAPI / таймеров (`getMotionReveal`, `getReportLaunchMotion`, `getReviewMeshDoneMotion`, `getScreenCloseFallbackMs`, `getAuthCodeResendCooldownMs`).
 - `brandScreenTransition.js` — open/close split-экранов; `handoff` сохраняет правый visual без повторной анимации.
 - `portfolioMeta.js` — нормализация URL портфолио; favicon (HTML → DDG → Google → `/favicon.ico`) и короткое имя сайта.
 - `platformBrandIcon.js` — иконка площадки: Simple Icons (jsDelivr) для известных брендов, иначе литера «W».

@@ -19,11 +19,21 @@ import { getSupabase } from "../lib/supabaseClient.js";
  *   onboarding?: Record<string, unknown> | null;
  *   onboarding_done?: boolean;
  *   balance?: number;
+ *   banned_at?: string | null;
+ *   ban_reason?: string | null;
  * }} Profile
  */
 
 const PROFILE_SELECT =
-  "id, auth_provider, display_name, avatar_url, telegram_id, telegram_username, email, role, grade, tier, domains, goals, onboarding, onboarding_done, balance";
+  "id, auth_provider, display_name, avatar_url, telegram_id, telegram_username, email, role, grade, tier, domains, goals, onboarding, onboarding_done, balance, banned_at, ban_reason";
+
+/**
+ * @param {Profile | null | undefined} profile
+ * @returns {boolean}
+ */
+export function isProfileBanned(profile) {
+  return Boolean(profile?.banned_at);
+}
 
 /**
  * @returns {Promise<Profile | null>}
@@ -61,8 +71,14 @@ export async function updateMyProfile(patch) {
     throw new Error("not_authenticated");
   }
 
-  // tier is server-managed (trigger + service_role); never send from client.
-  const { tier: _tier, id: _id, ...safePatch } = patch;
+  // tier / ban fields are server-managed (trigger + service_role); never send from client.
+  const {
+    tier: _tier,
+    id: _id,
+    banned_at: _bannedAt,
+    ban_reason: _banReason,
+    ...safePatch
+  } = patch;
 
   const { data, error } = await supabase
     .from("profiles")

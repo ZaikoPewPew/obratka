@@ -18,6 +18,9 @@ create table if not exists public.profiles (
   onboarding jsonb not null default '{}'::jsonb,
   onboarding_done boolean not null default false,
   balance integer not null default 0 check (balance >= 0),
+  -- Moderation: non-null banned_at ⇒ account locked (ban-screen). Clients cannot write.
+  banned_at timestamptz,
+  ban_reason text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -25,6 +28,9 @@ create table if not exists public.profiles (
 create index if not exists profiles_telegram_id_idx on public.profiles (telegram_id);
 create index if not exists profiles_auth_provider_idx on public.profiles (auth_provider);
 create index if not exists profiles_tier_idx on public.profiles (tier);
+create index if not exists profiles_banned_at_idx
+  on public.profiles (banned_at)
+  where banned_at is not null;
 
 -- Idempotent for DBs created before `tier` existed.
 alter table public.profiles
@@ -36,6 +42,13 @@ alter table public.profiles
 alter table public.profiles
   add constraint profiles_tier_check
   check (tier in ('free', 'pro', 'legendary'));
+
+-- Idempotent for DBs created before ban columns existed.
+alter table public.profiles
+  add column if not exists banned_at timestamptz;
+
+alter table public.profiles
+  add column if not exists ban_reason text;
 
 create or replace function public.set_profiles_updated_at()
 returns trigger
@@ -73,6 +86,50 @@ create trigger profiles_protect_tier
   before update on public.profiles
   for each row
   execute function public.protect_profiles_tier();
+
+-- Clients cannot self-ban / self-unban; service_role / SQL editor can.
+create or replace function public.protect_profiles_ban()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if (
+    new.banned_at is distinct from old.banned_at
+    or new.ban_reason is distinct from old.ban_reason
+  )
+     and coalesce(auth.jwt() ->> 'role', '') is distinct from 'service_role' then
+    raise exception 'profiles.ban fields are read-only for clients';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_protect_ban on public.profiles;
+create trigger profiles_protect_ban
+  before update on public.profiles
+  for each row
+  execute function public.protect_profiles_ban();
+
+-- Used by portfolios/reviews RLS (security definer — no recursive RLS on profiles).
+create or replace function public.is_profile_banned(uid uuid default auth.uid())
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.profiles p
+    where p.id = uid
+      and p.banned_at is not null
+  );
+$$;
+
+revoke all on function public.is_profile_banned(uuid) from public;
+revoke all on function public.is_profile_banned(uuid) from anon;
+grant execute on function public.is_profile_banned(uuid) to authenticated;
 
 create or replace function public.handle_new_user()
 returns trigger

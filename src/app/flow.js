@@ -10,6 +10,7 @@ import { ROUTE_PATHS } from "./routes.js";
 export const APP_FLOW = Object.freeze([
   "referral",
   "auth",
+  "authCode",
   "onboarding",
   "home",
 ]);
@@ -56,6 +57,7 @@ export function getPreviousScreen(id) {
  *   hasSession?: boolean;
  *   onboardingDone?: boolean;
  *   referralDone?: boolean;
+ *   banned?: boolean;
  * }} state
  * @returns {AppScreenId}
  */
@@ -64,8 +66,10 @@ export function resolveEntryScreen(state = {}) {
     hasSession = false,
     onboardingDone = false,
     referralDone = false,
+    banned = false,
   } = state;
 
+  if (banned) return "banned";
   if (hasSession && onboardingDone) return "home";
   if (hasSession && !onboardingDone) return "onboarding";
   if (referralDone) return "auth";
@@ -80,14 +84,33 @@ export function resolveEntryScreen(state = {}) {
  *   hasSession?: boolean;
  *   onboardingDone?: boolean;
  *   referralDone?: boolean;
+ *   banned?: boolean;
  * }} state
  * @returns {AppScreenId}
  */
 export function resolveAccessibleRoute(id, state = {}) {
+  const banned = Boolean(state.banned);
+
+  if (banned) return "banned";
+
+  if (id === "banned") {
+    return resolveEntryScreen(state);
+  }
+
   const hasPortfolio = Boolean(state.hasPortfolio);
 
   if (id === "review" || id === "quiz" || id === "done") {
     if (!hasPortfolio) return "home";
+  }
+
+  if (id === "authCode") {
+    // Без pending email код-экран недоступен — назад на регистрацию.
+    try {
+      const pending = window.sessionStorage.getItem("obratka.pendingAuthEmail");
+      if (!pending) return "auth";
+    } catch {
+      return "auth";
+    }
   }
 
   if (id === "home" || id === "onboarding") {

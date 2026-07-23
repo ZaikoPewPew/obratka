@@ -1,101 +1,130 @@
-# Memento — waitlist
+# Обратка — продукт и архитектура
 
-Лендинг вейтлиста: статическая вёрстка на **Vite**, логика на **vanilla JS**.
+Взаимное ревью портфолио: пользователь регистрируется, проходит онбординг, смотрит чужие работы (таймер + квиз) и/или подаёт свой URL в общую очередь.
 
-## Состояние проекта (кратко)
+**Стек:** Vite + vanilla JS, Supabase Auth / Postgres / Edge Function, i18n из `content/locales.json`, дизайн-токены в `styles/tokens.css`.
 
-**Что уже хорошо:** чёткое разделение десктоп / мобилка (768px), единый набор дизайн-токенов и стили на них, i18n из JSON, интеграция формы с Supabase. Стек простой, сборка предсказуемая.
+Карта экранов: [`SCREENS.md`](SCREENS.md). Структура папок: [`STRUCTURE.md`](STRUCTURE.md).
 
-**Зоны внимания (не обязательно код):** согласованность контента (тексты и цены в `locales.json`, отображаемое число в `src/config.js`), готовность Supabase (схема `subscribers`, RLS и политики), юридическая обвязка сбора email, SEO/OG и аналитика по желанию, ручной QA на реальных устройствах и в Safari. Подробнее — раздел «Что можно допилить без кода» ниже.
+## Состояние (кратко)
 
-## Форма и бэкенд
+| Область | Статус |
+|---------|--------|
+| Path-роутинг + entry по сессии | wired |
+| Auth: Email OTP, Telegram, Google | wired → `auth.users` + `profiles` |
+| Онбординг → `profiles` | wired |
+| Home: очередь `portfolios` / `reviews`, баланс | wired |
+| Review iframe + таймер + квиз | wired |
+| Подача URL + done на url-screen | wired |
+| Referrals validate/redeem | stub |
+| Legacy waitlist UI | код есть, **не смонтирован** из `main.js` / `index.html` |
 
-Отправка email реализована в `src/api/subscribers.js`: POST на `{SUPABASE_URL}/rest/v1/subscribers` с полями вроде `email` и `source`. Нужны переменные **`SUPABASE_URL`** и **`SUPABASE_ANON_KEY`** (см. `README.md`). На стороне Supabase должна существовать таблица и политики доступа, совместимые с anon-ключом.
+## Продуктовый флоу
 
-## Брейкпоинты: десктоп и мобилка
+```text
+/referral → /registration → /onboarding → /home
+                              ├─ pick → /review → /quiz → /quiz/done
+                              └─ submit → /portfolio → done (URL sync /done)
+```
 
-| Зона | Ширина viewport | Что показывается |
-|------|-----------------|------------------|
-| **Мобилка** | **до 767px включительно** (`max-width: 767px`) | блок `.layout-mobile` |
-| **Десктоп** | **от 768px** | блок `.layout-desktop` |
+Корень `/` → `resolveEntryScreen(getSession())` в `src/app/flow.js`.  
+Оркестрация: `src/main.js` (`go` / `applyRoute` / `syncRoute`).
 
-Единая «истина» для числа задокументирована в `styles/tokens.css`:
+Подробная таблица path ↔ экран — [`SCREENS.md`](SCREENS.md).
 
-- `--breakpoint-min-desktop: 768px` — для согласованности в комментариях и при необходимости в других стилях.
-- В `@media` в проекте явно заданы литералы **768px** / **767px** (см. комментарий в `tokens.css`).
+## Auth
 
-Итого: **граница — 768px**: уже = мобилка, шире = десктоп.
+| Провайдер | Клиент | Бэкенд |
+|-----------|--------|--------|
+| **Email OTP** | `requestEmailOtp` → `/registration/code` → `verifyEmailOtp` | Supabase Auth Email (OTP в Dashboard) |
+| **Telegram** | Login Widget → `signInWithTelegram` | Edge Function `telegram-auth` → `verifyOtp` |
+| **Google** | `signInWithGoogle` (OAuth PKCE) | Callback URL → `completeOAuthFromUrl` в `main.js` |
 
-## Как устроено, чтобы мобилка не ломала десктоп
+После успеха провайдера: `applyProviderUser` → `fetchMyProfile` → `obratka.session` → `onboarding` или `home`.
 
-В разметке **два параллельных дерева**:
+### Защита при регистрации
 
-- `.layout-desktop` — шапка, центр, футер и слот под форму **для десктопа**.
-- `.layout-mobile` — то же по смыслу, но с классами `mobile-*` и отдельными `data-*` там, где нужны другие размеры (логотип, вариант шапки).
+| Что | Как |
+|-----|-----|
+| Дубли Email ↔ Google | **Automatic linking** Supabase Auth (из коробки): одна verified email → один `auth.users` |
+| Telegram | Isolated synthetic email `tg{id}@t.me` — не пересекается с Email/Google |
+| Spam resend OTP | Клиентский cooldown `--auth-code-resend-cooldown` (60s) на `auth-code-screen` |
+| Rate limit Auth | `email_otp_rate_limit` → `authOtpRateLimit` |
+| Identity conflict | `mapSupabaseAuthErrorCode` → `auth_identity_conflict` → `authIdentityConflict` |
+| Busy-lock UI | На `/registration` нельзя жать второй провайдер, пока занят первый |
 
-Переключение видимости только CSS:
+**Вне скоупа (roadmap #4):** Manual `linkIdentity` UI, UNIQUE `profiles.email`, склейка Telegram↔email.
 
-- по умолчанию виден десктоп, мобильный лейаут скрыт;
-- при `max-width: 767px` десктоп скрывается (`display: none !important`), мобильный показывается.
+Документация: [`auth-screen/README.md`](src/components/auth-screen/README.md), [`auth-code-screen/README.md`](src/components/auth-code-screen/README.md), [`src/api/README.md`](src/api/README.md).
 
-Стили разведены по файлам:
+## Данные (Supabase)
 
-- `styles/desktop.css` — базовый десктопный лейаут и компоненты шапки/центра.
-- `styles/mobile.css` — правки **только внутри** `@media (max-width: 767px)` (в т.ч. `.apply-card--mobile` и мобильная форма).
-- `styles/apply.css` — общая карточка заявки; десктопные размеры: `--apply-card-width` / `--apply-card-inner-width`.
+| Сущность | Файл / роль |
+|----------|-------------|
+| `auth.users` | Supabase Auth |
+| `public.profiles` | 1:1 с user; онбординг, баланс, tier; триггер `handle_new_user` |
+| `public.portfolios` / reviews | общая очередь ревью |
+| `public.subscribers` | legacy waitlist API (`subscribers.js`), не entry UX |
+| Edge `telegram-auth` | проверка Telegram hash → сессия |
 
-Скрипт монтирует интерактив по слотам `data-mount` (см. `src/main.js`): карточка заявки на десктопе и hero+форма на мобилке. Остальные слоты (логотип, шапка, футер) дублируются в HTML; для шапки мобилки используется `data-header-variant="mobile"`.
+SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabase/README.md).
 
-**Практическое правило:** правки «как на макете телефона» — в `mobile.css` под медиазапросом и/или классы `mobile-*` / `--mobile`; фиксированные десктопные размеры — в `desktop.css` и базовых стилях карточки. Так десктоп остаётся изолированным от мобильных переопределений.
+## Слои UI
 
-## Дизайн из Figma / макетов
+| Слой | Где |
+|------|-----|
+| Brand split (referral / auth / onboarding / url) | `.url-screen*`, эталон `url-screen`; цель — `brand-screen-shell` |
+| Home | `home-screen` + `home-screen.css` (лента, не split) |
+| Review | `index.html` `.iframe-shell` + таймер в `main.js` |
+| Quiz | `review-screen` + `review-panel` |
+| Success | `success-screen` (`/done`) |
 
-При передаче мобильного дизайна имеет смысл явно зафиксировать:
+Handoff соседних brand-экранов: `go(id, { handoff: true })` — правый visual без повторной анимации.
 
-1. **Артборд по ширине** (например 375, 390, 430px) — как ориентир для отступов и типографики; в коде вёрстка тянется по `%` / `max-width`, а не под один пиксельный девайс.
-2. **Совпадение брейкпоинта** с проектом: если в дизайне другая граница — лучше заранее согласовать смену **767/768** во всех `@media` и в `--breakpoint-min-desktop`.
-3. **Токены** (`styles/tokens.css`): цвета, поверхности, статусы, тени, скругления, отступы и шрифт вынесены в один файл; новые общие значения добавляйте туда, а компоненты ссылаются на них через `var(--…)`.
+## Дизайн и i18n
 
-Текущая мобильная карточка уже слегка отличается от десктопной (модификатор `apply-card--mobile`, типографика и ширины в `mobile.css`) — новый макет можно накатывать точечно в этом же слое.
+- Токены: `styles/tokens.css` (правило `.cursor/rules/design-tokens.mdc`).  
+  В компонентах только `var(--…)`, шрифт Montserrat.
+- Motion: `--motion-*`, `entrance.css`, `src/utils/motionTokens.js`.
+- Строки: `content/locales.json` + `src/i18n.js` (правило `.cursor/rules/i18n.mdc`).
+- Тема: `<html data-theme="dark">` (семантика в токенах).
 
-## Структура репозитория (кратко)
+## Entrypoint vs legacy waitlist
 
-| Путь | Назначение |
-|------|------------|
-| `README.md` | Быстрый старт и ссылки на документацию |
-| `SCREENS.md` | Экраны и path-роутинг (`/referral` … `/quiz/done`) |
-| `mobile.md` | Спецификация мобильного UI |
-| `index.html` | Оболочка `/review` (iframe + таймер), слоты `data-*` |
-| `styles/tokens.css` | Единый источник дизайн-токенов |
-| `styles/iframe-shell.css` | `/review`, url-screen, auth, quiz UI |
-| `src/main.js` | Роутер + монтаж экранов + таймер + квиз |
-| `src/app/` | `routes` / `router` / `flow` / login-`session` |
-| `src/config.js` | Общие константы |
-| `src/i18n.js`, `content/locales.json` | Локализация |
-| `content/onboarding.json` | Шаги онбординга |
-| `src/api/` | Auth (Telegram/Google), profiles, wallet, portfolios stub |
-| `vite.config.js` | Сборка Vite, префиксы env |
+**Сейчас подключено** (`index.html` + `main.js`):
 
-## Что можно допилить без кода
+- CSS: `tokens`, `base`, `entrance`, `iframe-shell`, `success-screen`, `home-screen`
+- Экраны: referral, auth, onboarding, home, url, review-shell, review/quiz, success
 
-- **Контент:** финальные формулировки RU/EN, единый источник правды для отображаемого числа (`src/config.js` ↔ строки с `{count}` в локалях), актуальная дата таймера и цена в CTA.
-- **Продукт и доверие:** текст политики/согласия на рассылку, страница «Контакты», ответы на типовые вопросы до релиза.
-- **Supabase:** проверить таблицу, индексы, дубликаты по email, лимиты и алерты; при необходимости — отдельный канал уведомлений о новых подписчиках.
-- **SEO и шаринг:** уникальные `metaTitle`/описания по локали, превью-картинка OG, человекочитаемый заголовок вкладки на всех языках.
-- **Аналитика:** решить, нужны ли события (отправка формы, смена языка, клик по оплате) и какой инструмент использовать; зафиксировать это в процессе релиза.
-- **QA:** чеклист по `mobile.md` + десктопные разрешения, ландшафт на телефоне, тёмная тема ОС (если релевантно), медленная сеть.
-- **Дизайн-процесс:** явный артборд для планшета (768–1024px), если поведение должно отличаться от «узкой мобилки» или «широкого десктопа».
+**Legacy (не entry):** `apply-card`, `email-field`, `desktop.css` / `mobile.css` / `apply.css`, waitlist-хелперы в `i18n.js` (`@deprecated`).  
+Спека старого мобильного waitlist — раздел «Архив» в [`mobile.md`](mobile.md).
+
+## Env (кратко)
+
+| Где | Что |
+|-----|-----|
+| `.env` | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `TELEGRAM_BOT_ID` (+ optional username), `VITE_BASE_PATH` |
+| Dashboard Auth | Email OTP, Google OAuth, Redirect URLs |
+| Edge secrets | `TELEGRAM_BOT_TOKEN` |
+
+## Roadmap (код)
+
+1. Вынести общие split-стили в `brand-screen.css` / довести `brand-screen-shell`.
+2. Агрегация оценок нескольких ревьюеров в PDF-отчёте.
+3. Referrals: validate / redeem вместо stub.
+4. Manual identity linking UI (`linkIdentity`) + UNIQUE `profiles.email` + склейка Telegram↔email — вне текущего скоупа.  
+   Email↔Google закрывается **Automatic linking** в Supabase Auth (verified email = один user); см. [`auth-screen/README.md`](src/components/auth-screen/README.md).
 
 ## Команды
 
 ```bash
 npm install
-npm run dev      # разработка
-npm run build    # dist/ + 404.html
-npm run preview  # просмотр сборки
-npm test         # юнит-тесты
+npm run dev
+npm run build
+npm run preview
+npm test
 ```
 
 ---
 
-*Документ стоит обновлять при смене брейкпоинта, схемы Supabase, структуры экранов/URL или процесса деплоя.*
+*Обновлять при смене флоу экранов, схемы Supabase, auth-провайдеров или процесса деплоя.*

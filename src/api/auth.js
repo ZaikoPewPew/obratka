@@ -35,6 +35,71 @@ function getAnonKey() {
 }
 
 /**
+ * Стабильные коды ошибок Auth для UI (i18n).
+ * @param {unknown} error
+ * @returns {string | null}
+ */
+export function mapSupabaseAuthErrorCode(error) {
+  const status =
+    error && typeof error === "object" && "status" in error
+      ? Number(error.status)
+      : NaN;
+  const code = String(
+    error && typeof error === "object" && "code" in error
+      ? error.code || ""
+      : "",
+  ).toLowerCase();
+  const msg = String(
+    error instanceof Error
+      ? error.message
+      : error && typeof error === "object" && "message" in error
+        ? error.message || ""
+        : error || "",
+  ).toLowerCase();
+
+  if (status === 429 || msg.includes("rate") || code.includes("over_request")) {
+    return "email_otp_rate_limit";
+  }
+
+  if (
+    code === "email_exists" ||
+    code === "user_already_exists" ||
+    code === "identity_already_exists" ||
+    msg.includes("email_exists") ||
+    msg.includes("user already registered") ||
+    msg.includes("already been registered") ||
+    msg.includes("identity is already linked") ||
+    msg.includes("identity already linked") ||
+    msg.includes("already linked to another") ||
+    (msg.includes("identity") &&
+      (msg.includes("conflict") || msg.includes("already")))
+  ) {
+    return "auth_identity_conflict";
+  }
+
+  return null;
+}
+
+/**
+ * @param {unknown} error
+ * @param {string} fallback
+ * @returns {never}
+ */
+function throwMappedAuthError(error, fallback) {
+  const mapped = mapSupabaseAuthErrorCode(error);
+  if (mapped) {
+    throw new Error(mapped);
+  }
+  const message =
+    error instanceof Error
+      ? error.message
+      : error && typeof error === "object" && "message" in error
+        ? String(error.message || "")
+        : "";
+  throw new Error(message || fallback);
+}
+
+/**
  * @param {unknown} raw
  * @returns {AuthUser}
  */
@@ -212,7 +277,7 @@ export async function signInWithGoogle() {
     if (import.meta.env.DEV) {
       console.warn("[auth] google signInWithOAuth failed", error);
     }
-    throw new Error(error.message || "google_oauth_failed");
+    throwMappedAuthError(error, "google_oauth_failed");
   }
 }
 
@@ -236,10 +301,21 @@ export async function completeOAuthFromUrl() {
   const refreshToken = hashParams.get("refresh_token");
 
   if (errorParam || hashError) {
+    const description =
+      url.searchParams.get("error_description") ||
+      hashParams.get("error_description") ||
+      "";
     cleanOAuthParamsFromUrl();
     const codeName = errorParam || hashError || "google_oauth_failed";
     if (codeName === "access_denied") {
       throw new Error("google_cancelled");
+    }
+    const mapped = mapSupabaseAuthErrorCode({
+      message: description || codeName,
+      code: codeName,
+    });
+    if (mapped) {
+      throw new Error(mapped);
     }
     throw new Error(codeName);
   }
@@ -255,7 +331,7 @@ export async function completeOAuthFromUrl() {
       if (import.meta.env.DEV) {
         console.warn("[auth] exchangeCodeForSession failed", error);
       }
-      throw new Error(error.message || "google_session_failed");
+      throwMappedAuthError(error, "google_session_failed");
     }
     const user = data.user ? mapUser(data.user) : null;
     if (!user?.userId) {
@@ -277,7 +353,7 @@ export async function completeOAuthFromUrl() {
     if (import.meta.env.DEV) {
       console.warn("[auth] setSession from hash failed", error);
     }
-    throw new Error(error.message || "google_session_failed");
+    throwMappedAuthError(error, "google_session_failed");
   }
   const user = data.user ? mapUser(data.user) : null;
   if (!user?.userId) {
@@ -291,19 +367,105 @@ export async function completeOAuthFromUrl() {
 }
 
 /**
- * @param {{ email: string; password: string; name?: string }} _input
- * @returns {Promise<AuthSession>}
+ * Send a one-time code to the email (Supabase Auth Email OTP).
+ * @param {string} email
+ * @returns {Promise<{ email: string }>}
  */
-export async function signUp(_input) {
-  throw new Error("auth.signUp: not implemented");
+export async function requestEmailOtp(email) {
+  if (!isSupabaseConfigured()) {
+    throw new Error("supabase_not_configured");
+  }
+  const supabase = getSupabase();
+  if (!supabase) {
+    throw new Error("supabase_not_configured");
+  }
+
+  const normalized = String(email || "")
+    .trim()
+    .toLowerCase();
+  if (!normalized) {
+    throw new Error("email_invalid");
+  }
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email: normalized,
+    options: {
+      shouldCreateUser: true,
+    },
+  });
+
+  if (error) {
+    if (import.meta.env.DEV) {
+      console.warn("[auth] signInWithOtp failed", error);
+    }
+    throwMappedAuthError(error, "email_otp_send_failed");
+  }
+
+  return { email: normalized };
 }
 
 /**
- * @param {{ email: string; password: string }} _input
+ * Verify the email OTP and establish a Supabase session.
+ * @param {string} email
+ * @param {string} token
  * @returns {Promise<AuthSession>}
  */
-export async function signIn(_input) {
-  throw new Error("auth.signIn: not implemented");
+export async function verifyEmailOtp(email, token) {
+  if (!isSupabaseConfigured()) {
+    throw new Error("supabase_not_configured");
+  }
+  const supabase = getSupabase();
+  if (!supabase) {
+    throw new Error("supabase_not_configured");
+  }
+
+  const normalized = String(email || "")
+    .trim()
+    .toLowerCase();
+  const code = String(token || "").trim();
+  if (!normalized) {
+    throw new Error("email_invalid");
+  }
+  if (!code) {
+    throw new Error("email_otp_invalid");
+  }
+
+  const { data, error } = await supabase.auth.verifyOtp({
+    email: normalized,
+    token: code,
+    type: "email",
+  });
+
+  if (error) {
+    if (import.meta.env.DEV) {
+      console.warn("[auth] verifyEmailOtp failed", error);
+    }
+    const mapped = mapSupabaseAuthErrorCode(error);
+    if (mapped) {
+      throw new Error(mapped);
+    }
+    const msg = String(error.message || "").toLowerCase();
+    if (
+      msg.includes("expired") ||
+      msg.includes("invalid") ||
+      msg.includes("otp") ||
+      error.status === 403
+    ) {
+      throw new Error("email_otp_invalid");
+    }
+    throw new Error(error.message || "email_otp_verify_failed");
+  }
+
+  const user = data.user ? mapUser(data.user) : null;
+  if (!user?.userId) {
+    throw new Error("email_auth_no_user");
+  }
+
+  return {
+    user,
+    accessToken: data.session?.access_token,
+    refreshToken: data.session?.refresh_token,
+  };
 }
 
 /**

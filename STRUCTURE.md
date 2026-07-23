@@ -1,19 +1,20 @@
-# Структура проекта Memento / Обратка
+# Структура проекта Обратка
 
-Что где лежит и зачем.
+Что где лежит и зачем. Карта экранов: [`SCREENS.md`](SCREENS.md). Продукт: [`PROJECT.md`](PROJECT.md).
 
 ## Корень
 
 | Файл | Роль |
 |------|------|
-| `README.md` | Быстрый старт, env, скрипты |
-| `PROJECT.md` | Архитектура продукта и заметки |
-| `SCREENS.md` | **Экраны + path-роутинг** (referral → … → quiz/done) |
+| `README.md` | Быстрый старт, env, auth, ссылки |
+| `PROJECT.md` | Продукт, архитектура, бэкенд, roadmap |
+| `SCREENS.md` | Экраны + path-роутинг + контракты фабрик |
 | `STRUCTURE.md` | Этот документ |
-| `mobile.md` | Мобильный макет / QA |
-| `index.html` | Каркас iframe-оболочки (`/review`) |
-| `vite.config.js` | Vite, `VITE_BASE_PATH`, `SUPABASE_*` |
+| `mobile.md` | Мобильный UX продукта + архив waitlist-спеки |
+| `index.html` | Каркас `.iframe-shell` (`/review`) + CSS entry |
+| `vite.config.js` | Vite, `VITE_BASE_PATH`, префиксы `VITE_` / `SUPABASE_` / `TELEGRAM_` |
 | `package.json` | Скрипты (`build` → ещё `404.html` для SPA) |
+| `.env.example` | Шаблон клиентских env |
 
 ## Секреты (не в git)
 
@@ -25,27 +26,35 @@
 | `.env`, `.env*.local` | нет |
 | `dist/`, `node_modules/` | нет |
 
-### Переменные
+### Переменные клиента
 
 | Переменная | Назначение |
 |------------|------------|
-| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | клиент Supabase (Auth, profiles, subscribers) |
+| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | Auth, profiles, portfolios, (legacy) subscribers |
 | `TELEGRAM_BOT_ID` / `TELEGRAM_BOT_USERNAME` | Telegram Login Widget (публичные) |
 | `VITE_BASE_PATH` | base для GitHub Pages (`/obratka/`) |
 
-Google OAuth: Client ID/Secret **только** в Supabase Dashboard (Providers → Google), не в `.env`.  
-`TELEGRAM_BOT_TOKEN` — только Edge Function secrets. См. `.env.example` и `src/components/auth-screen/README.md`.
+### Только Dashboard / Edge
+
+| Что | Где |
+|-----|-----|
+| Google Client ID/Secret | Supabase Auth → Providers → Google |
+| Email OTP | Supabase Auth → Providers → Email |
+| `TELEGRAM_BOT_TOKEN` | Edge Function secrets (`telegram-auth`) |
+| Redirect URLs | `http://localhost:5173/`, `https://zaikopewpew.github.io/obratka/` |
+
+См. `.env.example` и `src/components/auth-screen/README.md`.
 
 ## Папки
 
 | Папка | Роль |
 |-------|------|
-| `src/` | Код: `main.js`, `app/` (routes), `components/`, `utils/`, `api/` |
-| `styles/` | Токены, iframe-shell, home, success, entrance, brand-заготовка |
-| `content/` | `locales.json`, onboarding, embed-hosts |
-| `public/` | Статика по URL |
-| `supabase/` | SQL (`profiles`, `subscribers_count`) + Edge Function `telegram-auth` |
-| `.cursor/` | Правила и карта для агента |
+| `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `lib/` |
+| `styles/` | Токены + UI. Entry: tokens/base/entrance/iframe-shell/home/success. Legacy waitlist CSS не в `index.html` |
+| `content/` | `locales.json`, onboarding, embed-hosts, privacy, founder-avatars |
+| `public/` | Статика по URL (favicon и т.п.) |
+| `supabase/` | SQL (`profiles`, `portfolios`, `subscribers_count`) + Edge `telegram-auth` |
+| `.cursor/` | Правила агента (`rules/*.mdc`) и карта (`.cursor/README.md`) |
 
 ## Экраны и URL (кратко)
 
@@ -58,8 +67,20 @@ Google OAuth: Client ID/Secret **только** в Supabase Dashboard (Providers
 ```
 
 `/review` = просмотр портфолио + таймер.  
-`/quiz` = опрос. Не путать с login-`session.js`.
+`/quiz` = опрос. Не путать с login-`session.js` (`obratka.session`).
+
+## Auth (кратко)
+
+| Провайдер | Модуль |
+|-----------|--------|
+| Email OTP | `src/api/auth.js` (`requestEmailOtp` / `verifyEmailOtp`) + `auth-code-screen` |
+| Telegram | `auth.js` + `telegramWidget.js` + `supabase/functions/telegram-auth/` |
+| Google | `signInWithGoogle` / `completeOAuthFromUrl` |
+| Ошибки Auth | `mapSupabaseAuthErrorCode` → UI (`authIdentityConflict`, rate-limit, …) |
+
+**Защита:** Automatic linking Email↔Google (Dashboard/GoTrue); cooldown resend OTP (`--auth-code-resend-cooldown`); Telegram изолирован.  
+Подробно: [`auth-screen/README.md`](src/components/auth-screen/README.md), [`PROJECT.md`](PROJECT.md) § Auth.
 
 ## Комментарии в JSON
 
-Пояснения к `content/*.json` — соседние `*.md` и `content/README.md`.
+Пояснения к `content/*.json` — соседние `*.md` и [`content/README.md`](content/README.md).

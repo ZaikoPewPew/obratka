@@ -50,6 +50,19 @@
   }
 }
 
+/** Мигающий caret (auth-code OTP). */
+@keyframes motion-caret-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
 /** Shimmer для skeleton-заглушек (home и др.). */
 @keyframes motion-skeleton-shimmer {
   to {

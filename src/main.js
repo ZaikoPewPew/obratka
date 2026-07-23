@@ -21,19 +21,22 @@ import { createAppRouter } from "./app/router.js";
 import { getSession, setSession, clearSession } from "./app/session.js";
 import { completeOAuthFromUrl, signOut } from "./api/auth.js";
 import { submitPortfolio, clearSubmittedPortfolios, submitPortfolioReview } from "./api/portfolios.js";
-import { fetchMyProfile } from "./api/profiles.js";
+import { fetchMyProfile, isProfileBanned } from "./api/profiles.js";
 import {
   awardReviewReward,
   canSubmitPortfolio,
+  refreshSessionFromProfile,
   spendSubmitCost,
 } from "./api/wallet.js";
 import { createReviewPanel } from "./components/review-panel/ReviewPanel.js";
 import { createReviewScreen } from "./components/review-screen/ReviewScreen.js";
 import { createAuthScreen } from "./components/auth-screen/AuthScreen.js";
+import { createAuthCodeScreen } from "./components/auth-code-screen/AuthCodeScreen.js";
 import { createHomeScreen } from "./components/home-screen/HomeScreen.js";
 import { createOnboardingScreen } from "./components/onboarding-screen/OnboardingScreen.js";
 import { createReferralScreen } from "./components/referral-screen/ReferralScreen.js";
 import { createSuccessScreen } from "./components/success-screen/SuccessScreen.js";
+import { createBanScreen } from "./components/ban-screen/BanScreen.js";
 import { createUrlScreen } from "./components/url-screen/UrlScreen.js";
 import {
   resolvePortfolioEmbed,
@@ -89,6 +92,11 @@ let appRouter = null;
  * }} [opts]
  */
 function go(id, opts = {}) {
+  const session = getSession();
+  if (session?.banned && id !== "banned") {
+    id = "banned";
+    opts = { ...opts, replace: true, handoff: false };
+  }
   pendingHandoff = Boolean(opts.handoff);
   appRouter?.navigate(id, {
     replace: opts.replace,
@@ -158,6 +166,9 @@ const successScreen = createSuccessScreen({
   },
 });
 document.body.append(successScreen.root);
+
+const banScreen = createBanScreen();
+document.body.append(banScreen.root);
 
 let remainingMs = SESSION_TOTAL_MS;
 let timerId = null;
@@ -518,7 +529,7 @@ const onboardingScreen = createOnboardingScreen({
  *   firstName?: string | null;
  *   photoUrl?: string | null;
  * }} user
- * @param {'google' | 'telegram'} provider
+ * @param {'google' | 'telegram' | 'email'} provider
  * @returns {Promise<import("./app/session.js").AppSession>}
  */
 async function applyProviderUser(user, provider) {
@@ -555,40 +566,93 @@ async function applyProviderUser(user, provider) {
       role: profile.role ?? next.role,
       grade: profile.grade ?? next.grade,
       tier: profile.tier ?? next.tier ?? "free",
+      banned: isProfileBanned(profile),
     };
+  } else {
+    next = { ...next, banned: false };
   }
 
   setSession(next);
   return next;
 }
 
+/** @type {string | null} */
+let pendingAuthEmail = null;
+
+const PENDING_AUTH_EMAIL_KEY = "obratka.pendingAuthEmail";
+
+/**
+ * @param {string | null} email
+ */
+function setPendingAuthEmail(email) {
+  pendingAuthEmail = email;
+  try {
+    if (email) {
+      window.sessionStorage.setItem(PENDING_AUTH_EMAIL_KEY, email);
+    } else {
+      window.sessionStorage.removeItem(PENDING_AUTH_EMAIL_KEY);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * @returns {string | null}
+ */
+function getPendingAuthEmail() {
+  if (pendingAuthEmail) return pendingAuthEmail;
+  try {
+    const stored = window.sessionStorage.getItem(PENDING_AUTH_EMAIL_KEY);
+    if (stored) {
+      pendingAuthEmail = stored;
+      return stored;
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
 const authScreen = createAuthScreen({
   onSuccess: async (result) => {
+    if (result.type === "email-otp-sent") {
+      setPendingAuthEmail(result.email);
+      go("authCode", { handoff: true });
+      return;
+    }
     if (result.type === "telegram" || result.type === "google") {
+      setPendingAuthEmail(null);
       const next = await applyProviderUser(result, result.type);
+      if (next.banned) {
+        go("banned", { replace: true });
+        return;
+      }
       if (next.onboardingDone) {
         go("home", { handoff: true });
         return;
       }
       go("onboarding", { handoff: true });
+    }
+  },
+});
+
+const authCodeScreen = createAuthCodeScreen({
+  onSuccess: async (result) => {
+    setPendingAuthEmail(null);
+    const next = await applyProviderUser(result, "email");
+    if (next.banned) {
+      go("banned", { replace: true });
       return;
     }
-
-    const session = getSession() ?? {};
-    /** @type {import("./app/session.js").AppSession} */
-    const next = {
-      ...session,
-      userId: session.userId ?? `local-${Date.now()}`,
-      email: result.type === "email" ? result.email : session.email,
-      balance: typeof session.balance === "number" ? session.balance : 0,
-    };
-
-    setSession(next);
     if (next.onboardingDone) {
       go("home", { handoff: true });
       return;
     }
     go("onboarding", { handoff: true });
+  },
+  onBack: () => {
+    go("auth", { handoff: true });
   },
 });
 
@@ -603,6 +667,7 @@ const referralScreen = createReferralScreen({
 document.body.append(
   referralScreen.root,
   authScreen.root,
+  authCodeScreen.root,
   onboardingScreen.root,
   homeScreen.root,
   urlScreen.root,
@@ -614,8 +679,13 @@ document.body.append(
  */
 async function applyRoute(id, opts = {}) {
   const handoff = Boolean(opts.handoff);
+  const session = getSession();
   let accessible = resolveAccessibleRoute(id, {
     hasPortfolio: Boolean(portfolioUrl),
+    hasSession: Boolean(session),
+    onboardingDone: Boolean(session?.onboardingDone),
+    referralDone: Boolean(session?.referralCode),
+    banned: Boolean(session?.banned),
   });
 
   if (accessible === "url" && !canSubmitPortfolio()) {
@@ -634,7 +704,11 @@ async function applyRoute(id, opts = {}) {
   const isReviewWorkspace = id === "review" || id === "quiz" || id === "done";
   const isBrandHandoff =
     handoff &&
-    (id === "referral" || id === "auth" || id === "onboarding" || id === "url");
+    (id === "referral" ||
+      id === "auth" ||
+      id === "authCode" ||
+      id === "onboarding" ||
+      id === "url");
   /** Brand → home: открыть home снизу, brand уходит fade (не instant handoff). */
   const isHomeReveal = id === "home" && handoff;
 
@@ -652,6 +726,11 @@ async function applyRoute(id, opts = {}) {
       authScreen.open(openOpts);
       return;
     }
+    if (target === "authCode") {
+      const email = getPendingAuthEmail() ?? "";
+      authCodeScreen.open(email, openOpts);
+      return;
+    }
     if (target === "onboarding") {
       onboardingScreen.open(openOpts);
       return;
@@ -666,6 +745,10 @@ async function applyRoute(id, opts = {}) {
     }
     if (target === "success") {
       successScreen.open({ preset: pendingSuccessPreset });
+      return;
+    }
+    if (target === "banned") {
+      banScreen.open();
     }
   }
 
@@ -674,11 +757,21 @@ async function applyRoute(id, opts = {}) {
     const closers = [];
     if (id !== "referral") closers.push(referralScreen.close(closeOpts));
     if (id !== "auth") closers.push(authScreen.close(closeOpts));
+    if (id !== "authCode") closers.push(authCodeScreen.close(closeOpts));
     if (id !== "onboarding") closers.push(onboardingScreen.close(closeOpts));
     if (id !== "home") closers.push(homeScreen.close());
     if (id !== "url") closers.push(urlScreen.close(closeOpts));
     if (id !== "success") closers.push(successScreen.close());
+    if (id !== "banned") closers.push(banScreen.close());
     await Promise.all(closers);
+  }
+
+  if (id === "banned") {
+    leaveSessionShell();
+    await closeReview();
+    await closeOthers();
+    openTarget("banned");
+    return;
   }
 
   if (isReviewWorkspace) {
@@ -719,9 +812,11 @@ async function applyRoute(id, opts = {}) {
       opening,
       referralScreen.close({}),
       authScreen.close({}),
+      authCodeScreen.close({}),
       onboardingScreen.close({}),
       urlScreen.close({}),
       successScreen.close(),
+      banScreen.close(),
     ]);
     return;
   }
@@ -741,6 +836,7 @@ appRouter = createAppRouter({
         hasSession: Boolean(session),
         onboardingDone: Boolean(session?.onboardingDone),
         referralDone: Boolean(session?.referralCode),
+        banned: Boolean(session?.banned),
       });
       const search = Object.fromEntries(location.search.entries());
       go(entry, { replace: true, search });
@@ -784,6 +880,9 @@ void (async () => {
     const oauthSession = await completeOAuthFromUrl();
     if (oauthSession) {
       await applyProviderUser(oauthSession.user, "google");
+    } else if (getSession()) {
+      // Re-validate ban from server — do not trust stale localStorage alone.
+      await refreshSessionFromProfile();
     }
   } catch (err) {
     if (import.meta.env.DEV) {

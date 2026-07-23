@@ -14,6 +14,7 @@ const STORAGE_KEY = "obratka.session";
  *   role?: string | null;
  *   grade?: string | null;
  *   tier?: 'free' | 'pro' | 'legendary';
+ *   banned?: boolean;
  * }} AppSession
  */
 

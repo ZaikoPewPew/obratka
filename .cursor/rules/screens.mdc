@@ -14,7 +14,8 @@ alwaysApply: true
 | Id | Path |
 |----|------|
 | `referral` | `/referral` |
-| `auth` | `/registration` |
+| `auth` | `/registration` (Email → OTP screen / Telegram / Google) |
+| `authCode` | `/registration/code` (6-digit Email OTP) |
 | `onboarding` | `/onboarding` |
 | `home` | `/home` |
 | `url` | `/portfolio` |
@@ -22,8 +23,12 @@ alwaysApply: true
 | `quiz` | `/quiz` |
 | `done` | `/quiz/done` |
 | `success` | `/done` |
+| `banned` | `/banned` (аккаунт заблокирован) |
 
 `session.js` — только login-сессия пользователя, не экран `/review`.
+
+Auth: логика в `src/api/auth.js`; UI — `auth-screen` + `auth-code-screen`. Setup / linking — `auth-screen/README.md`.  
+Защита: Automatic linking Email↔Google; OTP resend cooldown; `authIdentityConflict`. Manual linking — вне скоупа.
 
 ## Жёсткие правила
 

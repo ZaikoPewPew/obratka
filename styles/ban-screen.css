@@ -1,0 +1,222 @@
+/* Ban screen: split — слева тайтл + серая «Связаться», справа красный mesh. */
+
+.ban-screen {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  z-index: var(--ban-screen-z);
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
+  padding: var(--ban-screen-padding);
+  background: var(--color-bg);
+  opacity: 0;
+  transform: translateY(var(--motion-reveal-shift));
+  filter: blur(var(--motion-reveal-blur));
+  pointer-events: none;
+  transition:
+    opacity var(--motion-reveal-duration) var(--motion-reveal-ease),
+    transform var(--motion-reveal-duration) var(--motion-reveal-ease),
+    filter var(--motion-reveal-duration) var(--motion-reveal-ease);
+}
+
+.ban-screen--open {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+  pointer-events: auto;
+}
+
+.ban-screen[hidden] {
+  display: none !important;
+  pointer-events: none;
+}
+
+.ban-screen--open .ban-screen__visual,
+.ban-screen--open .ban-screen__brand-mark,
+.ban-screen--open .ban-screen__card {
+  animation-duration: var(--motion-reveal-duration);
+  animation-timing-function: var(--motion-reveal-ease);
+  animation-fill-mode: both;
+}
+
+.ban-screen--open .ban-screen__visual {
+  animation-name: motion-reveal;
+  animation-delay: var(--url-screen-reveal-delay-visual);
+}
+
+.ban-screen--open .ban-screen__brand-mark {
+  animation-name: motion-reveal-scale;
+  animation-delay: var(--url-screen-reveal-delay-brand);
+}
+
+.ban-screen--open .ban-screen__card {
+  animation-name: motion-reveal;
+  animation-delay: var(--motion-delay-2);
+}
+
+.ban-screen__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--url-screen-gap);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.ban-screen__panel {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: visible;
+  pointer-events: auto;
+}
+
+.ban-screen__card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--ban-screen-gap);
+  width: min(var(--ban-screen-width), 100%);
+  text-align: center;
+}
+
+.ban-screen__title {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-family: var(--font-family);
+  font-size: var(--ban-screen-title-size);
+  font-weight: var(--ban-screen-title-weight);
+  line-height: var(--line-height-snug);
+  white-space: pre-line;
+}
+
+.ban-screen__body {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-family);
+  font-size: var(--ban-screen-body-size);
+  font-weight: var(--font-weight-regular);
+  line-height: normal;
+}
+
+.ban-screen__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--ban-screen-actions-gap);
+  width: 100%;
+}
+
+.ban-screen__btn {
+  flex: 1 1 0;
+  min-height: var(--shell-review-control-height);
+  padding: var(--shell-review-control-padding-y) var(--shell-review-control-padding-x);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family);
+  font-size: var(--shell-review-control-font-size);
+  font-weight: var(--shell-review-control-font-weight);
+  line-height: var(--shell-review-control-line-height);
+  text-align: center;
+}
+
+.ban-screen__btn--contact {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.ban-screen__btn--contact:hover {
+  background: var(--color-surface-muted-hover);
+}
+
+.ban-screen__btn--contact:active {
+  background: var(--color-surface-muted-active);
+}
+
+.ban-screen__visual {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  border-radius: var(--url-screen-visual-radius);
+  background-color: var(--shell-ban-mesh-wash);
+  --url-screen-mesh-1: var(--shell-ban-mesh-1);
+  --url-screen-mesh-2: var(--shell-ban-mesh-2);
+  --url-screen-mesh-3: var(--shell-ban-mesh-3);
+  --url-screen-mesh-4: var(--shell-ban-mesh-4);
+  --url-screen-visual-wash: var(--shell-ban-mesh-wash);
+}
+
+.ban-screen__glow {
+  position: absolute;
+  inset: 0;
+  z-index: var(--shell-review-z-glow);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ban-screen__noise {
+  position: absolute;
+  inset: 0;
+  z-index: var(--shell-review-z-noise);
+  opacity: var(--url-screen-noise-opacity);
+  pointer-events: none;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2 2' numOctaves='3' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='luminanceToAlpha' result='alpha'/%3E%3CfeComponentTransfer in='alpha' result='mono'%3E%3CfeFuncA type='discrete' tableValues='0 1'/%3E%3C/feComponentTransfer%3E%3CfeFlood flood-color='%23F3F4F7' result='tint'/%3E%3CfeComposite in='tint' in2='mono' operator='in'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: var(--url-screen-noise-size) var(--url-screen-noise-size);
+  background-repeat: repeat;
+}
+
+.ban-screen__brand {
+  position: absolute;
+  inset: 0;
+  z-index: var(--shell-review-z-brand);
+  pointer-events: none;
+}
+
+.ban-screen__brand-slot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* Bottom + right align with previous 44×30 mark; flame extends upward */
+  transform: translate(-50%, calc(-50% + var(--ban-screen-brand-align-y)));
+}
+
+.ban-screen__brand-mark {
+  display: block;
+  width: var(--ban-screen-brand-width);
+  height: var(--ban-screen-brand-height);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ban-screen {
+    transition: none;
+    transform: none;
+    filter: none;
+  }
+
+  .ban-screen--open .ban-screen__visual,
+  .ban-screen--open .ban-screen__brand-mark,
+  .ban-screen--open .ban-screen__card {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .ban-screen__layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(
+      var(--url-screen-visual-mobile-min-height),
+      32vh
+    );
+  }
+}

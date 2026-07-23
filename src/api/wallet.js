@@ -81,6 +81,7 @@ export async function refreshSessionFromProfile() {
     role: profile.role ?? session.role,
     grade: profile.grade ?? session.grade,
     tier: profile.tier ?? session.tier ?? "free",
+    banned: Boolean(profile.banned_at),
   };
   setSession(next);
   return next;

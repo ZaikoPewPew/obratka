@@ -1,4 +1,8 @@
-import { signInWithGoogle, signInWithTelegram } from "../../api/auth.js";
+import {
+  requestEmailOtp,
+  signInWithGoogle,
+  signInWithTelegram,
+} from "../../api/auth.js";
 import { getStrings } from "../../i18n.js";
 import { isValidEmail } from "../../utils/emailValidation.js";
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
@@ -11,7 +15,7 @@ import {
 /**
  * @typedef {'sign-in' | 'sign-up'} AuthMode
  * @typedef {{
- *   type: 'email';
+ *   type: 'email-otp-sent';
  *   email: string;
  * } | {
  *   type: 'telegram';
@@ -65,16 +69,30 @@ const GOOGLE_ICON_SVG = `
 </svg>
 `;
 
-const PROVIDER_LOADER_SVG = `
-<svg class="auth-screen__provider-loader" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+const TELEGRAM_LOADER_SVG = `
+<svg class="auth-screen__provider-loader auth-screen__provider-loader--telegram" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <circle class="auth-screen__provider-loader-track" cx="14" cy="14" r="11" />
+  <path class="auth-screen__provider-loader-arc" d="M25 14a11 11 0 0 0-11-11" stroke-linecap="round" />
+</svg>
+`;
+
+const GOOGLE_LOADER_SVG = `
+<svg class="auth-screen__provider-loader auth-screen__provider-loader--google" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <linearGradient id="authGoogleLoaderGrad" x1="3" y1="3" x2="25" y2="25" gradientUnits="userSpaceOnUse">
+      <stop stop-color="var(--palette-google-blue)" />
+      <stop offset="0.33" stop-color="var(--palette-google-red)" />
+      <stop offset="0.66" stop-color="var(--palette-google-yellow)" />
+      <stop offset="1" stop-color="var(--palette-google-green)" />
+    </linearGradient>
+  </defs>
   <circle class="auth-screen__provider-loader-track" cx="14" cy="14" r="11" />
   <path class="auth-screen__provider-loader-arc" d="M25 14a11 11 0 0 0-11-11" stroke-linecap="round" />
 </svg>
 `;
 
 /**
- * Экран регистрации: split как url-screen; форма — как старый PDF/done
- * (заголовок → email → разделитель → Telegram / Google).
+ * Экран регистрации: email → (далее auth-code) / Telegram / Google.
  *
  * @param {{
  *   onSuccess: (result: AuthResult) => void | Promise<void>;
@@ -176,15 +194,15 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
 
   const telegramBtn = document.createElement("button");
   telegramBtn.type = "button";
-  telegramBtn.className = "auth-screen__provider";
+  telegramBtn.className = "auth-screen__provider auth-screen__provider--telegram";
   telegramBtn.setAttribute("aria-label", t.authTelegram);
-  telegramBtn.innerHTML = `${TELEGRAM_ICON_SVG}${PROVIDER_LOADER_SVG}<span class="auth-screen__provider-label">${t.authTelegram}</span>`;
+  telegramBtn.innerHTML = `${TELEGRAM_ICON_SVG}${TELEGRAM_LOADER_SVG}<span class="auth-screen__provider-label">${t.authTelegram}</span>`;
 
   const googleBtn = document.createElement("button");
   googleBtn.type = "button";
-  googleBtn.className = "auth-screen__provider";
+  googleBtn.className = "auth-screen__provider auth-screen__provider--google";
   googleBtn.setAttribute("aria-label", t.authGoogle);
-  googleBtn.innerHTML = `${GOOGLE_ICON_SVG}${PROVIDER_LOADER_SVG}<span class="auth-screen__provider-label">${t.authGoogle}</span>`;
+  googleBtn.innerHTML = `${GOOGLE_ICON_SVG}${GOOGLE_LOADER_SVG}<span class="auth-screen__provider-label">${t.authGoogle}</span>`;
 
   actions.append(telegramBtn, googleBtn);
   form.append(field, divider, actions, providerError);
@@ -220,9 +238,15 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
   let closing = false;
   let telegramBusy = false;
   let googleBusy = false;
+  let emailBusy = false;
 
-  function setError(visible) {
+  /**
+   * @param {boolean} visible
+   * @param {string} [message]
+   */
+  function setError(visible, message) {
     error.hidden = !visible;
+    error.textContent = message || t.authEmailInvalid;
     input.setAttribute("aria-invalid", visible ? "true" : "false");
     inputWrap.classList.toggle("url-screen__input-wrap--invalid", visible);
   }
@@ -238,6 +262,19 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
     }
     providerError.hidden = false;
     providerError.textContent = message;
+  }
+
+  /**
+   * @param {unknown} err
+   * @returns {string}
+   */
+  function emailOtpErrorMessage(err) {
+    const code = err instanceof Error ? err.message : String(err || "");
+    if (code === "supabase_not_configured") return t.authOtpNotConfigured;
+    if (code === "email_otp_rate_limit") return t.authOtpRateLimit;
+    if (code === "email_invalid") return t.authEmailInvalid;
+    if (code === "auth_identity_conflict") return t.authIdentityConflict;
+    return t.authOtpSendError;
   }
 
   /**
@@ -270,7 +307,22 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
     if (code === "supabase_not_configured") {
       return t.authGoogleNotConfigured;
     }
+    if (code === "auth_identity_conflict") {
+      return t.authIdentityConflict;
+    }
     return t.authGoogleError;
+  }
+
+  function syncMethodsLocked() {
+    const locked = emailBusy || telegramBusy || googleBusy;
+    const emailLockedByProvider = telegramBusy || googleBusy;
+
+    input.disabled = locked;
+    submit.disabled = locked;
+    telegramBtn.disabled = locked;
+    googleBtn.disabled = locked;
+
+    field.classList.toggle("auth-screen__field--locked", emailLockedByProvider);
   }
 
   /**
@@ -278,14 +330,13 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
    */
   function setTelegramBusy(busy) {
     telegramBusy = busy;
-    telegramBtn.disabled = busy || googleBusy;
-    googleBtn.disabled = googleBusy || busy;
     telegramBtn.setAttribute("aria-busy", busy ? "true" : "false");
     telegramBtn.setAttribute(
       "aria-label",
       busy ? t.authProviderConnecting : t.authTelegram,
     );
     telegramBtn.classList.toggle("auth-screen__provider--busy", busy);
+    syncMethodsLocked();
   }
 
   /**
@@ -293,14 +344,28 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
    */
   function setGoogleBusy(busy) {
     googleBusy = busy;
-    googleBtn.disabled = busy || telegramBusy;
-    telegramBtn.disabled = telegramBusy || busy;
     googleBtn.setAttribute("aria-busy", busy ? "true" : "false");
     googleBtn.setAttribute(
       "aria-label",
       busy ? t.authProviderConnecting : t.authGoogle,
     );
     googleBtn.classList.toggle("auth-screen__provider--busy", busy);
+    syncMethodsLocked();
+  }
+
+  /**
+   * @param {boolean} busy
+   */
+  function setEmailBusy(busy) {
+    emailBusy = busy;
+    submit.setAttribute("aria-busy", busy ? "true" : "false");
+    submit.setAttribute(
+      "aria-label",
+      busy ? t.authEmailSending : t.authEmailSubmitAria,
+    );
+    submit.title = busy ? t.authEmailSending : t.authEmailSubmitAria;
+    submit.classList.toggle("url-screen__submit--busy", busy);
+    syncMethodsLocked();
   }
 
   function syncSubmitVisibility() {
@@ -347,10 +412,11 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
       meshWash,
       opts,
       prepare: () => {
-        setError(false);
-        setProviderError(null);
+        setEmailBusy(false);
         setTelegramBusy(false);
         setGoogleBusy(false);
+        setError(false);
+        setProviderError(null);
         input.value = "";
         input.placeholder = t.authEmailPlaceholder;
         syncSubmitVisibility();
@@ -387,16 +453,30 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
     });
   }
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const email = input.value.trim();
+    if (emailBusy || telegramBusy || googleBusy) return;
+
+    const email = input.value.trim().toLowerCase();
     if (!isValidEmail(email)) {
       setError(true);
       input.focus();
       return;
     }
     setError(false);
-    finish({ type: "email", email });
+    setProviderError(null);
+    setEmailBusy(true);
+    try {
+      await requestEmailOtp(email);
+      finish({ type: "email-otp-sent", email });
+    } catch (err) {
+      setError(true, emailOtpErrorMessage(err));
+      if (import.meta.env.DEV) {
+        console.warn("[auth] email otp send failed", err);
+      }
+    } finally {
+      setEmailBusy(false);
+    }
   });
 
   input.addEventListener("input", () => {
@@ -405,7 +485,7 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
   });
 
   telegramBtn.addEventListener("click", async () => {
-    if (telegramBusy || googleBusy) return;
+    if (telegramBusy || googleBusy || emailBusy) return;
     setProviderError(null);
     setTelegramBusy(true);
     try {
@@ -434,12 +514,11 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
   });
 
   googleBtn.addEventListener("click", async () => {
-    if (googleBusy || telegramBusy) return;
+    if (googleBusy || telegramBusy || emailBusy) return;
     setProviderError(null);
     setGoogleBusy(true);
     try {
       await signInWithGoogle();
-      // Browser redirects to Google; busy stays until navigation.
     } catch (err) {
       setProviderError(googleErrorMessage(err));
       if (import.meta.env.DEV) {

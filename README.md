@@ -1,22 +1,38 @@
-# Memento — waitlist / Обратка
+# Обратка (obratka)
 
-**Vite**, **vanilla JS**, локализация через `content/locales.json`, Supabase (таблица `subscribers`).  
-Продуктовые экраны и path-роутинг: [`SCREENS.md`](SCREENS.md).
+Продукт взаимного ревью портфолио дизайнеров: регистрация → онбординг → очередь ревью / подача URL → квиз → отчёт.
+
+**Стек:** Vite, vanilla JS, Supabase (Auth + Postgres + Edge Function), i18n `ru`/`en`.  
+**Деплой:** GitHub Pages — https://zaikopewpew.github.io/obratka/  
+**Репозиторий:** https://github.com/ZaikoPewPew/obratka
+
+Карта экранов и URL: [`SCREENS.md`](SCREENS.md).
 
 ## Быстрый старт
 
 ```bash
 npm install
+cp .env.example .env   # заполнить SUPABASE_* и TELEGRAM_BOT_ID
 npm run dev
 ```
 
-Обычно `http://localhost:5173` → редирект на `/referral`.
+Обычно `http://localhost:5173` → `/referral` (или `/home` / `/onboarding`, если есть сессия).
 
-Примеры path’ов: `/referral`, `/registration`, `/onboarding`, `/home`, `/portfolio`, `/review`, `/quiz`, `/quiz/done`, `/done`.
+| Path | Экран |
+|------|--------|
+| `/referral` | Реферальный код |
+| `/registration` | Email → code / Telegram / Google |
+| `/registration/code` | Код из письма (6 ячеек) |
+| `/onboarding` | Вопросы профиля |
+| `/home` | Очередь + баланс |
+| `/portfolio` | Подача своего URL |
+| `/review` | Просмотр портфолио + таймер |
+| `/quiz` → `/quiz/done` | Квиз и финал |
+| `/done` | Успех подачи (deep link / sync) |
 
 ### Переменные окружения
 
-`.env` / `.env.local` (в `.gitignore`). Подробности: [`STRUCTURE.md`](STRUCTURE.md).
+`.env` / `.env.local` (в `.gitignore`). Подробности: [`STRUCTURE.md`](STRUCTURE.md), [`.env.example`](.env.example).
 
 | Переменная | Назначение |
 |------------|------------|
@@ -26,34 +42,53 @@ npm run dev
 | `TELEGRAM_BOT_USERNAME` | username бота (опционально) |
 | `VITE_BASE_PATH` | base для GitHub Pages (CI: `/obratka/`) |
 
-Google OAuth настраивается в Supabase Dashboard (не через `.env`). См. `src/components/auth-screen/README.md`.
+**Не в клиентском `.env`:**
+
+- Google Client ID/Secret — только Supabase Dashboard → Auth → Google  
+- `TELEGRAM_BOT_TOKEN` — только Edge Function secrets  
+- Email OTP — Dashboard → Auth → Providers → Email (включить OTP)
+
+См. [`src/components/auth-screen/README.md`](src/components/auth-screen/README.md).
 
 ## Скрипты
 
 | Команда | Назначение |
 |---------|------------|
 | `npm run dev` | Разработка (Vite HMR) |
-| `npm run build` | `dist/` + `404.html` (SPA-fallback) |
+| `npm run build` | `dist/` + `404.html` (SPA-fallback для Pages) |
 | `npm run preview` | Просмотр production-сборки |
 | `npm test` | Юнит-тесты (embed, meta, routes) |
 
-## Контент
+## Auth
 
-| Файл | Роль |
-|------|------|
-| `content/locales.json` | UI-строки, локали |
+| Провайдер | Как |
+|-----------|-----|
+| **Email OTP** | код на почту → `/registration/code` → `verifyOtp`; resend с клиентским cooldown 60s |
+| **Telegram** | Login Widget → Edge Function `telegram-auth` |
+| **Google** | OAuth PKCE → redirect → `completeOAuthFromUrl` |
 
-## Деплой
-
-Статика в `dist/`. На GitHub Pages `404.html` = копия `index.html` для deep link’ов. `SUPABASE_*` нужны на этапе `npm run build`.
+Сессия приложения: `localStorage` `obratka.session` + JWT Supabase Auth.  
+**Email ↔ Google:** Automatic linking в Supabase (одна verified email = один user). Telegram (`tg{id}@t.me`) не склеивается.  
+Ошибки identity / rate-limit мапятся в `auth.js` → i18n (`authIdentityConflict`, `authOtpRateLimit`).  
+API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](src/components/auth-screen/README.md).
 
 ## Документация
 
 | Документ | Содержание |
 |----------|------------|
-| [`SCREENS.md`](SCREENS.md) | Экраны и URL |
-| [`src/app/README.md`](src/app/README.md) | Routes / router / flow |
+| [`SCREENS.md`](SCREENS.md) | Экраны, URL, handoff, контракты, защита auth |
+| [`PROJECT.md`](PROJECT.md) | Продукт, архитектура, бэкенд, roadmap |
 | [`STRUCTURE.md`](STRUCTURE.md) | Папки и env |
-| [`PROJECT.md`](PROJECT.md) | Продукт и идеи |
-| [`mobile.md`](mobile.md) | Мобильный макет / QA |
-| [`.cursor/README.md`](.cursor/README.md) | Карта для агента |
+| [`mobile.md`](mobile.md) | Мобильный UX продукта (+ архив waitlist) |
+| [`src/app/README.md`](src/app/README.md) | Routes / router / flow / session |
+| [`src/api/README.md`](src/api/README.md) | Auth, profiles, wallet, portfolios |
+| [`src/components/auth-screen/README.md`](src/components/auth-screen/README.md) | Dashboard Auth + identity linking |
+| [`src/components/auth-code-screen/README.md`](src/components/auth-code-screen/README.md) | OTP UI + resend cooldown |
+| [`supabase/README.md`](supabase/README.md) | SQL и Edge Functions |
+| [`.cursor/README.md`](.cursor/README.md) | Карта для агента Cursor |
+
+## Деплой
+
+Статика в `dist/`. На GitHub Pages `404.html` = копия `index.html` для deep link’ов.  
+`SUPABASE_*` и `TELEGRAM_*` нужны на этапе `npm run build` (CI).  
+Remote только `ZaikoPewPew/obratka` — см. `.cursor/rules/git-remote.mdc`.
