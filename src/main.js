@@ -20,6 +20,7 @@ import {
 import { createAppRouter } from "./app/router.js";
 import { getSession, setSession, clearSession } from "./app/session.js";
 import { submitPortfolio, clearSubmittedPortfolios } from "./api/portfolios.js";
+import { fetchMyProfile } from "./api/profiles.js";
 import {
   awardReviewReward,
   canSubmitPortfolio,
@@ -469,9 +470,14 @@ const homeScreen = createHomeScreen({
 });
 
 const onboardingScreen = createOnboardingScreen({
-  onComplete: async () => {
+  onComplete: async (answers) => {
     const session = getSession() ?? {};
-    setSession({ ...session, onboardingDone: true });
+    setSession({
+      ...session,
+      onboardingDone: true,
+      role: typeof answers?.role === "string" ? answers.role : session.role,
+      grade: typeof answers?.grade === "string" ? answers.grade : session.grade,
+    });
     go("home", { replace: true, handoff: true });
   },
 });
@@ -490,7 +496,8 @@ const authScreen = createAuthScreen({
           ? result.email
           : session.email;
 
-    setSession({
+    /** @type {import("./app/session.js").AppSession} */
+    let next = {
       ...session,
       userId,
       email,
@@ -503,8 +510,30 @@ const authScreen = createAuthScreen({
             avatarUrl: result.photoUrl ?? null,
           }
         : {}),
-    });
-    if (session.onboardingDone) {
+    };
+
+    if (result.type === "telegram") {
+      const profile = await fetchMyProfile();
+      if (profile) {
+        next = {
+          ...next,
+          userId: profile.id || next.userId,
+          email: profile.email ?? next.email,
+          displayName: profile.display_name ?? next.displayName,
+          avatarUrl: profile.avatar_url ?? next.avatarUrl,
+          telegramId: profile.telegram_id ?? next.telegramId,
+          telegramUsername: profile.telegram_username ?? next.telegramUsername,
+          balance:
+            typeof profile.balance === "number" ? profile.balance : next.balance,
+          onboardingDone: Boolean(profile.onboarding_done),
+          role: profile.role ?? next.role,
+          grade: profile.grade ?? next.grade,
+        };
+      }
+    }
+
+    setSession(next);
+    if (next.onboardingDone) {
       go("home", { handoff: true });
       return;
     }

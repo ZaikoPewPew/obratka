@@ -7,15 +7,17 @@
 ### Есть
 
 - `subscribers.js` — сохранение email в таблицу `subscribers` и получение количества подписчиков через RPC/HEAD fallback.
+- `auth.js` — Telegram Login → Edge Function → Supabase session.
+- `telegramWidget.js` — загрузка Login Widget / `Telegram.Login.auth`.
+- `profiles.js` — `fetchMyProfile` / `updateMyProfile` (`public.profiles`).
+- `onboarding.js` — `saveOnboardingAnswers` → колонки + `onboarding` jsonb в профиле.
 
-### Local stubs (до Supabase)
+### Local stubs
 
 | Файл | Роль |
 |------|------|
 | `portfolios.js` | mock-очередь + `submitPortfolio` stub |
 | `wallet.js` | баланс / reward / spend (`session.balance`) |
-| `onboarding.js` | `saveOnboardingAnswers` no-op |
-| `auth.js` | signUp / signIn / signOut (stub) |
 | `referrals.js` | validate / redeem (stub) |
 
 См. [`SCREENS.md`](../../SCREENS.md).

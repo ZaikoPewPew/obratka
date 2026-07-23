@@ -11,6 +11,8 @@ const STORAGE_KEY = "obratka.session";
  *   telegramUsername?: string | null;
  *   displayName?: string | null;
  *   avatarUrl?: string | null;
+ *   role?: string | null;
+ *   grade?: string | null;
  * }} AppSession
  */
 

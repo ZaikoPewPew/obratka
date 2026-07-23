@@ -6,6 +6,7 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 
 Очередь: mock seed (`Наринэ`, `Janelle`) + поданные URL из localStorage (`obratka.submittedPortfolios`).  
 Карточка: превью (thum.io / fallback), favicon платформы + аватар, имя, роль, счётчик «N из M».  
+Профиль в шапке: `session.avatarUrl` (Telegram `photo_url`), иначе unavatar по email.  
 Клик по карточке → `onOpenPortfolio` → `/review`.  
 CTA «Подать своё» и dev-кнопки — под лентой. На десктопе справа пустая панель (как в Figma).
 

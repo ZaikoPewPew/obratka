@@ -539,8 +539,10 @@ export function createOnboardingScreen({ onComplete }) {
     const answers = collectAnswers();
     try {
       await saveOnboardingAnswers(answers);
-    } catch {
-      /* stub */
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.warn("[onboarding] saveOnboardingAnswers failed", err);
+      }
     }
     await onComplete(answers);
   }
