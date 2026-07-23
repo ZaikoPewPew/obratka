@@ -1,5 +1,7 @@
 import { getSupabase } from "../lib/supabaseClient.js";
 
+/** @typedef {'free' | 'pro' | 'legendary'} ProfileTier */
+
 /**
  * @typedef {{
  *   id: string;
@@ -11,6 +13,7 @@ import { getSupabase } from "../lib/supabaseClient.js";
  *   email?: string | null;
  *   role?: string | null;
  *   grade?: string | null;
+ *   tier?: ProfileTier;
  *   domains?: string[] | null;
  *   goals?: string[] | null;
  *   onboarding?: Record<string, unknown> | null;
@@ -18,6 +21,9 @@ import { getSupabase } from "../lib/supabaseClient.js";
  *   balance?: number;
  * }} Profile
  */
+
+const PROFILE_SELECT =
+  "id, auth_provider, display_name, avatar_url, telegram_id, telegram_username, email, role, grade, tier, domains, goals, onboarding, onboarding_done, balance";
 
 /**
  * @returns {Promise<Profile | null>}
@@ -28,9 +34,7 @@ export async function fetchMyProfile() {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select(
-      "id, auth_provider, display_name, avatar_url, telegram_id, telegram_username, email, role, grade, domains, goals, onboarding, onboarding_done, balance",
-    )
+    .select(PROFILE_SELECT)
     .maybeSingle();
 
   if (error) {
@@ -57,13 +61,14 @@ export async function updateMyProfile(patch) {
     throw new Error("not_authenticated");
   }
 
+  // tier is server-managed (trigger + service_role); never send from client.
+  const { tier: _tier, id: _id, ...safePatch } = patch;
+
   const { data, error } = await supabase
     .from("profiles")
-    .update(patch)
+    .update(safePatch)
     .eq("id", user.id)
-    .select(
-      "id, auth_provider, display_name, avatar_url, telegram_id, telegram_username, email, role, grade, domains, goals, onboarding, onboarding_done, balance",
-    )
+    .select(PROFILE_SELECT)
     .maybeSingle();
 
   if (error) {

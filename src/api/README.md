@@ -8,7 +8,7 @@
 |------|------|
 | `auth.js` | Telegram Login → Edge Function; Google OAuth (`signInWithGoogle` / `completeOAuthFromUrl`); `signOut` |
 | `telegramWidget.js` | загрузка Login Widget / `Telegram.Login.auth` |
-| `profiles.js` | `fetchMyProfile` / `updateMyProfile` (`public.profiles`) |
+| `profiles.js` | `fetchMyProfile` / `updateMyProfile` (`public.profiles`; `tier` только чтение) |
 | `onboarding.js` | `saveOnboardingAnswers` → колонки + `onboarding` jsonb в профиле |
 | `subscribers.js` | waitlist: POST email + RPC/HEAD count |
 
@@ -27,7 +27,7 @@ Env / Dashboard: `.env.example`, `src/components/auth-screen/README.md`, `supaba
 | Файл | Роль |
 |------|------|
 | `wallet.js` | `getBalance` / `creditBalance` / `spendForSubmit` / `REVIEW_REWARD` / `SUBMIT_COST`; `refreshSessionFromProfile` + `refreshWalletFromServer` (`profiles.balance` ↔ session) |
-| `portfolios.js` | mock-очередь + `submitPortfolio` (localStorage stub) + `formatPortfolioRole` |
+| `portfolios.js` | общая очередь Supabase: `listPortfoliosForReview` / `submitPortfolio` / `submitPortfolioReview` + `formatPortfolioRole` |
 | `referrals.js` | validate / redeem (stub) |
 
 См. [`SCREENS.md`](../../SCREENS.md).

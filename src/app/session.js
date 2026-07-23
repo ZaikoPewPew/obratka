@@ -13,6 +13,7 @@ const STORAGE_KEY = "obratka.session";
  *   avatarUrl?: string | null;
  *   role?: string | null;
  *   grade?: string | null;
+ *   tier?: 'free' | 'pro' | 'legendary';
  * }} AppSession
  */
 

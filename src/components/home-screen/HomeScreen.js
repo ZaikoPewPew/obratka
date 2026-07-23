@@ -26,8 +26,10 @@ const DEV_CREDIT_AMOUNT = 10;
  *   name?: string;
  *   role?: string;
  *   avatarUrl?: string;
- *   previewUrls?: string[];
- *   previewCount?: number;
+ *   ownerId?: string;
+ *   isOwn?: boolean;
+ *   reviewsCount?: number;
+ *   targetReviews?: number;
  *   status?: string;
  * }} HomePortfolioItem
  */
@@ -441,19 +443,31 @@ export function createHomeScreen({
     text.append(name, role);
     person.append(badges, text);
 
-    const total = Math.max(1, Number(item.previewCount) || 1);
+    const total = Math.max(1, Number(item.targetReviews) || 1);
+    const current = Math.min(
+      total,
+      Math.max(0, Number(item.reviewsCount) || 0),
+    );
     const count = document.createElement("span");
     count.className = "home-screen__card-count";
     count.textContent = formatString(t.homeCardProgress, {
-      current: 1,
+      current,
       total,
     });
 
     meta.append(person, count);
     button.append(preview, meta);
-    button.addEventListener("click", () => {
-      void onOpenPortfolio(item);
-    });
+
+    if (item.isOwn) {
+      button.disabled = true;
+      button.classList.add("home-screen__card--own");
+      button.title = t.homeCardOwnTitle;
+      button.setAttribute("aria-label", t.homeCardOwnAria);
+    } else {
+      button.addEventListener("click", () => {
+        void onOpenPortfolio(item);
+      });
+    }
 
     li.append(button);
     return li;

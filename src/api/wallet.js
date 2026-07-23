@@ -81,6 +81,7 @@ export async function refreshSessionFromProfile() {
         : session.onboardingDone,
     role: profile.role ?? session.role,
     grade: profile.grade ?? session.grade,
+    tier: profile.tier ?? session.tier ?? "free",
   };
   setSession(next);
   return next;

@@ -102,6 +102,7 @@
   --color-focus-ring-on-accent: rgba(255, 255, 255, 0.55);
   --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
+  --opacity-disabled: 0.64;
   --color-error-border: rgba(200, 60, 60, 0.45);
   --color-error-border-strong: rgba(200, 60, 60, 0.55);
 

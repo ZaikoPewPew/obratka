@@ -11,6 +11,8 @@ create table if not exists public.profiles (
   email text,
   role text,
   grade text,
+  -- Membership: free (default) / pro (paid) / legendary (manual VIP). Not onboarding `role`.
+  tier text not null default 'free' check (tier in ('free', 'pro', 'legendary')),
   domains text[] not null default '{}'::text[],
   goals text[] not null default '{}'::text[],
   onboarding jsonb not null default '{}'::jsonb,
@@ -22,6 +24,18 @@ create table if not exists public.profiles (
 
 create index if not exists profiles_telegram_id_idx on public.profiles (telegram_id);
 create index if not exists profiles_auth_provider_idx on public.profiles (auth_provider);
+create index if not exists profiles_tier_idx on public.profiles (tier);
+
+-- Idempotent for DBs created before `tier` existed.
+alter table public.profiles
+  add column if not exists tier text not null default 'free';
+
+alter table public.profiles
+  drop constraint if exists profiles_tier_check;
+
+alter table public.profiles
+  add constraint profiles_tier_check
+  check (tier in ('free', 'pro', 'legendary'));
 
 create or replace function public.set_profiles_updated_at()
 returns trigger
@@ -38,6 +52,27 @@ create trigger profiles_set_updated_at
   before update on public.profiles
   for each row
   execute function public.set_profiles_updated_at();
+
+-- Clients cannot self-escalate tier; service_role / SQL editor can.
+create or replace function public.protect_profiles_tier()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if new.tier is distinct from old.tier
+     and coalesce(auth.jwt() ->> 'role', '') is distinct from 'service_role' then
+    raise exception 'profiles.tier is read-only for clients';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_protect_tier on public.profiles;
+create trigger profiles_protect_tier
+  before update on public.profiles
+  for each row
+  execute function public.protect_profiles_tier();
 
 create or replace function public.handle_new_user()
 returns trigger

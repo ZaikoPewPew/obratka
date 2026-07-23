@@ -20,7 +20,7 @@ import {
 import { createAppRouter } from "./app/router.js";
 import { getSession, setSession, clearSession } from "./app/session.js";
 import { completeOAuthFromUrl, signOut } from "./api/auth.js";
-import { submitPortfolio, clearSubmittedPortfolios } from "./api/portfolios.js";
+import { submitPortfolio, clearSubmittedPortfolios, submitPortfolioReview } from "./api/portfolios.js";
 import { fetchMyProfile } from "./api/profiles.js";
 import {
   awardReviewReward,
@@ -60,6 +60,8 @@ const frameForwardBtn = document.querySelector('[data-action="frame-forward"]');
 
 /** @type {string | null} */
 let portfolioUrl = null;
+/** @type {string | null} */
+let portfolioId = null;
 /** @type {import("./utils/portfolioEmbed.js").PortfolioEmbedPlan | null} */
 let embedPlan = null;
 /** @type {string} */
@@ -112,7 +114,18 @@ const reviewPanel = createReviewPanel({
     setReviewReportReveal(active, payload);
   },
   onComplete: () => {
-    void awardReviewReward();
+    void (async () => {
+      try {
+        if (portfolioId) {
+          await submitPortfolioReview(portfolioId);
+        }
+      } catch (err) {
+        if (import.meta.env.DEV) {
+          console.warn("[review] submitPortfolioReview", err);
+        }
+      }
+      await awardReviewReward();
+    })();
   },
   onDoneChange: (done) => {
     if (done) {
@@ -280,10 +293,14 @@ function setPortfolioAvatar(primary, fallbacks = []) {
 
 /**
  * @param {string} url
- * @param {{ openExternal?: boolean }} [options]
+ * @param {{ openExternal?: boolean; portfolioId?: string | null }} [options]
  */
 async function applyPortfolio(url, options = {}) {
   portfolioUrl = url;
+  portfolioId =
+    typeof options.portfolioId === "string" && options.portfolioId.trim()
+      ? options.portfolioId.trim()
+      : null;
   const requestId = ++metaRequestId;
   const plan = resolvePortfolioEmbed(url);
 
@@ -441,9 +458,10 @@ const urlScreen = createUrlScreen({
 
 const homeScreen = createHomeScreen({
   onOpenPortfolio: async (item) => {
+    if (item?.isOwn) return;
     enterSessionShell();
     await closeReview();
-    await applyPortfolio(item.url);
+    await applyPortfolio(item.url, { portfolioId: item.id });
     go("review");
     void homeScreen.close();
     if (embedPlan?.mode === "external") {
@@ -466,6 +484,7 @@ const homeScreen = createHomeScreen({
     clearSubmittedPortfolios();
     stopTimer();
     portfolioUrl = null;
+    portfolioId = null;
     embedPlan = null;
     portfolioName = getStrings().brandName;
     pendingSuccessPreset = "generic";
@@ -535,6 +554,7 @@ async function applyProviderUser(user, provider) {
       onboardingDone: Boolean(profile.onboarding_done),
       role: profile.role ?? next.role,
       grade: profile.grade ?? next.grade,
+      tier: profile.tier ?? next.tier ?? "free",
     };
   }
 

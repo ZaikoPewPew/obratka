@@ -355,6 +355,19 @@
   outline-offset: var(--focus-ring-offset);
 }
 
+.home-screen__card:disabled,
+.home-screen__card--own {
+  cursor: default;
+  opacity: var(--opacity-disabled);
+}
+
+.home-screen__card:disabled:hover,
+.home-screen__card--own:hover,
+.home-screen__card:disabled:active,
+.home-screen__card--own:active {
+  --home-screen-card-surface: var(--home-screen-card-bg);
+}
+
 .home-screen__preview {
   box-sizing: border-box;
   position: relative;

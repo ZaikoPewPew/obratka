@@ -4,7 +4,8 @@
 
 | Файл | Роль |
 |------|------|
-| `profiles.sql` | таблица `public.profiles` (1:1 с `auth.users`), триггер `handle_new_user` (в т.ч. Google `app_metadata.provider`), RLS, колонки онбординга / balance / avatar |
+| `profiles.sql` | таблица `public.profiles` (1:1 с `auth.users`), триггер `handle_new_user` (в т.ч. Google `app_metadata.provider`), RLS, колонки онбординга / balance / avatar / `tier` (`free`\|`pro`\|`legendary`, клиент read-only) |
+| `portfolios.sql` | `public.portfolios` + `public.reviews`, счётчик ревьюеров, RLS, триггер инкремента / `done` |
 | `subscribers_count.sql` | RPC `public.subscribers_count()` + `grant execute` для `anon` / `authenticated` |
 
 Применять в SQL Editor Dashboard или через CLI. Обзор — [`../README.md`](../README.md).

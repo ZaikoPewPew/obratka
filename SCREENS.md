@@ -2,7 +2,7 @@
 
 Карта экранов «Обратки», path-роутинг и ветки с Home.
 
-Статус: **продуктовый флоу wired**. Auth: Telegram + Google OAuth → `profiles`. Onboarding пишет в Supabase. Home — хаб (mock-очередь + баланс из `profiles`). Submit URL — done на url-screen; success — пресеты / deep link.
+Статус: **продуктовый флоу wired**. Auth: Telegram + Google OAuth → `profiles`. Onboarding пишет в Supabase. Home — общая очередь `portfolios`/`reviews` + баланс из `profiles`. Submit URL — done на url-screen; success — пресеты / deep link.
 
 ## Продуктовый флоу
 
@@ -67,7 +67,7 @@ src/components/
 
 src/api/
   auth.js / profiles.js / onboarding.js / wallet.js
-  portfolios.js           ← mock очередь + submit stub
+  portfolios.js           ← общая очередь Supabase + submit/review
   referrals.js            ← stub
   telegramWidget.js / subscribers.js
 
@@ -92,7 +92,7 @@ content/
 | `createReferralScreen` | `/referral` | UI |
 | `createAuthScreen` | `/registration` | UI + Telegram/Google |
 | `createOnboardingScreen` | `/onboarding` | UI → profiles |
-| `createHomeScreen` | `/home` | UI (hub + mock feed) |
+| `createHomeScreen` | `/home` | UI (hub + shared feed) |
 | `createUrlScreen` | `/portfolio` | UI (submit own + done) |
 | iframe-shell + timer | `/review` | UI |
 | `createReviewScreen` + `createReviewPanel` | `/quiz` | UI |
@@ -125,13 +125,13 @@ go("auth", { handoff: true }); // referral → auth: visual статичен
 
 ## API
 
-`src/api/` — Auth (Telegram/Google), profiles, onboarding, wallet sync, portfolios stub. См. `src/api/README.md`.
+`src/api/` — Auth (Telegram/Google), profiles, onboarding, wallet sync, shared portfolios queue. См. `src/api/README.md`.
 
 ## Дальше
 
-1. Боевая лента / аккаунт вместо mock seed.
-2. Email auth через Supabase.
-3. Вынести CSS в `brand-screen.css`.
+1. Email auth через Supabase.
+2. Вынести CSS в `brand-screen.css`.
+3. Агрегация оценок нескольких ревьюеров в PDF-отчёте.
 
 ## Связанные документы
 

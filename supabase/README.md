@@ -4,7 +4,7 @@
 
 ## Состав
 
-- `sql/profiles.sql` — таблица `public.profiles` (1:1 с `auth.users`), триггер создания профиля, RLS.
+- `sql/profiles.sql` — таблица `public.profiles` (1:1 с `auth.users`), триггер создания профиля, RLS, `tier` (`free` / `pro` / `legendary`).
 - `sql/subscribers_count.sql` — функция `public.subscribers_count()` и `grant execute` для безопасного получения количества подписчиков при RLS.
 - `functions/telegram-auth/` — вход через Telegram Login Widget → сессия Supabase Auth (см. README в папке функции).
 

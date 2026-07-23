@@ -1,8 +1,9 @@
 import { getSession } from "../app/session.js";
 import { getStrings } from "../i18n.js";
+import { getSupabase } from "../lib/supabaseClient.js";
 
 /**
- * Очередь портфолио на ревью (local mock до Supabase).
+ * Общая очередь портфолио на ревью (Supabase).
  *
  * @typedef {{
  *   id: string;
@@ -10,13 +11,16 @@ import { getStrings } from "../i18n.js";
  *   name?: string;
  *   role?: string;
  *   avatarUrl?: string;
- *   previewUrls?: string[];
- *   previewCount?: number;
+ *   ownerId?: string;
+ *   isOwn?: boolean;
+ *   reviewsCount?: number;
+ *   targetReviews?: number;
  *   status?: 'pending' | 'done' | 'skipped';
  * }} PortfolioQueueItem
  */
 
-const SUBMITTED_STORAGE_KEY = "obratka.submittedPortfolios";
+/** Целевое число ревьюеров для новой карточки. */
+export const DEFAULT_TARGET_REVIEWS = 3;
 
 /**
  * Подписи роли на карточке всегда на английском (Title Case),
@@ -40,26 +44,6 @@ const GRADE_LABELS_EN = Object.freeze({
   lead: "Lead",
   head: "Head",
 });
-
-/** @type {readonly PortfolioQueueItem[]} */
-const SEED_QUEUE = Object.freeze([
-  {
-    id: "seed-narine",
-    url: "https://narinkalubluleshku-cmyk.github.io/ux-ui-2-crm-ui/",
-    name: "Наринэ Туманова",
-    role: "Senior Product Designer",
-    previewCount: 3,
-    status: "pending",
-  },
-  {
-    id: "seed-janelle",
-    url: "https://janelle.page",
-    name: "Janelle Jumadilova",
-    role: "Product Designer",
-    previewCount: 3,
-    status: "pending",
-  },
-]);
 
 /**
  * @param {string} url
@@ -100,59 +84,96 @@ export function portfolioPreviewUrl(url) {
 }
 
 /**
- * @returns {PortfolioQueueItem[]}
+ * @param {Record<string, unknown>} row
+ * @param {string | null | undefined} viewerId
+ * @returns {PortfolioQueueItem}
  */
-function readSubmitted() {
-  try {
-    const raw = window.localStorage.getItem(SUBMITTED_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (item) =>
-        item &&
-        typeof item === "object" &&
-        typeof item.id === "string" &&
-        typeof item.url === "string",
-    );
-  } catch {
-    return [];
+function mapPortfolioRow(row, viewerId) {
+  const ownerId = typeof row.owner_id === "string" ? row.owner_id : "";
+  const reviewsCount =
+    typeof row.reviews_count === "number" && Number.isFinite(row.reviews_count)
+      ? Math.max(0, Math.floor(row.reviews_count))
+      : 0;
+  const targetReviews =
+    typeof row.target_reviews === "number" && Number.isFinite(row.target_reviews)
+      ? Math.max(1, Math.floor(row.target_reviews))
+      : DEFAULT_TARGET_REVIEWS;
+
+  /** @type {PortfolioQueueItem} */
+  const item = {
+    id: String(row.id),
+    url: String(row.url || ""),
+    name: typeof row.name === "string" ? row.name : undefined,
+    role: typeof row.role === "string" ? row.role : undefined,
+    ownerId,
+    isOwn: Boolean(viewerId && ownerId && viewerId === ownerId),
+    reviewsCount,
+    targetReviews,
+    status:
+      row.status === "done" || row.status === "skipped" || row.status === "pending"
+        ? row.status
+        : "pending",
+  };
+  if (typeof row.avatar_url === "string" && row.avatar_url.trim()) {
+    item.avatarUrl = row.avatar_url.trim();
   }
+  return item;
 }
 
 /**
- * @param {PortfolioQueueItem[]} items
- */
-function writeSubmitted(items) {
-  window.localStorage.setItem(SUBMITTED_STORAGE_KEY, JSON.stringify(items));
-}
-
-/**
- * Сброс поданных портфолио (тест / reset session).
+ * No-op: очередь живёт в Supabase (раньше чистила localStorage).
  */
 export function clearSubmittedPortfolios() {
-  window.localStorage.removeItem(SUBMITTED_STORAGE_KEY);
+  /* intentionally empty */
 }
 
 /**
+ * Pending-очередь для главной: чужие ещё не отревьюенные + свои pending.
+ *
  * @returns {Promise<PortfolioQueueItem[]>}
  */
 export async function listPortfoliosForReview() {
-  const session = getSession();
-  const displayName =
-    typeof session?.displayName === "string" ? session.displayName.trim() : "";
-  const avatarUrl =
-    typeof session?.avatarUrl === "string" ? session.avatarUrl.trim() : "";
-  const roleLabel = formatPortfolioRole(session?.grade, session?.role);
+  const supabase = getSupabase();
+  if (!supabase) return [];
 
-  const seed = SEED_QUEUE.map((item) => ({ ...item }));
-  const submitted = readSubmitted().map((item) => ({
-    ...item,
-    name: displayName || item.name,
-    role: roleLabel,
-    ...(avatarUrl ? { avatarUrl } : {}),
-  }));
-  return [...seed, ...submitted];
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.id) return [];
+
+  const { data: rows, error } = await supabase
+    .from("portfolios")
+    .select(
+      "id, owner_id, url, name, role, avatar_url, target_reviews, reviews_count, status, created_at",
+    )
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    if (import.meta.env.DEV) {
+      console.warn("[portfolios] listPortfoliosForReview", error.message);
+    }
+    return [];
+  }
+
+  const { data: myReviews, error: reviewsError } = await supabase
+    .from("reviews")
+    .select("portfolio_id")
+    .eq("reviewer_id", user.id);
+
+  if (reviewsError && import.meta.env.DEV) {
+    console.warn("[portfolios] list reviews", reviewsError.message);
+  }
+
+  const reviewedIds = new Set(
+    (myReviews || [])
+      .map((r) => (r && typeof r.portfolio_id === "string" ? r.portfolio_id : ""))
+      .filter(Boolean),
+  );
+
+  return (rows || [])
+    .map((row) => mapPortfolioRow(row, user.id))
+    .filter((item) => item.isOwn || !reviewedIds.has(item.id));
 }
 
 /**
@@ -160,40 +181,115 @@ export async function listPortfoliosForReview() {
  * @returns {Promise<PortfolioQueueItem | null>}
  */
 export async function getPortfolio(id) {
-  const seed = SEED_QUEUE.find((entry) => entry.id === id);
-  if (seed) return { ...seed };
-  const submitted = readSubmitted().find((entry) => entry.id === id);
-  return submitted ? { ...submitted } : null;
+  const supabase = getSupabase();
+  if (!supabase || !id) return null;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data, error } = await supabase
+    .from("portfolios")
+    .select(
+      "id, owner_id, url, name, role, avatar_url, target_reviews, reviews_count, status",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    if (import.meta.env.DEV) {
+      console.warn("[portfolios] getPortfolio", error.message);
+    }
+    return null;
+  }
+  if (!data) return null;
+  return mapPortfolioRow(data, user?.id);
 }
 
 /**
- * Подача своего портфолио в очередь (local stub).
- * Появляется в списке на главной и доступно для ревью.
- * Имя/аватар — из сессии (Google / Telegram); роль — грейд + специализация онбординга.
+ * Подача своего портфолио в общую очередь.
  *
  * @param {string} rawUrl
  * @returns {Promise<PortfolioQueueItem>}
  */
 export async function submitPortfolio(rawUrl) {
   const url = String(rawUrl || "").trim();
+  const supabase = getSupabase();
+  if (!supabase) {
+    throw new Error("supabase_not_configured");
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.id) {
+    throw new Error("not_authenticated");
+  }
+
   const session = getSession();
   const displayName =
     typeof session?.displayName === "string" ? session.displayName.trim() : "";
   const avatarUrl =
     typeof session?.avatarUrl === "string" ? session.avatarUrl.trim() : "";
 
-  /** @type {PortfolioQueueItem} */
-  const item = {
-    id: `submitted-${Date.now()}`,
+  /** @type {Record<string, unknown>} */
+  const insert = {
+    owner_id: user.id,
     url,
     name: displayName || labelFromUrl(url),
     role: formatPortfolioRole(session?.grade, session?.role),
-    previewCount: 1,
+    target_reviews: DEFAULT_TARGET_REVIEWS,
+    reviews_count: 0,
     status: "pending",
   };
   if (avatarUrl) {
-    item.avatarUrl = avatarUrl;
+    insert.avatar_url = avatarUrl;
   }
-  writeSubmitted([...readSubmitted(), item]);
-  return { ...item };
+
+  const { data, error } = await supabase
+    .from("portfolios")
+    .insert(insert)
+    .select(
+      "id, owner_id, url, name, role, avatar_url, target_reviews, reviews_count, status",
+    )
+    .maybeSingle();
+
+  if (error || !data) {
+    throw new Error(error?.message || "portfolio_submit_failed");
+  }
+  return mapPortfolioRow(data, user.id);
+}
+
+/**
+ * Зафиксировать завершённое ревью (один раз на пару user↔portfolio).
+ *
+ * @param {string} portfolioId
+ * @returns {Promise<void>}
+ */
+export async function submitPortfolioReview(portfolioId) {
+  const id = String(portfolioId || "").trim();
+  if (!id) {
+    throw new Error("portfolio_id_required");
+  }
+
+  const supabase = getSupabase();
+  if (!supabase) {
+    throw new Error("supabase_not_configured");
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.id) {
+    throw new Error("not_authenticated");
+  }
+
+  const { error } = await supabase.from("reviews").insert({
+    portfolio_id: id,
+    reviewer_id: user.id,
+  });
+
+  if (error) {
+    throw new Error(error.message || "review_submit_failed");
+  }
 }

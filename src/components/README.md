@@ -10,7 +10,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `referral-screen/` | `/referral` | UI |
 | `auth-screen/` | `/registration` | UI + Telegram / Google |
 | `onboarding-screen/` | `/onboarding` | UI → `profiles` |
-| `home-screen/` | `/home` | UI (hub + mock feed + wallet) |
+| `home-screen/` | `/home` | UI (hub + shared feed + wallet) |
 | `url-screen/` | `/portfolio` | UI (submit own + done) |
 | `success-screen/` | `/done` | UI (пресеты подачи) |
 
