@@ -7,13 +7,14 @@ import {
   canSubmitPortfolio,
   creditBalance,
   getBalance,
-  SUBMIT_COST,
+  refreshWalletFromServer,
 } from "../../api/wallet.js";
 import { getSession } from "../../app/session.js";
 import { resolvePlatformIcon } from "../../utils/platformBrandIcon.js";
 import brandLogoUrl from "../../assets/brand/logo.svg";
 import boneIconUrl from "../../assets/home/bone.svg";
 import bellIconUrl from "../../assets/home/bell.svg";
+import plusIconUrl from "../../assets/home/plus.svg";
 
 /** Сколько монет даёт dev-кнопка на главной. */
 const DEV_CREDIT_AMOUNT = 10;
@@ -111,6 +112,22 @@ export function createHomeScreen({
   const topActions = document.createElement("div");
   topActions.className = "home-screen__top-actions";
 
+  const addBtn = document.createElement("button");
+  addBtn.type = "button";
+  addBtn.className = "home-screen__chip home-screen__chip--submit";
+
+  const plusImg = document.createElement("img");
+  plusImg.className = "home-screen__chip-icon";
+  plusImg.src = plusIconUrl;
+  plusImg.alt = "";
+  plusImg.width = 24;
+  plusImg.height = 24;
+  plusImg.decoding = "async";
+
+  const addLabel = document.createElement("span");
+  addLabel.className = "home-screen__chip-label";
+  addBtn.append(plusImg, addLabel);
+
   const balanceChip = document.createElement("button");
   balanceChip.type = "button";
   balanceChip.className = "home-screen__chip home-screen__chip--balance";
@@ -153,7 +170,7 @@ export function createHomeScreen({
   profileImg.decoding = "async";
   profileBtn.append(profileImg);
 
-  topActions.append(balanceChip, notifyBtn, profileBtn);
+  topActions.append(addBtn, balanceChip, notifyBtn, profileBtn);
   topbar.append(markLink, topActions);
 
   const body = document.createElement("div");
@@ -172,14 +189,6 @@ export function createHomeScreen({
   const footer = document.createElement("div");
   footer.className = "home-screen__footer";
 
-  const addBtn = document.createElement("button");
-  addBtn.type = "button";
-  addBtn.className = "iframe-shell__btn home-screen__add";
-
-  const hint = document.createElement("p");
-  hint.className = "home-screen__hint";
-  hint.hidden = true;
-
   const addCoinsBtn = document.createElement("button");
   addCoinsBtn.type = "button";
   addCoinsBtn.className = "iframe-shell__btn home-screen__reset";
@@ -188,7 +197,7 @@ export function createHomeScreen({
   resetBtn.type = "button";
   resetBtn.className = "iframe-shell__btn home-screen__reset";
 
-  footer.append(addBtn, hint, addCoinsBtn, resetBtn);
+  footer.append(addCoinsBtn, resetBtn);
   feed.append(list, empty, footer);
 
   const aside = document.createElement("aside");
@@ -243,7 +252,9 @@ export function createHomeScreen({
     markImg.alt = t.brandLogoAlt;
     list.setAttribute("aria-label", t.homeListAria);
     empty.textContent = t.homeEmpty;
-    addBtn.textContent = t.homeAddPortfolio;
+    addLabel.textContent = t.homeAddPortfolio;
+    addBtn.setAttribute("aria-label", t.homeAddPortfolio);
+    addBtn.title = t.homeAddPortfolio;
     addCoinsBtn.textContent = formatString(t.homeAddCoins, {
       amount: DEV_CREDIT_AMOUNT,
     });
@@ -259,24 +270,14 @@ export function createHomeScreen({
       "aria-label",
       formatString(t.homeBalanceAria, { balance }),
     );
-    balanceChip.title = formatString(t.homeAddCoinsTitle, {
-      amount: DEV_CREDIT_AMOUNT,
-    });
+    balanceChip.title = formatString(t.homeBalance, { balance });
     notifyBtn.setAttribute("aria-label", t.homeNotificationsAria);
     profileBtn.setAttribute("aria-label", t.homeProfileAria);
 
     const locked = !canSubmitPortfolio();
     addBtn.disabled = locked;
     if (locked) {
-      hint.textContent = t.homeSubmitLocked;
-      hint.hidden = false;
-      addBtn.setAttribute("aria-describedby", "home-screen-hint");
-      hint.id = "home-screen-hint";
-    } else {
-      hint.textContent = formatString(t.homeSubmitCost, { cost: SUBMIT_COST });
-      hint.hidden = false;
-      hint.id = "home-screen-hint";
-      addBtn.setAttribute("aria-describedby", "home-screen-hint");
+      addBtn.title = t.homeSubmitLocked;
     }
 
     syncProfileAvatar();
@@ -421,6 +422,7 @@ export function createHomeScreen({
   }
 
   async function refresh() {
+    await refreshWalletFromServer();
     syncCopy();
     const next = await listPortfoliosForReview();
     setItems(next);
@@ -454,13 +456,15 @@ export function createHomeScreen({
   });
 
   balanceChip.addEventListener("click", () => {
-    creditBalance(DEV_CREDIT_AMOUNT);
-    syncCopy();
+    void creditBalance(DEV_CREDIT_AMOUNT).then(() => {
+      syncCopy();
+    });
   });
 
   addCoinsBtn.addEventListener("click", () => {
-    creditBalance(DEV_CREDIT_AMOUNT);
-    syncCopy();
+    void creditBalance(DEV_CREDIT_AMOUNT).then(() => {
+      syncCopy();
+    });
   });
 
   resetBtn.addEventListener("click", () => {

@@ -18,22 +18,27 @@ import { getStrings } from "../i18n.js";
 
 const SUBMITTED_STORAGE_KEY = "obratka.submittedPortfolios";
 
-/** @type {Readonly<Record<string, string>>} */
-const ROLE_LABEL_KEYS = Object.freeze({
-  "web-designer": "onboardingStepRoleWeb",
-  "product-designer": "onboardingStepRoleProduct",
-  "emotional-designer": "onboardingStepRoleEmotional",
-  "ux-ui-designer": "onboardingStepRoleUxUi",
-  other: "onboardingStepRoleOther",
+/**
+ * Подписи роли на карточке всегда на английском (Title Case),
+ * независимо от UI-локали онбординга.
+ *
+ * @type {Readonly<Record<string, string>>}
+ */
+const ROLE_LABELS_EN = Object.freeze({
+  "web-designer": "Web Designer",
+  "product-designer": "Product Designer",
+  "emotional-designer": "Emotional Designer",
+  "ux-ui-designer": "UX / UI Designer",
+  other: "Designer",
 });
 
 /** @type {Readonly<Record<string, string>>} */
-const GRADE_LABEL_KEYS = Object.freeze({
-  junior: "onboardingStepGradeJunior",
-  middle: "onboardingStepGradeMiddle",
-  senior: "onboardingStepGradeSenior",
-  lead: "onboardingStepGradeLead",
-  head: "onboardingStepGradeHead",
+const GRADE_LABELS_EN = Object.freeze({
+  junior: "Junior",
+  middle: "Middle",
+  senior: "Senior",
+  lead: "Lead",
+  head: "Head",
 });
 
 /** @type {readonly PortfolioQueueItem[]} */
@@ -72,7 +77,8 @@ function labelFromUrl(url) {
 }
 
 /**
- * Грейд + специализация из онбординга → одна строка для карточки.
+ * Грейд + специализация → английская строка для карточки
+ * (напр. `Senior Product Designer`).
  *
  * @param {string | null | undefined} grade
  * @param {string | null | undefined} role
@@ -80,12 +86,8 @@ function labelFromUrl(url) {
  */
 export function formatPortfolioRole(grade, role) {
   const t = getStrings();
-  const gradeKey = grade ? GRADE_LABEL_KEYS[grade] : null;
-  const roleKey = role ? ROLE_LABEL_KEYS[role] : null;
-  const gradeLabel =
-    gradeKey && typeof t[gradeKey] === "string" ? t[gradeKey] : "";
-  const roleLabel =
-    roleKey && typeof t[roleKey] === "string" ? t[roleKey] : "";
+  const gradeLabel = grade ? GRADE_LABELS_EN[grade] || "" : "";
+  const roleLabel = role ? ROLE_LABELS_EN[role] || "" : "";
   const combined = [gradeLabel, roleLabel].filter(Boolean).join(" ").trim();
   return combined || t.homeDefaultRole;
 }
@@ -138,8 +140,20 @@ export function clearSubmittedPortfolios() {
  * @returns {Promise<PortfolioQueueItem[]>}
  */
 export async function listPortfoliosForReview() {
+  const session = getSession();
+  const displayName =
+    typeof session?.displayName === "string" ? session.displayName.trim() : "";
+  const avatarUrl =
+    typeof session?.avatarUrl === "string" ? session.avatarUrl.trim() : "";
+  const roleLabel = formatPortfolioRole(session?.grade, session?.role);
+
   const seed = SEED_QUEUE.map((item) => ({ ...item }));
-  const submitted = readSubmitted().map((item) => ({ ...item }));
+  const submitted = readSubmitted().map((item) => ({
+    ...item,
+    name: displayName || item.name,
+    role: roleLabel,
+    ...(avatarUrl ? { avatarUrl } : {}),
+  }));
   return [...seed, ...submitted];
 }
 

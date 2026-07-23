@@ -17,7 +17,7 @@
 | Файл | Роль |
 |------|------|
 | `portfolios.js` | mock-очередь + `submitPortfolio` stub |
-| `wallet.js` | баланс / reward / spend (`session.balance`) |
+| `wallet.js` | баланс / reward / spend (`profiles.balance` ↔ `session.balance`) |
 | `referrals.js` | validate / redeem (stub) |
 
 См. [`SCREENS.md`](../../SCREENS.md).

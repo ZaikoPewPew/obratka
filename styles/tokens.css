@@ -346,6 +346,13 @@
   --home-screen-chip-icon: 24px;
   --home-screen-chip-font-size: var(--font-size-base);
   --home-screen-chip-font-weight: var(--font-weight-medium);
+  --home-screen-submit-chip-width: 189px;
+  --home-screen-submit-chip-padding: var(--space-3) var(--space-5) var(--space-3)
+    var(--space-4);
+  --home-screen-submit-chip-bg: var(--color-accent);
+  --home-screen-submit-chip-color: var(--color-on-accent);
+  --home-screen-submit-chip-bg-hover: var(--color-accent-hover);
+  --home-screen-submit-chip-bg-active: var(--color-accent-active);
   --home-screen-profile-size: var(--space-12);
   --home-screen-body-padding: var(--space-4);
   --home-screen-body-gap: var(--space-4);
@@ -355,6 +362,7 @@
   --home-screen-aside-min-height: 462px;
   --home-screen-aside-radius: var(--radius-xl);
   --home-screen-aside-bg: var(--color-surface-muted);
+  --home-screen-aside-sticky-top: var(--space-4);
   --home-screen-card-padding: var(--space-2);
   --home-screen-card-gap: var(--space-2);
   --home-screen-card-radius: var(--radius-xl);

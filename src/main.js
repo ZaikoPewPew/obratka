@@ -111,7 +111,7 @@ const reviewPanel = createReviewPanel({
     setReviewReportReveal(active, payload);
   },
   onComplete: () => {
-    awardReviewReward();
+    void awardReviewReward();
   },
   onDoneChange: (done) => {
     if (done) {
@@ -424,7 +424,7 @@ const urlScreen = createUrlScreen({
       throw new Error("url.submit_locked");
     }
     try {
-      spendSubmitCost();
+      await spendSubmitCost();
       await submitPortfolio(url);
     } catch {
       go("home", { replace: true });
