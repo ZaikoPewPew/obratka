@@ -164,7 +164,7 @@
   position: absolute;
   inset: 0;
   z-index: var(--shell-review-z-noise);
-  opacity: var(--url-screen-noise-opacity);
+  opacity: var(--ban-screen-noise-opacity);
   pointer-events: none;
   background-color: transparent;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2 2' numOctaves='3' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='luminanceToAlpha' result='alpha'/%3E%3CfeComponentTransfer in='alpha' result='mono'%3E%3CfeFuncA type='discrete' tableValues='0 1'/%3E%3C/feComponentTransfer%3E%3CfeFlood flood-color='%23F3F4F7' result='tint'/%3E%3CfeComposite in='tint' in2='mono' operator='in'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");

@@ -347,6 +347,7 @@
   --ban-screen-body-size: var(--font-size-base);
   --ban-screen-actions-gap: var(--shell-review-done-actions-gap);
   --ban-screen-btn-width: 242px;
+  --ban-screen-noise-opacity: 0.5;
   /* Mark with flame: same width as brand, taller; nudge keeps bottom/right with old 44×30 */
   --ban-screen-brand-width: 44px;
   --ban-screen-brand-height: 37px;
