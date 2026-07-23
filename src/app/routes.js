@@ -2,7 +2,7 @@
  * Path-карта экранов. Источник правды для URL ↔ id.
  * Base (`import.meta.env.BASE_URL`) учитывается в router.js.
  *
- * @typedef {'referral' | 'auth' | 'onboarding' | 'home' | 'url' | 'review' | 'quiz' | 'done'} AppRouteId
+ * @typedef {'referral' | 'auth' | 'onboarding' | 'home' | 'url' | 'review' | 'quiz' | 'done' | 'success'} AppRouteId
  */
 
 /** @type {Readonly<Record<AppRouteId, string>>} */
@@ -16,8 +16,10 @@ export const ROUTE_PATHS = Object.freeze({
   review: "/review",
   /** Опрос после таймера */
   quiz: "/quiz",
-  /** Экран успеха (пресеты: квиз, подача портфолио, generic) */
-  done: "/done",
+  /** Финал опроса (внутри review-workspace) */
+  done: "/quiz/done",
+  /** Успех подачи своего портфолио (success-screen) */
+  success: "/done",
 });
 
 /** @type {readonly AppRouteId[]} */

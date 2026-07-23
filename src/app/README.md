@@ -22,7 +22,8 @@
 | `url` | `/portfolio` | Подача своего портфолио |
 | `review` | `/review` | Ревью: iframe + таймер |
 | `quiz` | `/quiz` | Квиз / опрос после таймера |
-| `done` | `/done` | Успех (пресеты success-screen) |
+| `done` | `/quiz/done` | Финал квиза (review-panel done + улет отчёта) |
+| `success` | `/done` | Успех подачи портфолио (success-screen) |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query вроде `?ref=` / `?lang=` сохраняются.
 
@@ -32,8 +33,8 @@
 
 ```text
 referral → auth → onboarding → home
-  home → review → quiz → done (quizComplete)
-  home → url → done (portfolioSubmitted)
+  home → review → quiz → /quiz/done
+  home → url → /done (portfolioSubmitted)
 ```
 
 См. корневой [`SCREENS.md`](../../SCREENS.md).

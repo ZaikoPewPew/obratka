@@ -111,8 +111,19 @@ const reviewPanel = createReviewPanel({
   },
   onComplete: () => {
     awardReviewReward();
-    pendingSuccessPreset = "quizComplete";
-    go("done");
+  },
+  onDoneChange: (done) => {
+    if (done) {
+      if (activeRouteId !== "done") syncRoute("done");
+      return;
+    }
+    if (activeRouteId === "done") syncRoute("quiz");
+  },
+  onExit: () => {
+    go("home", { replace: true });
+  },
+  onNextCase: () => {
+    go("home", { replace: true });
   },
 });
 const reviewScreen = createReviewScreen({
@@ -419,7 +430,7 @@ const urlScreen = createUrlScreen({
       return;
     }
     pendingSuccessPreset = "portfolioSubmitted";
-    go("done", { replace: true });
+    go("success", { replace: true });
   },
 });
 
@@ -518,7 +529,7 @@ async function applyRoute(id, opts = {}) {
   const closeOpts = handoff ? { handoff: true } : {};
   const openOpts = handoff ? { handoff: true } : {};
 
-  const isReviewWorkspace = id === "review" || id === "quiz";
+  const isReviewWorkspace = id === "review" || id === "quiz" || id === "done";
   const isBrandHandoff =
     handoff &&
     (id === "referral" || id === "auth" || id === "onboarding" || id === "url");
@@ -551,7 +562,7 @@ async function applyRoute(id, opts = {}) {
       urlScreen.open("", openOpts);
       return;
     }
-    if (target === "done") {
+    if (target === "success") {
       successScreen.open({ preset: pendingSuccessPreset });
     }
   }
@@ -564,7 +575,7 @@ async function applyRoute(id, opts = {}) {
     if (id !== "onboarding") closers.push(onboardingScreen.close(closeOpts));
     if (id !== "home") closers.push(homeScreen.close());
     if (id !== "url") closers.push(urlScreen.close(closeOpts));
-    if (id !== "done") closers.push(successScreen.close());
+    if (id !== "success") closers.push(successScreen.close());
     await Promise.all(closers);
   }
 
@@ -576,6 +587,11 @@ async function applyRoute(id, opts = {}) {
 
     frameWrap?.classList.add("iframe-shell__frame--locked");
     reviewScreen.open();
+    reviewPanel.open();
+    if (id === "done") {
+      reviewPanel.openDone();
+      return;
+    }
     reviewPanel.reset();
     reviewPanel.open();
     window.setTimeout(() => {

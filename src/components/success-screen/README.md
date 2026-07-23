@@ -1,12 +1,11 @@
 # `success-screen` — экран успеха (пресеты)
 
-Path: **`/done`**. Универсальный финал успешного действия (не часть quiz-workspace).
+Path: **`/done`** (`success`). Только для **подачи своего портфолио** (и generic). Финал квиза — в `review-panel` на `/quiz/done`.
 
 ## Пресеты
 
 | Id | Когда | CTA |
 |----|--------|-----|
-| `quizComplete` | после квиза | На главную / Следующий кейс → home |
 | `portfolioSubmitted` | после подачи портфолио | На главную |
 | `generic` | deep link / запасной | На главную |
 
@@ -17,10 +16,10 @@ Path: **`/done`**. Универсальный финал успешного де
 `createSuccessScreen({ onPrimary?, onSecondary? })` → `{ root, open, close }`
 
 ```js
-successScreen.open({ preset: "quizComplete" });
+successScreen.open({ preset: "portfolioSubmitted" });
 ```
 
-Пресет в рантайме задаёт `main.js` (`pendingSuccessPreset`) перед `go("done")`.
+Пресет в рантайме задаёт `main.js` (`pendingSuccessPreset`) перед `go("success")`.
 
 ## Стили
 

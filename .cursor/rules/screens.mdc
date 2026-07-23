@@ -20,7 +20,8 @@ alwaysApply: true
 | `url` | `/portfolio` |
 | `review` | `/review` (iframe + таймер) |
 | `quiz` | `/quiz` |
-| `done` | `/done` |
+| `done` | `/quiz/done` |
+| `success` | `/done` |
 
 `session.js` — только login-сессия пользователя, не экран `/review`.
 

@@ -1,7 +1,8 @@
 /**
- * Пресеты экрана успеха.
+ * Пресеты экрана успеха (подача портфолио / generic).
+ * Финал квиза — в `review-panel` (`/quiz/done`), не здесь.
  *
- * @typedef {'quizComplete' | 'portfolioSubmitted' | 'generic'} SuccessPresetId
+ * @typedef {'portfolioSubmitted' | 'generic'} SuccessPresetId
  *
  * @typedef {{
  *   id: SuccessPresetId;
@@ -14,12 +15,6 @@
 
 /** @type {Readonly<Record<SuccessPresetId, SuccessPreset>>} */
 export const SUCCESS_PRESETS = Object.freeze({
-  quizComplete: Object.freeze({
-    id: "quizComplete",
-    titleKey: "successQuizTitle",
-    primaryKey: "successQuizPrimary",
-    secondaryKey: "successQuizSecondary",
-  }),
   portfolioSubmitted: Object.freeze({
     id: "portfolioSubmitted",
     titleKey: "successPortfolioTitle",

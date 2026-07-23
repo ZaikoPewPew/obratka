@@ -401,6 +401,9 @@ function createStep(content) {
  *     },
  *   ) => void;
  *   onComplete?: (answers: Record<string, FormDataEntryValue>) => void | Promise<void>;
+ *   onExit?: () => void;
+ *   onNextCase?: () => void;
+ *   onDoneChange?: (done: boolean) => void;
  * }} [options]
  * @returns {{
  *   root: HTMLElement;
@@ -409,6 +412,7 @@ function createStep(content) {
  *   close: () => void;
  *   reset: () => void;
  *   focus: () => void;
+ *   openDone: () => void;
  * }}
  */
 export function createReviewPanel(options = {}) {
@@ -421,6 +425,11 @@ export function createReviewPanel(options = {}) {
     typeof options.onReportReveal === "function" ? options.onReportReveal : null;
   const onComplete =
     typeof options.onComplete === "function" ? options.onComplete : null;
+  const onExit = typeof options.onExit === "function" ? options.onExit : null;
+  const onNextCase =
+    typeof options.onNextCase === "function" ? options.onNextCase : null;
+  const onDoneChange =
+    typeof options.onDoneChange === "function" ? options.onDoneChange : null;
 
   const root = document.createElement("div");
   root.className = "review-panel";
@@ -707,12 +716,40 @@ export function createReviewPanel(options = {}) {
   footer.append(nextBtn, submit);
   form.append(stage, stepError, footer);
 
-  root.append(heading, top, form);
+  const done = document.createElement("div");
+  done.className = "review-panel__done";
+  done.hidden = true;
+
+  const doneTitle = document.createElement("h2");
+  doneTitle.className = "review-panel__done-title";
+  doneTitle.id = "review-done-title";
+  doneTitle.textContent = t.reviewDoneTitle;
+
+  const actions = document.createElement("div");
+  actions.className = "review-panel__done-actions";
+
+  const exitBtn = document.createElement("button");
+  exitBtn.type = "button";
+  exitBtn.className =
+    "iframe-shell__btn review-panel__done-btn review-panel__done-btn--exit";
+  exitBtn.textContent = t.reviewDoneExit;
+
+  const nextCaseBtn = document.createElement("button");
+  nextCaseBtn.type = "button";
+  nextCaseBtn.className =
+    "iframe-shell__btn review-panel__done-btn review-panel__done-btn--next";
+  nextCaseBtn.textContent = t.reviewDoneNextCase;
+
+  actions.append(exitBtn, nextCaseBtn);
+  done.append(doneTitle, actions);
+  root.append(heading, top, form, done);
 
   let currentStep = 0;
   let transitioning = false;
   /** @type {ReturnType<typeof setTimeout> | null} */
   let advanceTimer = null;
+  /** @type {Record<string, FormDataEntryValue> | null} */
+  let completedAnswers = null;
   const totalSteps = steps.length;
   const prefersReducedMotion = () =>
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -777,7 +814,8 @@ export function createReviewPanel(options = {}) {
   }
 
   function syncReportReveal() {
-    const onAdvice = !form.hidden && currentStep === totalSteps - 1;
+    const onAdvice =
+      done.hidden && !form.hidden && currentStep === totalSteps - 1;
 
     if (!onAdvice) {
       onReportReveal?.(false);
@@ -794,6 +832,8 @@ export function createReviewPanel(options = {}) {
   function showForm() {
     form.hidden = false;
     top.hidden = false;
+    done.hidden = true;
+    root.classList.remove("review-panel--to-done");
     root.style.minHeight = "";
     form.style.opacity = "";
     form.style.transform = "";
@@ -801,17 +841,86 @@ export function createReviewPanel(options = {}) {
     top.style.opacity = "";
     top.style.transform = "";
     top.style.filter = "";
+    done.style.opacity = "";
+    done.style.transform = "";
+    done.style.filter = "";
     onReportReveal?.(false);
+    onDoneChange?.(false);
   }
 
   /**
-   * Финальный submit квиза → колбэк наверх (success-screen в main.js).
-   * @param {Record<string, FormDataEntryValue>} answers
+   * Финальный вопрос → done слева; PDF-лист уезжает вниз справа.
+   * Form/top сразу уходят из потока (иначе flex-скачок), done входит на --motion-reveal-*.
+   * @param {Record<string, FormDataEntryValue> | null} [answers]
+   * @returns {Promise<void>}
    */
-  function completeQuiz(answers) {
+  async function showDone(answers = null) {
     clearAdvanceTimer();
+
+    if (!done.hidden && form.hidden) {
+      onReportReveal?.(false, { submitted: true });
+      onDoneChange?.(true);
+      return;
+    }
+
+    if (answers) {
+      completedAnswers = answers;
+      void onComplete?.(answers);
+    }
+
     onReportReveal?.(false, { submitted: true });
-    void onComplete?.(answers);
+    onDoneChange?.(true);
+
+    if (prefersReducedMotion()) {
+      form.hidden = true;
+      top.hidden = true;
+      done.hidden = false;
+      form.classList.remove("review-panel__form--advice");
+      return;
+    }
+
+    transitioning = true;
+    const { durationMs, shiftPx, blurPx, easing } = getMotionReveal();
+
+    /* Фиксируем высоту панели, чтобы не схлопнулась между hide form и enter done */
+    root.style.minHeight = `${root.getBoundingClientRect().height}px`;
+    root.classList.add("review-panel--to-done");
+
+    form.hidden = true;
+    top.hidden = true;
+    done.hidden = false;
+    form.classList.remove("review-panel__form--advice");
+
+    const enter = done.animate(
+      [
+        {
+          opacity: 0,
+          transform: `translateY(${shiftPx}px)`,
+          filter: `blur(${blurPx}px)`,
+        },
+        { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
+      ],
+      {
+        duration: durationMs,
+        easing,
+        fill: /** @type {FillMode} */ ("both"),
+      },
+    );
+
+    try {
+      await enter.finished;
+    } finally {
+      if (typeof enter.commitStyles === "function") {
+        enter.commitStyles();
+      }
+      enter.cancel();
+      done.style.opacity = "";
+      done.style.transform = "";
+      done.style.filter = "";
+      root.style.minHeight = "";
+      root.classList.remove("review-panel--to-done");
+      transitioning = false;
+    }
   }
 
   /**
@@ -1121,14 +1230,24 @@ export function createReviewPanel(options = {}) {
       return;
     }
 
-    void completeQuiz(answers);
+    void showDone(answers);
+  });
+
+  exitBtn.addEventListener("click", () => {
+    onExit?.();
+  });
+
+  nextCaseBtn.addEventListener("click", () => {
+    onNextCase?.();
   });
 
   function reset() {
     clearAdvanceTimer();
     transitioning = false;
     body.classList.remove("review-panel__body--animating");
+    root.classList.remove("review-panel--to-done");
     root.style.minHeight = "";
+    completedAnswers = null;
     form.reset();
     clearAllSelections();
     adviceInput.value = "";
@@ -1149,6 +1268,9 @@ export function createReviewPanel(options = {}) {
   }
 
   function focus() {
+    if (!done.hidden) {
+      return;
+    }
     focusActiveStep();
   }
 
@@ -1161,5 +1283,8 @@ export function createReviewPanel(options = {}) {
     close,
     reset,
     focus,
+    openDone: () => {
+      void showDone(completedAnswers);
+    },
   };
 }

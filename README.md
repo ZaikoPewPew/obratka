@@ -12,7 +12,7 @@ npm run dev
 
 Обычно `http://localhost:5173` → редирект на `/referral`.
 
-Примеры path’ов: `/referral`, `/registration`, `/onboarding`, `/home`, `/portfolio`, `/review`, `/quiz`, `/done`.
+Примеры path’ов: `/referral`, `/registration`, `/onboarding`, `/home`, `/portfolio`, `/review`, `/quiz`, `/quiz/done`, `/done`.
 
 ### Переменные окружения
 

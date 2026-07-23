@@ -8,8 +8,8 @@
 
 ```text
 referral → auth → onboarding → home
-                              ├─ pick → review → quiz → /done (quizComplete)
-                              └─ submit (url) → /done (portfolioSubmitted)
+                              ├─ pick → review → quiz → /quiz/done (review-panel done)
+                              └─ submit (url) → /done (success-screen portfolioSubmitted)
 ```
 
 | Шаг | Экран | Path | Смысл |
@@ -20,8 +20,8 @@ referral → auth → onboarding → home
 | 4 | `home-screen` | `/home` | Хаб: очередь + баланс + CTA |
 | 5a | iframe-shell | `/review` | Ревью выбранного портфолио |
 | 5b | `url-screen` | `/portfolio` | Подача своего URL (нужен баланс) |
-| 6 | `review-screen` + `review-panel` | `/quiz` | Квиз после таймера |
-| 7 | `success-screen` | `/done` | Успех (пресеты) |
+| 6 | `review-screen` + `review-panel` | `/quiz` → `/quiz/done` | Квиз; финал слева + улет отчёта |
+| 7 | `success-screen` | `/done` | Успех подачи портфолио |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query (`?ref=`, `?lang=`) сохраняются.
 
@@ -60,7 +60,7 @@ src/components/
   url-screen/
   review-screen/
   review-panel/           ← только шаги квиза
-  success-screen/         ← /done + пресеты
+  success-screen/         ← /done (подача портфолио)
 
 src/api/
   portfolios.js           ← mock очередь + submit stub
@@ -92,7 +92,7 @@ content/
 | `createUrlScreen` | `/portfolio` | UI (submit own) |
 | iframe-shell + timer | `/review` | UI |
 | `createReviewScreen` + `createReviewPanel` | `/quiz` | UI |
-| `createSuccessScreen` | `/done` | UI (presets) |
+| `createSuccessScreen` | `/done` | UI (portfolio submitted) |
 
 ### Handoff
 

@@ -1,33 +1,20 @@
-# `review-screen` — оболочка квиза
+# `review-screen` — workspace квиза
 
-Path: **`/quiz`**. Финал успеха — отдельный [`success-screen`](../success-screen/README.md) (`/done`).  
-Не путать с **`/review`** — там iframe + таймер (просмотр портфолио).
-
-Split как у `url-screen`: слева `review-panel`, справа brand visual (mesh + noise + лого + PDF-лист).
-
-## Файл
-
-- `ReviewScreen.js` — `createReviewScreen({ content })` → `{ root, open, close, setReportReveal }`.
+Path: **`/quiz`**, финал **`/quiz/done`**. Split: слева `review-panel`, справа brand visual (mesh + noise + лого + PDF-лист).
 
 ## API
 
-| Метод | Назначение |
-|--------|------------|
-| `open()` | Показать экран, mesh, сброс reveal |
-| `close()` | Закрытие с transition |
-| `setReportReveal(active, payload?)` | PDF-лист; `payload.answers` + `portfolioName` → `buildReportSections` |
+`createReviewScreen({ content })` → `{ root, open, close, setReportReveal, … }`.
 
-Монтаж: `main.js` кладёт `reviewPanel.root` в `content`; `onReportReveal` → `setReportReveal`.  
-URL: `syncRoute("quiz")` при открытии опроса; после submit квиза — `go("done")`.
+## URL
 
-## Visual (слои)
+- Открытие опроса → `syncRoute("quiz")` / `go("quiz")`.
+- После submit → `syncRoute("done")` (`/quiz/done`), панель остаётся в том же workspace.
+
+## Motion
 
 Снизу вверх (`--shell-review-z-*`): glow → noise → report → brand.
 
-На шаге advice лист выезжает; после submit — уезд + `.review-screen--done` (зелёный mesh) до перехода на success.
-
-## Motion / стили
+На шаге advice лист выезжает; после submit — уезд + `.review-screen--done` (зелёный mesh). Слева одновременно входит `review-panel__done`.
 
 Токены `--shell-review-*`, `--motion-report-launch-*`. Классы в `iframe-shell.css`.
-
-См. [`review-panel/README.md`](../review-panel/README.md), [`SCREENS.md`](../../../SCREENS.md).
