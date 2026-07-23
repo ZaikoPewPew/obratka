@@ -33,6 +33,15 @@ UI-кнопки и прогресс: ключи `onboarding*` в `locales.json`.
 
 Тексты вариантов и лейблов — **только** через `labelKey` → `locales.json` (ru/en), не строки в JSON.
 
+## Текущие шаги (v2)
+
+| # | `id` | `type` | Смысл |
+|---|------|--------|--------|
+| 1 | `role` | single | Специализация |
+| 2 | `grade` | single | Грейд (матчинг ревью) |
+| 3 | `domain` | multi | Профиль / домен |
+| 4 | `goal` | multi | Ожидания от платформы |
+
 ## Связь с экраном
 
-Левая панель onboarding-screen читает `steps` по порядку; правая — brand visual без изменений. Навигация next/back — как у `ReviewPanel`.
+Левая панель onboarding-screen читает `steps` по порядку; правая — brand visual без изменений. `single` — radio + auto-advance; `multi` — checkbox + «Далее» / «Начать».

@@ -7,11 +7,15 @@ const STORAGE_KEY = "obratka.session";
  *   onboardingDone?: boolean;
  *   referralCode?: string | null;
  *   balance?: number;
+ *   telegramId?: number;
+ *   telegramUsername?: string | null;
+ *   displayName?: string | null;
+ *   avatarUrl?: string | null;
  * }} AppSession
  */
 
 /**
- * Локальная сессия пользователя (заглушка до Supabase Auth).
+ * Локальная сессия приложения (поверх Supabase Auth session в supabase-js).
  * @returns {AppSession | null}
  */
 export function getSession() {

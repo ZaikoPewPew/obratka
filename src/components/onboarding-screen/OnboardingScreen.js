@@ -7,18 +7,49 @@ import {
 } from "../../utils/motionTokens.js";
 import { createBrandScreenShell } from "../brand-screen-shell/BrandScreenShell.js";
 
+const CHECKBOX_IDLE_PATH =
+  "M4 6C4 4.89543 4.89543 4 6 4H18C19.1046 4 20 4.89543 20 6V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V6Z";
+const CHECKBOX_CHECKED_PATH =
+  "M21 5L12 14L9 11M16 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V12";
+
+/**
+ * @param {string} d
+ * @returns {SVGSVGElement}
+ */
+function createCheckboxIcon(d) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "review-panel__check-icon");
+  svg.setAttribute("width", "24");
+  svg.setAttribute("height", "24");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("aria-hidden", "true");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", d);
+  path.setAttribute("stroke", "currentColor");
+  path.setAttribute("stroke-width", "1.3");
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+  svg.append(path);
+  return svg;
+}
+
 /**
  * @param {string} name
  * @param {string} value
  * @param {string} title
+ * @param {"radio" | "checkbox"} [type]
  */
-function createChoice(name, value, title) {
+function createChoice(name, value, title, type = "radio") {
   const label = document.createElement("label");
   label.className = "review-panel__choice";
+  if (type === "checkbox") {
+    label.classList.add("review-panel__choice--check");
+  }
 
   const input = document.createElement("input");
   input.className = "review-panel__choice-input";
-  input.type = "radio";
+  input.type = type;
   input.name = name;
   input.value = value;
   input.autocomplete = "off";
@@ -31,7 +62,20 @@ function createChoice(name, value, title) {
   text.textContent = title;
   copy.append(text);
 
-  label.append(input, copy);
+  if (type === "checkbox") {
+    const mark = document.createElement("span");
+    mark.className = "review-panel__check";
+    mark.setAttribute("aria-hidden", "true");
+    const idle = createCheckboxIcon(CHECKBOX_IDLE_PATH);
+    idle.classList.add("review-panel__check-icon--idle");
+    const checked = createCheckboxIcon(CHECKBOX_CHECKED_PATH);
+    checked.classList.add("review-panel__check-icon--checked");
+    mark.append(idle, checked);
+    label.append(input, copy, mark);
+  } else {
+    label.append(input, copy);
+  }
+
   return { label, input };
 }
 
@@ -67,6 +111,22 @@ function hasRadioValue(form, name) {
   return Boolean(new FormData(form).get(name));
 }
 
+/**
+ * @param {HTMLFormElement} form
+ * @param {string} name
+ */
+function hasCheckboxValue(form, name) {
+  return new FormData(form).getAll(name).some((value) => typeof value === "string" && value);
+}
+
+/**
+ * @param {unknown} type
+ * @returns {"single" | "multi"}
+ */
+function normalizeStepType(type) {
+  return type === "multi" ? "multi" : "single";
+}
+
 const BRAND_MARK_SVG = `
 <svg class="url-screen__brand-mark" width="44" height="30" viewBox="0 0 44 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <path d="M14.6249 30C11.6748 30 9.10235 29.4585 6.90772 28.3755C4.71308 27.2924 3.00414 25.7762 1.7809 23.8267C0.593632 21.8773 0 19.5848 0 16.9495C0 13.7004 0.755531 10.8123 2.26659 8.2852C3.77766 5.72202 5.84637 3.70036 8.47274 2.22022C11.1351 0.740072 14.1572 0 17.5391 0C20.5253 0 23.0977 0.541516 25.2563 1.62455C27.451 2.70758 29.1419 4.22383 30.3292 6.17328C31.5524 8.08664 32.1641 10.3791 32.1641 13.0505C32.1641 16.2635 31.4085 19.1516 29.8975 21.7148C28.3864 24.278 26.3177 26.2996 23.6913 27.7798C21.0649 29.2599 18.0428 30 14.6249 30ZM15.1646 23.0686C16.8196 23.0686 18.2767 22.6715 19.5359 21.8773C20.8311 21.0469 21.8385 19.9097 22.558 18.4657C23.2776 17.0217 23.6373 15.343 23.6373 13.4296C23.6373 11.4801 23.0617 9.90975 21.9104 8.71841C20.7591 7.52708 19.1401 6.93141 17.0534 6.93141C15.3984 6.93141 13.9234 7.34657 12.6282 8.1769C11.3689 8.97112 10.3616 10.0903 9.60604 11.5343C8.88649 12.9783 8.52671 14.657 8.52671 16.5704C8.52671 18.556 9.10235 20.1444 10.2536 21.3357C11.4049 22.491 13.0419 23.0686 15.1646 23.0686Z" fill="white"/>
@@ -78,7 +138,7 @@ const BRAND_MARK_SVG = `
  * Онбординг: те же паттерны, что у review-panel (choice / top / progress / footer).
  *
  * @param {{
- *   onComplete: (answers: Record<string, string>) => void | Promise<void>;
+ *   onComplete: (answers: Record<string, string | string[]>) => void | Promise<void>;
  * }} opts
  * @returns {{
  *   root: HTMLElement;
@@ -157,27 +217,38 @@ export function createOnboardingScreen({ onComplete }) {
   /** @type {{
    *   step: HTMLElement;
    *   fieldName: string;
+   *   type: "single" | "multi";
    *   title: string;
    *   validate: () => boolean;
    *   autoAdvance: boolean;
    * }[]} */
   const steps = contentSteps.map((stepDef, index) => {
     const fieldName = String(stepDef.id);
+    const stepType = normalizeStepType(stepDef.type);
+    const inputType = stepType === "multi" ? "checkbox" : "radio";
     const options = Array.isArray(stepDef.options) ? stepDef.options : [];
     const choices = options.map((opt) =>
       createChoice(
         fieldName,
         String(opt.value),
         t[opt.labelKey] ?? String(opt.value),
+        inputType,
       ),
     );
     const isLast = index === contentSteps.length - 1;
+    const required = stepDef.required !== false;
     return {
       step: createStep(createOptions(...choices.map((c) => c.label))),
       fieldName,
+      type: stepType,
       title: t[stepDef.labelKey] ?? t.onboardingTitle,
-      validate: () => hasRadioValue(form, fieldName),
-      autoAdvance: !isLast,
+      validate: () => {
+        if (!required) return true;
+        return stepType === "multi"
+          ? hasCheckboxValue(form, fieldName)
+          : hasRadioValue(form, fieldName);
+      },
+      autoAdvance: stepType === "single" && !isLast,
     };
   });
 
@@ -288,7 +359,7 @@ export function createOnboardingScreen({ onComplete }) {
   }
 
   /**
-   * Смена шага: весь `review-panel__stage` целиком (вопрос + варианты).
+   * Смена шага: `review-panel__stage` + footer одной пачкой.
    * @param {1 | -1} direction
    * @param {() => void} apply
    */
@@ -303,38 +374,57 @@ export function createOnboardingScreen({ onComplete }) {
       fill: /** @type {FillMode} */ ("forwards"),
     };
 
-    const leave = stage.animate(
-      [
-        { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
-        {
-          opacity: 0,
-          transform: `translateY(${leaveY}px)`,
-          filter: `blur(${blurPx}px)`,
-        },
-      ],
-      timing,
-    );
-    await leave.finished.catch(() => undefined);
-    leave.cancel();
+    /**
+     * @param {HTMLElement[]} targets
+     * @param {Keyframe[]} keyframes
+     */
+    async function runPack(targets, keyframes) {
+      if (targets.length === 0) return;
+      const anims = targets.map((el) => el.animate(keyframes, timing));
+      await Promise.all(
+        anims.map((anim) => anim.finished.catch(() => undefined)),
+      );
+      for (const anim of anims) {
+        anim.cancel();
+      }
+      for (const el of targets) {
+        el.style.opacity = "";
+        el.style.transform = "";
+        el.style.filter = "";
+      }
+    }
+
+    const leaveTargets = [stage];
+    if (!footer.hidden) {
+      leaveTargets.push(footer);
+    }
+
+    await runPack(leaveTargets, [
+      { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
+      {
+        opacity: 0,
+        transform: `translateY(${leaveY}px)`,
+        filter: `blur(${blurPx}px)`,
+      },
+    ]);
 
     apply();
 
-    const enter = stage.animate(
-      [
-        {
-          opacity: 0,
-          transform: `translateY(${enterY}px)`,
-          filter: `blur(${blurPx}px)`,
-        },
-        { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
-      ],
-      timing,
-    );
-    await enter.finished.catch(() => undefined);
-    enter.cancel();
-    stage.style.opacity = "";
-    stage.style.transform = "";
-    stage.style.filter = "";
+    const enterTargets = [stage];
+    if (!footer.hidden) {
+      /* Не дать CSS motion-reveal с --open перезапуститься поверх WAAPI. */
+      footer.style.animation = "none";
+      enterTargets.push(footer);
+    }
+
+    await runPack(enterTargets, [
+      {
+        opacity: 0,
+        transform: `translateY(${enterY}px)`,
+        filter: `blur(${blurPx}px)`,
+      },
+      { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
+    ]);
   }
 
   /**
@@ -424,10 +514,19 @@ export function createOnboardingScreen({ onComplete }) {
   }
 
   function collectAnswers() {
-    /** @type {Record<string, string>} */
+    /** @type {Record<string, string | string[]>} */
     const answers = {};
     const data = new FormData(form);
     for (const step of steps) {
+      if (step.type === "multi") {
+        const values = data
+          .getAll(step.fieldName)
+          .filter((value) => typeof value === "string" && value);
+        if (values.length > 0) {
+          answers[step.fieldName] = /** @type {string[]} */ (values);
+        }
+        continue;
+      }
       const value = data.get(step.fieldName);
       if (typeof value === "string" && value) {
         answers[step.fieldName] = value;
@@ -450,8 +549,11 @@ export function createOnboardingScreen({ onComplete }) {
     clearAdvanceTimer();
     transitioning = false;
     body.classList.remove("review-panel__body--animating");
+    footer.style.animation = "";
     form.reset();
-    for (const input of form.querySelectorAll('input[type="radio"]')) {
+    for (const input of form.querySelectorAll(
+      'input[type="radio"], input[type="checkbox"]',
+    )) {
       if (input instanceof HTMLInputElement) {
         input.checked = false;
       }

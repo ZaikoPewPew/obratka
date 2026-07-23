@@ -4,28 +4,38 @@ Path: **`/registration`**. Split как `url-screen`; форма — стиль 
 
 ## Левая панель
 
-1. Заголовок (`authWelcomeTitle`): «Добро пожаловать! / Давайте создадим аккаунт»
-2. Email (`authEmailPlaceholder`: `your@email.com`) + стрелка submit
-3. Разделитель (`authDividerOr`): «или войдите с помощью»
-4. Серые кнопки: Telegram / Google
+1. Заголовок (`authWelcomeTitle`)
+2. Email + стрелка submit
+3. Разделитель (`authDividerOr`)
+4. Кнопки: Telegram / Google
 
 ## Файл
 
 - `AuthScreen.js` — `createAuthScreen({ onSuccess, mode? })` → `{ root, open, close, setMode }`.
-- `open(mode | { handoff }?, { handoff? })`, `close({ handoff? })`.
 
 ## Поведение
 
-- Email → `onSuccess({ type: 'email', email })`.
-- Telegram / Google (stub) → `onSuccess({ type: 'telegram' | 'google' })`.
-- Happy-path: `go("url", { handoff: true })` (онбординг/home пока пропускаются).
+- Email → `onSuccess({ type: 'email', email })` (пока без Supabase email auth).
+- **Telegram** → Login Widget popup → Edge Function `telegram-auth` → `supabase.auth.setSession` →  
+  `onSuccess({ type: 'telegram', userId, email?, telegramId?, username?, … })`.
+- Google — stub → `onSuccess({ type: 'google' })`.
+- Happy-path в `main.js`: `onboarding` (или `home`, если `onboardingDone`).
+
+## Env
+
+См. `.env.example` и `supabase/functions/telegram-auth/README.md`:
+
+- `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+- `TELEGRAM_BOT_ID` (число до `:` в токене BotFather)
+- секрет `TELEGRAM_BOT_TOKEN` только в Edge Function secrets
 
 ## i18n
 
-`authWelcomeTitle`, `authEmailLabel`, `authEmailPlaceholder`, `authEmailSubmitAria`, `authEmailInvalid`, `authDividerOr`, `authTelegram`, `authGoogle`.
+`authWelcomeTitle`, `authEmail*`, `authDividerOr`, `authTelegram`, `authGoogle`,  
+`authTelegramError`, `authTelegramCancelled`, `authTelegramNotConfigured`.
 
 ## Стили
 
-`.auth-screen__*` + оболочка `.url-screen*` в `iframe-shell.css`; токены `--auth-screen-*`, палитра Google/Telegram в `tokens.css`.
+`.auth-screen__*` + `.url-screen*` в `iframe-shell.css`; токены `--auth-screen-*`.
 
 См. [`SCREENS.md`](../../../SCREENS.md).

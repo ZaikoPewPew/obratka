@@ -5,6 +5,10 @@
  *   id: string;
  *   url: string;
  *   name?: string;
+ *   role?: string;
+ *   avatarUrl?: string;
+ *   previewUrls?: string[];
+ *   previewCount?: number;
  *   status?: 'pending' | 'done' | 'skipped';
  * }} PortfolioQueueItem
  */
@@ -17,12 +21,18 @@ const SEED_QUEUE = Object.freeze([
     id: "seed-narine",
     url: "https://narinkalubluleshku-cmyk.github.io/ux-ui-2-crm-ui/",
     name: "Наринэ Туманова",
+    role: "Senior Product Designer",
+    avatarUrl: "https://unavatar.io/github/gaearon",
+    previewCount: 3,
     status: "pending",
   },
   {
     id: "seed-janelle",
     url: "https://janelle.page",
     name: "Janelle Jumadilova",
+    role: "Product Designer",
+    avatarUrl: "https://unavatar.io/github/rauchg",
+    previewCount: 3,
     status: "pending",
   },
 ]);
@@ -38,6 +48,15 @@ function labelFromUrl(url) {
   } catch {
     return url;
   }
+}
+
+/**
+ * Превью-скриншот страницы (внешний сервис; fallback в UI при ошибке).
+ * @param {string} url
+ * @returns {string}
+ */
+export function portfolioPreviewUrl(url) {
+  return `https://image.thum.io/get/maxAge/24/width/1000/crop/500/${url}`;
 }
 
 /**
@@ -108,6 +127,7 @@ export async function submitPortfolio(rawUrl) {
     id: `submitted-${Date.now()}`,
     url,
     name: labelFromUrl(url),
+    previewCount: 1,
     status: "pending",
   };
   writeSubmitted([...readSubmitted(), item]);

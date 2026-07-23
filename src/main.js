@@ -479,11 +479,30 @@ const onboardingScreen = createOnboardingScreen({
 const authScreen = createAuthScreen({
   onSuccess: async (result) => {
     const session = getSession() ?? {};
+    const userId =
+      result.type === "telegram" && result.userId
+        ? result.userId
+        : (session.userId ?? `local-${Date.now()}`);
+    const email =
+      result.type === "email"
+        ? result.email
+        : result.type === "telegram" && result.email
+          ? result.email
+          : session.email;
+
     setSession({
       ...session,
-      userId: session.userId ?? `local-${Date.now()}`,
-      email: result.type === "email" ? result.email : session.email,
+      userId,
+      email,
       balance: typeof session.balance === "number" ? session.balance : 0,
+      ...(result.type === "telegram"
+        ? {
+            telegramId: result.telegramId,
+            telegramUsername: result.username ?? null,
+            displayName: result.firstName ?? null,
+            avatarUrl: result.photoUrl ?? null,
+          }
+        : {}),
     });
     if (session.onboardingDone) {
       go("home", { handoff: true });

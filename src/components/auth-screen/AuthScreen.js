@@ -1,3 +1,4 @@
+import { signInWithTelegram } from "../../api/auth.js";
 import { getStrings } from "../../i18n.js";
 import { isValidEmail } from "../../utils/emailValidation.js";
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
@@ -9,7 +10,20 @@ import {
 
 /**
  * @typedef {'sign-in' | 'sign-up'} AuthMode
- * @typedef {{ type: 'email'; email: string } | { type: 'telegram' } | { type: 'google' }} AuthResult
+ * @typedef {{
+ *   type: 'email';
+ *   email: string;
+ * } | {
+ *   type: 'telegram';
+ *   userId: string;
+ *   email?: string | null;
+ *   telegramId?: number;
+ *   username?: string | null;
+ *   firstName?: string | null;
+ *   photoUrl?: string | null;
+ * } | {
+ *   type: 'google';
+ * }} AuthResult
  */
 
 const SUBMIT_ICON_SVG = `
@@ -123,6 +137,11 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
   error.hidden = true;
   error.textContent = t.authEmailInvalid;
 
+  const providerError = document.createElement("p");
+  providerError.className = "url-screen__error auth-screen__provider-error";
+  providerError.hidden = true;
+  providerError.setAttribute("role", "alert");
+
   field.append(inputWrap, error);
 
   const divider = document.createElement("div");
@@ -155,7 +174,7 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
   googleBtn.innerHTML = `${GOOGLE_ICON_SVG}<span class="auth-screen__provider-label">${t.authGoogle}</span>`;
 
   actions.append(telegramBtn, googleBtn);
-  form.append(field, divider, actions);
+  form.append(field, divider, actions, providerError);
   block.append(title, form);
   formPane.append(block);
 
@@ -186,11 +205,47 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
   root.append(layout);
 
   let closing = false;
+  let telegramBusy = false;
 
   function setError(visible) {
     error.hidden = !visible;
     input.setAttribute("aria-invalid", visible ? "true" : "false");
     inputWrap.classList.toggle("url-screen__input-wrap--invalid", visible);
+  }
+
+  /**
+   * @param {string | null} message
+   */
+  function setProviderError(message) {
+    if (!message) {
+      providerError.hidden = true;
+      providerError.textContent = "";
+      return;
+    }
+    providerError.hidden = false;
+    providerError.textContent = message;
+  }
+
+  /**
+   * @param {unknown} err
+   * @returns {string}
+   */
+  function telegramErrorMessage(err) {
+    const code = err instanceof Error ? err.message : String(err || "");
+    if (code === "telegram_cancelled") return t.authTelegramCancelled;
+    if (code === "telegram_bot_id_missing") return t.authTelegramNotConfigured;
+    if (code === "supabase_not_configured") return t.authTelegramNotConfigured;
+    return t.authTelegramError;
+  }
+
+  /**
+   * @param {boolean} busy
+   */
+  function setTelegramBusy(busy) {
+    telegramBusy = busy;
+    telegramBtn.disabled = busy;
+    telegramBtn.setAttribute("aria-busy", busy ? "true" : "false");
+    telegramBtn.classList.toggle("auth-screen__provider--busy", busy);
   }
 
   function syncSubmitVisibility() {
@@ -238,6 +293,8 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
       opts,
       prepare: () => {
         setError(false);
+        setProviderError(null);
+        setTelegramBusy(false);
         input.value = "";
         input.placeholder = t.authEmailPlaceholder;
         syncSubmitVisibility();
@@ -279,11 +336,37 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
     syncSubmitVisibility();
   });
 
-  telegramBtn.addEventListener("click", () => {
-    finish({ type: "telegram" });
+  telegramBtn.addEventListener("click", async () => {
+    if (telegramBusy) return;
+    setProviderError(null);
+    setTelegramBusy(true);
+    try {
+      const session = await signInWithTelegram();
+      finish({
+        type: "telegram",
+        userId: session.user.userId,
+        email: session.user.email,
+        telegramId: session.user.telegramId,
+        username: session.user.username,
+        firstName: session.user.firstName,
+        photoUrl: session.user.photoUrl,
+      });
+    } catch (err) {
+      if (err instanceof Error && err.message === "telegram_cancelled") {
+        setProviderError(null);
+      } else {
+        setProviderError(telegramErrorMessage(err));
+      }
+      if (import.meta.env.DEV) {
+        console.warn("[auth] telegram sign-in failed", err);
+      }
+    } finally {
+      setTelegramBusy(false);
+    }
   });
 
   googleBtn.addEventListener("click", () => {
+    setProviderError(null);
     finish({ type: "google" });
   });
 

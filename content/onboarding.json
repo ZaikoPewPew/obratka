@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "steps": [
     {
       "id": "role",
@@ -30,8 +30,64 @@
       ]
     },
     {
-      "id": "goal",
+      "id": "grade",
       "type": "single",
+      "required": true,
+      "labelKey": "onboardingStepGradeLabel",
+      "options": [
+        {
+          "value": "junior",
+          "labelKey": "onboardingStepGradeJunior"
+        },
+        {
+          "value": "middle",
+          "labelKey": "onboardingStepGradeMiddle"
+        },
+        {
+          "value": "senior",
+          "labelKey": "onboardingStepGradeSenior"
+        },
+        {
+          "value": "lead",
+          "labelKey": "onboardingStepGradeLead"
+        },
+        {
+          "value": "head",
+          "labelKey": "onboardingStepGradeHead"
+        }
+      ]
+    },
+    {
+      "id": "domain",
+      "type": "multi",
+      "required": true,
+      "labelKey": "onboardingStepDomainLabel",
+      "options": [
+        {
+          "value": "fintech",
+          "labelKey": "onboardingStepDomainFintech"
+        },
+        {
+          "value": "b2b-saas",
+          "labelKey": "onboardingStepDomainB2bSaas"
+        },
+        {
+          "value": "ecommerce-retail",
+          "labelKey": "onboardingStepDomainEcommerce"
+        },
+        {
+          "value": "edtech",
+          "labelKey": "onboardingStepDomainEdtech"
+        },
+        {
+          "value": "other",
+          "labelKey": "onboardingStepDomainOther"
+        }
+      ]
+    },
+    {
+      "id": "goal",
+      "type": "multi",
       "required": true,
       "labelKey": "onboardingStepGoalLabel",
       "options": [
@@ -54,10 +110,6 @@
         {
           "value": "find-talent",
           "labelKey": "onboardingStepGoalFindTalent"
-        },
-        {
-          "value": "explore",
-          "labelKey": "onboardingStepGoalExplore"
         }
       ]
     }

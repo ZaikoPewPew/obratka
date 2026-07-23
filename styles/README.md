@@ -5,7 +5,7 @@
 - `entrance.css` — `@keyframes motion-reveal` / `motion-reveal-scale`.
 - `iframe-shell.css` — оболочка `/review`, `.url-screen*`, `.auth-screen*`, `.review-screen*` / `.review-panel*`.
 - `brand-screen.css` — **заготовка** выноса общих split-стилей из iframe-shell.
-- `home-screen.css` — **заготовка** главной `/home`.
+- `home-screen.css` — главная `/home` (шапка + лента карточек).
 
 ## Motion
 

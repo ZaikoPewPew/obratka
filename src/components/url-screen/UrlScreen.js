@@ -61,7 +61,7 @@ function createPlatformAvatar({ id, host }) {
 }
 
 /**
- * Экран ссылки: ввод URL + вертикальная заглушка «Портфолио».
+ * Экран ссылки: ввод URL + лист-заглушка «Портфолио» со скелетонами.
  * Submit → тот же leave/enter, что quiz → done (лист улетает, зелёный mesh).
  *
  * @param {{
@@ -196,16 +196,18 @@ export function createUrlScreen({ onSubmit, onExit }) {
   const stubTitle = document.createElement("p");
   stubTitle.className = "url-screen__preview-stub-title";
 
-  const stubLine1 = document.createElement("p");
-  stubLine1.className = "url-screen__preview-stub-line";
+  const stubBones = document.createElement("div");
+  stubBones.className = "url-screen__preview-stub-bones";
 
-  const stubLine2 = document.createElement("p");
-  stubLine2.className = "url-screen__preview-stub-line";
+  /** @type {readonly string[]} */
+  const boneWidths = ["full", "long", "mid", "full", "long", "short", "mid", "short"];
+  for (const width of boneWidths) {
+    const bone = document.createElement("span");
+    bone.className = `url-screen__preview-stub-bone url-screen__preview-stub-bone--${width}`;
+    stubBones.append(bone);
+  }
 
-  const stubLine3 = document.createElement("p");
-  stubLine3.className = "url-screen__preview-stub-line";
-
-  previewStub.append(stubTitle, stubLine1, stubLine2, stubLine3);
+  previewStub.append(stubTitle, stubBones);
   previewSheet.append(previewStub);
   preview.append(previewSheet);
 
@@ -251,9 +253,6 @@ export function createUrlScreen({ onSubmit, onExit }) {
     error.textContent = strings.urlModalInvalid;
     platformsText.textContent = strings.urlScreenPlatforms;
     stubTitle.textContent = strings.urlPreviewStubTitle;
-    stubLine1.textContent = strings.urlPreviewStubLine1;
-    stubLine2.textContent = strings.urlPreviewStubLine2;
-    stubLine3.textContent = strings.urlPreviewStubLine3;
     doneTitle.textContent = strings.successPortfolioTitle;
     exitBtn.textContent = strings.reviewDoneExit;
   }

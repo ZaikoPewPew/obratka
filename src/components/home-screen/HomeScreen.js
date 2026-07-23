@@ -1,11 +1,22 @@
 import { formatString, getStrings } from "../../i18n.js";
-import { listPortfoliosForReview } from "../../api/portfolios.js";
+import {
+  listPortfoliosForReview,
+  portfolioPreviewUrl,
+} from "../../api/portfolios.js";
 import {
   canSubmitPortfolio,
   creditBalance,
   getBalance,
   SUBMIT_COST,
 } from "../../api/wallet.js";
+import { getSession } from "../../app/session.js";
+import {
+  duckDuckGoFaviconUrl,
+  googleFaviconUrl,
+} from "../../utils/portfolioMeta.js";
+import brandLogoUrl from "../../assets/brand/logo.svg";
+import boneIconUrl from "../../assets/home/bone.svg";
+import bellIconUrl from "../../assets/home/bell.svg";
 
 /** Сколько монет даёт dev-кнопка на главной. */
 const DEV_CREDIT_AMOUNT = 10;
@@ -15,12 +26,44 @@ const DEV_CREDIT_AMOUNT = 10;
  *   id: string;
  *   url: string;
  *   name?: string;
+ *   role?: string;
+ *   avatarUrl?: string;
+ *   previewUrls?: string[];
+ *   previewCount?: number;
  *   status?: string;
  * }} HomePortfolioItem
  */
 
 /**
- * Главная: очередь портфолио + баланс + CTA «подать своё».
+ * @param {string} url
+ * @returns {string}
+ */
+function hostFromUrl(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * @param {HTMLImageElement} img
+ * @param {string[]} candidates
+ */
+function bindImageFallbacks(img, candidates) {
+  let index = 0;
+  img.addEventListener("error", () => {
+    if (index < candidates.length) {
+      img.src = candidates[index];
+      index += 1;
+      return;
+    }
+    img.hidden = true;
+  });
+}
+
+/**
+ * Главная: шапка + лента карточек портфолио (Figma home).
  *
  * @param {{
  *   onOpenPortfolio: (item: HomePortfolioItem) => void | Promise<void>;
@@ -45,17 +88,82 @@ export function createHomeScreen({
   root.setAttribute("aria-labelledby", "home-screen-title");
   root.hidden = true;
 
-  const header = document.createElement("div");
-  header.className = "home-screen__header";
-
   const title = document.createElement("h1");
   title.className = "home-screen__title";
   title.id = "home-screen-title";
 
-  const balance = document.createElement("p");
-  balance.className = "home-screen__balance";
+  const topbar = document.createElement("header");
+  topbar.className = "home-screen__topbar";
 
-  header.append(title, balance);
+  const markLink = document.createElement("a");
+  markLink.className = "home-screen__mark";
+  markLink.href = "#";
+  markLink.addEventListener("click", (event) => {
+    event.preventDefault();
+  });
+
+  const markImg = document.createElement("img");
+  markImg.className = "home-screen__mark-img";
+  markImg.src = brandLogoUrl;
+  markImg.alt = "";
+  markImg.width = 44;
+  markImg.height = 30;
+  markImg.decoding = "async";
+  markLink.append(markImg);
+
+  const topActions = document.createElement("div");
+  topActions.className = "home-screen__top-actions";
+
+  const balanceChip = document.createElement("button");
+  balanceChip.type = "button";
+  balanceChip.className = "home-screen__chip home-screen__chip--balance";
+
+  const boneImg = document.createElement("img");
+  boneImg.className = "home-screen__chip-icon";
+  boneImg.src = boneIconUrl;
+  boneImg.alt = "";
+  boneImg.width = 24;
+  boneImg.height = 24;
+  boneImg.decoding = "async";
+
+  const balanceValue = document.createElement("span");
+  balanceValue.className = "home-screen__chip-value";
+
+  balanceChip.append(boneImg, balanceValue);
+
+  const notifyBtn = document.createElement("button");
+  notifyBtn.type = "button";
+  notifyBtn.className = "home-screen__chip home-screen__chip--icon";
+
+  const bellImg = document.createElement("img");
+  bellImg.className = "home-screen__chip-icon";
+  bellImg.src = bellIconUrl;
+  bellImg.alt = "";
+  bellImg.width = 24;
+  bellImg.height = 24;
+  bellImg.decoding = "async";
+  notifyBtn.append(bellImg);
+
+  const profileBtn = document.createElement("button");
+  profileBtn.type = "button";
+  profileBtn.className = "home-screen__profile";
+
+  const profileImg = document.createElement("img");
+  profileImg.className = "home-screen__profile-img";
+  profileImg.alt = "";
+  profileImg.width = 48;
+  profileImg.height = 48;
+  profileImg.decoding = "async";
+  profileBtn.append(profileImg);
+
+  topActions.append(balanceChip, notifyBtn, profileBtn);
+  topbar.append(markLink, topActions);
+
+  const body = document.createElement("div");
+  body.className = "home-screen__body";
+
+  const feed = document.createElement("div");
+  feed.className = "home-screen__feed";
 
   const list = document.createElement("ul");
   list.className = "home-screen__list";
@@ -84,18 +192,43 @@ export function createHomeScreen({
   resetBtn.className = "iframe-shell__btn home-screen__reset";
 
   footer.append(addBtn, hint, addCoinsBtn, resetBtn);
+  feed.append(list, empty, footer);
 
-  const inner = document.createElement("div");
-  inner.className = "home-screen__inner";
-  inner.append(header, list, empty, footer);
-  root.append(inner);
+  const aside = document.createElement("aside");
+  aside.className = "home-screen__aside";
+  aside.setAttribute("aria-hidden", "true");
+
+  const asidePanel = document.createElement("div");
+  asidePanel.className = "home-screen__aside-panel";
+  aside.append(asidePanel);
+
+  body.append(feed, aside);
+  root.append(title, topbar, body);
 
   /** @type {HomePortfolioItem[]} */
   let items = [];
 
+  function syncProfileAvatar() {
+    const session = getSession();
+    const email = typeof session?.email === "string" ? session.email.trim() : "";
+    const src = email
+      ? `https://unavatar.io/${encodeURIComponent(email)}`
+      : "https://unavatar.io/github/octocat";
+    profileImg.hidden = false;
+    profileImg.onerror = () => {
+      profileImg.hidden = true;
+      profileBtn.classList.add("home-screen__profile--empty");
+    };
+    profileImg.onload = () => {
+      profileBtn.classList.remove("home-screen__profile--empty");
+    };
+    profileImg.src = src;
+  }
+
   function syncCopy() {
     const t = getStrings();
     title.textContent = t.homeTitle;
+    markImg.alt = t.brandLogoAlt;
     list.setAttribute("aria-label", t.homeListAria);
     empty.textContent = t.homeEmpty;
     addBtn.textContent = t.homeAddPortfolio;
@@ -107,9 +240,18 @@ export function createHomeScreen({
     });
     resetBtn.textContent = t.homeResetSession;
     resetBtn.title = t.homeResetSessionTitle;
-    balance.textContent = formatString(t.homeBalance, {
-      balance: getBalance(),
+
+    const balance = getBalance();
+    balanceValue.textContent = String(balance);
+    balanceChip.setAttribute(
+      "aria-label",
+      formatString(t.homeBalanceAria, { balance }),
+    );
+    balanceChip.title = formatString(t.homeAddCoinsTitle, {
+      amount: DEV_CREDIT_AMOUNT,
     });
+    notifyBtn.setAttribute("aria-label", t.homeNotificationsAria);
+    profileBtn.setAttribute("aria-label", t.homeProfileAria);
 
     const locked = !canSubmitPortfolio();
     addBtn.disabled = locked;
@@ -124,6 +266,128 @@ export function createHomeScreen({
       hint.id = "home-screen-hint";
       addBtn.setAttribute("aria-describedby", "home-screen-hint");
     }
+
+    syncProfileAvatar();
+  }
+
+  /**
+   * @param {HomePortfolioItem} item
+   * @returns {HTMLLIElement}
+   */
+  function createCard(item) {
+    const t = getStrings();
+    const li = document.createElement("li");
+    li.className = "home-screen__item";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "home-screen__card";
+
+    const preview = document.createElement("div");
+    preview.className = "home-screen__preview";
+
+    const previewImg = document.createElement("img");
+    previewImg.className = "home-screen__preview-img";
+    previewImg.alt = "";
+    previewImg.decoding = "async";
+    previewImg.loading = "lazy";
+    previewImg.referrerPolicy = "no-referrer";
+
+    const previewSrc =
+      Array.isArray(item.previewUrls) && item.previewUrls[0]
+        ? item.previewUrls[0]
+        : portfolioPreviewUrl(item.url);
+    previewImg.src = previewSrc;
+    previewImg.addEventListener("error", () => {
+      previewImg.remove();
+      preview.classList.add("home-screen__preview--empty");
+    });
+    preview.append(previewImg);
+
+    const meta = document.createElement("div");
+    meta.className = "home-screen__card-meta";
+
+    const person = document.createElement("div");
+    person.className = "home-screen__card-person";
+
+    const badges = document.createElement("div");
+    badges.className = "home-screen__card-badges";
+
+    const host = hostFromUrl(item.url);
+    const platform = document.createElement("span");
+    platform.className = "home-screen__badge home-screen__badge--platform";
+    const platformImg = document.createElement("img");
+    platformImg.className = "home-screen__badge-img";
+    platformImg.alt = "";
+    platformImg.width = 52;
+    platformImg.height = 52;
+    platformImg.decoding = "async";
+    platformImg.loading = "lazy";
+    platformImg.referrerPolicy = "no-referrer";
+    if (host) {
+      platformImg.src = googleFaviconUrl(host);
+      bindImageFallbacks(platformImg, [duckDuckGoFaviconUrl(host)]);
+    } else {
+      platform.hidden = true;
+    }
+    platform.append(platformImg);
+
+    const avatar = document.createElement("span");
+    avatar.className = "home-screen__badge home-screen__badge--avatar";
+    const avatarImg = document.createElement("img");
+    avatarImg.className = "home-screen__badge-img";
+    avatarImg.alt = "";
+    avatarImg.width = 52;
+    avatarImg.height = 52;
+    avatarImg.decoding = "async";
+    avatarImg.loading = "lazy";
+    avatarImg.referrerPolicy = "no-referrer";
+    const avatarSrc =
+      item.avatarUrl ||
+      (host ? `https://unavatar.io/${encodeURIComponent(host)}` : "");
+    if (avatarSrc) {
+      avatarImg.src = avatarSrc;
+      avatarImg.addEventListener("error", () => {
+        avatarImg.remove();
+        avatar.classList.add("home-screen__badge--empty");
+      });
+      avatar.append(avatarImg);
+    } else {
+      avatar.classList.add("home-screen__badge--empty");
+    }
+
+    badges.append(platform, avatar);
+
+    const text = document.createElement("div");
+    text.className = "home-screen__card-text";
+
+    const name = document.createElement("p");
+    name.className = "home-screen__card-name";
+    name.textContent = item.name || item.url;
+
+    const role = document.createElement("p");
+    role.className = "home-screen__card-role";
+    role.textContent = item.role || t.homeDefaultRole;
+
+    text.append(name, role);
+    person.append(badges, text);
+
+    const total = Math.max(1, Number(item.previewCount) || 1);
+    const count = document.createElement("span");
+    count.className = "home-screen__card-count";
+    count.textContent = formatString(t.homeCardProgress, {
+      current: 1,
+      total,
+    });
+
+    meta.append(person, count);
+    button.append(preview, meta);
+    button.addEventListener("click", () => {
+      void onOpenPortfolio(item);
+    });
+
+    li.append(button);
+    return li;
   }
 
   function renderList() {
@@ -131,19 +395,7 @@ export function createHomeScreen({
     empty.hidden = items.length > 0;
 
     for (const item of items) {
-      const li = document.createElement("li");
-      li.className = "home-screen__item";
-
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "home-screen__item-btn";
-      button.textContent = item.name || item.url;
-      button.addEventListener("click", () => {
-        void onOpenPortfolio(item);
-      });
-
-      li.append(button);
-      list.append(li);
+      list.append(createCard(item));
     }
   }
 
@@ -188,6 +440,11 @@ export function createHomeScreen({
     void onAddPortfolio?.();
   });
 
+  balanceChip.addEventListener("click", () => {
+    creditBalance(DEV_CREDIT_AMOUNT);
+    syncCopy();
+  });
+
   addCoinsBtn.addEventListener("click", () => {
     creditBalance(DEV_CREDIT_AMOUNT);
     syncCopy();
@@ -195,6 +452,14 @@ export function createHomeScreen({
 
   resetBtn.addEventListener("click", () => {
     void onResetSession?.();
+  });
+
+  notifyBtn.addEventListener("click", () => {
+    /* Заглушка: уведомления появятся позже */
+  });
+
+  profileBtn.addEventListener("click", () => {
+    /* Заглушка: профиль появится позже */
   });
 
   syncCopy();
