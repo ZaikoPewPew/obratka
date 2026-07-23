@@ -1,37 +1,38 @@
 # `url-screen` — ссылка на портфолио
 
-Полноэкранный ввод URL портфолио перед iframe-сессией.
+Path: **`/portfolio`**. Полноэкранный ввод URL перед ревью (`/review`).
 
-## Роль в архитектуре
+## Роль
 
-**Эталон visual** для split-экранов: левая форма + правый mesh/бренд.
-
-При реализации `brand-screen-shell` этот экран нужно перевести на общий каркас без смены внешнего вида. Новые экраны (referral / auth / onboarding) копируют правую часть отсюда.
+**Эталон visual** для split-экранов: левая форма + правый mesh/бренд.  
+Referral / auth копируют разметку и классы `.url-screen*`; цель — общий `brand-screen-shell`.
 
 См. [`SCREENS.md`](../../../SCREENS.md).
 
 ## Файл
 
 - `UrlScreen.js` — `createUrlScreen({ onSubmit })` → `{ root, open, close }`.
+- `open(prefill?, { handoff? })`, `close({ handoff? })` через `brandScreenTransition.js`.
 
-## Появление (motion)
+## Поведение
 
-При `open()` корень получает `.url-screen--open`. Элементы входят staggered через общий слой `--motion-*` / `motion-reveal`:
+Submit валидного URL → `onSubmit(url)` → в `main.js`: оболочка iframe, `syncRoute("review")`, старт таймера (или arm для external).
 
-| Элемент | Эффект | Токен задержки |
-|---------|--------|----------------|
-| Visual | fade + slide up + blur | `--url-screen-reveal-delay-visual` → `--motion-delay-1` |
-| Title | то же | `--url-screen-reveal-delay-title` → `--motion-delay-2` |
-| Field | то же | `--url-screen-reveal-delay-field` → `--motion-delay-3` |
-| Platforms text | то же | `--url-screen-reveal-delay-platforms` → `--motion-delay-4` |
-| Avatars | scale + fade (по очереди) | platforms + n × `--motion-stagger` |
-| Brand mark | scale + fade | `--url-screen-reveal-delay-brand` → `--motion-delay-5` |
+## Motion
 
-Правки «ощущения» анимации — в `--motion-reveal-*` / `--ease-reveal` (`styles/tokens.css`).  
-Keyframes: `styles/entrance.css`. Экранные задержки можно тюнить через `--url-screen-reveal-delay-*`.  
-`prefers-reduced-motion: reduce` — анимации отключаются.
+При `open()` без handoff: `.url-screen--open`, staggered reveal (`--url-screen-reveal-delay-*` → `--motion-delay-*`).  
+С `handoff: true`: visual/brand без анимации (соседний brand-экран).
+
+| Элемент | Задержка |
+|---------|----------|
+| Visual | `--url-screen-reveal-delay-visual` |
+| Title | `--url-screen-reveal-delay-title` |
+| Field | `--url-screen-reveal-delay-field` |
+| Platforms / avatars | `--url-screen-reveal-delay-platforms` + stagger |
+| Brand | `--url-screen-reveal-delay-brand` |
+
+Keyframes: `styles/entrance.css`. `prefers-reduced-motion: reduce` — off.
 
 ## Стили
 
-Сейчас: `.url-screen*` в `styles/iframe-shell.css`, токены `--url-screen-*` в `tokens.css`.  
-Цель: общие правила → `styles/brand-screen.css` / `--brand-screen-*` (reveal унаследовать в shell).
+`.url-screen*` в `iframe-shell.css`, токены `--url-screen-*` в `tokens.css`.

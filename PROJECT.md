@@ -63,19 +63,18 @@
 | Путь | Назначение |
 |------|------------|
 | `README.md` | Быстрый старт и ссылки на документацию |
-| `SCREENS.md` | Архитектура продуктовых экранов (referral → home) |
-| `mobile.md` | Спецификация мобильного UI (отступы 16px, типографика, форма) |
-| `index.html` | Оболочка iframe-сессии, слоты `data-*`, подключение CSS/JS |
+| `SCREENS.md` | Экраны и path-роутинг (`/referral` … `/quiz/done`) |
+| `mobile.md` | Спецификация мобильного UI |
+| `index.html` | Оболочка `/review` (iframe + таймер), слоты `data-*` |
 | `styles/tokens.css` | Единый источник дизайн-токенов |
-| `styles/base.css` | Сброс, футер |
-| `styles/iframe-shell.css` | Оболочка сессии + url-screen |
-| `src/main.js` | Точка входа (сессия + url-screen; app-флоу — позже) |
-| `src/app/` | Флоу экранов и сессия пользователя (каркас) |
+| `styles/iframe-shell.css` | `/review`, url-screen, auth, quiz UI |
+| `src/main.js` | Роутер + монтаж экранов + таймер + квиз |
+| `src/app/` | `routes` / `router` / `flow` / login-`session` |
 | `src/config.js` | Общие константы |
 | `src/i18n.js`, `content/locales.json` | Локализация |
 | `content/onboarding.json` | Шаги онбординга |
 | `src/api/` | Supabase + stubs auth/referrals/portfolios |
-| `vite.config.js` | Сборка Vite, префиксы env для Supabase |
+| `vite.config.js` | Сборка Vite, префиксы env |
 
 ## Что можно допилить без кода
 
@@ -92,10 +91,11 @@
 ```bash
 npm install
 npm run dev      # разработка
-npm run build    # сборка в dist/
+npm run build    # dist/ + 404.html
 npm run preview  # просмотр сборки
+npm test         # юнит-тесты
 ```
 
 ---
 
-*Документ стоит обновлять при смене брейкпоинта, схемы Supabase, структуры лейаутов или процесса деплоя.*
+*Документ стоит обновлять при смене брейкпоинта, схемы Supabase, структуры экранов/URL или процесса деплоя.*

@@ -1,34 +1,27 @@
 # `brand-screen-shell` — общий split-экран
 
-Общий каркас экранов, визуально совпадающих со страницей «Ссылка на портфолио» (`url-screen`).
+Цель: один каркас для экранов как у «Ссылка на портфолио» (`/portfolio`).
 
-## Назначение
+## Сейчас
 
-- Левая панель (`form-pane`) — слот под контент экрана.
-- Правая панель (`visual`) — mesh-gradient wash, noise, бренд-марк; **одна и та же** для referral / auth / onboarding / (эталон) url.
+- API: `BrandScreenShell.js` — `createBrandScreenShell(opts)` → `{ root, open, close, setContent, getVisualRoot }`.
+- Использует onboarding stub; **referral / auth / url** пока копируют разметку `.url-screen*` напрямую.
+- Стили shell не вынесены (`styles/brand-screen.css` — заготовка).
 
-## Файл
+## Цель
 
-- `BrandScreenShell.js` — `createBrandScreenShell(opts)` → `{ root, open, close, setContent, getVisualRoot }`.
+| Зона | Роль |
+|------|------|
+| Левая `form-pane` | Слот контента экрана |
+| Правая `visual` | mesh + noise + бренд (общий) |
 
-## Потребители
+Потребители после миграции: url, referral, auth, onboarding.
 
-| Компонент | Левая панель |
-|-----------|----------------|
-| `url-screen` | поле URL + platforms (после миграции) |
-| `referral-screen` | реферальная ссылка / код |
-| `auth-screen` | вход / регистрация |
-| `onboarding-screen` | вопросы + навигация |
-
-## Motion
-
-При переносе стилей с `url-screen` унаследовать staggered reveal (`--motion-*`, алиасы `--url-screen-reveal-*` → при необходимости `--brand-screen-reveal-*`). Эталон поведения: `src/components/url-screen/README.md`.
-
-## Стили
-
-Целевой файл: `styles/brand-screen.css` (вынести из блоков `.url-screen` в `iframe-shell.css`). Токены: `--url-screen-*` → со временем `--brand-screen-*` с алиасами для обратной совместимости.
+Open/close + handoff: `src/utils/brandScreenTransition.js` (сейчас на классах url-screen).
 
 ## Не делать
 
-- Не дублировать разметку visual в каждом экране.
-- Не класть сырые цвета/px — только токены.
+- Не дублировать visual в каждом экране.
+- Только токены в CSS.
+
+См. [`SCREENS.md`](../../../SCREENS.md), [`url-screen/README.md`](../url-screen/README.md).

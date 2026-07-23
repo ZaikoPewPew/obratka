@@ -7,11 +7,13 @@
 - `countTemplate.js` — вставка отформатированного числа в текстовый шаблон (`{count}`).
 - `emailValidation.js` — валидация и нормализация email.
 - `foundersCountDisplay.js` — обновление отображаемого числа подписчиков/основателей.
-- `motionTokens.js` — чтение `--motion-*` из CSS для WAAPI / close-fallback (`getMotionReveal`, `getScreenCloseFallbackMs`).
+- `motionTokens.js` — чтение `--motion-*` из CSS для WAAPI / close-fallback (`getMotionReveal`, `getReportLaunchMotion`, `getReviewMeshDoneMotion`, `getScreenCloseFallbackMs`).
+- `brandScreenTransition.js` — open/close split-экранов; `handoff` сохраняет правый visual без повторной анимации.
 - `portfolioMeta.js` — нормализация URL портфолио; favicon (HTML → DDG → Google → `/favicon.ico`) и короткое имя сайта.
 - `embedHosts.js` — каталог хостов: external-only + labels (см. `content/embed-hosts.md`).
 - `portfolioEmbed.js` — стратегия показа URL: Figma/YouTube embed, iframe или внешняя вкладка.
-- `meshGradientWash.js` — WebGL mesh-градиент (Paper Shaders) с палитрой из CSS-токенов.
+- `meshGradientWash.js` — WebGL mesh-градиент (Paper Shaders) с палитрой из CSS-токенов; `transitionToCssColors` для плавной смены.
 - `portfolioEmbed.test.js` / `portfolioMeta.test.js` — фикстуры embed и meta (`npm test`).
-- `reviewReport.js` — сводка ответов ревью → тексты трактовок для PDF (`grade` включает lead/head).
-- `shareReviewPdf.js` — печатный документ отчёта (сохранение как PDF через print dialog).
+- Тесты роутов: `src/app/routes.test.js`.
+- `reviewReport.js` — сводка ответов квиза → тексты для PDF.
+- `shareReviewPdf.js` — печатный документ отчёта (PDF через print dialog).

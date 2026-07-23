@@ -1,34 +1,59 @@
 # Структура проекта Memento / Обратка
 
-Этот документ объясняет, что находится в проекте, зачем нужны папки и какие файлы являются ключевыми.
+Что где лежит и зачем.
 
-## Корень репозитория
+## Корень
 
-- `README.md` — быстрый старт, переменные окружения, команды запуска.
-- `PROJECT.md` — архитектурное описание проекта и организационные заметки.
-- `SCREENS.md` — **архитектура продуктовых экранов** (referral → auth → onboarding → home) + url / iframe / review.
-- `mobile.md` — детальная спецификация мобильного макета и QA-чеклист.
-- `STRUCTURE.md` — текущий навигационный документ по структуре.
-- `index.html` — HTML-каркас оболочки iframe-сессии.
-- `src/config.js` — общие константы приложения.
-- `vite.config.js` — конфигурация Vite (порт, env-префиксы).
-- `package.json` — npm-скрипты и зависимости.
-- `package-lock.json` — зафиксированное дерево npm-зависимостей.
+| Файл | Роль |
+|------|------|
+| `README.md` | Быстрый старт, env, скрипты |
+| `PROJECT.md` | Архитектура продукта и заметки |
+| `SCREENS.md` | **Экраны + path-роутинг** (referral → … → quiz/done) |
+| `STRUCTURE.md` | Этот документ |
+| `mobile.md` | Мобильный макет / QA |
+| `index.html` | Каркас iframe-оболочки (`/review`) |
+| `vite.config.js` | Vite, `VITE_BASE_PATH`, `SUPABASE_*` |
+| `package.json` | Скрипты (`build` → ещё `404.html` для SPA) |
 
-## Папки проекта
+## Секреты (не в git)
 
-- `src/` — основной код приложения (app-флоу, компоненты, API, i18n, утилиты).
-- `styles/` — CSS-слои (токены, база, оболочка, заготовки brand/home screen).
-- `content/` — контентные JSON/MD (локали, онбординг, embed-hosts, политика).
-- `public/` — статические ассеты, доступные по прямым URL.
-- `supabase/` — SQL-скрипты для Supabase.
+`.env` / `.env.local` — см. таблицу ниже. Проверка: `git check-ignore -v .env`.
 
-## Технические папки
+| Файл | В git? |
+|------|--------|
+| `.gitignore` | да |
+| `.env`, `.env*.local` | нет |
+| `dist/`, `node_modules/` | нет |
 
-- `dist/` — production-сборка после `npm run build` (генерируется автоматически).
-- `node_modules/` — установленные npm-зависимости (генерируется автоматически).
-- `.git/` — история git и служебные данные репозитория.
+### Переменные
 
-## Важно про комментарии
+| Переменная | Назначение |
+|------------|------------|
+| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | API подписчиков |
+| `VITE_BASE_PATH` | base для GitHub Pages (`/obratka/`) |
 
-JSON не поддерживает комментарии по стандарту, поэтому для файлов в `content/` пояснения вынесены в `content/README.md` и рядом лежащие `*.md` (например `onboarding.md`).
+## Папки
+
+| Папка | Роль |
+|-------|------|
+| `src/` | Код: `main.js`, `app/` (routes), `components/`, `utils/`, `api/` |
+| `styles/` | Токены, iframe-shell, entrance, заготовки brand/home |
+| `content/` | `locales.json`, onboarding, embed-hosts |
+| `public/` | Статика по URL |
+| `supabase/` | SQL |
+| `.cursor/` | Правила и карта для агента |
+
+## Экраны и URL (кратко)
+
+Полная таблица — [`SCREENS.md`](SCREENS.md) и [`src/app/README.md`](src/app/README.md).
+
+```text
+/referral → /registration → /onboarding → /home → /portfolio → /review → /quiz → /quiz/done
+```
+
+`/review` = просмотр портфолио + таймер.  
+`/quiz` = опрос. Не путать с login-`session.js`.
+
+## Комментарии в JSON
+
+Пояснения к `content/*.json` — соседние `*.md` и `content/README.md`.

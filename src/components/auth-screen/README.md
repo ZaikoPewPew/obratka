@@ -1,42 +1,31 @@
-# `auth-screen` — вход и регистрация
+# `auth-screen` — регистрация
 
-Экран создания аккаунта / авторизации.
+Path: **`/registration`**. Split как `url-screen`; форма — стиль старого PDF/done (email → divider → провайдеры).
 
-## Визуал
+## Левая панель
 
-На базе `brand-screen-shell` (эталон — «Ссылка на портфолио»): правый visual общий, слева форма.
-
-Motion: staggered reveal как у `url-screen`.
+1. Заголовок (`authWelcomeTitle`): «Добро пожаловать! / Давайте создадим аккаунт»
+2. Email (`authEmailPlaceholder`: `your@email.com`) + стрелка submit
+3. Разделитель (`authDividerOr`): «или войдите с помощью»
+4. Серые кнопки: Telegram / Google
 
 ## Файл
 
 - `AuthScreen.js` — `createAuthScreen({ onSuccess, mode? })` → `{ root, open, close, setMode }`.
-- Статус: **каркас**, не монтируется из `main.js`.
+- `open(mode | { handoff }?, { handoff? })`, `close({ handoff? })`.
 
-## Режимы
+## Поведение
 
-| Mode | Смысл | Заголовок (i18n) |
-|------|--------|------------------|
-| `sign-in` | Вход | `authSignInTitle` |
-| `sign-up` | Регистрация | `authSignUpTitle` |
-
-Переключение внутри левой панели без смены правого visual.
-
-## Поведение (план)
-
-1. Email + пароль (+ поля регистрации по продукту).
-2. Вызов `src/api/auth.js` → запись сессии в `src/app/session.js`.
-3. `onSuccess(session)` → `onboarding-screen` (новый пользователь) или `home-screen`.
+- Email → `onSuccess({ type: 'email', email })`.
+- Telegram / Google (stub) → `onSuccess({ type: 'telegram' | 'google' })`.
+- Happy-path: `go("url", { handoff: true })` (онбординг/home пока пропускаются).
 
 ## i18n
 
-Ключи `auth*` в `content/locales.json` (`authEmailLabel`, `authPasswordLabel`, submit/switch, `authStubHint`).
+`authWelcomeTitle`, `authEmailLabel`, `authEmailPlaceholder`, `authEmailSubmitAria`, `authEmailInvalid`, `authDividerOr`, `authTelegram`, `authGoogle`.
 
-## Зависимости
+## Стили
 
-- `brand-screen-shell`
-- `src/api/auth.js` (stub)
-- `src/app/session.js`
-- при необходимости переиспользовать паттерны `EmailField`
+`.auth-screen__*` + оболочка `.url-screen*` в `iframe-shell.css`; токены `--auth-screen-*`, палитра Google/Telegram в `tokens.css`.
 
 См. [`SCREENS.md`](../../../SCREENS.md).

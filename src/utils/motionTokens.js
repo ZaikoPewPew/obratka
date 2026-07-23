@@ -78,3 +78,66 @@ export function getMotionAdvanceDelayMs() {
 export function getMotionFocusDelayMs() {
   return parseCssTimeMs(readCssVar("--motion-focus-delay"), 720);
 }
+
+/**
+ * Уход PDF-листа: разгон вверх → бросок вниз, opacity всегда 1.
+ * @returns {{
+ *   durationMs: number;
+ *   liftPx: number;
+ *   peak: number;
+ *   easeLift: string;
+ *   easeDive: string;
+ * }}
+ */
+export function getReportLaunchMotion() {
+  const peakRaw = Number.parseFloat(readCssVar("--shell-review-report-launch-peak"));
+  const peak =
+    Number.isFinite(peakRaw) && peakRaw > 0 && peakRaw < 1 ? peakRaw : 0.24;
+
+  return {
+    durationMs: parseCssTimeMs(
+      readCssVar("--shell-review-report-launch-duration"),
+      780,
+    ),
+    liftPx: parseCssLengthPx(
+      readCssVar("--shell-review-report-launch-lift"),
+      40,
+    ),
+    peak,
+    easeLift:
+      readCssVar("--shell-review-report-launch-ease-lift") ||
+      "cubic-bezier(0.22, 1, 0.36, 1)",
+    easeDive:
+      readCssVar("--shell-review-report-launch-ease-dive") ||
+      "cubic-bezier(0.55, 0.05, 0.9, 0.3)",
+  };
+}
+
+/**
+ * Смена mesh-палитры после submit: к середине спуска лого.
+ * @returns {{ durationMs: number; easing: string }}
+ */
+export function getReviewMeshDoneMotion() {
+  const brandMs = parseCssTimeMs(
+    readCssVar("--shell-review-brand-motion-duration"),
+    1600,
+  );
+  const midpointRaw = Number.parseFloat(
+    readCssVar("--shell-review-mesh-done-midpoint"),
+  );
+  const midpoint =
+    Number.isFinite(midpointRaw) && midpointRaw > 0 && midpointRaw <= 1
+      ? midpointRaw
+      : 0.5;
+  const explicitMs = parseCssTimeMs(
+    readCssVar("--shell-review-mesh-done-duration"),
+    brandMs * midpoint,
+  );
+
+  return {
+    durationMs: explicitMs > 0 ? explicitMs : brandMs * midpoint,
+    easing:
+      readCssVar("--shell-review-brand-motion-ease") ||
+      "cubic-bezier(0.16, 1, 0.3, 1)",
+  };
+}

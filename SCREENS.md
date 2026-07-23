@@ -1,204 +1,135 @@
 # Экраны приложения — архитектура
 
-Карта будущих экранов «Обратки» и того, как они стыкуются с уже существующим `url-screen` / iframe-сессией.
+Карта экранов «Обратки», path-роутинг и связь с `url-screen` / iframe / квизом.
 
-Статус: **каркас и контракты**. Реализация UI — отдельными задачами; stub-модули экспортируют API, но не монтируются из `main.js`.
+Статус: **роутинг работает**. UI: referral + auth + url + review/quiz готовы; onboarding/home — stub (монтируются, deep link’и живые).
 
 ## Продуктовый флоу
 
 ```text
-referral-screen  →  auth-screen  →  onboarding-screen  →  home-screen
-                                                              │
-                                                              ▼
-                                                     url-screen (есть)
-                                                              │
-                                                              ▼
-                                                     iframe-shell + review (есть)
+referral → auth → onboarding → home → portfolio → review → quiz → quiz/done
+   │         │         │          │         │         │       │         │
+   UI        UI       stub       stub      UI        UI      UI        UI
 ```
 
-| Шаг | Экран | Смысл |
-|-----|--------|--------|
-| 1 | `referral-screen` | Ввод реферальной ссылки / кода приглашения |
-| 2 | `auth-screen` | Создание аккаунта, вход, регистрация |
-| 3 | `onboarding-screen` | Вопросы профиля + навигация по шагам |
-| 4 | `home-screen` | Главная: очередь портфолио на ревью |
-| — | `url-screen` | Уже есть: «Ссылка на портфолио» перед сессией |
-| — | `iframe-shell` | Уже есть: таймер + портфолио |
-| — | `review-screen` + `review-panel` | Уже есть: опрос после таймера, финал с PDF |
+| Шаг | Экран | Path | Смысл |
+|-----|--------|------|--------|
+| 1 | `referral-screen` | `/referral` | Реферальный код |
+| 2 | `auth-screen` | `/registration` | Создание аккаунта |
+| 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля (stub) |
+| 4 | `home-screen` | `/home` | Очередь портфолио (stub) |
+| 5 | `url-screen` | `/portfolio` | Ссылка на портфолио |
+| 6 | iframe-shell | `/review` | Ревью: просмотр + таймер |
+| 7 | `review-screen` + `review-panel` | `/quiz` | Квиз / опрос |
+| 8 | done | `/quiz/done` | Финал квиза |
 
-Вход с `?ref=` может префиллить referral-экран. Повторный визит с сессией пропускает шаги 1–3 и открывает `home-screen` (логика в `src/app/flow.js`).
+Сейчас после auth сразу `/portfolio` (онбординг/home пропускаются в happy-path, но URL открывают stub).
+
+Корень `/` → `resolveEntryScreen` (обычно `/referral`). Код: `src/app/routes.js` + `router.js`. Query (`?ref=`, `?lang=`) сохраняются. Prefill рефералки: `?ref=`.
+
+SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.html` → `dist/404.html`.
 
 ## Визуальная база
 
-Экраны **referral / auth / onboarding** строятся на том же split-layout, что и страница «Ссылка на портфолио» (`UrlScreen`):
+Экраны **referral / auth / onboarding / url** — split-layout (эталон `UrlScreen`):
 
 | Зона | Классы / роль | Поведение |
 |------|----------------|-----------|
-| Корень | `brand-screen` (сейчас в DOM: `url-screen`) | Полноэкранный слой, open/close + transition |
-| Левая | `brand-screen__form-pane` | **Меняется** по экрану: поле / форма auth / вопросы |
-| Правая | `brand-screen__visual` | **Общая**: mesh-wash, noise, бренд-марк |
+| Корень | `.url-screen` (цель: `brand-screen`) | Полноэкранный слой, open/close + transition |
+| Левая | `__form-pane` | Меняется по экрану |
+| Правая | `__visual` | mesh-wash, noise, бренд-марк |
 
-`url-screen` остаётся рабочим эталоном. При реализации новых экранов сначала вынести общий каркас в `brand-screen-shell`, затем перевести `UrlScreen` на него (без смены внешнего вида).
+Смена соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
-`home-screen` — **другой** лейаут: список/очередь, без обязательного правого visual-pane.
+`home-screen` — другой лейаут (очередь).  
+`review-screen` — split для квиза (слева panel, справа visual + PDF-лист).
 
 ## Дерево файлов
 
 ```text
-SCREENS.md                          ← этот документ
+SCREENS.md
 
 src/app/
+  routes.js / router.js / flow.js / session.js
   README.md
-  flow.js                           ← порядок экранов, skip-правила
-  session.js                        ← заглушка сессии пользователя
 
 src/components/
-  brand-screen-shell/
-    README.md
-    BrandScreenShell.js             ← общий split + visual
-  referral-screen/
-    README.md
-    ReferralScreen.js
-  auth-screen/
-    README.md
-    AuthScreen.js
-  onboarding-screen/
-    README.md
-    OnboardingScreen.js
-  home-screen/
-    README.md
-    HomeScreen.js
-  url-screen/UrlScreen.js           ← эталон (есть)
-  review-screen/                    ← есть: split + report reveal
-    README.md
-    ReviewScreen.js
-  review-panel/                     ← есть: шаги опроса + done
-    README.md
-    ReviewPanel.js
+  brand-screen-shell/     ← каркас (пока stub API)
+  referral-screen/        ← UI готов
+  auth-screen/            ← UI готов
+  onboarding-screen/      ← stub
+  home-screen/            ← stub
+  url-screen/             ← эталон split
+  review-screen/          ← оболочка квиза + report reveal
+  review-panel/           ← шаги квиза + done
 
 styles/
-  brand-screen.css                  ← общие стили split-экранов (вынести из iframe-shell)
-  home-screen.css                   ← стили главной / очереди
-  iframe-shell.css                  ← оболочка сессии + пока ещё url-screen
+  tokens.css
+  iframe-shell.css        ← url-screen, review-*, auth extras
+  brand-screen.css        ← заготовка выноса
+  home-screen.css         ← заготовка
+  entrance.css
 
 content/
-  onboarding.json                   ← шаги/вопросы онбординга
-  onboarding.md                     ← описание схемы JSON
-  locales.json                      ← UI-строки (ключи ниже)
+  locales.json
+  onboarding.json / onboarding.md
 ```
 
-## Контракты компонентов
+## Контракты
 
-Паттерн как у `createUrlScreen`: фабрика возвращает `{ root, open, close }` (и доп. методы при необходимости). Монтаж — из `main.js` / `flow.js`, не из HTML-слотов.
+Паттерн: фабрика → `{ root, open, close, … }`. Монтаж и URL — из `main.js` (`go` / `applyRoute`). Компонент **не** знает следующий экран.
 
-### `createBrandScreenShell(opts)`
+| Фабрика | Path | Статус |
+|---------|------|--------|
+| `createReferralScreen` | `/referral` | UI |
+| `createAuthScreen` | `/registration` | UI |
+| `createOnboardingScreen` | `/onboarding` | stub |
+| `createHomeScreen` | `/home` | stub |
+| `createUrlScreen` | `/portfolio` | UI |
+| iframe-shell + timer | `/review` | UI |
+| `createReviewScreen` + `createReviewPanel` | `/quiz`, `/quiz/done` | UI |
 
-Общий каркас. Экраны кладут контент в левую панель.
+Подробности API — README в папках компонентов.
+
+### Handoff
 
 ```js
-// opts (направление)
-{
-  labelledById: string,           // id заголовка для aria-labelledby
-  content: HTMLElement,           // левая панель
-  // visual — внутренний, общий
-}
-
-// return
-{ root, open, close, setContent(el), getVisualRoot() }
+go("auth", { handoff: true }); // referral → auth: visual статичен
 ```
 
-Токены и классы — префикс `brand-screen` / `--brand-screen-*`. Пока в CSS живут как `--url-screen-*`; при выносе завести алиасы или переименовать с миграцией `UrlScreen`.
+## Стили / motion
 
-### `createReferralScreen({ onSubmit })`
-
-- Визуал: brand-shell.
-- Левая: заголовок + поле ссылки/кода (+ ошибка валидации).
-- `onSubmit(referral: string)` после нормализации.
-
-### `createAuthScreen({ onSuccess, mode? })`
-
-- Визуал: brand-shell.
-- Левая: табы/режимы «Вход» | «Регистрация» (или единая форма с переключением).
-- Поля: email, пароль; при регистрации — подтверждение / имя по продукту.
-- `onSuccess(session)` → `src/app/session.js`.
-- Сеть: будущий `src/api/auth.js` (Supabase Auth или аналог).
-
-### `createOnboardingScreen({ onComplete })`
-
-- Визуал: brand-shell, **правая часть как у UrlScreen**.
-- Левая: вместо инпута — вопрос текущего шага + навигация (назад / далее), прогресс.
-- Данные шагов: `content/onboarding.json`; подписи кнопок — `locales.json`.
-- Паттерн шагов можно опираться на `ReviewPanel` (прогресс, required, next/back).
-- `onComplete(answers)`.
-
-### `createHomeScreen({ onOpenPortfolio, onAddPortfolio? })`
-
-- Список портфолио на ревью (карточки/строки: имя, превью/favicon, статус).
-- Не обязан использовать brand-shell.
-- Данные: будущий `src/api/portfolios.js` (+ локальный mock на этапе UI).
-- Клик по элементу → существующий путь `url-screen` или сразу сессия iframe (решить при реализации).
-
-## Стили
-
-| Файл | Когда |
-|------|--------|
-| `styles/brand-screen.css` | Вынести общие правила `.url-screen` → `.brand-screen`; подключить в `index.html` |
-| `styles/iframe-shell.css` | Оставить оболочку сессии; url-screen-блоки удалить после миграции |
-| `styles/home-screen.css` | Список на главной |
-| `styles/tokens.css` | Новые семантики только через токены; для brand — алиасы от текущих `--url-screen-*` |
-
-Правила: `.cursor/rules/design-tokens.mdc`.
-
-### Motion на url-screen (эталон)
-
-Staggered reveal при `.url-screen--open`: visual → title → field → platforms/avatars → brand.  
-Токены `--motion-*` (алиасы `--url-screen-reveal-*`). Тот же паттерн стоит перенести на referral / auth / onboarding через `brand-screen-shell`.
+Токены: `styles/tokens.css`. Reveal: `--motion-*`, keyframes в `entrance.css`, JS `motionTokens.js`.  
+Правило: `.cursor/rules/design-tokens.mdc`.
 
 ## i18n
 
-Все видимые строки — ключи в `content/locales.json` (ru + en). Черновой набор:
-
-| Префикс | Назначение |
-|---------|------------|
-| `referral*` | Заголовок, placeholder, submit, invalid |
-| `auth*` | Вход/регистрация, поля, ошибки, CTA |
-| `onboarding*` | Прогресс, next/back, ошибки шага |
-| `home*` | Заголовок очереди, пустое состояние, CTA «добавить» |
-| `review*` / `report*` | Опрос ревью, done-экран, тексты PDF-отчёта |
-
-Контент вопросов онбординга — в `content/onboarding.json` (как структура ревью), не хардкод в JS.
+Все UI-строки — `content/locales.json` (`referral*`, `auth*`, `onboarding*`, `home*`, `review*` / `report*`).  
+Правило: `.cursor/rules/i18n.mdc`.
 
 ## App-слой
 
-- `src/app/flow.js` — какой экран показать, переходы `next` / `back`, skip при наличии сессии/флагов онбординга.
-- `src/app/session.js` — `getSession` / `setSession` / `clearSession` (localStorage или Supabase); stub без реального API.
-
-Пока `main.js` открывает `urlScreen` и после таймера — `reviewScreen` / `reviewPanel`. Подключение флоу 1–4 — когда готовы экраны referral → home.
+| Файл | Роль |
+|------|------|
+| `routes.js` | id ↔ path |
+| `router.js` | History API + `BASE_URL` |
+| `flow.js` | порядок, entry, deep-link access |
+| `session.js` | login-сессия (localStorage) — **не** путать с `/review` |
 
 ## API (будущее)
 
-| Модуль | Роль |
-|--------|------|
-| `src/api/auth.js` | signUp / signIn / signOut |
-| `src/api/referrals.js` | validate / redeem кода |
-| `src/api/portfolios.js` | список очереди на ревью |
-| `src/api/onboarding.js` | опционально: сохранить ответы на бэкенд |
+`src/api/auth.js`, `referrals.js`, `portfolios.js`, `onboarding.js` — см. `src/api/README.md`.
 
-См. заготовки в `src/api/README.md`.
+## Дальше
 
-## Порядок реализации (рекомендуемый)
-
-1. Вынести `BrandScreenShell` + CSS из `UrlScreen` (визуальный паритет).
-2. `ReferralScreen` на shell.
-3. `AuthScreen` + `api/auth` stub.
-4. `OnboardingScreen` + `content/onboarding.json`.
-5. `HomeScreen` + mock списка.
-6. Склеить в `flow.js`, оставить текущую iframe-сессию как следующий шаг с home.
+1. Вынести CSS в `brand-screen.css`, перевести url/referral/auth на shell.
+2. UI onboarding + home, вернуть их в happy-path после auth.
+3. Реальный auth / referrals API.
 
 ## Связанные документы
 
-- [`STRUCTURE.md`](STRUCTURE.md) — карта репозитория
-- [`PROJECT.md`](PROJECT.md) — общий контекст продукта
-- [`content/onboarding.md`](content/onboarding.md) — схема вопросов
-- [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) — контракт shell
-- [`.cursor/README.md`](.cursor/README.md) — карта для агента
+- [`STRUCTURE.md`](STRUCTURE.md)
+- [`PROJECT.md`](PROJECT.md)
+- [`src/app/README.md`](src/app/README.md)
+- [`content/onboarding.md`](content/onboarding.md)
+- [`.cursor/README.md`](.cursor/README.md)

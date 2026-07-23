@@ -1,56 +1,55 @@
-# Memento — waitlist
+# Memento — waitlist / Обратка
 
-Статический лендинг вейтлиста: **Vite**, **vanilla JS**, локализация через `content/locales.json`, сохранение email в **Supabase** (таблица `subscribers` через PostgREST).
+**Vite**, **vanilla JS**, локализация через `content/locales.json`, Supabase (таблица `subscribers`).  
+Продуктовые экраны и path-роутинг: [`SCREENS.md`](SCREENS.md).
 
 ## Быстрый старт
-
-Требуется Node.js (рекомендуется актуальная LTS).
 
 ```bash
 npm install
 npm run dev
 ```
 
-Откройте в браузере адрес, который выведет Vite (обычно `http://localhost:5173`).
+Обычно `http://localhost:5173` → редирект на `/referral`.
+
+Примеры path’ов: `/referral`, `/registration`, `/portfolio`, `/review`, `/quiz`, `/quiz/done`.
 
 ### Переменные окружения
 
-Для работы отправки формы на бэкенд в корне проекта нужен файл **`.env`** (он в `.gitignore` и не попадает в репозиторий). Задайте:
+`.env` / `.env.local` (в `.gitignore`). Подробности: [`STRUCTURE.md`](STRUCTURE.md).
 
 | Переменная | Назначение |
 |------------|------------|
 | `SUPABASE_URL` | URL проекта Supabase |
 | `SUPABASE_ANON_KEY` | публичный anon key |
-
-Префиксы подхватываются Vite (`vite.config.js`: `envPrefix` включает `SUPABASE_`). Без заполненных переменных в dev в консоли будет предупреждение, сохранение подписчика не выполнится.
-
-На хостинге для production-сборки те же переменные нужно задать в настройках CI/CD или панели деплоя, иначе собранный сайт не сможет писать в Supabase.
+| `VITE_BASE_PATH` | base для GitHub Pages (CI: `/obratka/`) |
 
 ## Скрипты
 
 | Команда | Назначение |
 |---------|------------|
-| `npm run dev` | Режим разработки с hot reload |
-| `npm run build` | Сборка в каталог `dist/` |
-| `npm run preview` | Локальный просмотр production-сборки |
+| `npm run dev` | Разработка (Vite HMR) |
+| `npm run build` | `dist/` + `404.html` (SPA-fallback) |
+| `npm run preview` | Просмотр production-сборки |
+| `npm test` | Юнит-тесты (embed, meta, routes) |
 
 ## Контент
 
 | Файл | Роль |
 |------|------|
-| `content/locales.json` | Тексты UI, `defaultLocale`, `supportedLocales`, дата окончания таймера |
+| `content/locales.json` | UI-строки, локали |
 
-После правок локалей или данных пересоберите проект перед выкладкой.
+## Деплой
 
-## Деплой (суть)
+Статика в `dist/`. На GitHub Pages `404.html` = копия `index.html` для deep link’ов. `SUPABASE_*` нужны на этапе `npm run build`.
 
-Итог сборки — **статические файлы** в `dist/`. Их можно отдавать с любого CDN или статического хостинга. Важно: **переменные Supabase должны быть доступны на этапе сборки** (как у Vite для `import.meta.env`), либо заранее согласовать другой способ подстановки секретов, если пайплайн иной.
-
-## Документация в репозитории
+## Документация
 
 | Документ | Содержание |
 |----------|------------|
-| [`PROJECT.md`](PROJECT.md) | Архитектура, брейкпоинты, два лейаута, структура репо, бэкенд формы, идеи развития без кода |
-| [`SCREENS.md`](SCREENS.md) | Продуктовые экраны: referral → auth → onboarding → home (+ связь с url/iframe) |
-| [`mobile.md`](mobile.md) | Спецификация мобильного макета и чеклист проверки перед релизом |
-| [`STRUCTURE.md`](STRUCTURE.md) | Карта проекта: какие папки и файлы за что отвечают |
+| [`SCREENS.md`](SCREENS.md) | Экраны и URL |
+| [`src/app/README.md`](src/app/README.md) | Routes / router / flow |
+| [`STRUCTURE.md`](STRUCTURE.md) | Папки и env |
+| [`PROJECT.md`](PROJECT.md) | Продукт и идеи |
+| [`mobile.md`](mobile.md) | Мобильный макет / QA |
+| [`.cursor/README.md`](.cursor/README.md) | Карта для агента |

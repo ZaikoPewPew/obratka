@@ -1,37 +1,56 @@
 ---
-description: Экраны и флоу — модули, порядок в flow.js, brand-shell, карта SCREENS.md
+description: Экраны и флоу — модули, routes, go() в main, карта SCREENS.md
 alwaysApply: true
 ---
 
 # Экраны и флоу
 
-Источник правды по карте: `SCREENS.md`. Оркестрация порядка: `src/app/flow.js` (+ `session.js`).
+Источник правды по карте: `SCREENS.md`.  
+Порядок id: `src/app/flow.js`. Path ↔ id: `src/app/routes.js`. History: `src/app/router.js`.  
+Оркестрация open/close + URL: `main.js` (`go` / `applyRoute` / `syncRoute`).
+
+## URL
+
+| Id | Path |
+|----|------|
+| `referral` | `/referral` |
+| `auth` | `/registration` |
+| `onboarding` | `/onboarding` |
+| `home` | `/home` |
+| `url` | `/portfolio` |
+| `review` | `/review` (iframe + таймер) |
+| `quiz` | `/quiz` |
+| `done` | `/quiz/done` |
+
+`session.js` — только login-сессия пользователя, не экран `/review`.
 
 ## Жёсткие правила
 
 1. **Экран = модуль** в `src/components/<name>-screen/` (фабрика → `{ root, open, close, … }`). Не шить разметку следующего шага внутрь текущего.
-2. **Порядок шагов только в `flow.js`** (и skip-правила сессии). Компонент не знает «кто следующий» — сообщает событие/колбэк наверх.
-3. **Split-экраны** (referral / auth / onboarding / url / review): общий каркас `brand-screen-shell`, правый visual общий; меняется левая форма. Эталон поведения — `url-screen`. Не копипастить mesh/noise/logo.
-4. **home-screen** — другой лейаут (лента/очередь), без обязательного правого visual.
-5. **Монтаж** — из `main.js` / `flow.js`, не из HTML-слотов.
+2. **Порядок и URL снаружи** — колбэк наверх → `go(id)` в `main.js`. Компонент не знает «кто следующий» и сам не пишет `history`.
+3. **Split-экраны** (referral / auth / onboarding / url): эталон `url-screen`; цель — общий `brand-screen-shell`. Не копипастить mesh/noise/logo.
+4. **Handoff** между соседними brand-экранами: `go(id, { handoff: true })` — правый visual без повторной анимации (`brandScreenTransition.js`).
+5. **home-screen** — другой лейаут (очередь), без обязательного правого visual.
+6. **Монтаж** — из `main.js`, не из HTML-слотов.
 
-## Motion при сменах экранов
+## Motion
 
-Open/close и stagger — через `--motion-*` / `entrance.css` / `motionTokens.js` (см. правило токенов). Не хардкодить длительности переходов между экранами.
+Open/close и stagger — `--motion-*` / `entrance.css` / `motionTokens.js`. Не хардкодить длительности.
 
-## Документация (коротко)
+## Документация
 
 Новый или существенно изменённый экран:
 
 - README в папке компонента;
-- обновить блок/флоу в `SCREENS.md`.
+- обновить флоу / таблицу path в `SCREENS.md` и `src/app/README.md`.
 
 ## Пример
 
 ```js
-// ❌ экран сам открывает следующий
-onSubmit: () => authScreen.open();
+// ❌ экран сам открывает следующий и пишет URL
+onSubmit: () => { authScreen.open(); history.pushState(...); };
 
-// ✅ только сигнал наверх; порядок в flow.js
-onSubmit: (payload) => opts.onComplete(payload);
+// ✅ только сигнал наверх
+onSubmit: (payload) => opts.onSubmit(payload);
+// в main.js: go("auth", { handoff: true });
 ```

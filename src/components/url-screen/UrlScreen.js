@@ -6,6 +6,10 @@ import {
   normalizePortfolioUrl,
 } from "../../utils/portfolioMeta.js";
 import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
+import {
+  closeBrandScreen,
+  openBrandScreen,
+} from "../../utils/brandScreenTransition.js";
 
 /** Платформы в стеке иконок под полем URL (Framer → Dprofile → Behance → Notion). */
 const PLATFORM_ICONS = Object.freeze([
@@ -182,62 +186,38 @@ export function createUrlScreen({ onSubmit }) {
     inputWrap.classList.toggle("url-screen__input-wrap--ready", hasValue);
   }
 
-  function open(prefill = "") {
+  /**
+   * @param {string} [prefill]
+   * @param {{ handoff?: boolean }} [opts]
+   */
+  function open(prefill = "", opts = {}) {
     closing = false;
-    root.hidden = false;
-    root.classList.remove("url-screen--open");
-    meshWash.refresh();
-    setError(false);
-    input.value = prefill;
-    syncSubmitVisibility();
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        root.classList.add("url-screen--open");
-        meshWash.setActive(true);
-      });
+    openBrandScreen({
+      root,
+      meshWash,
+      opts,
+      prepare: () => {
+        setError(false);
+        input.value = prefill;
+        syncSubmitVisibility();
+      },
     });
   }
 
   /**
+   * @param {{ handoff?: boolean }} [opts]
    * @returns {Promise<void>}
    */
-  function close() {
-    if (root.hidden || closing) {
-      return Promise.resolve();
-    }
-
-    if (!root.classList.contains("url-screen--open")) {
-      meshWash.setActive(false);
-      root.hidden = true;
-      return Promise.resolve();
-    }
-
-    closing = true;
-    meshWash.setActive(false);
-    root.classList.remove("url-screen--open");
-
-    return new Promise((resolve) => {
-      let finished = false;
-      const finish = () => {
-        if (finished) return;
-        finished = true;
-        root.removeEventListener("transitionend", onTransitionEnd);
-        window.clearTimeout(fallbackId);
-        root.hidden = true;
-        closing = false;
-        resolve();
-      };
-
-      /** @param {TransitionEvent} event */
-      const onTransitionEnd = (event) => {
-        if (event.target === root && event.propertyName === "opacity") {
-          finish();
-        }
-      };
-
-      root.addEventListener("transitionend", onTransitionEnd);
-      const fallbackId = window.setTimeout(finish, getScreenCloseFallbackMs());
+  function close(opts = {}) {
+    return closeBrandScreen({
+      root,
+      meshWash,
+      opts,
+      isClosing: () => closing,
+      setClosing: (value) => {
+        closing = value;
+      },
+      getFallbackMs: getScreenCloseFallbackMs,
     });
   }
 

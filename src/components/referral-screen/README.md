@@ -1,33 +1,30 @@
-# `referral-screen` — реферальная ссылка
+# `referral-screen` — реферальный код
 
-Экран ввода реферальной ссылки / кода приглашения.
+Path: **`/referral`**. Визуально 1:1 с `url-screen` (split, mesh, motion).
 
-## Визуал
+## Отличия от url-screen
 
-На базе `brand-screen-shell` (эталон — страница «Ссылка на портфолио»): правый visual как есть, слева поле ввода.
-
-Motion: тот же staggered reveal, что у `url-screen` (после выноса в brand-shell).
+| Элемент | Значение |
+|---------|----------|
+| Заголовок | `referralTitle` — «Введите реферальный код» |
+| Placeholder | `referralPlaceholder` — `YTHWKPDWAK` |
+| Аватары | 4 тёмных круга (`url-screen__avatar--placeholder`) |
+| Текст под полем | `referralColleagues` — «140 твоих коллег уже внутри» |
 
 ## Файл
 
 - `ReferralScreen.js` — `createReferralScreen({ onSubmit })` → `{ root, open, close }`.
-- Статус: **каркас** (title + stub hint), не монтируется из `main.js`.
+- `open(prefill?, { handoff? })`, `close({ handoff? })`.
+- Стили: `.url-screen*` + `--placeholder` в `iframe-shell.css` / `tokens.css`.
 
-## Поведение (план)
+## Поведение
 
-1. Prefill из `?ref=` / `localStorage`, если есть.
-2. Нормализация и валидация кода/URL.
-3. `onSubmit(referral)` → следующий шаг флоу (`auth-screen`).
-4. Опционально: проверка через `src/api/referrals.js`.
+1. Prefill: `?ref=` (через `open(prefill)` из `main.js`).
+2. Submit непустого кода → `onSubmit(referral)` (без само-close).
+3. Дальше: `go("auth", { handoff: true })` в `main.js`.
 
 ## i18n
 
-Ключи в `content/locales.json`: `referralTitle`, `referralPlaceholder`, `referralSubmit`, `referralInvalid`, `referralStubHint`.
+`referralTitle`, `referralPlaceholder`, `referralSubmit`, `referralInvalid`, `referralColleagues`.
 
-## Зависимости
-
-- `brand-screen-shell`
-- `src/app/flow.js`
-- будущий `src/api/referrals.js`
-
-См. [`SCREENS.md`](../../../SCREENS.md).
+См. [`SCREENS.md`](../../../SCREENS.md), [`src/app/README.md`](../../app/README.md).

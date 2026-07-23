@@ -1,7 +1,5 @@
 import { formatString, getStrings } from "../../i18n.js";
 import { answersFromFormData } from "../../utils/reviewReport.js";
-import { shareReviewPdf } from "../../utils/shareReviewPdf.js";
-import { isValidEmail } from "../../utils/emailValidation.js";
 import {
   getMotionAdvanceDelayMs,
   getMotionReveal,
@@ -14,28 +12,6 @@ const CHECKBOX_IDLE_PATH =
   "M4 6C4 4.89543 4.89543 4 6 4H18C19.1046 4 20 4.89543 20 6V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V6Z";
 const CHECKBOX_CHECKED_PATH =
   "M21 5L12 14L9 11M16 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V12";
-
-const TELEGRAM_ICON_SVG = `
-<svg class="review-panel__done-icon review-panel__done-icon--telegram" width="29" height="28" viewBox="0 0 29 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path fill-rule="evenodd" clip-rule="evenodd" d="M1.98628 12.0538C9.74232 8.10237 14.9142 5.49734 17.502 4.23871C24.8906 0.645084 26.4259 0.0208329 27.4266 0.000219782C27.6467 -0.00431385 28.1388 0.0594683 28.4576 0.361928C28.7267 0.61732 28.8008 0.962317 28.8362 1.20446C28.8717 1.44659 28.9158 1.99819 28.8807 2.4292C28.4803 7.3486 26.7478 19.2867 25.8664 24.7965C25.4935 27.1279 24.7591 27.9096 24.0482 27.9861C22.5032 28.1524 21.3299 26.7921 19.8335 25.6451C17.4919 23.8502 16.169 22.7328 13.896 20.9813C11.2693 18.9572 12.9721 17.8447 14.4691 16.0265C14.8609 15.5507 21.6683 8.31018 21.8001 7.65336C21.8165 7.57121 21.8318 7.265 21.6763 7.10332C21.5207 6.94163 21.2911 6.99692 21.1254 7.04089C20.8906 7.10322 17.1498 9.99446 9.90307 15.7146C8.84126 16.5672 7.87951 16.9826 7.01781 16.9608C6.06786 16.9368 4.24053 16.3328 2.8821 15.8164C1.21593 15.1831 -0.108312 14.8482 0.00699973 13.7727C0.0670611 13.2124 0.726821 12.6395 1.98628 12.0538Z" fill="url(#reviewDoneTgGrad)" />
-  <defs>
-    <linearGradient id="reviewDoneTgGrad" x1="28.4147" y1="0.186668" x2="9.97971" y2="17.3366" gradientUnits="userSpaceOnUse">
-      <stop stop-color="var(--palette-telegram-start)" />
-      <stop offset="1" stop-color="var(--palette-telegram-end)" />
-    </linearGradient>
-  </defs>
-</svg>
-`;
-
-const DOWNLOAD_ICON_SVG = `
-<svg class="review-panel__done-icon review-panel__done-icon--download" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path d="M7 12L12 17L17 12M12 17V4M17 20H7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
-</svg>
-`;
-
-const SUBMIT_ICON_SVG = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path d="M9.99999 11L5.99999 15M5.99999 15L9.99999 19M5.99999 15H17C18.1046 15 19 14.107 19 13.0025C19 10.0901 19 4.92333 19 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
-</svg>`;
 
 /**
  * @param {string} d
@@ -416,13 +392,17 @@ function createStep(content) {
 /**
  * @param {{
  *   getPortfolioName?: () => string;
- *   onDoneChange?: (
- *     done: boolean,
+ *   onReportReveal?: (
+ *     active: boolean,
  *     payload?: {
  *       answers?: import("../../utils/reviewReport.js").ReviewAnswers | null;
  *       portfolioName?: string;
+ *       submitted?: boolean;
  *     },
  *   ) => void;
+ *   onExit?: () => void;
+ *   onNextCase?: () => void;
+ *   onDoneChange?: (done: boolean) => void;
  * }} [options]
  * @returns {{
  *   root: HTMLElement;
@@ -431,6 +411,7 @@ function createStep(content) {
  *   close: () => void;
  *   reset: () => void;
  *   focus: () => void;
+ *   openDone: () => void;
  * }}
  */
 export function createReviewPanel(options = {}) {
@@ -439,6 +420,11 @@ export function createReviewPanel(options = {}) {
     typeof options.getPortfolioName === "function"
       ? options.getPortfolioName
       : () => getStrings().brandName;
+  const onReportReveal =
+    typeof options.onReportReveal === "function" ? options.onReportReveal : null;
+  const onExit = typeof options.onExit === "function" ? options.onExit : null;
+  const onNextCase =
+    typeof options.onNextCase === "function" ? options.onNextCase : null;
   const onDoneChange =
     typeof options.onDoneChange === "function" ? options.onDoneChange : null;
 
@@ -527,6 +513,18 @@ export function createReviewPanel(options = {}) {
     ),
     createChoice(
       "structure",
+      "dump",
+      t.reviewStructureDump,
+      t.reviewStructureDumpHint,
+    ),
+    createChoice(
+      "structure",
+      "outline",
+      t.reviewStructureOutline,
+      t.reviewStructureOutlineHint,
+    ),
+    createChoice(
+      "structure",
       "clear",
       t.reviewStructureClear,
       t.reviewStructureClearHint,
@@ -537,9 +535,21 @@ export function createReviewPanel(options = {}) {
     createChoice("metrics", "none", t.reviewMetricsNone, t.reviewMetricsNoneHint),
     createChoice(
       "metrics",
+      "vanity",
+      t.reviewMetricsVanity,
+      t.reviewMetricsVanityHint,
+    ),
+    createChoice(
+      "metrics",
       "nominal",
       t.reviewMetricsNominal,
       t.reviewMetricsNominalHint,
+    ),
+    createChoice(
+      "metrics",
+      "solid",
+      t.reviewMetricsSolid,
+      t.reviewMetricsSolidHint,
     ),
     createChoice(
       "metrics",
@@ -712,65 +722,29 @@ export function createReviewPanel(options = {}) {
   doneTitle.id = "review-done-title";
   doneTitle.textContent = t.reviewDoneTitle;
 
-  const emailWrap = document.createElement("div");
-  emailWrap.className = "review-panel__done-email-wrap";
-
-  const emailInput = document.createElement("input");
-  emailInput.className = "review-panel__done-email";
-  emailInput.type = "email";
-  emailInput.name = "report-email";
-  emailInput.autocomplete = "email";
-  emailInput.inputMode = "email";
-  emailInput.placeholder = t.reviewDoneEmailPlaceholder;
-
-  const emailSubmit = document.createElement("button");
-  emailSubmit.type = "button";
-  emailSubmit.className = "review-panel__done-email-submit";
-  emailSubmit.hidden = true;
-  emailSubmit.setAttribute("aria-label", t.reviewDoneEmailSubmitAria);
-  emailSubmit.innerHTML = SUBMIT_ICON_SVG;
-
-  emailWrap.append(emailInput, emailSubmit);
-
-  const divider = document.createElement("div");
-  divider.className = "review-panel__done-divider";
-  divider.setAttribute("aria-hidden", "true");
-
-  const dividerLineStart = document.createElement("span");
-  dividerLineStart.className = "review-panel__done-divider-line";
-
-  const dividerLabel = document.createElement("span");
-  dividerLabel.className = "review-panel__done-divider-label";
-  dividerLabel.textContent = t.reviewDoneOr;
-
-  const dividerLineEnd = document.createElement("span");
-  dividerLineEnd.className = "review-panel__done-divider-line";
-
-  divider.append(dividerLineStart, dividerLabel, dividerLineEnd);
-
   const actions = document.createElement("div");
   actions.className = "review-panel__done-actions";
 
-  const telegramBtn = document.createElement("button");
-  telegramBtn.type = "button";
-  telegramBtn.className = "review-panel__done-action";
-  telegramBtn.innerHTML = `${TELEGRAM_ICON_SVG}<span class="review-panel__done-action-label">${t.reviewDoneTelegram}</span>`;
+  const exitBtn = document.createElement("button");
+  exitBtn.type = "button";
+  exitBtn.className =
+    "iframe-shell__btn review-panel__done-btn review-panel__done-btn--exit";
+  exitBtn.textContent = t.reviewDoneExit;
 
-  const downloadBtn = document.createElement("button");
-  downloadBtn.type = "button";
-  downloadBtn.className = "review-panel__done-action";
-  downloadBtn.innerHTML = `${DOWNLOAD_ICON_SVG}<span class="review-panel__done-action-label">${t.reviewDoneDownload}</span>`;
+  const nextCaseBtn = document.createElement("button");
+  nextCaseBtn.type = "button";
+  nextCaseBtn.className =
+    "iframe-shell__btn review-panel__done-btn review-panel__done-btn--next";
+  nextCaseBtn.textContent = t.reviewDoneNextCase;
 
-  actions.append(telegramBtn, downloadBtn);
-  done.append(doneTitle, emailWrap, divider, actions);
+  actions.append(exitBtn, nextCaseBtn);
+  done.append(doneTitle, actions);
   root.append(heading, top, form, done);
 
   let currentStep = 0;
   let transitioning = false;
   /** @type {ReturnType<typeof setTimeout> | null} */
   let advanceTimer = null;
-  /** @type {import("../../utils/reviewReport.js").ReviewAnswers | null} */
-  let submittedAnswers = null;
   const totalSteps = steps.length;
   const prefersReducedMotion = () =>
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -827,9 +801,27 @@ export function createReviewPanel(options = {}) {
     nextBtn.hidden = isLast || auto;
     submit.hidden = !isLast;
     footer.hidden = isLast ? false : auto;
+    form.classList.toggle("review-panel__form--advice", isLast);
     showStepError(false);
     syncQuestion();
     syncProgress();
+    syncReportReveal();
+  }
+
+  function syncReportReveal() {
+    const onAdvice =
+      done.hidden && !form.hidden && currentStep === totalSteps - 1;
+
+    if (!onAdvice) {
+      onReportReveal?.(false);
+      return;
+    }
+
+    const answers = answersFromFormData(new FormData(form));
+    onReportReveal?.(true, {
+      answers,
+      portfolioName: getPortfolioName(),
+    });
   }
 
   function showForm() {
@@ -847,37 +839,31 @@ export function createReviewPanel(options = {}) {
     done.style.opacity = "";
     done.style.transform = "";
     done.style.filter = "";
+    onReportReveal?.(false);
     onDoneChange?.(false);
   }
 
-  function notifyReportReveal(active) {
-    if (!active) {
-      onDoneChange?.(false);
-      return;
-    }
-    onDoneChange?.(true, {
-      answers: submittedAnswers,
-      portfolioName: getPortfolioName(),
-    });
-  }
-
   /**
-   * Финальный вопрос → done + PDF.
+   * Финальный вопрос → done; PDF-лист уезжает вниз.
    * Form/top сразу уходят из потока (иначе flex-скачок), done входит на --motion-reveal-*.
    * @returns {Promise<void>}
    */
   async function showDone() {
     clearAdvanceTimer();
     if (!done.hidden && form.hidden) {
-      notifyReportReveal(true);
+      onReportReveal?.(false, { submitted: true });
+      onDoneChange?.(true);
       return;
     }
+
+    onReportReveal?.(false, { submitted: true });
+    onDoneChange?.(true);
 
     if (prefersReducedMotion()) {
       form.hidden = true;
       top.hidden = true;
       done.hidden = false;
-      notifyReportReveal(true);
+      form.classList.remove("review-panel__form--advice");
       return;
     }
 
@@ -891,7 +877,7 @@ export function createReviewPanel(options = {}) {
     form.hidden = true;
     top.hidden = true;
     done.hidden = false;
-    notifyReportReveal(true);
+    form.classList.remove("review-panel__form--advice");
 
     const enter = done.animate(
       [
@@ -1159,6 +1145,9 @@ export function createReviewPanel(options = {}) {
   adviceInput.addEventListener("input", () => {
     adviceCount.textContent = `${adviceInput.value.length} / ${ADVICE_MAX_LEN}`;
     if (!stepError.hidden) showStepError(false);
+    if (currentStep === totalSteps - 1) {
+      syncReportReveal();
+    }
   });
 
   form.addEventListener("change", () => {
@@ -1232,68 +1221,15 @@ export function createReviewPanel(options = {}) {
       return;
     }
 
-    submittedAnswers = answers;
     void showDone();
   });
 
-  function syncEmailSubmit() {
-    const has = emailInput.value.trim().length > 0;
-    emailSubmit.hidden = !has;
-    emailWrap.classList.toggle("review-panel__done-email-wrap--ready", has);
-    emailWrap.classList.toggle(
-      "review-panel__done-email-wrap--invalid",
-      false,
-    );
-  }
-
-  function sendReportEmail() {
-    const value = emailInput.value.trim();
-    if (!value) return;
-    if (!isValidEmail(value)) {
-      emailWrap.classList.add("review-panel__done-email-wrap--invalid");
-      return;
-    }
-    emailWrap.classList.remove("review-panel__done-email-wrap--invalid");
-    const subject = formatString(t.reviewDoneEmailSubject, {
-      name: getPortfolioName(),
-    });
-    const href = `mailto:${value}?subject=${encodeURIComponent(subject)}`;
-    window.location.href = href;
-  }
-
-  emailInput.addEventListener("input", syncEmailSubmit);
-  emailInput.addEventListener("focus", () => {
-    emailInput.placeholder = "";
-  });
-  emailInput.addEventListener("blur", () => {
-    if (!emailInput.value.trim()) {
-      emailInput.placeholder = t.reviewDoneEmailPlaceholder;
-    }
-  });
-  emailInput.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter") return;
-    event.preventDefault();
-    sendReportEmail();
-  });
-  emailSubmit.addEventListener("pointerdown", (event) => {
-    event.preventDefault();
-  });
-  emailSubmit.addEventListener("click", sendReportEmail);
-
-  downloadBtn.addEventListener("click", () => {
-    if (!submittedAnswers) return;
-    shareReviewPdf(submittedAnswers, {
-      portfolioName: getPortfolioName(),
-    });
+  exitBtn.addEventListener("click", () => {
+    onExit?.();
   });
 
-  telegramBtn.addEventListener("click", () => {
-    if (!submittedAnswers) return;
-    const text = formatString(t.reviewDoneEmailSubject, {
-      name: getPortfolioName(),
-    });
-    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`;
-    window.open(shareUrl, "_blank", "noopener,noreferrer");
+  nextCaseBtn.addEventListener("click", () => {
+    onNextCase?.();
   });
 
   function reset() {
@@ -1306,10 +1242,6 @@ export function createReviewPanel(options = {}) {
     clearAllSelections();
     adviceInput.value = "";
     adviceCount.textContent = `0 / ${ADVICE_MAX_LEN}`;
-    emailInput.value = "";
-    emailInput.placeholder = t.reviewDoneEmailPlaceholder;
-    syncEmailSubmit();
-    submittedAnswers = null;
     currentStep = 0;
     showForm();
     renderStep();
@@ -1334,5 +1266,15 @@ export function createReviewPanel(options = {}) {
 
   renderStep();
 
-  return { root, form, open, close, reset, focus };
+  return {
+    root,
+    form,
+    open,
+    close,
+    reset,
+    focus,
+    openDone: () => {
+      void showDone();
+    },
+  };
 }

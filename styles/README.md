@@ -1,26 +1,28 @@
 # `styles/` — слои стилей
 
-- `tokens.css` — **единый источник дизайн-токенов** (примитивы → семантика → темы). См. `.cursor/rules/design-tokens.mdc`.
-- `base.css` — сброс и базовые правила.
-- `entrance.css` — общий motion-слой: `@keyframes motion-reveal` / `motion-reveal-scale`, утилиты `.motion-reveal*`.
-- `iframe-shell.css` — оболочка сессии, `.url-screen`, `.review-screen` / `.review-panel` (опрос + финальный reveal PDF).
-- `brand-screen.css` — **заготовка**: общие стили split-экранов (вынести из `iframe-shell` при реализации shell).
-- `home-screen.css` — **заготовка**: главная / очередь на ревью.
+- `tokens.css` — **источник дизайн-токенов** (примитивы → семантика → темы). Правило: `.cursor/rules/design-tokens.mdc`.
+- `base.css` — сброс / база.
+- `entrance.css` — `@keyframes motion-reveal` / `motion-reveal-scale`.
+- `iframe-shell.css` — оболочка `/review`, `.url-screen*`, `.auth-screen*`, `.review-screen*` / `.review-panel*`.
+- `brand-screen.css` — **заготовка** выноса общих split-стилей из iframe-shell.
+- `home-screen.css` — **заготовка** главной `/home`.
 
 ## Motion
 
-Источник правды: `--motion-*` и `--ease-reveal` в `tokens.css`.
+Источник: `--motion-*`, `--ease-reveal` в `tokens.css`.
 
 | Токен | Назначение |
 |-------|------------|
-| `--motion-reveal-*` | появление элементов и смена шагов (fade + slide/scale + blur) |
-| `--motion-screen-*` | open/close экранов (url → сессия, сессия → опрос) |
-| `--motion-advance-delay` | пауза перед auto-advance шага |
-| `--motion-focus-delay` | фокус после open опроса |
-| `--motion-feature-*` | PDF-лист и уезд лого |
-| `--motion-delay-*` / `--motion-stagger` | ступени stagger |
-| `--url-screen-reveal-*` | алиасы задержек экрана ссылки |
-| `--shell-review-step-*` / `--shell-review-report-*` | алиасы на `--motion-reveal-*` / `--motion-feature-*` |
+| `--motion-reveal-*` | появление элементов / шагов квиза |
+| `--motion-screen-*` | open/close экранов |
+| `--motion-advance-delay` / `--motion-focus-delay` | квиз |
+| `--motion-feature-*` / `--motion-report-launch-*` | PDF-лист |
+| `--motion-delay-*` / `--motion-stagger` | stagger |
+| `--url-screen-reveal-*` | алиасы задержек split-экранов |
+| `--auth-screen-*` | divider / provider buttons |
+| `--shell-review-*` | квиз / report / done |
 
-В CSS: `animation-name: motion-reveal` / `motion-reveal-scale` (из `entrance.css`).  
-В JS: `src/utils/motionTokens.js`.
+Handoff без анимации visual: класс `.url-screen--handoff` + `brandScreenTransition.js`.
+
+CSS: `animation-name: motion-reveal` / `motion-reveal-scale`.  
+JS: `src/utils/motionTokens.js`.

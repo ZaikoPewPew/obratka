@@ -13,8 +13,17 @@ import {
   formatString,
   getStrings,
 } from "./i18n.js";
+import {
+  resolveAccessibleRoute,
+  resolveEntryScreen,
+} from "./app/flow.js";
+import { createAppRouter } from "./app/router.js";
 import { createReviewPanel } from "./components/review-panel/ReviewPanel.js";
 import { createReviewScreen } from "./components/review-screen/ReviewScreen.js";
+import { createAuthScreen } from "./components/auth-screen/AuthScreen.js";
+import { createHomeScreen } from "./components/home-screen/HomeScreen.js";
+import { createOnboardingScreen } from "./components/onboarding-screen/OnboardingScreen.js";
+import { createReferralScreen } from "./components/referral-screen/ReferralScreen.js";
 import { createUrlScreen } from "./components/url-screen/UrlScreen.js";
 import {
   resolvePortfolioEmbed,
@@ -49,10 +58,59 @@ let portfolioName = getStrings().brandName;
 /** @type {ReturnType<typeof createReviewScreen>["setReportReveal"]} */
 let setReviewReportReveal = () => {};
 
+/** @type {import("./app/routes.js").AppRouteId | null} */
+let activeRouteId = null;
+/** @type {boolean} */
+let pendingHandoff = false;
+
+/** @type {ReturnType<typeof createAppRouter> | null} */
+let appRouter = null;
+
+/**
+ * @param {import("./app/routes.js").AppRouteId} id
+ * @param {{
+ *   replace?: boolean;
+ *   handoff?: boolean;
+ *   search?: string | URLSearchParams | Record<string, string | null | undefined>;
+ * }} [opts]
+ */
+function go(id, opts = {}) {
+  pendingHandoff = Boolean(opts.handoff);
+  appRouter?.navigate(id, {
+    replace: opts.replace,
+    search: opts.search,
+  });
+}
+
+/**
+ * @param {import("./app/routes.js").AppRouteId} id
+ * @param {{
+ *   replace?: boolean;
+ *   search?: string | URLSearchParams | Record<string, string | null | undefined>;
+ * }} [opts]
+ */
+function syncRoute(id, opts = {}) {
+  activeRouteId = id;
+  appRouter?.sync(id, opts);
+}
+
 const reviewPanel = createReviewPanel({
   getPortfolioName: () => portfolioName,
-  onDoneChange: (done, payload) => {
-    setReviewReportReveal(done, payload);
+  onReportReveal: (active, payload) => {
+    setReviewReportReveal(active, payload);
+  },
+  onDoneChange: (done) => {
+    if (done) {
+      if (activeRouteId !== "done") syncRoute("done");
+      return;
+    }
+    if (activeRouteId === "done") syncRoute("quiz");
+  },
+  onExit: () => {
+    go("url", { replace: true });
+  },
+  onNextCase: () => {
+    go("url", { replace: true });
   },
 });
 const reviewScreen = createReviewScreen({
@@ -220,6 +278,7 @@ function openReview() {
   reviewPanel.reset();
   reviewPanel.open();
   reviewScreen.open();
+  syncRoute("quiz");
 
   window.setTimeout(() => {
     reviewPanel.focus();
@@ -319,11 +378,19 @@ function enterSessionShell() {
   });
 }
 
+function leaveSessionShell() {
+  if (!shell) return;
+  shell.hidden = true;
+  shell.classList.remove("iframe-shell--entered");
+}
+
 const urlScreen = createUrlScreen({
   onSubmit: async (url) => {
     enterSessionShell();
     await closeReview();
     await applyPortfolio(url);
+    syncRoute("review");
+    void urlScreen.close({ handoff: true });
     if (embedPlan?.mode === "external") {
       armSession();
       return;
@@ -332,7 +399,153 @@ const urlScreen = createUrlScreen({
   },
 });
 
-document.body.append(urlScreen.root);
+const homeScreen = createHomeScreen({
+  onOpenPortfolio: async () => {
+    go("url", { replace: true });
+  },
+  onAddPortfolio: async () => {
+    go("url");
+  },
+});
+
+const onboardingScreen = createOnboardingScreen({
+  onComplete: async () => {
+    go("home", { replace: true });
+  },
+});
+
+const authScreen = createAuthScreen({
+  onSuccess: async () => {
+    // Онбординг/home пока stub — в продуктовом флоу идём на портфолио.
+    go("url", { handoff: true });
+  },
+});
+
+const referralScreen = createReferralScreen({
+  onSubmit: async () => {
+    go("auth", { handoff: true });
+  },
+});
+
+document.body.append(
+  referralScreen.root,
+  authScreen.root,
+  onboardingScreen.root,
+  homeScreen.root,
+  urlScreen.root,
+);
+
+/**
+ * @param {import("./app/routes.js").AppRouteId} id
+ * @param {{ handoff?: boolean }} [opts]
+ */
+async function applyRoute(id, opts = {}) {
+  const handoff = Boolean(opts.handoff);
+  const accessible = resolveAccessibleRoute(id, {
+    hasPortfolio: Boolean(portfolioUrl),
+  });
+
+  if (accessible !== id) {
+    syncRoute(accessible, { replace: true });
+    id = accessible;
+  }
+
+  activeRouteId = id;
+  const closeOpts = handoff ? { handoff: true } : {};
+  const openOpts = handoff ? { handoff: true } : {};
+
+  const isReviewWorkspace = id === "review" || id === "quiz" || id === "done";
+  const isBrandHandoff =
+    handoff && (id === "referral" || id === "auth" || id === "url");
+
+  /**
+   * @param {import("./app/routes.js").AppRouteId} target
+   */
+  function openTarget(target) {
+    if (target === "referral") {
+      const ref =
+        new URLSearchParams(window.location.search).get("ref") ?? "";
+      referralScreen.open(ref, openOpts);
+      return;
+    }
+    if (target === "auth") {
+      authScreen.open(openOpts);
+      return;
+    }
+    if (target === "onboarding") {
+      onboardingScreen.open();
+      return;
+    }
+    if (target === "home") {
+      homeScreen.open();
+      return;
+    }
+    if (target === "url") {
+      urlScreen.open("", openOpts);
+    }
+  }
+
+  async function closeOthers() {
+    /** @type {Array<Promise<void> | void>} */
+    const closers = [];
+    if (id !== "referral") closers.push(referralScreen.close(closeOpts));
+    if (id !== "auth") closers.push(authScreen.close(closeOpts));
+    if (id !== "onboarding") closers.push(onboardingScreen.close());
+    if (id !== "home") closers.push(homeScreen.close());
+    if (id !== "url") closers.push(urlScreen.close(closeOpts));
+    await Promise.all(closers);
+  }
+
+  if (isReviewWorkspace) {
+    enterSessionShell();
+    await closeOthers();
+
+    if (id === "review") return;
+
+    frameWrap?.classList.add("iframe-shell__frame--locked");
+    reviewScreen.open();
+    reviewPanel.open();
+    if (id === "done") {
+      reviewPanel.openDone();
+      return;
+    }
+    reviewPanel.reset();
+    reviewPanel.open();
+    window.setTimeout(() => {
+      reviewPanel.focus();
+    }, getMotionFocusDelayMs());
+    return;
+  }
+
+  leaveSessionShell();
+  await closeReview();
+
+  // Handoff: сначала новый экран поверх, потом убрать предыдущий — visual не мигает.
+  if (isBrandHandoff) {
+    openTarget(id);
+    await closeOthers();
+    return;
+  }
+
+  await closeOthers();
+  openTarget(id);
+}
+
+appRouter = createAppRouter({
+  onChange: (location) => {
+    const handoff = pendingHandoff;
+    pendingHandoff = false;
+
+    if (!location.id) {
+      const entry = resolveEntryScreen({});
+      const search = Object.fromEntries(location.search.entries());
+      go(entry, { replace: true, search });
+      return;
+    }
+
+    void applyRoute(location.id, { handoff });
+  },
+});
 
 openExternalBtn?.addEventListener("click", () => {
   startExternalSession();
@@ -361,4 +574,5 @@ if (shell) {
   shell.hidden = true;
   shell.classList.remove("iframe-shell--entered");
 }
-urlScreen.open();
+
+appRouter.start();

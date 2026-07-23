@@ -6,37 +6,45 @@
 
 | Что | Где |
 |-----|-----|
-| Токены (цвета, отступы, Montserrat, радиусы, motion, z-index, control-bar) | `styles/tokens.css` |
+| Токены | `styles/tokens.css` |
 | Правило токенов | `.cursor/rules/design-tokens.mdc` |
-| Локали ru/en (+ расширение) | `content/locales.json`, `src/i18n.js` |
+| Локали ru/en | `content/locales.json`, `src/i18n.js` |
 | Правило i18n | `.cursor/rules/i18n.mdc` |
 | Правило экранов / флоу | `.cursor/rules/screens.mdc` |
-| Оболочка iframe + панель | `styles/iframe-shell.css`, `index.html`, `src/main.js` |
-| Url-screen / shared reveal | токены `--motion-*` (+ алиасы `--url-screen-reveal-*`), keyframes в `entrance.css`, JS: `motionTokens.js` |
-| Шрифт (self-host) | `@fontsource/montserrat` → импорт в `src/main.js` |
+| Оболочка iframe + квиз | `styles/iframe-shell.css`, `index.html`, `src/main.js` |
+| Motion | `--motion-*`, `entrance.css`, `motionTokens.js`, `brandScreenTransition.js` |
+| Шрифт | `@fontsource/montserrat` → `src/main.js` |
 
-## Экраны (флоу)
+## Экраны и URL
+
+Источник правды: [`SCREENS.md`](../SCREENS.md).
+
+| Path | Экран |
+|------|--------|
+| `/referral` | Реферальный код (UI) |
+| `/registration` | Регистрация (UI) |
+| `/onboarding` | Онбординг (stub) |
+| `/home` | Главная (stub) |
+| `/portfolio` | Ссылка на портфолио (UI) |
+| `/review` | Ревью: iframe + таймер |
+| `/quiz` | Квиз |
+| `/quiz/done` | Финал квиза |
 
 | Что | Где |
 |-----|-----|
-| Архитектура экранов | `SCREENS.md` |
+| Routes / router / flow | `src/app/` |
 | Brand split-shell | `src/components/brand-screen-shell/` |
-| Referral / auth / onboarding / home | `src/components/*-screen/` (каркас) |
-| App flow + session | `src/app/` |
+| Referral / auth / onboarding / home / url | `src/components/*-screen/` |
+| Квиз | `review-screen/` + `review-panel/` |
 | Онбординг-контент | `content/onboarding.json`, `content/onboarding.md` |
 
-Эталон visual для split-экранов: `url-screen` («Ссылка на портфолио»). Пока `main.js` монтирует только url-screen + iframe-сессию.
+Эталон split: `url-screen`. Соседние brand-экраны: `handoff` без анимации правого visual.  
+Оркестрация: `main.js` → `go()` / `applyRoute()`.
 
 ## Темы и языки
 
 - Тема: `<html data-theme="dark">` (семантика в `tokens.css`)
 - Язык: `?lang=en` / кнопка RU↔EN; default `ru`
-
-## UI-сессия
-
-- Таймер 1 минута → blur → закрытие iframe → модалка recall
-- Портфолио: `https://janelle.page`
-- Figma: «Обратка», панель `node-id=393-922`
 
 ## Исследования
 

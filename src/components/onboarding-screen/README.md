@@ -1,37 +1,34 @@
 # `onboarding-screen` — онбординг
 
-Вопросы профиля после регистрации. Визуально — тот же split, что у «Ссылка на портфолио».
+Path: **`/onboarding`**. После регистрации; визуально — split как у «Ссылка на портфолио».
 
-## Визуал
+## Статус
+
+**Stub** (title + hint + nav-заглушка). Монтируется из `main.js`, deep link работает. В happy-path после auth пока не открывается.
+
+## Визуал (цель)
 
 | Сторона | Содержимое |
 |---------|------------|
-| Правая | Как у `UrlScreen` / `brand-screen-shell` (mesh + бренд) — **без изменений** |
-| Левая | Вместо инпута: вопрос шага + варианты ответа + навигация (назад / далее) + прогресс |
+| Правая | mesh + бренд (как url-screen / brand-shell) |
+| Левая | вопрос шага + ответы + назад/далее + прогресс |
 
-Motion появления экрана — как у url-screen; смена шагов — отдельный лёгкий transition (при реализации).
+Сейчас: `brand-screen-shell` + stub-контент (стили shell ещё не вынесены).
 
 ## Файл
 
 - `OnboardingScreen.js` — `createOnboardingScreen({ onComplete })` → `{ root, open, close }`.
-- Статус: **каркас**, не монтируется из `main.js`.
 
 ## Данные
 
-Шаги и тексты вопросов: [`content/onboarding.json`](../../../content/onboarding.json)  
-Схема: [`content/onboarding.md`](../../../content/onboarding.md)
+- Шаги: [`content/onboarding.json`](../../../content/onboarding.json)
+- Схема: [`content/onboarding.md`](../../../content/onboarding.md)
+- Кнопки: `onboarding*` в `locales.json`
 
-Кнопки/ошибки навигации — ключи `onboarding*` в `locales.json`.
+## План
 
-## Поведение (план)
-
-1. Один вопрос на шаг; required блокирует «Далее» (как в `ReviewPanel`).
-2. На последнем шаге — `onComplete(answers)`.
-3. Ответы можно дополнительно сохранить через будущий `src/api/onboarding.js`.
-
-## Паттерны рядом
-
-- Навигация/прогресс: `review-panel/ReviewPanel.js`
-- Каркас: `brand-screen-shell`
+1. Один вопрос на шаг; required как в `ReviewPanel`.
+2. `onComplete(answers)` → `go("home")`.
+3. Опционально `src/api/onboarding.js`.
 
 См. [`SCREENS.md`](../../../SCREENS.md).

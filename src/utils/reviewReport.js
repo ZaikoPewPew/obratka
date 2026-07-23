@@ -5,8 +5,8 @@
 
 /**
  * @typedef {'junior' | 'mid' | 'senior' | 'lead' | 'head'} Grade
- * @typedef {'mess' | 'clear'} Structure
- * @typedef {'none' | 'nominal' | 'strong'} Metrics
+ * @typedef {'mess' | 'dump' | 'outline' | 'clear'} Structure
+ * @typedef {'none' | 'vanity' | 'nominal' | 'solid' | 'strong'} Metrics
  * @typedef {'yes' | 'maybe' | 'no'} Hire
  *
  * @typedef {{
@@ -132,6 +132,10 @@ function structureText(structure, t) {
   switch (structure) {
     case "clear":
       return t.reportStructureClear;
+    case "outline":
+      return t.reportStructureOutline;
+    case "dump":
+      return t.reportStructureDump;
     case "mess":
       return t.reportStructureMess;
     default: {
@@ -146,7 +150,22 @@ function structureText(structure, t) {
  * @param {Record<string, string>} t
  */
 function metricsText(metrics, t) {
-  return metrics === "none" ? t.reportMetricsNone : t.reportMetricsPresent;
+  switch (metrics) {
+    case "none":
+      return t.reportMetricsNone;
+    case "vanity":
+      return t.reportMetricsVanity;
+    case "nominal":
+      return t.reportMetricsNominal;
+    case "solid":
+      return t.reportMetricsSolid;
+    case "strong":
+      return t.reportMetricsStrong;
+    default: {
+      const _exhaustive = metrics;
+      return _exhaustive;
+    }
+  }
 }
 
 /**
@@ -195,7 +214,12 @@ function isGrade(value) {
  * @returns {value is Structure}
  */
 function isStructure(value) {
-  return value === "mess" || value === "clear";
+  return (
+    value === "mess" ||
+    value === "dump" ||
+    value === "outline" ||
+    value === "clear"
+  );
 }
 
 /**
@@ -203,7 +227,13 @@ function isStructure(value) {
  * @returns {value is Metrics}
  */
 function isMetrics(value) {
-  return value === "none" || value === "nominal" || value === "strong";
+  return (
+    value === "none" ||
+    value === "vanity" ||
+    value === "nominal" ||
+    value === "solid" ||
+    value === "strong"
+  );
 }
 
 /**

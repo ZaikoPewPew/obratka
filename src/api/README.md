@@ -17,4 +17,4 @@
 | `portfolios.js` | очередь портфолио на ревью для `home-screen` |
 | `onboarding.js` | сохранение ответов онбординга |
 
-См. [`SCREENS.md`](../../SCREENS.md).
+См. [`SCREENS.md`](../../SCREENS.md). Paths: `/registration` (auth), `/referral`, `/home`, `/onboarding`.

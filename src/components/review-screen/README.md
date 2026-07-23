@@ -1,6 +1,9 @@
-# `review-screen` — полноэкранный опрос после сессии
+# `review-screen` — оболочка квиза
 
-Split-экран как у `url-screen`: слева опросник (`review-panel`), справа brand visual (mesh + noise + лого).
+Paths: **`/quiz`** (опрос), **`/quiz/done`** (финал).  
+Не путать с **`/review`** — там iframe + таймер (просмотр портфолио).
+
+Split как у `url-screen`: слева `review-panel`, справа brand visual (mesh + noise + лого + PDF-лист).
 
 ## Файл
 
@@ -10,36 +13,22 @@ Split-экран как у `url-screen`: слева опросник (`review-pa
 
 | Метод | Назначение |
 |--------|------------|
-| `open()` | Показать экран, запустить mesh, сбросить reveal отчёта |
-| `close()` | Закрытие с transition (как url-screen) |
-| `setReportReveal(active, payload?)` | Финальный шаг: PDF-лист выезжает, лого уезжает вверх. `payload.answers` + `portfolioName` заполняют лист теми же секциями, что и печатный PDF (`buildReportSections`) |
+| `open()` | Показать экран, mesh, сброс reveal |
+| `close()` | Закрытие с transition |
+| `setReportReveal(active, payload?)` | PDF-лист; `payload.answers` + `portfolioName` → `buildReportSections` |
 
-Монтаж: `main.js` кладёт `reviewPanel.root` в `content`, `onDoneChange` → `setReportReveal`.
+Монтаж: `main.js` кладёт `reviewPanel.root` в `content`; `onReportReveal` → `setReportReveal`.  
+URL: `syncRoute("quiz")` при открытии опроса, `syncRoute("done")` при done.
 
 ## Visual (слои)
 
-Снизу вверх (`--shell-review-z-*`):
+Снизу вверх (`--shell-review-z-*`): glow → noise → report → brand.
 
-1. `glow` — mesh wash  
-2. `noise` — зерно  
-3. `report` — лист отчёта (скрыт до финала)  
-4. `brand` — логотип  
+На шаге advice лист выезжает; после submit — уезд + `.review-screen--done` (зелёный mesh).
 
-Лист: eyebrow (бренд) → заголовок → имя портфолио → секции трактовок (грейд, ясность, структура, метрики, визуал, вердикт, совет).  
-Фон: `--shell-review-report-bg` → `--color-surface-muted` (`#F3F4F7`).
+## Motion / стили
 
-## Motion финала
+Токены `--shell-review-*`, `--motion-report-launch-*`. Классы в `iframe-shell.css`.  
+Подробности reveal — ниже по файлу в коде / см. историю в git.
 
-Класс `.review-screen--report`:
-
-- лист: `translateY` из-за нижней кромки фрейма (`--shell-review-report-shift-*`, duration ~1600ms);
-- лого: из центра к `--shell-review-brand-top` (40px).
-
-`prefers-reduced-motion` — почти мгновенно.
-
-## Стили / токены
-
-- Классы: `.review-screen*` в `styles/iframe-shell.css`
-- Токены: `--shell-review-*`, `--url-screen-*` (padding, radius, noise, brand size)
-
-См. также [`review-panel/README.md`](../review-panel/README.md), [`SCREENS.md`](../../../SCREENS.md).
+См. [`review-panel/README.md`](../review-panel/README.md), [`SCREENS.md`](../../../SCREENS.md).

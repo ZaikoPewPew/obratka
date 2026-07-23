@@ -40,9 +40,18 @@
   --palette-glow-lilac: #f0ebff;
   --palette-glow-mist: #e8f4ff;
   --palette-glow-sky: #d7ebff;
+  /* Mesh after review submit (accent green family) */
+  --palette-glow-mint: #e6fceb;
+  --palette-glow-foam: #c5f5cf;
+  --palette-glow-leaf: #6edc7e;
+  --palette-glow-green-mist: #e8fcef;
   --palette-notion-amber: #ffad00;
   --palette-telegram-start: #2aabee;
   --palette-telegram-end: #229ed9;
+  --palette-google-blue: #4285f4;
+  --palette-google-green: #34a853;
+  --palette-google-yellow: #fbbc04;
+  --palette-google-red: #ea4335;
 
   /* Шрифтовые семейства (сырьё). Единственный UI-шрифт — Montserrat (self-host @fontsource). */
   --font-montserrat: "Montserrat", sans-serif;
@@ -74,6 +83,10 @@
   --color-on-accent: var(--palette-white);
   --color-on-accent-hover: var(--palette-gray-50);
   --color-on-accent-active: #f0f0f0;
+
+  /* Цвета: выбранная плитка (single / multi choice) */
+  --color-choice-selected: var(--palette-glow-blue);
+  --color-on-choice-selected: var(--palette-white);
 
   /* Цвета: статусы */
   --color-error: var(--palette-red);
@@ -170,6 +183,12 @@
   --motion-feature-duration: 1600ms;
   --motion-feature-fade-duration: var(--motion-reveal-duration);
   --motion-feature-ease: var(--ease-reveal);
+  /* Уход PDF: разгон вверх → бросок вниз (без fade) */
+  --motion-report-launch-duration: 780ms;
+  --motion-report-launch-lift: 40px;
+  --motion-report-launch-peak: 0.24;
+  --motion-report-launch-ease-lift: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-report-launch-ease-dive: cubic-bezier(0.55, 0.05, 0.9, 0.3);
   /* JS close fallback ≈ screen duration + запас */
   --motion-screen-close-fallback: 700ms;
 
@@ -232,6 +251,7 @@
   --shell-review-hint-gap: var(--space-1);
   --shell-review-stage-offset: var(--space-12);
   --shell-review-body-min-height: 360px;
+  --shell-review-advice-footer-gap: var(--space-6);
   --shell-review-step-duration: var(--motion-reveal-duration);
   --shell-review-step-ease: var(--motion-reveal-ease);
   --shell-review-step-shift: var(--motion-reveal-shift);
@@ -244,8 +264,8 @@
   --shell-review-control-line-height: normal;
   --shell-review-control-bg: var(--color-surface-muted);
   --shell-review-control-text: var(--color-text);
-  --shell-review-control-active-bg: var(--color-accent);
-  --shell-review-control-active-text: var(--color-on-accent);
+  --shell-review-control-active-bg: var(--color-choice-selected);
+  --shell-review-control-active-text: var(--color-on-choice-selected);
   --shell-review-slider-width: 500px;
   --shell-review-slider-height: 106px;
   --shell-review-slider-track-height: 63px;
@@ -295,22 +315,24 @@
   --shell-review-done-gap: var(--space-6);
   --shell-review-done-title-size: var(--font-size-3xl);
   --shell-review-done-title-weight: var(--font-weight-regular);
-  --shell-review-done-divider-height: 27px;
-  --shell-review-done-divider-line: 221px;
-  --shell-review-done-divider-gap: var(--space-3);
-  --shell-review-done-divider-size: var(--font-size-base);
-  --shell-review-done-actions-gap: var(--space-4);
-  --shell-review-done-action-width: 242px;
-  --shell-review-done-action-height: 76px;
-  --shell-review-done-action-padding: var(--space-6);
-  --shell-review-done-action-radius: var(--radius-md);
-  --shell-review-done-action-bg: var(--color-surface-muted);
-  --shell-review-done-action-gap: var(--space-3);
-  --shell-review-done-action-size: var(--font-size-base);
-  --shell-review-done-action-weight: var(--font-weight-medium);
-  --shell-review-done-icon-tg-width: 29px;
-  --shell-review-done-icon-tg-height: 28px;
-  --shell-review-done-icon-download: 24px;
+  --shell-review-done-actions-gap: var(--space-3);
+  /* Auth (стиль старого PDF/done: divider + provider buttons) */
+  --auth-screen-divider-height: 27px;
+  --auth-screen-divider-line: 221px;
+  --auth-screen-divider-gap: var(--space-3);
+  --auth-screen-divider-size: var(--font-size-base);
+  --auth-screen-actions-gap: var(--space-4);
+  --auth-screen-provider-width: 242px;
+  --auth-screen-provider-height: 76px;
+  --auth-screen-provider-padding: var(--space-6);
+  --auth-screen-provider-radius: var(--radius-md);
+  --auth-screen-provider-bg: var(--color-surface-muted);
+  --auth-screen-provider-gap: var(--space-3);
+  --auth-screen-provider-size: var(--font-size-base);
+  --auth-screen-provider-weight: var(--font-weight-medium);
+  --auth-screen-icon-tg-width: 29px;
+  --auth-screen-icon-tg-height: 28px;
+  --auth-screen-icon-google: 28px;
   --shell-review-report-width: 527px;
   --shell-review-report-height: 722px;
   --shell-review-report-radius: var(--radius-md);
@@ -339,9 +361,22 @@
   --shell-review-report-duration: var(--motion-feature-duration);
   --shell-review-report-fade-duration: var(--motion-feature-fade-duration);
   --shell-review-report-ease: var(--motion-feature-ease);
+  --shell-review-report-launch-duration: var(--motion-report-launch-duration);
+  --shell-review-report-launch-lift: var(--motion-report-launch-lift);
+  --shell-review-report-launch-peak: var(--motion-report-launch-peak);
+  --shell-review-report-launch-ease-lift: var(--motion-report-launch-ease-lift);
+  --shell-review-report-launch-ease-dive: var(--motion-report-launch-ease-dive);
   --shell-review-brand-top: 40px;
   --shell-review-brand-motion-duration: var(--motion-feature-duration);
   --shell-review-brand-motion-ease: var(--motion-feature-ease);
+  /* Done-mesh: к середине спуска лого (доля от brand-motion-duration) */
+  --shell-review-mesh-done-midpoint: 0.5;
+  --shell-review-mesh-done-duration: 800ms;
+  --shell-review-mesh-done-1: var(--palette-glow-mint);
+  --shell-review-mesh-done-2: var(--palette-glow-foam);
+  --shell-review-mesh-done-3: var(--palette-glow-leaf);
+  --shell-review-mesh-done-4: var(--palette-green);
+  --shell-review-mesh-done-wash: var(--palette-glow-green-mist);
   --shell-review-z-glow: 0;
   --shell-review-z-noise: 1;
   --shell-review-z-report: 2;
@@ -388,6 +423,7 @@
   --url-screen-avatar-logo-size: calc(var(--url-screen-avatar-size) / 1.5);
   --url-screen-avatar-framer-bg: var(--palette-black);
   --url-screen-avatar-notion-bg: var(--palette-notion-amber);
+  --url-screen-avatar-placeholder-bg: var(--palette-gray-900);
   --url-screen-brand-width: 44px;
   --url-screen-brand-height: 30px;
   --url-screen-brand-fill: var(--palette-white);
@@ -440,6 +476,9 @@
   --color-on-accent-hover: #1a1a1d;
   --color-on-accent-active: #242428;
 
+  --color-choice-selected: var(--palette-glow-blue);
+  --color-on-choice-selected: var(--palette-white);
+
   --color-border: #2c2c31;
   --color-border-subtle: rgba(255, 255, 255, 0.12);
   --color-overlay: rgba(0, 0, 0, 0.55);
@@ -457,4 +496,10 @@
   --url-screen-mesh-3: #2a4a6e;
   --url-screen-mesh-4: #8bb5ff;
   --url-screen-visual-wash: #16141c;
+
+  --shell-review-mesh-done-1: #102418;
+  --shell-review-mesh-done-2: #1a5c28;
+  --shell-review-mesh-done-3: #147a28;
+  --shell-review-mesh-done-4: var(--palette-green);
+  --shell-review-mesh-done-wash: #0e1a12;
 }

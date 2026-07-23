@@ -1,6 +1,10 @@
 import { getStrings } from "../../i18n.js";
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
-import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
+import {
+  getReportLaunchMotion,
+  getReviewMeshDoneMotion,
+  getScreenCloseFallbackMs,
+} from "../../utils/motionTokens.js";
 import { buildReportSections } from "../../utils/reviewReport.js";
 
 const BRAND_MARK_SVG = `
@@ -26,6 +30,7 @@ const BRAND_MARK_SVG = `
  *     payload?: {
  *       answers?: import("../../utils/reviewReport.js").ReviewAnswers | null;
  *       portfolioName?: string;
+ *       submitted?: boolean;
  *     },
  *   ) => void;
  * }}
@@ -95,6 +100,10 @@ export function createReviewScreen({ content }) {
   root.append(layout);
 
   let closing = false;
+  /** @type {Animation | null} */
+  let reportLaunchAnim = null;
+  /** После submit: зелёный mesh, когда лого начинает спуск. */
+  let pendingDoneMesh = false;
 
   /**
    * @param {import("../../utils/reviewReport.js").ReviewAnswers | null | undefined} answers
@@ -128,26 +137,160 @@ export function createReviewScreen({ content }) {
     }
   }
 
+  function clearReportSheet() {
+    reportBody.replaceChildren();
+    reportSubtitle.textContent = "";
+  }
+
+  function clearDoneMesh() {
+    pendingDoneMesh = false;
+    root.classList.remove("review-screen--done");
+    meshWash.refresh();
+  }
+
+  /** Зелёный mesh: старт вместе со спуском лого, готов к середине пути. */
+  function activateDoneMesh() {
+    if (root.classList.contains("review-screen--done")) return;
+    root.classList.add("review-screen--done");
+    const { durationMs, easing } = getReviewMeshDoneMotion();
+    meshWash.transitionToCssColors({ durationMs, easing });
+  }
+
+  function releaseReportBrand() {
+    root.classList.remove("review-screen--report");
+    if (pendingDoneMesh) {
+      pendingDoneMesh = false;
+      activateDoneMesh();
+    }
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function cancelReportLaunch() {
+    if (!reportLaunchAnim) return;
+    reportLaunchAnim.cancel();
+    reportLaunchAnim = null;
+    report.style.transition = "";
+    report.style.opacity = "";
+    report.style.transform = "";
+  }
+
+  /**
+   * Уход листа: лёгкий подъём (разгон) → бросок вниз, opacity всегда 1.
+   * После анимации снимается `--report` — тогда лого спускается в центр.
+   * @returns {Promise<void>}
+   */
+  function launchReportAway() {
+    cancelReportLaunch();
+
+    if (!root.classList.contains("review-screen--report")) {
+      clearReportSheet();
+      if (pendingDoneMesh) {
+        pendingDoneMesh = false;
+        activateDoneMesh();
+      }
+      return Promise.resolve();
+    }
+
+    if (prefersReducedMotion()) {
+      releaseReportBrand();
+      clearReportSheet();
+      return Promise.resolve();
+    }
+
+    const { durationMs, liftPx, peak, easeLift, easeDive } =
+      getReportLaunchMotion();
+    const styles = getComputedStyle(root);
+    const shown =
+      styles.getPropertyValue("--shell-review-report-shift-shown").trim() ||
+      "22%";
+    const hidden =
+      styles.getPropertyValue("--shell-review-report-shift-hidden").trim() ||
+      "100%";
+
+    report.style.transition = "none";
+    report.style.opacity = "1";
+
+    const anim = report.animate(
+      [
+        {
+          transform: `translate(-50%, ${shown})`,
+          opacity: 1,
+          offset: 0,
+          easing: easeLift,
+        },
+        {
+          transform: `translate(-50%, calc(${shown} - ${liftPx}px))`,
+          opacity: 1,
+          offset: peak,
+          easing: easeDive,
+        },
+        {
+          transform: `translate(-50%, ${hidden})`,
+          opacity: 1,
+          offset: 1,
+        },
+      ],
+      {
+        duration: durationMs,
+        fill: /** @type {FillMode} */ ("forwards"),
+      },
+    );
+    reportLaunchAnim = anim;
+
+    return anim.finished
+      .catch(() => {
+        /* cancelled */
+      })
+      .then(() => {
+        if (reportLaunchAnim !== anim) return;
+        reportLaunchAnim = null;
+        if (typeof anim.commitStyles === "function") {
+          anim.commitStyles();
+        }
+        anim.cancel();
+        releaseReportBrand();
+        clearReportSheet();
+        report.style.transition = "none";
+        report.style.opacity = "";
+        report.style.transform = "";
+        void report.offsetWidth;
+        report.style.transition = "";
+      });
+  }
+
   /**
    * @param {boolean} active
    * @param {{
    *   answers?: import("../../utils/reviewReport.js").ReviewAnswers | null;
    *   portfolioName?: string;
+   *   submitted?: boolean;
    * }} [payload]
    */
   function setReportReveal(active, payload = {}) {
     if (active) {
+      pendingDoneMesh = false;
+      cancelReportLaunch();
       fillReportSheet(payload.answers, payload.portfolioName);
-    } else {
-      reportBody.replaceChildren();
-      reportSubtitle.textContent = "";
+      root.classList.add("review-screen--report");
+      return;
     }
-    root.classList.toggle("review-screen--report", active);
+
+    if (payload.submitted) {
+      pendingDoneMesh = true;
+    }
+
+    void launchReportAway();
   }
 
   function open() {
     closing = false;
-    setReportReveal(false);
+    cancelReportLaunch();
+    root.classList.remove("review-screen--report");
+    clearDoneMesh();
+    clearReportSheet();
     root.hidden = false;
     root.classList.remove("review-screen--open");
     meshWash.refresh();
@@ -170,14 +313,20 @@ export function createReviewScreen({ content }) {
 
     if (!root.classList.contains("review-screen--open")) {
       meshWash.setActive(false);
-      setReportReveal(false);
+      cancelReportLaunch();
+      root.classList.remove("review-screen--report");
+      clearDoneMesh();
+      clearReportSheet();
       root.hidden = true;
       return Promise.resolve();
     }
 
     closing = true;
     meshWash.setActive(false);
-    setReportReveal(false);
+    cancelReportLaunch();
+    root.classList.remove("review-screen--report");
+    clearDoneMesh();
+    clearReportSheet();
     root.classList.remove("review-screen--open");
 
     return new Promise((resolve) => {

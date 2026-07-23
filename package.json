@@ -4,9 +4,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && cp dist/index.html dist/404.html",
     "preview": "vite preview",
-    "test": "node --test src/utils/portfolioEmbed.test.js src/utils/portfolioMeta.test.js"
+    "test": "node --test src/utils/portfolioEmbed.test.js src/utils/portfolioMeta.test.js src/app/routes.test.js"
   },
   "devDependencies": {
     "vite": "^6.2.0"
