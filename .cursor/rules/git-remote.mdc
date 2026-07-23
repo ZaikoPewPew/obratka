@@ -1,0 +1,28 @@
+---
+description: Единственный GitHub remote и GitHub Pages
+alwaysApply: true
+---
+
+# Git remote и Pages
+
+## Жёсткое правило
+
+Единственный репозиторий проекта:
+
+- **GitHub:** https://github.com/ZaikoPewPew/obratka
+- **Remote URL:** `https://github.com/ZaikoPewPew/obratka.git`
+- **Pages:** https://zaikopewpew.github.io/obratka/
+
+## Перед push / PR
+
+1. Проверить `git remote -v`: `origin` (или push-remote) → **только** `ZaikoPewPew/obratka.git`.
+2. Пушить: `git push origin HEAD` (или `-u origin <branch>`), **не** в другие репо.
+3. Pages деплоится workflow’ом на push в `main` этого репо. Статус: https://github.com/ZaikoPewPew/obratka/actions
+
+## Запрещено
+
+- Пушить в `memory-whitelist-page` или любой другой старый/чужой remote.
+- Добавлять `origin`, указывающий не на `obratka`.
+- Сообщать ссылки Actions/Pages от другого репозитория.
+
+Если `origin` указывает не туда — сначала исправить remote, потом пушить.

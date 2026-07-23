@@ -11,6 +11,7 @@
 | Локали ru/en | `content/locales.json`, `src/i18n.js` |
 | Правило i18n | `.cursor/rules/i18n.mdc` |
 | Правило экранов / флоу | `.cursor/rules/screens.mdc` |
+| Git remote / Pages | `.cursor/rules/git-remote.mdc` — только `ZaikoPewPew/obratka` |
 | Оболочка iframe + квиз | `styles/iframe-shell.css`, `index.html`, `src/main.js` |
 | Motion | `--motion-*`, `entrance.css`, `motionTokens.js`, `brandScreenTransition.js` |
 | Шрифт | `@fontsource/montserrat` → `src/main.js` |
