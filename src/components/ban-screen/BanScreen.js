@@ -14,16 +14,20 @@ const BRAND_MARK_SVG = `
 `;
 
 /**
- * Экран блокировки аккаунта: тайтл + подтайтл + «Связаться», справа красный mesh.
- * Из экрана нельзя уйти навигацией — только контакт с админом.
+ * Экран блокировки аккаунта: тайтл + «Связаться» / «Выйти», справа красный mesh.
+ * Deep link / history не пускают в приложение; «Выйти» — выход из сессии наверх.
  *
+ * @param {{
+ *   onExit?: () => void | Promise<void>;
+ * }} [opts]
  * @returns {{
  *   root: HTMLElement;
  *   open: () => void;
  *   close: () => Promise<void>;
  * }}
  */
-export function createBanScreen() {
+export function createBanScreen(opts = {}) {
+  const onExit = typeof opts.onExit === "function" ? opts.onExit : null;
   let closing = false;
 
   const root = document.createElement("section");
@@ -52,10 +56,13 @@ export function createBanScreen() {
 
   const contactBtn = document.createElement("button");
   contactBtn.type = "button";
-  contactBtn.className =
-    "iframe-shell__btn ban-screen__btn ban-screen__btn--contact";
+  contactBtn.className = "iframe-shell__btn ban-screen__btn";
 
-  actions.append(contactBtn);
+  const exitBtn = document.createElement("button");
+  exitBtn.type = "button";
+  exitBtn.className = "iframe-shell__btn ban-screen__btn";
+
+  actions.append(contactBtn, exitBtn);
   card.append(title, body, actions);
   panel.append(card);
 
@@ -89,6 +96,7 @@ export function createBanScreen() {
     title.textContent = t.banTitle ?? "";
     body.textContent = t.banBody ?? "";
     contactBtn.textContent = t.banContact ?? "";
+    exitBtn.textContent = t.banExit ?? "";
   }
 
   function open() {
@@ -147,6 +155,10 @@ export function createBanScreen() {
 
   contactBtn.addEventListener("click", () => {
     window.open(BAN_CONTACT_URL, "_blank", "noopener,noreferrer");
+  });
+
+  exitBtn.addEventListener("click", () => {
+    void onExit?.();
   });
 
   return { root, open, close };

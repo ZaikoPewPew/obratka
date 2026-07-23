@@ -23,13 +23,14 @@ referral → auth → authCode → onboarding → home
 | 5b | `url-screen` | `/portfolio` | Подача своего URL (нужен баланс) |
 | 6 | `review-screen` + `review-panel` | `/quiz` → `/quiz/done` | Квиз; финал слева + улет отчёта |
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
-| — | `ban-screen` | `/banned` | Аккаунт заблокирован; серая «Связаться»; красный mesh; escape-proof |
+| — | `ban-screen` | `/banned` | Аккаунт заблокирован; «Связаться» + «Выйти» (242px); красный mesh; deep link escape-proof |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query (`?ref=`, `?lang=`) сохраняются.
 
 - **Google return:** hash/query → `completeOAuthFromUrl()` в `main.js` → onboarding / home.
 - **Email OTP / Telegram:** остаются на `/registration` до `onSuccess` → `applyProviderUser`.
 - **Ban:** `profiles.banned_at` → всегда `/banned` (login, boot, любой deep link).
+  Операторская шпаргалка: [`supabase/BAN.md`](supabase/BAN.md), шаблоны SQL: [`supabase/sql/ban-templates.sql`](supabase/sql/ban-templates.sql).
 
 SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.html` → `dist/404.html`.
 

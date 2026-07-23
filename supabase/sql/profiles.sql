@@ -73,8 +73,9 @@ language plpgsql
 set search_path = public
 as $$
 begin
+  -- No JWT (SQL Editor) or service_role → allow; authenticated/anon clients → deny.
   if new.tier is distinct from old.tier
-     and coalesce(auth.jwt() ->> 'role', '') is distinct from 'service_role' then
+     and coalesce(auth.jwt() ->> 'role', 'service_role') is distinct from 'service_role' then
     raise exception 'profiles.tier is read-only for clients';
   end if;
   return new;
@@ -94,11 +95,12 @@ language plpgsql
 set search_path = public
 as $$
 begin
+  -- No JWT (SQL Editor) or service_role → allow; authenticated/anon clients → deny.
   if (
     new.banned_at is distinct from old.banned_at
     or new.ban_reason is distinct from old.ban_reason
   )
-     and coalesce(auth.jwt() ->> 'role', '') is distinct from 'service_role' then
+     and coalesce(auth.jwt() ->> 'role', 'service_role') is distinct from 'service_role' then
     raise exception 'profiles.ban fields are read-only for clients';
   end if;
   return new;

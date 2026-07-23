@@ -67,7 +67,8 @@
 | `public.subscribers` | legacy waitlist API (`subscribers.js`), не entry UX |
 | Edge `telegram-auth` | проверка Telegram hash → сессия |
 
-SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabase/README.md).
+SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabase/README.md).  
+Бан юзеров (оператор): [`supabase/BAN.md`](supabase/BAN.md).
 
 ## Слои UI
 

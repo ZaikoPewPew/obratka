@@ -167,7 +167,26 @@ const successScreen = createSuccessScreen({
 });
 document.body.append(successScreen.root);
 
-const banScreen = createBanScreen();
+const banScreen = createBanScreen({
+  onExit: async () => {
+    try {
+      await signOut();
+    } catch {
+      /* всё равно чистим локальное состояние */
+    }
+    clearSession();
+    clearSubmittedPortfolios();
+    stopTimer();
+    portfolioUrl = null;
+    portfolioId = null;
+    embedPlan = null;
+    portfolioName = getStrings().brandName;
+    pendingSuccessPreset = "generic";
+    leaveSessionShell();
+    await closeReview();
+    go("referral", { replace: true });
+  },
+});
 document.body.append(banScreen.root);
 
 let remainingMs = SESSION_TOTAL_MS;

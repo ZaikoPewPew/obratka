@@ -85,6 +85,7 @@ API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](
 | [`src/components/auth-screen/README.md`](src/components/auth-screen/README.md) | Dashboard Auth + identity linking |
 | [`src/components/auth-code-screen/README.md`](src/components/auth-code-screen/README.md) | OTP UI + resend cooldown |
 | [`supabase/README.md`](supabase/README.md) | SQL и Edge Functions |
+| [`supabase/BAN.md`](supabase/BAN.md) | Как банить пользователей (Table/SQL + шаблоны) |
 | [`.cursor/README.md`](.cursor/README.md) | Карта для агента Cursor |
 
 ## Деплой

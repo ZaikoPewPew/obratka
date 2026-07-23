@@ -115,7 +115,9 @@
 }
 
 .ban-screen__btn {
-  flex: 1 1 0;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: var(--ban-screen-btn-width);
   min-height: var(--shell-review-control-height);
   padding: var(--shell-review-control-padding-y) var(--shell-review-control-padding-x);
   border-radius: var(--radius-md);
@@ -124,18 +126,15 @@
   font-weight: var(--shell-review-control-font-weight);
   line-height: var(--shell-review-control-line-height);
   text-align: center;
-}
-
-.ban-screen__btn--contact {
   background: var(--color-surface-muted);
   color: var(--color-text);
 }
 
-.ban-screen__btn--contact:hover {
+.ban-screen__btn:hover {
   background: var(--color-surface-muted-hover);
 }
 
-.ban-screen__btn--contact:active {
+.ban-screen__btn:active {
   background: var(--color-surface-muted-active);
 }
 

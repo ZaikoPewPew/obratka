@@ -9,12 +9,15 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 
 | Путь | Роль |
 |------|------|
+| `BAN.md` | **Оператор:** как банить (Table Editor + SQL), шаблоны |
 | `sql/profiles.sql` | `public.profiles` (1:1 с `auth.users`), триггер `handle_new_user`, RLS, `tier`, `banned_at` / `ban_reason` |
 | `sql/portfolios.sql` | `public.portfolios` + `public.reviews`, очередь ревью, RLS (banned не может INSERT) |
+| `sql/ban-templates.sql` | Copy-paste SQL: бан / разбан / поиск |
 | `sql/subscribers_count.sql` | RPC `subscribers_count()` (legacy waitlist) |
 | `functions/telegram-auth/` | Telegram Login Widget → сессия Supabase Auth |
 
 Подробнее по SQL: [`sql/README.md`](sql/README.md).  
+**Бан юзеров:** [`BAN.md`](BAN.md) ← начинать отсюда.  
 Telegram Edge: [`functions/telegram-auth/README.md`](functions/telegram-auth/README.md).
 
 ## Auth-провайдеры
@@ -47,12 +50,17 @@ Google Authorized redirect URI в Cloud Console: `https://<project-ref>.supabase
 
 ## Бан пользователя (оператор)
 
-SQL Editor / Table Editor (service_role), не из клиента:
+Полная шпаргалка + шаблоны: **[`BAN.md`](BAN.md)**  
+Copy-paste SQL: [`sql/ban-templates.sql`](sql/ban-templates.sql)
+
+Кратко: Dashboard → **SQL Editor** (2-я иконка слева) или Table Editor → `profiles` → заполни `banned_at`.
 
 ```sql
 update public.profiles
 set banned_at = now(), ban_reason = 'toxicity'
-where id = '<user-uuid>';
+where email = 'user@example.com';
 ```
 
 Снять: `banned_at = null`, `ban_reason = null`. UI: `/banned` (`ban-screen`).
+
+Клиентский JWT не может менять ban/tier; **SQL Editor** и Table Editor — могут.
