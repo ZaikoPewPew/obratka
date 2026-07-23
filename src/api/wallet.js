@@ -54,14 +54,44 @@ async function writeBalance(next) {
 }
 
 /**
+ * Подтянуть профиль из Supabase в local-сессию (имя, аватар, email, баланс…).
+ * @returns {Promise<import("../app/session.js").AppSession | null>}
+ */
+export async function refreshSessionFromProfile() {
+  const profile = await fetchMyProfile();
+  if (!profile) return getSession();
+
+  const session = getSession() ?? {};
+  /** @type {import("../app/session.js").AppSession} */
+  const next = {
+    ...session,
+    userId: profile.id || session.userId,
+    email: profile.email ?? session.email,
+    displayName: profile.display_name ?? session.displayName ?? null,
+    avatarUrl: profile.avatar_url ?? session.avatarUrl ?? null,
+    telegramId: profile.telegram_id ?? session.telegramId,
+    telegramUsername: profile.telegram_username ?? session.telegramUsername,
+    balance:
+      typeof profile.balance === "number" && Number.isFinite(profile.balance)
+        ? Math.max(0, Math.floor(profile.balance))
+        : session.balance,
+    onboardingDone:
+      typeof profile.onboarding_done === "boolean"
+        ? profile.onboarding_done
+        : session.onboardingDone,
+    role: profile.role ?? session.role,
+    grade: profile.grade ?? session.grade,
+  };
+  setSession(next);
+  return next;
+}
+
+/**
  * Подтянуть `profiles.balance` из Supabase в сессию.
  * @returns {Promise<number>}
  */
 export async function refreshWalletFromServer() {
-  const profile = await fetchMyProfile();
-  if (profile && typeof profile.balance === "number" && Number.isFinite(profile.balance)) {
-    return writeBalanceLocal(profile.balance);
-  }
+  await refreshSessionFromProfile();
   return getBalance();
 }
 

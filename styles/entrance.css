@@ -31,6 +31,19 @@
   }
 }
 
+/** Reveal без filter — для прозрачных хедеров (иначе белый композитный слой). */
+@keyframes motion-reveal-topbar {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-reveal-shift));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Утилиты: повесить класс + задать --reveal-delay (или animation-delay) */
 .motion-reveal,
 .motion-reveal-scale {

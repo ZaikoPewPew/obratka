@@ -6,12 +6,12 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 
 Очередь: mock seed (`Наринэ`, `Janelle`) + поданные URL из localStorage (`obratka.submittedPortfolios`).  
 Клик по карточке → `onOpenPortfolio` → `/review`.  
-CTA «Закинуть своё» — в топбаре слева от баланса. Dev-кнопки — под лентой.  
+CTA «Закинуть своё» — в топбаре слева от баланса. Dev-кнопки — под лентой (`Сбросить сессию` → `signOut` + clear local session).  
 Лента ровно по центру экрана; на десктопе слева от неё sticky-панель (прилегает с `--home-screen-aside-gap`).
-Topbar без фона (`--home-screen-topbar-bg: none`).
+Topbar прозрачный; появление без `filter` (иначе белый слой).
 
-Профиль в шапке: `session.avatarUrl` (Google / Telegram), иначе буква из `displayName`.  
-Без unavatar. Баланс: `profiles.balance` из Supabase → сессия (`refreshWalletFromServer` при open/refresh).
+Профиль в шапке: есть `avatarUrl` → фото; нет / ошибка → фон + буква из имени.
+При open/refresh профиль синкается из Supabase (`refreshSessionFromProfile` через wallet refresh).
 
 ### Поля карточки
 

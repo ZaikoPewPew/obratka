@@ -335,7 +335,6 @@
   --home-screen-bg: var(--color-bg);
   --home-screen-topbar-height: 80px;
   --home-screen-topbar-padding: var(--space-4);
-  --home-screen-topbar-bg: none;
   --home-screen-mark-width: 44px;
   --home-screen-mark-height: 30px;
   --home-screen-chip-height: var(--space-12);

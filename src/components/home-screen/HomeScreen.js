@@ -226,14 +226,23 @@ export function createHomeScreen({
   let items = [];
 
   function showProfileLetter(letter) {
-    profileLetter.textContent = letter;
+    const initial = letter && letter !== "?" ? letter : "?";
+    profileLetter.textContent = initial;
     profileLetter.hidden = false;
     profileImg.hidden = true;
     profileImg.removeAttribute("src");
+    profileImg.onload = null;
+    profileImg.onerror = null;
     profileBtn.classList.add("home-screen__profile--letter");
   }
 
-  function showProfilePhoto(src) {
+  /**
+   * Есть URL → пробуем фото; нет / ошибка загрузки → фон + буква имени.
+   * @param {string} src
+   * @param {string} letter
+   */
+  function showProfilePhoto(src, letter) {
+    profileLetter.textContent = letter;
     profileImg.referrerPolicy = "no-referrer";
     profileImg.onload = () => {
       profileImg.hidden = false;
@@ -241,7 +250,7 @@ export function createHomeScreen({
       profileBtn.classList.remove("home-screen__profile--letter");
     };
     profileImg.onerror = () => {
-      showProfileLetter(profileLetter.textContent || "?");
+      showProfileLetter(letter);
     };
     profileImg.src = src;
   }
@@ -256,17 +265,22 @@ export function createHomeScreen({
         : "";
     const email =
       typeof session?.email === "string" ? session.email.trim() : "";
-    const letter = initialFromLabel(
-      displayName || (email.endsWith("@t.me") ? "" : email),
-    );
-    profileLetter.textContent = letter;
+    const telegramUsername =
+      typeof session?.telegramUsername === "string"
+        ? session.telegramUsername.trim()
+        : "";
+    const label =
+      displayName ||
+      telegramUsername ||
+      (email && !email.endsWith("@t.me") ? email : "");
+    const letter = initialFromLabel(label);
 
-    if (!avatarUrl) {
-      showProfileLetter(letter);
+    if (avatarUrl) {
+      showProfilePhoto(avatarUrl, letter);
       return;
     }
 
-    showProfilePhoto(avatarUrl);
+    showProfileLetter(letter);
   }
 
   function syncCopy() {

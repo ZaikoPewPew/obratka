@@ -44,6 +44,8 @@
 
 .home-screen--open .home-screen__topbar {
   animation-delay: var(--url-screen-reveal-delay-title);
+  /* Без filter: иначе браузер рисует шапку как непрозрачный белый слой */
+  animation-name: motion-reveal-topbar;
 }
 
 .home-screen--open .home-screen__body {
@@ -96,7 +98,9 @@
   padding: var(--home-screen-topbar-padding);
   border: none;
   border-radius: 0;
-  background: var(--home-screen-topbar-bg);
+  background: transparent;
+  background-color: transparent;
+  box-shadow: none;
 }
 
 .home-screen__mark {
