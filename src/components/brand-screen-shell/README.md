@@ -5,7 +5,7 @@
 ## Сейчас
 
 - API: `BrandScreenShell.js` — `createBrandScreenShell(opts)` → `{ root, open, close, setContent, getVisualRoot }`.
-- Использует onboarding stub; **referral / auth / url** пока копируют разметку `.url-screen*` напрямую.
+- Пока **referral / auth / onboarding / url** копируют разметку `.url-screen*` напрямую (shell API готов, миграция впереди).
 - Стили shell не вынесены (`styles/brand-screen.css` — заготовка).
 
 ## Цель

@@ -22,22 +22,24 @@
 
 | Path | Экран |
 |------|--------|
-| `/referral` | Реферальный код (UI) |
-| `/registration` | Регистрация (UI) |
-| `/onboarding` | Онбординг (stub) |
-| `/home` | Главная (stub) |
-| `/portfolio` | Ссылка на портфолио (UI) |
+| `/referral` | Реферальный код |
+| `/registration` | Регистрация (Telegram / Google / email UI) |
+| `/onboarding` | Онбординг → `profiles` |
+| `/home` | Главная (лента + баланс + профиль) |
+| `/portfolio` | Подача своего URL |
 | `/review` | Ревью: iframe + таймер |
 | `/quiz` | Квиз |
 | `/quiz/done` | Финал квиза |
+| `/done` | Успех подачи портфолио (success / url done sync) |
 
 | Что | Где |
 |-----|-----|
 | Routes / router / flow | `src/app/` |
 | Brand split-shell | `src/components/brand-screen-shell/` |
-| Referral / auth / onboarding / home / url | `src/components/*-screen/` |
+| Referral / auth / onboarding / home / url / success | `src/components/*-screen/` |
 | Квиз | `review-screen/` + `review-panel/` |
 | Онбординг-контент | `content/onboarding.json`, `content/onboarding.md` |
+| Auth API | `src/api/auth.js`, `supabase/functions/telegram-auth/` |
 
 Эталон split: `url-screen`. Соседние brand-экраны: `handoff` без анимации правого visual.  
 Оркестрация: `main.js` → `go()` / `applyRoute()`.

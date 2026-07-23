@@ -9,15 +9,17 @@
 | `routes.js` | карта `AppRouteId` ↔ path |
 | `router.js` | History API + Vite `BASE_URL`, `navigate` / `sync` / `start` |
 | `flow.js` | `APP_FLOW`, `SESSION_FLOW`, `resolveEntryScreen`, `resolveAccessibleRoute` |
-| `session.js` | login-сессия + `balance` stub в localStorage (`obratka.session`) — не путать с `/review` |
+| `session.js` | login-сессия + `balance` в localStorage (`obratka.session`) — не путать с `/review` |
+
+Баланс и профиль дополнительно синкаются с `public.profiles` через `src/api/wallet.js` (`refreshSessionFromProfile`).
 
 ## URL
 
 | Id | Path | Смысл |
 |----|------|--------|
 | `referral` | `/referral` | Реферальный код |
-| `auth` | `/registration` | Регистрация |
-| `onboarding` | `/onboarding` | Онбординг |
+| `auth` | `/registration` | Регистрация (Telegram / Google / email UI) |
+| `onboarding` | `/onboarding` | Онбординг → profiles |
 | `home` | `/home` | Главная (хаб) |
 | `url` | `/portfolio` | Подача своего портфолио |
 | `review` | `/review` | Ревью: iframe + таймер |
@@ -25,7 +27,8 @@
 | `done` | `/quiz/done` | Финал квиза (review-panel done + улет отчёта) |
 | `success` | `/done` | Успех подачи портфолио (success-screen) |
 
-Корень `/` → `resolveEntryScreen(getSession())`. Query вроде `?ref=` / `?lang=` сохраняются.
+Корень `/` → `resolveEntryScreen(getSession())`. Query вроде `?ref=` / `?lang=` сохраняются.  
+Google OAuth return обрабатывается в `main.js` до роутинга (`completeOAuthFromUrl`).
 
 На GitHub Pages SPA-fallback: `dist/404.html` (= копия `index.html`) из `npm run build`.
 

@@ -86,11 +86,12 @@
 
 .home-screen__topbar {
   box-sizing: border-box;
-  position: sticky;
+  position: absolute;
   top: 0;
-  z-index: 1;
+  left: 0;
+  right: 0;
+  z-index: 2;
   display: flex;
-  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   gap: var(--home-screen-chip-gap);
@@ -101,6 +102,11 @@
   background: transparent;
   background-color: transparent;
   box-shadow: none;
+  pointer-events: none;
+}
+
+.home-screen__topbar > * {
+  pointer-events: auto;
 }
 
 .home-screen__mark {
@@ -272,6 +278,7 @@
   align-items: flex-start;
   min-height: 0;
   padding: var(--home-screen-body-padding);
+  padding-top: var(--home-screen-body-padding-top);
   overflow: auto;
 }
 

@@ -19,7 +19,7 @@ import {
 } from "./app/flow.js";
 import { createAppRouter } from "./app/router.js";
 import { getSession, setSession, clearSession } from "./app/session.js";
-import { completeOAuthFromUrl } from "./api/auth.js";
+import { completeOAuthFromUrl, signOut } from "./api/auth.js";
 import { submitPortfolio, clearSubmittedPortfolios } from "./api/portfolios.js";
 import { fetchMyProfile } from "./api/profiles.js";
 import {
@@ -457,6 +457,11 @@ const homeScreen = createHomeScreen({
     go("url");
   },
   onResetSession: async () => {
+    try {
+      await signOut();
+    } catch {
+      /* Dev reset: всё равно чистим локальное состояние */
+    }
     clearSession();
     clearSubmittedPortfolios();
     stopTimer();
@@ -466,6 +471,7 @@ const homeScreen = createHomeScreen({
     pendingSuccessPreset = "generic";
     leaveSessionShell();
     await closeReview();
+    void homeScreen.close();
     go("referral", { replace: true });
   },
 });

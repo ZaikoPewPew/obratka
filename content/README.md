@@ -11,10 +11,11 @@
 | Префикс | Экраны |
 |---------|--------|
 | `referral*` | `/referral` |
-| `auth*` | `/registration` |
+| `auth*` | `/registration` (в т.ч. Telegram/Google errors) |
 | `onboarding*` | `/onboarding` |
-| `home*` | `/home` |
+| `home*` | `/home` (карточки, баланс, dev-кнопки) |
 | `url*` / `urlModal*` / `urlScreen*` | `/portfolio` |
+| `success*` | `/done` |
 | `review*` / `report*` | `/quiz`, `/quiz/done`, PDF |
 
 Карта экранов: [`SCREENS.md`](../SCREENS.md).

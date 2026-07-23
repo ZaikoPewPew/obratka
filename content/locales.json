@@ -199,7 +199,7 @@
       "homeAddCoins": "+{amount} монет (тест)",
       "homeAddCoinsTitle": "Начислить {amount} монет (dev)",
       "homeResetSession": "Сбросить сессию (тест)",
-      "homeResetSessionTitle": "Очистить localStorage и начать флоу сначала",
+      "homeResetSessionTitle": "Выйти из аккаунта, очистить localStorage и начать флоу сначала",
       "langSwitchAria": "Переключить на {next}",
       "langCode": "RU"
     },
@@ -400,7 +400,7 @@
       "homeAddCoins": "+{amount} coins (dev)",
       "homeAddCoinsTitle": "Credit {amount} coins (dev)",
       "homeResetSession": "Reset session (dev)",
-      "homeResetSessionTitle": "Clear localStorage and restart the flow",
+      "homeResetSessionTitle": "Sign out, clear localStorage and restart the flow",
       "langSwitchAria": "Switch to {next}",
       "langCode": "EN"
     }

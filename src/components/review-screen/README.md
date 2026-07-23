@@ -1,10 +1,18 @@
 # `review-screen` — workspace квиза
 
-Path: **`/quiz`**, финал **`/quiz/done`**. Split: слева `review-panel`, справа brand visual (mesh + noise + лого + PDF-лист).
+Path: **`/quiz`**, финал **`/quiz/done`**. Split: слева слот под `review-panel`, справа brand visual (mesh + noise + лого + PDF-лист).
 
 ## API
 
-`createReviewScreen({ content })` → `{ root, open, close, setReportReveal, … }`.
+`createReviewScreen({ content })` → `{ root, open, close, setReportReveal }`.
+
+| Метод | Роль |
+|-------|------|
+| `open()` | Показать workspace (`.review-screen--open`) |
+| `close()` | Убрать слой (motion close / reduced-motion) |
+| `setReportReveal(active, payload?)` | Показать/скрыть PDF-лист; `payload.answers` → секции отчёта; `submitted: true` → улет листа + зелёный mesh (`.review-screen--done`) |
+
+Монтаж: `main.js` передаёт `reviewPanel.root` как `content`.
 
 ## URL
 
@@ -15,6 +23,13 @@ Path: **`/quiz`**, финал **`/quiz/done`**. Split: слева `review-panel`
 
 Снизу вверх (`--shell-review-z-*`): glow → noise → report → brand.
 
-На шаге advice лист выезжает; после submit — уезд + `.review-screen--done` (зелёный mesh). Слева одновременно входит `review-panel__done`.
+На шаге advice лист выезжает (`getReportLaunchMotion`); после submit — уезд + `.review-screen--done` (`getReviewMeshDoneMotion`). Слева одновременно входит `review-panel__done`.
 
-Токены `--shell-review-*`, `--motion-report-launch-*`. Классы в `iframe-shell.css`.
+Токены `--shell-review-*`, `--motion-report-launch-*`. Классы в `iframe-shell.css`.  
+PDF-тексты: `src/utils/reviewReport.js` (`buildReportSections`).
+
+## i18n
+
+`reviewPanelAria`, `reportDocumentTitle`, `brandName`, плюс ключи секций отчёта (`report*`).
+
+См. [`review-panel/README.md`](../review-panel/README.md), [`SCREENS.md`](../../../SCREENS.md).

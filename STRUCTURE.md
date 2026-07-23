@@ -29,18 +29,22 @@
 
 | Переменная | Назначение |
 |------------|------------|
-| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | API подписчиков |
+| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | клиент Supabase (Auth, profiles, subscribers) |
+| `TELEGRAM_BOT_ID` / `TELEGRAM_BOT_USERNAME` | Telegram Login Widget (публичные) |
 | `VITE_BASE_PATH` | base для GitHub Pages (`/obratka/`) |
+
+Google OAuth: Client ID/Secret **только** в Supabase Dashboard (Providers → Google), не в `.env`.  
+`TELEGRAM_BOT_TOKEN` — только Edge Function secrets. См. `.env.example` и `src/components/auth-screen/README.md`.
 
 ## Папки
 
 | Папка | Роль |
 |-------|------|
 | `src/` | Код: `main.js`, `app/` (routes), `components/`, `utils/`, `api/` |
-| `styles/` | Токены, iframe-shell, entrance, заготовки brand/home |
+| `styles/` | Токены, iframe-shell, home, success, entrance, brand-заготовка |
 | `content/` | `locales.json`, onboarding, embed-hosts |
 | `public/` | Статика по URL |
-| `supabase/` | SQL |
+| `supabase/` | SQL (`profiles`, `subscribers_count`) + Edge Function `telegram-auth` |
 | `.cursor/` | Правила и карта для агента |
 
 ## Экраны и URL (кратко)
@@ -48,7 +52,9 @@
 Полная таблица — [`SCREENS.md`](SCREENS.md) и [`src/app/README.md`](src/app/README.md).
 
 ```text
-/referral → /registration → /onboarding → /home → /portfolio → /review → /quiz → /quiz/done
+/referral → /registration → /onboarding → /home
+  → /portfolio | /review → /quiz → /quiz/done
+  → /done
 ```
 
 `/review` = просмотр портфолио + таймер.  

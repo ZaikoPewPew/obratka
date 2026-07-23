@@ -6,14 +6,27 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 
 Очередь: mock seed (`Наринэ`, `Janelle`) + поданные URL из localStorage (`obratka.submittedPortfolios`).  
 Клик по карточке → `onOpenPortfolio` → `/review`.  
-CTA «Закинуть своё» — в топбаре слева от баланса. Dev-кнопки — под лентой (`Сбросить сессию` → `signOut` + clear local session).  
-Лента ровно по центру экрана; на десктопе слева от неё sticky-панель (прилегает с `--home-screen-aside-gap`).
-Topbar прозрачный; появление без `filter` (иначе белый слой).
+CTA «Закинуть своё» — в топбаре слева от баланса (нужен баланс ≥ `SUBMIT_COST`).
 
-Профиль в шапке: есть `avatarUrl` → фото; нет / ошибка → фон + буква из имени.
-При open/refresh профиль синкается из Supabase (`refreshSessionFromProfile` через wallet refresh).
+Лента ровно по центру экрана (отступ сверху `--home-screen-body-padding-top` = 16px от края экрана);
+topbar поверх контента (`position: absolute`), не сдвигает ленту вниз; появление без `filter` (`motion-reveal-topbar`), иначе белый композитный слой.
 
-### Поля карточки
+На десктопе (≥960px) слева от ленты sticky-aside (прилегает с `--home-screen-aside-gap`).
+
+### Профиль и баланс
+
+- Есть `session.avatarUrl` → фото; нет / ошибка загрузки → фон + буква из имени (`displayName` / telegram / email).
+- При `open` / `refresh` профиль синкается из Supabase (`refreshSessionFromProfile` через `refreshWalletFromServer`).
+- Баланс: `profiles.balance` ↔ `session.balance`.
+
+### Dev-кнопки (под лентой)
+
+| Кнопка | Действие |
+|--------|----------|
+| `+{amount} монет` | `creditBalance` (локально + Supabase) |
+| `Сбросить сессию` | `signOut()` → `clearSession` + clear portfolios → `go("referral")` |
+
+## Поля карточки
 
 | Элемент | Источник |
 |---------|----------|
@@ -31,6 +44,6 @@ Topbar прозрачный; появление без `filter` (иначе бе
 ## Стили / i18n
 
 `styles/home-screen.css`, токены `--home-screen-*`.  
-Ключи: `homeTitle`, `homeListAria`, `homeEmpty`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeCardProgress`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitCost`.
+Ключи: `homeTitle`, `homeListAria`, `homeEmpty`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeCardProgress`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitCost`, `homeAddCoins*`, `homeResetSession*`.
 
 См. [`SCREENS.md`](../../../SCREENS.md).

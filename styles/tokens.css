@@ -358,6 +358,7 @@
   --home-screen-avatar-letter-bg: var(--palette-gray-900);
   --home-screen-avatar-letter-color: var(--palette-white);
   --home-screen-body-padding: var(--space-4);
+  --home-screen-body-padding-top: var(--space-4);
   --home-screen-body-gap: var(--space-4);
   --home-screen-feed-width: 500px;
   --home-screen-feed-gap: var(--space-4);

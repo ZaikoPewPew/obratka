@@ -73,7 +73,7 @@
 | `src/config.js` | Общие константы |
 | `src/i18n.js`, `content/locales.json` | Локализация |
 | `content/onboarding.json` | Шаги онбординга |
-| `src/api/` | Supabase + stubs auth/referrals/portfolios |
+| `src/api/` | Auth (Telegram/Google), profiles, wallet, portfolios stub |
 | `vite.config.js` | Сборка Vite, префиксы env |
 
 ## Что можно допилить без кода

@@ -22,7 +22,11 @@ npm run dev
 |------------|------------|
 | `SUPABASE_URL` | URL проекта Supabase |
 | `SUPABASE_ANON_KEY` | публичный anon key |
+| `TELEGRAM_BOT_ID` | число до `:` в токене BotFather (Login Widget) |
+| `TELEGRAM_BOT_USERNAME` | username бота (опционально) |
 | `VITE_BASE_PATH` | base для GitHub Pages (CI: `/obratka/`) |
+
+Google OAuth настраивается в Supabase Dashboard (не через `.env`). См. `src/components/auth-screen/README.md`.
 
 ## Скрипты
 

@@ -6,13 +6,13 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 
 | Модуль | Path | Статус |
 |--------|------|--------|
-| `brand-screen-shell/` | — | каркас API |
+| `brand-screen-shell/` | — | каркас API (миграция впереди) |
 | `referral-screen/` | `/referral` | UI |
-| `auth-screen/` | `/registration` | UI |
-| `onboarding-screen/` | `/onboarding` | UI (min) |
-| `home-screen/` | `/home` | UI (hub + mock) |
-| `url-screen/` | `/portfolio` | UI (подача своего) |
-| `success-screen/` | `/done` | UI (подача портфолио) |
+| `auth-screen/` | `/registration` | UI + Telegram / Google |
+| `onboarding-screen/` | `/onboarding` | UI → `profiles` |
+| `home-screen/` | `/home` | UI (hub + mock feed + wallet) |
+| `url-screen/` | `/portfolio` | UI (submit own + done) |
+| `success-screen/` | `/done` | UI (пресеты подачи) |
 
 ## Ревью и квиз
 

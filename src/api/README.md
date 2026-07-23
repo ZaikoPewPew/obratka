@@ -1,23 +1,33 @@
 # `src/api/` — сетевой слой
 
-Модули для внешних сервисов (Supabase и будущие эндпоинты продукта).
+Модули для Supabase Auth, профилей и продуктовых stubs.
 
-## Состав
-
-### Есть
-
-- `subscribers.js` — сохранение email в таблицу `subscribers` и получение количества подписчиков через RPC/HEAD fallback.
-- `auth.js` — Telegram Login → Edge Function → Supabase session.
-- `telegramWidget.js` — загрузка Login Widget / `Telegram.Login.auth`.
-- `profiles.js` — `fetchMyProfile` / `updateMyProfile` (`public.profiles`).
-- `onboarding.js` — `saveOnboardingAnswers` → колонки + `onboarding` jsonb в профиле.
-
-### Local stubs
+## Auth и профиль
 
 | Файл | Роль |
 |------|------|
-| `portfolios.js` | mock-очередь + `submitPortfolio` stub |
-| `wallet.js` | баланс / reward / spend (`profiles.balance` ↔ `session.balance`) |
+| `auth.js` | Telegram Login → Edge Function; Google OAuth (`signInWithGoogle` / `completeOAuthFromUrl`); `signOut` |
+| `telegramWidget.js` | загрузка Login Widget / `Telegram.Login.auth` |
+| `profiles.js` | `fetchMyProfile` / `updateMyProfile` (`public.profiles`) |
+| `onboarding.js` | `saveOnboardingAnswers` → колонки + `onboarding` jsonb в профиле |
+| `subscribers.js` | waitlist: POST email + RPC/HEAD count |
+
+### Провайдеры
+
+| Провайдер | Как |
+|-----------|-----|
+| Telegram | Widget → `telegram-auth` Edge Function → `setSession` |
+| Google | `signInWithOAuth` (PKCE) → redirect → `completeOAuthFromUrl` при старте |
+| Email | UI есть; Supabase email auth пока не wired |
+
+Env / Dashboard: `.env.example`, `src/components/auth-screen/README.md`, `supabase/README.md`.
+
+## Кошелёк и портфолио
+
+| Файл | Роль |
+|------|------|
+| `wallet.js` | `getBalance` / `creditBalance` / `spendForSubmit` / `REVIEW_REWARD` / `SUBMIT_COST`; `refreshSessionFromProfile` + `refreshWalletFromServer` (`profiles.balance` ↔ session) |
+| `portfolios.js` | mock-очередь + `submitPortfolio` (localStorage stub) + `formatPortfolioRole` |
 | `referrals.js` | validate / redeem (stub) |
 
 См. [`SCREENS.md`](../../SCREENS.md).
