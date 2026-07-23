@@ -34,6 +34,16 @@ function createPlatformAvatar({ id, host }) {
   const resolved = resolvePlatformIcon(host);
   if (!resolved) return avatar;
 
+  if (resolved.kind === "web") {
+    const letter = document.createElement("span");
+    letter.className = "url-screen__avatar-letter";
+    letter.textContent = getStrings().homePlatformWebLetter;
+    letter.setAttribute("aria-hidden", "true");
+    avatar.classList.add("url-screen__avatar--web");
+    avatar.append(letter);
+    return avatar;
+  }
+
   const img = document.createElement("img");
   img.className = "url-screen__avatar-img";
   img.src = resolved.src;

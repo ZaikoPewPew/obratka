@@ -7,7 +7,7 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 Очередь: mock seed (`Наринэ`, `Janelle`) + поданные URL из localStorage (`obratka.submittedPortfolios`).  
 Клик по карточке → `onOpenPortfolio` → `/review`.  
 CTA «Закинуть своё» — в топбаре слева от баланса. Dev-кнопки — под лентой.  
-Лента по центру экрана; на десктопе справа sticky-панель.
+Лента по центру экрана; на десктопе слева от неё fixed-панель (отступ `--home-screen-aside-gap`).
 
 Профиль в шапке: `session.avatarUrl` (Telegram `photo_url`), иначе unavatar по email.  
 Баланс: `profiles.balance` из Supabase → сессия (`refreshWalletFromServer` при open/refresh).
@@ -17,7 +17,7 @@ CTA «Закинуть своё» — в топбаре слева от бала
 | Элемент | Источник |
 |---------|----------|
 | Превью | thum.io / fallback |
-| Иконка площадки | Simple Icons для известных сервисов; иначе favicon сайта. Личные домены и `*.github.io` — favicon |
+| Иконка площадки | Simple Icons для известных сервисов; иначе литера **W** (кастомный сайт) |
 | Аватар | `item.avatarUrl` ← Telegram `photo_url` |
 | ФИО | `item.name` ← `session.displayName` |
 | Роль | всегда EN Title Case: `Senior Product Designer` (`formatPortfolioRole`) |
@@ -30,6 +30,6 @@ CTA «Закинуть своё» — в топбаре слева от бала
 ## Стили / i18n
 
 `styles/home-screen.css`, токены `--home-screen-*`.  
-Ключи: `homeTitle`, `homeListAria`, `homeEmpty`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeCardProgress`, `homeDefaultRole`, `homeSubmitLocked`, `homeSubmitCost`.
+Ключи: `homeTitle`, `homeListAria`, `homeEmpty`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeCardProgress`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitCost`.
 
 См. [`SCREENS.md`](../../../SCREENS.md).

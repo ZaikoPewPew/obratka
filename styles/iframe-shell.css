@@ -1665,6 +1665,19 @@ body {
   background: var(--url-screen-avatar-placeholder-bg);
 }
 
+.url-screen__avatar--web {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.url-screen__avatar-letter {
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  text-align: center;
+}
+
 .url-screen__avatar--framer .url-screen__avatar-img,
 .url-screen__avatar--notion .url-screen__avatar-img {
   width: var(--url-screen-avatar-logo-size);

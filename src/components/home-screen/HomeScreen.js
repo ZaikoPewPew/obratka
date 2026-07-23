@@ -208,7 +208,7 @@ export function createHomeScreen({
   asidePanel.className = "home-screen__aside-panel";
   aside.append(asidePanel);
 
-  body.append(feed, aside);
+  body.append(aside, feed);
   root.append(title, topbar, body);
 
   /** @type {HomePortfolioItem[]} */
@@ -329,22 +329,29 @@ export function createHomeScreen({
     const host = hostFromUrl(item.url);
     const platform = document.createElement("span");
     platform.className = "home-screen__badge home-screen__badge--platform";
-    const platformImg = document.createElement("img");
-    platformImg.className = "home-screen__badge-img";
-    platformImg.alt = "";
-    platformImg.width = 52;
-    platformImg.height = 52;
-    platformImg.decoding = "async";
-    platformImg.loading = "lazy";
-    platformImg.referrerPolicy = "no-referrer";
     const platformIcon = resolvePlatformIcon(item.url);
-    if (platformIcon) {
+    if (!platformIcon) {
+      platform.hidden = true;
+    } else if (platformIcon.kind === "web") {
+      platform.classList.add("home-screen__badge--web");
+      const letter = document.createElement("span");
+      letter.className = "home-screen__badge-letter";
+      letter.textContent = t.homePlatformWebLetter;
+      letter.setAttribute("aria-hidden", "true");
+      platform.append(letter);
+    } else {
+      const platformImg = document.createElement("img");
+      platformImg.className = "home-screen__badge-img";
+      platformImg.alt = "";
+      platformImg.width = 52;
+      platformImg.height = 52;
+      platformImg.decoding = "async";
+      platformImg.loading = "lazy";
+      platformImg.referrerPolicy = "no-referrer";
       platformImg.src = platformIcon.src;
       bindImageFallbacks(platformImg, platformIcon.fallbacks);
-    } else {
-      platform.hidden = true;
+      platform.append(platformImg);
     }
-    platform.append(platformImg);
 
     const avatar = document.createElement("span");
     avatar.className = "home-screen__badge home-screen__badge--avatar";

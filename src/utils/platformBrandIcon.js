@@ -1,6 +1,6 @@
 /**
  * Иконка площадки портфолио: Simple Icons для известных брендов,
- * иначе favicon сайта (Google → DuckDuckGo).
+ * иначе литера «W» (кастомный / личный сайт).
  */
 
 import { hostMatchesSuffix } from "./embedHosts.js";
@@ -100,9 +100,11 @@ export function findPlatformBrandIcon(hostname) {
 
 /**
  * @typedef {{
+ *   kind: "brand";
  *   src: string;
  *   fallbacks: string[];
- *   kind: "brand" | "favicon";
+ * } | {
+ *   kind: "web";
  * }} PlatformIconResolved
  */
 
@@ -115,21 +117,17 @@ export function resolvePlatformIcon(hostnameOrUrl) {
   if (!host) return null;
 
   const brand = findPlatformBrandIcon(host);
-  const faviconHost = brand?.faviconHost || host;
-  const google = googleFaviconUrl(faviconHost);
-  const ddg = duckDuckGoFaviconUrl(faviconHost);
-
   if (brand) {
+    const faviconHost = brand.faviconHost || host;
     return {
-      src: simpleIconsUrl(brand.slug),
-      fallbacks: [google, ddg],
       kind: "brand",
+      src: simpleIconsUrl(brand.slug),
+      fallbacks: [
+        googleFaviconUrl(faviconHost),
+        duckDuckGoFaviconUrl(faviconHost),
+      ],
     };
   }
 
-  return {
-    src: google,
-    fallbacks: [ddg],
-    kind: "favicon",
-  };
+  return { kind: "web" };
 }

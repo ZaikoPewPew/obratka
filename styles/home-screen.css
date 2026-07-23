@@ -251,11 +251,10 @@
 
 .home-screen__body {
   box-sizing: border-box;
-  display: grid;
+  display: flex;
   flex: 1;
-  grid-template-columns: 1fr minmax(0, var(--home-screen-feed-width)) 1fr;
-  align-items: start;
-  column-gap: var(--home-screen-body-gap);
+  justify-content: center;
+  align-items: flex-start;
   min-height: 0;
   padding: var(--home-screen-body-padding);
   overflow: auto;
@@ -263,7 +262,6 @@
 
 .home-screen__feed {
   box-sizing: border-box;
-  grid-column: 2;
   display: flex;
   flex-direction: column;
   gap: var(--home-screen-feed-gap);
@@ -283,16 +281,11 @@
 
 .home-screen__aside {
   display: none;
-  grid-column: 3;
-  justify-self: start;
-  width: var(--home-screen-aside-width);
-  min-width: 0;
 }
 
 .home-screen__aside-panel {
   box-sizing: border-box;
-  position: sticky;
-  top: var(--home-screen-aside-sticky-top);
+  width: 100%;
   min-height: var(--home-screen-aside-min-height);
   border-radius: var(--home-screen-aside-radius);
   background: var(--home-screen-aside-bg);
@@ -395,9 +388,29 @@
   z-index: 0;
 }
 
+.home-screen__badge--web {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.home-screen__badge-letter {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  text-align: center;
+}
+
 .home-screen__badge--avatar {
   z-index: 1;
-  border: var(--home-screen-badge-ring) solid var(--home-screen-badge-ring-color);
+  overflow: visible;
+  border: none;
+  box-shadow: 0 0 0 var(--home-screen-badge-ring)
+    var(--home-screen-badge-ring-color);
+}
+
+.home-screen__badge--avatar .home-screen__badge-img {
+  border-radius: var(--home-screen-badge-radius);
 }
 
 .home-screen__badge--empty {
@@ -491,20 +504,15 @@
   background: var(--color-surface-muted-active);
 }
 
-/* Desktop: пустая боковая панель справа от центрированной ленты */
+/* Desktop: панель слева от ленты, fixed */
 @media (min-width: 960px) {
   .home-screen__aside {
     display: block;
-  }
-}
-
-@media (max-width: 959px) {
-  .home-screen__body {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .home-screen__feed {
-    grid-column: 1;
-    justify-self: center;
+    position: fixed;
+    top: var(--home-screen-aside-fixed-top);
+    left: var(--home-screen-aside-fixed-left);
+    z-index: 0;
+    width: var(--home-screen-aside-width);
+    pointer-events: none;
   }
 }

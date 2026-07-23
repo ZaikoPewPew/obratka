@@ -10,7 +10,7 @@
 - `motionTokens.js` — чтение `--motion-*` из CSS для WAAPI / close-fallback (`getMotionReveal`, `getReportLaunchMotion`, `getReviewMeshDoneMotion`, `getScreenCloseFallbackMs`).
 - `brandScreenTransition.js` — open/close split-экранов; `handoff` сохраняет правый visual без повторной анимации.
 - `portfolioMeta.js` — нормализация URL портфолио; favicon (HTML → DDG → Google → `/favicon.ico`) и короткое имя сайта.
-- `platformBrandIcon.js` — иконка площадки: Simple Icons (jsDelivr) для известных брендов, иначе favicon сайта.
+- `platformBrandIcon.js` — иконка площадки: Simple Icons (jsDelivr) для известных брендов, иначе литера «W».
 - `embedHosts.js` — каталог хостов: external-only + labels (см. `content/embed-hosts.md`).
 - `portfolioEmbed.js` — стратегия показа URL: Figma/YouTube embed, iframe или внешняя вкладка.
 - `meshGradientWash.js` — WebGL mesh-градиент (Paper Shaders) с палитрой из CSS-токенов; `transitionToCssColors` для плавной смены.

@@ -64,23 +64,17 @@ describe("resolvePlatformIcon", () => {
     assert.equal(icon.src, simpleIconsUrl("framer"));
   });
 
-  it("returns site favicon for personal domains", () => {
+  it("returns web letter mark for personal domains", () => {
     const icon = resolvePlatformIcon("https://janelle.page/work");
     assert.ok(icon);
-    assert.equal(icon.kind, "favicon");
-    assert.equal(icon.src, googleFaviconUrl("janelle.page"));
-    assert.deepEqual(icon.fallbacks, [duckDuckGoFaviconUrl("janelle.page")]);
+    assert.equal(icon.kind, "web");
   });
 
-  it("returns site favicon for GitHub Pages", () => {
+  it("returns web letter mark for GitHub Pages", () => {
     const icon = resolvePlatformIcon(
       "https://narinkalubluleshku-cmyk.github.io/ux-ui-2-crm-ui/",
     );
     assert.ok(icon);
-    assert.equal(icon.kind, "favicon");
-    assert.equal(
-      icon.src,
-      googleFaviconUrl("narinkalubluleshku-cmyk.github.io"),
-    );
+    assert.equal(icon.kind, "web");
   });
 });
