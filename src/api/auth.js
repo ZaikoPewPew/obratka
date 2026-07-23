@@ -30,6 +30,10 @@ function getTelegramBotId() {
   ).trim();
 }
 
+function getAnonKey() {
+  return String(import.meta.env.SUPABASE_ANON_KEY || "").trim();
+}
+
 /**
  * @param {unknown} raw
  * @returns {AuthUser}
@@ -79,20 +83,30 @@ export async function signInWithTelegram() {
 export async function completeTelegramSignIn(telegramUser) {
   const supabase = getSupabase();
   const base = getSupabaseUrl();
-  if (!supabase || !base) {
+  const anonKey = getAnonKey();
+  if (!supabase || !base || !anonKey) {
     throw new Error("supabase_not_configured");
   }
 
-  const res = await fetch(`${base}/functions/v1/telegram-auth`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: String(import.meta.env.SUPABASE_ANON_KEY || "").trim(),
-    },
-    body: JSON.stringify(telegramUser),
-  });
+  let res;
+  try {
+    res = await fetch(`${base}/functions/v1/telegram-auth`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`,
+      },
+      body: JSON.stringify(telegramUser),
+    });
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.warn("[auth] telegram-auth fetch failed", err);
+    }
+    throw new Error("telegram_auth_network");
+  }
 
-  /** @type {{ error?: string; access_token?: string; refresh_token?: string; user?: object }} */
+  /** @type {{ error?: string; detail?: string; token_hash?: string; user?: object }} */
   let body = {};
   try {
     body = await res.json();
@@ -102,19 +116,25 @@ export async function completeTelegramSignIn(telegramUser) {
 
   if (!res.ok) {
     const code = body.error || `telegram_auth_http_${res.status}`;
+    if (import.meta.env.DEV) {
+      console.warn("[auth] telegram-auth error", res.status, body);
+    }
     throw new Error(code);
   }
 
-  if (!body.access_token || !body.refresh_token) {
+  if (!body.token_hash) {
     throw new Error("telegram_auth_no_session");
   }
 
-  const { data, error } = await supabase.auth.setSession({
-    access_token: body.access_token,
-    refresh_token: body.refresh_token,
+  const { data, error } = await supabase.auth.verifyOtp({
+    token_hash: body.token_hash,
+    type: "email",
   });
 
   if (error) {
+    if (import.meta.env.DEV) {
+      console.warn("[auth] verifyOtp failed", error);
+    }
     throw new Error(error.message || "telegram_session_failed");
   }
 
@@ -125,8 +145,8 @@ export async function completeTelegramSignIn(telegramUser) {
 
   return {
     user,
-    accessToken: body.access_token,
-    refreshToken: body.refresh_token,
+    accessToken: data.session?.access_token,
+    refreshToken: data.session?.refresh_token,
   };
 }
 

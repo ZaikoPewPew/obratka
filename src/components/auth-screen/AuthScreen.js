@@ -233,8 +233,14 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
   function telegramErrorMessage(err) {
     const code = err instanceof Error ? err.message : String(err || "");
     if (code === "telegram_cancelled") return t.authTelegramCancelled;
-    if (code === "telegram_bot_id_missing") return t.authTelegramNotConfigured;
-    if (code === "supabase_not_configured") return t.authTelegramNotConfigured;
+    if (
+      code === "telegram_bot_id_missing" ||
+      code === "supabase_not_configured" ||
+      code === "telegram_bot_token_missing"
+    ) {
+      return t.authTelegramNotConfigured;
+    }
+    if (code === "invalid_telegram_hash") return t.authTelegramHashInvalid;
     return t.authTelegramError;
   }
 

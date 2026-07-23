@@ -8,6 +8,16 @@ const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+/** Fields Telegram includes in the login hash (order does not matter; we sort). */
+const TELEGRAM_HASH_FIELDS = [
+  "id",
+  "first_name",
+  "last_name",
+  "username",
+  "photo_url",
+  "auth_date",
+] as const;
+
 type TelegramLoginPayload = {
   id: number | string;
   first_name?: string;
@@ -42,8 +52,9 @@ async function verifyTelegramAuth(
   if (!hash) return false;
 
   const data: Record<string, string> = {};
-  for (const [key, value] of Object.entries(payload)) {
-    if (key === "hash" || value === undefined || value === null) continue;
+  for (const key of TELEGRAM_HASH_FIELDS) {
+    const value = payload[key];
+    if (value === undefined || value === null || value === "") continue;
     data[key] = String(value);
   }
 
@@ -66,7 +77,12 @@ async function verifyTelegramAuth(
 }
 
 function telegramEmail(telegramId: number): string {
-  return `tg${telegramId}@users.telegram.local`;
+  // Valid-looking email for GoTrue; not used for mail delivery.
+  return `tg${telegramId}@t.me`;
+}
+
+function isAlreadyRegistered(message: string | undefined): boolean {
+  return /already|registered|exists|duplicate/i.test(message || "");
 }
 
 Deno.serve(async (req) => {
@@ -83,9 +99,11 @@ Deno.serve(async (req) => {
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")?.trim();
 
   if (!botToken) {
+    console.error("TELEGRAM_BOT_TOKEN missing");
     return json({ error: "telegram_bot_token_missing" }, 500);
   }
   if (!supabaseUrl || !serviceRoleKey) {
+    console.error("SUPABASE_URL or SERVICE_ROLE missing");
     return json({ error: "supabase_admin_missing" }, 500);
   }
 
@@ -113,6 +131,7 @@ Deno.serve(async (req) => {
 
   const valid = await verifyTelegramAuth(payload, botToken);
   if (!valid) {
+    console.error("invalid telegram hash for id", telegramId);
     return json({ error: "invalid_telegram_hash" }, 401);
   }
 
@@ -144,12 +163,12 @@ Deno.serve(async (req) => {
     user_metadata: userMetadata,
   });
 
-  if (
-    createError &&
-    !/already|registered|exists/i.test(createError.message || "")
-  ) {
+  if (createError && !isAlreadyRegistered(createError.message)) {
     console.error("createUser", createError);
-    return json({ error: "create_user_failed" }, 500);
+    return json(
+      { error: "create_user_failed", detail: createError.message },
+      500,
+    );
   }
 
   const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
@@ -159,37 +178,30 @@ Deno.serve(async (req) => {
 
   if (linkError || !linkData?.properties?.hashed_token) {
     console.error("generateLink", linkError);
-    return json({ error: "generate_link_failed" }, 500);
+    return json(
+      { error: "generate_link_failed", detail: linkError?.message },
+      500,
+    );
   }
 
   if (linkData.user?.id) {
-    await admin.auth.admin.updateUserById(linkData.user.id, {
-      user_metadata: userMetadata,
-    });
+    const { error: updateError } = await admin.auth.admin.updateUserById(
+      linkData.user.id,
+      { user_metadata: userMetadata },
+    );
+    if (updateError) {
+      console.error("updateUserById", updateError);
+    }
   }
 
-  const { data: sessionData, error: otpError } = await admin.auth.verifyOtp({
-    type: "email",
-    token_hash: linkData.properties.hashed_token,
-  });
-
-  if (otpError || !sessionData.session) {
-    console.error("verifyOtp", otpError);
-    return json({ error: "session_failed" }, 500);
-  }
-
-  const session = sessionData.session;
-  const user = sessionData.user ?? linkData.user;
-
+  // Client completes sign-in with anon key via verifyOtp.
   return json({
-    access_token: session.access_token,
-    refresh_token: session.refresh_token,
-    expires_in: session.expires_in,
-    token_type: session.token_type,
+    token_hash: linkData.properties.hashed_token,
+    email,
     user: {
-      id: user?.id,
-      email: user?.email,
-      user_metadata: user?.user_metadata ?? userMetadata,
+      id: linkData.user?.id,
+      email,
+      user_metadata: userMetadata,
     },
   });
 });
