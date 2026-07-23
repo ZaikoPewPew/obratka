@@ -1,10 +1,7 @@
 import { getStrings } from "../../i18n.js";
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
-import {
-  duckDuckGoFaviconUrl,
-  googleFaviconUrl,
-  normalizePortfolioUrl,
-} from "../../utils/portfolioMeta.js";
+import { normalizePortfolioUrl } from "../../utils/portfolioMeta.js";
+import { resolvePlatformIcon } from "../../utils/platformBrandIcon.js";
 import {
   getMotionReveal,
   getReportLaunchMotion,
@@ -34,9 +31,12 @@ function createPlatformAvatar({ id, host }) {
   const avatar = document.createElement("span");
   avatar.className = `url-screen__avatar url-screen__avatar--${id}`;
 
+  const resolved = resolvePlatformIcon(host);
+  if (!resolved) return avatar;
+
   const img = document.createElement("img");
   img.className = "url-screen__avatar-img";
-  img.src = googleFaviconUrl(host);
+  img.src = resolved.src;
   img.alt = "";
   img.width = 32;
   img.height = 32;
@@ -44,7 +44,7 @@ function createPlatformAvatar({ id, host }) {
   img.loading = "lazy";
   img.referrerPolicy = "no-referrer";
 
-  const fallbacks = [duckDuckGoFaviconUrl(host)];
+  const fallbacks = resolved.fallbacks;
   let fallbackIndex = 0;
 
   img.addEventListener("error", () => {

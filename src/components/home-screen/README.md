@@ -5,10 +5,23 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 ## Поведение
 
 Очередь: mock seed (`Наринэ`, `Janelle`) + поданные URL из localStorage (`obratka.submittedPortfolios`).  
-Карточка: превью (thum.io / fallback), favicon платформы + аватар, имя, роль, счётчик «N из M».  
-Профиль в шапке: `session.avatarUrl` (Telegram `photo_url`), иначе unavatar по email.  
 Клик по карточке → `onOpenPortfolio` → `/review`.  
 CTA «Подать своё» и dev-кнопки — под лентой. На десктопе справа пустая панель (как в Figma).
+
+Профиль в шапке: `session.avatarUrl` (Telegram `photo_url`), иначе unavatar по email.
+
+### Поля карточки
+
+| Элемент | Источник |
+|---------|----------|
+| Превью | thum.io / fallback |
+| Иконка площадки | [Simple Icons](https://github.com/simple-icons/simple-icons) для известных сервисов (Behance, Framer, Notion…); иначе favicon сайта (Google → DDG). Личные домены и `*.github.io` — всегда favicon |
+| Аватар | `item.avatarUrl` ← Telegram `photo_url` (другие провайдеры позже) |
+| ФИО | `item.name` ← `session.displayName` (Telegram) |
+| Роль | `item.role` ← грейд + специализация онбординга (`formatPortfolioRole`) |
+| Счётчик | `{current} из {total}` — сколько уже проревьюили / сколько нужно (`previewCount`) |
+
+При `submitPortfolio` имя, аватар и роль подтягиваются из текущей сессии.
 
 ## API
 

@@ -10,10 +10,7 @@ import {
   SUBMIT_COST,
 } from "../../api/wallet.js";
 import { getSession } from "../../app/session.js";
-import {
-  duckDuckGoFaviconUrl,
-  googleFaviconUrl,
-} from "../../utils/portfolioMeta.js";
+import { resolvePlatformIcon } from "../../utils/platformBrandIcon.js";
 import brandLogoUrl from "../../assets/brand/logo.svg";
 import boneIconUrl from "../../assets/home/bone.svg";
 import bellIconUrl from "../../assets/home/bell.svg";
@@ -339,9 +336,10 @@ export function createHomeScreen({
     platformImg.decoding = "async";
     platformImg.loading = "lazy";
     platformImg.referrerPolicy = "no-referrer";
-    if (host) {
-      platformImg.src = googleFaviconUrl(host);
-      bindImageFallbacks(platformImg, [duckDuckGoFaviconUrl(host)]);
+    const platformIcon = resolvePlatformIcon(item.url);
+    if (platformIcon) {
+      platformImg.src = platformIcon.src;
+      bindImageFallbacks(platformImg, platformIcon.fallbacks);
     } else {
       platform.hidden = true;
     }
