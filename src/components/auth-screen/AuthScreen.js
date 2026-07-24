@@ -488,15 +488,17 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
     setTelegramBusy(true);
     try {
       const session = await signInWithTelegram();
-      finish({
-        type: "telegram",
-        userId: session.user.userId,
-        email: session.user.email,
-        telegramId: session.user.telegramId,
-        username: session.user.username,
-        firstName: session.user.firstName,
-        photoUrl: session.user.photoUrl,
-      });
+      await Promise.resolve(
+        onSuccess({
+          type: "telegram",
+          userId: session.user.userId,
+          email: session.user.email,
+          telegramId: session.user.telegramId,
+          username: session.user.username,
+          firstName: session.user.firstName,
+          photoUrl: session.user.photoUrl,
+        }),
+      );
     } catch (err) {
       if (err instanceof Error && err.message === "telegram_cancelled") {
         setProviderError(null);

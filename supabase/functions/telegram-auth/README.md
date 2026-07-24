@@ -12,6 +12,8 @@ supabase secrets set TELEGRAM_BOT_TOKEN=<token_from_BotFather>
 
 `SUPABASE_URL` и `SUPABASE_SERVICE_ROLE_KEY` подставляются платформой автоматически.
 
+Admin-клиент **обязательно** шлёт `Authorization: Bearer <service_role>` (не JWT вызывающего). Иначе Auth Admin (`createUser` / `generateLink`) периодически отвечает `403 bad_jwt` (`unrecognized JWT kid` / ES256) — особенно при повторном входе после `signOut`.
+
 ## BotFather
 
 1. `@BotFather` → `/newbot` (или взять существующего).

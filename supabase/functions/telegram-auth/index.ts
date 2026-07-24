@@ -81,8 +81,33 @@ function telegramEmail(telegramId: number): string {
   return `tg${telegramId}@t.me`;
 }
 
-function isAlreadyRegistered(message: string | undefined): boolean {
+function isAlreadyRegistered(
+  message: string | undefined,
+  code?: string | undefined,
+): boolean {
+  if (code === "email_exists" || code === "user_already_exists") return true;
   return /already|registered|exists|duplicate/i.test(message || "");
+}
+
+/**
+ * Admin client must NOT inherit the caller's Authorization (anon / user JWT).
+ * Otherwise Auth Admin APIs intermittently return 403 bad_jwt
+ * (`unrecognized JWT kid <nil> for algorithm ES256`).
+ */
+function createAdminClient(supabaseUrl: string, serviceRoleKey: string) {
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+    global: {
+      headers: {
+        Authorization: `Bearer ${serviceRoleKey}`,
+        apikey: serviceRoleKey,
+      },
+    },
+  });
 }
 
 Deno.serve(async (req) => {
@@ -135,9 +160,7 @@ Deno.serve(async (req) => {
     return json({ error: "invalid_telegram_hash" }, 401);
   }
 
-  const admin = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  const admin = createAdminClient(supabaseUrl, serviceRoleKey);
 
   const email = telegramEmail(telegramId);
   const firstName = payload.first_name ? String(payload.first_name) : "";
@@ -163,7 +186,10 @@ Deno.serve(async (req) => {
     user_metadata: userMetadata,
   });
 
-  if (createError && !isAlreadyRegistered(createError.message)) {
+  if (
+    createError &&
+    !isAlreadyRegistered(createError.message, createError.code)
+  ) {
     console.error("createUser", createError);
     return json(
       { error: "create_user_failed", detail: createError.message },
@@ -171,10 +197,26 @@ Deno.serve(async (req) => {
     );
   }
 
-  const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
-    type: "magiclink",
-    email,
-  });
+  let linkData: Awaited<
+    ReturnType<typeof admin.auth.admin.generateLink>
+  >["data"] = null;
+  let linkError: Awaited<
+    ReturnType<typeof admin.auth.admin.generateLink>
+  >["error"] = null;
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const result = await admin.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+    });
+    linkData = result.data;
+    linkError = result.error;
+    if (!linkError && linkData?.properties?.hashed_token) break;
+    if (attempt === 0) {
+      console.warn("generateLink retry", linkError?.message);
+      await new Promise((r) => setTimeout(r, 150));
+    }
+  }
 
   if (linkError || !linkData?.properties?.hashed_token) {
     console.error("generateLink", linkError);

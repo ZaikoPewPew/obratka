@@ -1,5 +1,8 @@
 import { getStrings } from "../../i18n.js";
-import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
+import {
+  brandMarkSvg,
+  logoDoneMarkSvg,
+} from "../../assets/brand/brandMarks.js";
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
 import {
   getReportLaunchMotion,
@@ -8,7 +11,9 @@ import {
 } from "../../utils/motionTokens.js";
 import { buildReportSections } from "../../utils/reviewReport.js";
 
-const BRAND_MARK_SVG = brandMarkSvg("review-screen__brand-mark");
+const BRAND_MARK_CLASS = "review-screen__brand-mark";
+const BRAND_MARK_SVG = brandMarkSvg(BRAND_MARK_CLASS);
+const LOGO_DONE_SVG = logoDoneMarkSvg(BRAND_MARK_CLASS);
 
 
 /**
@@ -139,15 +144,25 @@ export function createReviewScreen({ content }) {
     reportSubtitle.textContent = "";
   }
 
+  function setDefaultBrandMark() {
+    brandSlot.innerHTML = BRAND_MARK_SVG;
+  }
+
+  function setLogoDoneMark() {
+    brandSlot.innerHTML = LOGO_DONE_SVG;
+  }
+
   function clearDoneMesh() {
     pendingDoneMesh = false;
     root.classList.remove("review-screen--done");
+    setDefaultBrandMark();
     meshWash.refresh();
   }
 
-  /** Зелёный mesh: старт вместе со спуском лого, готов к середине пути. */
+  /** Зелёный mesh + logo-done: старт вместе со спуском лого. */
   function activateDoneMesh() {
     if (root.classList.contains("review-screen--done")) return;
+    setLogoDoneMark();
     root.classList.add("review-screen--done");
     const { durationMs, easing } = getReviewMeshDoneMotion();
     meshWash.transitionToCssColors({ durationMs, easing });

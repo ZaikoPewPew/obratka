@@ -512,6 +512,12 @@ const homeScreen = createHomeScreen({
     }
     clearSession();
     clearSubmittedPortfolios();
+    setPendingAuthEmail(null);
+    try {
+      window.sessionStorage.removeItem("obratka.authProviderError");
+    } catch {
+      /* ignore */
+    }
     stopTimer();
     portfolioUrl = null;
     portfolioId = null;

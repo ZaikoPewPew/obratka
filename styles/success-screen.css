@@ -201,13 +201,17 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  /* logo-done: crown extends up; blob stays on default mark center */
+  transform: translate(
+    -50%,
+    calc(-50% + var(--url-screen-brand-done-align-y))
+  );
 }
 
 .success-screen__brand-mark {
   display: block;
-  width: var(--url-screen-brand-width);
-  height: var(--url-screen-brand-height);
+  width: var(--url-screen-brand-done-width);
+  height: var(--url-screen-brand-done-height);
 }
 
 @media (prefers-reduced-motion: reduce) {

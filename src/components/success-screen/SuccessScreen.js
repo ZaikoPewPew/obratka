@@ -1,5 +1,5 @@
 import { getStrings } from "../../i18n.js";
-import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
+import { logoDoneMarkSvg } from "../../assets/brand/brandMarks.js";
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
 import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
 import {
@@ -11,7 +11,7 @@ import {
  * @typedef {import("./successPresets.js").SuccessPresetId} SuccessPresetId
  */
 
-const BRAND_MARK_SVG = brandMarkSvg("success-screen__brand-mark");
+const BRAND_MARK_SVG = logoDoneMarkSvg("success-screen__brand-mark");
 
 
 /**

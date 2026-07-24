@@ -1,5 +1,8 @@
 import { getStrings } from "../../i18n.js";
-import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
+import {
+  brandMarkSvg,
+  logoDoneMarkSvg,
+} from "../../assets/brand/brandMarks.js";
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
 import { normalizePortfolioUrl } from "../../utils/portfolioMeta.js";
 import { resolvePlatformIcon } from "../../utils/platformBrandIcon.js";
@@ -230,9 +233,7 @@ export function createUrlScreen({ onSubmit, onExit }) {
 
   const brandSlot = document.createElement("div");
   brandSlot.className = "url-screen__brand-slot";
-  brandSlot.innerHTML = `
-    ${brandMarkSvg("url-screen__brand-mark")}
-  `;
+  brandSlot.innerHTML = brandMarkSvg("url-screen__brand-mark");
   brand.append(brandSlot);
 
   visual.append(glow, noise, preview, brand);
@@ -276,14 +277,29 @@ export function createUrlScreen({ onSubmit, onExit }) {
     inputWrap.classList.toggle("url-screen__input-wrap--ready", hasValue);
   }
 
+  const BRAND_MARK_CLASS = "url-screen__brand-mark";
+  const BRAND_MARK_SVG = brandMarkSvg(BRAND_MARK_CLASS);
+  const LOGO_DONE_SVG = logoDoneMarkSvg(BRAND_MARK_CLASS);
+
+  function setDefaultBrandMark() {
+    brandSlot.innerHTML = BRAND_MARK_SVG;
+  }
+
+  function setLogoDoneMark() {
+    brandSlot.innerHTML = LOGO_DONE_SVG;
+  }
+
   function clearDoneMesh() {
     pendingDoneMesh = false;
     root.classList.remove("url-screen--done");
+    setDefaultBrandMark();
     meshWash.refresh();
   }
 
+  /** Зелёный mesh + logo-done: старт вместе со спуском лого. */
   function activateDoneMesh() {
     if (root.classList.contains("url-screen--done")) return;
+    setLogoDoneMark();
     root.classList.add("url-screen--done");
     const { durationMs, easing } = getReviewMeshDoneMotion();
     meshWash.transitionToCssColors({ durationMs, easing });

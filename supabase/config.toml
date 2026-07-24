@@ -1,0 +1,6 @@
+# Minimal config for Edge Function deploy settings.
+# Full local stack config is optional; project lives on hosted Supabase.
+
+[functions.telegram-auth]
+# Telegram Login signs the payload; callers use the anon key only as a gateway.
+verify_jwt = false

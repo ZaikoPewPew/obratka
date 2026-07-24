@@ -630,6 +630,12 @@
   --url-screen-preview-stub-bone-width-short: 42%;
   --url-screen-brand-width: 44px;
   --url-screen-brand-height: 43px;
+  /* logo-done (crown): same width, taller; nudge keeps blob aligned with default mark */
+  --url-screen-brand-done-width: 44px;
+  --url-screen-brand-done-height: 58px;
+  --url-screen-brand-done-align-y: calc(
+    (var(--url-screen-brand-done-height) - var(--url-screen-brand-height)) / -2
+  );
   --url-screen-brand-fill: var(--palette-white);
   --url-screen-noise-color: var(--palette-gray-100);
   --url-screen-noise-opacity: 1;
