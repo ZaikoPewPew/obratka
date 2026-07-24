@@ -1,6 +1,6 @@
 import { getSupabase } from "../lib/supabaseClient.js";
 import { getSession, setSession } from "../app/session.js";
-import { getStrings } from "../i18n.js";
+import { formatPortfolioRole } from "./portfolios.js";
 import { parseReviewAnswers } from "../utils/reviewReport.js";
 
 /** @typedef {'low_effort' | 'spam' | 'harassment' | 'offensive' | 'irrelevant'} ReviewComplaintTag */
@@ -25,6 +25,7 @@ export const REPUTATION_DEFAULT = 100;
  *   reviewerDisplayName: string | null;
  *   reviewerAvatarUrl: string | null;
  *   reviewerGrade: string | null;
+ *   reviewerRole: string | null;
  *   createdAt: string | null;
  *   complained: boolean;
  *   answers: import("../utils/reviewReport.js").ReviewAnswers | null;
@@ -43,30 +44,16 @@ export const REPUTATION_DEFAULT = 100;
  */
 
 /**
- * Подпись грейда ревьюера для строки листа / PDF.
+ * EN Title Case должность ревьюера (как на карточке ленты).
  * @param {string | null | undefined} grade
- * @param {Record<string, string>} [t]
+ * @param {string | null | undefined} role
  * @returns {string}
  */
-export function formatReviewerGradeLabel(grade, t = getStrings()) {
-  const key = typeof grade === "string" ? grade.trim().toLowerCase() : "";
-  switch (key) {
-    case "junior":
-      return t.reviewGradeJunior ?? "Junior";
-    case "middle":
-    case "mid":
-      return t.reviewGradeMid ?? "Middle";
-    case "senior":
-      return t.reviewGradeSenior ?? "Senior";
-    case "staff":
-      return t.reviewGradeStaff ?? "Staff";
-    case "lead":
-      return t.reviewGradeLead ?? "Lead";
-    case "head":
-      return t.reviewGradeHead ?? "Head";
-    default:
-      return "";
-  }
+export function formatReviewerTitle(grade, role) {
+  const g = typeof grade === "string" ? grade.trim() : "";
+  const r = typeof role === "string" ? role.trim() : "";
+  if (!g && !r) return "";
+  return formatPortfolioRole(g || null, r || null);
 }
 
 /**
@@ -169,7 +156,7 @@ export async function listPortfolioReviewSheets(portfolioId) {
   const { data: rows, error } = await supabase
     .from("reviews")
     .select(
-      "id, portfolio_id, reviewer_id, reviewer_avatar_url, reviewer_display_name, reviewer_grade, created_at, answers",
+      "id, portfolio_id, reviewer_id, reviewer_avatar_url, reviewer_display_name, reviewer_grade, reviewer_role, created_at, answers",
     )
     .eq("portfolio_id", portfolioId)
     .order("created_at", { ascending: true });
@@ -227,6 +214,10 @@ export async function listPortfolioReviewSheets(portfolioId) {
         reviewerGrade:
           typeof row.reviewer_grade === "string" && row.reviewer_grade.trim()
             ? row.reviewer_grade.trim()
+            : null,
+        reviewerRole:
+          typeof row.reviewer_role === "string" && row.reviewer_role.trim()
+            ? row.reviewer_role.trim()
             : null,
         createdAt:
           typeof row.created_at === "string" ? row.created_at : null,

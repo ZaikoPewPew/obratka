@@ -16,6 +16,9 @@ alter table public.reviews
 alter table public.reviews
   add column if not exists reviewer_grade text;
 
+alter table public.reviews
+  add column if not exists reviewer_role text;
+
 create table if not exists public.review_claims (
   portfolio_id uuid not null references public.portfolios (id) on delete cascade,
   reviewer_id uuid not null references auth.users (id) on delete cascade,
@@ -316,6 +319,7 @@ declare
   avatar text;
   display text;
   grade text;
+  role_slug text;
 begin
   select * into p
   from public.portfolios
@@ -351,8 +355,9 @@ begin
   select
     nullif(trim(pr.avatar_url), ''),
     nullif(trim(pr.display_name), ''),
-    nullif(trim(pr.grade), '')
-  into avatar, display, grade
+    nullif(trim(pr.grade), ''),
+    nullif(trim(pr.role), '')
+  into avatar, display, grade, role_slug
   from public.profiles pr
   where pr.id = new.reviewer_id;
 
@@ -364,6 +369,9 @@ begin
   end if;
   if new.reviewer_grade is null or nullif(trim(new.reviewer_grade), '') is null then
     new.reviewer_grade := grade;
+  end if;
+  if new.reviewer_role is null or nullif(trim(new.reviewer_role), '') is null then
+    new.reviewer_role := role_slug;
   end if;
 
   update public.portfolios

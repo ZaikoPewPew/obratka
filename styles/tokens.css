@@ -580,6 +580,12 @@
   --home-screen-skeleton-base: var(--color-surface-muted-active);
   --home-screen-skeleton-shine: var(--color-surface);
   --home-screen-skeleton-duration: 1.4s;
+  --home-screen-skeleton-meta-height: var(--home-screen-badge-size);
+  --home-screen-skeleton-line-height: var(--space-3);
+  --home-screen-skeleton-line-name-width: 42%;
+  --home-screen-skeleton-line-role-width: 58%;
+  --home-screen-skeleton-badge-width: var(--home-screen-badge-size);
+  --home-screen-skeleton-badge-height: var(--home-screen-badge-size);
   --home-screen-skeleton-card-height: calc(
     (var(--home-screen-card-padding) * 2) + var(--home-screen-preview-height) +
       var(--home-screen-card-gap) + var(--home-screen-count-height)

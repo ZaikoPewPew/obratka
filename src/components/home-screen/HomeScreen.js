@@ -338,8 +338,10 @@ export function createHomeScreen({
   let loading = false;
   /** @type {ReturnType<typeof window.setInterval> | null} */
   let slotsPollId = null;
-  /** Показать stagger-reveal при смене skeleton → контент. */
+  /** Показать stagger-reveal при смене списка (не после skeleton — иначе гэп). */
   let revealItems = false;
+  /** Только что показывали skeleton ленты — не fade-in с opacity:0. */
+  let wasSkeletonLoading = false;
   /** @type {HomeTabId} */
   let activeTab = "feed";
   /**
@@ -707,6 +709,43 @@ export function createHomeScreen({
 
     const card = document.createElement("div");
     card.className = "home-screen__card home-screen__card--skeleton";
+
+    const preview = document.createElement("div");
+    preview.className =
+      "home-screen__preview home-screen__preview--loading home-screen__preview--skeleton";
+
+    const meta = document.createElement("div");
+    meta.className = "home-screen__card-meta home-screen__card-meta--skeleton";
+
+    const person = document.createElement("div");
+    person.className = "home-screen__card-person home-screen__card-person--skeleton";
+
+    const badges = document.createElement("div");
+    badges.className = "home-screen__skeleton-badges";
+
+    const platformBone = document.createElement("div");
+    platformBone.className = "home-screen__skeleton-badge";
+    const avatarBone = document.createElement("div");
+    avatarBone.className = "home-screen__skeleton-badge";
+    badges.append(platformBone, avatarBone);
+
+    const text = document.createElement("div");
+    text.className = "home-screen__skeleton-text";
+
+    const lineName = document.createElement("div");
+    lineName.className = "home-screen__skeleton-line home-screen__skeleton-line--name";
+
+    const lineRole = document.createElement("div");
+    lineRole.className = "home-screen__skeleton-line home-screen__skeleton-line--role";
+
+    text.append(lineName, lineRole);
+    person.append(badges, text);
+
+    const progress = document.createElement("div");
+    progress.className = "home-screen__skeleton-progress";
+
+    meta.append(person, progress);
+    card.append(preview, meta);
     li.append(card);
     return li;
   }
@@ -724,6 +763,9 @@ export function createHomeScreen({
    */
   function setLoading(next) {
     loading = next;
+    if (loading) {
+      wasSkeletonLoading = true;
+    }
     root.setAttribute("aria-busy", loading ? "true" : "false");
     const t = getStrings();
     list.setAttribute(
@@ -986,7 +1028,8 @@ export function createHomeScreen({
 
     for (const [index, item] of items.entries()) {
       const li = createCard(item);
-      if (revealItems) {
+      // Не стартуем с opacity:0 после скелетона — иначе гэп/скачок.
+      if (revealItems && !wasSkeletonLoading) {
         li.classList.add("motion-reveal");
         li.style.setProperty(
           "--reveal-delay",
@@ -995,6 +1038,7 @@ export function createHomeScreen({
       }
       list.append(li);
     }
+    wasSkeletonLoading = false;
     revealItems = false;
     scheduleTabbarContrastSync();
   }
@@ -1072,6 +1116,7 @@ export function createHomeScreen({
     root.classList.remove("home-screen--open");
     loading = false;
     revealItems = false;
+    wasSkeletonLoading = false;
     showTabbar();
     closeSubmitLockedModal();
     closeInviteModal();

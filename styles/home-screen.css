@@ -852,14 +852,102 @@
   color: var(--color-text);
 }
 
-/* Skeleton: целые карточки, пока грузится лента (хедер не трогаем) */
+/* Skeleton: layout как у реальной карточки (preview + meta), без opacity-скачка */
 .home-screen__card.home-screen__card--skeleton,
 .home-screen__card.home-screen__card--skeleton:hover,
 .home-screen__card.home-screen__card--skeleton:active {
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-screen-card-gap);
   min-height: var(--home-screen-skeleton-card-height);
   pointer-events: none;
   cursor: default;
+  background: var(--home-screen-card-surface);
+}
+
+.home-screen__preview--skeleton {
+  flex-shrink: 0;
+}
+
+.home-screen__card-meta--skeleton {
+  min-height: var(--home-screen-skeleton-meta-height);
+}
+
+.home-screen__card-person--skeleton {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.home-screen__skeleton-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.home-screen__skeleton-line {
+  height: var(--home-screen-skeleton-line-height);
+  border-radius: var(--radius-xs);
+  background-color: var(--home-screen-skeleton-base);
+  background-image: linear-gradient(
+    90deg,
+    var(--home-screen-skeleton-base) 0%,
+    var(--home-screen-skeleton-shine) 45%,
+    var(--home-screen-skeleton-base) 90%
+  );
+  background-size: 200% 100%;
+  background-position: right;
+  animation-name: motion-skeleton-shimmer;
+  animation-duration: var(--home-screen-skeleton-duration);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.home-screen__skeleton-line--name {
+  width: var(--home-screen-skeleton-line-name-width);
+}
+
+.home-screen__skeleton-line--role {
+  width: var(--home-screen-skeleton-line-role-width);
+}
+
+.home-screen__skeleton-badges {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.home-screen__skeleton-badge {
+  width: var(--home-screen-skeleton-badge-width);
+  height: var(--home-screen-skeleton-badge-height);
+  margin-inline-end: var(--home-screen-badge-overlap);
+  border-radius: var(--home-screen-badge-radius);
+  background-color: var(--home-screen-skeleton-base);
+  background-image: linear-gradient(
+    90deg,
+    var(--home-screen-skeleton-base) 0%,
+    var(--home-screen-skeleton-shine) 45%,
+    var(--home-screen-skeleton-base) 90%
+  );
+  background-size: 200% 100%;
+  background-position: right;
+  animation-name: motion-skeleton-shimmer;
+  animation-duration: var(--home-screen-skeleton-duration);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.home-screen__skeleton-badge:last-child {
+  margin-inline-end: 0;
+}
+
+.home-screen__skeleton-progress {
+  flex: 0 0 auto;
+  width: var(--home-screen-progress-width);
+  height: var(--home-screen-progress-height);
+  border-radius: var(--home-screen-progress-radius);
   background-color: var(--home-screen-skeleton-base);
   background-image: linear-gradient(
     90deg,
@@ -877,6 +965,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .home-screen__card.home-screen__card--skeleton {
+    animation: none;
+    background-image: none;
+  }
+
+  .home-screen__skeleton-line,
+  .home-screen__skeleton-badge,
+  .home-screen__skeleton-progress {
     animation: none;
     background-image: none;
   }

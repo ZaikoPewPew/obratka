@@ -623,6 +623,8 @@ export async function submitPortfolioReview(portfolioId, answers) {
     typeof session?.displayName === "string" ? session.displayName.trim() : "";
   const grade =
     typeof session?.grade === "string" ? session.grade.trim() : "";
+  const role =
+    typeof session?.role === "string" ? session.role.trim() : "";
 
   /** @type {Record<string, unknown>} */
   const insert = {
@@ -640,6 +642,9 @@ export async function submitPortfolioReview(portfolioId, answers) {
   }
   if (grade) {
     insert.reviewer_grade = grade;
+  }
+  if (role) {
+    insert.reviewer_role = role;
   }
 
   const { error } = await supabase.from("reviews").insert(insert);

@@ -9,7 +9,7 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 - Без жалобы лист считается «ок»; явного чипа «всё ок» нет
 - Одна жалоба на лист (`review_complaints`, RPC `submit_review_complaint`) → штраф репутации ревьюера на сервере
 - Справа: дефолт mesh + мокап листа; **Скачать PDF** можно много раз (лист снова выезжает → улетает → done)
-- В строке листа — грейд ревьюера (не «Лист n»)
+- В строке листа — EN Title Case должность ревьюера (`formatPortfolioRole`: Senior Product Designer / Product Design Lead / Head Of Design)
 - PDF: все ревьюеры, **1 дизайнер = 1 страница** (`shareReviewPdf`)
 - CTA: серая «На главную» + тёмная «Скачать PDF»
 

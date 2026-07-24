@@ -15,7 +15,7 @@ import { buildReportSections } from "../../utils/reviewReport.js";
 import { shareReviewPdf } from "../../utils/shareReviewPdf.js";
 import {
   REVIEW_COMPLAINT_TAGS,
-  formatReviewerGradeLabel,
+  formatReviewerTitle,
   listPortfolioReviewSheets,
   submitReviewComplaint,
 } from "../../api/reviewComplaints.js";
@@ -448,7 +448,10 @@ export function createReportScreen(opts = {}) {
         firstWithAnswers.reviewerDisplayName.trim()) ||
       t.reportSheetReviewerFallback ||
       "";
-    const gradeLabel = formatReviewerGradeLabel(firstWithAnswers.reviewerGrade, t);
+    const gradeLabel = formatReviewerTitle(
+      firstWithAnswers.reviewerGrade,
+      firstWithAnswers.reviewerRole,
+    );
     fillReportSheet(
       firstWithAnswers.answers,
       [gradeLabel, name].filter(Boolean).join(" · "),
@@ -486,8 +489,8 @@ export function createReportScreen(opts = {}) {
    */
   function sheetGradeLabel(sheet, index) {
     const t = getStrings();
-    const gradeLabel = formatReviewerGradeLabel(sheet.reviewerGrade, t);
-    if (gradeLabel) return gradeLabel;
+    const title = formatReviewerTitle(sheet.reviewerGrade, sheet.reviewerRole);
+    if (title) return title;
     return formatString(t.reportSheetLabel, { n: index + 1 });
   }
 
