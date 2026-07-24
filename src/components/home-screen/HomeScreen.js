@@ -17,7 +17,7 @@ import boneIconUrl from "../../assets/home/bone.svg";
 import bellIconUrl from "../../assets/home/bell.svg";
 import plusIconUrl from "../../assets/home/plus.svg";
 
-/** Сколько монет даёт dev-кнопка на главной. */
+/** Сколько монет даёт клик по чипу баланса (dev). */
 const DEV_CREDIT_AMOUNT = 10;
 
 /** Сколько skeleton-карточек показывать, пока грузится лента. */
@@ -111,6 +111,8 @@ export function createHomeScreen({
   markLink.href = "#";
   markLink.addEventListener("click", (event) => {
     event.preventDefault();
+    /* Временно: сброс сессии по клику на логотип (dev). */
+    void onResetSession?.();
   });
 
   const markImg = document.createElement("img");
@@ -209,30 +211,35 @@ export function createHomeScreen({
   empty.className = "home-screen__empty";
   empty.hidden = true;
 
-  const footer = document.createElement("div");
-  footer.className = "home-screen__footer";
-
-  const addCoinsBtn = document.createElement("button");
-  addCoinsBtn.type = "button";
-  addCoinsBtn.className = "iframe-shell__btn home-screen__reset";
-
-  const resetBtn = document.createElement("button");
-  resetBtn.type = "button";
-  resetBtn.className = "iframe-shell__btn home-screen__reset";
-
-  footer.append(addCoinsBtn, resetBtn);
-  feed.append(list, empty, footer);
-
-  const aside = document.createElement("aside");
-  aside.className = "home-screen__aside";
-  aside.setAttribute("aria-hidden", "true");
-
-  const asidePanel = document.createElement("div");
-  asidePanel.className = "home-screen__aside-panel";
-  aside.append(asidePanel);
-
-  cluster.append(aside, feed);
+  feed.append(list, empty);
+  /* Рейтинг (`createRatingPanel`) пока не монтируем — см. src/components/rating/. */
+  cluster.append(feed);
   body.append(cluster);
+
+  const lockedBackdrop = document.createElement("div");
+  lockedBackdrop.className = "home-screen__locked-backdrop";
+  lockedBackdrop.hidden = true;
+  lockedBackdrop.setAttribute("aria-hidden", "true");
+
+  const lockedDialog = document.createElement("div");
+  lockedDialog.className = "home-screen__locked-dialog";
+  lockedDialog.setAttribute("role", "dialog");
+  lockedDialog.setAttribute("aria-modal", "true");
+  lockedDialog.setAttribute("aria-labelledby", "home-submit-locked-title");
+
+  const lockedTitle = document.createElement("h2");
+  lockedTitle.className = "home-screen__locked-title";
+  lockedTitle.id = "home-submit-locked-title";
+
+  const lockedBody = document.createElement("p");
+  lockedBody.className = "home-screen__locked-body";
+
+  const lockedClose = document.createElement("button");
+  lockedClose.type = "button";
+  lockedClose.className = "home-screen__locked-close";
+
+  lockedDialog.append(lockedTitle, lockedBody, lockedClose);
+  lockedBackdrop.append(lockedDialog);
 
   const tabbar = document.createElement("div");
   tabbar.className = "home-screen__tabbar";
@@ -257,7 +264,7 @@ export function createHomeScreen({
   mineTab.dataset.tab = "mine";
 
   tabbar.append(tabThumb, feedTab, mineTab);
-  root.append(title, topbar, body, tabbar);
+  root.append(title, topbar, body, tabbar, lockedBackdrop);
 
   /** @type {HomePortfolioItem[]} */
   let items = [];
@@ -350,14 +357,12 @@ export function createHomeScreen({
     addLabel.textContent = t.homeAddPortfolio;
     addBtn.setAttribute("aria-label", t.homeAddPortfolio);
     addBtn.title = t.homeAddPortfolio;
-    addCoinsBtn.textContent = formatString(t.homeAddCoins, {
-      amount: DEV_CREDIT_AMOUNT,
-    });
-    addCoinsBtn.title = formatString(t.homeAddCoinsTitle, {
-      amount: DEV_CREDIT_AMOUNT,
-    });
-    resetBtn.textContent = t.homeResetSession;
-    resetBtn.title = t.homeResetSessionTitle;
+    markLink.title = t.homeResetSessionTitle;
+
+    lockedTitle.textContent = t.homeSubmitLockedTitle;
+    lockedBody.textContent = t.homeSubmitLocked;
+    lockedClose.textContent = t.homeSubmitLockedClose;
+    lockedClose.setAttribute("aria-label", t.homeSubmitLockedCloseAria);
 
     const balance = getBalance();
     balanceValue.textContent = String(balance);
@@ -369,14 +374,23 @@ export function createHomeScreen({
     notifyBtn.setAttribute("aria-label", t.homeNotificationsAria);
     profileBtn.setAttribute("aria-label", t.homeProfileAria);
 
-    const locked = !canSubmitPortfolio();
-    addBtn.disabled = locked;
-    if (locked) {
-      addBtn.title = t.homeSubmitLocked;
-    }
-
     syncProfileAvatar();
     scheduleTabThumbSync();
+  }
+
+  function openSubmitLockedModal() {
+    lockedBackdrop.hidden = false;
+    lockedBackdrop.setAttribute("aria-hidden", "false");
+    requestAnimationFrame(() => {
+      lockedBackdrop.classList.add("home-screen__locked-backdrop--open");
+      lockedClose.focus();
+    });
+  }
+
+  function closeSubmitLockedModal() {
+    lockedBackdrop.classList.remove("home-screen__locked-backdrop--open");
+    lockedBackdrop.setAttribute("aria-hidden", "true");
+    lockedBackdrop.hidden = true;
   }
 
   /**
@@ -456,48 +470,6 @@ export function createHomeScreen({
 
     const card = document.createElement("div");
     card.className = "home-screen__card home-screen__card--skeleton";
-
-    const preview = document.createElement("div");
-    preview.className = "home-screen__preview home-screen__skeleton-bone";
-
-    const meta = document.createElement("div");
-    meta.className = "home-screen__card-meta";
-
-    const person = document.createElement("div");
-    person.className = "home-screen__card-person";
-
-    const badges = document.createElement("div");
-    badges.className = "home-screen__card-badges";
-
-    const platform = document.createElement("span");
-    platform.className =
-      "home-screen__badge home-screen__badge--platform home-screen__skeleton-bone";
-
-    const avatar = document.createElement("span");
-    avatar.className =
-      "home-screen__badge home-screen__badge--avatar home-screen__skeleton-bone";
-
-    badges.append(platform, avatar);
-
-    const text = document.createElement("div");
-    text.className = "home-screen__card-text";
-
-    const nameBone = document.createElement("span");
-    nameBone.className =
-      "home-screen__skeleton-line home-screen__skeleton-line--name";
-
-    const roleBone = document.createElement("span");
-    roleBone.className =
-      "home-screen__skeleton-line home-screen__skeleton-line--role";
-
-    text.append(nameBone, roleBone);
-    person.append(badges, text);
-
-    const count = document.createElement("span");
-    count.className = "home-screen__card-count home-screen__skeleton-bone";
-
-    meta.append(person, count);
-    card.append(preview, meta);
     li.append(card);
     return li;
   }
@@ -515,7 +487,6 @@ export function createHomeScreen({
    */
   function setLoading(next) {
     loading = next;
-    root.classList.toggle("home-screen--loading", loading);
     root.setAttribute("aria-busy", loading ? "true" : "false");
     const t = getStrings();
     list.setAttribute(
@@ -727,7 +698,6 @@ export function createHomeScreen({
         : await listPortfoliosForReview();
     revealItems = loading;
     loading = false;
-    root.classList.remove("home-screen--loading");
     root.setAttribute("aria-busy", "false");
     setItems(next);
   }
@@ -755,10 +725,11 @@ export function createHomeScreen({
    * @returns {Promise<void>}
    */
   function close() {
-    root.classList.remove("home-screen--open", "home-screen--loading");
+    root.classList.remove("home-screen--open");
     loading = false;
     revealItems = false;
     showTabbar();
+    closeSubmitLockedModal();
     root.setAttribute("aria-busy", "false");
     root.hidden = true;
     return Promise.resolve();
@@ -801,7 +772,10 @@ export function createHomeScreen({
   });
 
   addBtn.addEventListener("click", () => {
-    if (addBtn.disabled) return;
+    if (!canSubmitPortfolio()) {
+      openSubmitLockedModal();
+      return;
+    }
     void onAddPortfolio?.();
   });
 
@@ -811,14 +785,20 @@ export function createHomeScreen({
     });
   });
 
-  addCoinsBtn.addEventListener("click", () => {
-    void creditBalance(DEV_CREDIT_AMOUNT).then(() => {
-      syncCopy();
-    });
+  lockedClose.addEventListener("click", () => {
+    closeSubmitLockedModal();
   });
 
-  resetBtn.addEventListener("click", () => {
-    void onResetSession?.();
+  lockedBackdrop.addEventListener("click", (event) => {
+    if (event.target === lockedBackdrop) {
+      closeSubmitLockedModal();
+    }
+  });
+
+  window.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    if (lockedBackdrop.hidden) return;
+    closeSubmitLockedModal();
   });
 
   notifyBtn.addEventListener("click", () => {

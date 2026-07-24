@@ -1,4 +1,4 @@
-/* Home screen: шапка + лента карточек + боковая панель (Figma). */
+/* Home screen: шапка + лента карточек (Figma). */
 
 .home-screen {
   box-sizing: border-box;
@@ -170,19 +170,14 @@
   text-align: right;
 }
 
-.home-screen__chip--submit:hover:not(:disabled) {
+.home-screen__chip--submit:hover {
   background: var(--home-screen-submit-chip-bg-hover);
   color: var(--color-on-accent-hover);
 }
 
-.home-screen__chip--submit:active:not(:disabled) {
+.home-screen__chip--submit:active {
   background: var(--home-screen-submit-chip-bg-active);
   color: var(--color-on-accent-active);
-}
-
-.home-screen__chip--submit:disabled {
-  opacity: var(--shell-review-choice-disabled-opacity);
-  cursor: not-allowed;
 }
 
 .home-screen__chip--submit .home-screen__chip-icon {
@@ -199,7 +194,7 @@
   background: var(--color-surface-muted-hover);
 }
 
-.home-screen__chip--submit:hover:not(:disabled) {
+.home-screen__chip--submit:hover {
   background: var(--home-screen-submit-chip-bg-hover);
 }
 
@@ -207,7 +202,7 @@
   background: var(--color-surface-muted-active);
 }
 
-.home-screen__chip--submit:active:not(:disabled) {
+.home-screen__chip--submit:active {
   background: var(--home-screen-submit-chip-bg-active);
 }
 
@@ -308,18 +303,6 @@
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.home-screen__aside {
-  display: none;
-}
-
-.home-screen__aside-panel {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: var(--home-screen-aside-min-height);
-  border-radius: var(--home-screen-aside-radius);
-  background: var(--home-screen-aside-bg);
 }
 
 .home-screen__card {
@@ -532,40 +515,100 @@
   color: var(--color-text-muted);
 }
 
-.home-screen__footer {
+.home-screen__locked-backdrop {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  z-index: var(--home-screen-locked-modal-z);
   display: flex;
-  flex-direction: column;
-  gap: var(--home-screen-footer-gap);
-  margin-top: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  background: var(--color-overlay);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-screen-duration) var(--motion-screen-ease);
 }
 
-.home-screen__reset {
-  align-self: stretch;
-  min-height: var(--control-btn-height);
-  padding-inline: var(--control-btn-padding-x);
-  border-radius: var(--control-btn-radius);
+.home-screen__locked-backdrop--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.home-screen__locked-backdrop[hidden] {
+  display: none !important;
+}
+
+.home-screen__locked-dialog {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-screen-locked-modal-gap);
+  width: 100%;
+  max-width: var(--home-screen-locked-modal-max-width);
+  margin: 0;
+  padding: var(--home-screen-locked-modal-padding);
+  border-radius: var(--home-screen-locked-modal-radius);
   background: var(--color-surface);
-  color: var(--color-text-muted);
+  box-shadow: var(--shadow-modal);
+  color: var(--color-text);
   font-family: var(--font-family);
 }
 
-.home-screen__reset:hover {
-  background: var(--color-surface-muted-hover);
-  color: var(--color-text);
+.home-screen__locked-title {
+  margin: 0;
+  font-size: var(--home-screen-locked-modal-title-size);
+  font-weight: var(--home-screen-locked-modal-title-weight);
+  line-height: 1.3;
 }
 
-.home-screen__reset:active {
-  background: var(--color-surface-muted-active);
+.home-screen__locked-body {
+  margin: 0;
+  font-size: var(--home-screen-locked-modal-body-size);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.4;
+  color: var(--color-text-muted);
 }
 
-/* Skeleton: топбар + карточки, пока грузится лента */
-.home-screen__skeleton-bone,
-.home-screen__skeleton-line,
-.home-screen--loading .home-screen__chip--submit,
-.home-screen--loading .home-screen__chip--balance .home-screen__chip-value,
-.home-screen--loading .home-screen__chip--icon,
-.home-screen--loading .home-screen__profile,
-.home-screen--loading .home-screen__aside-panel {
+.home-screen__locked-close {
+  box-sizing: border-box;
+  align-self: stretch;
+  min-height: var(--control-btn-height);
+  margin: 0;
+  padding: 0 var(--control-btn-padding-x);
+  border: none;
+  border-radius: var(--control-btn-radius);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.home-screen__locked-close:hover {
+  background: var(--color-accent-hover);
+  color: var(--color-on-accent-hover);
+}
+
+.home-screen__locked-close:active {
+  background: var(--color-accent-active);
+  color: var(--color-on-accent-active);
+}
+
+.home-screen__locked-close:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Skeleton: целые карточки, пока грузится лента (хедер не трогаем) */
+.home-screen__card.home-screen__card--skeleton,
+.home-screen__card.home-screen__card--skeleton:hover,
+.home-screen__card.home-screen__card--skeleton:active {
+  box-sizing: border-box;
+  min-height: var(--home-screen-skeleton-card-height);
+  pointer-events: none;
+  cursor: default;
   background-color: var(--home-screen-skeleton-base);
   background-image: linear-gradient(
     90deg,
@@ -581,130 +624,14 @@
   animation-iteration-count: infinite;
 }
 
-.home-screen__skeleton-line {
-  display: block;
-  height: var(--home-screen-skeleton-line-height);
-  border-radius: var(--radius-xs);
-}
-
-.home-screen__skeleton-line--name {
-  width: var(--home-screen-skeleton-line-name-width);
-}
-
-.home-screen__skeleton-line--role {
-  width: var(--home-screen-skeleton-line-role-width);
-}
-
-.home-screen__card--skeleton {
-  pointer-events: none;
-  cursor: default;
-}
-
-.home-screen__card--skeleton:hover,
-.home-screen__card--skeleton:active {
-  --home-screen-card-surface: var(--home-screen-card-bg);
-}
-
-.home-screen__card--skeleton .home-screen__preview {
-  background: transparent;
-}
-
-.home-screen__card--skeleton .home-screen__badge {
-  border: none;
-  box-shadow: none;
-}
-
-.home-screen__card--skeleton .home-screen__card-count {
-  min-width: var(--home-screen-count-height);
-  background: transparent;
-  color: transparent;
-}
-
-.home-screen--loading .home-screen__footer {
-  display: none;
-}
-
-.home-screen--loading .home-screen__top-actions {
-  pointer-events: none;
-}
-
-.home-screen--loading .home-screen__chip--submit {
-  color: transparent;
-  pointer-events: none;
-}
-
-.home-screen--loading .home-screen__chip--submit .home-screen__chip-icon,
-.home-screen--loading .home-screen__chip--submit .home-screen__chip-label {
-  opacity: 0;
-}
-
-.home-screen--loading .home-screen__chip--balance .home-screen__chip-value {
-  display: inline-block;
-  min-width: var(--home-screen-skeleton-balance-width);
-  color: transparent;
-  border-radius: var(--radius-xs);
-}
-
-.home-screen--loading .home-screen__chip--icon,
-.home-screen--loading .home-screen__profile {
-  color: transparent;
-}
-
-.home-screen--loading .home-screen__chip--icon .home-screen__chip-icon,
-.home-screen--loading .home-screen__profile-img,
-.home-screen--loading .home-screen__profile-letter {
-  opacity: 0;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .home-screen__skeleton-bone,
-  .home-screen__skeleton-line,
-  .home-screen--loading .home-screen__chip--submit,
-  .home-screen--loading .home-screen__chip--balance .home-screen__chip-value,
-  .home-screen--loading .home-screen__chip--icon,
-  .home-screen--loading .home-screen__profile,
-  .home-screen--loading .home-screen__aside-panel {
+  .home-screen__card.home-screen__card--skeleton {
     animation: none;
     background-image: none;
   }
-}
 
-/* Desktop: лента ровно по центру экрана; aside слева вплотную к ней */
-@media (min-width: 960px) {
-  .home-screen__body {
-    justify-content: flex-start;
-  }
-
-  .home-screen__cluster {
-    width: calc(
-      var(--home-screen-aside-width) + var(--home-screen-aside-gap) +
-        var(--home-screen-feed-width)
-    );
-    max-width: none;
-    /* Сдвиг: левый край feed = 50% − feed/2 → feed по центру viewport */
-    margin-inline-start: max(
-      0px,
-      calc(
-        50% - (var(--home-screen-feed-width) / 2) -
-          var(--home-screen-aside-width) - var(--home-screen-aside-gap)
-      )
-    );
-    margin-inline-end: auto;
-  }
-
-  .home-screen__aside {
-    display: block;
-    position: sticky;
-    top: var(--home-screen-aside-sticky-top);
-    flex-shrink: 0;
-    align-self: flex-start;
-    width: var(--home-screen-aside-width);
-  }
-
-  .home-screen__feed {
-    flex: 0 0 var(--home-screen-feed-width);
-    width: var(--home-screen-feed-width);
-    max-width: var(--home-screen-feed-width);
+  .home-screen__locked-backdrop {
+    transition-duration: 0.01ms;
   }
 }
 

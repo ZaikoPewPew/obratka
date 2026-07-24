@@ -15,7 +15,7 @@
 | `referral*` | `/referral` |
 | `auth*` / `authEmail*` / `authCode*` / `authOtp*` / `authIdentityConflict` | `/registration`, `/registration/code` |
 | `onboarding*` | `/onboarding` |
-| `home*` | `/home` (карточки, баланс, dev-кнопки) |
+| `home*` | `/home` (карточки, баланс, stub-модалка подачи) |
 | `url*` / `urlModal*` / `urlScreen*` | `/portfolio` |
 | `success*` | `/done` |
 | `ban*` | `/banned` |

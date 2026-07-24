@@ -348,9 +348,9 @@
   --ban-screen-actions-gap: var(--shell-review-done-actions-gap);
   --ban-screen-btn-width: 242px;
   --ban-screen-noise-opacity: 0.5;
-  /* Mark with flame: same width as brand, taller; nudge keeps bottom/right with old 44×30 */
+  /* Mark with flame: same width as brand, taller; nudge keeps bottom/right with 44×43 */
   --ban-screen-brand-width: 44px;
-  --ban-screen-brand-height: 37px;
+  --ban-screen-brand-height: 52px;
   --ban-screen-brand-align-y: calc(
     (var(--ban-screen-brand-height) - var(--url-screen-brand-height)) / -2
   );
@@ -398,6 +398,14 @@
   --home-screen-aside-bg: var(--color-surface-muted);
   --home-screen-aside-gap: var(--space-4);
   --home-screen-aside-sticky-top: 0px;
+  --home-screen-locked-modal-max-width: 360px;
+  --home-screen-locked-modal-padding: var(--space-6);
+  --home-screen-locked-modal-gap: var(--space-4);
+  --home-screen-locked-modal-radius: var(--radius-md);
+  --home-screen-locked-modal-title-size: var(--font-size-lg);
+  --home-screen-locked-modal-title-weight: var(--font-weight-semibold);
+  --home-screen-locked-modal-body-size: var(--font-size-base);
+  --home-screen-locked-modal-z: calc(var(--home-screen-z) + 1);
   --home-screen-card-padding: var(--space-2);
   --home-screen-card-gap: var(--space-2);
   --home-screen-card-radius: var(--radius-xl);
@@ -420,15 +428,14 @@
   --home-screen-count-padding: var(--space-4);
   --home-screen-count-radius: var(--radius-md);
   --home-screen-count-bg: var(--color-surface);
-  --home-screen-footer-gap: var(--space-2);
   --home-screen-hint-size: var(--font-size-sm);
   --home-screen-skeleton-base: var(--color-surface-muted-active);
   --home-screen-skeleton-shine: var(--color-surface);
   --home-screen-skeleton-duration: 1.4s;
-  --home-screen-skeleton-line-name-width: 42%;
-  --home-screen-skeleton-line-role-width: 58%;
-  --home-screen-skeleton-line-height: var(--space-3);
-  --home-screen-skeleton-balance-width: var(--space-8);
+  --home-screen-skeleton-card-height: calc(
+    (var(--home-screen-card-padding) * 2) + var(--home-screen-preview-height) +
+      var(--home-screen-card-gap) + var(--home-screen-count-height)
+  );
   /* Bottom tabs «Лента | Мои» (Figma menu 445:473) */
   --home-screen-tabbar-height: 52px;
   --home-screen-tabbar-offset: var(--space-4);
@@ -622,7 +629,7 @@
   --url-screen-preview-stub-bone-width-mid: 64%;
   --url-screen-preview-stub-bone-width-short: 42%;
   --url-screen-brand-width: 44px;
-  --url-screen-brand-height: 30px;
+  --url-screen-brand-height: 43px;
   --url-screen-brand-fill: var(--palette-white);
   --url-screen-noise-color: var(--palette-gray-100);
   --url-screen-noise-opacity: 1;

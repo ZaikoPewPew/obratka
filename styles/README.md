@@ -30,7 +30,7 @@
 | `--auth-screen-*` | divider / providers / OTP hint / links |
 | `--auth-code-*` | ячейки OTP / caret / `--auth-code-resend-cooldown` |
 | `--shell-review-*` | квиз / report / done |
-| `--home-screen-*` | topbar / feed / aside / avatar |
+| `--home-screen-*` | topbar / feed / avatar / locked-modal |
 
 Handoff без анимации visual: класс `.url-screen--handoff` + `brandScreenTransition.js`.
 

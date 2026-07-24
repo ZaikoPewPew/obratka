@@ -1,0 +1,24 @@
+/* Рейтинг на главной (пока не подключён в index.html). */
+
+.rating-panel {
+  display: none;
+}
+
+.rating-panel__surface {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--home-screen-aside-min-height);
+  border-radius: var(--home-screen-aside-radius);
+  background: var(--home-screen-aside-bg);
+}
+
+@media (min-width: 960px) {
+  .rating-panel:not([hidden]) {
+    display: block;
+    position: sticky;
+    top: var(--home-screen-aside-sticky-top);
+    flex-shrink: 0;
+    align-self: flex-start;
+    width: var(--home-screen-aside-width);
+  }
+}

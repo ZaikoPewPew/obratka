@@ -32,10 +32,10 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 
 ### Лента и карточки
 
-При `open` / смене таба: skeleton (топбар + 5 карточек), затем данные с `motion-reveal` stagger.  
+При `open` / смене таба: skeleton только у ленты (5 целых карточек-шиммеров), хедер без изменений; затем данные с `motion-reveal` stagger.  
 Клик по чужой карточке → `onOpenPortfolio` → `/review`.  
 Своя (`isOwn`, вкладка «Мои») — полный визуал, клик запрещён (`aria-disabled`).  
-CTA «Закинуть своё» — в топбаре слева от баланса (нужен баланс ≥ `SUBMIT_COST`).
+CTA «Закинуть своё» — всегда активна (чёрная). Баланс ≥ `SUBMIT_COST` → `onAddPortfolio` → `/portfolio`; иначе stub-модалка «не хватает монет» (контент позже).
 
 Лиги (тихий матчинг): junior → junior; middle → junior+middle; senior/lead/head → middle+senior+.  
 Клиент-зеркало: [`src/api/leagues.js`](../../api/leagues.js). Сервер: [`supabase/sql/portfolios.sql`](../../../supabase/sql/portfolios.sql) (`can_review_portfolio`, RLS).
@@ -43,7 +43,7 @@ CTA «Закинуть своё» — в топбаре слева от бала
 Лента по центру экрана (`--home-screen-body-padding-top` = 16px сверху); снизу запас под таббар (`--home-screen-body-padding-bottom`).  
 Topbar поверх контента (`position: absolute`), появление без `filter` (`motion-reveal-topbar`).
 
-На десктопе (≥960px) слева от ленты sticky-aside (`--home-screen-aside-*`).
+Рейтинг слева (топ по валюте) — компонент [`rating/`](../rating/), пока **не монтируется**.
 
 ### Профиль и баланс
 
@@ -51,13 +51,11 @@ Topbar поверх контента (`position: absolute`), появление 
 - Если в `profiles.avatar_url` пусто — при refresh подтягиваем picture из Auth и пишем в профиль.
 - При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.
 - Баланс: `profiles.balance` ↔ `session.balance`.
+- Клик по чипу баланса (dev): `creditBalance(+10)`.
 
-### Dev-кнопки (под лентой)
+### Dev: сброс сессии
 
-| Кнопка | Действие |
-|--------|----------|
-| `+{amount} монет` | `creditBalance` (локально + Supabase) |
-| `Сбросить сессию` | `onResetSession` → signOut / clear / `go("referral")` |
+Временно: клик по логотипу в шапке → `onResetSession` → signOut / clear / `go("referral")`.
 
 ## Поля карточки
 
@@ -91,7 +89,7 @@ Topbar поверх контента (`position: absolute`), появление 
 
 Токены `--home-screen-tabbar-*` (высота 52, padding трека 2px, таб 48, offset 16, радиус 12, motion hide/thumb/label).
 
-Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeTabFeed`, `homeTabMine`, `homeTabsAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeCardProgress`, `homeCardOwnTitle`, `homeCardOwnAria`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitCost`, `homeAddCoins*`, `homeResetSession*`.
+Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeTabFeed`, `homeTabMine`, `homeTabsAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeCardProgress`, `homeCardOwnTitle`, `homeCardOwnAria`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`, `homeResetSessionTitle`.
 
 `prefers-reduced-motion: reduce` — hide/thumb/label transitions ≈ мгновенные.
 

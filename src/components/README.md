@@ -12,6 +12,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `auth-code-screen/` | `/registration/code` | UI + OTP verify + resend cooldown |
 | `onboarding-screen/` | `/onboarding` | UI → `profiles` |
 | `home-screen/` | `/home` | UI (hub + shared feed + wallet) |
+| `rating/` | — | топ по валюте на home (пока не монтируется) |
 | `url-screen/` | `/portfolio` | UI (submit own + done) |
 | `success-screen/` | `/done` | UI (пресеты подачи) |
 | `ban-screen/` | `/banned` | UI (аккаунт заблокирован) |
