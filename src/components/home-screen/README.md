@@ -60,7 +60,7 @@ Topbar поверх контента (`position: absolute`), появление 
 - Репутация: `profiles.reputation` ↔ `session.reputation`; чип = иконка + дельта от 100 (`0` / `+10` / `-20`, `formatReputationDelta`); клик → explainer через `createAppModal` (без весов тегов).
 - Порядок чипов: «Закинуть своё» → репутация → баланс → уведомления → аватар.
 - Баланс: `profiles.balance` ↔ `session.balance`.
-- Клик по чипу баланса: в **DEV** только локальный кэш (`creditBalance`); в production no-op. Серверный баланс — RPC `spend_submit_cost` / награда в review trigger.
+- Клик по чипу баланса (**временно**): `TEMP_BALANCE_CHIP_CREDIT` → RPC `temp_credit_balance` (+10); иначе DEV local-only. Убрать флаг + RPC после тестов. Серверный spend — `spend_submit_cost`.
 - CTA «Закинуть своё» без монет → `createAppModal` «Монет маловато»; notices (no slots / already reviewed) — тот же `noticeModal`.
 - Клик по аватару профиля → `createAppModal` «Твой реферальный код»: код в слоте, primary/secondary копируют код / ссылку `?ref=`. API: `fetchMyReferral` / `buildReferralShareUrl`. Без наград — только шаринг.
 

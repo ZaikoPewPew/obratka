@@ -14,6 +14,8 @@ import {
   creditBalance,
   getBalance,
   refreshWalletFromServer,
+  TEMP_BALANCE_CHIP_AMOUNT,
+  TEMP_BALANCE_CHIP_CREDIT,
 } from "../../api/wallet.js";
 import { formatReputationDelta } from "../../api/reviewComplaints.js";
 import { getSession, setSession } from "../../app/session.js";
@@ -49,8 +51,8 @@ function createSubmitPlusIcon() {
   return svg;
 }
 
-/** Сколько монет даёт клик по чипу баланса (dev). */
-const DEV_CREDIT_AMOUNT = 10;
+/** Сколько монет даёт клик по чипу баланса (temp / DEV). */
+const DEV_CREDIT_AMOUNT = TEMP_BALANCE_CHIP_AMOUNT;
 
 /** Сколько skeleton-карточек показывать, пока грузится лента. */
 const SKELETON_CARD_COUNT = 5;
@@ -1127,7 +1129,7 @@ export function createHomeScreen({
   });
 
   balanceChip.addEventListener("click", () => {
-    if (!import.meta.env.DEV) return;
+    if (!TEMP_BALANCE_CHIP_CREDIT && !import.meta.env.DEV) return;
     void creditBalance(DEV_CREDIT_AMOUNT).then(() => {
       syncCopy();
     });

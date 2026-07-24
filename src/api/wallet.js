@@ -125,16 +125,40 @@ export async function awardReviewReward() {
 }
 
 /**
- * Dev-only: локальный кэш баланса (сервер не пишет). В production — no-op.
+ * Временно: клик по чипу баланса на home начисляет кости (RPC + локальный кэш).
+ * Выключить / удалить RPC `temp_credit_balance` после тестов.
+ */
+export const TEMP_BALANCE_CHIP_CREDIT = true;
+
+/** Сколько костей даёт один клик по чипу (temp / DEV). */
+export const TEMP_BALANCE_CHIP_AMOUNT = 10;
+
+/**
+ * Temp / DEV: начислить кости. При `TEMP_BALANCE_CHIP_CREDIT` — RPC `temp_credit_balance`.
  * @param {number} amount
  * @returns {Promise<number>} новый баланс
  */
 export async function creditBalance(amount) {
-  if (!import.meta.env.DEV) {
+  if (!TEMP_BALANCE_CHIP_CREDIT && !import.meta.env.DEV) {
     return getBalance();
   }
   const n = typeof amount === "number" && Number.isFinite(amount) ? amount : 0;
   if (n <= 0) return getBalance();
+
+  const supabase = getSupabase();
+  if (TEMP_BALANCE_CHIP_CREDIT && supabase) {
+    const { data, error } = await supabase.rpc("temp_credit_balance", {
+      p_amount: Math.floor(n),
+    });
+    if (!error && typeof data === "number" && Number.isFinite(data)) {
+      return writeBalanceLocal(data);
+    }
+    if (import.meta.env.DEV && error) {
+      console.warn("[wallet] temp_credit_balance", error.message || error);
+    }
+  }
+
+  /* Fallback без RPC: только localStorage (сотрётся на refresh с сервера). */
   return writeBalanceLocal(getBalance() + n);
 }
 

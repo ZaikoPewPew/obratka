@@ -587,11 +587,7 @@
   --home-screen-tabbar-offset: var(--space-4);
   --home-screen-tabbar-padding: var(--space-1);
   --home-screen-tabbar-radius: var(--radius-md);
-  --home-screen-tabbar-track-bg: color-mix(
-    in srgb,
-    var(--palette-gray-900) 20%,
-    transparent
-  );
+  --home-screen-tabbar-track-bg: var(--color-surface-muted);
   --home-screen-tabbar-track-bg-on-dark: color-mix(
     in srgb,
     var(--palette-white) 78%,

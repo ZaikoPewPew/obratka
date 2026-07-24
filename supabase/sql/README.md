@@ -5,7 +5,7 @@
 | Файл | Роль |
 |------|------|
 | `profiles.sql` | `public.profiles`, protect tier/ban/reputation/**balance**/grade, `is_profile_banned` (self-only), telegram_id из app_metadata |
-| `wallet.sql` | `protect_profiles_balance` + RPC `spend_submit_cost` (после profiles) |
+| `wallet.sql` | `protect_profiles_balance` + RPC `spend_submit_cost` (+ temp `temp_credit_balance` для тестов) |
 | `referrals.sql` | персональный `referral_code` (max 2 uses), seed `YTHWKPDWAK`, RPC validate/redeem; без наград |
 | `portfolios.sql` | portfolios/reviews, лиги; INSERT WITH CHECK pending/0/target=3 |
 | `review_claims.sql` | claims + award balance (+1) в `handle_review_inserted` |

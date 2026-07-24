@@ -78,3 +78,45 @@ $$;
 revoke all on function public.spend_submit_cost() from public;
 revoke all on function public.spend_submit_cost() from anon;
 grant execute on function public.spend_submit_cost() to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- TEMP: chip credit on home (remove after testing).
+-- ---------------------------------------------------------------------------
+
+create or replace function public.temp_credit_balance(p_amount integer default 10)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  uid uuid := auth.uid();
+  bal integer;
+  amt integer := greatest(1, least(coalesce(p_amount, 10), 100));
+begin
+  if uid is null then
+    raise exception 'not_authenticated';
+  end if;
+
+  if public.is_profile_banned(uid) then
+    raise exception 'banned';
+  end if;
+
+  perform set_config('app.bypass_profile_guards', 'on', true);
+
+  update public.profiles
+  set balance = balance + amt
+  where id = uid
+  returning balance into bal;
+
+  if not found or bal is null then
+    raise exception 'profile_not_found';
+  end if;
+
+  return bal;
+end;
+$$;
+
+revoke all on function public.temp_credit_balance(integer) from public;
+revoke all on function public.temp_credit_balance(integer) from anon;
+grant execute on function public.temp_credit_balance(integer) to authenticated;
