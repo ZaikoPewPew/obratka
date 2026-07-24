@@ -13,6 +13,9 @@ alter table public.reviews
 alter table public.reviews
   add column if not exists reviewer_display_name text;
 
+alter table public.reviews
+  add column if not exists reviewer_grade text;
+
 create table if not exists public.review_claims (
   portfolio_id uuid not null references public.portfolios (id) on delete cascade,
   reviewer_id uuid not null references auth.users (id) on delete cascade,
@@ -312,6 +315,7 @@ declare
   p public.portfolios;
   avatar text;
   display text;
+  grade text;
 begin
   select * into p
   from public.portfolios
@@ -344,22 +348,22 @@ begin
     raise exception 'review_claim_required';
   end if;
 
-  if new.reviewer_avatar_url is null or nullif(trim(new.reviewer_avatar_url), '') is null
-     or new.reviewer_display_name is null or nullif(trim(new.reviewer_display_name), '') is null
-  then
-    select
-      nullif(trim(pr.avatar_url), ''),
-      nullif(trim(pr.display_name), '')
-    into avatar, display
-    from public.profiles pr
-    where pr.id = new.reviewer_id;
+  select
+    nullif(trim(pr.avatar_url), ''),
+    nullif(trim(pr.display_name), ''),
+    nullif(trim(pr.grade), '')
+  into avatar, display, grade
+  from public.profiles pr
+  where pr.id = new.reviewer_id;
 
-    if new.reviewer_avatar_url is null or nullif(trim(new.reviewer_avatar_url), '') is null then
-      new.reviewer_avatar_url := avatar;
-    end if;
-    if new.reviewer_display_name is null or nullif(trim(new.reviewer_display_name), '') is null then
-      new.reviewer_display_name := display;
-    end if;
+  if new.reviewer_avatar_url is null or nullif(trim(new.reviewer_avatar_url), '') is null then
+    new.reviewer_avatar_url := avatar;
+  end if;
+  if new.reviewer_display_name is null or nullif(trim(new.reviewer_display_name), '') is null then
+    new.reviewer_display_name := display;
+  end if;
+  if new.reviewer_grade is null or nullif(trim(new.reviewer_grade), '') is null then
+    new.reviewer_grade := grade;
   end if;
 
   update public.portfolios

@@ -15,6 +15,7 @@ import { buildReportSections } from "../../utils/reviewReport.js";
 import { shareReviewPdf } from "../../utils/shareReviewPdf.js";
 import {
   REVIEW_COMPLAINT_TAGS,
+  formatReviewerGradeLabel,
   listPortfolioReviewSheets,
   submitReviewComplaint,
 } from "../../api/reviewComplaints.js";
@@ -77,7 +78,6 @@ export function createReportScreen(opts = {}) {
   let selectedTags = new Set();
   let submitting = false;
   let loadToken = 0;
-  let pdfDone = false;
   /** @type {Animation | null} */
   let reportLaunchAnim = null;
   let pendingDoneMesh = false;
@@ -286,7 +286,6 @@ export function createReportScreen(opts = {}) {
 
   function clearDoneMesh() {
     pendingDoneMesh = false;
-    pdfDone = false;
     root.classList.remove("report-screen--done");
     setDefaultBrandMark();
     meshWash.refresh();
@@ -449,27 +448,47 @@ export function createReportScreen(opts = {}) {
         firstWithAnswers.reviewerDisplayName.trim()) ||
       t.reportSheetReviewerFallback ||
       "";
-    const index = sheets.indexOf(firstWithAnswers);
-    const sheetLabel = formatString(t.reportSheetLabel, { n: index + 1 });
+    const gradeLabel = formatReviewerGradeLabel(firstWithAnswers.reviewerGrade, t);
     fillReportSheet(
       firstWithAnswers.answers,
-      [sheetLabel, name].filter(Boolean).join(" · "),
+      [gradeLabel, name].filter(Boolean).join(" · "),
     );
     root.classList.add("report-screen--report");
   }
 
+  /**
+   * Перед повторным скачиванием: снять done и снова вытащить мокап.
+   */
+  function prepareSheetForDownload() {
+    cancelReportLaunch();
+    pendingDoneMesh = false;
+    if (root.classList.contains("report-screen--done")) {
+      clearDoneMesh();
+    }
+    showReportMockup();
+  }
+
   function markPdfDownloaded() {
-    if (pdfDone) return;
-    pdfDone = true;
     pendingDoneMesh = true;
     void launchReportAway();
-    syncDownloadButton();
   }
 
   function syncDownloadButton() {
     const hasAnswers = sheets.some((sheet) => sheet.answers);
-    downloadBtn.disabled = pdfDone || !hasAnswers;
+    downloadBtn.disabled = !hasAnswers;
     downloadBtn.hidden = false;
+  }
+
+  /**
+   * @param {import("../../api/reviewComplaints.js").PortfolioReviewSheet} sheet
+   * @param {number} index
+   * @returns {string}
+   */
+  function sheetGradeLabel(sheet, index) {
+    const t = getStrings();
+    const gradeLabel = formatReviewerGradeLabel(sheet.reviewerGrade, t);
+    if (gradeLabel) return gradeLabel;
+    return formatString(t.reportSheetLabel, { n: index + 1 });
   }
 
   function applyCopy() {
@@ -607,7 +626,7 @@ export function createReportScreen(opts = {}) {
 
     const labelEl = document.createElement("p");
     labelEl.className = "report-screen__sheet-label";
-    labelEl.textContent = formatString(t.reportSheetLabel, { n: index + 1 });
+    labelEl.textContent = sheetGradeLabel(sheet, index);
 
     textCol.append(nameEl, labelEl);
     meta.append(avatar, textCol);
@@ -637,7 +656,7 @@ export function createReportScreen(opts = {}) {
       sheetsList.hidden = true;
       sheetsEmpty.hidden = false;
       syncDownloadButton();
-      if (!pdfDone) showReportMockup();
+      showReportMockup();
       return;
     }
     sheetsEmpty.hidden = true;
@@ -646,7 +665,7 @@ export function createReportScreen(opts = {}) {
       sheetsList.append(buildSheetRow(sheet, index));
     });
     syncDownloadButton();
-    if (!pdfDone) showReportMockup();
+    showReportMockup();
   }
 
   /**
@@ -749,7 +768,7 @@ export function createReportScreen(opts = {}) {
   });
 
   downloadBtn.addEventListener("click", () => {
-    if (downloadBtn.disabled || pdfDone) return;
+    if (downloadBtn.disabled) return;
     const t = getStrings();
     const pages = sheets
       .map((sheet, index) => {
@@ -761,12 +780,14 @@ export function createReportScreen(opts = {}) {
         return {
           answers: sheet.answers,
           reviewerName,
-          sheetLabel: formatString(t.reportSheetLabel, { n: index + 1 }),
+          sheetLabel: sheetGradeLabel(sheet, index),
         };
       })
       .filter(Boolean);
 
     if (pages.length === 0) return;
+
+    prepareSheetForDownload();
 
     shareReviewPdf(pages, {
       portfolioName: portfolioName || t.brandName,

@@ -1,5 +1,6 @@
 import { getSupabase } from "../lib/supabaseClient.js";
 import { getSession, setSession } from "../app/session.js";
+import { getStrings } from "../i18n.js";
 import { parseReviewAnswers } from "../utils/reviewReport.js";
 
 /** @typedef {'low_effort' | 'spam' | 'harassment' | 'offensive' | 'irrelevant'} ReviewComplaintTag */
@@ -23,6 +24,7 @@ export const REPUTATION_DEFAULT = 100;
  *   reviewerId: string;
  *   reviewerDisplayName: string | null;
  *   reviewerAvatarUrl: string | null;
+ *   reviewerGrade: string | null;
  *   createdAt: string | null;
  *   complained: boolean;
  *   answers: import("../utils/reviewReport.js").ReviewAnswers | null;
@@ -39,6 +41,33 @@ export const REPUTATION_DEFAULT = 100;
  *   reviewerBanned: boolean;
  * }} SubmitReviewComplaintResult
  */
+
+/**
+ * Подпись грейда ревьюера для строки листа / PDF.
+ * @param {string | null | undefined} grade
+ * @param {Record<string, string>} [t]
+ * @returns {string}
+ */
+export function formatReviewerGradeLabel(grade, t = getStrings()) {
+  const key = typeof grade === "string" ? grade.trim().toLowerCase() : "";
+  switch (key) {
+    case "junior":
+      return t.reviewGradeJunior ?? "Junior";
+    case "middle":
+    case "mid":
+      return t.reviewGradeMid ?? "Middle";
+    case "senior":
+      return t.reviewGradeSenior ?? "Senior";
+    case "staff":
+      return t.reviewGradeStaff ?? "Staff";
+    case "lead":
+      return t.reviewGradeLead ?? "Lead";
+    case "head":
+      return t.reviewGradeHead ?? "Head";
+    default:
+      return "";
+  }
+}
 
 /**
  * @returns {number}
@@ -140,7 +169,7 @@ export async function listPortfolioReviewSheets(portfolioId) {
   const { data: rows, error } = await supabase
     .from("reviews")
     .select(
-      "id, portfolio_id, reviewer_id, reviewer_avatar_url, reviewer_display_name, created_at, answers",
+      "id, portfolio_id, reviewer_id, reviewer_avatar_url, reviewer_display_name, reviewer_grade, created_at, answers",
     )
     .eq("portfolio_id", portfolioId)
     .order("created_at", { ascending: true });
@@ -194,6 +223,10 @@ export async function listPortfolioReviewSheets(portfolioId) {
         reviewerAvatarUrl:
           typeof row.reviewer_avatar_url === "string"
             ? row.reviewer_avatar_url
+            : null,
+        reviewerGrade:
+          typeof row.reviewer_grade === "string" && row.reviewer_grade.trim()
+            ? row.reviewer_grade.trim()
             : null,
         createdAt:
           typeof row.created_at === "string" ? row.created_at : null,

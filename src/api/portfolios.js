@@ -621,6 +621,8 @@ export async function submitPortfolioReview(portfolioId, answers) {
     typeof session?.avatarUrl === "string" ? session.avatarUrl.trim() : "";
   const displayName =
     typeof session?.displayName === "string" ? session.displayName.trim() : "";
+  const grade =
+    typeof session?.grade === "string" ? session.grade.trim() : "";
 
   /** @type {Record<string, unknown>} */
   const insert = {
@@ -635,6 +637,9 @@ export async function submitPortfolioReview(portfolioId, answers) {
   }
   if (displayName) {
     insert.reviewer_display_name = displayName;
+  }
+  if (grade) {
+    insert.reviewer_grade = grade;
   }
 
   const { error } = await supabase.from("reviews").insert(insert);
