@@ -12,6 +12,11 @@ import {
 } from "../../api/wallet.js";
 import { getSession } from "../../app/session.js";
 import { resolvePlatformIcon } from "../../utils/platformBrandIcon.js";
+import {
+  BACKDROP_DARK_LUMA,
+  resolveImageLumaProbes,
+  sampleBackdropLuminance,
+} from "../../utils/backdropLuminance.js";
 import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import boneIconUrl from "../../assets/home/bone.svg";
 import bellIconUrl from "../../assets/home/bell.svg";
@@ -23,8 +28,11 @@ const DEV_CREDIT_AMOUNT = 10;
 /** Сколько skeleton-карточек показывать, пока грузится лента. */
 const SKELETON_CARD_COUNT = 5;
 
-/** Порог смены направления скролла для hide/show таббара. */
-const TABBAR_SCROLL_DELTA = 8;
+/**
+ * Порог только для hide: show — при любом скролле вверх.
+ * Hide чуть с запасом, чтобы не дёргался от трекпада.
+ */
+const TABBAR_HIDE_DELTA = 6;
 
 /**
  * @typedef {'feed' | 'mine'} HomeTabId
@@ -268,6 +276,10 @@ export function createHomeScreen({
   let activeTab = "feed";
   let lastScrollTop = 0;
   let tabbarHidden = false;
+  let tabbarOnDark = false;
+  let tabbarContrastRaf = 0;
+  /** @type {string | null} */
+  let tabbarContrastProbeKey = null;
 
   /** Нет фото → фон + буква; картинку прячем. */
   function showProfileLetter(letter) {
@@ -389,10 +401,52 @@ export function createHomeScreen({
     if (tabbarHidden === hidden) return;
     tabbarHidden = hidden;
     tabbar.classList.toggle("home-screen__tabbar--hidden", hidden);
+    if (!hidden) {
+      scheduleTabbarContrastSync();
+    }
   }
 
   function showTabbar() {
     setTabbarHidden(false);
+  }
+
+  /**
+   * @param {boolean} onDark
+   */
+  function setTabbarOnDark(onDark) {
+    if (tabbarOnDark === onDark) return;
+    tabbarOnDark = onDark;
+    tabbar.classList.toggle("home-screen__tabbar--on-dark", onDark);
+  }
+
+  /**
+   * Адаптивный контраст таббара по яркости фона под ним.
+   * @returns {void}
+   */
+  function syncTabbarContrast() {
+    if (root.hidden || tabbarHidden) return;
+    const { luma, pendingSrcs } = sampleBackdropLuminance(tabbar);
+    setTabbarOnDark(luma < BACKDROP_DARK_LUMA);
+    if (!pendingSrcs.length) return;
+    const key = pendingSrcs.slice().sort().join("\0");
+    if (key === tabbarContrastProbeKey) return;
+    tabbarContrastProbeKey = key;
+    void resolveImageLumaProbes(pendingSrcs).then((updated) => {
+      if (key === tabbarContrastProbeKey) {
+        tabbarContrastProbeKey = null;
+      }
+      if (updated) {
+        scheduleTabbarContrastSync();
+      }
+    });
+  }
+
+  function scheduleTabbarContrastSync() {
+    if (tabbarContrastRaf) return;
+    tabbarContrastRaf = requestAnimationFrame(() => {
+      tabbarContrastRaf = 0;
+      syncTabbarContrast();
+    });
   }
 
   /**
@@ -519,9 +573,13 @@ export function createHomeScreen({
         ? item.previewUrls[0]
         : portfolioPreviewUrl(item.url);
     previewImg.src = previewSrc;
+    previewImg.addEventListener("load", () => {
+      scheduleTabbarContrastSync();
+    });
     previewImg.addEventListener("error", () => {
       previewImg.remove();
       preview.classList.add("home-screen__preview--empty");
+      scheduleTabbarContrastSync();
     });
     preview.append(previewImg);
 
@@ -668,6 +726,7 @@ export function createHomeScreen({
       list.append(li);
     }
     revealItems = false;
+    scheduleTabbarContrastSync();
   }
 
   /**
@@ -704,10 +763,12 @@ export function createHomeScreen({
       requestAnimationFrame(() => {
         root.classList.add("home-screen--open");
         scheduleTabThumbSync(true);
+        scheduleTabbarContrastSync();
       });
     });
     await refresh();
     scheduleTabThumbSync(true);
+    scheduleTabbarContrastSync();
   }
 
   /**
@@ -729,14 +790,13 @@ export function createHomeScreen({
     () => {
       const scrollTop = body.scrollTop;
       const delta = scrollTop - lastScrollTop;
-      if (scrollTop <= 0) {
+      if (scrollTop <= 0 || delta < 0) {
         showTabbar();
-      } else if (delta > TABBAR_SCROLL_DELTA) {
+      } else if (delta > TABBAR_HIDE_DELTA) {
         setTabbarHidden(true);
-      } else if (delta < -TABBAR_SCROLL_DELTA) {
-        showTabbar();
       }
       lastScrollTop = scrollTop;
+      scheduleTabbarContrastSync();
     },
     { passive: true },
   );
@@ -750,7 +810,10 @@ export function createHomeScreen({
     tabbarResize.observe(mineTab);
   }
 
-  window.addEventListener("resize", scheduleTabThumbSync);
+  window.addEventListener("resize", () => {
+    scheduleTabThumbSync();
+    scheduleTabbarContrastSync();
+  });
 
   feedTab.addEventListener("click", () => {
     void setActiveTab("feed");

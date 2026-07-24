@@ -15,7 +15,7 @@ const BRAND_MARK_SVG = logoDoneMarkSvg("success-screen__brand-mark");
 
 
 /**
- * Экран успеха после подачи портфолио: тайтл + кнопка «Выйти», справа зелёный mesh.
+ * Экран успеха после подачи портфолио: тайтл + кнопка «На главную», справа зелёный mesh.
  *
  * @param {{
  *   onPrimary?: (preset: SuccessPresetId) => void | Promise<void>;

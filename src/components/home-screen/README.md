@@ -16,8 +16,13 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 Переключатель: `home-screen__tabbar` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`). Вкладки: **На ревью** / **Мои посты**.
 
 - Скролл **вниз** по `home-screen__body` → таббар уезжает за нижний край (`--hidden`).
-- Скролл **вверх** / у верхнего края → снова виден.
+- Скролл **вверх** (любой delta &lt; 0) / у верхнего края → снова виден сразу.
+- Hide — с небольшим порогом (`TABBAR_HIDE_DELTA`), чтобы трекпад не дёргал.
 - Анимация hide/show: `--home-screen-tabbar-hide-duration` / `--home-screen-tabbar-hide-ease` → `--motion-screen-*`.
+
+### Контраст над тёмным превью
+
+Пока таббар виден, сэмплим яркость фона под ним (`src/utils/backdropLuminance.js`, scroll / resize / load превью). Если фон тёмный → класс `home-screen__tabbar--on-dark`: светлая подложка + светлый текст неактивного таба (активный пилл без изменений). Токены: `--home-screen-tabbar-*-on-dark`, transition `--home-screen-tabbar-contrast-*`.
 
 ### Переключение таба (UI)
 
@@ -79,7 +84,7 @@ Topbar поверх контента (`position: absolute`), появление 
   button.home-screen__tab     role=tab  data-tab=feed|mine
 ```
 
-Классы состояния: `--active` на табе; `--hidden` на tabbar при скролле вниз.
+Классы состояния: `--active` на табе; `--hidden` на tabbar при скролле вниз; `--on-dark` при тёмном фоне под баром.
 
 ## API модуля
 
@@ -89,7 +94,7 @@ Topbar поверх контента (`position: absolute`), появление 
 
 ## Стили / i18n / a11y
 
-Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, motion hide/thumb/label).
+Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, motion hide/thumb/label/contrast, on-dark track/label).
 
 Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeTabFeed`, `homeTabMine`, `homeTabsAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeCardProgress`, `homeCardOwnTitle`, `homeCardOwnAria`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`, `homeResetSessionTitle`.
 

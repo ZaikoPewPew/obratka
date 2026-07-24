@@ -460,6 +460,11 @@
     var(--palette-gray-900) 20%,
     transparent
   );
+  --home-screen-tabbar-track-bg-on-dark: color-mix(
+    in srgb,
+    var(--palette-white) 78%,
+    transparent
+  );
   --home-screen-tabbar-blur: 20px;
   --home-screen-tabbar-tab-height: 48px;
   --home-screen-tabbar-tab-padding-x: var(--space-4);
@@ -470,6 +475,7 @@
   --home-screen-tabbar-tab-active-bg: var(--color-accent);
   --home-screen-tabbar-tab-active-color: var(--color-on-accent);
   --home-screen-tabbar-tab-color: var(--color-text);
+  --home-screen-tabbar-tab-color-on-dark: var(--palette-white);
   --home-screen-tabbar-z: 3;
   --home-screen-tabbar-hide-duration: var(--motion-screen-duration);
   --home-screen-tabbar-hide-ease: var(--motion-screen-ease);
@@ -477,6 +483,8 @@
   --home-screen-tabbar-thumb-ease: var(--motion-screen-ease);
   --home-screen-tabbar-label-duration: var(--motion-screen-duration);
   --home-screen-tabbar-label-ease: var(--motion-screen-ease);
+  --home-screen-tabbar-contrast-duration: var(--motion-screen-duration);
+  --home-screen-tabbar-contrast-ease: var(--motion-screen-ease);
   --home-screen-body-padding-bottom: calc(
     var(--home-screen-tabbar-offset) + var(--home-screen-tabbar-height) +
       var(--space-4)

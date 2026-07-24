@@ -265,7 +265,7 @@ export function createUrlScreen({ onSubmit, onExit }) {
     platformsText.textContent = strings.urlScreenPlatforms;
     stubTitle.textContent = strings.urlPreviewStubTitle;
     doneTitle.textContent = strings.successPortfolioTitle;
-    exitBtn.textContent = strings.reviewDoneExit;
+    exitBtn.textContent = strings.successGenericPrimary;
   }
 
   function setError(visible) {

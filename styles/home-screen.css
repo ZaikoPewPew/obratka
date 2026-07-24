@@ -690,8 +690,11 @@
   backdrop-filter: blur(var(--home-screen-tabbar-blur));
   -webkit-backdrop-filter: blur(var(--home-screen-tabbar-blur));
   transform: translateX(-50%);
-  transition: bottom var(--home-screen-tabbar-hide-duration)
-    var(--home-screen-tabbar-hide-ease);
+  transition:
+    bottom var(--home-screen-tabbar-hide-duration)
+      var(--home-screen-tabbar-hide-ease),
+    background-color var(--home-screen-tabbar-contrast-duration)
+      var(--home-screen-tabbar-contrast-ease);
   pointer-events: auto;
 }
 
@@ -700,6 +703,18 @@
     -1 * (var(--home-screen-tabbar-height) + var(--home-screen-tabbar-offset))
   );
   pointer-events: none;
+}
+
+.home-screen__tabbar--on-dark {
+  background: var(--home-screen-tabbar-track-bg-on-dark);
+}
+
+.home-screen__tabbar--on-dark .home-screen__tab {
+  color: var(--home-screen-tabbar-tab-color-on-dark);
+}
+
+.home-screen__tabbar--on-dark .home-screen__tab--active {
+  color: var(--home-screen-tabbar-tab-active-color);
 }
 
 .home-screen__tabbar-thumb {
