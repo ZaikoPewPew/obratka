@@ -764,6 +764,10 @@ async function applyProviderUser(user, provider) {
       telegramUsername: profile.telegram_username ?? next.telegramUsername,
       balance:
         typeof profile.balance === "number" ? profile.balance : next.balance,
+      reputation:
+        typeof profile.reputation === "number"
+          ? profile.reputation
+          : next.reputation,
       onboardingDone: Boolean(profile.onboarding_done),
       role: profile.role ?? next.role,
       grade: profile.grade ?? next.grade,

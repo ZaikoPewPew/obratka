@@ -1,0 +1,40 @@
+---
+description: Supabase SQL — порядок apply, RPC, RLS, операторские шаблоны
+globs: supabase/**
+alwaysApply: false
+---
+
+# Supabase SQL
+
+Инварианты секретов / RLS / клиента: `security.mdc`.
+
+## Порядок apply
+
+1. `profiles.sql`
+2. `portfolios.sql`
+3. `review_claims.sql` (обязателен после portfolios)
+4. `review_complaints.sql` (после profiles + portfolios/reviews)
+5. `referrals.sql` (можно параллельно с portfolios, зависит от profiles)
+
+Не ломать зависимости: `is_profile_banned`, `can_review_portfolio`, claim BEFORE INSERT.
+
+## Паттерны
+
+- Mutations: `security definer` + `set search_path = public`; revoke direct write где нужно.
+- Claims / referrals — только RPC (`claim_*`, `validate_referral`, `redeem_referral`).
+- `portfolio_reviewer_slots` — **VOLATILE**, не STABLE (иначе PostgREST 405).
+- Клиент read-only: `tier`, `banned_at`, `ban_reason` (protect-триггеры).
+
+## Оператор vs app
+
+| Файл | Роль |
+|------|------|
+| `BAN.md`, `ban-templates.sql` | бан / разбан руками |
+| `delete-account-templates.sql` | полное удаление тестового аккаунта |
+| `subscribers_count.sql` | legacy waitlist, не entry UX |
+
+Не путать операторские шаблоны с app-schema. Документация рядом с SQL.
+
+## SoT
+
+`supabase/README.md`, `supabase/sql/README.md`, Edge: `functions/telegram-auth/`.

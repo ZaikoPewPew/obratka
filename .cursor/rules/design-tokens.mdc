@@ -15,24 +15,29 @@ alwaysApply: true
 
 ## Жёсткое правило
 
-Любая **новая или существующая** сущность (кнопка, панель, модалка, текст, отступ, цвет, радиус, тень, z-index, размер контрола) должна быть **полностью на токенах**:
+Любая **новая или существующая** сущность должна быть **полностью на токенах**:
 
 - сначала токен в `styles/tokens.css`;
 - в `styles/*.css` / инлайне — только `var(--…)`;
-- запрещены сырые `#hex`, `rgba(…)`, «магические» `px`/`rem` в компонентах (исключение: литералы в `@media` брейкпоинтах; one-off сразу выносится в токен);
+- запрещены сырые `#hex`, `rgba(…)`, «магические» `px`/`rem` в компонентах (исключение: литералы в `@media` брейкпоинтах; one-off сразу в токен);
 - не добавлять другие шрифты в стек UI — только Montserrat.
 
-## Оболочка
+## Оболочка и экраны
 
-`--control-*`, `--shell-*`, `--frame-*`, `--recall-*`. Аватар и кнопка «Заметки»: `--radius-xs` (= 8px).
+- `--control-*`, `--shell-*`, `--frame-*`, `--recall-*`. Аватар / «Заметки»: `--radius-xs`.
+- Ban: `--shell-ban-mesh-*`, `--ban-screen-*`.
+- Home tabbar: `--home-screen-tabbar-*` (hide / thumb / on-dark / contrast).
+- Auth OTP: `--auth-code-resend-cooldown`.
+- Brand mark: `--url-screen-brand-*` vs `--url-screen-brand-done-*`; **invalid не меняет size**.
 
 ## Motion
 
-Общий язык появления: `--motion-*`, `--ease-reveal` в `tokens.css`; keyframes/утилиты в `styles/entrance.css`.
+`--motion-*`, `--ease-reveal` в `tokens.css`; keyframes в `styles/entrance.css`.
 
-- CSS: `animation-name: motion-reveal` / `motion-reveal-scale` (не дублировать keyframes в компонентах).
+- CSS: `motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` (не дублировать keyframes).
 - Экранные задержки — алиасы (`--url-screen-reveal-delay-*` → `--motion-delay-*`).
-- JS (WAAPI / close fallback): `src/utils/motionTokens.js`, без хардкода ms/px/easing.
+- Field error: `--motion-field-error-*`, `--motion-field-error-visual-*` + `--url-screen-error-mesh-*`.
+- JS (WAAPI / close): `src/utils/motionTokens.js`, без хардкода ms/px/easing.
 
 ## Примеры
 

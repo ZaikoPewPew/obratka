@@ -95,6 +95,11 @@ export async function refreshSessionFromProfile() {
       typeof profile.balance === "number" && Number.isFinite(profile.balance)
         ? Math.max(0, Math.floor(profile.balance))
         : session.balance,
+    reputation:
+      typeof profile.reputation === "number" &&
+      Number.isFinite(profile.reputation)
+        ? Math.max(0, Math.floor(profile.reputation))
+        : session.reputation,
     onboardingDone:
       typeof profile.onboarding_done === "boolean"
         ? profile.onboarding_done

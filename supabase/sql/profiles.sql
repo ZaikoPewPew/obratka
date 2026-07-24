@@ -26,6 +26,8 @@ create table if not exists public.profiles (
   -- Moderation: non-null banned_at ⇒ account locked (ban-screen). Clients cannot write.
   banned_at timestamptz,
   ban_reason text,
+  -- Reviewer reputation (complaints → auto-ban). Clients cannot write; see review_complaints.sql.
+  reputation integer not null default 100 check (reputation >= 0),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -54,6 +56,17 @@ alter table public.profiles
 
 alter table public.profiles
   add column if not exists ban_reason text;
+
+-- Idempotent for DBs created before reputation existed (RPC in review_complaints.sql).
+alter table public.profiles
+  add column if not exists reputation integer not null default 100;
+
+alter table public.profiles
+  drop constraint if exists profiles_reputation_check;
+
+alter table public.profiles
+  add constraint profiles_reputation_check
+  check (reputation >= 0);
 
 -- Idempotent for DBs created before referral columns existed (full RPCs in referrals.sql).
 alter table public.profiles
@@ -107,12 +120,16 @@ create trigger profiles_protect_tier
   execute function public.protect_profiles_tier();
 
 -- Clients cannot self-ban / self-unban; service_role / SQL editor can.
+-- RPC auto-ban sets app.bypass_profile_guards=on (see review_complaints.sql).
 create or replace function public.protect_profiles_ban()
 returns trigger
 language plpgsql
 set search_path = public
 as $$
 begin
+  if current_setting('app.bypass_profile_guards', true) = 'on' then
+    return new;
+  end if;
   -- No JWT (SQL Editor) or service_role → allow; authenticated/anon clients → deny.
   if (
     new.banned_at is distinct from old.banned_at
@@ -130,6 +147,30 @@ create trigger profiles_protect_ban
   before update on public.profiles
   for each row
   execute function public.protect_profiles_ban();
+
+-- Clients cannot self-edit reputation; service_role / SQL editor / bypass RPC can.
+create or replace function public.protect_profiles_reputation()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if current_setting('app.bypass_profile_guards', true) = 'on' then
+    return new;
+  end if;
+  if new.reputation is distinct from old.reputation
+     and coalesce(auth.jwt() ->> 'role', 'service_role') is distinct from 'service_role' then
+    raise exception 'profiles.reputation is read-only for clients';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_protect_reputation on public.profiles;
+create trigger profiles_protect_reputation
+  before update on public.profiles
+  for each row
+  execute function public.protect_profiles_reputation();
 
 -- Used by portfolios/reviews RLS (security definer — no recursive RLS on profiles).
 create or replace function public.is_profile_banned(uid uuid default auth.uid())

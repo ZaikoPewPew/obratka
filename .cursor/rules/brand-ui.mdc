@@ -1,0 +1,42 @@
+---
+description: Brand UI — visual variants, field errors, marks; не копипастить mesh
+alwaysApply: true
+---
+
+# Brand UI
+
+Правый visual split-экранов — только через `createBrandScreenVisual`. Не копипастить mesh / noise / logo.
+
+## Visual (`setVariant`)
+
+| Variant | Когда | Марка |
+|---------|-------|-------|
+| `default` | обычное | blob 44×43 |
+| `invalid` | ошибка поля / OTP / provider | рожки fade-in, **без** resize SVG |
+| `done` | submit URL (url-screen) | logo-done (размеры меняются) |
+
+- Классы `--invalid` / `--done` вешать на **screen section** через `bindScreenRoot`, не на `visual.root`.
+- Ban-screen: статичный `banBrandMarkSvg`, не morph / не `setVariant`.
+- Marks / morph: `src/assets/brand/brandMarks.js`.
+- Shell: onboarding на `brand-screen-shell`; цель миграции остальных — не дублировать glow/noise.
+
+## Field errors
+
+Текст + обводка: [`FIELD_ERROR.md`](../../src/utils/FIELD_ERROR.md).
+
+```js
+setUrlScreenFieldInvalid({ wrap, input, error }, { visible, message });
+brandVisual.setVariant(visible ? "invalid" : "default");
+```
+
+- Text-input: `setUrlScreenFieldInvalid` (обводка `--invalid` обязательна).
+- OTP: `setUrlScreenOtpInvalid`.
+- Auth provider-only: текст без outline инпута; visual `invalid` через OR.
+- Не тоглить `url-screen__input-wrap--invalid` вручную в одном месте.
+
+## SoT
+
+- `src/components/brand-screen-visual/README.md`
+- `src/components/brand-screen-shell/README.md`
+- `src/utils/FIELD_ERROR.md`
+- `src/assets/README.md`

@@ -14,50 +14,46 @@ alwaysApply: true
 | Id | Path |
 |----|------|
 | `referral` | `/referral` |
-| `auth` | `/registration` (Email → OTP screen / Telegram / Google) |
-| `authCode` | `/registration/code` (6-digit Email OTP) |
+| `auth` | `/registration` (Email → OTP / Telegram / Google) |
+| `authCode` | `/registration/code` |
 | `onboarding` | `/onboarding` |
 | `home` | `/home` |
 | `url` | `/portfolio` |
-| `review` | `/review` (iframe + таймер) |
+| `review` | `/review` (iframe + таймер; нужен claim) |
 | `quiz` | `/quiz` |
 | `done` | `/quiz/done` |
-| `success` | `/done` |
-| `report` | `/report` (отчёт автору, каркас) |
-| `banned` | `/banned` (аккаунт заблокирован) |
+| `success` | `/done` (deep link / запасной; submit URL остаётся на url-screen) |
+| `report` | `/report` (листы + жалоба; только «Мои») |
+| `banned` | `/banned` (escape-proof при `session.banned`) |
 
-`session.js` — только login-сессия пользователя, не экран `/review`.
+`session.js` — login-сессия пользователя, не экран `/review`.
 
-Auth: логика в `src/api/auth.js`; UI — `auth-screen` + `auth-code-screen`. Setup / linking — `auth-screen/README.md`.  
-Защита: Automatic linking Email↔Google; OTP resend cooldown; `authIdentityConflict`. Manual linking — вне скоупа.
+## Ключевые флоу
+
+- Home pick → **claim** → `/review` → quiz; abort → home **без** награды (см. `review-claims.mdc`).
+- Submit URL → `setVariant("done")` на url-screen + `syncRoute("success")`; не прыгать на success-screen.
+- Mine / `isOwn` → `onOpenReport` → `/report` (листы + жалоба).
+- Ban: любой route → `banned` (`flow.js`); см. `ban.mdc`.
+- Auth: `src/api/auth.js`; UI — `auth-screen` + `auth-code-screen`. Automatic linking Email↔Google; OTP cooldown; Manual `linkIdentity` — вне скоупа.
 
 ## Жёсткие правила
 
-1. **Экран = модуль** в `src/components/<name>-screen/` (фабрика → `{ root, open, close, … }`). Не шить разметку следующего шага внутрь текущего.
-2. **Порядок и URL снаружи** — колбэк наверх → `go(id)` в `main.js`. Компонент не знает «кто следующий» и сам не пишет `history`.
-3. **Split-экраны** (referral / auth / onboarding / url): эталон `url-screen`; цель — общий `brand-screen-shell`. Не копипастить mesh/noise/logo.
-4. **Handoff** между соседними brand-экранами: `go(id, { handoff: true })` — правый visual без повторной анимации (`brandScreenTransition.js`).
-5. **home-screen** — другой лейаут (очередь), без обязательного правого visual. Вкладки **Лента / Мои** снизу (`listPortfoliosForReview` / `listMyPortfolios`); очередь ревью фильтруется **лигами** по `profiles.grade` (RLS + `src/api/leagues.js`). UI таббара и скользящий пилл — README `home-screen`.
-6. **Монтаж** — из `main.js`, не из HTML-слотов.
+1. **Экран = модуль** в `src/components/<name>-screen/` (фабрика → `{ root, open, close, … }`). Не шить следующий шаг внутрь текущего.
+2. **Порядок и URL снаружи** — колбэк наверх → `go(id)` в `main.js`. Компонент не пишет `history`.
+3. **Split-экраны** (referral / auth / auth-code / onboarding / url): visual — `brand-screen-visual`; каркас — `brand-screen-shell` (цель миграции). Детали — `brand-ui.mdc`.
+4. **Handoff** соседних brand: `go(id, { handoff: true })` — правый visual без повторной анимации.
+5. **Ошибки полей** + `setVariant("invalid")` — `brand-ui.mdc` / `FIELD_ERROR.md`.
+6. **home-screen** — другой лейаут; вкладки Лента / Мои (`listPortfoliosForReview` / `listMyPortfolios`); лиги — `leagues.mdc`.
+7. **Монтаж** — из `main.js`, не из HTML-слотов. Legacy waitlist (`apply-card`, `desktop.css` / `mobile.css`) **не монтировать** без явной задачи.
 
-## Motion
+## Motion / docs
 
-Open/close и stagger — `--motion-*` / `entrance.css` / `motionTokens.js`. Не хардкодить длительности.
-
-## Документация
-
-Новый или существенно изменённый экран:
-
-- README в папке компонента;
-- обновить флоу / таблицу path в `SCREENS.md` и `src/app/README.md`.
-
-## Пример
+Open/close — `--motion-*` / `entrance.css` / `motionTokens.js`.  
+Новый экран: README в папке + таблица path в `SCREENS.md` и `src/app/README.md`.
 
 ```js
-// ❌ экран сам открывает следующий и пишет URL
+// ❌ экран сам открывает следующий
 onSubmit: () => { authScreen.open(); history.pushState(...); };
-
-// ✅ только сигнал наверх
+// ✅ сигнал наверх
 onSubmit: (payload) => opts.onSubmit(payload);
-// в main.js: go("auth", { handoff: true });
 ```

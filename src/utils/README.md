@@ -4,17 +4,46 @@
 
 ## Состав
 
-- `countTemplate.js` — вставка отформатированного числа в текстовый шаблон (`{count}`).
-- `emailValidation.js` — валидация и нормализация email.
-- `foundersCountDisplay.js` — обновление отображаемого числа подписчиков/основателей.
-- `motionTokens.js` — чтение `--motion-*` / `--auth-code-resend-cooldown` из CSS для WAAPI / таймеров (`getMotionReveal`, `getReportLaunchMotion`, `getReviewMeshDoneMotion`, `getScreenCloseFallbackMs`, `getAuthCodeResendCooldownMs`).
-- `brandScreenTransition.js` — open/close split-экранов; `handoff` сохраняет правый visual без повторной анимации.
-- `portfolioMeta.js` — нормализация URL портфолио; favicon (HTML → DDG → Google → `/favicon.ico`) и короткое имя сайта.
-- `platformBrandIcon.js` — иконка площадки: Simple Icons (jsDelivr) для известных брендов, иначе литера «W».
-- `embedHosts.js` — каталог хостов: external-only + labels (см. `content/embed-hosts.md`).
-- `portfolioEmbed.js` — стратегия показа URL: Figma/YouTube embed, iframe или внешняя вкладка.
-- `meshGradientWash.js` — WebGL mesh-градиент (Paper Shaders) с палитрой из CSS-токенов; `transitionToCssColors` для плавной смены.
-- `portfolioEmbed.test.js` / `portfolioMeta.test.js` / `platformBrandIcon.test.js` — фикстуры embed, meta и brand-icon (`npm test`).
-- Тесты роутов: `src/app/routes.test.js`.
-- `reviewReport.js` — сводка ответов квиза → тексты для PDF.
-- `shareReviewPdf.js` — печатный документ отчёта (PDF через print dialog).
+| Файл | Роль |
+|------|------|
+| `countTemplate.js` | вставка отформатированного числа в шаблон (`{count}`) |
+| `emailValidation.js` | валидация и нормализация email |
+| `foundersCountDisplay.js` | число подписчиков/основателей |
+| `motionTokens.js` | чтение `--motion-*` / cooldowns из CSS для WAAPI / таймеров |
+| `brandScreenTransition.js` | open/close split-экранов; `handoff` без повторной анимации visual |
+| `fieldError.js` | плавный выезд `.url-screen__error` (opacity/blur/высота) |
+| `urlScreenField.js` | invalid поля: текст + aria + обводка (`--invalid` / OTP cells) |
+| `portfolioMeta.js` | нормализация URL; favicon и имя сайта |
+| `platformBrandIcon.js` | иконка площадки (Simple Icons / «W») |
+| `embedHosts.js` | каталог хостов (см. `content/embed-hosts.md`) |
+| `portfolioEmbed.js` | Figma/YouTube embed / iframe / внешняя вкладка |
+| `meshGradientWash.js` | WebGL mesh (Paper Shaders); `transitionToCssColors` |
+| `reviewReport.js` | сводка квиза → тексты PDF |
+| `shareReviewPdf.js` | печать PDF-отчёта |
+| `referralCode.js` | нормализация referral-кода / URL |
+
+Тесты: `*.test.js` рядом + `src/app/routes.test.js` (`npm test`).
+
+## Ошибки полей brand-экранов
+
+Подробно: **[`FIELD_ERROR.md`](FIELD_ERROR.md)**.
+
+Кратко: `setUrlScreenFieldInvalid` / `setUrlScreenOtpInvalid` + `createBrandScreenVisual().setVariant("invalid")`.
+
+## Motion helpers (`motionTokens.js`)
+
+| Функция | Токены |
+|---------|--------|
+| `getMotionReveal` | `--motion-reveal-*` |
+| `getScreenCloseFallbackMs` | `--motion-screen-close-fallback` |
+| `getMotionFieldError` | `--motion-field-error-*` (текст ошибки) |
+| `getMotionFieldErrorVisual` | `--motion-field-error-visual-*` (mesh + evil) |
+| `getAuthCodeResendCooldownMs` | `--auth-code-resend-cooldown` |
+| `getMotionAdvanceDelayMs` / `getMotionFocusDelayMs` | квиз |
+| `getReportLaunchMotion` | уход PDF/preview-листа |
+| `getReviewMeshDoneMotion` / `getBrandMarkMorphMotion` | зелёный done + logo-done |
+
+## Brand visual
+
+Правый mesh/марка — не util, а компонент: [`brand-screen-visual`](../components/brand-screen-visual/README.md).  
+Open/close: `brandScreenTransition.js` + `meshWash` с экрана.

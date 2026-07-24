@@ -30,7 +30,7 @@
 
 | Переменная | Назначение |
 |------------|------------|
-| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | Auth, profiles, referrals RPC, portfolios, (legacy) subscribers |
+| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | Auth, profiles, referrals, portfolios, review_complaints RPC, (legacy) subscribers |
 | `TELEGRAM_BOT_ID` / `TELEGRAM_BOT_USERNAME` | Telegram Login Widget (публичные) |
 | `VITE_BASE_PATH` | base для GitHub Pages (`/obratka/`) |
 
@@ -49,12 +49,21 @@
 
 | Папка | Роль |
 |-------|------|
-| `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `lib/` |
-| `styles/` | Токены + UI. Entry: tokens/base/entrance/iframe-shell/home/success. Legacy waitlist CSS не в `index.html` |
+| `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `lib/`, `assets/` |
+| `styles/` | Токены + UI. Entry: tokens/base/entrance/iframe-shell/home/success/ban/report. Legacy waitlist CSS не в `index.html` |
 | `content/` | `locales.json`, onboarding, embed-hosts, privacy, founder-avatars |
 | `public/` | Статика по URL (favicon и т.п.) |
-| `supabase/` | SQL (`profiles`, `referrals`, `portfolios`, `subscribers_count`) + Edge `telegram-auth` |
+| `supabase/` | SQL (`profiles`, `referrals`, `portfolios`, `review_claims`, `review_complaints`, …) + Edge `telegram-auth` |
 | `.cursor/` | Правила агента (`rules/*.mdc`) и карта (`.cursor/README.md`) |
+
+### Brand UI (кратко)
+
+| Модуль | Документ |
+|--------|----------|
+| Правый visual | [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) |
+| Split-каркас | [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) |
+| Ошибки полей | [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) |
+| Марки / morph | [`src/assets/README.md`](src/assets/README.md) |
 
 ## Экраны и URL (кратко)
 
@@ -63,12 +72,14 @@
 ```text
 /referral → /registration → /onboarding → /home
   → /portfolio | /review → /quiz → /quiz/done
-  → /done
+  → /report (Мои) | /done | /banned
 ```
 
 `/referral` — invite-only gate (`validate_referral`); после входа у юзера свой код (лимит 2), шаринг с home.  
 `/review` = просмотр портфолио + таймер.  
-`/quiz` = опрос. Не путать с login-`session.js` (`obratka.session`).
+`/quiz` = опрос. Не путать с login-`session.js` (`obratka.session`).  
+`/report` = листы ревью автора + жалоба → `reputation`.  
+`/banned` = бан (в т.ч. автобан по репутации).
 
 ## Auth (кратко)
 

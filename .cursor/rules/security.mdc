@@ -1,0 +1,40 @@
+---
+description: Безопасность Supabase — секреты, RLS, клиент; anon публичный, service_role никогда
+alwaysApply: true
+---
+
+# Безопасность (Supabase / клиент)
+
+Защита данных = **RLS + `auth.uid()` + security definer RPC**, не «скрытие» anon-ключа.  
+`SUPABASE_ANON_KEY` публичный (бандл / Pages / `.env.production` в git — ок для publishable).  
+Катастрофа: `service_role`, bot token, Client Secret в клиенте или git; отключённый RLS; доверие к localStorage без сервера.
+
+## Секреты
+
+**Можно в клиент / `.env` / `.env.production` / бандл:**  
+`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `TELEGRAM_BOT_ID`, `TELEGRAM_BOT_USERNAME`.
+
+**Никогда:** `service_role`, `TELEGRAM_BOT_TOKEN`, Google Client Secret, любые Dashboard secrets.
+
+- Браузерный клиент — только [`src/lib/supabaseClient.js`](../../src/lib/supabaseClient.js) (anon). Не плодить `createClient` с другим ключом.
+- Edge `telegram-auth`: `service_role` / bot token — только Function secrets; клиент не шлёт admin-ключ.
+
+## RLS / SQL
+
+1. Новая таблица → сразу `enable row level security` + политики (не «потом»).
+2. Mutations claims / referrals / ban / tier — RPC `security definer` + `set search_path = public`, не прямой INSERT/UPDATE с клиента.
+3. Не `grant` лишнего на `anon`/`authenticated`; seed-таблицы без прямого SELECT.
+4. Клиент не пишет: `banned_at`, `ban_reason`, `tier`, чужой `balance` / reputation.
+5. Не ослаблять лиги / claim-триггеры «для удобства UI».
+
+## Клиент / сессия
+
+- `obratka.session` в localStorage — UX-кэш; бан и доступ ревалидировать с сервера (`main.js`).
+- Не логировать `access_token` / refresh / полный session в `console.*`.
+- Ошибки Auth → i18n-коды (`mapSupabaseAuthErrorCode`), не сырой текст Supabase.
+
+## Агент / git
+
+- Не коммитить `.env`, `.env.local`; не предлагать `--no-verify` ради секретов.
+- Не вставлять секреты в чат / README / issues.
+- SQL / auth: [`supabase/README.md`](../../supabase/README.md), [`STRUCTURE.md`](../../STRUCTURE.md) § Секреты.

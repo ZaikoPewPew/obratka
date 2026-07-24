@@ -71,24 +71,30 @@ npm run dev
 **Email ↔ Google:** Automatic linking в Supabase (одна verified email = один user). Telegram (`tg{id}@t.me`) не склеивается.  
 Ошибки identity / rate-limit мапятся в `auth.js` → i18n (`authIdentityConflict`, `authOtpRateLimit`).  
 **Рефералы:** validate до auth / redeem после логина; 1 код на юзера, лимит 2; без наград. Seed: `YTHWKPDWAK`. См. [`supabase/sql/referrals.sql`](supabase/sql/referrals.sql), [`src/api/referrals.js`](src/api/referrals.js).  
+**Репутация:** жалоба на лист в `/report` → штраф `profiles.reputation` → автобан. См. [`supabase/BAN.md`](supabase/BAN.md), [`src/api/reviewComplaints.js`](src/api/reviewComplaints.js).  
 API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](src/components/auth-screen/README.md).
 
 ## Документация
 
 | Документ | Содержание |
 |----------|------------|
-| [`SCREENS.md`](SCREENS.md) | Экраны, URL, handoff, контракты, защита auth |
+| [`SCREENS.md`](SCREENS.md) | Экраны, URL, handoff, visual variants, контракты |
 | [`PROJECT.md`](PROJECT.md) | Продукт, архитектура, бэкенд, roadmap |
 | [`STRUCTURE.md`](STRUCTURE.md) | Папки и env |
 | [`mobile.md`](mobile.md) | Мобильный UX продукта (+ архив waitlist) |
 | [`src/app/README.md`](src/app/README.md) | Routes / router / flow / session |
-| [`src/api/README.md`](src/api/README.md) | Auth, profiles, referrals, wallet, portfolios |
+| [`src/api/README.md`](src/api/README.md) | Auth, profiles, referrals, wallet, portfolios, reviewComplaints |
+| [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) | Правый visual: `default` / `invalid` / `done` |
+| [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) | Split-каркас brand-экранов |
+| [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) | Ошибки полей (текст + обводка) |
+| [`src/assets/README.md`](src/assets/README.md) | Brand marks / evil morph без resize |
 | [`src/components/auth-screen/README.md`](src/components/auth-screen/README.md) | Dashboard Auth + identity linking |
 | [`src/components/auth-code-screen/README.md`](src/components/auth-code-screen/README.md) | OTP UI + resend cooldown |
 | [`src/components/referral-screen/README.md`](src/components/referral-screen/README.md) | Invite gate + validate RPC |
-| [`src/components/home-screen/README.md`](src/components/home-screen/README.md) | Лента, баланс, шаринг реферального кода |
+| [`src/components/home-screen/README.md`](src/components/home-screen/README.md) | Лента, баланс, репутация, шаринг реферального кода |
+| [`src/components/report-screen/README.md`](src/components/report-screen/README.md) | Листы ревью + жалоба |
 | [`supabase/README.md`](supabase/README.md) | SQL и Edge Functions |
-| [`supabase/BAN.md`](supabase/BAN.md) | Как банить пользователей (Table/SQL + шаблоны) |
+| [`supabase/BAN.md`](supabase/BAN.md) | Бан / автобан по репутации (Table/SQL + шаблоны) |
 | [`.cursor/README.md`](.cursor/README.md) | Карта для агента Cursor |
 
 ## Деплой

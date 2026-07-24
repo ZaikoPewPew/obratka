@@ -9,7 +9,7 @@
 ```text
 referral → auth → authCode → onboarding → home
                               ├─ pick → claim → review → quiz → /quiz/done (review-panel done)
-                              ├─ mine card → report (каркас отчёта автора)
+                              ├─ mine card → report (листы + жалоба)
                               └─ submit (url) → done на url-screen → /done (URL sync)
 ```
 
@@ -24,7 +24,7 @@ referral → auth → authCode → onboarding → home
 | 5b | `url-screen` | `/portfolio` | Подача своего URL (нужен баланс) |
 | 6 | `review-screen` + `review-panel` | `/quiz` → `/quiz/done` | Квиз; финал слева + улет отчёта |
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
-| 8 | `report-screen` | `/report` | Отчёт автору (каркас; контент позже) |
+| 8 | `report-screen` | `/report` | Отчёт автору: листы ревью + «Пожаловаться» (теги → репутация) |
 | — | `ban-screen` | `/banned` | Аккаунт заблокирован; «Выйти» + «Связаться» (242px); красный mesh; deep link escape-proof |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query (`?ref=`, `?lang=`) сохраняются.
@@ -57,20 +57,32 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 
 ## Визуальная база
 
-Экраны **referral / auth / onboarding / url** — split-layout (эталон `UrlScreen`):
+Экраны **referral / auth / auth-code / onboarding / url** — split-layout.
 
-| Зона | Классы / роль | Поведение |
-|------|----------------|-----------|
-| Корень | `.url-screen` (цель: `brand-screen`) | Полноэкранный слой, open/close + transition |
-| Левая | `__form-pane` | Меняется по экрану |
-| Правая | `__visual` | mesh-wash, noise, бренд-марк |
+| Зона | Классы / модуль | Поведение |
+|------|-----------------|-----------|
+| Корень | `.url-screen` (цель: `brand-screen`) | open/close + transition |
+| Левая | `__form-pane` | контент экрана |
+| Правая | [`brand-screen-visual`](src/components/brand-screen-visual/README.md) | mesh + noise + марка |
 
-Смена соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
+### Варианты правого visual (`setVariant`)
+
+| Variant | Когда | Mesh | Марка |
+|---------|--------|------|-------|
+| `default` | обычное состояние | `--url-screen-mesh-*` | blob 44×43 |
+| `invalid` | ошибка поля / OTP / provider | `--url-screen-error-mesh-*` (ban) | рожки fade-in, **без** resize SVG |
+| `done` | submit URL (url-screen) | `--shell-review-mesh-done-*` | logo-done |
+
+Ошибка поля (текст + обводка): [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md)  
+(`setUrlScreenFieldInvalid` / `setUrlScreenOtpInvalid` + `setVariant("invalid")`).
+
+Handoff соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
 `home-screen` — отдельный полноэкранный слой (absolute topbar поверх ленты).  
-`url-screen` — split; при URL справа заглушка «Портфолио»; submit → done на том же экране (как quiz).  
+`url-screen` — split; при URL справа заглушка «Портфолио»; submit → done на том же экране (`setVariant("done")`).  
 `success-screen` — запасной `/done` (deep link); основной submit больше не прыгает сюда.  
-`review-screen` — split для квиза (слева panel, справа visual + PDF-лист).
+`review-screen` — split для квиза (слева panel, справа visual + PDF-лист).  
+`ban-screen` — статичный красный mesh + `banBrandMarkSvg` (не `setVariant`).
 
 ## Дерево файлов
 
@@ -82,7 +94,8 @@ src/app/
   README.md
 
 src/components/
-  brand-screen-shell/
+  brand-screen-shell/     ← каркас split + visual
+  brand-screen-visual/    ← mesh + марка, variants
   referral-screen/
   auth-screen/
   auth-code-screen/
@@ -92,15 +105,21 @@ src/components/
   review-screen/
   review-panel/           ← только шаги квиза
   success-screen/         ← /done (подача портфолио)
-  report-screen/          ← /report (отчёт автору, каркас)
+  report-screen/          ← /report (листы ревью + жалоба)
   ban-screen/             ← /banned (аккаунт заблокирован)
+
+src/utils/
+  FIELD_ERROR.md          ← fieldError + urlScreenField
+  fieldError.js / urlScreenField.js
+  brandScreenTransition.js / meshGradientWash.js / motionTokens.js
+
+src/assets/brand/
+  brandMarks.js           ← SVG + morph (evil без resize / done)
 
 src/api/
   auth.js / profiles.js / onboarding.js / wallet.js
-  portfolios.js           ← очередь по лигам + claim-слоты + listMyPortfolios / submit/review
-  leagues.js              ← маппинг grade → лига (зеркало SQL)
-  referrals.js            ← validate / redeem / fetchMyReferral
-  telegramWidget.js / subscribers.js   ← subscribers = legacy waitlist
+  portfolios.js / leagues.js / referrals.js
+  telegramWidget.js / subscribers.js
 
 styles/
   tokens.css
@@ -121,16 +140,18 @@ content/
 
 | Фабрика | Path | Статус |
 |---------|------|--------|
-| `createReferralScreen` | `/referral` | UI + validate (ошибки через `setError`) |
+| `createReferralScreen` | `/referral` | UI + validate; field invalid + visual |
 | `createAuthScreen` | `/registration` | UI + Email → authCode / Telegram / Google |
-| `createAuthCodeScreen` | `/registration/code` | UI + Email OTP verify |
-| `createOnboardingScreen` | `/onboarding` | UI → profiles |
+| `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` |
+| `createOnboardingScreen` | `/onboarding` | UI → profiles (на shell) |
 | `createHomeScreen` | `/home` | UI (hub + feed + invite modal) |
-| `createUrlScreen` | `/portfolio` | UI (submit own + done) |
+| `createUrlScreen` | `/portfolio` | UI (submit + done via `setVariant`) |
 | iframe-shell + timer | `/review` | UI |
 | `createReviewScreen` + `createReviewPanel` | `/quiz` | UI |
 | `createSuccessScreen` | `/done` | UI (portfolio submitted) |
-| `createReportScreen` | `/report` | UI (author report shell) |
+| `createReportScreen` | `/report` | UI (листы + жалоба на лист) |
+| `createBrandScreenVisual` | — | правый visual (не экран) |
+| `createBrandScreenShell` | — | split-каркас |
 
 ### Handoff
 
@@ -141,12 +162,13 @@ go("auth", { handoff: true }); // referral → auth: visual статичен
 ## Стили / motion
 
 Токены: `styles/tokens.css`. Reveal: `--motion-*`, keyframes в `entrance.css` (в т.ч. `motion-reveal-topbar`), JS `motionTokens.js`.  
+Field error: `--motion-field-error-*`, `--motion-field-error-visual-*`.  
 Auth: `--auth-screen-*`, `--auth-code-*` (в т.ч. `--auth-code-resend-cooldown`).  
 Правило: `.cursor/rules/design-tokens.mdc`.
 
 ## i18n
 
-Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*`, `success*`, `reportScreen*`, `review*` / `report*`).  
+Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*` / `homeReputation*`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `report*`).
 Правило: `.cursor/rules/i18n.mdc`.
 
 ## App-слой
@@ -165,7 +187,7 @@ Auth: `--auth-screen-*`, `--auth-code-*` (в т.ч. `--auth-code-resend-cooldown
 ## Дальше
 
 1. Вынести CSS в `brand-screen.css`.
-2. Агрегация оценок нескольких ревьюеров в PDF-отчёте / наполнение `report-screen`.
+2. Агрегация оценок нескольких ревьюеров в PDF-отчёте / наполнение сводки на `report-screen` (жалобы на листы уже есть).
 3. Manual identity linking (`linkIdentity`) + UNIQUE `profiles.email` + Telegram↔email — вне текущего скоупа.
 
 ## Связанные документы
@@ -173,6 +195,10 @@ Auth: `--auth-screen-*`, `--auth-code-*` (в т.ч. `--auth-code-resend-cooldown
 - [`STRUCTURE.md`](STRUCTURE.md)
 - [`PROJECT.md`](PROJECT.md)
 - [`src/app/README.md`](src/app/README.md)
+- [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) — правый visual + variants
+- [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) — split-каркас
+- [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — ошибки полей
+- [`src/assets/README.md`](src/assets/README.md) — марки / morph
 - [`src/components/auth-screen/README.md`](src/components/auth-screen/README.md)
 - [`src/components/auth-code-screen/README.md`](src/components/auth-code-screen/README.md)
 - [`content/onboarding.md`](content/onboarding.md)

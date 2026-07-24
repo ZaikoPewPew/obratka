@@ -103,6 +103,7 @@
   /* Цвета: границы и фокус */
   --color-border: var(--palette-gray-100);
   --color-border-subtle: rgba(36, 36, 38, 0.12);
+  --border-width: 1px;
   --color-overlay: rgba(36, 36, 38, 0.45);
   --color-focus-ring: rgba(36, 36, 38, 0.35);
   --color-focus-ring-on-accent: rgba(255, 255, 255, 0.55);
@@ -354,6 +355,41 @@
   --report-screen-title-weight: var(--success-screen-title-weight);
   --report-screen-body-size: var(--success-screen-body-size);
   --report-screen-actions-gap: var(--success-screen-actions-gap);
+  --report-screen-sheets-gap: var(--space-3);
+  --report-screen-sheets-max-height: min(40dvh, 320px);
+  --report-screen-sheet-padding: var(--space-3);
+  --report-screen-sheet-gap: var(--space-3);
+  --report-screen-sheet-radius: var(--radius-md);
+  --report-screen-sheet-bg: var(--color-surface-muted);
+  --report-screen-sheet-avatar-size: var(--space-10);
+  --report-screen-sheet-avatar-radius: var(--radius-xs);
+  --report-screen-sheet-name-size: var(--font-size-base);
+  --report-screen-sheet-name-weight: var(--font-weight-semibold);
+  --report-screen-sheet-label-size: var(--font-size-sm);
+  --report-screen-complain-height: var(--space-10);
+  --report-screen-complain-padding-x: var(--space-4);
+  --report-screen-complain-radius: var(--radius-xs);
+  --report-screen-complain-font-size: var(--font-size-sm);
+  --report-screen-complain-font-weight: var(--font-weight-medium);
+  --report-screen-modal-z: calc(var(--report-screen-z) + 1);
+  --report-screen-modal-max-width: 400px;
+  --report-screen-modal-padding: var(--space-6);
+  --report-screen-modal-gap: var(--space-4);
+  --report-screen-modal-radius: var(--radius-md);
+  --report-screen-modal-title-size: var(--font-size-lg);
+  --report-screen-modal-title-weight: var(--font-weight-semibold);
+  --report-screen-modal-body-size: var(--font-size-base);
+  --report-screen-tags-gap: var(--space-2);
+  --report-screen-tag-padding: var(--space-3) var(--space-4);
+  --report-screen-tag-radius: var(--radius-md);
+  --report-screen-tag-label-size: var(--font-size-base);
+  --report-screen-tag-label-weight: var(--font-weight-medium);
+  --report-screen-tag-hint-size: var(--font-size-sm);
+  --report-screen-tag-border: var(--border-width) solid var(--color-border);
+  --report-screen-modal-actions-gap: var(--space-2);
+  --report-screen-modal-btn-height: var(--space-12);
+  --report-screen-modal-error-size: var(--font-size-sm);
+  --report-screen-modal-error-color: var(--color-error);
 
   /* Слоты ревьюеров на карточке (Figma Frame 140: 96×52 chip) */
   --home-screen-progress-width: 96px;
@@ -419,6 +455,8 @@
   --home-screen-chip-icon: 24px;
   --home-screen-chip-font-size: var(--font-size-base);
   --home-screen-chip-font-weight: var(--font-weight-medium);
+  --home-screen-reputation-chip-gap: var(--space-2);
+  --home-screen-reputation-body-pre: pre-line;
   --home-screen-submit-chip-width: 189px;
   --home-screen-submit-chip-padding: var(--space-3) var(--space-5) var(--space-3)
     var(--space-4);

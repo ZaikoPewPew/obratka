@@ -15,6 +15,7 @@ import {
   getBalance,
   refreshWalletFromServer,
 } from "../../api/wallet.js";
+import { getReputation } from "../../api/reviewComplaints.js";
 import { getSession, setSession } from "../../app/session.js";
 import { resolvePlatformIcon } from "../../utils/platformBrandIcon.js";
 import {
@@ -182,6 +183,18 @@ export function createHomeScreen({
 
   balanceChip.append(boneImg, balanceValue);
 
+  const reputationChip = document.createElement("button");
+  reputationChip.type = "button";
+  reputationChip.className = "home-screen__chip home-screen__chip--reputation";
+
+  const reputationLabel = document.createElement("span");
+  reputationLabel.className = "home-screen__chip-label";
+
+  const reputationValue = document.createElement("span");
+  reputationValue.className = "home-screen__chip-value";
+
+  reputationChip.append(reputationLabel, reputationValue);
+
   const notifyBtn = document.createElement("button");
   notifyBtn.type = "button";
   notifyBtn.className = "home-screen__chip home-screen__chip--icon";
@@ -214,7 +227,7 @@ export function createHomeScreen({
   profileLetter.textContent = "?";
 
   profileBtn.append(profileImg, profileLetter);
-  topActions.append(addBtn, balanceChip, notifyBtn, profileBtn);
+  topActions.append(addBtn, balanceChip, reputationChip, notifyBtn, profileBtn);
   topbar.append(markLink, topActions);
 
   const body = document.createElement("div");
@@ -309,6 +322,33 @@ export function createHomeScreen({
   inviteDialog.append(inviteTitle, inviteBody, inviteCode, inviteActions);
   inviteBackdrop.append(inviteDialog);
 
+  const reputationBackdrop = document.createElement("div");
+  reputationBackdrop.className =
+    "home-screen__locked-backdrop home-screen__reputation-backdrop";
+  reputationBackdrop.hidden = true;
+  reputationBackdrop.setAttribute("aria-hidden", "true");
+
+  const reputationDialog = document.createElement("div");
+  reputationDialog.className =
+    "home-screen__locked-dialog home-screen__reputation-dialog";
+  reputationDialog.setAttribute("role", "dialog");
+  reputationDialog.setAttribute("aria-modal", "true");
+  reputationDialog.setAttribute("aria-labelledby", "home-reputation-title");
+
+  const reputationTitle = document.createElement("h2");
+  reputationTitle.className = "home-screen__locked-title";
+  reputationTitle.id = "home-reputation-title";
+
+  const reputationBody = document.createElement("p");
+  reputationBody.className = "home-screen__locked-body home-screen__reputation-body";
+
+  const reputationClose = document.createElement("button");
+  reputationClose.type = "button";
+  reputationClose.className = "home-screen__locked-close";
+
+  reputationDialog.append(reputationTitle, reputationBody, reputationClose);
+  reputationBackdrop.append(reputationDialog);
+
   const tabbar = document.createElement("div");
   tabbar.className = "home-screen__tabbar";
   tabbar.setAttribute("role", "tablist");
@@ -332,7 +372,15 @@ export function createHomeScreen({
   mineTab.dataset.tab = "mine";
 
   tabbar.append(tabThumb, feedTab, mineTab);
-  root.append(title, topbar, body, tabbar, lockedBackdrop, inviteBackdrop);
+  root.append(
+    title,
+    topbar,
+    body,
+    tabbar,
+    lockedBackdrop,
+    inviteBackdrop,
+    reputationBackdrop,
+  );
 
   /** @type {HomePortfolioItem[]} */
   let items = [];
@@ -450,6 +498,16 @@ export function createHomeScreen({
       formatString(t.homeBalanceAria, { balance }),
     );
     balanceChip.title = formatString(t.homeBalance, { balance });
+
+    const reputation = getReputation();
+    reputationLabel.textContent = t.homeReputationLabel ?? "";
+    reputationValue.textContent = String(reputation);
+    reputationChip.setAttribute(
+      "aria-label",
+      formatString(t.homeReputationAria, { reputation }),
+    );
+    reputationChip.title = formatString(t.homeReputation, { reputation });
+
     notifyBtn.setAttribute("aria-label", t.homeNotificationsAria);
     profileBtn.setAttribute("aria-label", t.homeProfileAria);
 
@@ -1077,6 +1135,8 @@ export function createHomeScreen({
     revealItems = false;
     showTabbar();
     closeSubmitLockedModal();
+    closeInviteModal();
+    closeReputationModal();
     root.setAttribute("aria-busy", "false");
     root.hidden = true;
     return Promise.resolve();
@@ -1138,6 +1198,46 @@ export function createHomeScreen({
     void creditBalance(DEV_CREDIT_AMOUNT).then(() => {
       syncCopy();
     });
+  });
+
+  function openReputationModal() {
+    const t = getStrings();
+    const reputation = getReputation();
+    reputationTitle.textContent = formatString(t.homeReputationTitle, {
+      reputation,
+    });
+    reputationBody.textContent = t.homeReputationBody ?? "";
+    reputationClose.textContent = t.homeReputationClose ?? "";
+    reputationClose.setAttribute(
+      "aria-label",
+      t.homeReputationCloseAria ?? t.homeReputationClose ?? "",
+    );
+    reputationBackdrop.hidden = false;
+    reputationBackdrop.setAttribute("aria-hidden", "false");
+    requestAnimationFrame(() => {
+      reputationBackdrop.classList.add("home-screen__locked-backdrop--open");
+      reputationClose.focus();
+    });
+  }
+
+  function closeReputationModal() {
+    reputationBackdrop.classList.remove("home-screen__locked-backdrop--open");
+    reputationBackdrop.hidden = true;
+    reputationBackdrop.setAttribute("aria-hidden", "true");
+  }
+
+  reputationChip.addEventListener("click", () => {
+    openReputationModal();
+  });
+
+  reputationClose.addEventListener("click", () => {
+    closeReputationModal();
+  });
+
+  reputationBackdrop.addEventListener("click", (event) => {
+    if (event.target === reputationBackdrop) {
+      closeReputationModal();
+    }
   });
 
   lockedClose.addEventListener("click", () => {

@@ -2,21 +2,29 @@
 
 Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../../SCREENS.md).
 
+## Общие блоки brand-экранов
+
+| Модуль | Роль |
+|--------|------|
+| [`brand-screen-visual/`](brand-screen-visual/README.md) | Правый mesh + марка; `setVariant("default"\|"invalid"\|"done")` |
+| [`brand-screen-shell/`](brand-screen-shell/README.md) | Split-каркас (form-pane + visual); onboarding уже на нём |
+| Field errors | [`../utils/FIELD_ERROR.md`](../utils/FIELD_ERROR.md) — обводка + текст ошибки |
+
 ## Продуктовый флоу
 
 | Модуль | Path | Статус |
 |--------|------|--------|
-| `brand-screen-shell/` | — | каркас API + visual из `brand-screen-visual` |
-| `brand-screen-visual/` | — | mesh + марка, variants default/invalid/done |
 | `referral-screen/` | `/referral` | Invite gate + validate RPC |
-| `auth-screen/` | `/registration` | UI + Email → auth-code / Telegram / Google; identity conflict |
-| `auth-code-screen/` | `/registration/code` | UI + OTP verify + resend cooldown |
-| `onboarding-screen/` | `/onboarding` | UI → `profiles` |
-| `home-screen/` | `/home` | UI (hub + feed + wallet + шаринг referral-кода) |
+| `auth-screen/` | `/registration` | Email → auth-code / Telegram / Google |
+| `auth-code-screen/` | `/registration/code` | OTP verify + resend cooldown |
+| `onboarding-screen/` | `/onboarding` | UI → `profiles` (shell) |
+| `home-screen/` | `/home` | хаб + feed + wallet + репутация + шаринг referral |
+| `url-screen/` | `/portfolio` | submit own + done (`setVariant("done")`) |
+| `review-screen/` | `/quiz` | квиз + PDF-лист |
+| `success-screen/` | `/done` | пресеты успеха (deep link) |
+| `report-screen/` | `/report` | листы ревью + жалоба |
+| `ban-screen/` | `/banned` | блок аккаунта; статичный evil mark |
 | `rating/` | — | топ по валюте на home (пока не монтируется) |
-| `url-screen/` | `/portfolio` | UI (submit own + done) |
-| `success-screen/` | `/done` | UI (пресеты подачи) |
-| `ban-screen/` | `/banned` | UI (аккаунт заблокирован) |
 
 ## Ревью и квиз
 

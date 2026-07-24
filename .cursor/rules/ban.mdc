@@ -1,0 +1,31 @@
+---
+description: Бан аккаунта — escape-proof /banned, операторский SQL, не visual.invalid
+alwaysApply: true
+---
+
+# Бан пользователей
+
+Источник: `profiles.banned_at IS NOT NULL`. `ban_reason` — только оператору, в UI нет.
+
+## Клиент
+
+1. `session.banned` из профиля (`applyProviderUser` / `refreshSessionFromProfile`).
+2. `resolveEntryScreen` / `resolveAccessibleRoute` / `go` → всегда `banned` (deep link escape-proof).
+3. Клиент **не** пишет `banned_at` / `ban_reason` / `tier` / `reputation` (триггеры `protect_profiles_*`; RPC жалоб ставит bypass).
+4. UI: `ban-screen` — статичный красный mesh + `banBrandMarkSvg` **44×52**.
+5. **Не** использовать `createBrandScreenVisual` / `setVariant("invalid")` на ban-screen.
+6. «Выйти» → signOut → `/referral`; повторный логин того же аккаунта снова → `/banned`.
+7. RLS: banned не INSERT portfolios/reviews (`is_profile_banned`).
+8. Автобан: жалобы на листы → `reputation` → порог → те же `banned_at` (см. `reputation.mdc`).
+
+## Оператор
+
+Правки только Dashboard SQL / Table Editor. Шпаргалка: `supabase/BAN.md`, шаблоны: `supabase/sql/ban-templates.sql`.  
+После автобана по репутации при разбане при необходимости вернуть `reputation`.
+
+## Код
+
+- UI: `src/components/ban-screen/`
+- Flow: `src/app/flow.js`
+- SQL: `supabase/sql/profiles.sql` (`banned_at`, `reputation`, `is_profile_banned`)
+- Жалобы: `supabase/sql/review_complaints.sql`

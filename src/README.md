@@ -15,8 +15,8 @@
 | Папка | Роль |
 |-------|------|
 | `app/` | routes, router, flow, login-session (`obratka.session`) |
-| `components/` | UI-экраны и виджеты (фабрики) |
-| `utils/` | portfolio embed/meta, motion, handoff, PDF |
-| `api/` | Auth (Email OTP / Telegram / Google + error mapping), profiles, wallet, portfolios |
-| `assets/` | импортируемые ассеты |
+| `components/` | UI-экраны; brand: `brand-screen-visual`, `brand-screen-shell` |
+| `utils/` | field errors, motion, handoff, mesh, portfolio, PDF — см. [`utils/README.md`](utils/README.md) |
+| `api/` | Auth, profiles, wallet, portfolios, referrals, reviewComplaints |
+| `assets/` | brand marks / morph — [`assets/README.md`](assets/README.md) |
 | `lib/` | supabase client |

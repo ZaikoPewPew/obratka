@@ -2277,6 +2277,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: visible;
   pointer-events: none;
 }
 
@@ -2284,6 +2285,7 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
+  overflow: visible;
   transform: translate(-50%, -50%);
   transition:
     top var(--shell-review-brand-motion-duration) var(--shell-review-brand-motion-ease),
@@ -2297,20 +2299,12 @@ body {
 
 .url-screen__brand-mark {
   display: block;
+  overflow: visible;
   width: var(--url-screen-brand-width);
   height: var(--url-screen-brand-height);
   transition:
     width var(--shell-review-brand-mark-morph-duration) var(--shell-review-brand-mark-morph-ease),
     height var(--shell-review-brand-mark-morph-duration) var(--shell-review-brand-mark-morph-ease);
-}
-
-.url-screen--invalid:not(.url-screen--done) .url-screen__brand-slot {
-  transform: translate(-50%, calc(-50% + var(--ban-screen-brand-align-y)));
-}
-
-.url-screen--invalid:not(.url-screen--done) .url-screen__brand-mark {
-  width: var(--ban-screen-brand-width);
-  height: var(--ban-screen-brand-height);
 }
 
 .url-screen--done:not(.url-screen--preview) .url-screen__brand-slot {

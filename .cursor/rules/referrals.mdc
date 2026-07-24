@@ -1,0 +1,31 @@
+---
+description: Invite-only referrals — validate до auth, redeem после, 2 слота, без наград
+alwaysApply: true
+---
+
+# Рефералы (invite-only)
+
+Без наград: код → вход → свой код → поделиться.
+
+## Флоу
+
+1. `/referral` → RPC `validate_referral` (**anon**, до auth) → `session.referralCode`.
+2. После логина → `redeem_referral` (**один раз** на аккаунт).
+3. Код юзера: `profiles.referral_code`, max **2** (`REFERRAL_MAX_USES`).
+4. Seed холодного старта: `YTHWKPDWAK` в `referral_seed_codes` (только через RPC).
+5. Prefill / share: `?ref=` + `normalizeReferralCode` / `buildReferralShareUrl`.
+6. Deep link `/registration` без кода и без сессии → обратно на `/referral` (`flow.js`).
+
+## Жёсткие правила
+
+- Seed-таблицу клиенту не открывать — только RPC.
+- Шаринг: home → аватар → модалка (`homeInvite*`); копировать код / ссылку.
+- Ошибки поля на referral-screen: `setUrlScreenFieldInvalid` + `visual.setVariant("invalid")`.
+
+## Код
+
+- SQL: `supabase/sql/referrals.sql`
+- API: `src/api/referrals.js`
+- Utils: `src/utils/referralCode.js`
+- UI: `src/components/referral-screen/`
+- Продукт: `PROJECT.md` § Рефералы

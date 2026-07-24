@@ -12,8 +12,16 @@ Path: **`/registration/code`**. Split как `auth-screen` / `url-screen`.
 ## Файл
 
 - `AuthCodeScreen.js` — `createAuthCodeScreen({ onSuccess, onBack })` → `{ root, open(email), close }`.
-- Visual: [`brand-screen-visual`](../brand-screen-visual/README.md).
-- Ошибка OTP: `setUrlScreenOtpInvalid` ([`urlScreenField.js`](../../utils/urlScreenField.js)) + `setVariant("invalid")`.
+
+## Visual и ошибки OTP
+
+| Слой | API |
+|------|-----|
+| Текст + `aria-invalid` + обводка ячеек | `setUrlScreenOtpInvalid` ([`FIELD_ERROR.md`](../../utils/FIELD_ERROR.md)) |
+| Красный mesh + рожки | `visual.setVariant("invalid")` |
+| Правый visual | [`brand-screen-visual`](../brand-screen-visual/README.md) |
+
+Класс обводки: `.auth-code-screen__cells--invalid` (не `input-wrap--invalid`).
 
 ## Поведение
 

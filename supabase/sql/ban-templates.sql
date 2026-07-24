@@ -22,7 +22,7 @@ order by banned_at desc;
 update public.profiles
 set
   banned_at = now(),
-  ban_reason = 'toxicity'  -- toxicity | bad_reviews | spam | other
+  ban_reason = 'toxicity'  -- toxicity | bad_reviews | spam | reputation | other
 where id = '00000000-0000-0000-0000-000000000000';
 
 -- --- Забанить по email -------------------------------------------------------
@@ -51,6 +51,7 @@ update public.profiles
 set
   banned_at = null,
   ban_reason = null
+  -- , reputation = 100  -- раскомментируй после автобана по reputation
 where id = '00000000-0000-0000-0000-000000000000';
 -- where email = 'user@example.com';
 -- where telegram_username = 'username';

@@ -13,8 +13,17 @@ Referral / auth / onboarding опираются на `.url-screen*`; цель �
 
 - `UrlScreen.js` — `createUrlScreen({ onSubmit, onExit })` → `{ root, open, close }`.
 - `open(prefill?, { handoff? })`, `close({ handoff? })` через `brandScreenTransition.js`.
-- Ошибка URL: `setUrlScreenFieldInvalid` + `setVariant("invalid"|"default")`.
-- Done: `setVariant("done")` (зелёный mesh + logo-done).
+- Visual: `createBrandScreenVisual({ withBrandSlot: true })` + preview-лист вставляется перед `brand`.
+
+## Visual и состояния поля
+
+| Состояние | Поле | Visual |
+|-----------|------|--------|
+| Обычное | — | `setVariant("default")` |
+| Невалидный URL / ошибка | `setUrlScreenFieldInvalid` | `setVariant("invalid")` |
+| После submit | форма → done copy | `setVariant("done")` (зелёный mesh + logo-done) |
+
+Ошибки: [`FIELD_ERROR.md`](../../utils/FIELD_ERROR.md). Variants: [`brand-screen-visual`](../brand-screen-visual/README.md).
 
 ## Поведение
 

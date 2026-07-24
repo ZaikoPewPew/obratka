@@ -1,0 +1,32 @@
+---
+description: Claim-слоты ревью — claim/heartbeat/release, награда только после submit
+alwaysApply: true
+---
+
+# Review claims
+
+Перед `/review` обязателен живой claim. Без него INSERT review → `review_claim_required`.
+
+## Жёсткие правила
+
+1. Открытие карточки: `claimPortfolioReview` → при успехе `claimHeld = true` → `go("review")`.
+2. Пока review/quiz открыт: `heartbeatPortfolioClaim` (TTL **20 min**).
+3. Уход без submit (back / home / pagehide / abort): `releasePortfolioClaim` — **без** монет.
+4. Награда только после успешного `submitPortfolioReview` → `awardReviewReward()` (`REVIEW_REWARD`).
+5. Не открывать quiz без `claimHeld` (анти ghost-quiz).
+6. Mutations claims — только security definer RPC, не прямой INSERT/UPDATE с клиента.
+
+## Слоты на карточке
+
+- `completed` = reviews; `active` = чужие live claims.
+- Карточка в ленте до `target_reviews` completed (default **3**).
+- Active **не** прячут карточку; при открытии без места → `no_slots`.
+- RPC-ошибки → `portfolioRpcErrorCode` → home notices (`homeNoSlots*`, `homeAlreadyReviewed*`).
+- `portfolio_reviewer_slots` должна быть **VOLATILE** (STABLE → PostgREST 405).
+
+## Код
+
+- SQL: `supabase/sql/review_claims.sql` (после `portfolios.sql`)
+- API: `src/api/portfolios.js` (`claim` / `heartbeat` / `release`)
+- Оркестрация: `src/main.js` (`claimHeld`, heartbeat, `releaseHeldClaim`)
+- UI слотов: `src/components/home-screen/README.md`

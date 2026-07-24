@@ -4,7 +4,7 @@
 Если значение **не `null`** → пользователь на экране [`/banned`](../src/components/ban-screen/README.md).  
 `ban_reason` — только для тебя (в UI не показывается).
 
-Клиент сайта **не может** сам поставить/снять бан. Менять можно из **Supabase Dashboard** (SQL Editor или Table Editor).
+Клиент сайта **не может** сам поставить/снять бан. Менять можно из **Supabase Dashboard** (SQL Editor или Table Editor). Автобан по репутации пишет те же поля через RPC `submit_review_complaint` (см. ниже).
 
 Dashboard проекта: [supabase.com/dashboard](https://supabase.com/dashboard) → проект **obratka**.
 
@@ -138,7 +138,39 @@ order by banned_at desc;
 | `toxicity` | токсичность / оскорбления |
 | `bad_reviews` | плохие / бессмысленные отзывы |
 | `spam` | спам, накрутка |
+| `reputation` | автобан: репутация упала до порога (жалобы на листы) |
 | `other` | прочее (лучше дописать словами) |
+
+### Автобан по репутации
+
+Жалоба автора на лист (`submit_review_complaint`) сразу снижает `profiles.reputation` ревьюера. Веса тегов и порог — только в SQL (`review_complaints.sql`), не в UI.
+
+При `reputation <= 0` выставляются `banned_at = now()` и `ban_reason = 'reputation'`. Апелляция — вручную через «Связаться» на `/banned`, затем разбан (и при необходимости вернуть `reputation`) из Dashboard.
+
+Разбан после автобана:
+
+```sql
+update public.profiles
+set
+  banned_at = null,
+  ban_reason = null,
+  reputation = 100  -- по ситуации
+where id = '00000000-0000-0000-0000-000000000000';
+```
+
+Посмотреть репутацию и жалобы:
+
+```sql
+select id, display_name, email, reputation, banned_at, ban_reason
+from public.profiles
+where reputation < 100
+order by reputation asc;
+
+select c.created_at, c.tags, c.penalty, c.reviewer_id, c.reporter_id, c.review_id
+from public.review_complaints c
+order by c.created_at desc
+limit 50;
+```
 
 ---
 

@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Лиги ревью
 
-Тихий матчинг: пользователь не видит UI «лиг»; лента и insert review режутся на сервере.
+Тихий матчинг: пользователь не видит UI «лиг»; лента и insert/claim режутся на сервере.
 
 ## Лиги
 
@@ -25,11 +25,17 @@ alwaysApply: true
 
 Senior → Junior **нельзя** (ликвидность мидлов). Grade обязателен в онбординге.
 
+## Claims и слоты
+
+- `claim_portfolio_review` / INSERT review тоже проверяют `can_review_portfolio` (+ `review_league_mismatch`).
+- Active claims **не** снимают карточку с ленты; лимит = `reviews_count + live_others >= target_reviews`.
+- Детали claim/heartbeat/release — `review-claims.mdc`.
+
 ## Код
 
-- SQL / RLS / trigger: `supabase/sql/portfolios.sql` (`grade_league`, `can_review_portfolio`, `review_league_mismatch`)
+- SQL / RLS: `supabase/sql/portfolios.sql` + `review_claims.sql`
 - Клиент-зеркало: `src/api/leagues.js`
-- Списки: `listPortfoliosForReview` (без own), `listMyPortfolios` — `src/api/portfolios.js`
-- Home UI вкладок: `src/components/home-screen/`
+- Списки: `listPortfoliosForReview` / `listMyPortfolios` — `src/api/portfolios.js`
+- Home UI: `src/components/home-screen/`
 
 Награды v1 пока 1:1; дифференциал экономики — позже.

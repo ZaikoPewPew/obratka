@@ -39,7 +39,7 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 
 При `open` / смене таба: skeleton только у ленты (5 целых карточек-шиммеров), хедер без изменений; затем данные с `motion-reveal` stagger.  
 Клик по чужой карточке → `claimPortfolioReview` → `onOpenPortfolio` → `/review`.  
-Своя (`isOwn`, вкладка «Мои») → `onOpenReport` → `/report` (каркас отчёта).  
+Своя (`isOwn`, вкладка «Мои») → `onOpenReport` → `/report` (листы + жалоба).
 CTA «Закинуть своё» — всегда активна (чёрная). Баланс ≥ `SUBMIT_COST` → `onAddPortfolio` → `/portfolio`; иначе stub-модалка «не хватает монет» (контент позже).
 
 Лиги (тихий матчинг): junior → junior; middle → junior+middle; senior/lead/head → middle+senior+.  
@@ -58,6 +58,7 @@ Topbar поверх контента (`position: absolute`), появление 
 - Если в `profiles.avatar_url` пусто — при refresh подтягиваем picture из Auth и пишем в профиль.
 - При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.
 - Баланс: `profiles.balance` ↔ `session.balance`.
+- Репутация: `profiles.reputation` ↔ `session.reputation`; чип в топбаре → explainer (без весов тегов).
 - Клик по чипу баланса (dev): `creditBalance(+10)`.
 - Клик по аватару профиля → модалка «Твой реферальный код»: код, слоты `left/max` (лимит 2), копировать код / ссылку `?ref=`. API: `fetchMyReferral` / `buildReferralShareUrl`. Без наград — только шаринг.
 

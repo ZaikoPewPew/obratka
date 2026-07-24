@@ -30,7 +30,7 @@
 | `quiz` | `/quiz` | Квиз / опрос после таймера |
 | `done` | `/quiz/done` | Финал квиза (review-panel done + улет отчёта) |
 | `success` | `/done` | Успех подачи портфолио (success-screen) |
-| `report` | `/report` | Отчёт автору (report-screen, каркас) |
+| `report` | `/report` | Отчёт автору (листы + жалоба) |
 | `banned` | `/banned` | Аккаунт заблокирован (ban-screen); escape-proof |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query вроде `?ref=` / `?lang=` сохраняются.  
@@ -48,8 +48,10 @@ referral → auth → (authCode) → onboarding → home
 ```
 
 Auth-защита и Dashboard: [`auth-screen/README.md`](../components/auth-screen/README.md).  
+Brand visual / field errors: [`brand-screen-visual`](../components/brand-screen-visual/README.md), [`FIELD_ERROR.md`](../utils/FIELD_ERROR.md).  
 См. корневой [`SCREENS.md`](../../SCREENS.md).
 
 ## Правило
 
-Компоненты не знают о следующем экране — только колбэки. Переходы и URL — через `go()` / роутер в `main.js`.
+Компоненты не знают о следующем экране — только колбэки. Переходы и URL — через `go()` / роутер в `main.js`.  
+Ошибки полей на brand-экранах — через utils + `setVariant`, не локальный хардкод обводки.

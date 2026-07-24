@@ -166,6 +166,15 @@
   padding-inline-end: var(--space-5);
 }
 
+.home-screen__chip--reputation {
+  gap: var(--home-screen-reputation-chip-gap);
+  padding-inline: var(--home-screen-chip-padding-x);
+}
+
+.home-screen__reputation-body {
+  white-space: var(--home-screen-reputation-body-pre);
+}
+
 .home-screen__chip--submit {
   width: var(--home-screen-submit-chip-width);
   padding: var(--home-screen-submit-chip-padding);

@@ -17,8 +17,18 @@ Invite-only gate: код проверяется через RPC `validate_referra
 
 - `ReferralScreen.js` — `createReferralScreen({ onSubmit })` → `{ root, open, close, setError }`.
 - `open(prefill?, { handoff? })`, `close({ handoff? })`.
-- Visual: [`brand-screen-visual`](../brand-screen-visual/README.md); ошибка поля: `setUrlScreenFieldInvalid` ([`urlScreenField.js`](../../utils/urlScreenField.js)) — текст + обводка + `setVariant("invalid")`.
 - Стили: `.url-screen*` + `--placeholder` в `iframe-shell.css` / `tokens.css`.
+
+## Visual и ошибки поля
+
+| Слой | Модуль |
+|------|--------|
+| Правый mesh + марка | [`createBrandScreenVisual`](../brand-screen-visual/README.md) |
+| Текст ошибки + красная обводка | `setUrlScreenFieldInvalid` — [`FIELD_ERROR.md`](../../utils/FIELD_ERROR.md) |
+| Красный mesh + рожки | `visual.setVariant("invalid")` (без resize SVG) |
+
+Типичный `setError`: FieldInvalid **и** `setVariant("invalid"|"default")` вместе.  
+Handoff на auth: `go("auth", { handoff: true })` — visual не переигрывается.
 
 ## Поведение
 

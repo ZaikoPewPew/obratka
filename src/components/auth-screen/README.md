@@ -13,8 +13,17 @@ Path: **`/registration`**. Split как `url-screen`; форма — email → d
 ## Файл
 
 - `AuthScreen.js` — `createAuthScreen({ onSuccess, mode? })` → `{ root, open, close, setMode }`.
-- Visual: [`brand-screen-visual`](../brand-screen-visual/README.md).
-- Email-ошибка: `setUrlScreenFieldInvalid` (обводка + текст); provider-ошибка — только текст; visual `invalid`, если любая ошибка видна.
+
+## Visual и ошибки
+
+| Источник ошибки | Outline инпута | Текст | Visual `invalid` |
+|-----------------|----------------|-------|------------------|
+| Email (валидация / OTP send) | да — `setUrlScreenFieldInvalid` | да | да (OR) |
+| Provider (Telegram / Google) | нет | да — `setFieldErrorVisible` на providerError | да (OR) |
+
+Правый visual: [`brand-screen-visual`](../brand-screen-visual/README.md).  
+Полный контракт поля: [`FIELD_ERROR.md`](../../utils/FIELD_ERROR.md).  
+Visual `invalid`, пока видна **любая** ошибка (email **или** provider).
 
 ## Поведение
 

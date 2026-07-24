@@ -9,6 +9,7 @@ const STORAGE_KEY = "obratka.session";
  *   myReferralCode?: string | null;
  *   referralUses?: number;
  *   balance?: number;
+ *   reputation?: number;
  *   telegramId?: number;
  *   telegramUsername?: string | null;
  *   displayName?: string | null;

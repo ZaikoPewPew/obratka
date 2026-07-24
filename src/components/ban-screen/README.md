@@ -6,7 +6,10 @@ Path: **`/banned`** (`banned`).
 
 ## Layout
 
-Split как у `success-screen`: слева тайтл + подтайтл + кнопки (**Выйти** серая → **Связаться** тёмная), справа красный mesh (`#FF4837` family) + brand mark с огнём (44×37, низ/право как у обычного 44×30).
+Split как у `success-screen`: слева тайтл + подтайтл + кнопки (**Выйти** серая → **Связаться** тёмная), справа красный mesh (`--shell-ban-mesh-*`) + **статичный** `banBrandMarkSvg` (полный evil **44×52**).
+
+**Не** использует `createBrandScreenVisual` / `setVariant("invalid")` — это отдельный экран-ловушка, не brand-gate с полем.  
+Морф рожек без resize — только на referral/auth/auth-code/url; см. [`brand-screen-visual`](../brand-screen-visual/README.md), [`assets/README.md`](../../assets/README.md).
 
 ## Копирайт
 
@@ -44,6 +47,8 @@ where email = 'user@example.com';
 ```
 
 Колонки `banned_at` / `ban_reason` клиенту read-only (триггер `protect_profiles_ban`). INSERT в `portfolios` / `reviews` для забаненных режет RLS (`is_profile_banned`).
+
+Автобан: жалобы на листы ревью снижают `profiles.reputation`; при пороге выставляется `banned_at` (`ban_reason = reputation`). Апелляция — «Связаться». См. [`supabase/BAN.md`](../../../supabase/BAN.md).
 
 ## Стили
 
