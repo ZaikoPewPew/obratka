@@ -1130,9 +1130,20 @@ export function createHomeScreen({
 
   balanceChip.addEventListener("click", () => {
     if (!TEMP_BALANCE_CHIP_CREDIT && !import.meta.env.DEV) return;
-    void creditBalance(DEV_CREDIT_AMOUNT).then(() => {
-      syncCopy();
-    });
+    balanceChip.disabled = true;
+    void creditBalance(DEV_CREDIT_AMOUNT)
+      .then((next) => {
+        syncCopy();
+        if (import.meta.env.DEV || TEMP_BALANCE_CHIP_CREDIT) {
+          console.info("[home] balance credit →", next);
+        }
+      })
+      .catch((err) => {
+        console.warn("[home] balance credit failed", err);
+      })
+      .finally(() => {
+        balanceChip.disabled = false;
+      });
   });
 
   function openReputationModal() {

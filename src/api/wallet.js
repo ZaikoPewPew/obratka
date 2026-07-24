@@ -10,6 +10,12 @@ export const REVIEW_REWARD = 1;
 export const SUBMIT_COST = 1;
 
 /**
+ * Инкремент при локальной мутации баланса (credit/spend), чтобы in-flight
+ * refreshSessionFromProfile не затирал свежее значение устаревшим ответом.
+ */
+let walletMutationGen = 0;
+
+/**
  * @returns {number}
  */
 export function getBalance() {
@@ -40,11 +46,27 @@ function writeBalanceLocal(next) {
 }
 
 /**
+ * @param {unknown} value
+ * @returns {number | null}
+ */
+function coerceBalance(value) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.max(0, Math.floor(value));
+  }
+  if (typeof value === "string" && value.trim()) {
+    const n = Number(value);
+    if (Number.isFinite(n)) return Math.max(0, Math.floor(n));
+  }
+  return null;
+}
+
+/**
  * Подтянуть профиль из Supabase в local-сессию (имя, аватар, email, баланс…).
  * Если в profiles нет avatar_url — берём picture из Auth (Google/Telegram) и пишем в профиль.
  * @returns {Promise<import("../app/session.js").AppSession | null>}
  */
 export async function refreshSessionFromProfile() {
+  const genAtStart = walletMutationGen;
   const profile = await fetchMyProfile();
   if (!profile) return getSession();
 
@@ -68,6 +90,9 @@ export async function refreshSessionFromProfile() {
     }
   }
 
+  const serverBalance = coerceBalance(profile.balance);
+  const keepLocalBalance = genAtStart !== walletMutationGen;
+
   /** @type {import("../app/session.js").AppSession} */
   const next = {
     ...session,
@@ -77,9 +102,10 @@ export async function refreshSessionFromProfile() {
     avatarUrl,
     telegramId: profile.telegram_id ?? session.telegramId,
     telegramUsername: profile.telegram_username ?? session.telegramUsername,
-    balance:
-      typeof profile.balance === "number" && Number.isFinite(profile.balance)
-        ? Math.max(0, Math.floor(profile.balance))
+    balance: keepLocalBalance
+      ? getBalance()
+      : serverBalance != null
+        ? serverBalance
         : session.balance,
     reputation:
       typeof profile.reputation === "number" &&
@@ -150,15 +176,20 @@ export async function creditBalance(amount) {
     const { data, error } = await supabase.rpc("temp_credit_balance", {
       p_amount: Math.floor(n),
     });
-    if (!error && typeof data === "number" && Number.isFinite(data)) {
-      return writeBalanceLocal(data);
+    const credited = coerceBalance(data);
+    if (!error && credited != null) {
+      walletMutationGen += 1;
+      return writeBalanceLocal(credited);
     }
-    if (import.meta.env.DEV && error) {
-      console.warn("[wallet] temp_credit_balance", error.message || error);
-    }
+    console.warn(
+      "[wallet] temp_credit_balance failed",
+      error?.message || error || "bad_payload",
+      data,
+    );
   }
 
-  /* Fallback без RPC: только localStorage (сотрётся на refresh с сервера). */
+  /* Fallback без RPC: только localStorage (сотрётся на следующем удачном sync). */
+  walletMutationGen += 1;
   return writeBalanceLocal(getBalance() + n);
 }
 
@@ -190,6 +221,7 @@ export async function spendSubmitCost() {
     typeof data === "number" && Number.isFinite(data)
       ? Math.max(0, Math.floor(data))
       : getBalance() - SUBMIT_COST;
+  walletMutationGen += 1;
   writeBalanceLocal(next);
   return next;
 }
