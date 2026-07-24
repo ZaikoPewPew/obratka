@@ -1,25 +1,55 @@
-# `home-screen` — главная (лента)
+# `home-screen` — главная (лента + мои)
 
-Path: **`/home`**. После onboarding: шапка (лого, баланс, уведомления, аватар) + лента карточек портфолио.
+Path: **`/home`**. После onboarding: шапка (лого, баланс, уведомления, аватар) + лента карточек портфолио + нижний переключатель **Лента / Мои**.
+
+Файл: [`HomeScreen.js`](./HomeScreen.js). Стили: [`styles/home-screen.css`](../../../styles/home-screen.css). Токены: `--home-screen-*` в [`styles/tokens.css`](../../../styles/tokens.css).
 
 ## Поведение
 
-Очередь: общая лента из Supabase (`portfolios` + `reviews`).  
-При `open` сначала skeleton (топбар + 5 карточек), затем данные с `motion-reveal` stagger.  
+### Вкладки
+
+| Вкладка | API | Содержимое |
+|---------|-----|------------|
+| **Лента** (`feed`, default) | `listPortfoliosForReview()` | Чужие `pending` **в лиге** грейда ревьюера (RLS), без своих; уже отревьюенные этим юзером скрыты |
+| **Мои** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …) |
+
+Переключатель: `home-screen__tabbar` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`).
+
+- Скролл **вниз** по `home-screen__body` → таббар уезжает за нижний край (`--hidden`).
+- Скролл **вверх** / у верхнего края → снова виден.
+- Анимация hide/show: `--home-screen-tabbar-hide-duration` / `--home-screen-tabbar-hide-ease` → `--motion-screen-*`.
+
+### Переключение таба (UI)
+
+Активный фон — отдельный слой `home-screen__tabbar-thumb` (скользящий пилл):
+
+- при смене вкладки двигается `transform` + `width` к активной кнопке;
+- длительность/easing: `--home-screen-tabbar-thumb-*` → `--motion-screen-*`;
+- цвет подписи таба плавно через `transition: color` (`--home-screen-tabbar-label-*`);
+- радиусы обёртки и пилла/кнопок: **12px** (`--home-screen-tabbar-radius`, `--home-screen-tabbar-tab-radius`).
+
+Синхрон позиции thumb: после `open` / смены таба / `syncCopy` (смена языка меняет ширину) / `ResizeObserver` / `window.resize`.
+
+### Лента и карточки
+
+При `open` / смене таба: skeleton (топбар + 5 карточек), затем данные с `motion-reveal` stagger.  
 Клик по чужой карточке → `onOpenPortfolio` → `/review`.  
-Своя карточка видна, но без открытия на ревью.  
-Уже отревьюенные тобой и `done` (собрали целевое число ревью) в ленте не показываются.  
+Своя (`isOwn`, вкладка «Мои») — полный визуал, клик запрещён (`aria-disabled`).  
 CTA «Закинуть своё» — в топбаре слева от баланса (нужен баланс ≥ `SUBMIT_COST`).
 
-Лента ровно по центру экрана (отступ сверху `--home-screen-body-padding-top` = 16px от края экрана);
-topbar поверх контента (`position: absolute`), не сдвигает ленту вниз; появление без `filter` (`motion-reveal-topbar`), иначе белый композитный слой.
+Лиги (тихий матчинг): junior → junior; middle → junior+middle; senior/lead/head → middle+senior+.  
+Клиент-зеркало: [`src/api/leagues.js`](../../api/leagues.js). Сервер: [`supabase/sql/portfolios.sql`](../../../supabase/sql/portfolios.sql) (`can_review_portfolio`, RLS).
 
-На десктопе (≥960px) слева от ленты sticky-aside (прилегает с `--home-screen-aside-gap`).
+Лента по центру экрана (`--home-screen-body-padding-top` = 16px сверху); снизу запас под таббар (`--home-screen-body-padding-bottom`).  
+Topbar поверх контента (`position: absolute`), появление без `filter` (`motion-reveal-topbar`).
+
+На десктопе (≥960px) слева от ленты sticky-aside (`--home-screen-aside-*`).
 
 ### Профиль и баланс
 
-- Есть `session.avatarUrl` → фото; нет / ошибка загрузки → фон + буква из имени (`displayName` / telegram / email).
-- При `open` / `refresh` профиль синкается из Supabase (`refreshSessionFromProfile` через `refreshWalletFromServer`).
+- Есть `session.avatarUrl` → фото (круг); нет / ошибка → тёмный круг + буква имени.
+- Если в `profiles.avatar_url` пусто — при refresh подтягиваем picture из Auth и пишем в профиль.
+- При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.
 - Баланс: `profiles.balance` ↔ `session.balance`.
 
 ### Dev-кнопки (под лентой)
@@ -27,27 +57,42 @@ topbar поверх контента (`position: absolute`), не сдвигае
 | Кнопка | Действие |
 |--------|----------|
 | `+{amount} монет` | `creditBalance` (локально + Supabase) |
-| `Сбросить сессию` | `signOut()` → `clearSession` → `go("referral")` |
+| `Сбросить сессию` | `onResetSession` → signOut / clear / `go("referral")` |
 
 ## Поля карточки
 
 | Элемент | Источник |
 |---------|----------|
 | Превью | thum.io / fallback |
-| Иконка площадки | Simple Icons для известных сервисов; иначе литера **W** (кастомный сайт) |
-| Аватар | `item.avatarUrl` (фото Google/Telegram) или буква из `item.name` |
-| ФИО | `item.name` (денормализация при submit) |
-| Роль | всегда EN Title Case: `Senior Product Designer` (`formatPortfolioRole`) |
-| Счётчик | `{current} из {total}` = `reviewsCount` / `targetReviews` (цель ревьюеров) |
-| Своя | `isOwn` → disabled + `homeCardOwnTitle` / `homeCardOwnAria` |
+| Иконка площадки | Simple Icons; иначе литера **W** |
+| Аватар | `item.avatarUrl` или буква из `item.name` |
+| ФИО | `item.name` |
+| Роль | EN Title Case: `formatPortfolioRole` |
+| Счётчик | `{current} из {total}` = `reviewsCount` / `targetReviews` |
+| Своя | `isOwn` только во вкладке «Мои» |
 
-## API
+## Разметка таббара
+
+```
+.home-screen__tabbar          role=tablist
+  .home-screen__tabbar-thumb  aria-hidden (пилл)
+  button.home-screen__tab     role=tab  data-tab=feed|mine
+```
+
+Классы состояния: `--active` на табе; `--hidden` на tabbar при скролле вниз.
+
+## API модуля
 
 `createHomeScreen({ onOpenPortfolio, onAddPortfolio?, onResetSession? })` → `{ root, open, close, setItems, refresh }`.
 
-## Стили / i18n
+Внутреннее: `activeTab` `feed` \| `mine`; `refresh` читает соответствующий list API.
 
-`styles/home-screen.css`, токены `--home-screen-*`.  
-Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeEmpty`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeCardProgress`, `homeCardOwnTitle`, `homeCardOwnAria`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitCost`, `homeAddCoins*`, `homeResetSession*`.
+## Стили / i18n / a11y
 
-См. [`SCREENS.md`](../../../SCREENS.md).
+Токены `--home-screen-tabbar-*` (высота 52, padding трека 2px, таб 48, offset 16, радиус 12, motion hide/thumb/label).
+
+Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeTabFeed`, `homeTabMine`, `homeTabsAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeCardProgress`, `homeCardOwnTitle`, `homeCardOwnAria`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitCost`, `homeAddCoins*`, `homeResetSession*`.
+
+`prefers-reduced-motion: reduce` — hide/thumb/label transitions ≈ мгновенные.
+
+См. [`SCREENS.md`](../../../SCREENS.md), [`src/api/README.md`](../../api/README.md).

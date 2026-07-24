@@ -45,7 +45,7 @@ Google Authorized redirect URI в Cloud Console: `https://<project-ref>.supabase
 |-----------------|------------------|
 | `auth.users` | Supabase Auth (все провайдеры) |
 | `profiles` | `profiles.js`, `onboarding.js`, `wallet.js`; автосоздание триггером; `banned_at` → ban-screen |
-| `portfolios` / `reviews` | `portfolios.js` (INSERT blocked if banned) |
+| `portfolios` / `reviews` | `portfolios.js` (очередь по лигам; INSERT blocked if banned / league mismatch) |
 | `subscribers` | `subscribers.js` (не entry UX) |
 
 ## Бан пользователя (оператор)

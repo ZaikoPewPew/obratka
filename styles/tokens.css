@@ -384,7 +384,7 @@
   --home-screen-submit-chip-bg-hover: var(--color-accent-hover);
   --home-screen-submit-chip-bg-active: var(--color-accent-active);
   --home-screen-profile-size: var(--space-12);
-  --home-screen-profile-letter-padding: var(--space-3);
+  --home-screen-avatar-radius: var(--radius-pill);
   --home-screen-avatar-letter-bg: var(--palette-gray-900);
   --home-screen-avatar-letter-color: var(--palette-white);
   --home-screen-body-padding: var(--space-4);
@@ -429,6 +429,36 @@
   --home-screen-skeleton-line-role-width: 58%;
   --home-screen-skeleton-line-height: var(--space-3);
   --home-screen-skeleton-balance-width: var(--space-8);
+  /* Bottom tabs «Лента | Мои» (Figma menu 445:473) */
+  --home-screen-tabbar-height: 52px;
+  --home-screen-tabbar-offset: var(--space-4);
+  --home-screen-tabbar-padding: 2px;
+  /* Figma menu: radius 12 на обёртке и на табах */
+  --home-screen-tabbar-radius: 12px;
+  --home-screen-tabbar-track-bg: color-mix(
+    in srgb,
+    var(--palette-gray-900) 20%,
+    transparent
+  );
+  --home-screen-tabbar-tab-height: 48px;
+  --home-screen-tabbar-tab-padding-x: var(--space-4);
+  --home-screen-tabbar-tab-radius: 12px;
+  --home-screen-tabbar-tab-font-size: var(--font-size-base);
+  --home-screen-tabbar-tab-font-weight: var(--font-weight-medium);
+  --home-screen-tabbar-tab-active-bg: var(--color-accent);
+  --home-screen-tabbar-tab-active-color: var(--color-on-accent);
+  --home-screen-tabbar-tab-color: var(--color-text);
+  --home-screen-tabbar-z: 3;
+  --home-screen-tabbar-hide-duration: var(--motion-screen-duration);
+  --home-screen-tabbar-hide-ease: var(--motion-screen-ease);
+  --home-screen-tabbar-thumb-duration: var(--motion-screen-duration);
+  --home-screen-tabbar-thumb-ease: var(--motion-screen-ease);
+  --home-screen-tabbar-label-duration: var(--motion-screen-duration);
+  --home-screen-tabbar-label-ease: var(--motion-screen-ease);
+  --home-screen-body-padding-bottom: calc(
+    var(--home-screen-tabbar-offset) + var(--home-screen-tabbar-height) +
+      var(--space-4)
+  );
 
   /* Auth (стиль старого PDF/done: divider + provider buttons) */
   --auth-screen-divider-height: 27px;

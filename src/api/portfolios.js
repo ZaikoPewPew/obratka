@@ -3,7 +3,8 @@ import { getStrings } from "../i18n.js";
 import { getSupabase } from "../lib/supabaseClient.js";
 
 /**
- * Общая очередь портфолио на ревью (Supabase).
+ * Очередь портфолио на ревью (Supabase) + свои карточки.
+ * Матчинг лиг — RLS / `can_review_portfolio` (см. `leagues.js`).
  *
  * @typedef {{
  *   id: string;
@@ -128,7 +129,8 @@ export function clearSubmittedPortfolios() {
 }
 
 /**
- * Pending-очередь для главной: чужие ещё не отревьюенные + свои pending.
+ * Очередь на ревью: чужие pending в лиге ревьюера (RLS), без своих,
+ * минус уже отревьюенные этим пользователем.
  *
  * @returns {Promise<PortfolioQueueItem[]>}
  */
@@ -147,6 +149,7 @@ export async function listPortfoliosForReview() {
       "id, owner_id, url, name, role, avatar_url, target_reviews, reviews_count, status, created_at",
     )
     .eq("status", "pending")
+    .neq("owner_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -173,7 +176,39 @@ export async function listPortfoliosForReview() {
 
   return (rows || [])
     .map((row) => mapPortfolioRow(row, user.id))
-    .filter((item) => item.isOwn || !reviewedIds.has(item.id));
+    .filter((item) => !reviewedIds.has(item.id));
+}
+
+/**
+ * Портфолио текущего пользователя (для вкладки «Мои»; UI переключателя — снаружи).
+ *
+ * @returns {Promise<PortfolioQueueItem[]>}
+ */
+export async function listMyPortfolios() {
+  const supabase = getSupabase();
+  if (!supabase) return [];
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.id) return [];
+
+  const { data: rows, error } = await supabase
+    .from("portfolios")
+    .select(
+      "id, owner_id, url, name, role, avatar_url, target_reviews, reviews_count, status, created_at",
+    )
+    .eq("owner_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    if (import.meta.env.DEV) {
+      console.warn("[portfolios] listMyPortfolios", error.message);
+    }
+    return [];
+  }
+
+  return (rows || []).map((row) => mapPortfolioRow(row, user.id));
 }
 
 /**

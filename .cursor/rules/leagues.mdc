@@ -1,0 +1,35 @@
+---
+description: Лиги матчинга ревью — тихий фильтр очереди по grade
+alwaysApply: true
+---
+
+# Лиги ревью
+
+Тихий матчинг: пользователь не видит UI «лиг»; лента и insert review режутся на сервере.
+
+## Лиги
+
+| Лига | `profiles.grade` |
+|------|------------------|
+| 1 | `junior` |
+| 2 | `middle` |
+| 3 | `senior`, `lead`, `head` |
+
+## Кто кого ревьюит
+
+| Портфолио | Ревьюеры |
+|-----------|----------|
+| Junior | Junior, Middle |
+| Middle | Middle, Senior+ |
+| Senior+ | Senior+ |
+
+Senior → Junior **нельзя** (ликвидность мидлов). Grade обязателен в онбординге.
+
+## Код
+
+- SQL / RLS / trigger: `supabase/sql/portfolios.sql` (`grade_league`, `can_review_portfolio`, `review_league_mismatch`)
+- Клиент-зеркало: `src/api/leagues.js`
+- Списки: `listPortfoliosForReview` (без own), `listMyPortfolios` — `src/api/portfolios.js`
+- Home UI вкладок: `src/components/home-screen/`
+
+Награды v1 пока 1:1; дифференциал экономики — позже.

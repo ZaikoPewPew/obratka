@@ -36,7 +36,7 @@ Auth: логика в `src/api/auth.js`; UI — `auth-screen` + `auth-code-scree
 2. **Порядок и URL снаружи** — колбэк наверх → `go(id)` в `main.js`. Компонент не знает «кто следующий» и сам не пишет `history`.
 3. **Split-экраны** (referral / auth / onboarding / url): эталон `url-screen`; цель — общий `brand-screen-shell`. Не копипастить mesh/noise/logo.
 4. **Handoff** между соседними brand-экранами: `go(id, { handoff: true })` — правый visual без повторной анимации (`brandScreenTransition.js`).
-5. **home-screen** — другой лейаут (очередь), без обязательного правого visual.
+5. **home-screen** — другой лейаут (очередь), без обязательного правого visual. Вкладки **Лента / Мои** снизу (`listPortfoliosForReview` / `listMyPortfolios`); очередь ревью фильтруется **лигами** по `profiles.grade` (RLS + `src/api/leagues.js`). UI таббара и скользящий пилл — README `home-screen`.
 6. **Монтаж** — из `main.js`, не из HTML-слотов.
 
 ## Motion

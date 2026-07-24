@@ -1,5 +1,6 @@
 import { formatString, getStrings } from "../../i18n.js";
 import {
+  listMyPortfolios,
   listPortfoliosForReview,
   portfolioPreviewUrl,
 } from "../../api/portfolios.js";
@@ -21,6 +22,13 @@ const DEV_CREDIT_AMOUNT = 10;
 
 /** Сколько skeleton-карточек показывать, пока грузится лента. */
 const SKELETON_CARD_COUNT = 5;
+
+/** Порог смены направления скролла для hide/show таббара. */
+const TABBAR_SCROLL_DELTA = 8;
+
+/**
+ * @typedef {'feed' | 'mine'} HomeTabId
+ */
 
 /**
  * @typedef {{
@@ -225,22 +233,50 @@ export function createHomeScreen({
 
   cluster.append(aside, feed);
   body.append(cluster);
-  root.append(title, topbar, body);
+
+  const tabbar = document.createElement("div");
+  tabbar.className = "home-screen__tabbar";
+  tabbar.setAttribute("role", "tablist");
+
+  const tabThumb = document.createElement("div");
+  tabThumb.className = "home-screen__tabbar-thumb";
+  tabThumb.setAttribute("aria-hidden", "true");
+
+  const feedTab = document.createElement("button");
+  feedTab.type = "button";
+  feedTab.className = "home-screen__tab home-screen__tab--active";
+  feedTab.setAttribute("role", "tab");
+  feedTab.setAttribute("aria-selected", "true");
+  feedTab.dataset.tab = "feed";
+
+  const mineTab = document.createElement("button");
+  mineTab.type = "button";
+  mineTab.className = "home-screen__tab";
+  mineTab.setAttribute("role", "tab");
+  mineTab.setAttribute("aria-selected", "false");
+  mineTab.dataset.tab = "mine";
+
+  tabbar.append(tabThumb, feedTab, mineTab);
+  root.append(title, topbar, body, tabbar);
 
   /** @type {HomePortfolioItem[]} */
   let items = [];
   let loading = false;
   /** Показать stagger-reveal при смене skeleton → контент. */
   let revealItems = false;
+  /** @type {HomeTabId} */
+  let activeTab = "feed";
+  let lastScrollTop = 0;
+  let tabbarHidden = false;
 
   function showProfileLetter(letter) {
     const initial = letter && letter !== "?" ? letter : "?";
     profileLetter.textContent = initial;
     profileLetter.hidden = false;
     profileImg.hidden = true;
-    profileImg.removeAttribute("src");
     profileImg.onload = null;
     profileImg.onerror = null;
+    profileImg.removeAttribute("src");
     profileBtn.classList.add("home-screen__profile--letter");
   }
 
@@ -251,6 +287,9 @@ export function createHomeScreen({
    */
   function showProfilePhoto(src, letter) {
     profileLetter.textContent = letter;
+    profileLetter.hidden = false;
+    profileImg.hidden = true;
+    profileBtn.classList.add("home-screen__profile--letter");
     profileImg.referrerPolicy = "no-referrer";
     profileImg.onload = () => {
       profileImg.hidden = false;
@@ -297,9 +336,17 @@ export function createHomeScreen({
     markImg.alt = t.brandLogoAlt;
     list.setAttribute(
       "aria-label",
-      loading ? t.homeListLoadingAria : t.homeListAria,
+      loading
+        ? t.homeListLoadingAria
+        : activeTab === "mine"
+          ? t.homeListMineAria
+          : t.homeListAria,
     );
-    empty.textContent = t.homeEmpty;
+    empty.textContent =
+      activeTab === "mine" ? t.homeEmptyMine : t.homeEmpty;
+    feedTab.textContent = t.homeTabFeed;
+    mineTab.textContent = t.homeTabMine;
+    tabbar.setAttribute("aria-label", t.homeTabsAria);
     addLabel.textContent = t.homeAddPortfolio;
     addBtn.setAttribute("aria-label", t.homeAddPortfolio);
     addBtn.title = t.homeAddPortfolio;
@@ -329,6 +376,74 @@ export function createHomeScreen({
     }
 
     syncProfileAvatar();
+    scheduleTabThumbSync();
+  }
+
+  /**
+   * @param {boolean} hidden
+   */
+  function setTabbarHidden(hidden) {
+    if (tabbarHidden === hidden) return;
+    tabbarHidden = hidden;
+    tabbar.classList.toggle("home-screen__tabbar--hidden", hidden);
+  }
+
+  function showTabbar() {
+    setTabbarHidden(false);
+  }
+
+  /**
+   * @param {HomeTabId} tab
+   */
+  function syncTabButtons(tab) {
+    const isFeed = tab === "feed";
+    feedTab.classList.toggle("home-screen__tab--active", isFeed);
+    mineTab.classList.toggle("home-screen__tab--active", !isFeed);
+    feedTab.setAttribute("aria-selected", isFeed ? "true" : "false");
+    mineTab.setAttribute("aria-selected", isFeed ? "false" : "true");
+    syncTabThumb();
+  }
+
+  /** Скользящий пилл активного таба (ширина/смещение по layout). */
+  function syncTabThumb(instant = false) {
+    const activeEl = activeTab === "mine" ? mineTab : feedTab;
+    const barRect = tabbar.getBoundingClientRect();
+    const tabRect = activeEl.getBoundingClientRect();
+    if (!barRect.width || !tabRect.width) return;
+    const left = tabRect.left - barRect.left;
+    if (instant) {
+      tabThumb.style.transition = "none";
+    }
+    tabThumb.style.width = `${tabRect.width}px`;
+    tabThumb.style.transform = `translateX(${left}px)`;
+    if (instant) {
+      void tabThumb.offsetWidth;
+      tabThumb.style.transition = "";
+    }
+  }
+
+  /**
+   * @param {boolean} [instant]
+   */
+  function scheduleTabThumbSync(instant = false) {
+    requestAnimationFrame(() => {
+      syncTabThumb(instant);
+    });
+  }
+
+  /**
+   * @param {HomeTabId} tab
+   */
+  async function setActiveTab(tab) {
+    if (activeTab === tab) return;
+    activeTab = tab;
+    syncTabButtons(tab);
+    showTabbar();
+    body.scrollTop = 0;
+    lastScrollTop = 0;
+    setLoading(true);
+    syncCopy();
+    await refresh();
   }
 
   /**
@@ -405,7 +520,11 @@ export function createHomeScreen({
     const t = getStrings();
     list.setAttribute(
       "aria-label",
-      loading ? t.homeListLoadingAria : t.homeListAria,
+      loading
+        ? t.homeListLoadingAria
+        : activeTab === "mine"
+          ? t.homeListMineAria
+          : t.homeListAria,
     );
     if (loading) {
       renderSkeleton();
@@ -549,10 +668,15 @@ export function createHomeScreen({
     button.append(preview, meta);
 
     if (item.isOwn) {
-      button.disabled = true;
+      // Полный визуал, без disabled/opacity — только запрет клика.
       button.classList.add("home-screen__card--own");
+      button.setAttribute("aria-disabled", "true");
       button.title = t.homeCardOwnTitle;
       button.setAttribute("aria-label", t.homeCardOwnAria);
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
     } else {
       button.addEventListener("click", () => {
         void onOpenPortfolio(item);
@@ -566,7 +690,11 @@ export function createHomeScreen({
   function renderList() {
     list.replaceChildren();
     empty.hidden = items.length > 0;
-    list.setAttribute("aria-label", getStrings().homeListAria);
+    const t = getStrings();
+    list.setAttribute(
+      "aria-label",
+      activeTab === "mine" ? t.homeListMineAria : t.homeListAria,
+    );
 
     for (const [index, item] of items.entries()) {
       const li = createCard(item);
@@ -593,7 +721,10 @@ export function createHomeScreen({
   async function refresh() {
     await refreshWalletFromServer();
     syncCopy();
-    const next = await listPortfoliosForReview();
+    const next =
+      activeTab === "mine"
+        ? await listMyPortfolios()
+        : await listPortfoliosForReview();
     revealItems = loading;
     loading = false;
     root.classList.remove("home-screen--loading");
@@ -604,14 +735,20 @@ export function createHomeScreen({
   async function open() {
     root.hidden = false;
     root.classList.remove("home-screen--open");
+    syncTabButtons(activeTab);
+    showTabbar();
+    lastScrollTop = 0;
+    body.scrollTop = 0;
     syncCopy();
     setLoading(true);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         root.classList.add("home-screen--open");
+        scheduleTabThumbSync(true);
       });
     });
     await refresh();
+    scheduleTabThumbSync(true);
   }
 
   /**
@@ -621,10 +758,47 @@ export function createHomeScreen({
     root.classList.remove("home-screen--open", "home-screen--loading");
     loading = false;
     revealItems = false;
+    showTabbar();
     root.setAttribute("aria-busy", "false");
     root.hidden = true;
     return Promise.resolve();
   }
+
+  body.addEventListener(
+    "scroll",
+    () => {
+      const scrollTop = body.scrollTop;
+      const delta = scrollTop - lastScrollTop;
+      if (scrollTop <= 0) {
+        showTabbar();
+      } else if (delta > TABBAR_SCROLL_DELTA) {
+        setTabbarHidden(true);
+      } else if (delta < -TABBAR_SCROLL_DELTA) {
+        showTabbar();
+      }
+      lastScrollTop = scrollTop;
+    },
+    { passive: true },
+  );
+
+  if (typeof ResizeObserver === "function") {
+    const tabbarResize = new ResizeObserver(() => {
+      syncTabThumb();
+    });
+    tabbarResize.observe(tabbar);
+    tabbarResize.observe(feedTab);
+    tabbarResize.observe(mineTab);
+  }
+
+  window.addEventListener("resize", scheduleTabThumbSync);
+
+  feedTab.addEventListener("click", () => {
+    void setActiveTab("feed");
+  });
+
+  mineTab.addEventListener("click", () => {
+    void setActiveTab("mine");
+  });
 
   addBtn.addEventListener("click", () => {
     if (addBtn.disabled) return;

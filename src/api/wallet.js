@@ -1,4 +1,5 @@
 import { getSession, setSession } from "../app/session.js";
+import { getAuthUserAvatarUrl } from "./auth.js";
 import { fetchMyProfile, updateMyProfile } from "./profiles.js";
 
 /** Награда за завершённое ревью (stub). */
@@ -54,6 +55,7 @@ async function writeBalance(next) {
 
 /**
  * Подтянуть профиль из Supabase в local-сессию (имя, аватар, email, баланс…).
+ * Если в profiles нет avatar_url — берём picture из Auth (Google/Telegram) и пишем в профиль.
  * @returns {Promise<import("../app/session.js").AppSession | null>}
  */
 export async function refreshSessionFromProfile() {
@@ -61,13 +63,32 @@ export async function refreshSessionFromProfile() {
   if (!profile) return getSession();
 
   const session = getSession() ?? {};
+  const profileAvatar =
+    typeof profile.avatar_url === "string" ? profile.avatar_url.trim() : "";
+  let avatarUrl =
+    profileAvatar ||
+    (typeof session.avatarUrl === "string" ? session.avatarUrl.trim() : "") ||
+    null;
+
+  if (!avatarUrl) {
+    const fromAuth = await getAuthUserAvatarUrl();
+    if (fromAuth) {
+      avatarUrl = fromAuth;
+      void updateMyProfile({ avatar_url: fromAuth }).catch((err) => {
+        if (import.meta.env.DEV) {
+          console.warn("[wallet] persist auth avatar", err);
+        }
+      });
+    }
+  }
+
   /** @type {import("../app/session.js").AppSession} */
   const next = {
     ...session,
     userId: profile.id || session.userId,
     email: profile.email ?? session.email,
     displayName: profile.display_name ?? session.displayName ?? null,
-    avatarUrl: profile.avatar_url ?? session.avatarUrl ?? null,
+    avatarUrl,
     telegramId: profile.telegram_id ?? session.telegramId,
     telegramUsername: profile.telegram_username ?? session.telegramUsername,
     balance:

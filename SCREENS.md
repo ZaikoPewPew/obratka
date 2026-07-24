@@ -2,7 +2,7 @@
 
 Карта экранов «Обратки», path-роутинг и ветки с Home.
 
-Статус: **продуктовый флоу wired**. Auth: **Email OTP + Telegram + Google** → `profiles`. Onboarding пишет в Supabase. Home — общая очередь `portfolios`/`reviews` + баланс из `profiles`. Submit URL — done на url-screen; success — пресеты / deep link.
+Статус: **продуктовый флоу wired**. Auth: **Email OTP + Telegram + Google** → `profiles`. Onboarding пишет в Supabase. Home — очередь `portfolios`/`reviews` по лиге грейда + баланс из `profiles`. Submit URL — done на url-screen; success — пресеты / deep link.
 
 ## Продуктовый флоу
 
@@ -94,7 +94,8 @@ src/components/
 
 src/api/
   auth.js / profiles.js / onboarding.js / wallet.js
-  portfolios.js           ← общая очередь Supabase + submit/review
+  portfolios.js           ← очередь по лигам + listMyPortfolios / submit/review
+  leagues.js              ← маппинг grade → лига (зеркало SQL)
   referrals.js            ← stub
   telegramWidget.js / subscribers.js   ← subscribers = legacy waitlist
 

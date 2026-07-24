@@ -13,7 +13,7 @@
 | Path-роутинг + entry по сессии | wired |
 | Auth: Email OTP, Telegram, Google | wired → `auth.users` + `profiles` |
 | Онбординг → `profiles` | wired |
-| Home: очередь `portfolios` / `reviews`, баланс | wired |
+| Home: очередь по лигам `portfolios` / `reviews`, баланс | wired |
 | Review iframe + таймер + квиз | wired |
 | Подача URL + done на url-screen | wired |
 | Referrals validate/redeem | stub |
@@ -63,7 +63,7 @@
 |----------|-------------|
 | `auth.users` | Supabase Auth |
 | `public.profiles` | 1:1 с user; онбординг, баланс, tier; триггер `handle_new_user` |
-| `public.portfolios` / reviews | общая очередь ревью |
+| `public.portfolios` / reviews | очередь ревью с матчингом по лиге грейда |
 | `public.subscribers` | legacy waitlist API (`subscribers.js`), не entry UX |
 | Edge `telegram-auth` | проверка Telegram hash → сессия |
 

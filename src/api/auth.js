@@ -121,6 +121,25 @@ function mapUser(raw) {
 }
 
 /**
+ * URL аватара из текущей Supabase Auth-сессии (Google picture / Telegram photo).
+ * @returns {Promise<string | null>}
+ */
+export async function getAuthUserAvatarUrl() {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const photoUrl = mapUser(user).photoUrl;
+  if (typeof photoUrl !== "string") return null;
+  const trimmed = photoUrl.trim();
+  return trimmed || null;
+}
+
+/**
  * Telegram Login Widget → Edge Function `telegram-auth` → Supabase session.
  * @returns {Promise<AuthSession>}
  */

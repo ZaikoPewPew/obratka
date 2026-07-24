@@ -56,7 +56,71 @@ create trigger portfolios_set_updated_at
   for each row
   execute function public.set_portfolios_updated_at();
 
--- После insert ревью: запрет self-review / не-pending; инкремент счётчика; done при цели.
+-- Лиги матчинга (тихий фильтр). Grade → league; кто кого может ревьюить.
+-- 1 junior | 2 middle | 3 senior/lead/head
+-- junior→junior; middle→junior+middle; senior+→middle+senior+
+create or replace function public.profile_grade(uid uuid)
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select p.grade from public.profiles p where p.id = uid;
+$$;
+
+create or replace function public.grade_league(grade text)
+returns integer
+language sql
+immutable
+set search_path = public
+as $$
+  select case grade
+    when 'junior' then 1
+    when 'middle' then 2
+    when 'senior' then 3
+    when 'lead' then 3
+    when 'head' then 3
+    else null
+  end;
+$$;
+
+create or replace function public.can_review_grades(reviewer_grade text, owner_grade text)
+returns boolean
+language sql
+immutable
+set search_path = public
+as $$
+  select
+    public.grade_league(reviewer_grade) is not null
+    and public.grade_league(owner_grade) is not null
+    and (
+      (public.grade_league(reviewer_grade) = 1 and public.grade_league(owner_grade) = 1)
+      or (public.grade_league(reviewer_grade) = 2 and public.grade_league(owner_grade) in (1, 2))
+      or (public.grade_league(reviewer_grade) = 3 and public.grade_league(owner_grade) in (2, 3))
+    );
+$$;
+
+create or replace function public.can_review_portfolio(
+  portfolio_owner_id uuid,
+  reviewer_id uuid default auth.uid()
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce(
+    public.can_review_grades(
+      public.profile_grade(reviewer_id),
+      public.profile_grade(portfolio_owner_id)
+    ),
+    false
+  );
+$$;
+
+-- После insert ревью: self / pending / лига; инкремент счётчика; done при цели.
 create or replace function public.handle_review_inserted()
 returns trigger
 language plpgsql
@@ -83,6 +147,10 @@ begin
     raise exception 'portfolio_not_pending';
   end if;
 
+  if not public.can_review_portfolio(p.owner_id, new.reviewer_id) then
+    raise exception 'review_league_mismatch';
+  end if;
+
   update public.portfolios
   set
     reviews_count = p.reviews_count + 1,
@@ -105,12 +173,18 @@ create trigger reviews_after_insert
 alter table public.portfolios enable row level security;
 alter table public.reviews enable row level security;
 
--- Лента: все auth видят pending; свои строки — всегда (в т.ч. done).
+-- Лента: свои всегда; чужие pending — только в лиге ревьюера.
 drop policy if exists "portfolios_select_feed" on public.portfolios;
 create policy "portfolios_select_feed"
   on public.portfolios for select
   to authenticated
-  using (status = 'pending' or owner_id = auth.uid());
+  using (
+    owner_id = auth.uid()
+    or (
+      status = 'pending'
+      and public.can_review_portfolio(owner_id, auth.uid())
+    )
+  );
 
 drop policy if exists "portfolios_insert_own" on public.portfolios;
 create policy "portfolios_insert_own"
@@ -141,11 +215,17 @@ create policy "reviews_insert_own"
       where p.id = portfolio_id
         and p.status = 'pending'
         and p.owner_id <> auth.uid()
+        and public.can_review_portfolio(p.owner_id, auth.uid())
     )
   );
 
 grant select, insert on public.portfolios to authenticated;
 grant select, insert on public.reviews to authenticated;
+
+grant execute on function public.profile_grade(uuid) to authenticated;
+grant execute on function public.grade_league(text) to authenticated;
+grant execute on function public.can_review_grades(text, text) to authenticated;
+grant execute on function public.can_review_portfolio(uuid, uuid) to authenticated;
 
 -- Trigger-only: не вызывать через PostgREST RPC.
 revoke all on function public.set_portfolios_updated_at() from public;

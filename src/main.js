@@ -21,7 +21,7 @@ import { createAppRouter } from "./app/router.js";
 import { getSession, setSession, clearSession } from "./app/session.js";
 import { completeOAuthFromUrl, signOut } from "./api/auth.js";
 import { submitPortfolio, clearSubmittedPortfolios, submitPortfolioReview } from "./api/portfolios.js";
-import { fetchMyProfile, isProfileBanned } from "./api/profiles.js";
+import { fetchMyProfile, isProfileBanned, updateMyProfile } from "./api/profiles.js";
 import {
   awardReviewReward,
   canSubmitPortfolio,
@@ -571,12 +571,20 @@ async function applyProviderUser(user, provider) {
 
   const profile = await fetchMyProfile();
   if (profile) {
+    const photoFromAuth =
+      typeof user.photoUrl === "string" ? user.photoUrl.trim() : "";
+    const profileAvatar =
+      typeof profile.avatar_url === "string" ? profile.avatar_url.trim() : "";
+    if (photoFromAuth && !profileAvatar) {
+      void updateMyProfile({ avatar_url: photoFromAuth }).catch(() => {});
+    }
+
     next = {
       ...next,
       userId: profile.id || next.userId,
       email: profile.email ?? next.email,
       displayName: profile.display_name ?? next.displayName,
-      avatarUrl: profile.avatar_url ?? next.avatarUrl,
+      avatarUrl: profileAvatar || photoFromAuth || next.avatarUrl,
       telegramId: profile.telegram_id ?? next.telegramId,
       telegramUsername: profile.telegram_username ?? next.telegramUsername,
       balance:

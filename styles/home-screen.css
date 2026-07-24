@@ -239,14 +239,10 @@
   padding: 0;
   overflow: hidden;
   border: none;
-  border-radius: var(--radius-pill);
+  border-radius: var(--home-screen-avatar-radius);
   background: var(--home-screen-avatar-letter-bg);
   color: var(--home-screen-avatar-letter-color);
   cursor: pointer;
-}
-
-.home-screen__profile--letter {
-  padding: var(--home-screen-profile-letter-padding);
 }
 
 .home-screen__profile:focus-visible {
@@ -259,6 +255,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: var(--home-screen-avatar-radius);
 }
 
 .home-screen__profile-letter {
@@ -279,6 +276,7 @@
   min-height: 0;
   padding: var(--home-screen-body-padding);
   padding-top: var(--home-screen-body-padding-top);
+  padding-bottom: var(--home-screen-body-padding-bottom);
   overflow: auto;
 }
 
@@ -355,10 +353,13 @@
   outline-offset: var(--focus-ring-offset);
 }
 
-.home-screen__card:disabled,
-.home-screen__card--own {
-  cursor: default;
+.home-screen__card:disabled {
+  cursor: not-allowed;
   opacity: var(--opacity-disabled);
+}
+
+.home-screen__card--own {
+  cursor: not-allowed;
 }
 
 .home-screen__card:disabled:hover,
@@ -452,13 +453,13 @@
   z-index: 1;
   overflow: visible;
   border: none;
-  border-radius: var(--home-screen-badge-radius);
+  border-radius: var(--home-screen-avatar-radius);
   box-shadow: 0 0 0 var(--home-screen-badge-ring)
     var(--home-screen-card-surface, var(--home-screen-badge-ring-color));
 }
 
 .home-screen__badge--avatar .home-screen__badge-img {
-  border-radius: var(--home-screen-badge-radius);
+  border-radius: var(--home-screen-avatar-radius);
 }
 
 .home-screen__badge--letter {
@@ -704,5 +705,94 @@
     flex: 0 0 var(--home-screen-feed-width);
     width: var(--home-screen-feed-width);
     max-width: var(--home-screen-feed-width);
+  }
+}
+
+/* Bottom tabs «Лента | Мои» */
+.home-screen__tabbar {
+  box-sizing: border-box;
+  position: absolute;
+  left: 50%;
+  bottom: var(--home-screen-tabbar-offset);
+  z-index: var(--home-screen-tabbar-z);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: var(--home-screen-tabbar-height);
+  margin: 0;
+  padding: var(--home-screen-tabbar-padding);
+  border: none;
+  border-radius: var(--home-screen-tabbar-radius);
+  background: var(--home-screen-tabbar-track-bg);
+  transform: translateX(-50%);
+  transition: bottom var(--home-screen-tabbar-hide-duration)
+    var(--home-screen-tabbar-hide-ease);
+  pointer-events: auto;
+}
+
+.home-screen__tabbar--hidden {
+  bottom: calc(
+    -1 * (var(--home-screen-tabbar-height) + var(--home-screen-tabbar-offset))
+  );
+  pointer-events: none;
+}
+
+.home-screen__tabbar-thumb {
+  box-sizing: border-box;
+  position: absolute;
+  top: var(--home-screen-tabbar-padding);
+  left: 0;
+  z-index: 0;
+  height: var(--home-screen-tabbar-tab-height);
+  width: 0;
+  border-radius: var(--home-screen-tabbar-tab-radius);
+  background: var(--home-screen-tabbar-tab-active-bg);
+  transform: translateX(0);
+  transition:
+    transform var(--home-screen-tabbar-thumb-duration)
+      var(--home-screen-tabbar-thumb-ease),
+    width var(--home-screen-tabbar-thumb-duration)
+      var(--home-screen-tabbar-thumb-ease);
+  pointer-events: none;
+}
+
+.home-screen__tab {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--home-screen-tabbar-tab-height);
+  margin: 0;
+  padding: 0 var(--home-screen-tabbar-tab-padding-x);
+  border: none;
+  border-radius: var(--home-screen-tabbar-tab-radius);
+  background: transparent;
+  color: var(--home-screen-tabbar-tab-color);
+  font-family: var(--font-family);
+  font-size: var(--home-screen-tabbar-tab-font-size);
+  font-weight: var(--home-screen-tabbar-tab-font-weight);
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--home-screen-tabbar-label-duration)
+    var(--home-screen-tabbar-label-ease);
+}
+
+.home-screen__tab--active {
+  color: var(--home-screen-tabbar-tab-active-color);
+}
+
+.home-screen__tab:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-screen__tabbar,
+  .home-screen__tabbar-thumb,
+  .home-screen__tab {
+    transition-duration: 0.01ms;
   }
 }
