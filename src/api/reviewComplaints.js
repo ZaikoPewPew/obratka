@@ -1,5 +1,6 @@
 import { getSupabase } from "../lib/supabaseClient.js";
 import { getSession, setSession } from "../app/session.js";
+import { parseReviewAnswers } from "../utils/reviewReport.js";
 
 /** @typedef {'low_effort' | 'spam' | 'harassment' | 'offensive' | 'irrelevant'} ReviewComplaintTag */
 
@@ -24,6 +25,7 @@ export const REPUTATION_DEFAULT = 100;
  *   reviewerAvatarUrl: string | null;
  *   createdAt: string | null;
  *   complained: boolean;
+ *   answers: import("../utils/reviewReport.js").ReviewAnswers | null;
  * }} PortfolioReviewSheet
  */
 
@@ -138,7 +140,7 @@ export async function listPortfolioReviewSheets(portfolioId) {
   const { data: rows, error } = await supabase
     .from("reviews")
     .select(
-      "id, portfolio_id, reviewer_id, reviewer_avatar_url, reviewer_display_name, created_at",
+      "id, portfolio_id, reviewer_id, reviewer_avatar_url, reviewer_display_name, created_at, answers",
     )
     .eq("portfolio_id", portfolioId)
     .order("created_at", { ascending: true });
@@ -196,6 +198,7 @@ export async function listPortfolioReviewSheets(portfolioId) {
         createdAt:
           typeof row.created_at === "string" ? row.created_at : null,
         complained: complainedIds.has(row.id),
+        answers: parseReviewAnswers(row.answers),
       };
     })
     .filter(Boolean);

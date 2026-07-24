@@ -87,6 +87,8 @@ let portfolioName = getStrings().brandName;
 
 /** @type {string | null} */
 let pendingReportPortfolioId = null;
+/** @type {string} */
+let pendingReportPortfolioName = "";
 
 /** @type {ReturnType<typeof createReviewScreen>["setReportReveal"]} */
 let setReviewReportReveal = () => {};
@@ -207,6 +209,7 @@ document.body.append(successScreen.root);
 const reportScreen = createReportScreen({
   onPrimary: () => {
     pendingReportPortfolioId = null;
+    pendingReportPortfolioName = "";
     go("home", { replace: true });
   },
 });
@@ -231,6 +234,7 @@ const banScreen = createBanScreen({
     portfolioName = getStrings().brandName;
     pendingSuccessPreset = "generic";
     pendingReportPortfolioId = null;
+    pendingReportPortfolioName = "";
     leaveSessionShell();
     await closeReview();
     go("referral", { replace: true });
@@ -665,6 +669,10 @@ const homeScreen = createHomeScreen({
   onOpenReport: async (item) => {
     if (!item?.isOwn || !item.id) return;
     pendingReportPortfolioId = item.id;
+    pendingReportPortfolioName =
+      typeof item.name === "string" && item.name.trim()
+        ? item.name.trim()
+        : "";
     go("report", { search: { id: item.id } });
   },
   onAddPortfolio: async () => {
@@ -693,6 +701,7 @@ const homeScreen = createHomeScreen({
     portfolioName = getStrings().brandName;
     pendingSuccessPreset = "generic";
     pendingReportPortfolioId = null;
+    pendingReportPortfolioName = "";
     leaveSessionShell();
     await closeReview();
     void homeScreen.close();
@@ -997,7 +1006,10 @@ async function applyRoute(id, opts = {}) {
           ? new URLSearchParams(window.location.search).get("id")
           : null;
       const id = pendingReportPortfolioId || fromSearch || null;
-      reportScreen.open({ portfolioId: id });
+      reportScreen.open({
+        portfolioId: id,
+        portfolioName: pendingReportPortfolioName || null,
+      });
       return;
     }
     if (target === "banned") {

@@ -55,6 +55,39 @@ export function answersFromFormData(formData) {
 }
 
 /**
+ * Разобрать `reviews.answers` jsonb с сервера.
+ * @param {unknown} raw
+ * @returns {ReviewAnswers | null}
+ */
+export function parseReviewAnswers(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const row = /** @type {Record<string, unknown>} */ (raw);
+  const grade = String(row.grade || "");
+  const structure = String(row.structure || "");
+  const metrics = String(row.metrics || "");
+  const hire = String(row.hire || "");
+  const context = Number(row.context);
+  const visual = Number(row.visual);
+  const advice = typeof row.advice === "string" ? row.advice.trim() : "";
+  const pain = Array.isArray(row.pain)
+    ? row.pain.map((value) => String(value || "").trim()).filter(Boolean)
+    : [];
+
+  if (
+    !isGrade(grade) ||
+    !isStructure(structure) ||
+    !isMetrics(metrics) ||
+    !isHire(hire) ||
+    !Number.isFinite(context) ||
+    !Number.isFinite(visual)
+  ) {
+    return null;
+  }
+
+  return { grade, context, structure, metrics, visual, hire, advice, pain };
+}
+
+/**
  * @param {ReviewAnswers} answers
  * @param {Record<string, string>} t
  * @returns {ReportSection[]}

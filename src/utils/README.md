@@ -19,7 +19,7 @@
 | `portfolioEmbed.js` | Figma/YouTube embed / iframe / внешняя вкладка |
 | `meshGradientWash.js` | WebGL mesh (Paper Shaders); `transitionToCssColors` |
 | `reviewReport.js` | сводка квиза → тексты PDF |
-| `shareReviewPdf.js` | печать PDF-отчёта |
+| `shareReviewPdf.js` | печать PDF-отчёта (1 ревьюер = 1 страница; `onComplete`) |
 | `referralCode.js` | нормализация referral-кода / URL |
 
 Тесты: `*.test.js` рядом + `src/app/routes.test.js` (`npm test`).

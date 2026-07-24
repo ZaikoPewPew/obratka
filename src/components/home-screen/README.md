@@ -72,11 +72,11 @@ Topbar поверх контента (`position: absolute`), появление 
 
 | Элемент | Источник |
 |---------|----------|
-| Превью | thum.io / fallback |
+| Превью | thum.io; до load — skeleton (`--loading`), при error — `--empty` |
 | Иконка площадки | Simple Icons; иначе литера **W** |
 | Аватар | `item.avatarUrl` или буква из `item.name` |
 | ФИО | `item.name` |
-| Роль | EN Title Case: `formatPortfolioRole` |
+| Роль | EN Title Case: `formatPortfolioRole` (Lead → `… Design Lead`, Head → `Head Of …`) |
 | Слоты | Белый чип `.home-screen__card-progress` 96×52 r16 (Figma Frame 140); внутри стек 64×24 |
 | Пустой слот | 24×24, фон muted, **внешняя** обводка 3px (box-shadow), плюс 18×18 |
 | Active / completed | Аватарка; margin −4px между слотами, L→R |

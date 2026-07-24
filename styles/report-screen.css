@@ -1,4 +1,4 @@
-/* Report screen: каркас как success/done — слева копирайт, справа зелёный mesh. */
+/* Report screen: слева отчёт + CTA, справа mesh + мокап листа (как review-screen). */
 
 .report-screen {
   box-sizing: border-box;
@@ -95,15 +95,6 @@
   font-weight: var(--report-screen-title-weight);
   line-height: var(--line-height-snug);
   white-space: pre-line;
-}
-
-.report-screen__body {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-family: var(--font-family);
-  font-size: var(--report-screen-body-size);
-  font-weight: var(--font-weight-regular);
-  line-height: normal;
 }
 
 .report-screen__sheets {
@@ -411,6 +402,10 @@
 }
 
 .report-screen__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--report-screen-btn-icon-gap);
   flex: 1 1 0;
   min-height: var(--shell-review-control-height);
   padding: var(--shell-review-control-padding-y) var(--shell-review-control-padding-x);
@@ -420,6 +415,16 @@
   font-weight: var(--shell-review-control-font-weight);
   line-height: var(--shell-review-control-line-height);
   text-align: center;
+}
+
+.report-screen__btn-icon {
+  flex: 0 0 auto;
+  width: var(--report-screen-btn-icon-size);
+  height: var(--report-screen-btn-icon-size);
+}
+
+.report-screen__btn-label {
+  min-width: 0;
 }
 
 .report-screen__btn--exit {
@@ -435,18 +440,43 @@
   background: var(--color-surface-muted-active);
 }
 
+.report-screen__btn--download {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.report-screen__btn--download:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.report-screen__btn--download:active:not(:disabled) {
+  background: var(--color-accent-active);
+}
+
+.report-screen__btn--download:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
 .report-screen__visual {
   position: relative;
   overflow: hidden;
   min-width: 0;
   min-height: 0;
   border-radius: var(--url-screen-visual-radius);
-  background-color: var(--shell-review-mesh-done-wash);
+  background-color: var(--url-screen-visual-wash);
+  transition: background-color var(--shell-review-mesh-done-duration)
+    var(--shell-review-brand-motion-ease);
+}
+
+.report-screen--done .report-screen__visual,
+.report-screen--done .report-screen__glow {
   --url-screen-mesh-1: var(--shell-review-mesh-done-1);
   --url-screen-mesh-2: var(--shell-review-mesh-done-2);
   --url-screen-mesh-3: var(--shell-review-mesh-done-3);
   --url-screen-mesh-4: var(--shell-review-mesh-done-4);
   --url-screen-visual-wash: var(--shell-review-mesh-done-wash);
+  background-color: var(--shell-review-mesh-done-wash);
 }
 
 .report-screen__glow {
@@ -469,6 +499,101 @@
   background-repeat: repeat;
 }
 
+.report-screen__report {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  z-index: var(--shell-review-z-report);
+  width: min(var(--shell-review-report-width), 120%);
+  height: var(--shell-review-report-height);
+  transform: translate(-50%, var(--shell-review-report-shift-hidden));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--shell-review-report-duration) var(--shell-review-report-ease),
+    opacity var(--shell-review-report-fade-duration) var(--shell-review-report-ease);
+}
+
+.report-screen--report .report-screen__report {
+  transform: translate(-50%, var(--shell-review-report-shift-shown));
+  opacity: 1;
+}
+
+.report-screen__report-sheet {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: var(--shell-review-report-padding-y) var(--shell-review-report-padding-x);
+  overflow: hidden;
+  border-radius: var(--shell-review-report-radius) var(--shell-review-report-radius) 0 0;
+  background: var(--shell-review-report-bg);
+  box-shadow: var(--shadow-sheet);
+}
+
+.report-screen__report-eyebrow {
+  margin: 0 0 var(--shell-review-report-header-gap);
+  font-family: var(--font-family);
+  font-size: var(--shell-review-report-eyebrow-size);
+  font-weight: var(--shell-review-report-eyebrow-weight);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--shell-review-report-eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--shell-review-report-eyebrow-color);
+}
+
+.report-screen__report-title {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--shell-review-report-title-size);
+  font-weight: var(--shell-review-report-title-weight);
+  line-height: var(--line-height-snug);
+  color: var(--color-text);
+}
+
+.report-screen__report-subtitle {
+  margin: var(--shell-review-report-header-gap) 0 0;
+  font-family: var(--font-family);
+  font-size: var(--shell-review-report-subtitle-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-snug);
+  color: var(--shell-review-report-subtitle-color);
+}
+
+.report-screen__report-subtitle:empty {
+  display: none;
+}
+
+.report-screen__report-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--shell-review-report-body-gap);
+  margin-top: var(--shell-review-report-body-offset);
+}
+
+.report-screen__report-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--shell-review-report-section-gap);
+}
+
+.report-screen__report-section-title {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--shell-review-report-section-title-size);
+  font-weight: var(--shell-review-report-section-title-weight);
+  line-height: var(--line-height-snug);
+  color: var(--color-text);
+}
+
+.report-screen__report-section-body {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--shell-review-report-section-body-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--shell-review-report-section-line-height);
+  color: var(--shell-review-report-section-body-color);
+}
+
 .report-screen__brand {
   position: absolute;
   inset: 0;
@@ -480,14 +605,34 @@
   position: absolute;
   top: 50%;
   left: 50%;
+  transform: translate(-50%, -50%);
+  transition:
+    top var(--shell-review-brand-motion-duration) var(--shell-review-brand-motion-ease),
+    transform var(--shell-review-brand-motion-duration) var(--shell-review-brand-motion-ease);
+}
+
+.report-screen--report .report-screen__brand-slot {
+  top: var(--shell-review-brand-top);
+  transform: translate(-50%, 0);
+}
+
+.report-screen__brand-mark {
+  display: block;
+  width: var(--url-screen-brand-width);
+  height: var(--url-screen-brand-height);
+  transition:
+    width var(--shell-review-brand-mark-morph-duration) var(--shell-review-brand-mark-morph-ease),
+    height var(--shell-review-brand-mark-morph-duration) var(--shell-review-brand-mark-morph-ease);
+}
+
+.report-screen--done:not(.report-screen--report) .report-screen__brand-slot {
   transform: translate(
     -50%,
     calc(-50% + var(--url-screen-brand-done-align-y))
   );
 }
 
-.report-screen__brand-mark {
-  display: block;
+.report-screen--done .report-screen__brand-mark.logo-done {
   width: var(--url-screen-brand-done-width);
   height: var(--url-screen-brand-done-height);
 }
@@ -506,6 +651,15 @@
     opacity: 1;
     transform: none;
     filter: none;
+  }
+
+  .report-screen__report {
+    transition: none;
+  }
+
+  .report-screen__brand-slot,
+  .report-screen__brand-mark {
+    transition: none;
   }
 }
 

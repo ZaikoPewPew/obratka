@@ -355,6 +355,8 @@
   --report-screen-title-weight: var(--success-screen-title-weight);
   --report-screen-body-size: var(--success-screen-body-size);
   --report-screen-actions-gap: var(--success-screen-actions-gap);
+  --report-screen-btn-icon-gap: var(--space-2);
+  --report-screen-btn-icon-size: var(--space-6);
   --report-screen-sheets-gap: var(--space-3);
   --report-screen-sheets-max-height: min(40dvh, 320px);
   --report-screen-sheet-padding: var(--space-3);

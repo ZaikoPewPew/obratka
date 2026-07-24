@@ -153,10 +153,10 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 ## Roadmap (код)
 
 1. Вынести общие split-стили в `brand-screen.css` (классы пока `.url-screen*`).
-2. Агрегация оценок нескольких ревьюеров в PDF-сводке на `report-screen` (жалобы на листы уже есть).
-3. Manual identity linking UI (`linkIdentity`) + UNIQUE `profiles.email` + склейка Telegram↔email — вне текущего скоупа.  
+2. Manual identity linking UI (`linkIdentity`) + UNIQUE `profiles.email` + склейка Telegram↔email — вне текущего скоупа.  
    Email↔Google закрывается **Automatic linking** в Supabase Auth (verified email = один user); см. [`auth-screen/README.md`](src/components/auth-screen/README.md).
-4. Троттлинг злоупотреблений жалобой / тег `misleading` / очередь модерации.
+3. Троттлинг злоупотреблений жалобой / тег `misleading` / очередь модерации.
+4. Редизайн жалоб / списка листов на `report-screen` (PDF-сводка уже есть).
 
 ## Команды
 

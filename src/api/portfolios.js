@@ -52,8 +52,21 @@ const GRADE_LABELS_EN = Object.freeze({
   junior: "Junior",
   middle: "Middle",
   senior: "Senior",
+  staff: "Staff",
   lead: "Lead",
   head: "Head",
+});
+
+/**
+ * Head Of {Discipline} — product/other → «Head Of Design».
+ * @type {Readonly<Record<string, string>>}
+ */
+const HEAD_ROLE_LABELS_EN = Object.freeze({
+  "web-designer": "Head Of Web Design",
+  "product-designer": "Head Of Design",
+  "emotional-designer": "Head Of Emotional Design",
+  "ux-ui-designer": "Head Of UX / UI Design",
+  other: "Head Of Design",
 });
 
 /**
@@ -70,8 +83,10 @@ function labelFromUrl(url) {
 }
 
 /**
- * Грейд + специализация → английская строка для карточки
- * (напр. `Senior Product Designer`).
+ * Грейд + специализация → английская строка для карточки.
+ * Junior/Middle/Senior/Staff: `{Grade} {Role}`.
+ * Lead: `Product Design Lead` (не `Lead Product Designer`).
+ * Head: `Head Of Design` / `Head Of Emotional Design` / …
  *
  * @param {string | null | undefined} grade
  * @param {string | null | undefined} role
@@ -79,8 +94,20 @@ function labelFromUrl(url) {
  */
 export function formatPortfolioRole(grade, role) {
   const t = getStrings();
+  const roleKey = typeof role === "string" ? role : "";
+  const roleLabel = roleKey ? ROLE_LABELS_EN[roleKey] || "" : "";
+
+  if (grade === "head") {
+    return HEAD_ROLE_LABELS_EN[roleKey] || "Head Of Design";
+  }
+
+  if (grade === "lead") {
+    if (!roleLabel) return "Design Lead";
+    if (/^Designer$/i.test(roleLabel)) return "Design Lead";
+    return roleLabel.replace(/\s*Designer$/i, " Design Lead");
+  }
+
   const gradeLabel = grade ? GRADE_LABELS_EN[grade] || "" : "";
-  const roleLabel = role ? ROLE_LABELS_EN[role] || "" : "";
   const combined = [gradeLabel, roleLabel].filter(Boolean).join(" ").trim();
   return combined || t.homeDefaultRole;
 }

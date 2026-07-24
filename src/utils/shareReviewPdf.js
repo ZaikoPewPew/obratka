@@ -1,19 +1,38 @@
-import { getStrings } from "../i18n.js";
+import { formatString, getStrings } from "../i18n.js";
 import { buildReportSections } from "./reviewReport.js";
+
+/**
+ * @typedef {{
+ *   answers: import("./reviewReport.js").ReviewAnswers;
+ *   reviewerName?: string;
+ *   sheetLabel?: string;
+ * }} ReviewPdfPage
+ */
 
 /**
  * Печать отчёта через скрытый iframe (без window.open — не блокируется).
  * В диалоге печати: «Сохранить как PDF».
+ * Один ревьюер → одна страница (`page-break-after`).
  *
- * @param {import("./reviewReport.js").ReviewAnswers} answers
- * @param {{ portfolioName?: string }} [options]
+ * @param {import("./reviewReport.js").ReviewAnswers | ReviewPdfPage[]} answersOrPages
+ * @param {{
+ *   portfolioName?: string;
+ *   onComplete?: () => void;
+ * }} [options]
  */
-export function shareReviewPdf(answers, options = {}) {
+export function shareReviewPdf(answersOrPages, options = {}) {
   const t = getStrings();
-  const sections = buildReportSections(answers, t);
+  const pages = normalizePdfPages(answersOrPages, t);
+  if (pages.length === 0) {
+    options.onComplete?.();
+    return;
+  }
+
   const portfolioName = options.portfolioName?.trim() || t.brandName;
   const title = `${t.reportDocumentTitle} — ${portfolioName}`;
-  const html = buildReportDocumentHtml({ title, portfolioName, sections, t });
+  const html = buildReportDocumentHtml({ title, portfolioName, pages, t });
+  const onComplete =
+    typeof options.onComplete === "function" ? options.onComplete : null;
 
   const iframe = document.createElement("iframe");
   iframe.setAttribute("aria-hidden", "true");
@@ -27,6 +46,7 @@ export function shareReviewPdf(answers, options = {}) {
   if (!frameWindow || !frameDoc) {
     iframe.remove();
     downloadReportHtml(html, title);
+    onComplete?.();
     return;
   }
 
@@ -39,6 +59,7 @@ export function shareReviewPdf(answers, options = {}) {
     if (cleaned) return;
     cleaned = true;
     iframe.remove();
+    onComplete?.();
   };
 
   frameWindow.addEventListener("afterprint", cleanup);
@@ -48,9 +69,33 @@ export function shareReviewPdf(answers, options = {}) {
       frameWindow.print();
     } catch {
       downloadReportHtml(html, title);
+      cleanup();
+      return;
     }
     window.setTimeout(cleanup, 60_000);
   }, 50);
+}
+
+/**
+ * @param {import("./reviewReport.js").ReviewAnswers | ReviewPdfPage[]} answersOrPages
+ * @param {Record<string, string>} t
+ * @returns {ReviewPdfPage[]}
+ */
+function normalizePdfPages(answersOrPages, t) {
+  if (Array.isArray(answersOrPages)) {
+    return answersOrPages.filter(
+      (page) => page && page.answers && typeof page.answers === "object",
+    );
+  }
+  if (answersOrPages && typeof answersOrPages === "object") {
+    return [
+      {
+        answers: answersOrPages,
+        sheetLabel: formatString(t.reportSheetLabel, { n: 1 }),
+      },
+    ];
+  }
+  return [];
 }
 
 /**
@@ -107,20 +152,41 @@ function readReportTheme() {
  * @param {{
  *   title: string;
  *   portfolioName: string;
- *   sections: import("./reviewReport.js").ReportSection[];
+ *   pages: ReviewPdfPage[];
  *   t: Record<string, string>;
  * }} params
  */
-function buildReportDocumentHtml({ title, portfolioName, sections, t }) {
+function buildReportDocumentHtml({ title, portfolioName, pages, t }) {
   const theme = readReportTheme();
-  const sectionHtml = sections
-    .map(
-      (section) => `
+  const pagesHtml = pages
+    .map((page, index) => {
+      const sections = buildReportSections(page.answers, t);
+      const sectionHtml = sections
+        .map(
+          (section) => `
       <section class="section">
         <h2>${escapeHtml(section.title)}</h2>
         <p>${escapeHtml(section.body)}</p>
       </section>`,
-    )
+        )
+        .join("");
+      const sheetLabel =
+        page.sheetLabel?.trim() ||
+        formatString(t.reportSheetLabel, { n: index + 1 });
+      const reviewer =
+        page.reviewerName?.trim() || t.reportSheetReviewerFallback || "";
+      const subtitle = [sheetLabel, reviewer, portfolioName]
+        .filter(Boolean)
+        .join(" · ");
+
+      return `
+  <main class="page${index < pages.length - 1 ? " page--break" : ""}">
+    <p class="eyebrow">${escapeHtml(t.brandName)}</p>
+    <h1>${escapeHtml(t.reportDocumentTitle)}</h1>
+    <p class="subtitle">${escapeHtml(subtitle)}</p>
+    ${sectionHtml}
+  </main>`;
+    })
     .join("");
 
   return `<!DOCTYPE html>
@@ -144,6 +210,10 @@ function buildReportDocumentHtml({ title, portfolioName, sections, t }) {
       max-width: 720px;
       margin: 0 auto;
       padding: 24px 20px 40px;
+    }
+    .page--break {
+      page-break-after: always;
+      break-after: page;
     }
     .eyebrow {
       margin: 0 0 8px;
@@ -193,12 +263,7 @@ function buildReportDocumentHtml({ title, portfolioName, sections, t }) {
   </style>
 </head>
 <body>
-  <main class="page">
-    <p class="eyebrow">${escapeHtml(t.brandName)}</p>
-    <h1>${escapeHtml(t.reportDocumentTitle)}</h1>
-    <p class="subtitle">${escapeHtml(portfolioName)}</p>
-    ${sectionHtml}
-  </main>
+  ${pagesHtml}
 </body>
 </html>`;
 }

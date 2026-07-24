@@ -23,7 +23,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `url-screen/` | `/portfolio` | submit own + done (`setVariant("done")`; shell) |
 | `review-screen/` | `/quiz` | квиз + PDF-лист |
 | `success-screen/` | `/done` | пресеты успеха (deep link) |
-| `report-screen/` | `/report` | листы ревью + жалоба |
+| `report-screen/` | `/report` | листы ревью + жалоба + PDF |
 | `ban-screen/` | `/banned` | блок аккаунта; статичный evil mark |
 | `rating/` | — | топ по валюте на home (пока не монтируется) |
 | `locale-toggle/` | — | переключатель языка (не в entry; стили не подключены) |

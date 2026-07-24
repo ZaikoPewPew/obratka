@@ -1,14 +1,30 @@
 import { formatString, getStrings } from "../../i18n.js";
-import { logoDoneMarkSvg } from "../../assets/brand/brandMarks.js";
+import {
+  brandMarkSvg,
+  morphBrandMarkToDone,
+  resetBrandMarkToDefault,
+} from "../../assets/brand/brandMarks.js";
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
-import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
+import {
+  getBrandMarkMorphMotion,
+  getReportLaunchMotion,
+  getReviewMeshDoneMotion,
+  getScreenCloseFallbackMs,
+} from "../../utils/motionTokens.js";
+import { buildReportSections } from "../../utils/reviewReport.js";
+import { shareReviewPdf } from "../../utils/shareReviewPdf.js";
 import {
   REVIEW_COMPLAINT_TAGS,
   listPortfolioReviewSheets,
   submitReviewComplaint,
 } from "../../api/reviewComplaints.js";
 
-const BRAND_MARK_SVG = logoDoneMarkSvg("report-screen__brand-mark");
+const BRAND_MARK_CLASS = "report-screen__brand-mark";
+const BRAND_MARK_SVG = brandMarkSvg(BRAND_MARK_CLASS);
+
+const DOWNLOAD_ICON_SVG = `<svg class="report-screen__btn-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M7 19L5.78311 18.9954C3.12231 18.8818 1 16.6888 1 14C1 11.3501 3.06139 9.18169 5.66806 9.01084C6.78942 6.64027 9.20316 5 12 5C15.5268 5 18.4445 7.60822 18.9293 11.001L19 11C21.2091 11 23 12.7909 23 15C23 17.1422 21.316 18.8911 19.1996 18.9951L17 19M12 10V18M9 15L12 18L15 15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`;
 
 /** @type {Record<(typeof REVIEW_COMPLAINT_TAGS)[number], { label: string; hint: string }>} */
 const TAG_I18N_KEYS = {
@@ -32,14 +48,14 @@ const TAG_I18N_KEYS = {
 };
 
 /**
- * Отчёт автору портфолио: список листов + жалоба (теги в модалке).
+ * Отчёт автору портфолио: список листов + жалоба + PDF.
  *
  * @param {{
  *   onPrimary?: () => void | Promise<void>;
  * }} [opts]
  * @returns {{
  *   root: HTMLElement;
- *   open: (opts?: { portfolioId?: string | null }) => void;
+ *   open: (opts?: { portfolioId?: string | null; portfolioName?: string | null }) => void;
  *   close: () => Promise<void>;
  *   getPortfolioId: () => string | null;
  * }}
@@ -50,6 +66,8 @@ export function createReportScreen(opts = {}) {
 
   /** @type {string | null} */
   let portfolioId = null;
+  /** @type {string} */
+  let portfolioName = "";
   let closing = false;
   /** @type {import("../../api/reviewComplaints.js").PortfolioReviewSheet[]} */
   let sheets = [];
@@ -59,6 +77,10 @@ export function createReportScreen(opts = {}) {
   let selectedTags = new Set();
   let submitting = false;
   let loadToken = 0;
+  let pdfDone = false;
+  /** @type {Animation | null} */
+  let reportLaunchAnim = null;
+  let pendingDoneMesh = false;
 
   const root = document.createElement("section");
   root.className = "report-screen";
@@ -78,9 +100,6 @@ export function createReportScreen(opts = {}) {
   title.className = "report-screen__title";
   title.id = "report-screen-title";
 
-  const body = document.createElement("p");
-  body.className = "report-screen__body";
-
   const sheetsList = document.createElement("ul");
   sheetsList.className = "report-screen__sheets";
   sheetsList.hidden = true;
@@ -92,13 +111,24 @@ export function createReportScreen(opts = {}) {
   const actions = document.createElement("div");
   actions.className = "report-screen__actions";
 
-  const primaryBtn = document.createElement("button");
-  primaryBtn.type = "button";
-  primaryBtn.className =
+  const homeBtn = document.createElement("button");
+  homeBtn.type = "button";
+  homeBtn.className =
     "iframe-shell__btn report-screen__btn report-screen__btn--exit";
 
-  actions.append(primaryBtn);
-  card.append(title, body, sheetsList, sheetsEmpty, actions);
+  const downloadBtn = document.createElement("button");
+  downloadBtn.type = "button";
+  downloadBtn.className =
+    "iframe-shell__btn report-screen__btn report-screen__btn--download";
+
+  const downloadLabel = document.createElement("span");
+  downloadLabel.className = "report-screen__btn-label";
+
+  downloadBtn.insertAdjacentHTML("afterbegin", DOWNLOAD_ICON_SVG);
+  downloadBtn.append(downloadLabel);
+
+  actions.append(homeBtn, downloadBtn);
+  card.append(title, sheetsList, sheetsEmpty, actions);
   panel.append(card);
 
   const visual = document.createElement("div");
@@ -107,6 +137,27 @@ export function createReportScreen(opts = {}) {
 
   const glow = document.createElement("div");
   glow.className = "report-screen__glow";
+
+  const report = document.createElement("div");
+  report.className = "report-screen__report";
+
+  const reportSheet = document.createElement("div");
+  reportSheet.className = "report-screen__report-sheet";
+
+  const reportEyebrow = document.createElement("p");
+  reportEyebrow.className = "report-screen__report-eyebrow";
+
+  const reportTitle = document.createElement("p");
+  reportTitle.className = "report-screen__report-title";
+
+  const reportSubtitle = document.createElement("p");
+  reportSubtitle.className = "report-screen__report-subtitle";
+
+  const reportBody = document.createElement("div");
+  reportBody.className = "report-screen__report-body";
+
+  reportSheet.append(reportEyebrow, reportTitle, reportSubtitle, reportBody);
+  report.append(reportSheet);
 
   const noise = document.createElement("span");
   noise.className = "report-screen__noise";
@@ -119,7 +170,7 @@ export function createReportScreen(opts = {}) {
   brandSlot.innerHTML = BRAND_MARK_SVG;
   brand.append(brandSlot);
 
-  visual.append(glow, noise, brand);
+  visual.append(glow, noise, report, brand);
   const meshWash = mountMeshGradientWash(glow);
   meshWash.setActive(false);
 
@@ -202,11 +253,234 @@ export function createReportScreen(opts = {}) {
   modalBackdrop.append(modal);
   root.append(modalBackdrop);
 
+  function brandMarkEl() {
+    return /** @type {SVGElement | null} */ (brandSlot.querySelector("svg"));
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function setDefaultBrandMark() {
+    const svg = brandMarkEl();
+    if (svg) {
+      resetBrandMarkToDefault(svg);
+      return;
+    }
+    brandSlot.innerHTML = BRAND_MARK_SVG;
+  }
+
+  function setLogoDoneMark() {
+    let svg = brandMarkEl();
+    if (!svg) {
+      brandSlot.innerHTML = BRAND_MARK_SVG;
+      svg = brandMarkEl();
+    }
+    const { durationMs, easing } = getBrandMarkMorphMotion();
+    morphBrandMarkToDone(svg, {
+      durationMs,
+      easing,
+      reducedMotion: prefersReducedMotion(),
+    });
+  }
+
+  function clearDoneMesh() {
+    pendingDoneMesh = false;
+    pdfDone = false;
+    root.classList.remove("report-screen--done");
+    setDefaultBrandMark();
+    meshWash.refresh();
+  }
+
+  function activateDoneMesh() {
+    if (root.classList.contains("report-screen--done")) return;
+    root.classList.add("report-screen--done");
+    setLogoDoneMark();
+    const { durationMs, easing } = getReviewMeshDoneMotion();
+    meshWash.transitionToCssColors({ durationMs, easing });
+  }
+
+  function releaseReportBrand() {
+    root.classList.remove("report-screen--report");
+    if (pendingDoneMesh) {
+      pendingDoneMesh = false;
+      activateDoneMesh();
+    }
+  }
+
+  function clearReportSheet() {
+    reportBody.replaceChildren();
+    reportSubtitle.textContent = "";
+  }
+
+  /**
+   * @param {import("../../utils/reviewReport.js").ReviewAnswers | null | undefined} answers
+   * @param {string} [subtitle]
+   */
+  function fillReportSheet(answers, subtitle) {
+    const strings = getStrings();
+    reportEyebrow.textContent = strings.brandName;
+    reportTitle.textContent = strings.reportDocumentTitle;
+    reportSubtitle.textContent =
+      subtitle?.trim() || portfolioName.trim() || strings.brandName;
+
+    reportBody.replaceChildren();
+    if (!answers) return;
+
+    const sections = buildReportSections(answers, strings);
+    for (const section of sections) {
+      const block = document.createElement("section");
+      block.className = "report-screen__report-section";
+
+      const heading = document.createElement("h3");
+      heading.className = "report-screen__report-section-title";
+      heading.textContent = section.title;
+
+      const bodyEl = document.createElement("p");
+      bodyEl.className = "report-screen__report-section-body";
+      bodyEl.textContent = section.body;
+
+      block.append(heading, bodyEl);
+      reportBody.append(block);
+    }
+  }
+
+  function cancelReportLaunch() {
+    if (!reportLaunchAnim) return;
+    reportLaunchAnim.cancel();
+    reportLaunchAnim = null;
+    report.style.transition = "";
+    report.style.opacity = "";
+    report.style.transform = "";
+  }
+
+  /**
+   * @returns {Promise<void>}
+   */
+  function launchReportAway() {
+    cancelReportLaunch();
+
+    if (!root.classList.contains("report-screen--report")) {
+      clearReportSheet();
+      if (pendingDoneMesh) {
+        pendingDoneMesh = false;
+        activateDoneMesh();
+      }
+      return Promise.resolve();
+    }
+
+    if (prefersReducedMotion()) {
+      releaseReportBrand();
+      clearReportSheet();
+      return Promise.resolve();
+    }
+
+    const { durationMs, liftPx, peak, easeLift, easeDive } =
+      getReportLaunchMotion();
+    const styles = getComputedStyle(root);
+    const shown =
+      styles.getPropertyValue("--shell-review-report-shift-shown").trim() ||
+      "22%";
+    const hidden =
+      styles.getPropertyValue("--shell-review-report-shift-hidden").trim() ||
+      "100%";
+
+    report.style.transition = "none";
+    report.style.opacity = "1";
+
+    const anim = report.animate(
+      [
+        {
+          transform: `translate(-50%, ${shown})`,
+          opacity: 1,
+          offset: 0,
+          easing: easeLift,
+        },
+        {
+          transform: `translate(-50%, calc(${shown} - ${liftPx}px))`,
+          opacity: 1,
+          offset: peak,
+          easing: easeDive,
+        },
+        {
+          transform: `translate(-50%, ${hidden})`,
+          opacity: 1,
+          offset: 1,
+        },
+      ],
+      {
+        duration: durationMs,
+        fill: /** @type {FillMode} */ ("forwards"),
+      },
+    );
+    reportLaunchAnim = anim;
+
+    return anim.finished
+      .catch(() => {
+        /* cancelled */
+      })
+      .then(() => {
+        if (reportLaunchAnim !== anim) return;
+        reportLaunchAnim = null;
+        if (typeof anim.commitStyles === "function") {
+          anim.commitStyles();
+        }
+        anim.cancel();
+        releaseReportBrand();
+        clearReportSheet();
+        report.style.transition = "none";
+        report.style.opacity = "";
+        report.style.transform = "";
+        void report.offsetWidth;
+        report.style.transition = "";
+      });
+  }
+
+  function showReportMockup() {
+    const firstWithAnswers = sheets.find((sheet) => sheet.answers);
+    const t = getStrings();
+    if (!firstWithAnswers?.answers) {
+      root.classList.remove("report-screen--report");
+      clearReportSheet();
+      return;
+    }
+    const name =
+      (firstWithAnswers.reviewerDisplayName &&
+        firstWithAnswers.reviewerDisplayName.trim()) ||
+      t.reportSheetReviewerFallback ||
+      "";
+    const index = sheets.indexOf(firstWithAnswers);
+    const sheetLabel = formatString(t.reportSheetLabel, { n: index + 1 });
+    fillReportSheet(
+      firstWithAnswers.answers,
+      [sheetLabel, name].filter(Boolean).join(" · "),
+    );
+    root.classList.add("report-screen--report");
+  }
+
+  function markPdfDownloaded() {
+    if (pdfDone) return;
+    pdfDone = true;
+    pendingDoneMesh = true;
+    void launchReportAway();
+    syncDownloadButton();
+  }
+
+  function syncDownloadButton() {
+    const hasAnswers = sheets.some((sheet) => sheet.answers);
+    downloadBtn.disabled = pdfDone || !hasAnswers;
+    downloadBtn.hidden = false;
+  }
+
   function applyCopy() {
     const t = getStrings();
     title.textContent = t.reportScreenTitle ?? "";
-    body.textContent = t.reportScreenBody ?? "";
-    primaryBtn.textContent = t.reportScreenPrimary ?? "";
+    homeBtn.textContent = t.reportScreenPrimary ?? "";
+    downloadLabel.textContent = t.reportScreenDownloadPdf ?? "";
+    downloadBtn.setAttribute(
+      "aria-label",
+      t.reportScreenDownloadPdfAria ?? t.reportScreenDownloadPdf ?? "",
+    );
     sheetsEmpty.textContent = t.reportSheetsEmpty ?? "";
     modalTitle.textContent = t.reportComplaintModalTitle ?? "";
     modalBody.textContent = t.reportComplaintModalBody ?? "";
@@ -362,6 +636,8 @@ export function createReportScreen(opts = {}) {
     if (sheets.length === 0) {
       sheetsList.hidden = true;
       sheetsEmpty.hidden = false;
+      syncDownloadButton();
+      if (!pdfDone) showReportMockup();
       return;
     }
     sheetsEmpty.hidden = true;
@@ -369,18 +645,28 @@ export function createReportScreen(opts = {}) {
     sheets.forEach((sheet, index) => {
       sheetsList.append(buildSheetRow(sheet, index));
     });
+    syncDownloadButton();
+    if (!pdfDone) showReportMockup();
   }
 
   /**
-   * @param {{ portfolioId?: string | null }} [openOpts]
+   * @param {{ portfolioId?: string | null; portfolioName?: string | null }} [openOpts]
    */
   function open(openOpts = {}) {
     closing = false;
     closeComplaintModal();
+    cancelReportLaunch();
+    clearDoneMesh();
+    clearReportSheet();
+    root.classList.remove("report-screen--report");
     portfolioId =
       typeof openOpts.portfolioId === "string" && openOpts.portfolioId.trim()
         ? openOpts.portfolioId.trim()
         : null;
+    portfolioName =
+      typeof openOpts.portfolioName === "string"
+        ? openOpts.portfolioName.trim()
+        : "";
     sheets = [];
     applyCopy();
     renderSheets();
@@ -398,6 +684,7 @@ export function createReportScreen(opts = {}) {
     const token = ++loadToken;
     if (!portfolioId) {
       sheetsEmpty.hidden = false;
+      syncDownloadButton();
       return;
     }
 
@@ -418,15 +705,22 @@ export function createReportScreen(opts = {}) {
 
     closeComplaintModal();
     loadToken += 1;
+    cancelReportLaunch();
 
     if (!root.classList.contains("report-screen--open")) {
       meshWash.setActive(false);
+      root.classList.remove("report-screen--report");
+      clearDoneMesh();
+      clearReportSheet();
       root.hidden = true;
       return Promise.resolve();
     }
 
     closing = true;
     meshWash.setActive(false);
+    root.classList.remove("report-screen--report");
+    clearDoneMesh();
+    clearReportSheet();
     root.classList.remove("report-screen--open");
 
     return new Promise((resolve) => {
@@ -450,8 +744,36 @@ export function createReportScreen(opts = {}) {
     });
   }
 
-  primaryBtn.addEventListener("click", () => {
+  homeBtn.addEventListener("click", () => {
     void onPrimary?.();
+  });
+
+  downloadBtn.addEventListener("click", () => {
+    if (downloadBtn.disabled || pdfDone) return;
+    const t = getStrings();
+    const pages = sheets
+      .map((sheet, index) => {
+        if (!sheet.answers) return null;
+        const reviewerName =
+          (sheet.reviewerDisplayName && sheet.reviewerDisplayName.trim()) ||
+          t.reportSheetReviewerFallback ||
+          "";
+        return {
+          answers: sheet.answers,
+          reviewerName,
+          sheetLabel: formatString(t.reportSheetLabel, { n: index + 1 }),
+        };
+      })
+      .filter(Boolean);
+
+    if (pages.length === 0) return;
+
+    shareReviewPdf(pages, {
+      portfolioName: portfolioName || t.brandName,
+      onComplete: () => {
+        markPdfDownloaded();
+      },
+    });
   });
 
   modalCancel.addEventListener("click", () => {

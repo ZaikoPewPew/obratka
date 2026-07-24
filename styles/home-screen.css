@@ -391,6 +391,22 @@
   background: var(--color-surface);
 }
 
+.home-screen__preview--loading {
+  background-color: var(--home-screen-skeleton-base);
+  background-image: linear-gradient(
+    90deg,
+    var(--home-screen-skeleton-base) 0%,
+    var(--home-screen-skeleton-shine) 45%,
+    var(--home-screen-skeleton-base) 90%
+  );
+  background-size: 200% 100%;
+  background-position: right;
+  animation-name: motion-skeleton-shimmer;
+  animation-duration: var(--home-screen-skeleton-duration);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
 .home-screen__preview--empty {
   background:
     linear-gradient(
@@ -406,6 +422,23 @@
   height: 100%;
   object-fit: cover;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--motion-reveal-duration) var(--motion-reveal-ease);
+}
+
+.home-screen__preview--ready .home-screen__preview-img {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-screen__preview--loading {
+    animation: none;
+    background-image: none;
+  }
+
+  .home-screen__preview-img {
+    transition: none;
+  }
 }
 
 .home-screen__card-meta {

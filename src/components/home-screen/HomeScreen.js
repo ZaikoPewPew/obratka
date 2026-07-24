@@ -753,7 +753,7 @@ export function createHomeScreen({
     button.className = "home-screen__card";
 
     const preview = document.createElement("div");
-    preview.className = "home-screen__preview";
+    preview.className = "home-screen__preview home-screen__preview--loading";
 
     const previewImg = document.createElement("img");
     previewImg.className = "home-screen__preview-img";
@@ -768,10 +768,14 @@ export function createHomeScreen({
         : portfolioPreviewUrl(item.url);
     previewImg.src = previewSrc;
     previewImg.addEventListener("load", () => {
+      preview.classList.remove("home-screen__preview--loading");
+      preview.classList.add("home-screen__preview--ready");
       scheduleTabbarContrastSync();
     });
     previewImg.addEventListener("error", () => {
       previewImg.remove();
+      preview.classList.remove("home-screen__preview--loading");
+      preview.classList.remove("home-screen__preview--ready");
       preview.classList.add("home-screen__preview--empty");
       scheduleTabbarContrastSync();
     });

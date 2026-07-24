@@ -24,7 +24,7 @@ referral → auth → authCode → onboarding → home
 | 5b | `url-screen` | `/portfolio` | Подача своего URL (нужен баланс) |
 | 6 | `review-screen` + `review-panel` | `/quiz` → `/quiz/done` | Квиз; финал слева + улет отчёта |
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
-| 8 | `report-screen` | `/report` | Отчёт автору: листы ревью + «Пожаловаться» (теги → репутация) |
+| 8 | `report-screen` | `/report` | Отчёт автору: листы + жалоба + PDF (мокап листа → done после скачивания) |
 | — | `ban-screen` | `/banned` | Аккаунт заблокирован; «Выйти» + «Связаться» (242px); красный mesh; deep link escape-proof |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query (`?ref=`, `?lang=`) сохраняются.
@@ -198,8 +198,8 @@ App modal: `--app-modal-*` + `styles/app-modal.css` ([`app-modal/README.md`](src
 ## Дальше
 
 1. Вынести CSS в `brand-screen.css` (классы пока `.url-screen*`).
-2. Агрегация оценок нескольких ревьюеров в PDF-отчёте / наполнение сводки на `report-screen` (жалобы на листы уже есть).
-3. Manual identity linking (`linkIdentity`) + UNIQUE `profiles.email` + Telegram↔email — вне текущего скоупа.
+2. Manual identity linking (`linkIdentity`) + UNIQUE `profiles.email` + Telegram↔email — вне текущего скоупа.
+3. Редизайн жалоб / списка листов на `report-screen` (PDF уже есть).
 
 ## Связанные документы
 
