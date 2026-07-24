@@ -22,7 +22,7 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 
 ### Контраст над тёмным превью
 
-Пока таббар виден, сэмплим яркость фона под ним (`src/utils/backdropLuminance.js`, scroll / resize / load превью). Если фон тёмный → класс `home-screen__tabbar--on-dark`: светлая подложка + светлый текст неактивного таба (активный пилл без изменений). Токены: `--home-screen-tabbar-*-on-dark`, transition `--home-screen-tabbar-contrast-*`.
+Пока таббар виден, сэмплим яркость фона под ним (`src/utils/backdropLuminance.js`, scroll / resize / load превью). Если фон тёмный → класс `home-screen__tabbar--on-dark`: светлая подложка; цвет текста табов как обычно (тёмный неактивный / светлый на активном пилле). Токен: `--home-screen-tabbar-track-bg-on-dark`, transition `--home-screen-tabbar-contrast-*`.
 
 ### Переключение таба (UI)
 
@@ -94,7 +94,7 @@ Topbar поверх контента (`position: absolute`), появление 
 
 ## Стили / i18n / a11y
 
-Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, motion hide/thumb/label/contrast, on-dark track/label).
+Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, motion hide/thumb/label/contrast, on-dark track).
 
 Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeTabFeed`, `homeTabMine`, `homeTabsAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeCardProgress`, `homeCardOwnTitle`, `homeCardOwnAria`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`, `homeResetSessionTitle`.
 

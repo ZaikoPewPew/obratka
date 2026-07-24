@@ -475,7 +475,6 @@
   --home-screen-tabbar-tab-active-bg: var(--color-accent);
   --home-screen-tabbar-tab-active-color: var(--color-on-accent);
   --home-screen-tabbar-tab-color: var(--color-text);
-  --home-screen-tabbar-tab-color-on-dark: var(--palette-white);
   --home-screen-tabbar-z: 3;
   --home-screen-tabbar-hide-duration: var(--motion-screen-duration);
   --home-screen-tabbar-hide-ease: var(--motion-screen-ease);
