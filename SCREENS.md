@@ -23,7 +23,7 @@ referral → auth → authCode → onboarding → home
 | 5b | `url-screen` | `/portfolio` | Подача своего URL (нужен баланс) |
 | 6 | `review-screen` + `review-panel` | `/quiz` → `/quiz/done` | Квиз; финал слева + улет отчёта |
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
-| — | `ban-screen` | `/banned` | Аккаунт заблокирован; «Выйти» + «Связаться» (242px, TG-иконка); красный mesh; deep link escape-proof |
+| — | `ban-screen` | `/banned` | Аккаунт заблокирован; «Выйти» + «Связаться» (242px); красный mesh; deep link escape-proof |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query (`?ref=`, `?lang=`) сохраняются.
 

@@ -347,15 +347,12 @@
   --ban-screen-body-size: var(--font-size-base);
   --ban-screen-actions-gap: var(--shell-review-done-actions-gap);
   --ban-screen-btn-width: 242px;
-  --ban-screen-btn-gap: var(--space-3);
   --ban-screen-btn-contact-bg: var(--color-accent);
   --ban-screen-btn-contact-bg-hover: var(--color-accent-hover);
   --ban-screen-btn-contact-bg-active: var(--color-accent-active);
   --ban-screen-btn-contact-color: var(--color-on-accent);
   --ban-screen-btn-contact-color-hover: var(--color-on-accent-hover);
   --ban-screen-btn-contact-color-active: var(--color-on-accent-active);
-  --ban-screen-icon-tg-width: var(--auth-screen-icon-tg-width);
-  --ban-screen-icon-tg-height: var(--auth-screen-icon-tg-height);
   --ban-screen-noise-opacity: 0.5;
   /* Mark with flame: same width as brand, taller; nudge keeps bottom/right with 44×43 */
   --ban-screen-brand-width: 44px;
@@ -374,8 +371,8 @@
   --home-screen-bg: var(--color-bg);
   --home-screen-topbar-height: 80px;
   --home-screen-topbar-padding: var(--space-4);
-  --home-screen-mark-width: 44px;
-  --home-screen-mark-height: 30px;
+  --home-screen-mark-width: var(--url-screen-brand-width);
+  --home-screen-mark-height: var(--url-screen-brand-height);
   --home-screen-chip-height: var(--space-12);
   --home-screen-chip-gap: var(--space-2);
   --home-screen-chip-padding-x: var(--space-4);
@@ -401,6 +398,14 @@
   --home-screen-body-gap: var(--space-4);
   --home-screen-feed-width: 500px;
   --home-screen-feed-gap: var(--space-4);
+  --home-screen-empty-radius: var(--radius-xl);
+  --home-screen-empty-padding: var(--space-2);
+  --home-screen-empty-width: var(--home-screen-feed-width);
+  --home-screen-empty-height: 326px;
+  --home-screen-empty-bg: var(--color-surface-muted);
+  --home-screen-empty-font-size: var(--font-size-base);
+  --home-screen-empty-font-weight: var(--font-weight-regular);
+  --home-screen-empty-color: var(--color-text);
   --home-screen-aside-width: 278px;
   --home-screen-aside-min-height: 462px;
   --home-screen-aside-radius: var(--radius-xl);
@@ -445,19 +450,20 @@
     (var(--home-screen-card-padding) * 2) + var(--home-screen-preview-height) +
       var(--home-screen-card-gap) + var(--home-screen-count-height)
   );
-  /* Bottom tabs «Лента | Мои» (Figma menu 445:473) */
-  --home-screen-tabbar-height: 52px;
+  /* Bottom tabs «На ревью | Мои посты» */
+  --home-screen-tabbar-height: 56px;
   --home-screen-tabbar-offset: var(--space-4);
-  --home-screen-tabbar-padding: 2px;
-  /* Figma menu: radius 12 на обёртке и на табах */
-  --home-screen-tabbar-radius: 12px;
+  --home-screen-tabbar-padding: var(--space-1);
+  --home-screen-tabbar-radius: var(--radius-md);
   --home-screen-tabbar-track-bg: color-mix(
     in srgb,
     var(--palette-gray-900) 20%,
     transparent
   );
+  --home-screen-tabbar-blur: 20px;
   --home-screen-tabbar-tab-height: 48px;
   --home-screen-tabbar-tab-padding-x: var(--space-4);
+  --home-screen-tabbar-tab-padding-y: var(--space-3);
   --home-screen-tabbar-tab-radius: 12px;
   --home-screen-tabbar-tab-font-size: var(--font-size-base);
   --home-screen-tabbar-tab-font-weight: var(--font-weight-medium);

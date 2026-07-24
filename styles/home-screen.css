@@ -123,7 +123,11 @@
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  color: inherit;
+}
+
+.home-screen__mark-img path {
+  fill: currentColor;
 }
 
 .home-screen__top-actions {
@@ -235,9 +239,13 @@
   overflow: hidden;
   border: none;
   border-radius: var(--home-screen-avatar-radius);
-  background: var(--home-screen-avatar-letter-bg);
+  background: transparent;
   color: var(--home-screen-avatar-letter-color);
   cursor: pointer;
+}
+
+.home-screen__profile--letter {
+  background: var(--home-screen-avatar-letter-bg);
 }
 
 .home-screen__profile:focus-visible {
@@ -251,6 +259,11 @@
   height: 100%;
   object-fit: cover;
   border-radius: var(--home-screen-avatar-radius);
+}
+
+.home-screen__profile-img[hidden],
+.home-screen__profile-letter[hidden] {
+  display: none !important;
 }
 
 .home-screen__profile-letter {
@@ -511,8 +524,27 @@
 }
 
 .home-screen__empty {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: var(--home-screen-empty-width);
+  height: var(--home-screen-empty-height);
   margin: 0;
-  color: var(--color-text-muted);
+  padding: var(--home-screen-empty-padding);
+  border-radius: var(--home-screen-empty-radius);
+  background: var(--home-screen-empty-bg);
+  color: var(--home-screen-empty-color);
+  font-family: var(--font-family);
+  font-size: var(--home-screen-empty-font-size);
+  font-weight: var(--home-screen-empty-font-weight);
+  line-height: normal;
+  text-align: center;
+}
+
+.home-screen__empty[hidden] {
+  display: none !important;
 }
 
 .home-screen__locked-backdrop {
@@ -635,7 +667,7 @@
   }
 }
 
-/* Bottom tabs «Лента | Мои» */
+/* Bottom tabs «На ревью | Мои посты» */
 .home-screen__tabbar {
   box-sizing: border-box;
   position: absolute;
@@ -651,6 +683,8 @@
   border: none;
   border-radius: var(--home-screen-tabbar-radius);
   background: var(--home-screen-tabbar-track-bg);
+  backdrop-filter: blur(var(--home-screen-tabbar-blur));
+  -webkit-backdrop-filter: blur(var(--home-screen-tabbar-blur));
   transform: translateX(-50%);
   transition: bottom var(--home-screen-tabbar-hide-duration)
     var(--home-screen-tabbar-hide-ease);
@@ -692,7 +726,8 @@
   justify-content: center;
   height: var(--home-screen-tabbar-tab-height);
   margin: 0;
-  padding: 0 var(--home-screen-tabbar-tab-padding-x);
+  padding: var(--home-screen-tabbar-tab-padding-y)
+    var(--home-screen-tabbar-tab-padding-x);
   border: none;
   border-radius: var(--home-screen-tabbar-tab-radius);
   background: transparent;

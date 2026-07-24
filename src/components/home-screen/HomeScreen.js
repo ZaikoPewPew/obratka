@@ -12,7 +12,7 @@ import {
 } from "../../api/wallet.js";
 import { getSession } from "../../app/session.js";
 import { resolvePlatformIcon } from "../../utils/platformBrandIcon.js";
-import brandLogoUrl from "../../assets/brand/logo.svg";
+import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import boneIconUrl from "../../assets/home/bone.svg";
 import bellIconUrl from "../../assets/home/bell.svg";
 import plusIconUrl from "../../assets/home/plus.svg";
@@ -115,14 +115,7 @@ export function createHomeScreen({
     void onResetSession?.();
   });
 
-  const markImg = document.createElement("img");
-  markImg.className = "home-screen__mark-img";
-  markImg.src = brandLogoUrl;
-  markImg.alt = "";
-  markImg.width = 44;
-  markImg.height = 30;
-  markImg.decoding = "async";
-  markLink.append(markImg);
+  markLink.innerHTML = brandMarkSvg("home-screen__mark-img");
 
   const topActions = document.createElement("div");
   topActions.className = "home-screen__top-actions";
@@ -276,33 +269,29 @@ export function createHomeScreen({
   let lastScrollTop = 0;
   let tabbarHidden = false;
 
+  /** Нет фото → фон + буква; картинку прячем. */
   function showProfileLetter(letter) {
     const initial = letter && letter !== "?" ? letter : "?";
-    profileLetter.textContent = initial;
-    profileLetter.hidden = false;
-    profileImg.hidden = true;
     profileImg.onload = null;
     profileImg.onerror = null;
     profileImg.removeAttribute("src");
+    profileImg.hidden = true;
+    profileLetter.textContent = initial;
+    profileLetter.hidden = false;
     profileBtn.classList.add("home-screen__profile--letter");
   }
 
   /**
-   * Есть URL → пробуем фото; нет / ошибка загрузки → фон + буква имени.
+   * Есть URL → только фото (без буквы); ошибка загрузки → фон + буква.
    * @param {string} src
    * @param {string} letter
    */
   function showProfilePhoto(src, letter) {
-    profileLetter.textContent = letter;
-    profileLetter.hidden = false;
-    profileImg.hidden = true;
-    profileBtn.classList.add("home-screen__profile--letter");
+    profileLetter.hidden = true;
+    profileImg.hidden = false;
+    profileBtn.classList.remove("home-screen__profile--letter");
     profileImg.referrerPolicy = "no-referrer";
-    profileImg.onload = () => {
-      profileImg.hidden = false;
-      profileLetter.hidden = true;
-      profileBtn.classList.remove("home-screen__profile--letter");
-    };
+    profileImg.onload = null;
     profileImg.onerror = () => {
       showProfileLetter(letter);
     };
@@ -340,7 +329,7 @@ export function createHomeScreen({
   function syncCopy() {
     const t = getStrings();
     title.textContent = t.homeTitle;
-    markImg.alt = t.brandLogoAlt;
+    markLink.setAttribute("aria-label", t.brandLogoAlt);
     list.setAttribute(
       "aria-label",
       loading

@@ -117,10 +117,6 @@
 .ban-screen__btn {
   flex: 0 0 auto;
   box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--ban-screen-btn-gap);
   width: var(--ban-screen-btn-width);
   min-height: var(--shell-review-control-height);
   padding: var(--shell-review-control-padding-y) var(--shell-review-control-padding-x);
@@ -160,20 +156,6 @@
 .ban-screen__btn--contact:focus-visible {
   outline: var(--focus-ring-width) solid var(--color-focus-ring-on-accent);
   outline-offset: var(--focus-ring-offset);
-}
-
-.ban-screen__btn-icon {
-  flex-shrink: 0;
-  display: block;
-}
-
-.ban-screen__btn-icon--telegram {
-  width: var(--ban-screen-icon-tg-width);
-  height: var(--ban-screen-icon-tg-height);
-}
-
-.ban-screen__btn-label {
-  white-space: nowrap;
 }
 
 .ban-screen__visual {
