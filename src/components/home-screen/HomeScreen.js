@@ -15,7 +15,7 @@ import {
   getBalance,
   refreshWalletFromServer,
 } from "../../api/wallet.js";
-import { getReputation } from "../../api/reviewComplaints.js";
+import { formatReputationDelta } from "../../api/reviewComplaints.js";
 import { getSession, setSession } from "../../app/session.js";
 import { resolvePlatformIcon } from "../../utils/platformBrandIcon.js";
 import {
@@ -24,10 +24,30 @@ import {
   sampleBackdropLuminance,
 } from "../../utils/backdropLuminance.js";
 import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
+import { createAppModal } from "../app-modal/AppModal.js";
 import boneIconUrl from "../../assets/home/bone.svg";
 import bellIconUrl from "../../assets/home/bell.svg";
-import plusIconUrl from "../../assets/home/plus.svg";
+import plusIconSvg from "../../assets/home/plus.svg?raw";
+import reputationIconUrl from "../../assets/home/reputation.svg";
 import slotPlusIconUrl from "../../assets/home/slot-plus.svg";
+
+/**
+ * Plus для accent-чипа — inline SVG: в `<img>` currentColor не наследует color кнопки.
+ * @returns {SVGElement}
+ */
+function createSubmitPlusIcon() {
+  const wrap = document.createElement("span");
+  wrap.innerHTML = plusIconSvg.trim();
+  const svg = wrap.firstElementChild;
+  if (!(svg instanceof SVGElement)) {
+    throw new Error("plus.svg must be a root <svg>");
+  }
+  svg.classList.add("home-screen__chip-icon");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("width", "24");
+  svg.setAttribute("height", "24");
+  return svg;
+}
 
 /** Сколько монет даёт клик по чипу баланса (dev). */
 const DEV_CREDIT_AMOUNT = 10;
@@ -154,17 +174,9 @@ export function createHomeScreen({
   addBtn.type = "button";
   addBtn.className = "home-screen__chip home-screen__chip--submit";
 
-  const plusImg = document.createElement("img");
-  plusImg.className = "home-screen__chip-icon";
-  plusImg.src = plusIconUrl;
-  plusImg.alt = "";
-  plusImg.width = 24;
-  plusImg.height = 24;
-  plusImg.decoding = "async";
-
   const addLabel = document.createElement("span");
   addLabel.className = "home-screen__chip-label";
-  addBtn.append(plusImg, addLabel);
+  addBtn.append(createSubmitPlusIcon(), addLabel);
 
   const balanceChip = document.createElement("button");
   balanceChip.type = "button";
@@ -187,13 +199,18 @@ export function createHomeScreen({
   reputationChip.type = "button";
   reputationChip.className = "home-screen__chip home-screen__chip--reputation";
 
-  const reputationLabel = document.createElement("span");
-  reputationLabel.className = "home-screen__chip-label";
+  const reputationImg = document.createElement("img");
+  reputationImg.className = "home-screen__chip-icon";
+  reputationImg.src = reputationIconUrl;
+  reputationImg.alt = "";
+  reputationImg.width = 24;
+  reputationImg.height = 24;
+  reputationImg.decoding = "async";
 
   const reputationValue = document.createElement("span");
   reputationValue.className = "home-screen__chip-value";
 
-  reputationChip.append(reputationLabel, reputationValue);
+  reputationChip.append(reputationImg, reputationValue);
 
   const notifyBtn = document.createElement("button");
   notifyBtn.type = "button";
@@ -227,7 +244,7 @@ export function createHomeScreen({
   profileLetter.textContent = "?";
 
   profileBtn.append(profileImg, profileLetter);
-  topActions.append(addBtn, balanceChip, reputationChip, notifyBtn, profileBtn);
+  topActions.append(addBtn, reputationChip, balanceChip, notifyBtn, profileBtn);
   topbar.append(markLink, topActions);
 
   const body = document.createElement("div");
@@ -251,103 +268,43 @@ export function createHomeScreen({
   cluster.append(feed);
   body.append(cluster);
 
-  const lockedBackdrop = document.createElement("div");
-  lockedBackdrop.className = "home-screen__locked-backdrop";
-  lockedBackdrop.hidden = true;
-  lockedBackdrop.setAttribute("aria-hidden", "true");
+  const reputationBody = document.createElement("p");
+  reputationBody.className = "home-screen__reputation-body";
 
-  const lockedDialog = document.createElement("div");
-  lockedDialog.className = "home-screen__locked-dialog";
-  lockedDialog.setAttribute("role", "dialog");
-  lockedDialog.setAttribute("aria-modal", "true");
-  lockedDialog.setAttribute("aria-labelledby", "home-submit-locked-title");
-
-  const lockedTitle = document.createElement("h2");
-  lockedTitle.className = "home-screen__locked-title";
-  lockedTitle.id = "home-submit-locked-title";
-
-  const lockedBody = document.createElement("p");
-  lockedBody.className = "home-screen__locked-body";
-
-  const lockedClose = document.createElement("button");
-  lockedClose.type = "button";
-  lockedClose.className = "home-screen__locked-close";
-
-  lockedDialog.append(lockedTitle, lockedBody, lockedClose);
-  lockedBackdrop.append(lockedDialog);
-
-  const inviteBackdrop = document.createElement("div");
-  inviteBackdrop.className =
-    "home-screen__locked-backdrop home-screen__invite-backdrop";
-  inviteBackdrop.hidden = true;
-  inviteBackdrop.setAttribute("aria-hidden", "true");
-
-  const inviteDialog = document.createElement("div");
-  inviteDialog.className =
-    "home-screen__locked-dialog home-screen__invite-dialog";
-  inviteDialog.setAttribute("role", "dialog");
-  inviteDialog.setAttribute("aria-modal", "true");
-  inviteDialog.setAttribute("aria-labelledby", "home-invite-title");
-
-  const inviteTitle = document.createElement("h2");
-  inviteTitle.className = "home-screen__locked-title";
-  inviteTitle.id = "home-invite-title";
-
-  const inviteBody = document.createElement("p");
-  inviteBody.className = "home-screen__locked-body";
+  const noticeModal = createAppModal({
+    size: "md",
+    showSecondary: false,
+    onPrimary: () => {
+      void noticeModal.close();
+    },
+  });
 
   const inviteCode = document.createElement("p");
   inviteCode.className = "home-screen__invite-code";
   inviteCode.setAttribute("aria-live", "polite");
 
-  const inviteActions = document.createElement("div");
-  inviteActions.className = "home-screen__invite-actions";
-
-  const inviteCopyCode = document.createElement("button");
-  inviteCopyCode.type = "button";
-  inviteCopyCode.className =
-    "home-screen__locked-close home-screen__invite-action";
-
-  const inviteCopyLink = document.createElement("button");
-  inviteCopyLink.type = "button";
-  inviteCopyLink.className =
-    "home-screen__invite-action home-screen__invite-action--secondary";
-
-  const inviteClose = document.createElement("button");
-  inviteClose.type = "button";
-  inviteClose.className =
-    "home-screen__invite-action home-screen__invite-action--ghost";
-
-  inviteActions.append(inviteCopyCode, inviteCopyLink, inviteClose);
-  inviteDialog.append(inviteTitle, inviteBody, inviteCode, inviteActions);
-  inviteBackdrop.append(inviteDialog);
-
-  const reputationBackdrop = document.createElement("div");
-  reputationBackdrop.className =
-    "home-screen__locked-backdrop home-screen__reputation-backdrop";
-  reputationBackdrop.hidden = true;
-  reputationBackdrop.setAttribute("aria-hidden", "true");
-
-  const reputationDialog = document.createElement("div");
-  reputationDialog.className =
-    "home-screen__locked-dialog home-screen__reputation-dialog";
-  reputationDialog.setAttribute("role", "dialog");
-  reputationDialog.setAttribute("aria-modal", "true");
-  reputationDialog.setAttribute("aria-labelledby", "home-reputation-title");
-
-  const reputationTitle = document.createElement("h2");
-  reputationTitle.className = "home-screen__locked-title";
-  reputationTitle.id = "home-reputation-title";
-
-  const reputationBody = document.createElement("p");
-  reputationBody.className = "home-screen__locked-body home-screen__reputation-body";
-
-  const reputationClose = document.createElement("button");
-  reputationClose.type = "button";
-  reputationClose.className = "home-screen__locked-close";
-
-  reputationDialog.append(reputationTitle, reputationBody, reputationClose);
-  reputationBackdrop.append(reputationDialog);
+  const inviteModal = createAppModal({
+    size: "md",
+    onPrimary: () => {
+      if (!inviteCodeValue) return;
+      const t = getStrings();
+      void copyInviteText(
+        inviteCodeValue,
+        "primary",
+        t.homeInviteCopyCode,
+      );
+    },
+    onSecondary: () => {
+      if (!inviteCodeValue) return;
+      const t = getStrings();
+      void copyInviteText(
+        buildReferralShareUrl(inviteCodeValue),
+        "secondary",
+        t.homeInviteCopyLink,
+      );
+    },
+  });
+  inviteModal.content.append(inviteCode);
 
   const tabbar = document.createElement("div");
   tabbar.className = "home-screen__tabbar";
@@ -372,15 +329,7 @@ export function createHomeScreen({
   mineTab.dataset.tab = "mine";
 
   tabbar.append(tabThumb, feedTab, mineTab);
-  root.append(
-    title,
-    topbar,
-    body,
-    tabbar,
-    lockedBackdrop,
-    inviteBackdrop,
-    reputationBackdrop,
-  );
+  root.append(title, topbar, body, tabbar, noticeModal.root, inviteModal.root);
 
   /** @type {HomePortfolioItem[]} */
   let items = [];
@@ -486,11 +435,6 @@ export function createHomeScreen({
     addBtn.title = t.homeAddPortfolio;
     markLink.title = t.homeResetSessionTitle;
 
-    lockedTitle.textContent = t.homeSubmitLockedTitle;
-    lockedBody.textContent = t.homeSubmitLocked;
-    lockedClose.textContent = t.homeSubmitLockedClose;
-    lockedClose.setAttribute("aria-label", t.homeSubmitLockedCloseAria);
-
     const balance = getBalance();
     balanceValue.textContent = String(balance);
     balanceChip.setAttribute(
@@ -499,14 +443,15 @@ export function createHomeScreen({
     );
     balanceChip.title = formatString(t.homeBalance, { balance });
 
-    const reputation = getReputation();
-    reputationLabel.textContent = t.homeReputationLabel ?? "";
-    reputationValue.textContent = String(reputation);
+    const reputationDelta = formatReputationDelta();
+    reputationValue.textContent = reputationDelta;
     reputationChip.setAttribute(
       "aria-label",
-      formatString(t.homeReputationAria, { reputation }),
+      formatString(t.homeReputationAria, { reputation: reputationDelta }),
     );
-    reputationChip.title = formatString(t.homeReputation, { reputation });
+    reputationChip.title = formatString(t.homeReputation, {
+      reputation: reputationDelta,
+    });
 
     notifyBtn.setAttribute("aria-label", t.homeNotificationsAria);
     profileBtn.setAttribute("aria-label", t.homeProfileAria);
@@ -517,16 +462,13 @@ export function createHomeScreen({
 
   function openSubmitLockedModal() {
     const t = getStrings();
-    lockedTitle.textContent = t.homeSubmitLockedTitle;
-    lockedBody.textContent = t.homeSubmitLocked;
-    lockedClose.textContent = t.homeSubmitLockedClose;
-    lockedClose.setAttribute("aria-label", t.homeSubmitLockedCloseAria);
-    lockedBackdrop.hidden = false;
-    lockedBackdrop.setAttribute("aria-hidden", "false");
-    requestAnimationFrame(() => {
-      lockedBackdrop.classList.add("home-screen__locked-backdrop--open");
-      lockedClose.focus();
-    });
+    noticeModal.content.replaceChildren();
+    noticeModal.setTitle(t.homeSubmitLockedTitle ?? "");
+    noticeModal.setDescription(t.homeSubmitLocked ?? "");
+    noticeModal.setPrimaryLabel(t.homeSubmitLockedClose ?? "");
+    noticeModal.setCloseAriaLabel(t.homeSubmitLockedCloseAria ?? "");
+    noticeModal.setActionsVisible({ primary: true, secondary: false });
+    noticeModal.open();
   }
 
   /**
@@ -540,35 +482,27 @@ export function createHomeScreen({
    */
   function showNotice(opts) {
     const t = getStrings();
-    lockedTitle.textContent = opts.title;
-    lockedBody.textContent = opts.body;
-    lockedClose.textContent = opts.closeLabel || t.homeSubmitLockedClose;
-    lockedClose.setAttribute(
-      "aria-label",
-      opts.closeAria || opts.closeLabel || t.homeSubmitLockedCloseAria,
+    noticeModal.content.replaceChildren();
+    noticeModal.setTitle(opts.title);
+    noticeModal.setDescription(opts.body);
+    noticeModal.setPrimaryLabel(opts.closeLabel || t.homeSubmitLockedClose);
+    noticeModal.setCloseAriaLabel(
+      opts.closeAria || opts.closeLabel || t.homeSubmitLockedCloseAria || "",
     );
-    lockedBackdrop.hidden = false;
-    lockedBackdrop.setAttribute("aria-hidden", "false");
-    requestAnimationFrame(() => {
-      lockedBackdrop.classList.add("home-screen__locked-backdrop--open");
-      lockedClose.focus();
-    });
+    noticeModal.setActionsVisible({ primary: true, secondary: false });
+    noticeModal.open();
   }
 
   function closeSubmitLockedModal() {
-    lockedBackdrop.classList.remove("home-screen__locked-backdrop--open");
-    lockedBackdrop.setAttribute("aria-hidden", "true");
-    lockedBackdrop.hidden = true;
+    void noticeModal.close();
   }
 
   function closeInviteModal() {
-    inviteBackdrop.classList.remove("home-screen__locked-backdrop--open");
-    inviteBackdrop.setAttribute("aria-hidden", "true");
-    inviteBackdrop.hidden = true;
     if (inviteCopyResetId != null) {
       window.clearTimeout(inviteCopyResetId);
       inviteCopyResetId = null;
     }
+    void inviteModal.close();
   }
 
   /**
@@ -581,49 +515,48 @@ export function createHomeScreen({
   function openInviteModal(info) {
     const t = getStrings();
     inviteCodeValue = info.code;
-    inviteTitle.textContent = t.homeInviteTitle;
-    inviteBody.textContent = info.code
-      ? formatString(t.homeInviteBody, {
-          left: info.slotsLeft,
-          max: info.maxUses,
-        })
-      : t.homeInviteEmpty;
+    inviteModal.setTitle(t.homeInviteTitle ?? "");
+    inviteModal.setDescription(
+      info.code
+        ? formatString(t.homeInviteBody, {
+            left: info.slotsLeft,
+            max: info.maxUses,
+          })
+        : (t.homeInviteEmpty ?? ""),
+    );
     inviteCode.textContent = info.code || "—";
     inviteCode.hidden = !info.code;
-    inviteCopyCode.textContent = t.homeInviteCopyCode;
-    inviteCopyLink.textContent = t.homeInviteCopyLink;
-    inviteClose.textContent = t.homeInviteClose;
-    inviteClose.setAttribute("aria-label", t.homeInviteCloseAria);
-    inviteCopyCode.disabled = !info.code;
-    inviteCopyLink.disabled = !info.code;
-    inviteCopyCode.hidden = !info.code;
-    inviteCopyLink.hidden = !info.code;
-
-    inviteBackdrop.hidden = false;
-    inviteBackdrop.setAttribute("aria-hidden", "false");
-    requestAnimationFrame(() => {
-      inviteBackdrop.classList.add("home-screen__locked-backdrop--open");
-      (info.code ? inviteCopyCode : inviteClose).focus();
+    inviteModal.setPrimaryLabel(t.homeInviteCopyCode ?? "");
+    inviteModal.setSecondaryLabel(t.homeInviteCopyLink ?? "");
+    inviteModal.setCloseAriaLabel(t.homeInviteCloseAria ?? "");
+    inviteModal.setActionsVisible({
+      primary: Boolean(info.code),
+      secondary: Boolean(info.code),
     });
+    inviteModal.open();
   }
 
   /**
    * @param {string} text
-   * @param {HTMLButtonElement} button
+   * @param {"primary" | "secondary"} which
    * @param {string} idleLabel
    */
-  async function copyInviteText(text, button, idleLabel) {
+  async function copyInviteText(text, which, idleLabel) {
     const t = getStrings();
+    const setLabel =
+      which === "primary"
+        ? inviteModal.setPrimaryLabel
+        : inviteModal.setSecondaryLabel;
     try {
       await navigator.clipboard.writeText(text);
-      button.textContent = t.homeInviteCopied;
+      setLabel(t.homeInviteCopied ?? "");
       if (inviteCopyResetId != null) window.clearTimeout(inviteCopyResetId);
       inviteCopyResetId = window.setTimeout(() => {
-        button.textContent = idleLabel;
+        setLabel(idleLabel);
         inviteCopyResetId = null;
       }, 1600);
     } catch {
-      button.textContent = idleLabel;
+      setLabel(idleLabel);
     }
   }
 
@@ -1136,7 +1069,6 @@ export function createHomeScreen({
     showTabbar();
     closeSubmitLockedModal();
     closeInviteModal();
-    closeReputationModal();
     root.setAttribute("aria-busy", "false");
     root.hidden = true;
     return Promise.resolve();
@@ -1203,88 +1135,23 @@ export function createHomeScreen({
 
   function openReputationModal() {
     const t = getStrings();
-    const reputation = getReputation();
-    reputationTitle.textContent = formatString(t.homeReputationTitle, {
-      reputation,
-    });
+    const reputationDelta = formatReputationDelta();
     reputationBody.textContent = t.homeReputationBody ?? "";
-    reputationClose.textContent = t.homeReputationClose ?? "";
-    reputationClose.setAttribute(
-      "aria-label",
+    noticeModal.content.replaceChildren(reputationBody);
+    noticeModal.setTitle(
+      formatString(t.homeReputationTitle, { reputation: reputationDelta }),
+    );
+    noticeModal.setDescription("");
+    noticeModal.setPrimaryLabel(t.homeReputationClose ?? "");
+    noticeModal.setCloseAriaLabel(
       t.homeReputationCloseAria ?? t.homeReputationClose ?? "",
     );
-    reputationBackdrop.hidden = false;
-    reputationBackdrop.setAttribute("aria-hidden", "false");
-    requestAnimationFrame(() => {
-      reputationBackdrop.classList.add("home-screen__locked-backdrop--open");
-      reputationClose.focus();
-    });
-  }
-
-  function closeReputationModal() {
-    reputationBackdrop.classList.remove("home-screen__locked-backdrop--open");
-    reputationBackdrop.hidden = true;
-    reputationBackdrop.setAttribute("aria-hidden", "true");
+    noticeModal.setActionsVisible({ primary: true, secondary: false });
+    noticeModal.open();
   }
 
   reputationChip.addEventListener("click", () => {
     openReputationModal();
-  });
-
-  reputationClose.addEventListener("click", () => {
-    closeReputationModal();
-  });
-
-  reputationBackdrop.addEventListener("click", (event) => {
-    if (event.target === reputationBackdrop) {
-      closeReputationModal();
-    }
-  });
-
-  lockedClose.addEventListener("click", () => {
-    closeSubmitLockedModal();
-  });
-
-  lockedBackdrop.addEventListener("click", (event) => {
-    if (event.target === lockedBackdrop) {
-      closeSubmitLockedModal();
-    }
-  });
-
-  inviteClose.addEventListener("click", () => {
-    closeInviteModal();
-  });
-
-  inviteBackdrop.addEventListener("click", (event) => {
-    if (event.target === inviteBackdrop) {
-      closeInviteModal();
-    }
-  });
-
-  inviteCopyCode.addEventListener("click", () => {
-    if (!inviteCodeValue) return;
-    const t = getStrings();
-    void copyInviteText(inviteCodeValue, inviteCopyCode, t.homeInviteCopyCode);
-  });
-
-  inviteCopyLink.addEventListener("click", () => {
-    if (!inviteCodeValue) return;
-    const t = getStrings();
-    void copyInviteText(
-      buildReferralShareUrl(inviteCodeValue),
-      inviteCopyLink,
-      t.homeInviteCopyLink,
-    );
-  });
-
-  window.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape") return;
-    if (!inviteBackdrop.hidden) {
-      closeInviteModal();
-      return;
-    }
-    if (lockedBackdrop.hidden) return;
-    closeSubmitLockedModal();
   });
 
   notifyBtn.addEventListener("click", () => {

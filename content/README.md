@@ -15,6 +15,7 @@
 | `auth*` / `authEmail*` / `authCode*` / `authOtp*` / `authIdentityConflict` | `/registration`, `/registration/code` |
 | `onboarding*` | `/onboarding` |
 | `home*` / `homeInvite*` | `/home` (карточки, баланс, модалка реферального кода) |
+| `modalCloseAria` | общая модалка (`app-modal`) |
 | `url*` / `urlModal*` / `urlScreen*` | `/portfolio` |
 | `success*` | `/done` |
 | `ban*` | `/banned` |

@@ -40,7 +40,7 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 При `open` / смене таба: skeleton только у ленты (5 целых карточек-шиммеров), хедер без изменений; затем данные с `motion-reveal` stagger.  
 Клик по чужой карточке → `claimPortfolioReview` → `onOpenPortfolio` → `/review`.  
 Своя (`isOwn`, вкладка «Мои») → `onOpenReport` → `/report` (листы + жалоба).
-CTA «Закинуть своё» — всегда активна (чёрная). Баланс ≥ `SUBMIT_COST` → `onAddPortfolio` → `/portfolio`; иначе stub-модалка «не хватает монет» (контент позже).
+CTA «Закинуть своё» — всегда активна (чёрная). Баланс ≥ `SUBMIT_COST` → `onAddPortfolio` → `/portfolio`; иначе `createAppModal` «не хватает монет».
 
 Лиги (тихий матчинг): junior → junior; middle → junior+middle; senior/lead/head → middle+senior+.  
 Клиент-зеркало: [`src/api/leagues.js`](../../api/leagues.js). Сервер: [`supabase/sql/portfolios.sql`](../../../supabase/sql/portfolios.sql) + [`review_claims.sql`](../../../supabase/sql/review_claims.sql) (`can_review_portfolio`, claim-слоты, RLS).
@@ -57,10 +57,12 @@ Topbar поверх контента (`position: absolute`), появление 
 - Empty state ленты — карточка `--home-screen-empty-*` (радиус 24, высота 326, muted-фон, текст по центру).
 - Если в `profiles.avatar_url` пусто — при refresh подтягиваем picture из Auth и пишем в профиль.
 - При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.
+- Репутация: `profiles.reputation` ↔ `session.reputation`; чип = иконка + дельта от 100 (`0` / `+10` / `-20`, `formatReputationDelta`); клик → explainer через `createAppModal` (без весов тегов).
+- Порядок чипов: «Закинуть своё» → репутация → баланс → уведомления → аватар.
 - Баланс: `profiles.balance` ↔ `session.balance`.
-- Репутация: `profiles.reputation` ↔ `session.reputation`; чип в топбаре → explainer (без весов тегов).
 - Клик по чипу баланса: в **DEV** только локальный кэш (`creditBalance`); в production no-op. Серверный баланс — RPC `spend_submit_cost` / награда в review trigger.
-- Клик по аватару профиля → модалка «Твой реферальный код»: код, слоты `left/max` (лимит 2), копировать код / ссылку `?ref=`. API: `fetchMyReferral` / `buildReferralShareUrl`. Без наград — только шаринг.
+- CTA «Закинуть своё» без монет → `createAppModal` «Монет маловато»; notices (no slots / already reviewed) — тот же `noticeModal`.
+- Клик по аватару профиля → `createAppModal` «Твой реферальный код»: код в слоте, primary/secondary копируют код / ссылку `?ref=`. API: `fetchMyReferral` / `buildReferralShareUrl`. Без наград — только шаринг.
 
 ### Dev: сброс сессии
 

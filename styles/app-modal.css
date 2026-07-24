@@ -1,0 +1,251 @@
+/**
+ * Универсальная модалка (Figma Modal).
+ * Токены: --app-modal-* в tokens.css.
+ */
+
+.app-modal {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  z-index: var(--app-modal-z);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--app-modal-backdrop-padding);
+  background: var(--color-overlay);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--app-modal-backdrop-duration) var(--app-modal-backdrop-ease);
+}
+
+.app-modal--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.app-modal[hidden] {
+  display: none !important;
+}
+
+.app-modal__dialog {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-modal-gap);
+  width: min(var(--app-modal-width, var(--app-modal-width-md)), 100%);
+  max-height: min(90dvh, 100%);
+  margin: 0;
+  padding: var(--app-modal-padding);
+  overflow: auto;
+  border: none;
+  border-radius: var(--app-modal-radius);
+  background: var(--app-modal-bg);
+  box-shadow: var(--app-modal-shadow);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  opacity: 0;
+  transform: translateY(var(--app-modal-dialog-shift))
+    scale(var(--app-modal-dialog-scale-from));
+  filter: blur(var(--app-modal-dialog-blur));
+  transition:
+    opacity var(--app-modal-dialog-duration) var(--app-modal-dialog-ease),
+    transform var(--app-modal-dialog-duration) var(--app-modal-dialog-ease),
+    filter var(--app-modal-dialog-duration) var(--app-modal-dialog-ease);
+}
+
+.app-modal--size-md {
+  --app-modal-width: var(--app-modal-width-md);
+}
+
+.app-modal--size-lg {
+  --app-modal-width: var(--app-modal-width-lg);
+}
+
+.app-modal--size-xl {
+  --app-modal-width: var(--app-modal-width-xl);
+}
+
+.app-modal--open .app-modal__dialog {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+.app-modal__header {
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--app-modal-header-gap);
+  flex-shrink: 0;
+}
+
+.app-modal__heading {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-modal-title-desc-gap);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.app-modal__title {
+  margin: 0;
+  color: var(--app-modal-title-color);
+  font-family: var(--font-family);
+  font-size: var(--app-modal-title-size);
+  font-weight: var(--app-modal-title-weight);
+  line-height: var(--app-modal-title-line-height);
+}
+
+.app-modal__description {
+  margin: 0;
+  color: var(--app-modal-desc-color);
+  font-family: var(--font-family);
+  font-size: var(--app-modal-desc-size);
+  font-weight: var(--app-modal-desc-weight);
+  line-height: var(--app-modal-desc-line-height);
+}
+
+.app-modal__description[hidden] {
+  display: none !important;
+}
+
+.app-modal__close {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: var(--app-modal-close-size);
+  height: var(--app-modal-close-size);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--app-modal-close-radius);
+  background: var(--app-modal-close-bg);
+  color: var(--app-modal-close-color);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.app-modal__close:hover {
+  background: var(--app-modal-close-bg-hover);
+}
+
+.app-modal__close:active {
+  background: var(--app-modal-close-bg-active);
+}
+
+.app-modal__close:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.app-modal__close-icon {
+  display: block;
+  width: var(--app-modal-close-icon-size);
+  height: var(--app-modal-close-icon-size);
+}
+
+/* Слот под кастомный контент кейса (в Figma — красная зона #EA4335). */
+.app-modal__content {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.app-modal__content:empty {
+  display: none;
+}
+
+.app-modal__actions {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--app-modal-actions-gap);
+  flex-shrink: 0;
+}
+
+.app-modal__actions[hidden] {
+  display: none !important;
+}
+
+.app-modal__btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--app-modal-btn-gap);
+  min-height: var(--app-modal-btn-height);
+  margin: 0;
+  padding: 0 var(--app-modal-btn-padding-x);
+  border: none;
+  border-radius: var(--app-modal-btn-radius);
+  font-family: var(--font-family);
+  font-size: var(--app-modal-btn-font-size);
+  font-weight: var(--app-modal-btn-font-weight);
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.app-modal__btn:disabled {
+  cursor: default;
+  opacity: var(--opacity-disabled);
+}
+
+.app-modal__btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.app-modal__btn--primary {
+  background: var(--app-modal-btn-primary-bg);
+  color: var(--app-modal-btn-primary-color);
+}
+
+.app-modal__btn--primary:hover:not(:disabled) {
+  background: var(--app-modal-btn-primary-bg-hover);
+}
+
+.app-modal__btn--primary:active:not(:disabled) {
+  background: var(--app-modal-btn-primary-bg-active);
+}
+
+.app-modal__btn--primary:focus-visible {
+  outline-color: var(--color-focus-ring-on-accent);
+}
+
+.app-modal__btn--secondary {
+  background: var(--app-modal-btn-secondary-bg);
+  color: var(--app-modal-btn-secondary-color);
+}
+
+.app-modal__btn--secondary:hover:not(:disabled) {
+  background: var(--app-modal-btn-secondary-bg-hover);
+}
+
+.app-modal__btn--secondary:active:not(:disabled) {
+  background: var(--app-modal-btn-secondary-bg-active);
+}
+
+.app-modal__btn[hidden] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-modal,
+  .app-modal__dialog {
+    transition-duration: 0.01ms;
+  }
+
+  .app-modal__dialog {
+    transform: none;
+    filter: none;
+  }
+}

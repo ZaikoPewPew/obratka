@@ -50,7 +50,7 @@
 | Папка | Роль |
 |-------|------|
 | `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `lib/`, `assets/` |
-| `styles/` | Токены + UI. Entry: tokens/base/entrance/iframe-shell/home/success/ban/report |
+| `styles/` | Токены + UI. Entry: tokens/base/entrance/app-modal/iframe-shell/home/success/ban/report |
 | `content/` | `locales.json`, onboarding, embed-hosts, privacy, founder-avatars |
 | `public/` | Статика по URL (favicon и т.п.) |
 | `supabase/` | SQL (`profiles`, `referrals`, `portfolios`, `review_claims`, `review_complaints`, …) + Edge `telegram-auth` |
@@ -62,6 +62,7 @@
 |--------|----------|
 | Правый visual | [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) |
 | Split-каркас | [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) |
+| App modal | [`src/components/app-modal/README.md`](src/components/app-modal/README.md) |
 | Ошибки полей | [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) |
 | Марки / morph | [`src/assets/README.md`](src/assets/README.md) |
 

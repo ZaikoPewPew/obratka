@@ -29,6 +29,7 @@
 | Field errors | `src/utils/FIELD_ERROR.md`, `fieldError.js`, `urlScreenField.js` |
 | Brand visual / variants | `src/components/brand-screen-visual/` |
 | Brand split-shell | `src/components/brand-screen-shell/` |
+| App modal | `src/components/app-modal/` (`createAppModal`, `--app-modal-*`) |
 | Brand marks / morph | `src/assets/brand/brandMarks.js` |
 | Шрифт | `@fontsource/montserrat` → `src/main.js` |
 
@@ -59,7 +60,7 @@
 | Квиз | `review-screen/` + `review-panel/` |
 | Онбординг-контент | `content/onboarding.json`, `content/onboarding.md` |
 
-Entry CSS: `tokens`, `base`, `entrance`, `iframe-shell`, `home-screen`, `success-screen`, `ban-screen`, `report-screen`.
+Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `success-screen`, `ban-screen`, `report-screen`.
 
 **Не восстанавливать** waitlist dual-layout (`apply-card`, `desktop.css` / `mobile.css`) без явной задачи.
 
@@ -125,7 +126,8 @@ API: `src/api/auth.js`. Edge: `supabase/functions/telegram-auth/`.
 Эталон split: `url-screen` + `brand-screen-visual`.  
 Ошибки: `setUrlScreenFieldInvalid` / `setUrlScreenOtpInvalid` **и** `setVariant("invalid")`.  
 Variants: `default` / `invalid` (без resize) / `done`. Handoff: `go(id, { handoff: true })`.  
-Подробно — `brand-ui.mdc`.
+Оверлей: `createAppModal` — слот контента + CTA; токены `--app-modal-*`.  
+Подробно — `brand-ui.mdc`, [`app-modal/README.md`](../src/components/app-modal/README.md).
 
 ## Темы и языки
 

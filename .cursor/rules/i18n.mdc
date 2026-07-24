@@ -29,6 +29,7 @@ alwaysApply: true
 | `referral*` | invite gate |
 | `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict` | регистрация / OTP |
 | `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` | home + notices |
+| `modalCloseAria` | общая модалка (`app-modal`) |
 | `ban*` | `/banned` |
 | `reportScreen*` | `/report` |
 

@@ -50,6 +50,30 @@ export function getReputation() {
 }
 
 /**
+ * Смещение от стартовой репутации (чип: −10 / 0 / +10).
+ * @param {number} [reputation]
+ * @returns {number}
+ */
+export function getReputationDelta(reputation = getReputation()) {
+  const value =
+    typeof reputation === "number" && Number.isFinite(reputation)
+      ? Math.max(0, Math.floor(reputation))
+      : REPUTATION_DEFAULT;
+  return value - REPUTATION_DEFAULT;
+}
+
+/**
+ * Подпись чипа / title: `0`, `+10`, `-20`.
+ * @param {number} [delta]
+ * @returns {string}
+ */
+export function formatReputationDelta(delta = getReputationDelta()) {
+  const n = Math.trunc(delta);
+  if (n === 0) return "0";
+  return n > 0 ? `+${n}` : String(n);
+}
+
+/**
  * @param {number} next
  * @returns {number}
  */

@@ -108,6 +108,7 @@ SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabas
 |------|-----|
 | Brand split (referral / auth / auth-code / onboarding / url) | `.url-screen*` + [`brand-screen-visual`](src/components/brand-screen-visual/README.md); цель — `brand-screen-shell` |
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
+| App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
 | Home | `home-screen` + `home-screen.css` (лента, не split) |
 | Review | `index.html` `.iframe-shell` + таймер в `main.js` |
 | Quiz | `review-screen` + `review-panel` |
@@ -124,19 +125,20 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 
 - Токены: `styles/tokens.css` (правило `.cursor/rules/design-tokens.mdc`).  
   В компонентах только `var(--…)`, шрифт Montserrat.
-- Motion: `--motion-*` (в т.ч. `--motion-field-error-*`), `entrance.css`, `src/utils/motionTokens.js`.
+- Motion: `--motion-*` (в т.ч. `--motion-field-error-*`, `--app-modal-*`), `entrance.css`, `src/utils/motionTokens.js`.
 - Field errors: [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md).
 - Brand visual: [`brand-screen-visual`](src/components/brand-screen-visual/README.md).
-- Строки: `content/locales.json` + `src/i18n.js` (правило `.cursor/rules/i18n.mdc`).
+- App modal: [`app-modal`](src/components/app-modal/README.md).
+- Строки: `content/locales.json` + `src/i18n.js` (правило `.cursor/rules/i18n.mdc`); close aria модалки — `modalCloseAria`.
 - Тема: `<html data-theme="dark">` (семантика в токенах).
 
 ## Entrypoint vs legacy waitlist
 
 **Сейчас подключено** (`index.html` + `main.js`):
 
-- CSS: `tokens`, `base`, `entrance`, `iframe-shell`, `success-screen`, `home-screen`, `ban-screen`, `report-screen`
+- CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `success-screen`, `home-screen`, `ban-screen`, `report-screen`
 - Экраны: referral, auth, auth-code, onboarding, home, url, review-shell, review/quiz, success, report, ban
-- Shared UI: `brand-screen-visual`, `brand-screen-shell` (referral / auth / auth-code / onboarding / url)
+- Shared UI: `brand-screen-visual`, `brand-screen-shell` (referral / auth / auth-code / onboarding / url), `app-modal`
 
 Архив waitlist (`apply-card`, `email-field`, dual-layout CSS) удалён. Спека: раздел «Архив» в [`mobile.md`](mobile.md).
 

@@ -96,6 +96,7 @@ src/app/
 src/components/
   brand-screen-shell/     ← каркас split + visual
   brand-screen-visual/    ← mesh + марка, variants
+  app-modal/              ← универсальная модалка (слот + CTA)
   referral-screen/
   auth-screen/
   auth-code-screen/
@@ -123,11 +124,13 @@ src/api/
 
 styles/
   tokens.css
+  entrance.css
+  app-modal.css
   iframe-shell.css
   home-screen.css
   success-screen.css
   report-screen.css
-  entrance.css
+  ban-screen.css
 
 content/
   locales.json
@@ -137,6 +140,14 @@ content/
 ## Контракты
 
 Паттерн: фабрика → `{ root, open, close, … }`. Монтаж и URL — из `main.js` (`go` / `applyRoute`). Компонент **не** знает следующий экран.
+
+Shared (не экраны флоу):
+
+| Фабрика | Роль |
+|---------|------|
+| `createBrandScreenShell` | split form + visual |
+| `createBrandScreenVisual` | mesh + марка |
+| `createAppModal` | оверлей-диалог; слот `content` + primary/secondary; без `history` |
 
 | Фабрика | Path | Статус |
 |---------|------|--------|
@@ -151,8 +162,6 @@ content/
 | `createSuccessScreen` | `/done` | UI (portfolio submitted) |
 | `createReportScreen` | `/report` | UI (листы + жалоба на лист) |
 | `createBanScreen` | `/banned` | UI (блок аккаунта; static evil mark) |
-| `createBrandScreenVisual` | — | правый visual (не экран) |
-| `createBrandScreenShell` | — | split-каркас (referral / auth / auth-code / onboarding / url) |
 
 ### Handoff
 
@@ -165,11 +174,12 @@ go("auth", { handoff: true }); // referral → auth: visual статичен
 Токены: `styles/tokens.css`. Reveal: `--motion-*`, keyframes в `entrance.css` (в т.ч. `motion-reveal-topbar`), JS `motionTokens.js`.  
 Field error: `--motion-field-error-*`, `--motion-field-error-visual-*`.  
 Auth: `--auth-screen-*`, `--auth-code-*` (в т.ч. `--auth-code-resend-cooldown`).  
+App modal: `--app-modal-*` + `styles/app-modal.css` ([`app-modal/README.md`](src/components/app-modal/README.md)).  
 Правило: `.cursor/rules/design-tokens.mdc`.
 
 ## i18n
 
-Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*` / `homeReputation*`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `report*`).
+Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*` / `homeReputation*`, `modalCloseAria`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `report*`).
 Правило: `.cursor/rules/i18n.mdc`.
 
 ## App-слой
@@ -198,6 +208,7 @@ Auth: `--auth-screen-*`, `--auth-code-*` (в т.ч. `--auth-code-resend-cooldown
 - [`src/app/README.md`](src/app/README.md)
 - [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) — правый visual + variants
 - [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) — split-каркас
+- [`src/components/app-modal/README.md`](src/components/app-modal/README.md) — универсальная модалка
 - [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — ошибки полей
 - [`src/assets/README.md`](src/assets/README.md) — марки / morph
 - [`src/components/auth-screen/README.md`](src/components/auth-screen/README.md)

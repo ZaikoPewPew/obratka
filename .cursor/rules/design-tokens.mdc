@@ -29,6 +29,7 @@ alwaysApply: true
 - Home tabbar: `--home-screen-tabbar-*` (hide / thumb / on-dark / contrast).
 - Auth OTP: `--auth-code-resend-cooldown`.
 - Brand mark: `--url-screen-brand-*` vs `--url-screen-brand-done-*`; **invalid не меняет size**.
+- App modal: `--app-modal-*` (`styles/app-modal.css`, [`app-modal/README.md`](../../src/components/app-modal/README.md)).
 
 ## Motion
 
@@ -37,6 +38,7 @@ alwaysApply: true
 - CSS: `motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` (не дублировать keyframes).
 - Экранные задержки — алиасы (`--url-screen-reveal-delay-*` → `--motion-delay-*`).
 - Field error: `--motion-field-error-*`, `--motion-field-error-visual-*` + `--url-screen-error-mesh-*`.
+- App modal open/close: `--app-modal-backdrop-*` / `--app-modal-dialog-*` (алиасы на `--motion-screen-*` / `--motion-reveal-*`).
 - JS (WAAPI / close): `src/utils/motionTokens.js`, без хардкода ms/px/easing.
 
 ## Примеры

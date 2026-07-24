@@ -391,6 +391,60 @@
   --report-screen-modal-error-size: var(--font-size-sm);
   --report-screen-modal-error-color: var(--color-error);
 
+  /*
+   * App modal (Figma Modal: Size=600 / 800 / Size3).
+   * Красный #EA4335 в макете — только слот контента, не фон в UI.
+   */
+  --app-modal-z: var(--z-modal);
+  --app-modal-backdrop-padding: var(--space-6);
+  --app-modal-width-md: 600px;
+  --app-modal-width-lg: 800px;
+  --app-modal-width-xl: 1000px;
+  --app-modal-padding: var(--space-8);
+  --app-modal-gap: var(--space-4);
+  --app-modal-radius: var(--radius-xl);
+  --app-modal-bg: var(--color-surface);
+  --app-modal-shadow: var(--shadow-modal);
+  --app-modal-header-gap: var(--space-2);
+  --app-modal-title-desc-gap: var(--space-1);
+  --app-modal-title-size: 24px;
+  --app-modal-title-weight: var(--font-weight-regular);
+  --app-modal-title-line-height: var(--line-height-snug);
+  --app-modal-title-color: var(--color-text);
+  --app-modal-desc-size: var(--font-size-md);
+  --app-modal-desc-weight: var(--font-weight-regular);
+  --app-modal-desc-line-height: var(--line-height-loose);
+  --app-modal-desc-color: var(--color-text-muted);
+  --app-modal-close-size: 56px;
+  --app-modal-close-radius: var(--radius-md);
+  --app-modal-close-bg: var(--color-surface-muted);
+  --app-modal-close-bg-hover: var(--color-surface-muted-hover);
+  --app-modal-close-bg-active: var(--color-surface-muted-active);
+  --app-modal-close-icon-size: var(--space-6);
+  --app-modal-close-color: var(--color-text);
+  --app-modal-actions-gap: var(--space-3);
+  --app-modal-btn-height: 56px;
+  --app-modal-btn-padding-x: var(--space-6);
+  --app-modal-btn-radius: var(--radius-md);
+  --app-modal-btn-gap: var(--space-2);
+  --app-modal-btn-font-size: var(--font-size-base);
+  --app-modal-btn-font-weight: var(--font-weight-medium);
+  --app-modal-btn-primary-bg: var(--color-accent);
+  --app-modal-btn-primary-bg-hover: var(--color-accent-hover);
+  --app-modal-btn-primary-bg-active: var(--color-accent-active);
+  --app-modal-btn-primary-color: var(--color-on-accent);
+  --app-modal-btn-secondary-bg: var(--color-surface-muted);
+  --app-modal-btn-secondary-bg-hover: var(--color-surface-muted-hover);
+  --app-modal-btn-secondary-bg-active: var(--color-surface-muted-active);
+  --app-modal-btn-secondary-color: var(--color-text);
+  --app-modal-backdrop-duration: var(--motion-screen-duration);
+  --app-modal-backdrop-ease: var(--motion-screen-ease);
+  --app-modal-dialog-duration: var(--motion-reveal-duration);
+  --app-modal-dialog-ease: var(--motion-reveal-ease);
+  --app-modal-dialog-shift: var(--motion-reveal-shift);
+  --app-modal-dialog-blur: var(--motion-reveal-blur);
+  --app-modal-dialog-scale-from: var(--motion-reveal-scale-from);
+
   /* Слоты ревьюеров на карточке (Figma Frame 140: 96×52 chip) */
   --home-screen-progress-width: 96px;
   --home-screen-progress-height: 52px;

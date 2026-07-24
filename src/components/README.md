@@ -8,6 +8,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 |--------|------|
 | [`brand-screen-visual/`](brand-screen-visual/README.md) | Правый mesh + марка; `setVariant("default"\|"invalid"\|"done")` |
 | [`brand-screen-shell/`](brand-screen-shell/README.md) | Split-каркас (form-pane + visual); все brand-gate экраны |
+| [`app-modal/`](app-modal/README.md) | Универсальная модалка (слот контента + primary/secondary) |
 | Field errors | [`../utils/FIELD_ERROR.md`](../utils/FIELD_ERROR.md) — обводка + текст ошибки |
 
 ## Продуктовый флоу
