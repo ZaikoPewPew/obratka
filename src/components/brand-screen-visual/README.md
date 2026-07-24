@@ -103,13 +103,11 @@ Auth: outline только у email; provider-error — текст + тот же
 
 | Экран / модуль | Как |
 |----------------|-----|
-| `referral-screen` | `createBrandScreenVisual()` |
-| `auth-screen` | то же |
-| `auth-code-screen` | то же |
-| `url-screen` | `withBrandSlot: true` + preview |
-| `brand-screen-shell` | `markPending: true`; SVG марки снаружи (onboarding) |
+| `brand-screen-shell` | обёртка для referral / auth / auth-code / onboarding / url |
+| onboarding | shell `markPending: true`; SVG марки снаружи |
+| url | shell `withBrandSlot: true` + preview |
 
-Open/close mesh: `openBrandScreen` / `closeBrandScreen` получают `meshWash` с экрана (или shell).
+Open/close mesh: `openBrandScreen` / `closeBrandScreen` через shell (`meshWash`).
 
 ## Токены
 

@@ -1,6 +1,5 @@
 import locales from "../content/locales.json";
 import founderAvatars from "../content/founder-avatars.json";
-import privacyPolicy from "../content/privacy-policy.json";
 
 const STORAGE_KEY = "obratka.locale";
 
@@ -139,17 +138,7 @@ export function applyDocumentI18n(locale = getLocale()) {
   return t;
 }
 
-/** @deprecated waitlist-only; оставлен для старых компонентов */
-export function getPrivacyPolicyHtml(locale = getLocale()) {
-  const block = privacyPolicy[locale];
-  if (block && typeof block.html === "string") {
-    return block.html;
-  }
-  const fallback = privacyPolicy[locales.defaultLocale] || privacyPolicy.en || privacyPolicy.ru;
-  return typeof fallback?.html === "string" ? fallback.html : "";
-}
-
-/** @deprecated waitlist-only */
+/** Источники аватаров из `content/founder-avatars.json`. */
 export function getFounderAvatarSources() {
   const list = founderAvatars.sources;
   return Array.isArray(list) ? list : [];
@@ -162,7 +151,7 @@ function getFounderAvatarPickCount() {
   return typeof n === "number" && n > 0 ? Math.floor(n) : 4;
 }
 
-/** @deprecated waitlist-only */
+/** Shuffle once per page load — стек аватаров на `/referral`. */
 export function getFounderAvatarSourcesForPage() {
   if (shuffledAvatarSourcesCache) {
     return shuffledAvatarSourcesCache;

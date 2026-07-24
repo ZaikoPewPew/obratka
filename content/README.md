@@ -3,8 +3,7 @@
 - `locales.json` — **UI-строки** (`ru` / `en`, `supportedLocales`). Правило: `.cursor/rules/i18n.mdc`.
 - `onboarding.json` / `onboarding.md` — шаги онбординга (`/onboarding`).
 - `embed-hosts.md` — площадки портфолио (iframe vs external). Код: `src/utils/embedHosts.js`.
-- `founder-avatars.json` — пул GitHub-источников для стека аватаров (`pickCount` + `sources`). Shuffle: `getFounderAvatarSourcesForPage()` в `src/i18n.js` → unavatar.io. Сейчас: `/referral` ([`referral-screen`](../src/components/referral-screen/README.md)); legacy waitlist — `EmailField` / apply-card.
-- `privacy-policy.json` — текст политики (legacy waitlist / общие блоки).
+- `founder-avatars.json` — пул GitHub-источников для стека аватаров (`pickCount` + `sources`). Shuffle: `getFounderAvatarSourcesForPage()` в `src/i18n.js` → unavatar.io. Сейчас: `/referral` ([`referral-screen`](../src/components/referral-screen/README.md)).
 
 Новый язык: `supportedLocales` + полный блок ключей + `LOCALE_NATIVE_NAMES` в `src/i18n.js`.
 

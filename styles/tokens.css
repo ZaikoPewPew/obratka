@@ -590,15 +590,22 @@
   --auth-screen-provider-loader-stroke: 2.5px;
   --auth-screen-provider-loader-track: var(--color-border);
   --auth-screen-provider-loader-arc: var(--color-text);
-  --auth-screen-provider-loader-arc-telegram: var(--palette-telegram-start);
+  --auth-screen-provider-telegram-start: var(--palette-telegram-start);
+  --auth-screen-provider-telegram-end: var(--palette-telegram-end);
+  --auth-screen-provider-google-blue: var(--palette-google-blue);
+  --auth-screen-provider-google-green: var(--palette-google-green);
+  --auth-screen-provider-google-yellow: var(--palette-google-yellow);
+  --auth-screen-provider-google-red: var(--palette-google-red);
+  --auth-screen-provider-icon-fill: var(--palette-white);
+  --auth-screen-provider-loader-arc-telegram: var(--auth-screen-provider-telegram-start);
   --auth-screen-provider-loader-track-telegram: color-mix(
     in srgb,
-    var(--palette-telegram-start) 28%,
+    var(--auth-screen-provider-telegram-start) 28%,
     transparent
   );
   --auth-screen-provider-loader-track-google: color-mix(
     in srgb,
-    var(--palette-google-blue) 22%,
+    var(--auth-screen-provider-google-blue) 22%,
     transparent
   );
   --auth-screen-provider-loader-duration: 700ms;

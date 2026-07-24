@@ -50,7 +50,7 @@
 | Папка | Роль |
 |-------|------|
 | `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `lib/`, `assets/` |
-| `styles/` | Токены + UI. Entry: tokens/base/entrance/iframe-shell/home/success/ban/report. Legacy waitlist CSS не в `index.html` |
+| `styles/` | Токены + UI. Entry: tokens/base/entrance/iframe-shell/home/success/ban/report |
 | `content/` | `locales.json`, onboarding, embed-hosts, privacy, founder-avatars |
 | `public/` | Статика по URL (favicon и т.п.) |
 | `supabase/` | SQL (`profiles`, `referrals`, `portfolios`, `review_claims`, `review_complaints`, …) + Edge `telegram-auth` |

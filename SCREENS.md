@@ -140,18 +140,19 @@ content/
 
 | Фабрика | Path | Статус |
 |---------|------|--------|
-| `createReferralScreen` | `/referral` | UI + validate; field invalid + visual |
-| `createAuthScreen` | `/registration` | UI + Email → authCode / Telegram / Google |
-| `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` |
-| `createOnboardingScreen` | `/onboarding` | UI → profiles (на shell) |
+| `createReferralScreen` | `/referral` | UI + validate; field invalid + visual (shell) |
+| `createAuthScreen` | `/registration` | UI + Email → authCode / Telegram / Google (shell) |
+| `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` (shell) |
+| `createOnboardingScreen` | `/onboarding` | UI → profiles (shell) |
 | `createHomeScreen` | `/home` | UI (hub + feed + invite modal) |
-| `createUrlScreen` | `/portfolio` | UI (submit + done via `setVariant`) |
+| `createUrlScreen` | `/portfolio` | UI (submit + done via `setVariant`; shell) |
 | iframe-shell + timer | `/review` | UI |
 | `createReviewScreen` + `createReviewPanel` | `/quiz` | UI |
 | `createSuccessScreen` | `/done` | UI (portfolio submitted) |
 | `createReportScreen` | `/report` | UI (листы + жалоба на лист) |
+| `createBanScreen` | `/banned` | UI (блок аккаунта; static evil mark) |
 | `createBrandScreenVisual` | — | правый visual (не экран) |
-| `createBrandScreenShell` | — | split-каркас |
+| `createBrandScreenShell` | — | split-каркас (referral / auth / auth-code / onboarding / url) |
 
 ### Handoff
 
@@ -186,7 +187,7 @@ Auth: `--auth-screen-*`, `--auth-code-*` (в т.ч. `--auth-code-resend-cooldown
 
 ## Дальше
 
-1. Вынести CSS в `brand-screen.css`.
+1. Вынести CSS в `brand-screen.css` (классы пока `.url-screen*`).
 2. Агрегация оценок нескольких ревьюеров в PDF-отчёте / наполнение сводки на `report-screen` (жалобы на листы уже есть).
 3. Manual identity linking (`linkIdentity`) + UNIQUE `profiles.email` + Telegram↔email — вне текущего скоупа.
 

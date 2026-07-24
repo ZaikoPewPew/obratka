@@ -61,7 +61,7 @@
 
 Entry CSS: `tokens`, `base`, `entrance`, `iframe-shell`, `home-screen`, `success-screen`, `ban-screen`, `report-screen`.
 
-**Не монтировать** legacy waitlist (`apply-card`, `desktop.css` / `mobile.css`) без явной задачи.
+**Не восстанавливать** waitlist dual-layout (`apply-card`, `desktop.css` / `mobile.css`) без явной задачи.
 
 ## Review claims (шпаргалка)
 

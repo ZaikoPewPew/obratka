@@ -1,3 +1,5 @@
+import { getStrings } from "../../i18n.js";
+
 const LANG_ICON_SVG = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3M12 21C9.4651 18.3899 8 15.3051 8 12C8 8.69488 9.4651 5.61005 12 3M12 21C14.5349 18.3899 16 15.3051 16 12C16 8.69488 14.5349 5.61005 12 3M20 9H4M20 15H4" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`;
@@ -11,15 +13,15 @@ const MOBILE_MENU_ICON_SVG = `<svg width="19" height="19" viewBox="0 0 19 19" fi
 </svg>`;
 
 const MOBILE_MENU_CLOSE_SVG = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path d="M4.70605 4.70605L14.1178 14.1178M14.1178 4.70605L4.70605 14.1178" stroke="#242426" stroke-width="1.01961" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M4.70605 4.70605L14.1178 14.1178M14.1178 4.70605L4.70605 14.1178" stroke="currentColor" stroke-width="1.01961" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`;
 
 const CHECK_SVG = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path d="M12.9997 4.6665L5.99967 11.6665L3.33301 8.99984" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" />
+  <path d="M12.9997 4.6665L5.99967 11.6665L3.33301 8.99984" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" />
 </svg>`;
 
 const CHECK_SVG_MOBILE = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path d="M19.5 7L9 17.5L5 13.5" stroke="#242426" stroke-width="1.01961" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M19.5 7L9 17.5L5 13.5" stroke="currentColor" stroke-width="1.01961" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`;
 
 /**
@@ -395,7 +397,7 @@ export function createMobileLocaleSheet({
  */
 export function createMobileHeaderMenu({
   buttonAriaLabel,
-  closeAriaLabel = "Close menu",
+  closeAriaLabel = getStrings().mobileMenuCloseAria,
   title,
   languageLabel,
   contactsLabel,

@@ -72,6 +72,38 @@ function downloadReportHtml(html, title) {
 }
 
 /**
+ * @param {string} name
+ * @returns {string}
+ */
+function readCssToken(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+/**
+ * PDF iframe не видит app CSS — подставляем уже вычисленные значения токенов.
+ * @returns {{
+ *   fontFamily: string;
+ *   colorText: string;
+ *   colorTextStrong: string;
+ *   colorTextMuted: string;
+ *   colorBody: string;
+ *   colorBg: string;
+ *   colorBorder: string;
+ * }}
+ */
+function readReportTheme() {
+  return {
+    fontFamily: readCssToken("--font-family") || "Montserrat, sans-serif",
+    colorText: readCssToken("--color-text"),
+    colorTextStrong: readCssToken("--color-text-strong"),
+    colorTextMuted: readCssToken("--color-text-muted"),
+    colorBody: readCssToken("--color-text-subtle") || readCssToken("--color-text"),
+    colorBg: readCssToken("--color-surface") || readCssToken("--color-bg"),
+    colorBorder: readCssToken("--color-border"),
+  };
+}
+
+/**
  * @param {{
  *   title: string;
  *   portfolioName: string;
@@ -80,6 +112,7 @@ function downloadReportHtml(html, title) {
  * }} params
  */
 function buildReportDocumentHtml({ title, portfolioName, sections, t }) {
+  const theme = readReportTheme();
   const sectionHtml = sections
     .map(
       (section) => `
@@ -100,9 +133,9 @@ function buildReportDocumentHtml({ title, portfolioName, sections, t }) {
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "Montserrat", system-ui, sans-serif;
-      color: #242426;
-      background: #fff;
+      font-family: ${escapeHtml(theme.fontFamily)};
+      color: ${escapeHtml(theme.colorText)};
+      background: ${escapeHtml(theme.colorBg)};
       line-height: 1.5;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
@@ -118,24 +151,24 @@ function buildReportDocumentHtml({ title, portfolioName, sections, t }) {
       font-weight: 500;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      color: #797979;
+      color: ${escapeHtml(theme.colorTextMuted)};
     }
     h1 {
       margin: 0 0 8px;
       font-size: 24px;
       font-weight: 600;
       line-height: 1.25;
-      color: #111;
+      color: ${escapeHtml(theme.colorTextStrong)};
     }
     .subtitle {
       margin: 0 0 28px;
       font-size: 14px;
-      color: #797979;
+      color: ${escapeHtml(theme.colorTextMuted)};
     }
     .section {
       margin: 0 0 20px;
       padding: 0 0 16px;
-      border-bottom: 1px solid #eceef3;
+      border-bottom: 1px solid ${escapeHtml(theme.colorBorder)};
     }
     .section:last-child {
       border-bottom: 0;
@@ -147,12 +180,12 @@ function buildReportDocumentHtml({ title, portfolioName, sections, t }) {
       font-size: 15px;
       font-weight: 600;
       line-height: 1.3;
-      color: #111;
+      color: ${escapeHtml(theme.colorTextStrong)};
     }
     p {
       margin: 0;
       font-size: 14px;
-      color: #3d3d42;
+      color: ${escapeHtml(theme.colorBody)};
     }
     @media print {
       .page { padding: 0; max-width: none; }

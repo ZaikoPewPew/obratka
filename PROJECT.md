@@ -136,10 +136,9 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 
 - CSS: `tokens`, `base`, `entrance`, `iframe-shell`, `success-screen`, `home-screen`, `ban-screen`, `report-screen`
 - Экраны: referral, auth, auth-code, onboarding, home, url, review-shell, review/quiz, success, report, ban
-- Shared UI: `brand-screen-visual`, `brand-screen-shell` (onboarding)
+- Shared UI: `brand-screen-visual`, `brand-screen-shell` (referral / auth / auth-code / onboarding / url)
 
-**Legacy (не entry):** `apply-card`, `email-field`, `desktop.css` / `mobile.css` / `apply.css`, waitlist-хелперы в `i18n.js` (`@deprecated`).  
-Спека старого мобильного waitlist — раздел «Архив» в [`mobile.md`](mobile.md).
+Архив waitlist (`apply-card`, `email-field`, dual-layout CSS) удалён. Спека: раздел «Архив» в [`mobile.md`](mobile.md).
 
 ## Env (кратко)
 
@@ -151,7 +150,7 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 
 ## Roadmap (код)
 
-1. Вынести общие split-стили в `brand-screen.css` / довести `brand-screen-shell`.
+1. Вынести общие split-стили в `brand-screen.css` (классы пока `.url-screen*`).
 2. Агрегация оценок нескольких ревьюеров в PDF-сводке на `report-screen` (жалобы на листы уже есть).
 3. Manual identity linking UI (`linkIdentity`) + UNIQUE `profiles.email` + склейка Telegram↔email — вне текущего скоупа.  
    Email↔Google закрывается **Automatic linking** в Supabase Auth (verified email = один user); см. [`auth-screen/README.md`](src/components/auth-screen/README.md).

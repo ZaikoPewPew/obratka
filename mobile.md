@@ -8,7 +8,7 @@
 
 - **Входит:** ширины до 767px, портрет как основной сценарий.
 - **Планшет 768+:** тот же продуктовый UI, что и десктоп (нет отдельного waitlist-лейаута).
-- **Не entry:** старый dual-tree `.layout-desktop` / `.layout-mobile` и waitlist-форма — код legacy, не монтируется из `index.html` / `main.js`.
+- **Не entry:** старый dual-tree `.layout-desktop` / `.layout-mobile` и waitlist-форма — **удалены** из репозитория; историческая спека ниже.
 
 ## Чеклист QA (продукт)
 
@@ -30,26 +30,24 @@
 
 ## Подключённые стили (entry)
 
-Из `index.html`: `tokens.css`, `base.css`, `entrance.css`, `iframe-shell.css`, `success-screen.css`, `home-screen.css`.
-
-Не подключены (legacy waitlist): `desktop.css`, `mobile.css`, `apply.css`, …
+Из `index.html`: `tokens.css`, `base.css`, `entrance.css`, `iframe-shell.css`, `success-screen.css`, `home-screen.css`, `ban-screen.css`, `report-screen.css`.
 
 ---
 
 ## Архив: waitlist-макет (не продукт)
 
-Ниже — историческая спека лендинга вейтлиста (таймер «В базе N», apply-card, dual layout). **Не** описывает текущий `main.js`. Оставлена для сверки со старым Figma / legacy CSS.
+Ниже — историческая спека лендинга вейтлиста (таймер «В базе N», apply-card, dual layout). **Не** описывает текущий `main.js`. Код waitlist удалён; текст оставлен для сверки со старым Figma.
 
 <details>
 <summary>Старая спека (767px waitlist)</summary>
 
 Целевой референс для узкого экрана waitlist (`max-width: 767px`). Отступы от краёв: **16px**.
 
-Реализация legacy: `styles/mobile.css` + классы `mobile-*` / `.layout-mobile` — **не** в текущем `index.html`.
+Бывшая реализация: `styles/mobile.css` + классы `mobile-*` / `.layout-mobile` — удалены.
 
 Хедер waitlist: таймер слева, текст «В базе N», язык справа; pill `border-radius` ~500px; фон поверхности — через токены (`--color-surface-muted`), не хардкод `#f3f4f7` в новом коде.
 
-Форма: email + CTA; см. legacy `apply-card` / `email-field`.
+Форма: email + CTA (бывшие `apply-card` / `email-field`).
 
 При переносе идей из архива в продукт — сразу переводить значения в `styles/tokens.css`.
 

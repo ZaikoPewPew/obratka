@@ -4,7 +4,7 @@ import {
   signInWithTelegram,
 } from "../../api/auth.js";
 import { getStrings } from "../../i18n.js";
-import { createBrandScreenVisual } from "../brand-screen-visual/BrandScreenVisual.js";
+import { createBrandScreenShell } from "../brand-screen-shell/BrandScreenShell.js";
 import { isValidEmail } from "../../utils/emailValidation.js";
 import {
   ensureFieldErrorInner,
@@ -14,11 +14,6 @@ import {
   isFieldErrorVisible,
   setUrlScreenFieldInvalid,
 } from "../../utils/urlScreenField.js";
-import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
-import {
-  closeBrandScreen,
-  openBrandScreen,
-} from "../../utils/brandScreenTransition.js";
 
 /**
  * @typedef {'sign-in' | 'sign-up'} AuthMode
@@ -54,8 +49,8 @@ const TELEGRAM_ICON_SVG = `
   <path fill-rule="evenodd" clip-rule="evenodd" d="M1.98628 12.0538C9.74232 8.10237 14.9142 5.49734 17.502 4.23871C24.8906 0.645084 26.4259 0.0208329 27.4266 0.000219782C27.6467 -0.00431385 28.1388 0.0594683 28.4576 0.361928C28.7267 0.61732 28.8008 0.962317 28.8362 1.20446C28.8717 1.44659 28.9158 1.99819 28.8807 2.4292C28.4803 7.3486 26.7478 19.2867 25.8664 24.7965C25.4935 27.1279 24.7591 27.9096 24.0482 27.9861C22.5032 28.1524 21.3299 26.7921 19.8335 25.6451C17.4919 23.8502 16.169 22.7328 13.896 20.9813C11.2693 18.9572 12.9721 17.8447 14.4691 16.0265C14.8609 15.5507 21.6683 8.31018 21.8001 7.65336C21.8165 7.57121 21.8318 7.265 21.6763 7.10332C21.5207 6.94163 21.2911 6.99692 21.1254 7.04089C20.8906 7.10322 17.1498 9.99446 9.90307 15.7146C8.84126 16.5672 7.87951 16.9826 7.01781 16.9608C6.06786 16.9368 4.24053 16.3328 2.8821 15.8164C1.21593 15.1831 -0.108312 14.8482 0.00699973 13.7727C0.0670611 13.2124 0.726821 12.6395 1.98628 12.0538Z" fill="url(#authTgGrad)" />
   <defs>
     <linearGradient id="authTgGrad" x1="28.4147" y1="0.186668" x2="9.97971" y2="17.3366" gradientUnits="userSpaceOnUse">
-      <stop stop-color="var(--palette-telegram-start)" />
-      <stop offset="1" stop-color="var(--palette-telegram-end)" />
+      <stop stop-color="var(--auth-screen-provider-telegram-start)" />
+      <stop offset="1" stop-color="var(--auth-screen-provider-telegram-end)" />
     </linearGradient>
   </defs>
 </svg>
@@ -64,14 +59,14 @@ const TELEGRAM_ICON_SVG = `
 const GOOGLE_ICON_SVG = `
 <svg class="auth-screen__provider-icon auth-screen__provider-icon--google" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <g clip-path="url(#authGoogleClip)">
-    <path d="M27.7273 14.3223C27.7273 13.3706 27.6501 12.4138 27.4855 11.4775H14.2803V16.8687H21.8423C21.5285 18.6074 20.5202 20.1456 19.0438 21.123V24.621H23.5553C26.2046 22.1827 27.7273 18.5817 27.7273 14.3223Z" fill="var(--palette-google-blue)" />
-    <path d="M14.2803 28.0009C18.0561 28.0009 21.2404 26.7611 23.5605 24.6211L19.049 21.1231C17.7938 21.977 16.1734 22.4606 14.2854 22.4606C10.633 22.4606 7.5362 19.9965 6.42505 16.6836H1.76953V20.2897C4.14616 25.0172 8.98688 28.0009 14.2803 28.0009V28.0009Z" fill="var(--palette-google-green)" />
-    <path d="M6.4199 16.6842C5.83346 14.9454 5.83346 13.0626 6.4199 11.3239V7.71777H1.76953C-0.216144 11.6737 -0.216144 16.3343 1.76953 20.2903L6.4199 16.6842V16.6842Z" fill="var(--palette-google-yellow)" />
-    <path d="M14.2803 5.54127C16.2762 5.51041 18.2053 6.26146 19.6508 7.64012L23.6479 3.64305C21.1169 1.26642 17.7578 -0.0402103 14.2803 0.000943444C8.98687 0.000943444 4.14616 2.98459 1.76953 7.71728L6.41991 11.3234C7.52591 8.00536 10.6279 5.54127 14.2803 5.54127V5.54127Z" fill="var(--palette-google-red)" />
+    <path d="M27.7273 14.3223C27.7273 13.3706 27.6501 12.4138 27.4855 11.4775H14.2803V16.8687H21.8423C21.5285 18.6074 20.5202 20.1456 19.0438 21.123V24.621H23.5553C26.2046 22.1827 27.7273 18.5817 27.7273 14.3223Z" fill="var(--auth-screen-provider-google-blue)" />
+    <path d="M14.2803 28.0009C18.0561 28.0009 21.2404 26.7611 23.5605 24.6211L19.049 21.1231C17.7938 21.977 16.1734 22.4606 14.2854 22.4606C10.633 22.4606 7.5362 19.9965 6.42505 16.6836H1.76953V20.2897C4.14616 25.0172 8.98688 28.0009 14.2803 28.0009V28.0009Z" fill="var(--auth-screen-provider-google-green)" />
+    <path d="M6.4199 16.6842C5.83346 14.9454 5.83346 13.0626 6.4199 11.3239V7.71777H1.76953C-0.216144 11.6737 -0.216144 16.3343 1.76953 20.2903L6.4199 16.6842V16.6842Z" fill="var(--auth-screen-provider-google-yellow)" />
+    <path d="M14.2803 5.54127C16.2762 5.51041 18.2053 6.26146 19.6508 7.64012L23.6479 3.64305C21.1169 1.26642 17.7578 -0.0402103 14.2803 0.000943444C8.98687 0.000943444 4.14616 2.98459 1.76953 7.71728L6.41991 11.3234C7.52591 8.00536 10.6279 5.54127 14.2803 5.54127V5.54127Z" fill="var(--auth-screen-provider-google-red)" />
   </g>
   <defs>
     <clipPath id="authGoogleClip">
-      <rect width="28" height="28" fill="var(--palette-white)" />
+      <rect width="28" height="28" fill="var(--auth-screen-provider-icon-fill)" />
     </clipPath>
   </defs>
 </svg>
@@ -88,10 +83,10 @@ const GOOGLE_LOADER_SVG = `
 <svg class="auth-screen__provider-loader auth-screen__provider-loader--google" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <defs>
     <linearGradient id="authGoogleLoaderGrad" x1="3" y1="3" x2="25" y2="25" gradientUnits="userSpaceOnUse">
-      <stop stop-color="var(--palette-google-blue)" />
-      <stop offset="0.33" stop-color="var(--palette-google-red)" />
-      <stop offset="0.66" stop-color="var(--palette-google-yellow)" />
-      <stop offset="1" stop-color="var(--palette-google-green)" />
+      <stop stop-color="var(--auth-screen-provider-google-blue)" />
+      <stop offset="0.33" stop-color="var(--auth-screen-provider-google-red)" />
+      <stop offset="0.66" stop-color="var(--auth-screen-provider-google-yellow)" />
+      <stop offset="1" stop-color="var(--auth-screen-provider-google-green)" />
     </linearGradient>
   </defs>
   <circle class="auth-screen__provider-loader-track" cx="14" cy="14" r="11" />
@@ -117,17 +112,6 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
   const t = getStrings();
   /** @type {AuthMode} */
   let mode = initialMode;
-
-  const root = document.createElement("section");
-  root.className = "url-screen auth-screen";
-  root.setAttribute("aria-labelledby", "auth-screen-title");
-  root.hidden = true;
-
-  const layout = document.createElement("div");
-  layout.className = "url-screen__layout";
-
-  const formPane = document.createElement("div");
-  formPane.className = "url-screen__form-pane";
 
   const block = document.createElement("div");
   block.className = "url-screen__block auth-screen__block";
@@ -218,16 +202,15 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
   actions.append(telegramBtn, googleBtn);
   form.append(field, divider, actions, providerError);
   block.append(title, form);
-  formPane.append(block);
 
-  const brandVisual = createBrandScreenVisual();
-  brandVisual.bindScreenRoot(root);
-  const { meshWash } = brandVisual;
+  const shell = createBrandScreenShell({
+    labelledById: "auth-screen-title",
+    content: block,
+    rootClassName: "url-screen",
+  });
+  shell.root.classList.add("auth-screen");
+  const brandVisual = shell.getBrandVisual();
 
-  layout.append(formPane, brandVisual.root);
-  root.append(layout);
-
-  let closing = false;
   let telegramBusy = false;
   let googleBusy = false;
   let emailBusy = false;
@@ -405,11 +388,8 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
     }
 
     if (nextMode) setMode(nextMode);
-    closing = false;
-    openBrandScreen({
-      root,
-      meshWash,
-      opts,
+    shell.open({
+      ...opts,
       prepare: () => {
         setEmailBusy(false);
         setTelegramBusy(false);
@@ -440,16 +420,7 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
    * @returns {Promise<void>}
    */
   function close(opts = {}) {
-    return closeBrandScreen({
-      root,
-      meshWash,
-      opts,
-      isClosing: () => closing,
-      setClosing: (value) => {
-        closing = value;
-      },
-      getFallbackMs: getScreenCloseFallbackMs,
-    });
+    return shell.close(opts);
   }
 
   form.addEventListener("submit", async (event) => {
@@ -529,5 +500,5 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
     }
   });
 
-  return { root, open, close, setMode };
+  return { root: shell.root, open, close, setMode };
 }

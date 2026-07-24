@@ -9,9 +9,12 @@ createBrandScreenShell({
   labelledById: "…",
   content: leftPaneElement,
   rootClassName: "url-screen", // или будущий "brand-screen"
+  withBrandSlot: false,
+  markPending: false,
 }) → {
   root, open, close,
   setContent(el),
+  getFormPane(),
   getVisualRoot(),      // visual.root
   getBrandVisual(),     // полный createBrandScreenVisual()
   setVariant(v),        // proxy → visual.setVariant
@@ -19,20 +22,19 @@ createBrandScreenShell({
 }
 ```
 
-Open/close + handoff: [`brandScreenTransition.js`](../../utils/brandScreenTransition.js) (классы `url-screen` / `url-screen--open` / `--handoff`).
+`open({ handoff, prepare })` / `close({ handoff })` — через [`brandScreenTransition.js`](../../utils/brandScreenTransition.js) (классы `url-screen` / `url-screen--open` / `--handoff`).
 
-## Сейчас
+## Кто на shell
 
-| Кто | Shell? | Visual |
-|-----|--------|--------|
-| onboarding | **да** (`rootClassName: "url-screen"`) | shell (`markPending`); SVG вставляет экран |
-| referral / auth / auth-code / url | layout сами | `createBrandScreenVisual` напрямую |
+| Экран | Shell | Visual notes |
+|-------|-------|--------------|
+| referral | да | default mark |
+| auth | да | default mark |
+| auth-code | да | default mark; `auth-code-screen__pane` на form-pane |
+| onboarding | да | `markPending: true` — SVG вставляет экран |
+| url | да | `withBrandSlot: true` + preview sheet |
 
 Стили shell не вынесены (`styles/brand-screen.css` — заготовка); классы пока `.url-screen*`.
-
-## Цель
-
-Все split-экраны на shell; левая колонка — только контент экрана; visual не копипастить.
 
 ## Не делать
 

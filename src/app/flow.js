@@ -26,12 +26,18 @@ export const SESSION_FLOW = Object.freeze([
   "done",
 ]);
 
-/** @type {readonly AppScreenId[]} */
+/**
+ * Линейный порядок онбординга + сессии ревью.
+ * Side-routes (`success`, `report`, `banned`) сюда не входят — ими управляет `go` / access.
+ * @type {readonly AppScreenId[]}
+ */
 export const FULL_FLOW = Object.freeze([...APP_FLOW, ...SESSION_FLOW]);
 
 export { ROUTE_PATHS };
 
 /**
+ * Следующий экран в `FULL_FLOW` (не используется оркестрацией; left for debug/tests).
+ * @deprecated Навигация только через `go` в `main.js`.
  * @param {AppScreenId} id
  * @returns {AppScreenId | null}
  */
@@ -42,6 +48,8 @@ export function getNextScreen(id) {
 }
 
 /**
+ * Предыдущий экран в `FULL_FLOW`.
+ * @deprecated Навигация только через `go` в `main.js`.
  * @param {AppScreenId} id
  * @returns {AppScreenId | null}
  */
@@ -123,7 +131,6 @@ export function resolveAccessibleRoute(id, state = {}) {
   }
 
   if (id === "home" || id === "onboarding" || id === "report") {
-    // Пока stub-экраны: deep link оставляем, UI покажет каркас.
     return id;
   }
 

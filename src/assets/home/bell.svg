@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
   <path
-    stroke="#242426"
+    stroke="currentColor"
     stroke-width="1.5"
     stroke-linecap="round"
     stroke-linejoin="round"
     d="M6.75 9.1V8.6c0-2.9 2.35-5.25 5.25-5.25s5.25 2.35 5.25 5.25v.5c0 .95.33 1.87.92 2.6l1.08 1.34c.72.9.08 2.21-1.06 2.21H5.81c-1.14 0-1.78-1.31-1.06-2.21l1.08-1.34c.59-.73.92-1.65.92-2.6Z"
   />
   <path
-    stroke="#242426"
+    stroke="currentColor"
     stroke-width="1.5"
     stroke-linecap="round"
     d="M9.6 16.75a2.5 2.5 0 0 0 4.8 0"

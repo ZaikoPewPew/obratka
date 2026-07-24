@@ -2,12 +2,7 @@ import {
   getFounderAvatarSourcesForPage,
   getStrings,
 } from "../../i18n.js";
-import { createBrandScreenVisual } from "../brand-screen-visual/BrandScreenVisual.js";
-import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
-import {
-  closeBrandScreen,
-  openBrandScreen,
-} from "../../utils/brandScreenTransition.js";
+import { createBrandScreenShell } from "../brand-screen-shell/BrandScreenShell.js";
 import { normalizeReferralCode } from "../../utils/referralCode.js";
 import { ensureFieldErrorInner } from "../../utils/fieldError.js";
 import {
@@ -87,17 +82,6 @@ function createFounderAvatar(source) {
 export function createReferralScreen({ onSubmit }) {
   const t = getStrings();
 
-  const root = document.createElement("section");
-  root.className = "url-screen referral-screen";
-  root.setAttribute("aria-labelledby", "referral-screen-title");
-  root.hidden = true;
-
-  const layout = document.createElement("div");
-  layout.className = "url-screen__layout";
-
-  const formPane = document.createElement("div");
-  formPane.className = "url-screen__form-pane";
-
   const block = document.createElement("div");
   block.className = "url-screen__block";
 
@@ -168,16 +152,15 @@ export function createReferralScreen({ onSubmit }) {
   platforms.append(avatars, platformsText);
   form.append(field, platforms);
   block.append(title, form);
-  formPane.append(block);
 
-  const brandVisual = createBrandScreenVisual();
-  brandVisual.bindScreenRoot(root);
-  const { meshWash } = brandVisual;
+  const shell = createBrandScreenShell({
+    labelledById: "referral-screen-title",
+    content: block,
+    rootClassName: "url-screen",
+  });
+  shell.root.classList.add("referral-screen");
+  const brandVisual = shell.getBrandVisual();
 
-  layout.append(formPane, brandVisual.root);
-  root.append(layout);
-
-  let closing = false;
   let submitting = false;
 
   /**
@@ -221,12 +204,9 @@ export function createReferralScreen({ onSubmit }) {
    * @param {{ handoff?: boolean }} [opts]
    */
   function open(prefill = "", opts = {}) {
-    closing = false;
     submitting = false;
-    openBrandScreen({
-      root,
-      meshWash,
-      opts,
+    shell.open({
+      ...opts,
       prepare: () => {
         setError(null);
         input.value = prefill;
@@ -241,16 +221,7 @@ export function createReferralScreen({ onSubmit }) {
    * @returns {Promise<void>}
    */
   function close(opts = {}) {
-    return closeBrandScreen({
-      root,
-      meshWash,
-      opts,
-      isClosing: () => closing,
-      setClosing: (value) => {
-        closing = value;
-      },
-      getFallbackMs: getScreenCloseFallbackMs,
-    });
+    return shell.close(opts);
   }
 
   form.addEventListener("submit", (event) => {
@@ -289,5 +260,5 @@ export function createReferralScreen({ onSubmit }) {
     syncSubmitVisibility();
   });
 
-  return { root, open, close, setError };
+  return { root: shell.root, open, close, setError };
 }

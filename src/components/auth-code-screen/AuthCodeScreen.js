@@ -1,19 +1,12 @@
 import { requestEmailOtp, verifyEmailOtp } from "../../api/auth.js";
 import { formatString, getStrings } from "../../i18n.js";
-import { createBrandScreenVisual } from "../brand-screen-visual/BrandScreenVisual.js";
+import { createBrandScreenShell } from "../brand-screen-shell/BrandScreenShell.js";
 import { ensureFieldErrorInner } from "../../utils/fieldError.js";
 import {
   isFieldErrorVisible,
   setUrlScreenOtpInvalid,
 } from "../../utils/urlScreenField.js";
-import {
-  getAuthCodeResendCooldownMs,
-  getScreenCloseFallbackMs,
-} from "../../utils/motionTokens.js";
-import {
-  closeBrandScreen,
-  openBrandScreen,
-} from "../../utils/brandScreenTransition.js";
+import { getAuthCodeResendCooldownMs } from "../../utils/motionTokens.js";
 
 const OTP_LENGTH = 6;
 
@@ -44,23 +37,14 @@ export function createAuthCodeScreen({ onSuccess, onBack }) {
   const t = getStrings();
   /** @type {string} */
   let pendingEmail = "";
-  let closing = false;
   let verifying = false;
   let resendBusy = false;
   /** @type {ReturnType<typeof setInterval> | null} */
   let cooldownTimer = null;
   let cooldownUntil = 0;
 
-  const root = document.createElement("section");
-  root.className = "url-screen auth-code-screen";
-  root.setAttribute("aria-labelledby", "auth-code-screen-title");
-  root.hidden = true;
-
-  const layout = document.createElement("div");
-  layout.className = "url-screen__layout";
-
-  const formPane = document.createElement("div");
-  formPane.className = "url-screen__form-pane auth-code-screen__pane";
+  const pane = document.createElement("div");
+  pane.className = "auth-code-screen__pane-inner";
 
   const top = document.createElement("div");
   top.className = "auth-code-screen__top review-panel__top";
@@ -151,14 +135,16 @@ export function createAuthCodeScreen({ onSuccess, onBack }) {
   form.append(cells, error, resend);
   block.append(title, form);
   stage.append(block);
-  formPane.append(top, stage);
+  pane.append(top, stage);
 
-  const brandVisual = createBrandScreenVisual();
-  brandVisual.bindScreenRoot(root);
-  const { meshWash } = brandVisual;
-
-  layout.append(formPane, brandVisual.root);
-  root.append(layout);
+  const shell = createBrandScreenShell({
+    labelledById: "auth-code-screen-title",
+    content: pane,
+    rootClassName: "url-screen",
+  });
+  shell.root.classList.add("auth-code-screen");
+  shell.getFormPane().classList.add("auth-code-screen__pane");
+  const brandVisual = shell.getBrandVisual();
 
   /**
    * @returns {number}
@@ -356,11 +342,8 @@ export function createAuthCodeScreen({ onSuccess, onBack }) {
     pendingEmail = String(email || "")
       .trim()
       .toLowerCase();
-    closing = false;
-    openBrandScreen({
-      root,
-      meshWash,
-      opts,
+    shell.open({
+      ...opts,
       prepare: () => {
         setBusy(false);
         setResendBusy(false);
@@ -379,16 +362,7 @@ export function createAuthCodeScreen({ onSuccess, onBack }) {
    */
   function close(opts = {}) {
     stopCooldown();
-    return closeBrandScreen({
-      root,
-      meshWash,
-      opts,
-      isClosing: () => closing,
-      setClosing: (value) => {
-        closing = value;
-      },
-      getFallbackMs: getScreenCloseFallbackMs,
-    });
+    return shell.close(opts);
   }
 
   cells.addEventListener("pointerdown", (event) => {
@@ -453,5 +427,5 @@ export function createAuthCodeScreen({ onSuccess, onBack }) {
 
   syncDigits();
 
-  return { root, open, close };
+  return { root: shell.root, open, close };
 }

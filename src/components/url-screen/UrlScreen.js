@@ -1,5 +1,5 @@
 import { getStrings } from "../../i18n.js";
-import { createBrandScreenVisual } from "../brand-screen-visual/BrandScreenVisual.js";
+import { createBrandScreenShell } from "../brand-screen-shell/BrandScreenShell.js";
 import { normalizePortfolioUrl } from "../../utils/portfolioMeta.js";
 import { resolvePlatformIcon } from "../../utils/platformBrandIcon.js";
 import {
@@ -13,12 +13,7 @@ import {
 import {
   getMotionReveal,
   getReportLaunchMotion,
-  getScreenCloseFallbackMs,
 } from "../../utils/motionTokens.js";
-import {
-  closeBrandScreen,
-  openBrandScreen,
-} from "../../utils/brandScreenTransition.js";
 
 /** Платформы в стеке иконок под полем URL (Framer → Dprofile → Behance → Notion). */
 const PLATFORM_ICONS = Object.freeze([
@@ -94,16 +89,8 @@ function createPlatformAvatar({ id, host }) {
 export function createUrlScreen({ onSubmit, onExit }) {
   const t = getStrings();
 
-  const root = document.createElement("section");
-  root.className = "url-screen";
-  root.setAttribute("aria-labelledby", "url-screen-title");
-  root.hidden = true;
-
-  const layout = document.createElement("div");
-  layout.className = "url-screen__layout";
-
-  const formPane = document.createElement("div");
-  formPane.className = "url-screen__form-pane";
+  const formContent = document.createElement("div");
+  formContent.className = "url-screen__form-content";
 
   const block = document.createElement("div");
   block.className = "url-screen__block";
@@ -193,11 +180,17 @@ export function createUrlScreen({ onSubmit, onExit }) {
 
   doneActions.append(exitBtn);
   done.append(doneTitle, doneActions);
-  formPane.append(block, done);
+  formContent.append(block, done);
 
-  const brandVisual = createBrandScreenVisual({ withBrandSlot: true });
-  brandVisual.bindScreenRoot(root);
-  const { meshWash } = brandVisual;
+  const shell = createBrandScreenShell({
+    labelledById: "url-screen-title",
+    content: formContent,
+    rootClassName: "url-screen",
+    withBrandSlot: true,
+  });
+  const root = shell.root;
+  const formPane = shell.getFormPane();
+  const brandVisual = shell.getBrandVisual();
 
   const preview = document.createElement("div");
   preview.className = "url-screen__preview";
@@ -227,10 +220,6 @@ export function createUrlScreen({ onSubmit, onExit }) {
   preview.append(previewSheet);
   brandVisual.root.insertBefore(preview, brandVisual.brand);
 
-  layout.append(formPane, brandVisual.root);
-  root.append(layout);
-
-  let closing = false;
   let submitting = false;
   let transitioning = false;
   /** @type {ReturnType<typeof setTimeout> | null} */
@@ -529,13 +518,10 @@ export function createUrlScreen({ onSubmit, onExit }) {
    * @param {{ handoff?: boolean }} [opts]
    */
   function open(prefill = "", opts = {}) {
-    closing = false;
     resetFormState();
     syncCopy();
-    openBrandScreen({
-      root,
-      meshWash,
-      opts,
+    shell.open({
+      ...opts,
       prepare: () => {
         setError(false);
         input.value = prefill;
@@ -551,16 +537,7 @@ export function createUrlScreen({ onSubmit, onExit }) {
    * @returns {Promise<void>}
    */
   function close(opts = {}) {
-    return closeBrandScreen({
-      root,
-      meshWash,
-      opts,
-      isClosing: () => closing,
-      setClosing: (value) => {
-        closing = value;
-      },
-      getFallbackMs: getScreenCloseFallbackMs,
-    }).then(() => {
+    return shell.close(opts).then(() => {
       resetFormState();
     });
   }

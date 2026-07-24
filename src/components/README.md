@@ -7,24 +7,25 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | Модуль | Роль |
 |--------|------|
 | [`brand-screen-visual/`](brand-screen-visual/README.md) | Правый mesh + марка; `setVariant("default"\|"invalid"\|"done")` |
-| [`brand-screen-shell/`](brand-screen-shell/README.md) | Split-каркас (form-pane + visual); onboarding уже на нём |
+| [`brand-screen-shell/`](brand-screen-shell/README.md) | Split-каркас (form-pane + visual); все brand-gate экраны |
 | Field errors | [`../utils/FIELD_ERROR.md`](../utils/FIELD_ERROR.md) — обводка + текст ошибки |
 
 ## Продуктовый флоу
 
 | Модуль | Path | Статус |
 |--------|------|--------|
-| `referral-screen/` | `/referral` | Invite gate + validate RPC |
-| `auth-screen/` | `/registration` | Email → auth-code / Telegram / Google |
-| `auth-code-screen/` | `/registration/code` | OTP verify + resend cooldown |
+| `referral-screen/` | `/referral` | Invite gate + validate RPC (shell) |
+| `auth-screen/` | `/registration` | Email → auth-code / Telegram / Google (shell) |
+| `auth-code-screen/` | `/registration/code` | OTP verify + resend cooldown (shell) |
 | `onboarding-screen/` | `/onboarding` | UI → `profiles` (shell) |
 | `home-screen/` | `/home` | хаб + feed + wallet + репутация + шаринг referral |
-| `url-screen/` | `/portfolio` | submit own + done (`setVariant("done")`) |
+| `url-screen/` | `/portfolio` | submit own + done (`setVariant("done")`; shell) |
 | `review-screen/` | `/quiz` | квиз + PDF-лист |
 | `success-screen/` | `/done` | пресеты успеха (deep link) |
 | `report-screen/` | `/report` | листы ревью + жалоба |
 | `ban-screen/` | `/banned` | блок аккаунта; статичный evil mark |
 | `rating/` | — | топ по валюте на home (пока не монтируется) |
+| `locale-toggle/` | — | переключатель языка (не в entry; стили не подключены) |
 
 ## Ревью и квиз
 
@@ -34,9 +35,4 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `review-screen/` | `/quiz` | Оболочка квиза + PDF reveal |
 | `review-panel/` | `/quiz` → `/quiz/done` | Шаги опроса + локальный done |
 
-## Прочее (legacy waitlist / общие)
-
-Не монтируются из текущего `main.js`:  
-`access-modal`, `apply-card`, `cta-button`, `divider-or`, `email-field`, `locale-toggle`, `logo`, `notification`, `privacy-policy`, `timer`, `waitlist-counter`.
-
-См. [`PROJECT.md`](../../PROJECT.md) — Entrypoint vs legacy.
+См. [`PROJECT.md`](../../PROJECT.md) — Entrypoint.

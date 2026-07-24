@@ -24,7 +24,7 @@ Invite-only gate: код проверяется через RPC `validate_referra
 
 | Слой | Модуль |
 |------|--------|
-| Правый mesh + марка | [`createBrandScreenVisual`](../brand-screen-visual/README.md) |
+| Правый mesh + марка | [`createBrandScreenShell`](../brand-screen-shell/README.md) → visual |
 | Текст ошибки + красная обводка | `setUrlScreenFieldInvalid` — [`FIELD_ERROR.md`](../../utils/FIELD_ERROR.md) |
 | Красный mesh + рожки | `visual.setVariant("invalid")` (без resize SVG) |
 

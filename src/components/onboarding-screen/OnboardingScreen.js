@@ -284,6 +284,7 @@ export function createOnboardingScreen({ onComplete }) {
     labelledById: "onboarding-screen-title",
     content: panel,
     rootClassName: "url-screen",
+    markPending: true,
   });
   shell.root.classList.add("onboarding-screen");
 

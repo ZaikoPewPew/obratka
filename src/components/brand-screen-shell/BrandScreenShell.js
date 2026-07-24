@@ -13,12 +13,15 @@ import {
  *   labelledById: string;
  *   content: HTMLElement;
  *   rootClassName?: string;
+ *   withBrandSlot?: boolean;
+ *   markPending?: boolean;
  * }} opts
  * @returns {{
  *   root: HTMLElement;
- *   open: (opts?: { handoff?: boolean }) => void;
+ *   open: (opts?: { handoff?: boolean; prepare?: () => void }) => void;
  *   close: (opts?: { handoff?: boolean }) => Promise<void>;
  *   setContent: (el: HTMLElement) => void;
+ *   getFormPane: () => HTMLElement;
  *   getVisualRoot: () => HTMLElement;
  *   getBrandVisual: () => ReturnType<typeof createBrandScreenVisual>;
  *   setVariant: (variant: "default" | "invalid" | "done") => void;
@@ -29,6 +32,8 @@ export function createBrandScreenShell({
   labelledById,
   content,
   rootClassName = "brand-screen",
+  withBrandSlot = false,
+  markPending = false,
 }) {
   const root = document.createElement("section");
   root.className = rootClassName;
@@ -45,7 +50,8 @@ export function createBrandScreenShell({
   const brandVisual = createBrandScreenVisual({
     classPrefix: rootClassName,
     markClassName: `${rootClassName}__brand-mark`,
-    markPending: true,
+    withBrandSlot,
+    markPending,
   });
   brandVisual.bindScreenRoot(root);
   const { meshWash } = brandVisual;
@@ -60,11 +66,17 @@ export function createBrandScreenShell({
   }
 
   /**
-   * @param {{ handoff?: boolean }} [opts]
+   * @param {{ handoff?: boolean; prepare?: () => void }} [opts]
    */
   function open(opts = {}) {
     closing = false;
-    openBrandScreen({ root, meshWash, opts });
+    const { prepare, ...transitionOpts } = opts;
+    openBrandScreen({
+      root,
+      meshWash,
+      opts: transitionOpts,
+      prepare,
+    });
   }
 
   /**
@@ -89,6 +101,7 @@ export function createBrandScreenShell({
     open,
     close,
     setContent,
+    getFormPane: () => formPane,
     getVisualRoot: () => brandVisual.root,
     getBrandVisual: () => brandVisual,
     setVariant: (variant) => brandVisual.setVariant(variant),

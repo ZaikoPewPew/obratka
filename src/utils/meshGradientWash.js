@@ -39,8 +39,9 @@ function readCssNumber(el, name, fallback) {
  * @param {HTMLElement} el
  */
 function readMeshParams(el) {
-  const colors = COLOR_VARS.map((name, index) =>
-    readCssVar(el, name, ["#fdeeee", "#f0ebff", "#d7ebff", "#8bb5ff"][index]),
+  const root = document.documentElement;
+  const colors = COLOR_VARS.map((name) =>
+    readCssVar(el, name, readCssVar(root, name, "")),
   );
 
   return {

@@ -4,16 +4,16 @@ Path: **`/portfolio`**. Ввод URL со своего Home (нужен бала
 
 ## Роль
 
-**Эталон visual** для split-экранов: левая форма + правый mesh/бренд через [`brand-screen-visual`](../brand-screen-visual/README.md).  
-Referral / auth / onboarding опираются на `.url-screen*`; цель — общий `brand-screen-shell`.
+**Эталон visual** для split-экранов: левая форма + правый mesh/бренд через [`brand-screen-shell`](../brand-screen-shell/README.md) (`withBrandSlot: true`).  
+Referral / auth / auth-code / onboarding — тот же shell и классы `.url-screen*`.
 
 См. [`SCREENS.md`](../../../SCREENS.md).
 
 ## Файл
 
 - `UrlScreen.js` — `createUrlScreen({ onSubmit, onExit })` → `{ root, open, close }`.
-- `open(prefill?, { handoff? })`, `close({ handoff? })` через `brandScreenTransition.js`.
-- Visual: `createBrandScreenVisual({ withBrandSlot: true })` + preview-лист вставляется перед `brand`.
+- `open(prefill?, { handoff? })`, `close({ handoff? })` через shell → `brandScreenTransition.js`.
+- Visual: shell `withBrandSlot: true` + preview-лист вставляется перед `brand`.
 
 ## Visual и состояния поля
 
