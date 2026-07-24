@@ -292,6 +292,11 @@ export function createHomeScreen({
   let revealItems = false;
   /** @type {HomeTabId} */
   let activeTab = "feed";
+  /**
+   * Инкремент при каждом refresh / смене вкладки — отбрасываем устаревшие
+   * ответы (полл или предыдущий таб), иначе на секунду мелькает чужой список.
+   */
+  let refreshEpoch = 0;
   let lastScrollTop = 0;
   let tabbarHidden = false;
   let tabbarOnDark = false;
@@ -543,6 +548,7 @@ export function createHomeScreen({
   async function setActiveTab(tab) {
     if (activeTab === tab) return;
     activeTab = tab;
+    refreshEpoch += 1;
     syncTabButtons(tab);
     showTabbar();
     body.scrollTop = 0;
@@ -859,12 +865,16 @@ export function createHomeScreen({
   }
 
   async function refresh() {
+    const epoch = ++refreshEpoch;
+    const tab = activeTab;
     await refreshWalletFromServer();
+    if (epoch !== refreshEpoch) return;
     syncCopy();
     const next =
-      activeTab === "mine"
+      tab === "mine"
         ? await listMyPortfolios()
         : await listPortfoliosForReview();
+    if (epoch !== refreshEpoch) return;
     revealItems = loading;
     loading = false;
     root.setAttribute("aria-busy", "false");
@@ -881,7 +891,9 @@ export function createHomeScreen({
   function startSlotsPoll() {
     stopSlotsPoll();
     slotsPollId = window.setInterval(() => {
-      if (root.hidden || document.visibilityState !== "visible") return;
+      if (root.hidden || document.visibilityState !== "visible" || loading) {
+        return;
+      }
       void refresh();
     }, HOME_SLOTS_POLL_MS);
   }
@@ -913,6 +925,7 @@ export function createHomeScreen({
    */
   function close() {
     stopSlotsPoll();
+    refreshEpoch += 1;
     root.classList.remove("home-screen--open");
     loading = false;
     revealItems = false;
@@ -955,7 +968,7 @@ export function createHomeScreen({
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState !== "visible") return;
-    if (root.hidden) return;
+    if (root.hidden || loading) return;
     void refresh();
   });
 
