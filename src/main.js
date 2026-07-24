@@ -23,6 +23,10 @@ import { completeOAuthFromUrl, signOut } from "./api/auth.js";
 import { submitPortfolio, clearSubmittedPortfolios, submitPortfolioReview, claimPortfolioReview, heartbeatPortfolioClaim, releasePortfolioClaim, portfolioRpcErrorCode } from "./api/portfolios.js";
 import { fetchMyProfile, isProfileBanned, updateMyProfile } from "./api/profiles.js";
 import {
+  redeemReferral,
+  validateReferral,
+} from "./api/referrals.js";
+import {
   awardReviewReward,
   canSubmitPortfolio,
   refreshSessionFromProfile,
@@ -765,9 +769,26 @@ async function applyProviderUser(user, provider) {
       grade: profile.grade ?? next.grade,
       tier: profile.tier ?? next.tier ?? "free",
       banned: isProfileBanned(profile),
+      myReferralCode:
+        typeof profile.referral_code === "string"
+          ? profile.referral_code
+          : next.myReferralCode ?? null,
+      referralUses:
+        typeof profile.referral_uses === "number"
+          ? profile.referral_uses
+          : next.referralUses ?? 0,
     };
   } else {
     next = { ...next, banned: false };
+  }
+
+  const pendingCode =
+    typeof next.referralCode === "string" ? next.referralCode.trim() : "";
+  if (pendingCode) {
+    const redeemed = await redeemReferral(pendingCode);
+    if (!redeemed.ok && import.meta.env.DEV) {
+      console.warn("[referrals] redeem after auth", redeemed.reason);
+    }
   }
 
   setSession(next);
@@ -856,8 +877,14 @@ const authCodeScreen = createAuthCodeScreen({
 
 const referralScreen = createReferralScreen({
   onSubmit: async (referral) => {
+    const result = await validateReferral(referral);
+    if (!result.ok) {
+      const err = new Error(result.reason);
+      /** @type {{ reason: string }} */ (err).reason = result.reason;
+      throw err;
+    }
     const session = getSession() ?? {};
-    setSession({ ...session, referralCode: referral });
+    setSession({ ...session, referralCode: result.code });
     go("auth", { handoff: true });
   },
 });
@@ -880,7 +907,7 @@ async function applyRoute(id, opts = {}) {
   const session = getSession();
   let accessible = resolveAccessibleRoute(id, {
     hasPortfolio: Boolean(portfolioUrl),
-    hasSession: Boolean(session),
+    hasSession: Boolean(session?.userId),
     onboardingDone: Boolean(session?.onboardingDone),
     referralDone: Boolean(session?.referralCode),
     banned: Boolean(session?.banned),
@@ -1046,7 +1073,7 @@ appRouter = createAppRouter({
     if (!location.id) {
       const session = getSession();
       const entry = resolveEntryScreen({
-        hasSession: Boolean(session),
+        hasSession: Boolean(session?.userId),
         onboardingDone: Boolean(session?.onboardingDone),
         referralDone: Boolean(session?.referralCode),
         banned: Boolean(session?.banned),

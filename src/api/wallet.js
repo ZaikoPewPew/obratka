@@ -103,6 +103,14 @@ export async function refreshSessionFromProfile() {
     grade: profile.grade ?? session.grade,
     tier: profile.tier ?? session.tier ?? "free",
     banned: Boolean(profile.banned_at),
+    myReferralCode:
+      typeof profile.referral_code === "string"
+        ? profile.referral_code
+        : session.myReferralCode ?? null,
+    referralUses:
+      typeof profile.referral_uses === "number"
+        ? profile.referral_uses
+        : session.referralUses ?? 0,
   };
   setSession(next);
   return next;

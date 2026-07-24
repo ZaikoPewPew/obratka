@@ -18,6 +18,11 @@ create table if not exists public.profiles (
   onboarding jsonb not null default '{}'::jsonb,
   onboarding_done boolean not null default false,
   balance integer not null default 0 check (balance >= 0),
+  -- Referral: personal invite code (max 2 redemptions). See sql/referrals.sql.
+  referral_code text,
+  referred_by uuid references public.profiles (id) on delete set null,
+  referral_uses integer not null default 0 check (referral_uses >= 0 and referral_uses <= 2),
+  referral_entry_code text,
   -- Moderation: non-null banned_at ⇒ account locked (ban-screen). Clients cannot write.
   banned_at timestamptz,
   ban_reason text,
@@ -49,6 +54,19 @@ alter table public.profiles
 
 alter table public.profiles
   add column if not exists ban_reason text;
+
+-- Idempotent for DBs created before referral columns existed (full RPCs in referrals.sql).
+alter table public.profiles
+  add column if not exists referral_code text;
+
+alter table public.profiles
+  add column if not exists referred_by uuid references public.profiles (id) on delete set null;
+
+alter table public.profiles
+  add column if not exists referral_uses integer not null default 0;
+
+alter table public.profiles
+  add column if not exists referral_entry_code text;
 
 create or replace function public.set_profiles_updated_at()
 returns trigger
@@ -143,11 +161,19 @@ declare
   meta jsonb := coalesce(new.raw_user_meta_data, '{}'::jsonb);
   app_meta jsonb := coalesce(new.raw_app_meta_data, '{}'::jsonb);
   tg_id bigint;
+  new_code text;
 begin
   begin
     tg_id := nullif(meta->>'telegram_id', '')::bigint;
   exception when others then
     tg_id := null;
+  end;
+
+  -- generate_referral_code lives in referrals.sql; fallback if not yet applied.
+  begin
+    new_code := public.generate_referral_code();
+  exception when undefined_function then
+    new_code := upper(substr(replace(new.id::text, '-', ''), 1, 10));
   end;
 
   insert into public.profiles (
@@ -157,7 +183,8 @@ begin
     avatar_url,
     telegram_id,
     telegram_username,
-    email
+    email,
+    referral_code
   )
   values (
     new.id,
@@ -179,7 +206,8 @@ begin
     coalesce(meta->>'avatar_url', meta->>'photo_url', meta->>'picture'),
     tg_id,
     nullif(meta->>'username', ''),
-    new.email
+    new.email,
+    new_code
   )
   on conflict (id) do update set
     auth_provider = excluded.auth_provider,
@@ -188,6 +216,7 @@ begin
     telegram_id = coalesce(excluded.telegram_id, public.profiles.telegram_id),
     telegram_username = coalesce(excluded.telegram_username, public.profiles.telegram_username),
     email = coalesce(excluded.email, public.profiles.email),
+    referral_code = coalesce(public.profiles.referral_code, excluded.referral_code),
     updated_at = now();
 
   return new;

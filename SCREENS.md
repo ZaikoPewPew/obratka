@@ -15,7 +15,7 @@ referral → auth → authCode → onboarding → home
 
 | Шаг | Экран | Path | Смысл |
 |-----|--------|------|--------|
-| 1 | `referral-screen` | `/referral` | Реферальный код |
+| 1 | `referral-screen` | `/referral` | Реферальный код (validate RPC; seed `YTHWKPDWAK`) |
 | 2 | `auth-screen` | `/registration` | Email → OTP screen / Telegram / Google |
 | 2b | `auth-code-screen` | `/registration/code` | 6 ячеек кода из письма |
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |
@@ -99,7 +99,7 @@ src/api/
   auth.js / profiles.js / onboarding.js / wallet.js
   portfolios.js           ← очередь по лигам + claim-слоты + listMyPortfolios / submit/review
   leagues.js              ← маппинг grade → лига (зеркало SQL)
-  referrals.js            ← stub
+  referrals.js            ← validate / redeem / fetchMyReferral
   telegramWidget.js / subscribers.js   ← subscribers = legacy waitlist
 
 styles/
@@ -121,11 +121,11 @@ content/
 
 | Фабрика | Path | Статус |
 |---------|------|--------|
-| `createReferralScreen` | `/referral` | UI |
+| `createReferralScreen` | `/referral` | UI + validate (ошибки через `setError`) |
 | `createAuthScreen` | `/registration` | UI + Email → authCode / Telegram / Google |
 | `createAuthCodeScreen` | `/registration/code` | UI + Email OTP verify |
 | `createOnboardingScreen` | `/onboarding` | UI → profiles |
-| `createHomeScreen` | `/home` | UI (hub + shared feed) |
+| `createHomeScreen` | `/home` | UI (hub + feed + invite modal) |
 | `createUrlScreen` | `/portfolio` | UI (submit own + done) |
 | iframe-shell + timer | `/review` | UI |
 | `createReviewScreen` + `createReviewPanel` | `/quiz` | UI |
@@ -146,7 +146,7 @@ Auth: `--auth-screen-*`, `--auth-code-*` (в т.ч. `--auth-code-resend-cooldown
 
 ## i18n
 
-Все UI-строки — `content/locales.json` (`referral*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*`, `success*`, `reportScreen*`, `review*` / `report*`).  
+Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*`, `success*`, `reportScreen*`, `review*` / `report*`).  
 Правило: `.cursor/rules/i18n.mdc`.
 
 ## App-слой
@@ -155,19 +155,18 @@ Auth: `--auth-screen-*`, `--auth-code-*` (в т.ч. `--auth-code-resend-cooldown
 |------|------|
 | `routes.js` | id ↔ path |
 | `router.js` | History API + `BASE_URL` |
-| `flow.js` | порядок, entry, deep-link access |
-| `session.js` | login-сессия + balance в localStorage (`obratka.session`) — **не** путать с `/review` |
+| `flow.js` | порядок, entry, deep-link access (auth без кода → referral) |
+| `session.js` | login-сессия + balance + referral fields в localStorage (`obratka.session`) — **не** путать с `/review` |
 
 ## API
 
-`src/api/` — Auth (Email OTP / Telegram / Google + `mapSupabaseAuthErrorCode`), profiles, onboarding, wallet sync, shared portfolios queue. См. `src/api/README.md`.
+`src/api/` — Auth (Email OTP / Telegram / Google + `mapSupabaseAuthErrorCode`), profiles, referrals (validate/redeem), onboarding, wallet sync, shared portfolios queue. См. `src/api/README.md`.
 
 ## Дальше
 
 1. Вынести CSS в `brand-screen.css`.
 2. Агрегация оценок нескольких ревьюеров в PDF-отчёте / наполнение `report-screen`.
-3. Referrals validate/redeem.
-4. Manual identity linking (`linkIdentity`) + UNIQUE `profiles.email` + Telegram↔email — вне текущего скоупа.
+3. Manual identity linking (`linkIdentity`) + UNIQUE `profiles.email` + Telegram↔email — вне текущего скоупа.
 
 ## Связанные документы
 

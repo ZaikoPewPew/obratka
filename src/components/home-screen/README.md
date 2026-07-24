@@ -59,6 +59,7 @@ Topbar поверх контента (`position: absolute`), появление 
 - При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.
 - Баланс: `profiles.balance` ↔ `session.balance`.
 - Клик по чипу баланса (dev): `creditBalance(+10)`.
+- Клик по аватару профиля → модалка «Твой реферальный код»: код, слоты `left/max` (лимит 2), копировать код / ссылку `?ref=`. API: `fetchMyReferral` / `buildReferralShareUrl`. Без наград — только шаринг.
 
 ### Dev: сброс сессии
 

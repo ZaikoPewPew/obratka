@@ -720,6 +720,93 @@
   outline-offset: var(--focus-ring-offset);
 }
 
+.home-screen__invite-code {
+  margin: 0;
+  font-size: var(--home-screen-invite-code-size);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--home-screen-invite-code-tracking);
+  line-height: 1.2;
+  color: var(--color-text-strong);
+  word-break: break-all;
+}
+
+.home-screen__invite-code[hidden] {
+  display: none;
+}
+
+.home-screen__invite-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-screen-invite-actions-gap);
+  align-self: stretch;
+}
+
+.home-screen__invite-action {
+  box-sizing: border-box;
+  align-self: stretch;
+  min-height: var(--control-btn-height);
+  margin: 0;
+  padding: 0 var(--control-btn-padding-x);
+  border: none;
+  border-radius: var(--control-btn-radius);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.home-screen__invite-action:hover {
+  background: var(--color-accent-hover);
+  color: var(--color-on-accent-hover);
+}
+
+.home-screen__invite-action:active {
+  background: var(--color-accent-active);
+  color: var(--color-on-accent-active);
+}
+
+.home-screen__invite-action:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.home-screen__invite-action:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.home-screen__invite-action--secondary {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.home-screen__invite-action--secondary:hover {
+  background: var(--color-surface-muted-hover);
+  color: var(--color-text);
+}
+
+.home-screen__invite-action--secondary:active {
+  background: var(--color-surface-muted-active);
+  color: var(--color-text);
+}
+
+.home-screen__invite-action--ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.home-screen__invite-action--ghost:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.home-screen__invite-action--ghost:active {
+  background: var(--color-surface-muted-active);
+  color: var(--color-text);
+}
+
 /* Skeleton: целые карточки, пока грузится лента (хедер не трогаем) */
 .home-screen__card.home-screen__card--skeleton,
 .home-screen__card.home-screen__card--skeleton:hover,

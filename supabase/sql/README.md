@@ -4,7 +4,8 @@
 
 | Файл | Роль |
 |------|------|
-| `profiles.sql` | таблица `public.profiles` (1:1 с `auth.users`), триггер `handle_new_user` (в т.ч. Google `app_metadata.provider`), RLS, колонки онбординга / balance / avatar / `tier` (`free`\|`pro`\|`legendary`, клиент read-only), `banned_at` / `ban_reason` (клиент read-only) + `is_profile_banned()` |
+| `profiles.sql` | таблица `public.profiles` (1:1 с `auth.users`), триггер `handle_new_user` (в т.ч. Google `app_metadata.provider`), RLS, колонки онбординга / balance / avatar / `tier` (`free`\|`pro`\|`legendary`, клиент read-only), `banned_at` / `ban_reason` (клиент read-only) + `is_profile_banned()`, referral-колонки |
+| `referrals.sql` | персональный `referral_code` (max 2 uses), `referral_seed_codes` (bootstrap `YTHWKPDWAK`), RPC `validate_referral` (anon) / `redeem_referral` (auth); без наград |
 | `portfolios.sql` | `public.portfolios` + `public.reviews`, лиги матчинга (`grade_league` / `can_review_portfolio`), RLS (лента только в лиге; INSERT review с проверкой лиги), триггер инкремента / `done` |
 | `review_claims.sql` | `public.review_claims` + RPC claim/heartbeat/release/slots; `reviews.answers`; BEFORE-триггер требует живой claim |
 | `ban-templates.sql` | операторские шаблоны: бан / разбан / поиск (см. [`../BAN.md`](../BAN.md)) |

@@ -22,11 +22,11 @@
 
 | Path | Экран |
 |------|--------|
-| `/referral` | Реферальный код |
+| `/referral` | Invite-only код (`validate_referral`; seed `YTHWKPDWAK`) |
 | `/registration` | Email → `/registration/code` / Telegram / Google |
 | `/registration/code` | 6 ячеек OTP из письма |
 | `/onboarding` | Онбординг → `profiles` |
-| `/home` | Главная (лента + баланс + профиль) |
+| `/home` | Главная (лента + баланс + шаринг своего кода) |
 | `/portfolio` | Подача своего URL |
 | `/review` | Ревью: iframe + таймер |
 | `/quiz` | Квиз |
@@ -41,11 +41,13 @@
 | Квиз | `review-screen/` + `review-panel/` |
 | Онбординг-контент | `content/onboarding.json`, `content/onboarding.md` |
 | Auth API | `src/api/auth.js` (Email OTP + Google + Telegram) |
+| Referrals API / SQL | `src/api/referrals.js`, `supabase/sql/referrals.sql` |
 | Telegram Edge | `supabase/functions/telegram-auth/` |
 | Auth UI | `auth-screen` + `auth-code-screen` |
 
 Эталон split: `url-screen`. Соседние brand-экраны: `handoff` без анимации правого visual.  
-Оркестрация: `main.js` → `go()` / `applyRoute()`.
+Оркестрация: `main.js` → `go()` / `applyRoute()`.  
+Рефералы: validate до auth, redeem после login, 1 код / 2 слота, seed `YTHWKPDWAK`, **без наград**; шаринг с home (аватар).
 
 **Не монтировать** legacy waitlist (`apply-card`, `desktop.css` / `mobile.css`) без явной задачи — entry только iframe-shell + screen-фабрики.
 

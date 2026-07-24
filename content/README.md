@@ -12,10 +12,10 @@
 
 | Префикс | Экраны |
 |---------|--------|
-| `referral*` | `/referral` |
+| `referral*` | `/referral` (validate errors: `referralExhausted`, …) |
 | `auth*` / `authEmail*` / `authCode*` / `authOtp*` / `authIdentityConflict` | `/registration`, `/registration/code` |
 | `onboarding*` | `/onboarding` |
-| `home*` | `/home` (карточки, баланс, stub-модалка подачи) |
+| `home*` / `homeInvite*` | `/home` (карточки, баланс, модалка реферального кода) |
 | `url*` / `urlModal*` / `urlScreen*` | `/portfolio` |
 | `success*` | `/done` |
 | `ban*` | `/banned` |

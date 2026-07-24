@@ -5,12 +5,17 @@ import {
   portfolioPreviewUrl,
 } from "../../api/portfolios.js";
 import {
+  buildReferralShareUrl,
+  REFERRAL_MAX_USES,
+} from "../../utils/referralCode.js";
+import { fetchMyReferral } from "../../api/referrals.js";
+import {
   canSubmitPortfolio,
   creditBalance,
   getBalance,
   refreshWalletFromServer,
 } from "../../api/wallet.js";
-import { getSession } from "../../app/session.js";
+import { getSession, setSession } from "../../app/session.js";
 import { resolvePlatformIcon } from "../../utils/platformBrandIcon.js";
 import {
   BACKDROP_DARK_LUMA,
@@ -258,6 +263,52 @@ export function createHomeScreen({
   lockedDialog.append(lockedTitle, lockedBody, lockedClose);
   lockedBackdrop.append(lockedDialog);
 
+  const inviteBackdrop = document.createElement("div");
+  inviteBackdrop.className =
+    "home-screen__locked-backdrop home-screen__invite-backdrop";
+  inviteBackdrop.hidden = true;
+  inviteBackdrop.setAttribute("aria-hidden", "true");
+
+  const inviteDialog = document.createElement("div");
+  inviteDialog.className =
+    "home-screen__locked-dialog home-screen__invite-dialog";
+  inviteDialog.setAttribute("role", "dialog");
+  inviteDialog.setAttribute("aria-modal", "true");
+  inviteDialog.setAttribute("aria-labelledby", "home-invite-title");
+
+  const inviteTitle = document.createElement("h2");
+  inviteTitle.className = "home-screen__locked-title";
+  inviteTitle.id = "home-invite-title";
+
+  const inviteBody = document.createElement("p");
+  inviteBody.className = "home-screen__locked-body";
+
+  const inviteCode = document.createElement("p");
+  inviteCode.className = "home-screen__invite-code";
+  inviteCode.setAttribute("aria-live", "polite");
+
+  const inviteActions = document.createElement("div");
+  inviteActions.className = "home-screen__invite-actions";
+
+  const inviteCopyCode = document.createElement("button");
+  inviteCopyCode.type = "button";
+  inviteCopyCode.className =
+    "home-screen__locked-close home-screen__invite-action";
+
+  const inviteCopyLink = document.createElement("button");
+  inviteCopyLink.type = "button";
+  inviteCopyLink.className =
+    "home-screen__invite-action home-screen__invite-action--secondary";
+
+  const inviteClose = document.createElement("button");
+  inviteClose.type = "button";
+  inviteClose.className =
+    "home-screen__invite-action home-screen__invite-action--ghost";
+
+  inviteActions.append(inviteCopyCode, inviteCopyLink, inviteClose);
+  inviteDialog.append(inviteTitle, inviteBody, inviteCode, inviteActions);
+  inviteBackdrop.append(inviteDialog);
+
   const tabbar = document.createElement("div");
   tabbar.className = "home-screen__tabbar";
   tabbar.setAttribute("role", "tablist");
@@ -281,7 +332,7 @@ export function createHomeScreen({
   mineTab.dataset.tab = "mine";
 
   tabbar.append(tabThumb, feedTab, mineTab);
-  root.append(title, topbar, body, tabbar, lockedBackdrop);
+  root.append(title, topbar, body, tabbar, lockedBackdrop, inviteBackdrop);
 
   /** @type {HomePortfolioItem[]} */
   let items = [];
@@ -303,6 +354,10 @@ export function createHomeScreen({
   let tabbarContrastRaf = 0;
   /** @type {string | null} */
   let tabbarContrastProbeKey = null;
+  /** @type {string | null} */
+  let inviteCodeValue = null;
+  /** @type {ReturnType<typeof window.setTimeout> | null} */
+  let inviteCopyResetId = null;
 
   /** Нет фото → фон + буква; картинку прячем. */
   function showProfileLetter(letter) {
@@ -446,6 +501,97 @@ export function createHomeScreen({
     lockedBackdrop.classList.remove("home-screen__locked-backdrop--open");
     lockedBackdrop.setAttribute("aria-hidden", "true");
     lockedBackdrop.hidden = true;
+  }
+
+  function closeInviteModal() {
+    inviteBackdrop.classList.remove("home-screen__locked-backdrop--open");
+    inviteBackdrop.setAttribute("aria-hidden", "true");
+    inviteBackdrop.hidden = true;
+    if (inviteCopyResetId != null) {
+      window.clearTimeout(inviteCopyResetId);
+      inviteCopyResetId = null;
+    }
+  }
+
+  /**
+   * @param {{
+   *   code: string | null;
+   *   slotsLeft: number;
+   *   maxUses: number;
+   * }} info
+   */
+  function openInviteModal(info) {
+    const t = getStrings();
+    inviteCodeValue = info.code;
+    inviteTitle.textContent = t.homeInviteTitle;
+    inviteBody.textContent = info.code
+      ? formatString(t.homeInviteBody, {
+          left: info.slotsLeft,
+          max: info.maxUses,
+        })
+      : t.homeInviteEmpty;
+    inviteCode.textContent = info.code || "—";
+    inviteCode.hidden = !info.code;
+    inviteCopyCode.textContent = t.homeInviteCopyCode;
+    inviteCopyLink.textContent = t.homeInviteCopyLink;
+    inviteClose.textContent = t.homeInviteClose;
+    inviteClose.setAttribute("aria-label", t.homeInviteCloseAria);
+    inviteCopyCode.disabled = !info.code;
+    inviteCopyLink.disabled = !info.code;
+    inviteCopyCode.hidden = !info.code;
+    inviteCopyLink.hidden = !info.code;
+
+    inviteBackdrop.hidden = false;
+    inviteBackdrop.setAttribute("aria-hidden", "false");
+    requestAnimationFrame(() => {
+      inviteBackdrop.classList.add("home-screen__locked-backdrop--open");
+      (info.code ? inviteCopyCode : inviteClose).focus();
+    });
+  }
+
+  /**
+   * @param {string} text
+   * @param {HTMLButtonElement} button
+   * @param {string} idleLabel
+   */
+  async function copyInviteText(text, button, idleLabel) {
+    const t = getStrings();
+    try {
+      await navigator.clipboard.writeText(text);
+      button.textContent = t.homeInviteCopied;
+      if (inviteCopyResetId != null) window.clearTimeout(inviteCopyResetId);
+      inviteCopyResetId = window.setTimeout(() => {
+        button.textContent = idleLabel;
+        inviteCopyResetId = null;
+      }, 1600);
+    } catch {
+      button.textContent = idleLabel;
+    }
+  }
+
+  async function openMyReferralInvite() {
+    const session = getSession() ?? {};
+    let code =
+      typeof session.myReferralCode === "string" ? session.myReferralCode : null;
+    let uses =
+      typeof session.referralUses === "number" ? session.referralUses : 0;
+
+    const remote = await fetchMyReferral();
+    if (remote) {
+      code = remote.code;
+      uses = remote.uses;
+      setSession({
+        ...session,
+        myReferralCode: remote.code,
+        referralUses: remote.uses,
+      });
+    }
+
+    openInviteModal({
+      code,
+      slotsLeft: Math.max(0, REFERRAL_MAX_USES - uses),
+      maxUses: REFERRAL_MAX_USES,
+    });
   }
 
   /**
@@ -1004,8 +1150,38 @@ export function createHomeScreen({
     }
   });
 
+  inviteClose.addEventListener("click", () => {
+    closeInviteModal();
+  });
+
+  inviteBackdrop.addEventListener("click", (event) => {
+    if (event.target === inviteBackdrop) {
+      closeInviteModal();
+    }
+  });
+
+  inviteCopyCode.addEventListener("click", () => {
+    if (!inviteCodeValue) return;
+    const t = getStrings();
+    void copyInviteText(inviteCodeValue, inviteCopyCode, t.homeInviteCopyCode);
+  });
+
+  inviteCopyLink.addEventListener("click", () => {
+    if (!inviteCodeValue) return;
+    const t = getStrings();
+    void copyInviteText(
+      buildReferralShareUrl(inviteCodeValue),
+      inviteCopyLink,
+      t.homeInviteCopyLink,
+    );
+  });
+
   window.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
+    if (!inviteBackdrop.hidden) {
+      closeInviteModal();
+      return;
+    }
     if (lockedBackdrop.hidden) return;
     closeSubmitLockedModal();
   });
@@ -1015,7 +1191,7 @@ export function createHomeScreen({
   });
 
   profileBtn.addEventListener("click", () => {
-    /* Заглушка: профиль появится позже */
+    void openMyReferralInvite();
   });
 
   syncCopy();

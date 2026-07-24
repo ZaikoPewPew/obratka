@@ -30,7 +30,7 @@
 
 | Переменная | Назначение |
 |------------|------------|
-| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | Auth, profiles, portfolios, (legacy) subscribers |
+| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | Auth, profiles, referrals RPC, portfolios, (legacy) subscribers |
 | `TELEGRAM_BOT_ID` / `TELEGRAM_BOT_USERNAME` | Telegram Login Widget (публичные) |
 | `VITE_BASE_PATH` | base для GitHub Pages (`/obratka/`) |
 
@@ -53,7 +53,7 @@
 | `styles/` | Токены + UI. Entry: tokens/base/entrance/iframe-shell/home/success. Legacy waitlist CSS не в `index.html` |
 | `content/` | `locales.json`, onboarding, embed-hosts, privacy, founder-avatars |
 | `public/` | Статика по URL (favicon и т.п.) |
-| `supabase/` | SQL (`profiles`, `portfolios`, `subscribers_count`) + Edge `telegram-auth` |
+| `supabase/` | SQL (`profiles`, `referrals`, `portfolios`, `subscribers_count`) + Edge `telegram-auth` |
 | `.cursor/` | Правила агента (`rules/*.mdc`) и карта (`.cursor/README.md`) |
 
 ## Экраны и URL (кратко)
@@ -66,6 +66,7 @@
   → /done
 ```
 
+`/referral` — invite-only gate (`validate_referral`); после входа у юзера свой код (лимит 2), шаринг с home.  
 `/review` = просмотр портфолио + таймер.  
 `/quiz` = опрос. Не путать с login-`session.js` (`obratka.session`).
 

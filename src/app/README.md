@@ -9,19 +9,22 @@
 | `routes.js` | карта `AppRouteId` ↔ path |
 | `router.js` | History API + Vite `BASE_URL`, `navigate` / `sync` / `start` |
 | `flow.js` | `APP_FLOW`, `SESSION_FLOW`, `resolveEntryScreen`, `resolveAccessibleRoute` |
-| `session.js` | login-сессия + `balance` в localStorage (`obratka.session`) — не путать с `/review` |
+| `session.js` | login-сессия + balance + `referralCode` / `myReferralCode` в localStorage (`obratka.session`) — не путать с `/review` |
 
 Баланс и профиль дополнительно синкаются с `public.profiles` через `src/api/wallet.js` (`refreshSessionFromProfile`).
+
+`resolveAccessibleRoute`: `/registration` без `referralCode` и без `userId` → обратно на `/referral`.  
+После логина `main.js` вызывает `redeemReferral` (идемпотентно).
 
 ## URL
 
 | Id | Path | Смысл |
 |----|------|--------|
-| `referral` | `/referral` | Реферальный код |
+| `referral` | `/referral` | Invite gate: `validate_referral` → session.referralCode |
 | `auth` | `/registration` | Email → code screen / Telegram / Google |
 | `authCode` | `/registration/code` | 6-digit Email OTP + resend cooldown |
 | `onboarding` | `/onboarding` | Онбординг → profiles |
-| `home` | `/home` | Главная (хаб) |
+| `home` | `/home` | Главная (хаб + шаринг своего referral-кода) |
 | `url` | `/portfolio` | Подача своего портфолио |
 | `review` | `/review` | Ревью: iframe + таймер |
 | `quiz` | `/quiz` | Квиз / опрос после таймера |

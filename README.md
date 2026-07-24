@@ -20,11 +20,11 @@ npm run dev
 
 | Path | Экран |
 |------|--------|
-| `/referral` | Реферальный код |
+| `/referral` | Invite-only: валидный код → auth (seed `YTHWKPDWAK`) |
 | `/registration` | Email → code / Telegram / Google |
 | `/registration/code` | Код из письма (6 ячеек) |
 | `/onboarding` | Вопросы профиля |
-| `/home` | Очередь + баланс |
+| `/home` | Очередь + баланс; аватар → свой реферальный код |
 | `/portfolio` | Подача своего URL |
 | `/review` | Просмотр портфолио + таймер |
 | `/quiz` → `/quiz/done` | Квиз и финал |
@@ -57,7 +57,7 @@ npm run dev
 | `npm run dev` | Разработка (Vite HMR) |
 | `npm run build` | `dist/` + `404.html` (SPA-fallback для Pages) |
 | `npm run preview` | Просмотр production-сборки |
-| `npm test` | Юнит-тесты (embed, meta, routes) |
+| `npm test` | Юнит-тесты (embed, meta, routes, referral code) |
 
 ## Auth
 
@@ -70,6 +70,7 @@ npm run dev
 Сессия приложения: `localStorage` `obratka.session` + JWT Supabase Auth.  
 **Email ↔ Google:** Automatic linking в Supabase (одна verified email = один user). Telegram (`tg{id}@t.me`) не склеивается.  
 Ошибки identity / rate-limit мапятся в `auth.js` → i18n (`authIdentityConflict`, `authOtpRateLimit`).  
+**Рефералы:** validate до auth / redeem после логина; 1 код на юзера, лимит 2; без наград. Seed: `YTHWKPDWAK`. См. [`supabase/sql/referrals.sql`](supabase/sql/referrals.sql), [`src/api/referrals.js`](src/api/referrals.js).  
 API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](src/components/auth-screen/README.md).
 
 ## Документация
@@ -81,9 +82,11 @@ API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](
 | [`STRUCTURE.md`](STRUCTURE.md) | Папки и env |
 | [`mobile.md`](mobile.md) | Мобильный UX продукта (+ архив waitlist) |
 | [`src/app/README.md`](src/app/README.md) | Routes / router / flow / session |
-| [`src/api/README.md`](src/api/README.md) | Auth, profiles, wallet, portfolios |
+| [`src/api/README.md`](src/api/README.md) | Auth, profiles, referrals, wallet, portfolios |
 | [`src/components/auth-screen/README.md`](src/components/auth-screen/README.md) | Dashboard Auth + identity linking |
 | [`src/components/auth-code-screen/README.md`](src/components/auth-code-screen/README.md) | OTP UI + resend cooldown |
+| [`src/components/referral-screen/README.md`](src/components/referral-screen/README.md) | Invite gate + validate RPC |
+| [`src/components/home-screen/README.md`](src/components/home-screen/README.md) | Лента, баланс, шаринг реферального кода |
 | [`supabase/README.md`](supabase/README.md) | SQL и Edge Functions |
 | [`supabase/BAN.md`](supabase/BAN.md) | Как банить пользователей (Table/SQL + шаблоны) |
 | [`.cursor/README.md`](.cursor/README.md) | Карта для агента Cursor |

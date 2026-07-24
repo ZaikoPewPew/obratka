@@ -19,13 +19,17 @@ import { getSupabase } from "../lib/supabaseClient.js";
  *   onboarding?: Record<string, unknown> | null;
  *   onboarding_done?: boolean;
  *   balance?: number;
+ *   referral_code?: string | null;
+ *   referral_uses?: number;
+ *   referred_by?: string | null;
+ *   referral_entry_code?: string | null;
  *   banned_at?: string | null;
  *   ban_reason?: string | null;
  * }} Profile
  */
 
 const PROFILE_SELECT =
-  "id, auth_provider, display_name, avatar_url, telegram_id, telegram_username, email, role, grade, tier, domains, goals, onboarding, onboarding_done, balance, banned_at, ban_reason";
+  "id, auth_provider, display_name, avatar_url, telegram_id, telegram_username, email, role, grade, tier, domains, goals, onboarding, onboarding_done, balance, referral_code, referral_uses, referred_by, referral_entry_code, banned_at, ban_reason";
 
 /**
  * @param {Profile | null | undefined} profile
@@ -71,12 +75,16 @@ export async function updateMyProfile(patch) {
     throw new Error("not_authenticated");
   }
 
-  // tier / ban fields are server-managed (trigger + service_role); never send from client.
+  // tier / ban / referral fields are server-managed; never send from client.
   const {
     tier: _tier,
     id: _id,
     banned_at: _bannedAt,
     ban_reason: _banReason,
+    referral_code: _referralCode,
+    referral_uses: _referralUses,
+    referred_by: _referredBy,
+    referral_entry_code: _referralEntryCode,
     ...safePatch
   } = patch;
 

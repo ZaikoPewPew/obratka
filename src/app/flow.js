@@ -113,6 +113,15 @@ export function resolveAccessibleRoute(id, state = {}) {
     }
   }
 
+  // Invite-only: auth без кода / без сессии → обратно на referral.
+  if (
+    (id === "auth" || id === "authCode") &&
+    !state.hasSession &&
+    !state.referralDone
+  ) {
+    return "referral";
+  }
+
   if (id === "home" || id === "onboarding" || id === "report") {
     // Пока stub-экраны: deep link оставляем, UI покажет каркас.
     return id;

@@ -6,19 +6,9 @@ import {
   closeBrandScreen,
   openBrandScreen,
 } from "../../utils/brandScreenTransition.js";
+import { normalizeReferralCode } from "../../utils/referralCode.js";
 
 const PLACEHOLDER_AVATAR_COUNT = 4;
-
-/**
- * Нормализация реферального кода / ссылки.
- * @param {string} raw
- * @returns {string | null}
- */
-function normalizeReferral(raw) {
-  const value = String(raw ?? "").trim();
-  if (!value) return null;
-  return value;
-}
 
 /**
  * Тёмный плейсхолдер-аватар (пока без реальных фото).
@@ -32,11 +22,14 @@ function createPlaceholderAvatar() {
 
 /**
  * Экран реферального кода: 1:1 с UrlScreen (Figma split), другая копирайта слева.
- * @param {{ onSubmit: (referral: string) => void | Promise<void> }} opts
+ * @param {{
+ *   onSubmit: (referral: string) => void | Promise<void>;
+ * }} opts
  * @returns {{
  *   root: HTMLElement;
- *   open: (prefill?: string) => void;
- *   close: () => Promise<void>;
+ *   open: (prefill?: string, opts?: { handoff?: boolean }) => void;
+ *   close: (opts?: { handoff?: boolean }) => Promise<void>;
+ *   setError: (reason?: string | null) => void;
  * }}
  */
 export function createReferralScreen({ onSubmit }) {
@@ -148,15 +141,33 @@ export function createReferralScreen({ onSubmit }) {
   root.append(layout);
 
   let closing = false;
+  let submitting = false;
 
-  function setError(visible) {
-    error.hidden = !visible;
-    input.setAttribute("aria-invalid", visible ? "true" : "false");
+  /**
+   * @param {string | null | undefined} reason
+   */
+  function setError(reason) {
+    const strings = getStrings();
+    if (!reason) {
+      error.hidden = true;
+      input.setAttribute("aria-invalid", "false");
+      return;
+    }
+    const messages = {
+      invalid: strings.referralInvalid,
+      exhausted: strings.referralExhausted,
+      not_configured: strings.referralNotConfigured,
+      rpc_failed: strings.referralValidateError,
+      self_referral: strings.referralInvalid,
+    };
+    error.textContent = messages[reason] || strings.referralInvalid;
+    error.hidden = false;
+    input.setAttribute("aria-invalid", "true");
   }
 
   function syncSubmitVisibility() {
     const hasValue = input.value.trim().length > 0;
-    submit.hidden = !hasValue;
+    submit.hidden = !hasValue || submitting;
     inputWrap.classList.toggle("url-screen__input-wrap--ready", hasValue);
   }
 
@@ -166,13 +177,15 @@ export function createReferralScreen({ onSubmit }) {
    */
   function open(prefill = "", opts = {}) {
     closing = false;
+    submitting = false;
     openBrandScreen({
       root,
       meshWash,
       opts,
       prepare: () => {
-        setError(false);
+        setError(null);
         input.value = prefill;
+        input.disabled = false;
         syncSubmitVisibility();
       },
     });
@@ -197,20 +210,39 @@ export function createReferralScreen({ onSubmit }) {
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    const normalized = normalizeReferral(input.value);
+    if (submitting) return;
+
+    const normalized = normalizeReferralCode(input.value);
     if (!normalized) {
-      setError(true);
+      setError("invalid");
       input.focus();
       return;
     }
-    setError(false);
-    void Promise.resolve(onSubmit(normalized));
+
+    setError(null);
+    submitting = true;
+    input.disabled = true;
+    syncSubmitVisibility();
+
+    void Promise.resolve(onSubmit(normalized))
+      .catch((err) => {
+        const reason =
+          err && typeof err === "object" && "reason" in err
+            ? String(/** @type {{ reason: unknown }} */ (err).reason)
+            : "rpc_failed";
+        setError(reason);
+      })
+      .finally(() => {
+        submitting = false;
+        input.disabled = false;
+        syncSubmitVisibility();
+      });
   });
 
   input.addEventListener("input", () => {
-    if (!error.hidden) setError(false);
+    if (!error.hidden) setError(null);
     syncSubmitVisibility();
   });
 
-  return { root, open, close };
+  return { root, open, close, setError };
 }

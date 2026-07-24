@@ -449,6 +449,9 @@
   --home-screen-locked-modal-title-weight: var(--font-weight-semibold);
   --home-screen-locked-modal-body-size: var(--font-size-base);
   --home-screen-locked-modal-z: calc(var(--home-screen-z) + 1);
+  --home-screen-invite-code-size: var(--font-size-xl);
+  --home-screen-invite-code-tracking: 0.08em;
+  --home-screen-invite-actions-gap: var(--space-2);
   --home-screen-card-padding: var(--space-2);
   --home-screen-card-gap: var(--space-2);
   --home-screen-card-radius: var(--radius-xl);

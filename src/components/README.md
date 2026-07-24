@@ -7,11 +7,11 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | Модуль | Path | Статус |
 |--------|------|--------|
 | `brand-screen-shell/` | — | каркас API (миграция впереди) |
-| `referral-screen/` | `/referral` | UI |
+| `referral-screen/` | `/referral` | Invite gate + validate RPC |
 | `auth-screen/` | `/registration` | UI + Email → auth-code / Telegram / Google; identity conflict |
 | `auth-code-screen/` | `/registration/code` | UI + OTP verify + resend cooldown |
 | `onboarding-screen/` | `/onboarding` | UI → `profiles` |
-| `home-screen/` | `/home` | UI (hub + shared feed + wallet) |
+| `home-screen/` | `/home` | UI (hub + feed + wallet + шаринг referral-кода) |
 | `rating/` | — | топ по валюте на home (пока не монтируется) |
 | `url-screen/` | `/portfolio` | UI (submit own + done) |
 | `success-screen/` | `/done` | UI (пресеты подачи) |

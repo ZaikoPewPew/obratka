@@ -14,11 +14,11 @@
 
 | Экран / сценарий | Проверить |
 |------------------|-----------|
-| `/referral` | поле кода, submit, handoff на auth |
+| `/referral` | поле кода, validate RPC, ошибки exhausted/invalid, handoff на auth |
 | `/registration` | email → `/registration/code` (OTP + cooldown resend / назад); Telegram; Google (редирект) |
 | `/registration/code` | 6 ячеек; cooldown «Повторно через N с»; ошибки identity / rate-limit |
 | `/onboarding` | шаги, валидация, запись в `profiles` |
-| `/home` | лента, баланс, CTA review / submit |
+| `/home` | лента, баланс, CTA; аватар → модалка «скопировать код / ссылку» |
 | `/portfolio` | ввод URL, нехватка баланса, done |
 | `/review` | iframe / external, таймер, выход |
 | `/quiz` → done | шаги, PDF reveal |

@@ -10,7 +10,8 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 | Путь | Роль |
 |------|------|
 | `BAN.md` | **Оператор:** как банить (Table Editor + SQL), шаблоны |
-| `sql/profiles.sql` | `public.profiles` (1:1 с `auth.users`), триггер `handle_new_user`, RLS, `tier`, `banned_at` / `ban_reason` |
+| `sql/profiles.sql` | `public.profiles` (1:1 с `auth.users`), триггер `handle_new_user`, RLS, `tier`, `banned_at` / `ban_reason`, колонки referral |
+| `sql/referrals.sql` | referral-код на профиль (лимит 2), seed `YTHWKPDWAK`, RPC `validate_referral` / `redeem_referral` |
 | `sql/portfolios.sql` | `public.portfolios` + `public.reviews`, очередь ревью, RLS (banned не может INSERT) |
 | `sql/ban-templates.sql` | Copy-paste SQL: бан / разбан / поиск |
 | `sql/subscribers_count.sql` | RPC `subscribers_count()` (legacy waitlist) |
@@ -44,7 +45,8 @@ Google Authorized redirect URI в Cloud Console: `https://<project-ref>.supabase
 | Таблица / сервис | Кто читает/пишет |
 |-----------------|------------------|
 | `auth.users` | Supabase Auth (все провайдеры) |
-| `profiles` | `profiles.js`, `onboarding.js`, `wallet.js`; автосоздание триггером; `banned_at` → ban-screen |
+| `profiles` | `profiles.js`, `onboarding.js`, `wallet.js`, `referrals.js`; автосоздание триггером; `banned_at` → ban-screen; `referral_code` (лимит 2) |
+| `referral_seed_codes` | только через RPC (bootstrap `YTHWKPDWAK`) |
 | `portfolios` / `reviews` | `portfolios.js` (очередь по лигам; INSERT blocked if banned / league mismatch) |
 | `subscribers` | `subscribers.js` (не entry UX) |
 
