@@ -8,7 +8,8 @@
 
 ```text
 referral → auth → authCode → onboarding → home
-                              ├─ pick → review → quiz → /quiz/done (review-panel done)
+                              ├─ pick → claim → review → quiz → /quiz/done (review-panel done)
+                              ├─ mine card → report (каркас отчёта автора)
                               └─ submit (url) → done на url-screen → /done (URL sync)
 ```
 
@@ -19,10 +20,11 @@ referral → auth → authCode → onboarding → home
 | 2b | `auth-code-screen` | `/registration/code` | 6 ячеек кода из письма |
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |
 | 4 | `home-screen` | `/home` | Хаб: очередь + баланс + CTA |
-| 5a | iframe-shell | `/review` | Ревью выбранного портфолио |
+| 5a | iframe-shell | `/review` | Ревью выбранного портфолио (после claim слота) |
 | 5b | `url-screen` | `/portfolio` | Подача своего URL (нужен баланс) |
 | 6 | `review-screen` + `review-panel` | `/quiz` → `/quiz/done` | Квиз; финал слева + улет отчёта |
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
+| 8 | `report-screen` | `/report` | Отчёт автору (каркас; контент позже) |
 | — | `ban-screen` | `/banned` | Аккаунт заблокирован; «Выйти» + «Связаться» (242px); красный mesh; deep link escape-proof |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query (`?ref=`, `?lang=`) сохраняются.
@@ -90,11 +92,12 @@ src/components/
   review-screen/
   review-panel/           ← только шаги квиза
   success-screen/         ← /done (подача портфолио)
+  report-screen/          ← /report (отчёт автору, каркас)
   ban-screen/             ← /banned (аккаунт заблокирован)
 
 src/api/
   auth.js / profiles.js / onboarding.js / wallet.js
-  portfolios.js           ← очередь по лигам + listMyPortfolios / submit/review
+  portfolios.js           ← очередь по лигам + claim-слоты + listMyPortfolios / submit/review
   leagues.js              ← маппинг grade → лига (зеркало SQL)
   referrals.js            ← stub
   telegramWidget.js / subscribers.js   ← subscribers = legacy waitlist
@@ -104,6 +107,7 @@ styles/
   iframe-shell.css
   home-screen.css
   success-screen.css
+  report-screen.css
   entrance.css
 
 content/
@@ -126,6 +130,7 @@ content/
 | iframe-shell + timer | `/review` | UI |
 | `createReviewScreen` + `createReviewPanel` | `/quiz` | UI |
 | `createSuccessScreen` | `/done` | UI (portfolio submitted) |
+| `createReportScreen` | `/report` | UI (author report shell) |
 
 ### Handoff
 
@@ -141,7 +146,7 @@ Auth: `--auth-screen-*`, `--auth-code-*` (в т.ч. `--auth-code-resend-cooldown
 
 ## i18n
 
-Все UI-строки — `content/locales.json` (`referral*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*`, `success*`, `review*` / `report*`).  
+Все UI-строки — `content/locales.json` (`referral*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*`, `success*`, `reportScreen*`, `review*` / `report*`).  
 Правило: `.cursor/rules/i18n.mdc`.
 
 ## App-слой
@@ -160,7 +165,7 @@ Auth: `--auth-screen-*`, `--auth-code-*` (в т.ч. `--auth-code-resend-cooldown
 ## Дальше
 
 1. Вынести CSS в `brand-screen.css`.
-2. Агрегация оценок нескольких ревьюеров в PDF-отчёте.
+2. Агрегация оценок нескольких ревьюеров в PDF-отчёте / наполнение `report-screen`.
 3. Referrals validate/redeem.
 4. Manual identity linking (`linkIdentity`) + UNIQUE `profiles.email` + Telegram↔email — вне текущего скоупа.
 

@@ -17,6 +17,7 @@
  *   visual: number;
  *   hire: Hire;
  *   advice: string;
+ *   pain?: string[];
  * }} ReviewAnswers
  *
  * @typedef {{ title: string; body: string }} ReportSection
@@ -34,6 +35,10 @@ export function answersFromFormData(formData) {
   const context = Number(formData.get("context"));
   const visual = Number(formData.get("visual"));
   const advice = String(formData.get("advice") || "").trim();
+  const pain = formData
+    .getAll("pain")
+    .map((value) => String(value || "").trim())
+    .filter(Boolean);
 
   if (
     !isGrade(grade) ||
@@ -46,7 +51,7 @@ export function answersFromFormData(formData) {
     return null;
   }
 
-  return { grade, context, structure, metrics, visual, hire, advice };
+  return { grade, context, structure, metrics, visual, hire, advice, pain };
 }
 
 /**

@@ -337,6 +337,22 @@
   --success-screen-body-size: var(--font-size-base);
   --success-screen-actions-gap: var(--shell-review-done-actions-gap);
 
+  /* Report screen (каркас для автора) — тот же язык, что success/done */
+  --report-screen-z: var(--success-screen-z);
+  --report-screen-padding: var(--success-screen-padding);
+  --report-screen-width: var(--success-screen-width);
+  --report-screen-gap: var(--success-screen-gap);
+  --report-screen-title-size: var(--success-screen-title-size);
+  --report-screen-title-weight: var(--success-screen-title-weight);
+  --report-screen-body-size: var(--success-screen-body-size);
+  --report-screen-actions-gap: var(--success-screen-actions-gap);
+
+  /* Слоты ревьюеров на карточке home */
+  --home-screen-reviewer-slot-size: var(--space-6);
+  --home-screen-reviewer-slots-gap: calc(var(--space-1) * -1);
+  --home-screen-reviewer-slot-empty-bg: var(--color-surface-muted);
+  --home-screen-reviewer-slot-ring: var(--color-bg);
+
   /* Ban screen (locked account — same layout as success, red mesh) */
   --ban-screen-z: var(--z-modal);
   --ban-screen-padding: var(--url-screen-padding);

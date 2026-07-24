@@ -40,6 +40,13 @@ const TABBAR_HIDE_DELTA = 6;
 
 /**
  * @typedef {{
+ *   kind?: 'completed' | 'active';
+ *   reviewerId?: string;
+ *   avatarUrl?: string;
+ *   displayName?: string;
+ * }} HomeReviewerSlot
+ *
+ * @typedef {{
  *   id: string;
  *   url: string;
  *   name?: string;
@@ -50,6 +57,7 @@ const TABBAR_HIDE_DELTA = 6;
  *   reviewsCount?: number;
  *   targetReviews?: number;
  *   status?: string;
+ *   reviewerSlots?: HomeReviewerSlot[];
  * }} HomePortfolioItem
  */
 
@@ -86,6 +94,7 @@ function bindImageFallbacks(img, candidates) {
  *
  * @param {{
  *   onOpenPortfolio: (item: HomePortfolioItem) => void | Promise<void>;
+ *   onOpenReport?: (item: HomePortfolioItem) => void | Promise<void>;
  *   onAddPortfolio?: () => void | Promise<void>;
  *   onResetSession?: () => void | Promise<void>;
  * }} opts
@@ -95,10 +104,12 @@ function bindImageFallbacks(img, candidates) {
  *   close: () => Promise<void>;
  *   setItems: (items: HomePortfolioItem[]) => void;
  *   refresh: () => Promise<void>;
+ *   showNotice: (opts: { title: string; body: string; closeLabel?: string; closeAria?: string }) => void;
  * }}
  */
 export function createHomeScreen({
   onOpenPortfolio,
+  onOpenReport,
   onAddPortfolio,
   onResetSession,
 }) {
@@ -380,6 +391,37 @@ export function createHomeScreen({
   }
 
   function openSubmitLockedModal() {
+    const t = getStrings();
+    lockedTitle.textContent = t.homeSubmitLockedTitle;
+    lockedBody.textContent = t.homeSubmitLocked;
+    lockedClose.textContent = t.homeSubmitLockedClose;
+    lockedClose.setAttribute("aria-label", t.homeSubmitLockedCloseAria);
+    lockedBackdrop.hidden = false;
+    lockedBackdrop.setAttribute("aria-hidden", "false");
+    requestAnimationFrame(() => {
+      lockedBackdrop.classList.add("home-screen__locked-backdrop--open");
+      lockedClose.focus();
+    });
+  }
+
+  /**
+   * Универсальный диалог (нет слотов / locked submit и т.п.).
+   * @param {{
+   *   title: string;
+   *   body: string;
+   *   closeLabel?: string;
+   *   closeAria?: string;
+   * }} opts
+   */
+  function showNotice(opts) {
+    const t = getStrings();
+    lockedTitle.textContent = opts.title;
+    lockedBody.textContent = opts.body;
+    lockedClose.textContent = opts.closeLabel || t.homeSubmitLockedClose;
+    lockedClose.setAttribute(
+      "aria-label",
+      opts.closeAria || opts.closeLabel || t.homeSubmitLockedCloseAria,
+    );
     lockedBackdrop.hidden = false;
     lockedBackdrop.setAttribute("aria-hidden", "false");
     requestAnimationFrame(() => {
@@ -682,18 +724,83 @@ export function createHomeScreen({
       total,
     });
 
-    meta.append(person, count);
+    const slots = document.createElement("div");
+    slots.className = "home-screen__reviewer-slots";
+    const filledSlots = Array.isArray(item.reviewerSlots)
+      ? item.reviewerSlots.slice(0, total)
+      : [];
+    slots.setAttribute(
+      "aria-label",
+      formatString(t.homeCardReviewerSlotsAria, {
+        filled: filledSlots.length,
+        total,
+      }),
+    );
+
+    for (let i = 0; i < total; i += 1) {
+      const slotData = filledSlots[i];
+      const slot = document.createElement("span");
+      slot.className = "home-screen__reviewer-slot";
+      if (!slotData) {
+        slot.classList.add("home-screen__reviewer-slot--empty");
+        slot.setAttribute("aria-hidden", "true");
+        slots.append(slot);
+        continue;
+      }
+      if (slotData.kind === "active") {
+        slot.classList.add("home-screen__reviewer-slot--active");
+      } else {
+        slot.classList.add("home-screen__reviewer-slot--completed");
+      }
+      const slotAvatar =
+        typeof slotData.avatarUrl === "string" ? slotData.avatarUrl.trim() : "";
+      const slotLetter = initialFromLabel(
+        slotData.displayName || slotData.reviewerId || "?",
+      );
+      if (slotAvatar) {
+        const slotImg = document.createElement("img");
+        slotImg.className = "home-screen__reviewer-slot-img";
+        slotImg.alt = "";
+        slotImg.width = 24;
+        slotImg.height = 24;
+        slotImg.decoding = "async";
+        slotImg.loading = "lazy";
+        slotImg.referrerPolicy = "no-referrer";
+        slotImg.addEventListener("error", () => {
+          slotImg.remove();
+          slot.classList.add("home-screen__reviewer-slot--letter");
+          const letterEl = document.createElement("span");
+          letterEl.className = "home-screen__reviewer-slot-letter";
+          letterEl.textContent = slotLetter;
+          letterEl.setAttribute("aria-hidden", "true");
+          slot.append(letterEl);
+        });
+        slotImg.src = slotAvatar;
+        slot.append(slotImg);
+      } else {
+        slot.classList.add("home-screen__reviewer-slot--letter");
+        const letterEl = document.createElement("span");
+        letterEl.className = "home-screen__reviewer-slot-letter";
+        letterEl.textContent = slotLetter;
+        letterEl.setAttribute("aria-hidden", "true");
+        slot.append(letterEl);
+      }
+      slots.append(slot);
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "home-screen__card-progress";
+    progress.append(slots, count);
+
+    meta.append(person, progress);
     button.append(preview, meta);
 
     if (item.isOwn) {
-      // Полный визуал, без disabled/opacity — только запрет клика.
       button.classList.add("home-screen__card--own");
-      button.setAttribute("aria-disabled", "true");
-      button.title = t.homeCardOwnTitle;
-      button.setAttribute("aria-label", t.homeCardOwnAria);
-      button.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
+      button.title = t.homeCardReportTitle;
+      button.setAttribute("aria-label", t.homeCardReportAria);
+      button.addEventListener("click", () => {
+        void onOpenReport?.(item);
       });
     } else {
       button.addEventListener("click", () => {
@@ -864,5 +971,5 @@ export function createHomeScreen({
   syncCopy();
   renderList();
 
-  return { root, open, close, setItems, refresh };
+  return { root, open, close, setItems, refresh, showNotice };
 }

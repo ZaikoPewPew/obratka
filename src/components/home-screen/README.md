@@ -38,12 +38,12 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 ### Лента и карточки
 
 При `open` / смене таба: skeleton только у ленты (5 целых карточек-шиммеров), хедер без изменений; затем данные с `motion-reveal` stagger.  
-Клик по чужой карточке → `onOpenPortfolio` → `/review`.  
-Своя (`isOwn`, вкладка «Мои») — полный визуал, клик запрещён (`aria-disabled`).  
+Клик по чужой карточке → `claimPortfolioReview` → `onOpenPortfolio` → `/review`.  
+Своя (`isOwn`, вкладка «Мои») → `onOpenReport` → `/report` (каркас отчёта).  
 CTA «Закинуть своё» — всегда активна (чёрная). Баланс ≥ `SUBMIT_COST` → `onAddPortfolio` → `/portfolio`; иначе stub-модалка «не хватает монет» (контент позже).
 
 Лиги (тихий матчинг): junior → junior; middle → junior+middle; senior/lead/head → middle+senior+.  
-Клиент-зеркало: [`src/api/leagues.js`](../../api/leagues.js). Сервер: [`supabase/sql/portfolios.sql`](../../../supabase/sql/portfolios.sql) (`can_review_portfolio`, RLS).
+Клиент-зеркало: [`src/api/leagues.js`](../../api/leagues.js). Сервер: [`supabase/sql/portfolios.sql`](../../../supabase/sql/portfolios.sql) + [`review_claims.sql`](../../../supabase/sql/review_claims.sql) (`can_review_portfolio`, claim-слоты, RLS).
 
 Лента по центру экрана (`--home-screen-body-padding-top` = 16px сверху); снизу запас под таббар (`--home-screen-body-padding-bottom`).  
 Topbar поверх контента (`position: absolute`), появление без `filter` (`motion-reveal-topbar`).
@@ -73,8 +73,9 @@ Topbar поверх контента (`position: absolute`), появление 
 | Аватар | `item.avatarUrl` или буква из `item.name` |
 | ФИО | `item.name` |
 | Роль | EN Title Case: `formatPortfolioRole` |
-| Счётчик | `{current} из {total}` = `reviewsCount` / `targetReviews` |
-| Своя | `isOwn` только во вкладке «Мои» |
+| Счётчик | `{current} из {total}` = `reviewsCount` / `targetReviews` (только completed) |
+| Слоты ревьюеров | `.home-screen__reviewer-slots` — completed + active claims (аватарки) |
+| Своя | `isOwn` только во вкладке «Мои» → клик открывает report |
 
 ## Разметка таббара
 

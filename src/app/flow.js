@@ -113,7 +113,7 @@ export function resolveAccessibleRoute(id, state = {}) {
     }
   }
 
-  if (id === "home" || id === "onboarding") {
+  if (id === "home" || id === "onboarding" || id === "report") {
     // Пока stub-экраны: deep link оставляем, UI покажет каркас.
     return id;
   }

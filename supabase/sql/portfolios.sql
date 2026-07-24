@@ -30,9 +30,13 @@ create table if not exists public.reviews (
   id uuid primary key default gen_random_uuid(),
   portfolio_id uuid not null references public.portfolios (id) on delete cascade,
   reviewer_id uuid not null references auth.users (id) on delete cascade,
+  answers jsonb,
+  reviewer_avatar_url text,
+  reviewer_display_name text,
   created_at timestamptz not null default now(),
   constraint reviews_portfolio_reviewer_unique unique (portfolio_id, reviewer_id)
 );
+-- Claim-слоты, RPC и BEFORE-триггер с проверкой claim: см. review_claims.sql
 
 create index if not exists reviews_reviewer_id_idx
   on public.reviews (reviewer_id);
@@ -121,6 +125,7 @@ as $$
 $$;
 
 -- После insert ревью: self / pending / лига; инкремент счётчика; done при цели.
+-- Актуальная версия (claim required, BEFORE INSERT, answers/avatar): review_claims.sql
 create or replace function public.handle_review_inserted()
 returns trigger
 language plpgsql
@@ -170,6 +175,9 @@ create trigger reviews_after_insert
   for each row
   execute function public.handle_review_inserted();
 
+-- ВАЖНО: после этого файла всегда применяйте review_claims.sql
+-- (заменит триггер на BEFORE + проверку claim).
+
 alter table public.portfolios enable row level security;
 alter table public.reviews enable row level security;
 
@@ -196,6 +204,7 @@ create policy "portfolios_insert_own"
   );
 
 -- Счётчик/статус обновляет только security definer trigger.
+-- Актуальная SELECT-политика (reviewer + owner): review_claims.sql
 drop policy if exists "reviews_select_own" on public.reviews;
 create policy "reviews_select_own"
   on public.reviews for select

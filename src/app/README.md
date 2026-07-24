@@ -27,6 +27,7 @@
 | `quiz` | `/quiz` | Квиз / опрос после таймера |
 | `done` | `/quiz/done` | Финал квиза (review-panel done + улет отчёта) |
 | `success` | `/done` | Успех подачи портфолио (success-screen) |
+| `report` | `/report` | Отчёт автору (report-screen, каркас) |
 | `banned` | `/banned` | Аккаунт заблокирован (ban-screen); escape-proof |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query вроде `?ref=` / `?lang=` сохраняются.  

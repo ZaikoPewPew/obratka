@@ -5,6 +5,14 @@ import { getSupabase } from "../lib/supabaseClient.js";
 /**
  * Очередь портфолио на ревью (Supabase) + свои карточки.
  * Матчинг лиг — RLS / `can_review_portfolio` (см. `leagues.js`).
+ * Claim-слоты: `claimPortfolioReview` / heartbeat / release.
+ *
+ * @typedef {{
+ *   kind: 'completed' | 'active';
+ *   reviewerId: string;
+ *   avatarUrl?: string;
+ *   displayName?: string;
+ * }} PortfolioReviewerSlot
  *
  * @typedef {{
  *   id: string;
@@ -17,6 +25,7 @@ import { getSupabase } from "../lib/supabaseClient.js";
  *   reviewsCount?: number;
  *   targetReviews?: number;
  *   status?: 'pending' | 'done' | 'skipped';
+ *   reviewerSlots?: PortfolioReviewerSlot[];
  * }} PortfolioQueueItem
  */
 
@@ -85,6 +94,23 @@ export function portfolioPreviewUrl(url) {
 }
 
 /**
+ * @param {unknown} err
+ * @returns {string}
+ */
+export function portfolioRpcErrorCode(err) {
+  const raw =
+    err && typeof err === "object" && "message" in err
+      ? String(/** @type {{ message?: unknown }} */ (err).message || "")
+      : err instanceof Error
+        ? err.message
+        : String(err || "");
+  const match = raw.match(
+    /\b(no_slots|claim_not_found|already_reviewed|review_claim_required|portfolio_not_pending|portfolio_not_found|cannot_review_own_portfolio|review_league_mismatch|profile_banned|not_authenticated)\b/,
+  );
+  return match ? match[1] : raw || "unknown_error";
+}
+
+/**
  * @param {Record<string, unknown>} row
  * @param {string | null | undefined} viewerId
  * @returns {PortfolioQueueItem}
@@ -122,6 +148,86 @@ function mapPortfolioRow(row, viewerId) {
 }
 
 /**
+ * @param {unknown} row
+ * @returns {PortfolioReviewerSlot | null}
+ */
+function mapSlotRow(row) {
+  if (!row || typeof row !== "object") return null;
+  const r = /** @type {Record<string, unknown>} */ (row);
+  const kind = r.slot_kind === "active" ? "active" : "completed";
+  const reviewerId =
+    typeof r.reviewer_id === "string" ? r.reviewer_id : "";
+  if (!reviewerId) return null;
+  /** @type {PortfolioReviewerSlot} */
+  const slot = { kind, reviewerId };
+  if (typeof r.avatar_url === "string" && r.avatar_url.trim()) {
+    slot.avatarUrl = r.avatar_url.trim();
+  }
+  if (typeof r.display_name === "string" && r.display_name.trim()) {
+    slot.displayName = r.display_name.trim();
+  }
+  return slot;
+}
+
+/**
+ * @param {string[]} portfolioIds
+ * @returns {Promise<Map<string, PortfolioReviewerSlot[]>>}
+ */
+async function fetchReviewerSlotsByPortfolio(portfolioIds) {
+  /** @type {Map<string, PortfolioReviewerSlot[]>} */
+  const map = new Map();
+  const ids = [...new Set(portfolioIds.filter(Boolean))];
+  if (ids.length === 0) return map;
+
+  const supabase = getSupabase();
+  if (!supabase) return map;
+
+  const { data, error } = await supabase.rpc("portfolio_reviewer_slots", {
+    p_ids: ids,
+  });
+
+  if (error) {
+    if (import.meta.env.DEV) {
+      console.warn("[portfolios] portfolio_reviewer_slots", error.message);
+    }
+    return map;
+  }
+
+  for (const row of data || []) {
+    const portfolioId =
+      row && typeof row.portfolio_id === "string" ? row.portfolio_id : "";
+    const slot = mapSlotRow(row);
+    if (!portfolioId || !slot) continue;
+    const list = map.get(portfolioId) || [];
+    list.push(slot);
+    map.set(portfolioId, list);
+  }
+
+  for (const [id, list] of map) {
+    list.sort((a, b) => {
+      if (a.kind === b.kind) return 0;
+      return a.kind === "completed" ? -1 : 1;
+    });
+    map.set(id, list);
+  }
+
+  return map;
+}
+
+/**
+ * @param {PortfolioQueueItem[]} items
+ * @returns {Promise<PortfolioQueueItem[]>}
+ */
+async function attachReviewerSlots(items) {
+  if (items.length === 0) return items;
+  const slotsMap = await fetchReviewerSlotsByPortfolio(items.map((i) => i.id));
+  return items.map((item) => {
+    const slots = slotsMap.get(item.id) || [];
+    return { ...item, reviewerSlots: slots };
+  });
+}
+
+/**
  * No-op: очередь живёт в Supabase (раньше чистила localStorage).
  */
 export function clearSubmittedPortfolios() {
@@ -130,7 +236,8 @@ export function clearSubmittedPortfolios() {
 
 /**
  * Очередь на ревью: чужие pending в лиге ревьюера (RLS), без своих,
- * минус уже отревьюенные этим пользователем.
+ * минус уже отревьюенные этим пользователем,
+ * минус карточки без свободных слотов (completed + active claims).
  *
  * @returns {Promise<PortfolioQueueItem[]>}
  */
@@ -174,9 +281,17 @@ export async function listPortfoliosForReview() {
       .filter(Boolean),
   );
 
-  return (rows || [])
+  const mapped = (rows || [])
     .map((row) => mapPortfolioRow(row, user.id))
     .filter((item) => !reviewedIds.has(item.id));
+
+  const withSlots = await attachReviewerSlots(mapped);
+
+  return withSlots.filter((item) => {
+    const target = Math.max(1, Number(item.targetReviews) || DEFAULT_TARGET_REVIEWS);
+    const occupied = (item.reviewerSlots || []).length;
+    return occupied < target;
+  });
 }
 
 /**
@@ -208,7 +323,8 @@ export async function listMyPortfolios() {
     return [];
   }
 
-  return (rows || []).map((row) => mapPortfolioRow(row, user.id));
+  const mapped = (rows || []).map((row) => mapPortfolioRow(row, user.id));
+  return attachReviewerSlots(mapped);
 }
 
 /**
@@ -238,7 +354,10 @@ export async function getPortfolio(id) {
     return null;
   }
   if (!data) return null;
-  return mapPortfolioRow(data, user?.id);
+  const [withSlots] = await attachReviewerSlots([
+    mapPortfolioRow(data, user?.id),
+  ]);
+  return withSlots ?? null;
 }
 
 /**
@@ -296,12 +415,84 @@ export async function submitPortfolio(rawUrl) {
 }
 
 /**
- * Зафиксировать завершённое ревью (один раз на пару user↔portfolio).
+ * Занять слот ревью при открытии /review.
  *
  * @param {string} portfolioId
  * @returns {Promise<void>}
  */
-export async function submitPortfolioReview(portfolioId) {
+export async function claimPortfolioReview(portfolioId) {
+  const id = String(portfolioId || "").trim();
+  if (!id) {
+    throw new Error("portfolio_id_required");
+  }
+
+  const supabase = getSupabase();
+  if (!supabase) {
+    throw new Error("supabase_not_configured");
+  }
+
+  const { error } = await supabase.rpc("claim_portfolio_review", {
+    p_portfolio_id: id,
+  });
+
+  if (error) {
+    throw new Error(portfolioRpcErrorCode(error));
+  }
+}
+
+/**
+ * Продлить TTL claim, пока пользователь на review/quiz.
+ *
+ * @param {string} portfolioId
+ * @returns {Promise<void>}
+ */
+export async function heartbeatPortfolioClaim(portfolioId) {
+  const id = String(portfolioId || "").trim();
+  if (!id) return;
+
+  const supabase = getSupabase();
+  if (!supabase) return;
+
+  const { error } = await supabase.rpc("heartbeat_portfolio_claim", {
+    p_portfolio_id: id,
+  });
+
+  if (error) {
+    throw new Error(portfolioRpcErrorCode(error));
+  }
+}
+
+/**
+ * Освободить слот при уходе без submit.
+ *
+ * @param {string} portfolioId
+ * @returns {Promise<void>}
+ */
+export async function releasePortfolioClaim(portfolioId) {
+  const id = String(portfolioId || "").trim();
+  if (!id) return;
+
+  const supabase = getSupabase();
+  if (!supabase) return;
+
+  const { error } = await supabase.rpc("release_portfolio_claim", {
+    p_portfolio_id: id,
+  });
+
+  if (error && import.meta.env.DEV) {
+    console.warn("[portfolios] releasePortfolioClaim", error.message);
+  }
+}
+
+/**
+ * Зафиксировать завершённое ревью (один раз на пару user↔portfolio).
+ * Требует живой claim; пишет answers jsonb.
+ *
+ * @param {string} portfolioId
+ * @param {import("../utils/reviewReport.js").ReviewAnswers | null | undefined} [answers]
+ * @returns {Promise<void>}
+ */
+export async function submitPortfolioReview(portfolioId, answers) {
   const id = String(portfolioId || "").trim();
   if (!id) {
     throw new Error("portfolio_id_required");
@@ -319,12 +510,30 @@ export async function submitPortfolioReview(portfolioId) {
     throw new Error("not_authenticated");
   }
 
-  const { error } = await supabase.from("reviews").insert({
+  const session = getSession();
+  const avatarUrl =
+    typeof session?.avatarUrl === "string" ? session.avatarUrl.trim() : "";
+  const displayName =
+    typeof session?.displayName === "string" ? session.displayName.trim() : "";
+
+  /** @type {Record<string, unknown>} */
+  const insert = {
     portfolio_id: id,
     reviewer_id: user.id,
-  });
+  };
+  if (answers && typeof answers === "object") {
+    insert.answers = answers;
+  }
+  if (avatarUrl) {
+    insert.reviewer_avatar_url = avatarUrl;
+  }
+  if (displayName) {
+    insert.reviewer_display_name = displayName;
+  }
+
+  const { error } = await supabase.from("reviews").insert(insert);
 
   if (error) {
-    throw new Error(error.message || "review_submit_failed");
+    throw new Error(portfolioRpcErrorCode(error) || "review_submit_failed");
   }
 }

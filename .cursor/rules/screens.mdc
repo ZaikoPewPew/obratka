@@ -23,6 +23,7 @@ alwaysApply: true
 | `quiz` | `/quiz` |
 | `done` | `/quiz/done` |
 | `success` | `/done` |
+| `report` | `/report` (отчёт автору, каркас) |
 | `banned` | `/banned` (аккаунт заблокирован) |
 
 `session.js` — только login-сессия пользователя, не экран `/review`.

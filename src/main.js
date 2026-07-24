@@ -20,7 +20,7 @@ import {
 import { createAppRouter } from "./app/router.js";
 import { getSession, setSession, clearSession } from "./app/session.js";
 import { completeOAuthFromUrl, signOut } from "./api/auth.js";
-import { submitPortfolio, clearSubmittedPortfolios, submitPortfolioReview } from "./api/portfolios.js";
+import { submitPortfolio, clearSubmittedPortfolios, submitPortfolioReview, claimPortfolioReview, heartbeatPortfolioClaim, releasePortfolioClaim, portfolioRpcErrorCode } from "./api/portfolios.js";
 import { fetchMyProfile, isProfileBanned, updateMyProfile } from "./api/profiles.js";
 import {
   awardReviewReward,
@@ -36,6 +36,7 @@ import { createHomeScreen } from "./components/home-screen/HomeScreen.js";
 import { createOnboardingScreen } from "./components/onboarding-screen/OnboardingScreen.js";
 import { createReferralScreen } from "./components/referral-screen/ReferralScreen.js";
 import { createSuccessScreen } from "./components/success-screen/SuccessScreen.js";
+import { createReportScreen } from "./components/report-screen/ReportScreen.js";
 import { createBanScreen } from "./components/ban-screen/BanScreen.js";
 import { createUrlScreen } from "./components/url-screen/UrlScreen.js";
 import {
@@ -48,6 +49,8 @@ import brandLogoUrl from "./assets/brand/logo.svg";
 const SESSION_SECONDS = 5;
 const SESSION_TOTAL_MS = SESSION_SECONDS * 1000;
 const TIMER_TICK_MS = 10;
+/** Продление claim TTL, пока пользователь на review/quiz. */
+const CLAIM_HEARTBEAT_MS = 2 * 60 * 1000;
 
 const frameWrap = document.querySelector("[data-frame]");
 const frame = document.querySelector("#portfolio-frame");
@@ -65,10 +68,19 @@ const frameForwardBtn = document.querySelector('[data-action="frame-forward"]');
 let portfolioUrl = null;
 /** @type {string | null} */
 let portfolioId = null;
+/** Активный claim на portfolioId (нужно release при уходе без submit). */
+let claimHeld = false;
+/** Ревью уже отправлено — claim не освобождаем (триггер снял его). */
+let reviewSubmitted = false;
+/** @type {ReturnType<typeof window.setInterval> | null} */
+let claimHeartbeatId = null;
 /** @type {import("./utils/portfolioEmbed.js").PortfolioEmbedPlan | null} */
 let embedPlan = null;
 /** @type {string} */
 let portfolioName = getStrings().brandName;
+
+/** @type {string | null} */
+let pendingReportPortfolioId = null;
 
 /** @type {ReturnType<typeof createReviewScreen>["setReportReveal"]} */
 let setReviewReportReveal = () => {};
@@ -121,11 +133,14 @@ const reviewPanel = createReviewPanel({
   onReportReveal: (active, payload) => {
     setReviewReportReveal(active, payload);
   },
-  onComplete: () => {
+  onComplete: (answers) => {
     void (async () => {
       try {
         if (portfolioId) {
-          await submitPortfolioReview(portfolioId);
+          await submitPortfolioReview(portfolioId, answers ?? null);
+          reviewSubmitted = true;
+          claimHeld = false;
+          stopClaimHeartbeat();
         }
       } catch (err) {
         if (import.meta.env.DEV) {
@@ -143,9 +158,11 @@ const reviewPanel = createReviewPanel({
     if (activeRouteId === "done") syncRoute("quiz");
   },
   onExit: () => {
+    void releaseHeldClaim();
     go("home", { replace: true });
   },
   onNextCase: () => {
+    void releaseHeldClaim();
     go("home", { replace: true });
   },
 });
@@ -167,6 +184,14 @@ const successScreen = createSuccessScreen({
 });
 document.body.append(successScreen.root);
 
+const reportScreen = createReportScreen({
+  onPrimary: () => {
+    pendingReportPortfolioId = null;
+    go("home", { replace: true });
+  },
+});
+document.body.append(reportScreen.root);
+
 const banScreen = createBanScreen({
   onExit: async () => {
     try {
@@ -179,9 +204,13 @@ const banScreen = createBanScreen({
     stopTimer();
     portfolioUrl = null;
     portfolioId = null;
+    claimHeld = false;
+    reviewSubmitted = false;
+    stopClaimHeartbeat();
     embedPlan = null;
     portfolioName = getStrings().brandName;
     pendingSuccessPreset = "generic";
+    pendingReportPortfolioId = null;
     leaveSessionShell();
     await closeReview();
     go("referral", { replace: true });
@@ -196,6 +225,44 @@ let sessionEnded = false;
 let sessionStarted = false;
 /** @type {number} */
 let metaRequestId = 0;
+
+function stopClaimHeartbeat() {
+  if (claimHeartbeatId != null) {
+    window.clearInterval(claimHeartbeatId);
+    claimHeartbeatId = null;
+  }
+}
+
+function startClaimHeartbeat() {
+  stopClaimHeartbeat();
+  if (!portfolioId || !claimHeld) return;
+  claimHeartbeatId = window.setInterval(() => {
+    if (!portfolioId || !claimHeld || reviewSubmitted) {
+      stopClaimHeartbeat();
+      return;
+    }
+    void heartbeatPortfolioClaim(portfolioId).catch((err) => {
+      if (import.meta.env.DEV) {
+        console.warn("[review] heartbeat", err);
+      }
+    });
+  }, CLAIM_HEARTBEAT_MS);
+}
+
+/**
+ * Освободить claim, если ревью не отправлено.
+ * @returns {Promise<void>}
+ */
+async function releaseHeldClaim() {
+  stopClaimHeartbeat();
+  if (!claimHeld || reviewSubmitted || !portfolioId) {
+    claimHeld = false;
+    return;
+  }
+  const id = portfolioId;
+  claimHeld = false;
+  await releasePortfolioClaim(id);
+}
 
 function formatTime(totalMs) {
   const clampedMs = Math.max(0, totalMs);
@@ -354,6 +421,7 @@ function openReview() {
   void authScreen.close({ handoff: true });
   void referralScreen.close({ handoff: true });
   void successScreen.close();
+  void reportScreen.close();
 
   frameWrap.classList.add("iframe-shell__frame--locked");
   reviewPanel.reset();
@@ -489,9 +557,37 @@ const urlScreen = createUrlScreen({
 const homeScreen = createHomeScreen({
   onOpenPortfolio: async (item) => {
     if (item?.isOwn) return;
+    const id = typeof item?.id === "string" ? item.id : "";
+    if (!id) return;
+
+    try {
+      await claimPortfolioReview(id);
+    } catch (err) {
+      const code = portfolioRpcErrorCode(err);
+      if (code === "no_slots") {
+        const t = getStrings();
+        homeScreen.showNotice({
+          title: t.homeNoSlotsTitle,
+          body: t.homeNoSlotsBody,
+          closeLabel: t.homeNoSlotsClose,
+          closeAria: t.homeNoSlotsCloseAria,
+        });
+        void homeScreen.refresh();
+        return;
+      }
+      if (import.meta.env.DEV) {
+        console.warn("[review] claimPortfolioReview", err);
+      }
+      void homeScreen.refresh();
+      return;
+    }
+
+    claimHeld = true;
+    reviewSubmitted = false;
     enterSessionShell();
     await closeReview();
-    await applyPortfolio(item.url, { portfolioId: item.id });
+    await applyPortfolio(item.url, { portfolioId: id });
+    startClaimHeartbeat();
     go("review");
     void homeScreen.close();
     if (embedPlan?.mode === "external") {
@@ -499,6 +595,11 @@ const homeScreen = createHomeScreen({
       return;
     }
     startTimer();
+  },
+  onOpenReport: async (item) => {
+    if (!item?.isOwn || !item.id) return;
+    pendingReportPortfolioId = item.id;
+    go("report", { search: { id: item.id } });
   },
   onAddPortfolio: async () => {
     if (!canSubmitPortfolio()) return;
@@ -519,11 +620,13 @@ const homeScreen = createHomeScreen({
       /* ignore */
     }
     stopTimer();
+    await releaseHeldClaim();
     portfolioUrl = null;
     portfolioId = null;
     embedPlan = null;
     portfolioName = getStrings().brandName;
     pendingSuccessPreset = "generic";
+    pendingReportPortfolioId = null;
     leaveSessionShell();
     await closeReview();
     void homeScreen.close();
@@ -780,6 +883,15 @@ async function applyRoute(id, opts = {}) {
       successScreen.open({ preset: pendingSuccessPreset });
       return;
     }
+    if (target === "report") {
+      const fromSearch =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("id")
+          : null;
+      const id = pendingReportPortfolioId || fromSearch || null;
+      reportScreen.open({ portfolioId: id });
+      return;
+    }
     if (target === "banned") {
       banScreen.open();
     }
@@ -795,12 +907,14 @@ async function applyRoute(id, opts = {}) {
     if (id !== "home") closers.push(homeScreen.close());
     if (id !== "url") closers.push(urlScreen.close(closeOpts));
     if (id !== "success") closers.push(successScreen.close());
+    if (id !== "report") closers.push(reportScreen.close());
     if (id !== "banned") closers.push(banScreen.close());
     await Promise.all(closers);
   }
 
   if (id === "banned") {
     leaveSessionShell();
+    await releaseHeldClaim();
     await closeReview();
     await closeOthers();
     openTarget("banned");
@@ -829,6 +943,7 @@ async function applyRoute(id, opts = {}) {
   }
 
   leaveSessionShell();
+  await releaseHeldClaim();
   await closeReview();
 
   // Handoff: сначала новый экран поверх, потом убрать предыдущий — visual не мигает.
@@ -849,6 +964,7 @@ async function applyRoute(id, opts = {}) {
       onboardingScreen.close({}),
       urlScreen.close({}),
       successScreen.close(),
+      reportScreen.close(),
       banScreen.close(),
     ]);
     return;
@@ -907,6 +1023,14 @@ if (shell) {
   shell.hidden = true;
   shell.classList.remove("iframe-shell--entered");
 }
+
+window.addEventListener("pagehide", () => {
+  if (claimHeld && !reviewSubmitted && portfolioId) {
+    void releasePortfolioClaim(portfolioId);
+    claimHeld = false;
+  }
+  stopClaimHeartbeat();
+});
 
 void (async () => {
   try {

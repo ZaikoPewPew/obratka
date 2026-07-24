@@ -1,0 +1,224 @@
+/* Report screen: каркас как success/done — слева копирайт, справа зелёный mesh. */
+
+.report-screen {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  z-index: var(--report-screen-z);
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
+  padding: var(--report-screen-padding);
+  background: var(--color-bg);
+  opacity: 0;
+  transform: translateY(var(--motion-reveal-shift));
+  filter: blur(var(--motion-reveal-blur));
+  pointer-events: none;
+  transition:
+    opacity var(--motion-reveal-duration) var(--motion-reveal-ease),
+    transform var(--motion-reveal-duration) var(--motion-reveal-ease),
+    filter var(--motion-reveal-duration) var(--motion-reveal-ease);
+}
+
+.report-screen--open {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+  pointer-events: auto;
+}
+
+.report-screen[hidden] {
+  display: none !important;
+  pointer-events: none;
+}
+
+.report-screen--open .report-screen__visual,
+.report-screen--open .report-screen__brand-mark,
+.report-screen--open .report-screen__card {
+  animation-duration: var(--motion-reveal-duration);
+  animation-timing-function: var(--motion-reveal-ease);
+  animation-fill-mode: both;
+}
+
+.report-screen--open .report-screen__visual {
+  animation-name: motion-reveal;
+  animation-delay: var(--url-screen-reveal-delay-visual);
+}
+
+.report-screen--open .report-screen__brand-mark {
+  animation-name: motion-reveal-scale;
+  animation-delay: var(--url-screen-reveal-delay-brand);
+}
+
+.report-screen--open .report-screen__card {
+  animation-name: motion-reveal;
+  animation-delay: var(--motion-delay-2);
+}
+
+.report-screen__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--url-screen-gap);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.report-screen__panel {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: visible;
+  pointer-events: auto;
+}
+
+.report-screen__card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--report-screen-gap);
+  width: min(var(--report-screen-width), 100%);
+  text-align: center;
+}
+
+.report-screen__title {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-family: var(--font-family);
+  font-size: var(--report-screen-title-size);
+  font-weight: var(--report-screen-title-weight);
+  line-height: var(--line-height-snug);
+  white-space: pre-line;
+}
+
+.report-screen__body {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-family);
+  font-size: var(--report-screen-body-size);
+  font-weight: var(--font-weight-regular);
+  line-height: normal;
+}
+
+.report-screen__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--report-screen-actions-gap);
+  width: 100%;
+}
+
+.report-screen__btn {
+  flex: 1 1 0;
+  min-height: var(--shell-review-control-height);
+  padding: var(--shell-review-control-padding-y) var(--shell-review-control-padding-x);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family);
+  font-size: var(--shell-review-control-font-size);
+  font-weight: var(--shell-review-control-font-weight);
+  line-height: var(--shell-review-control-line-height);
+  text-align: center;
+}
+
+.report-screen__btn--exit {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.report-screen__btn--exit:hover {
+  background: var(--color-surface-muted-hover);
+}
+
+.report-screen__btn--exit:active {
+  background: var(--color-surface-muted-active);
+}
+
+.report-screen__visual {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  border-radius: var(--url-screen-visual-radius);
+  background-color: var(--shell-review-mesh-done-wash);
+  --url-screen-mesh-1: var(--shell-review-mesh-done-1);
+  --url-screen-mesh-2: var(--shell-review-mesh-done-2);
+  --url-screen-mesh-3: var(--shell-review-mesh-done-3);
+  --url-screen-mesh-4: var(--shell-review-mesh-done-4);
+  --url-screen-visual-wash: var(--shell-review-mesh-done-wash);
+}
+
+.report-screen__glow {
+  position: absolute;
+  inset: 0;
+  z-index: var(--shell-review-z-glow);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.report-screen__noise {
+  position: absolute;
+  inset: 0;
+  z-index: var(--shell-review-z-noise);
+  opacity: var(--url-screen-noise-opacity);
+  pointer-events: none;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2 2' numOctaves='3' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='luminanceToAlpha' result='alpha'/%3E%3CfeComponentTransfer in='alpha' result='mono'%3E%3CfeFuncA type='discrete' tableValues='0 1'/%3E%3C/feComponentTransfer%3E%3CfeFlood flood-color='%23F3F4F7' result='tint'/%3E%3CfeComposite in='tint' in2='mono' operator='in'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: var(--url-screen-noise-size) var(--url-screen-noise-size);
+  background-repeat: repeat;
+}
+
+.report-screen__brand {
+  position: absolute;
+  inset: 0;
+  z-index: var(--shell-review-z-brand);
+  pointer-events: none;
+}
+
+.report-screen__brand-slot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(
+    -50%,
+    calc(-50% + var(--url-screen-brand-done-align-y))
+  );
+}
+
+.report-screen__brand-mark {
+  display: block;
+  width: var(--url-screen-brand-done-width);
+  height: var(--url-screen-brand-done-height);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .report-screen {
+    transition: none;
+    transform: none;
+    filter: none;
+  }
+
+  .report-screen--open .report-screen__visual,
+  .report-screen--open .report-screen__brand-mark,
+  .report-screen--open .report-screen__card {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .report-screen__layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(
+      var(--url-screen-visual-mobile-min-height),
+      32vh
+    );
+  }
+}

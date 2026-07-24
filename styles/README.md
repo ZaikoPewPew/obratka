@@ -11,7 +11,7 @@
 
 ## Что подключено из `index.html`
 
-`tokens.css` → `base.css` → `entrance.css` → `iframe-shell.css` → `success-screen.css` → `ban-screen.css` → `home-screen.css`.
+`tokens.css` → `base.css` → `entrance.css` → `iframe-shell.css` → `success-screen.css` → `report-screen.css` → `ban-screen.css` → `home-screen.css`.
 
 **Не подключены** (legacy waitlist): `desktop.css`, `mobile.css`, `apply.css`, `access-modal.css`, `notification.css`, `privacy-policy-panel.css`.
 

@@ -48,7 +48,7 @@ Env / Dashboard: `.env.example`, `src/components/auth-screen/README.md`, `supaba
 |------|------|
 | `wallet.js` | `getBalance` / `creditBalance` / `spendForSubmit` / `REVIEW_REWARD` / `SUBMIT_COST`; `refreshSessionFromProfile` + `refreshWalletFromServer` (`profiles.balance` ↔ session) |
 | `leagues.js` | матчинг лиг по `grade` (зеркало SQL): `gradeToLeague` / `canReviewGrades` |
-| `portfolios.js` | `listPortfoliosForReview` (чужие в лиге, RLS) / `listMyPortfolios` / `submitPortfolio` / `submitPortfolioReview` + `formatPortfolioRole` |
+| `portfolios.js` | `listPortfoliosForReview` (чужие в лиге, RLS, без полных слотов) / `listMyPortfolios` / claim·heartbeat·release / `submitPortfolio` / `submitPortfolioReview` (+ answers) + `formatPortfolioRole` |
 | `referrals.js` | validate / redeem (stub) |
 
 См. [`SCREENS.md`](../../SCREENS.md).
