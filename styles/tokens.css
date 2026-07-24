@@ -347,6 +347,15 @@
   --ban-screen-body-size: var(--font-size-base);
   --ban-screen-actions-gap: var(--shell-review-done-actions-gap);
   --ban-screen-btn-width: 242px;
+  --ban-screen-btn-gap: var(--space-3);
+  --ban-screen-btn-contact-bg: var(--color-accent);
+  --ban-screen-btn-contact-bg-hover: var(--color-accent-hover);
+  --ban-screen-btn-contact-bg-active: var(--color-accent-active);
+  --ban-screen-btn-contact-color: var(--color-on-accent);
+  --ban-screen-btn-contact-color-hover: var(--color-on-accent-hover);
+  --ban-screen-btn-contact-color-active: var(--color-on-accent-active);
+  --ban-screen-icon-tg-width: var(--auth-screen-icon-tg-width);
+  --ban-screen-icon-tg-height: var(--auth-screen-icon-tg-height);
   --ban-screen-noise-opacity: 0.5;
   /* Mark with flame: same width as brand, taller; nudge keeps bottom/right with 44×43 */
   --ban-screen-brand-width: 44px;
