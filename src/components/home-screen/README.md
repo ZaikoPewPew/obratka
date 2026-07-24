@@ -74,8 +74,8 @@ Topbar поверх контента (`position: absolute`), появление 
 | ФИО | `item.name` |
 | Роль | EN Title Case: `formatPortfolioRole` |
 | Слоты | Белый чип `.home-screen__card-progress` 96×52 r16 (Figma Frame 140); внутри стек 64×24 |
-| Пустой слот | 24×24, фон muted, обводка 3px белая, плюс 18×18 |
-| Active / completed | Аватарка; overlap −4px, L→R |
+| Пустой слот | 24×24, фон muted, **внешняя** обводка 3px (box-shadow), плюс 18×18 |
+| Active / completed | Аватарка; margin −4px между слотами, L→R |
 
 Заполнение слотов слева направо; по умолчанию три плюса. Текста «N из 3» нет (есть в aria).
 

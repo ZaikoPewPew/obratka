@@ -545,11 +545,24 @@
   width: var(--home-screen-reviewer-slot-size);
   height: var(--home-screen-reviewer-slot-size);
   margin-inline-end: var(--home-screen-reviewer-slots-gap);
-  overflow: hidden;
-  border: var(--home-screen-reviewer-slot-border) solid
-    var(--home-screen-reviewer-slot-ring);
+  /* Обводка снаружи, не съедает 24×24 */
+  border: none;
   border-radius: var(--home-screen-reviewer-slot-radius);
   background: var(--home-screen-reviewer-slot-empty-bg);
+  box-shadow: 0 0 0 var(--home-screen-reviewer-slot-border)
+    var(--home-screen-reviewer-slot-ring);
+}
+
+.home-screen__reviewer-slot:nth-child(1) {
+  z-index: 1;
+}
+
+.home-screen__reviewer-slot:nth-child(2) {
+  z-index: 2;
+}
+
+.home-screen__reviewer-slot:nth-child(3) {
+  z-index: 3;
 }
 
 .home-screen__reviewer-slot:last-child {
@@ -579,6 +592,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: var(--home-screen-reviewer-slot-radius);
 }
 
 .home-screen__reviewer-slot-letter {

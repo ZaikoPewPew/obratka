@@ -357,8 +357,8 @@
   --home-screen-progress-slots-width: 64px;
   --home-screen-progress-slots-height: var(--space-6);
   --home-screen-reviewer-slot-size: var(--space-6);
-  /* Старт каждые 20px → overlap 4px при size 24 */
-  --home-screen-reviewer-slots-gap: calc(var(--space-1) * -1);
+  /* Figma: старт каждые 20px при size 24 → margin −4 */
+  --home-screen-reviewer-slots-gap: -4px;
   --home-screen-reviewer-slot-radius: var(--radius-md);
   --home-screen-reviewer-slot-border: 3px;
   --home-screen-reviewer-slot-ring: var(--color-surface);
