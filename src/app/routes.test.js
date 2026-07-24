@@ -12,6 +12,7 @@ describe("routes", () => {
     assert.equal(pathForRoute("referral"), "/referral");
     assert.equal(pathForRoute("auth"), "/registration");
     assert.equal(pathForRoute("authCode"), "/registration/code");
+    assert.equal(pathForRoute("settings"), "/settings");
     assert.equal(pathForRoute("url"), "/portfolio");
     assert.equal(pathForRoute("review"), "/review");
     assert.equal(pathForRoute("quiz"), "/quiz");
@@ -24,6 +25,7 @@ describe("routes", () => {
     assert.equal(routeIdFromPathname("/referral"), "referral");
     assert.equal(routeIdFromPathname("/registration"), "auth");
     assert.equal(routeIdFromPathname("/registration/code"), "authCode");
+    assert.equal(routeIdFromPathname("/settings"), "settings");
     assert.equal(routeIdFromPathname("/obratka/portfolio", "/obratka/"), "url");
     assert.equal(routeIdFromPathname("/obratka/review", "/obratka/"), "review");
     assert.equal(routeIdFromPathname("/obratka/quiz/done", "/obratka/"), "done");

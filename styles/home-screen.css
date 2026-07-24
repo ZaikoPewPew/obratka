@@ -256,6 +256,12 @@
   cursor: pointer;
 }
 
+.home-screen__profile-menu-anchor {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
 .home-screen__profile--letter {
   background: var(--home-screen-avatar-letter-bg);
 }

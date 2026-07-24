@@ -20,7 +20,7 @@ Split как у `success-screen`: слева тайтл + подтайтл + к�
 | `banContact` | Связаться |
 | `banExit` | Выйти |
 
-Контакт: `BAN_CONTACT_URL` в `BanScreen.js` → `https://t.me/ezzzz12345`.  
+Контакт: `COMMUNITY_CONTACT_URL` в `src/config/contacts.js`.
 Кнопки: ширина `--ban-screen-btn-width` (242px). «Выйти» — серая (`--color-surface-muted`). «Связаться» — accent (`--color-accent` / `#242426`) + белый текст. «Выйти» → `onExit` (sign-out → `/referral`).
 
 ## API

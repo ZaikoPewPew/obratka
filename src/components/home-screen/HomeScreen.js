@@ -27,6 +27,8 @@ import {
 } from "../../utils/backdropLuminance.js";
 import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import { createAppModal } from "../app-modal/AppModal.js";
+import { createAccountMenu } from "../account-menu/AccountMenu.js";
+import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
 import boneIconUrl from "../../assets/home/bone.svg";
 import bellIconUrl from "../../assets/home/bell.svg";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
@@ -129,7 +131,8 @@ function bindImageFallbacks(img, candidates) {
  *   onOpenPortfolio: (item: HomePortfolioItem) => void | Promise<void>;
  *   onOpenReport?: (item: HomePortfolioItem) => void | Promise<void>;
  *   onAddPortfolio?: () => void | Promise<void>;
- *   onResetSession?: () => void | Promise<void>;
+ *   onOpenSettings?: () => void | Promise<void>;
+ *   onSignOut?: () => void | Promise<void>;
  * }} opts
  * @returns {{
  *   root: HTMLElement;
@@ -144,7 +147,8 @@ export function createHomeScreen({
   onOpenPortfolio,
   onOpenReport,
   onAddPortfolio,
-  onResetSession,
+  onOpenSettings,
+  onSignOut,
 }) {
   const root = document.createElement("section");
   root.className = "home-screen";
@@ -158,16 +162,10 @@ export function createHomeScreen({
   const topbar = document.createElement("header");
   topbar.className = "home-screen__topbar";
 
-  const markLink = document.createElement("a");
-  markLink.className = "home-screen__mark";
-  markLink.href = "#";
-  markLink.addEventListener("click", (event) => {
-    event.preventDefault();
-    /* Временно: сброс сессии по клику на логотип (dev). */
-    void onResetSession?.();
-  });
-
-  markLink.innerHTML = brandMarkSvg("home-screen__mark-img");
+  const mark = document.createElement("div");
+  mark.className = "home-screen__mark";
+  mark.setAttribute("aria-hidden", "true");
+  mark.innerHTML = brandMarkSvg("home-screen__mark-img");
 
   const topActions = document.createElement("div");
   topActions.className = "home-screen__top-actions";
@@ -230,6 +228,7 @@ export function createHomeScreen({
   const profileBtn = document.createElement("button");
   profileBtn.type = "button";
   profileBtn.className = "home-screen__profile home-screen__profile--letter";
+  profileBtn.setAttribute("aria-expanded", "false");
 
   const profileImg = document.createElement("img");
   profileImg.className = "home-screen__profile-img";
@@ -246,8 +245,48 @@ export function createHomeScreen({
   profileLetter.textContent = "?";
 
   profileBtn.append(profileImg, profileLetter);
-  topActions.append(addBtn, reputationChip, balanceChip, notifyBtn, profileBtn);
-  topbar.append(markLink, topActions);
+
+  const profileMenuAnchor = document.createElement("div");
+  profileMenuAnchor.className = "home-screen__profile-menu-anchor";
+
+  const contactsModal = createAppModal({
+    size: "md",
+    showSecondary: false,
+    onPrimary: () => {
+      window.open(COMMUNITY_CONTACT_URL, "_blank", "noopener,noreferrer");
+      void contactsModal.close();
+    },
+  });
+
+  const accountMenu = createAccountMenu({
+    onClose: () => {
+      profileBtn.setAttribute("aria-expanded", "false");
+    },
+    onSettings: () => onOpenSettings?.(),
+    onInvite: () => {
+      void openMyReferralInvite();
+    },
+    onContacts: () => {
+      const t = getStrings();
+      contactsModal.setTitle(t.homeContactsTitle ?? "");
+      contactsModal.setDescription(t.homeContactsBody ?? "");
+      contactsModal.setPrimaryLabel(t.homeContactsOpen ?? "");
+      contactsModal.setCloseAriaLabel(t.homeContactsCloseAria ?? "");
+      contactsModal.setActionsVisible({ primary: true, secondary: false });
+      contactsModal.open();
+    },
+    onSignOut: () => onSignOut?.(),
+  });
+
+  profileMenuAnchor.append(profileBtn, accountMenu.root);
+  topActions.append(
+    addBtn,
+    reputationChip,
+    balanceChip,
+    notifyBtn,
+    profileMenuAnchor,
+  );
+  topbar.append(mark, topActions);
 
   const body = document.createElement("div");
   body.className = "home-screen__body";
@@ -331,7 +370,15 @@ export function createHomeScreen({
   mineTab.dataset.tab = "mine";
 
   tabbar.append(tabThumb, feedTab, mineTab);
-  root.append(title, topbar, body, tabbar, noticeModal.root, inviteModal.root);
+  root.append(
+    title,
+    topbar,
+    body,
+    tabbar,
+    noticeModal.root,
+    inviteModal.root,
+    contactsModal.root,
+  );
 
   /** @type {HomePortfolioItem[]} */
   let items = [];
@@ -420,7 +467,6 @@ export function createHomeScreen({
   function syncCopy() {
     const t = getStrings();
     title.textContent = t.homeTitle;
-    markLink.setAttribute("aria-label", t.brandLogoAlt);
     list.setAttribute(
       "aria-label",
       loading
@@ -437,7 +483,6 @@ export function createHomeScreen({
     addLabel.textContent = t.homeAddPortfolio;
     addBtn.setAttribute("aria-label", t.homeAddPortfolio);
     addBtn.title = t.homeAddPortfolio;
-    markLink.title = t.homeResetSessionTitle;
 
     const balance = getBalance();
     balanceValue.textContent = String(balance);
@@ -459,6 +504,8 @@ export function createHomeScreen({
 
     notifyBtn.setAttribute("aria-label", t.homeNotificationsAria);
     profileBtn.setAttribute("aria-label", t.homeProfileAria);
+    profileBtn.setAttribute("aria-haspopup", "menu");
+    accountMenu.syncContent();
 
     syncProfileAvatar();
     scheduleTabThumbSync();
@@ -507,6 +554,11 @@ export function createHomeScreen({
       inviteCopyResetId = null;
     }
     void inviteModal.close();
+  }
+
+  function closeAccountMenu() {
+    profileBtn.setAttribute("aria-expanded", "false");
+    return accountMenu.close();
   }
 
   /**
@@ -1120,6 +1172,8 @@ export function createHomeScreen({
     showTabbar();
     closeSubmitLockedModal();
     closeInviteModal();
+    void closeAccountMenu();
+    void contactsModal.close();
     root.setAttribute("aria-busy", "false");
     root.hidden = true;
     return Promise.resolve();
@@ -1221,7 +1275,21 @@ export function createHomeScreen({
   });
 
   profileBtn.addEventListener("click", () => {
-    void openMyReferralInvite();
+    if (profileBtn.getAttribute("aria-expanded") === "true") {
+      void closeAccountMenu();
+      return;
+    }
+    profileBtn.setAttribute("aria-expanded", "true");
+    accountMenu.open();
+    accountMenu.focusFirst();
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!accountMenu.isOpen()) return;
+    if (event.target instanceof Node && profileMenuAnchor.contains(event.target)) {
+      return;
+    }
+    void closeAccountMenu();
   });
 
   syncCopy();

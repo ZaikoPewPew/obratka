@@ -8,6 +8,7 @@
 
 ```text
 referral → auth → authCode → onboarding → home
+                              ├─ profile → settings
                               ├─ pick → claim → review → quiz → /quiz/done (review-panel done)
                               ├─ mine card → report (листы + жалоба)
                               └─ submit (url) → done на url-screen → /done (URL sync)
@@ -20,6 +21,7 @@ referral → auth → authCode → onboarding → home
 | 2b | `auth-code-screen` | `/registration/code` | 6 ячеек кода из письма |
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |
 | 4 | `home-screen` | `/home` | Хаб: очередь + баланс + CTA |
+| 4a | `settings-screen` | `/settings` | Настройки аккаунта (пока заглушка) |
 | 5a | iframe-shell | `/review` | Ревью выбранного портфолио (после claim слота) |
 | 5b | `url-screen` | `/portfolio` | Подача своего URL (нужен баланс) |
 | 6 | `review-screen` + `review-panel` | `/quiz` → `/quiz/done` | Квиз; финал слева + улет отчёта |
@@ -79,6 +81,8 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 Handoff соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
 `home-screen` — отдельный полноэкранный слой (absolute topbar поверх ленты).  
+`account-menu` — поповер под аватаром; identity read-only, действия открывают settings / contacts modal / sign out.
+`settings-screen` — отдельный полноэкранный side-route `/settings`.
 `url-screen` — split; при URL справа заглушка «Портфолио»; submit → done на том же экране (`setVariant("done")`).  
 `success-screen` — запасной `/done` (deep link); основной submit больше не прыгает сюда.  
 `review-screen` — split для квиза (слева panel, справа visual + PDF-лист).  
@@ -102,6 +106,8 @@ src/components/
   auth-code-screen/
   onboarding-screen/
   home-screen/
+  account-menu/          ← поповер профиля под аватаром
+  settings-screen/       ← /settings (пока заглушка)
   url-screen/
   review-screen/
   review-panel/           ← только шаги квиза
@@ -156,6 +162,7 @@ Shared (не экраны флоу):
 | `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` (shell) |
 | `createOnboardingScreen` | `/onboarding` | UI → profiles (shell) |
 | `createHomeScreen` | `/home` | UI (hub + feed + invite modal) |
+| `createSettingsScreen` | `/settings` | UI (заглушка настроек) |
 | `createUrlScreen` | `/portfolio` | UI (submit + done via `setVariant`; shell) |
 | iframe-shell + timer | `/review` | UI |
 | `createReviewScreen` + `createReviewPanel` | `/quiz` | UI |

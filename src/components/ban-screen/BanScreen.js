@@ -2,9 +2,7 @@ import { getStrings } from "../../i18n.js";
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
 import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
 import { banBrandMarkSvg } from "../../assets/brand/brandMarks.js";
-
-/** Контакт админа сообщества (кнопка «Связаться»). */
-export const BAN_CONTACT_URL = "https://t.me/ezzzz12345";
+import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
 
 const BRAND_MARK_SVG = banBrandMarkSvg();
 
@@ -150,7 +148,7 @@ export function createBanScreen(opts = {}) {
   }
 
   contactBtn.addEventListener("click", () => {
-    window.open(BAN_CONTACT_URL, "_blank", "noopener,noreferrer");
+    window.open(COMMUNITY_CONTACT_URL, "_blank", "noopener,noreferrer");
   });
 
   exitBtn.addEventListener("click", () => {

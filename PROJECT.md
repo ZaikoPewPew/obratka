@@ -109,7 +109,7 @@ SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabas
 | Brand split (referral / auth / auth-code / onboarding / url) | `.url-screen*` + [`brand-screen-visual`](src/components/brand-screen-visual/README.md); цель — `brand-screen-shell` |
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
-| Home | `home-screen` + `home-screen.css` (лента, не split) |
+| Home | `home-screen` + `account-menu` (лента и меню профиля, не split) |
 | Review | `index.html` `.iframe-shell` + таймер в `main.js` |
 | Quiz | `review-screen` + `review-panel` |
 | Success | `success-screen` (`/done`) |
@@ -136,9 +136,9 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 
 **Сейчас подключено** (`index.html` + `main.js`):
 
-- CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `success-screen`, `home-screen`, `ban-screen`, `report-screen`
+- CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `success-screen`, `home-screen`, `account-menu`, `settings-screen`, `ban-screen`, `report-screen`
 - Экраны: referral, auth, auth-code, onboarding, home, url, review-shell, review/quiz, success, report, ban
-- Shared UI: `brand-screen-visual`, `brand-screen-shell` (referral / auth / auth-code / onboarding / url), `app-modal`
+- Shared UI: `brand-screen-visual`, `brand-screen-shell` (referral / auth / auth-code / onboarding / url), `app-modal`, `account-menu`
 
 Архив waitlist (`apply-card`, `email-field`, dual-layout CSS) удалён. Спека: раздел «Архив» в [`mobile.md`](mobile.md).
 

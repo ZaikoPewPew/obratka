@@ -24,7 +24,8 @@
 | `auth` | `/registration` | Email → code screen / Telegram / Google |
 | `authCode` | `/registration/code` | 6-digit Email OTP + resend cooldown |
 | `onboarding` | `/onboarding` | Онбординг → profiles |
-| `home` | `/home` | Главная (хаб + шаринг своего referral-кода) |
+| `home` | `/home` | Главная (хаб + меню профиля) |
+| `settings` | `/settings` | Отдельный экран настроек (пока заглушка) |
 | `url` | `/portfolio` | Подача своего портфолио |
 | `review` | `/review` | Ревью: iframe + таймер |
 | `quiz` | `/quiz` | Квиз / опрос после таймера |
@@ -43,6 +44,7 @@ Google OAuth return обрабатывается в `main.js` до роутин�
 
 ```text
 referral → auth → (authCode) → onboarding → home
+  home → settings
   home → review → quiz → /quiz/done
   home → url → /done (portfolioSubmitted)
 ```

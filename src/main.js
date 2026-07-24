@@ -43,6 +43,7 @@ import { createSuccessScreen } from "./components/success-screen/SuccessScreen.j
 import { createReportScreen } from "./components/report-screen/ReportScreen.js";
 import { createBanScreen } from "./components/ban-screen/BanScreen.js";
 import { createUrlScreen } from "./components/url-screen/UrlScreen.js";
+import { createSettingsScreen } from "./components/settings-screen/SettingsScreen.js";
 import {
   resolvePortfolioEmbed,
 } from "./utils/portfolioEmbed.js";
@@ -215,30 +216,39 @@ const reportScreen = createReportScreen({
 });
 document.body.append(reportScreen.root);
 
+async function exitAuthenticatedSession() {
+  try {
+    await signOut();
+  } catch {
+    /* Локальную сессию всё равно закрываем. */
+  }
+  clearSession();
+  clearSubmittedPortfolios();
+  setPendingAuthEmail(null);
+  try {
+    window.sessionStorage.removeItem("obratka.authProviderError");
+  } catch {
+    /* ignore */
+  }
+  stopTimer();
+  await releaseHeldClaim();
+  portfolioUrl = null;
+  portfolioId = null;
+  claimHeld = false;
+  reviewSubmitted = false;
+  stopClaimHeartbeat();
+  embedPlan = null;
+  portfolioName = getStrings().brandName;
+  pendingSuccessPreset = "generic";
+  pendingReportPortfolioId = null;
+  pendingReportPortfolioName = "";
+  leaveSessionShell();
+  await closeReview();
+  go("referral", { replace: true });
+}
+
 const banScreen = createBanScreen({
-  onExit: async () => {
-    try {
-      await signOut();
-    } catch {
-      /* всё равно чистим локальное состояние */
-    }
-    clearSession();
-    clearSubmittedPortfolios();
-    stopTimer();
-    portfolioUrl = null;
-    portfolioId = null;
-    claimHeld = false;
-    reviewSubmitted = false;
-    stopClaimHeartbeat();
-    embedPlan = null;
-    portfolioName = getStrings().brandName;
-    pendingSuccessPreset = "generic";
-    pendingReportPortfolioId = null;
-    pendingReportPortfolioName = "";
-    leaveSessionShell();
-    await closeReview();
-    go("referral", { replace: true });
-  },
+  onExit: exitAuthenticatedSession,
 });
 document.body.append(banScreen.root);
 
@@ -462,6 +472,7 @@ function openReview() {
   }
 
   void homeScreen.close();
+  void settingsScreen.close();
   void urlScreen.close();
   void onboardingScreen.close({ handoff: true });
   void authScreen.close({ handoff: true });
@@ -601,6 +612,12 @@ const urlScreen = createUrlScreen({
   },
 });
 
+const settingsScreen = createSettingsScreen({
+  onBack: () => {
+    go("home");
+  },
+});
+
 const homeScreen = createHomeScreen({
   onOpenPortfolio: async (item) => {
     if (item?.isOwn) return;
@@ -679,34 +696,10 @@ const homeScreen = createHomeScreen({
     if (!canSubmitPortfolio()) return;
     go("url");
   },
-  onResetSession: async () => {
-    try {
-      await signOut();
-    } catch {
-      /* Dev reset: всё равно чистим локальное состояние */
-    }
-    clearSession();
-    clearSubmittedPortfolios();
-    setPendingAuthEmail(null);
-    try {
-      window.sessionStorage.removeItem("obratka.authProviderError");
-    } catch {
-      /* ignore */
-    }
-    stopTimer();
-    await releaseHeldClaim();
-    portfolioUrl = null;
-    portfolioId = null;
-    embedPlan = null;
-    portfolioName = getStrings().brandName;
-    pendingSuccessPreset = "generic";
-    pendingReportPortfolioId = null;
-    pendingReportPortfolioName = "";
-    leaveSessionShell();
-    await closeReview();
-    void homeScreen.close();
-    go("referral", { replace: true });
+  onOpenSettings: () => {
+    go("settings");
   },
+  onSignOut: exitAuthenticatedSession,
 });
 
 const onboardingScreen = createOnboardingScreen({
@@ -912,6 +905,7 @@ document.body.append(
   authCodeScreen.root,
   onboardingScreen.root,
   homeScreen.root,
+  settingsScreen.root,
   urlScreen.root,
 );
 
@@ -992,6 +986,10 @@ async function applyRoute(id, opts = {}) {
       void homeScreen.open();
       return;
     }
+    if (target === "settings") {
+      settingsScreen.open();
+      return;
+    }
     if (target === "url") {
       urlScreen.open("", openOpts);
       return;
@@ -1025,6 +1023,7 @@ async function applyRoute(id, opts = {}) {
     if (id !== "authCode") closers.push(authCodeScreen.close(closeOpts));
     if (id !== "onboarding") closers.push(onboardingScreen.close(closeOpts));
     if (id !== "home") closers.push(homeScreen.close());
+    if (id !== "settings") closers.push(settingsScreen.close());
     if (id !== "url") closers.push(urlScreen.close(closeOpts));
     if (id !== "success") closers.push(successScreen.close());
     if (id !== "report") closers.push(reportScreen.close());
@@ -1084,6 +1083,7 @@ async function applyRoute(id, opts = {}) {
       authScreen.close({}),
       authCodeScreen.close({}),
       onboardingScreen.close({}),
+      settingsScreen.close(),
       urlScreen.close({}),
       successScreen.close(),
       reportScreen.close(),
