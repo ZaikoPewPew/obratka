@@ -1,6 +1,8 @@
 # Edge Function: `telegram-auth`
 
-Проверяет данные [Telegram Login Widget](https://core.telegram.org/widgets/login), создаёт/находит пользователя в Supabase Auth и возвращает `access_token` + `refresh_token`.
+Проверяет данные [Telegram Login Widget](https://core.telegram.org/widgets/login), создаёт/находит пользователя в Supabase Auth и возвращает `token_hash` для клиентского `verifyOtp` (не session JWT).
+
+`auth_date` принимается не старше **1 часа**. `telegram_id` пишется в `app_metadata` (не в `user_metadata`).
 
 ## Секреты проекта
 

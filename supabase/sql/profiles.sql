@@ -84,6 +84,7 @@ alter table public.profiles
 create or replace function public.set_profiles_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();
@@ -172,7 +173,60 @@ create trigger profiles_protect_reputation
   for each row
   execute function public.protect_profiles_reputation();
 
+-- Clients cannot self-credit balance; RPC / review trigger use bypass GUC.
+create or replace function public.protect_profiles_balance()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if current_setting('app.bypass_profile_guards', true) = 'on' then
+    return new;
+  end if;
+  if new.balance is distinct from old.balance
+     and coalesce(auth.jwt() ->> 'role', 'service_role') is distinct from 'service_role' then
+    raise exception 'profiles.balance is read-only for clients';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_protect_balance on public.profiles;
+create trigger profiles_protect_balance
+  before update on public.profiles
+  for each row
+  execute function public.protect_profiles_balance();
+
+-- Grade / role: only before onboarding_done (or service_role / SQL Editor).
+create or replace function public.protect_profiles_grade()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if current_setting('app.bypass_profile_guards', true) = 'on' then
+    return new;
+  end if;
+  if (
+    new.grade is distinct from old.grade
+    or new.role is distinct from old.role
+  )
+     and coalesce(old.onboarding_done, false) is true
+     and coalesce(auth.jwt() ->> 'role', 'service_role') is distinct from 'service_role' then
+    raise exception 'profiles.grade/role locked after onboarding';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_protect_grade on public.profiles;
+create trigger profiles_protect_grade
+  before update on public.profiles
+  for each row
+  execute function public.protect_profiles_grade();
+
 -- Used by portfolios/reviews RLS (security definer — no recursive RLS on profiles).
+-- Client oracle: only reports ban for auth.uid(); other uid → false (no leak).
 create or replace function public.is_profile_banned(uid uuid default auth.uid())
 returns boolean
 language sql
@@ -183,7 +237,8 @@ as $$
   select exists (
     select 1
     from public.profiles p
-    where p.id = uid
+    where p.id = auth.uid()
+      and (uid is null or uid = auth.uid())
       and p.banned_at is not null
   );
 $$;
@@ -204,8 +259,9 @@ declare
   tg_id bigint;
   new_code text;
 begin
+  -- telegram_id only from app_metadata (Edge / service_role), not user_metadata.
   begin
-    tg_id := nullif(meta->>'telegram_id', '')::bigint;
+    tg_id := nullif(app_meta->>'telegram_id', '')::bigint;
   exception when others then
     tg_id := null;
   end;
@@ -285,4 +341,13 @@ create policy "profiles_update_own"
   using (auth.uid() = id)
   with check (auth.uid() = id);
 
+revoke all on table public.profiles from anon;
+revoke all on table public.profiles from public;
 grant select, update on public.profiles to authenticated;
+
+revoke all on function public.protect_profiles_balance() from public;
+revoke all on function public.protect_profiles_balance() from anon;
+revoke all on function public.protect_profiles_balance() from authenticated;
+revoke all on function public.protect_profiles_grade() from public;
+revoke all on function public.protect_profiles_grade() from anon;
+revoke all on function public.protect_profiles_grade() from authenticated;

@@ -15,7 +15,7 @@ referral → auth → authCode → onboarding → home
 
 | Шаг | Экран | Path | Смысл |
 |-----|--------|------|--------|
-| 1 | `referral-screen` | `/referral` | Реферальный код (validate RPC; seed `YTHWKPDWAK`) |
+| 1 | `referral-screen` | `/referral` | Реферальный код (validate RPC; seed `YTHWKPDWAK`); стек аватаров — random из `founder-avatars.json` |
 | 2 | `auth-screen` | `/registration` | Email → OTP screen / Telegram / Google |
 | 2b | `auth-code-screen` | `/registration/code` | 6 ячеек кода из письма |
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |

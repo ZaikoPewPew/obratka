@@ -10,10 +10,13 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 | Путь | Роль |
 |------|------|
 | `BAN.md` | **Оператор:** как банить (Table Editor + SQL), шаблоны |
-| `sql/profiles.sql` | `public.profiles` (1:1 с `auth.users`), триггер `handle_new_user`, RLS, `tier`, `banned_at` / `ban_reason`, `reputation`, колонки referral |
-| `sql/referrals.sql` | referral-код на профиль (лимит 2), seed `YTHWKPDWAK`, RPC `validate_referral` / `redeem_referral` |
-| `sql/portfolios.sql` | `public.portfolios` + `public.reviews`, очередь ревью, RLS (banned не может INSERT) |
-| `sql/review_complaints.sql` | жалобы на листы → `reputation` → автобан (`submit_review_complaint`) |
+| `sql/profiles.sql` | `public.profiles`, protect tier/ban/reputation/balance/grade, referral |
+| `sql/wallet.sql` | protect balance + RPC `spend_submit_cost` |
+| `sql/referrals.sql` | referral-код на профиль (лимит 2), seed `YTHWKPDWAK`, RPC validate/redeem |
+| `sql/portfolios.sql` | portfolios/reviews, лиги; INSERT pending/0/target=3 |
+| `sql/review_claims.sql` | claims + award balance в review trigger |
+| `sql/review_complaints.sql` | жалобы на листы → `reputation` → автобан |
+| `sql/subscribers_rls.sql` | RLS на legacy `subscribers` (если таблица есть) |
 | `sql/ban-templates.sql` | Copy-paste SQL: бан / разбан / поиск |
 | `sql/subscribers_count.sql` | RPC `subscribers_count()` (legacy waitlist) |
 | `functions/telegram-auth/` | Telegram Login Widget → сессия Supabase Auth |

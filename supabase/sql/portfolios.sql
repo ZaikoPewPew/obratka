@@ -201,6 +201,9 @@ create policy "portfolios_insert_own"
   with check (
     owner_id = auth.uid()
     and not public.is_profile_banned(auth.uid())
+    and status = 'pending'
+    and reviews_count = 0
+    and target_reviews = 3
   );
 
 -- Счётчик/статус обновляет только security definer trigger.
@@ -231,7 +234,16 @@ create policy "reviews_insert_own"
 grant select, insert on public.portfolios to authenticated;
 grant select, insert on public.reviews to authenticated;
 
-grant execute on function public.profile_grade(uuid) to authenticated;
+revoke all on table public.portfolios from anon;
+revoke all on table public.portfolios from public;
+revoke all on table public.reviews from anon;
+revoke all on table public.reviews from public;
+
+-- profile_grade is an oracle if callable by clients; keep for internal definer use only.
+revoke all on function public.profile_grade(uuid) from public;
+revoke all on function public.profile_grade(uuid) from anon;
+revoke all on function public.profile_grade(uuid) from authenticated;
+
 grant execute on function public.grade_league(text) to authenticated;
 grant execute on function public.can_review_grades(text, text) to authenticated;
 grant execute on function public.can_review_portfolio(uuid, uuid) to authenticated;

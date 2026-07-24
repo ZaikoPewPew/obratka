@@ -1,4 +1,7 @@
-import { getStrings } from "../../i18n.js";
+import {
+  getFounderAvatarSourcesForPage,
+  getStrings,
+} from "../../i18n.js";
 import { createBrandScreenVisual } from "../brand-screen-visual/BrandScreenVisual.js";
 import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
 import {
@@ -12,15 +15,60 @@ import {
   setUrlScreenFieldInvalid,
 } from "../../utils/urlScreenField.js";
 
-const PLACEHOLDER_AVATAR_COUNT = 4;
+const UNAVATAR_BASE = "https://unavatar.io/";
 
 /**
- * Тёмный плейсхолдер-аватар (пока без реальных фото).
+ * @param {string} source — путь после unavatar.io/, напр. github/octocat
+ * @returns {string}
+ */
+function unavatarSrc(source) {
+  const trimmed = String(source).replace(/^\/+/, "");
+  const path = trimmed
+    .split("/")
+    .map((seg) => encodeURIComponent(seg))
+    .join("/");
+  return `${UNAVATAR_BASE}${path}`;
+}
+
+/**
+ * Круг из рандомного пула `content/founder-avatars.json` (unavatar.io).
+ * При ошибке загрузки остаётся тёмный плейсхолдер.
+ * @param {string} source
  * @returns {HTMLSpanElement}
  */
-function createPlaceholderAvatar() {
+function createFounderAvatar(source) {
   const avatar = document.createElement("span");
-  avatar.className = "url-screen__avatar url-screen__avatar--placeholder";
+  avatar.className =
+    "url-screen__avatar url-screen__avatar--placeholder url-screen__avatar--photo";
+
+  const img = document.createElement("img");
+  img.className = "url-screen__avatar-img";
+  img.src = unavatarSrc(source);
+  img.alt = "";
+  img.width = 32;
+  img.height = 32;
+  img.decoding = "async";
+  img.loading = "lazy";
+  img.referrerPolicy = "no-referrer";
+
+  function revealPhoto() {
+    avatar.classList.remove("url-screen__avatar--placeholder");
+    avatar.classList.add("url-screen__avatar--photo-ready");
+  }
+
+  img.addEventListener("load", revealPhoto);
+  if (img.complete && img.naturalWidth > 0) {
+    revealPhoto();
+  }
+  img.addEventListener("error", () => {
+    img.remove();
+    avatar.classList.remove(
+      "url-screen__avatar--photo",
+      "url-screen__avatar--photo-ready",
+    );
+  });
+
+  avatar.append(img);
   return avatar;
 }
 
@@ -109,8 +157,8 @@ export function createReferralScreen({ onSubmit }) {
   avatars.className = "url-screen__avatars";
   avatars.setAttribute("aria-hidden", "true");
 
-  for (let i = 0; i < PLACEHOLDER_AVATAR_COUNT; i += 1) {
-    avatars.append(createPlaceholderAvatar());
+  for (const source of getFounderAvatarSourcesForPage()) {
+    avatars.append(createFounderAvatar(source));
   }
 
   const platformsText = document.createElement("p");

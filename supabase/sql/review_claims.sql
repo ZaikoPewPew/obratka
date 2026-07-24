@@ -375,6 +375,12 @@ begin
   where portfolio_id = new.portfolio_id
     and reviewer_id = new.reviewer_id;
 
+  -- Award REVIEW_REWARD (1) server-side; clients cannot write balance.
+  perform set_config('app.bypass_profile_guards', 'on', true);
+  update public.profiles
+  set balance = balance + 1
+  where id = new.reviewer_id;
+
   return new;
 end;
 $$;
@@ -431,7 +437,9 @@ create policy "reviews_select_reviewer_or_owner"
   );
 
 grant execute on function public.review_claim_ttl() to authenticated;
-grant execute on function public.purge_expired_review_claims() to authenticated;
+revoke all on function public.purge_expired_review_claims() from public;
+revoke all on function public.purge_expired_review_claims() from anon;
+revoke all on function public.purge_expired_review_claims() from authenticated;
 grant execute on function public.claim_portfolio_review(uuid) to authenticated;
 grant execute on function public.heartbeat_portfolio_claim(uuid) to authenticated;
 grant execute on function public.release_portfolio_claim(uuid) to authenticated;

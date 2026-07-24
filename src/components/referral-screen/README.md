@@ -10,14 +10,15 @@ Invite-only gate: код проверяется через RPC `validate_referra
 |---------|----------|
 | Заголовок | `referralTitle` — «Введи реферальный код» |
 | Placeholder | `referralPlaceholder` — `YTHWKPDWAK` |
-| Аватары | 4 тёмных круга (`url-screen__avatar--placeholder`) |
+| Аватары | 4 рандомных фото из `founder-avatars.json` через unavatar (`getFounderAvatarSourcesForPage`) |
 | Текст под полем | `referralColleagues` — «140 твоих коллег уже внутри» |
 
 ## Файл
 
 - `ReferralScreen.js` — `createReferralScreen({ onSubmit })` → `{ root, open, close, setError }`.
 - `open(prefill?, { handoff? })`, `close({ handoff? })`.
-- Стили: `.url-screen*` + `--placeholder` в `iframe-shell.css` / `tokens.css`.
+- Стили: `.url-screen*` + photo/placeholder в `iframe-shell.css` / `tokens.css`.
+- Пул источников: [`content/founder-avatars.json`](../../../content/founder-avatars.json) — shuffle на загрузку страницы.
 
 ## Visual и ошибки поля
 

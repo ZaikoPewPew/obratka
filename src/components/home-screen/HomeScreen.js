@@ -1195,6 +1195,7 @@ export function createHomeScreen({
   });
 
   balanceChip.addEventListener("click", () => {
+    if (!import.meta.env.DEV) return;
     void creditBalance(DEV_CREDIT_AMOUNT).then(() => {
       syncCopy();
     });

@@ -73,7 +73,14 @@ async function verifyTelegramAuth(
     ["sign"],
   );
   const signature = await crypto.subtle.sign("HMAC", key, enc.encode(checkString));
-  return toHex(signature) === hash;
+  const expected = toHex(signature);
+  if (expected.length !== hash.length) return false;
+  // Constant-time-ish compare (mitigate timing leaks on hash string).
+  let mismatch = 0;
+  for (let i = 0; i < expected.length; i++) {
+    mismatch |= expected.charCodeAt(i) ^ hash.charCodeAt(i);
+  }
+  return mismatch === 0;
 }
 
 function telegramEmail(telegramId: number): string {
@@ -148,7 +155,7 @@ Deno.serve(async (req) => {
     return json({ error: "invalid_auth_date" }, 400);
   }
 
-  const maxAgeSec = 24 * 60 * 60;
+  const maxAgeSec = 60 * 60; // 1h — limit replay of stolen Telegram login payloads
   const nowSec = Math.floor(Date.now() / 1000);
   if (Math.abs(nowSec - authDate) > maxAgeSec) {
     return json({ error: "auth_date_expired" }, 401);
@@ -171,7 +178,6 @@ Deno.serve(async (req) => {
 
   const userMetadata = {
     provider: "telegram",
-    telegram_id: telegramId,
     username: username || null,
     first_name: firstName || null,
     last_name: lastName || null,
@@ -179,11 +185,17 @@ Deno.serve(async (req) => {
     photo_url: photoUrl || null,
     avatar_url: photoUrl || null,
   };
+  // telegram_id only in app_metadata (trusted); handle_new_user reads it from there.
+  const appMetadata = {
+    provider: "telegram",
+    telegram_id: telegramId,
+  };
 
   const { error: createError } = await admin.auth.admin.createUser({
     email,
     email_confirm: true,
     user_metadata: userMetadata,
+    app_metadata: appMetadata,
   });
 
   if (
@@ -191,10 +203,7 @@ Deno.serve(async (req) => {
     !isAlreadyRegistered(createError.message, createError.code)
   ) {
     console.error("createUser", createError);
-    return json(
-      { error: "create_user_failed", detail: createError.message },
-      500,
-    );
+    return json({ error: "create_user_failed" }, 500);
   }
 
   let linkData: Awaited<
@@ -220,16 +229,16 @@ Deno.serve(async (req) => {
 
   if (linkError || !linkData?.properties?.hashed_token) {
     console.error("generateLink", linkError);
-    return json(
-      { error: "generate_link_failed", detail: linkError?.message },
-      500,
-    );
+    return json({ error: "generate_link_failed" }, 500);
   }
 
   if (linkData.user?.id) {
     const { error: updateError } = await admin.auth.admin.updateUserById(
       linkData.user.id,
-      { user_metadata: userMetadata },
+      {
+        user_metadata: userMetadata,
+        app_metadata: appMetadata,
+      },
     );
     if (updateError) {
       console.error("updateUserById", updateError);

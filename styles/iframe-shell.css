@@ -2007,6 +2007,15 @@ body {
   object-fit: cover;
 }
 
+.url-screen__avatar--photo .url-screen__avatar-img {
+  opacity: 0;
+  transition: opacity var(--motion-screen-duration) var(--motion-screen-ease);
+}
+
+.url-screen__avatar--photo-ready .url-screen__avatar-img {
+  opacity: 1;
+}
+
 .url-screen__avatar--framer {
   background: var(--url-screen-avatar-framer-bg);
 }

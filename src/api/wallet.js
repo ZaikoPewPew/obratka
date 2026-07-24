@@ -1,11 +1,12 @@
 import { getSession, setSession } from "../app/session.js";
 import { getAuthUserAvatarUrl } from "./auth.js";
 import { fetchMyProfile, updateMyProfile } from "./profiles.js";
+import { getSupabase } from "../lib/supabaseClient.js";
 
-/** Награда за завершённое ревью (stub). */
+/** Награда за завершённое ревью (начисляет сервер в handle_review_inserted). */
 export const REVIEW_REWARD = 1;
 
-/** Стоимость подачи своего портфолио (stub). */
+/** Стоимость подачи своего портфолио (списывает RPC spend_submit_cost). */
 export const SUBMIT_COST = 1;
 
 /**
@@ -35,21 +36,6 @@ function writeBalanceLocal(next) {
   const value = Math.max(0, Math.floor(next));
   const session = getSession() ?? {};
   setSession({ ...session, balance: value });
-  return value;
-}
-
-/**
- * @param {number} next
- * @returns {Promise<number>}
- */
-async function writeBalance(next) {
-  const value = writeBalanceLocal(next);
-  /* Persist не блокирует UI — локальный баланс уже обновлён. */
-  void updateMyProfile({ balance: value }).catch((err) => {
-    if (import.meta.env.DEV) {
-      console.warn("[wallet] persist balance failed", err);
-    }
-  });
   return value;
 }
 
@@ -131,32 +117,55 @@ export async function refreshWalletFromServer() {
 }
 
 /**
- * Начислить награду за ревью.
+ * После submit review: сервер уже начислил награду в триггере — только sync сессии.
  * @returns {Promise<number>} новый баланс
  */
 export async function awardReviewReward() {
-  return writeBalance(getBalance() + REVIEW_REWARD);
+  return refreshWalletFromServer();
 }
 
 /**
- * Начислить монеты (dev / тестирование).
+ * Dev-only: локальный кэш баланса (сервер не пишет). В production — no-op.
  * @param {number} amount
  * @returns {Promise<number>} новый баланс
  */
 export async function creditBalance(amount) {
+  if (!import.meta.env.DEV) {
+    return getBalance();
+  }
   const n = typeof amount === "number" && Number.isFinite(amount) ? amount : 0;
   if (n <= 0) return getBalance();
-  return writeBalance(getBalance() + n);
+  return writeBalanceLocal(getBalance() + n);
 }
 
 /**
- * Списать стоимость подачи портфолио.
+ * Списать стоимость подачи портфолио через RPC.
  * @returns {Promise<number>} новый баланс
- * @throws {Error} если недостаточно средств
+ * @throws {Error} если недостаточно средств / не авторизован
  */
 export async function spendSubmitCost() {
   if (!canSubmitPortfolio()) {
     throw new Error("wallet.spendSubmitCost: insufficient balance");
   }
-  return writeBalance(getBalance() - SUBMIT_COST);
+
+  const supabase = getSupabase();
+  if (!supabase) {
+    throw new Error("supabase_not_configured");
+  }
+
+  const { data, error } = await supabase.rpc("spend_submit_cost");
+  if (error) {
+    const msg = String(error.message || "");
+    if (/insufficient_balance/i.test(msg)) {
+      throw new Error("wallet.spendSubmitCost: insufficient balance");
+    }
+    throw new Error(msg || "wallet.spend_failed");
+  }
+
+  const next =
+    typeof data === "number" && Number.isFinite(data)
+      ? Math.max(0, Math.floor(data))
+      : getBalance() - SUBMIT_COST;
+  writeBalanceLocal(next);
+  return next;
 }

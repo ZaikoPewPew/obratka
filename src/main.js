@@ -783,7 +783,11 @@ async function applyProviderUser(user, provider) {
           : next.referralUses ?? 0,
     };
   } else {
-    next = { ...next, banned: false };
+    // Do not trust “not banned” when profile fetch failed — keep prior flag.
+    next = {
+      ...next,
+      banned: Boolean(session.banned),
+    };
   }
 
   const pendingCode =
@@ -908,7 +912,18 @@ document.body.append(
  */
 async function applyRoute(id, opts = {}) {
   const handoff = Boolean(opts.handoff);
-  const session = getSession();
+  let session = getSession();
+
+  if (session?.userId) {
+    try {
+      session = (await refreshSessionFromProfile()) ?? session;
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.warn("[session] refresh before route", err);
+      }
+    }
+  }
+
   let accessible = resolveAccessibleRoute(id, {
     hasPortfolio: Boolean(portfolioUrl),
     hasSession: Boolean(session?.userId),
@@ -1130,6 +1145,16 @@ window.addEventListener("pagehide", () => {
     claimHeld = false;
   }
   stopClaimHeartbeat();
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  if (!getSession()?.userId) return;
+  void refreshSessionFromProfile().then((session) => {
+    if (session?.banned && activeRouteId !== "banned") {
+      go("banned", { replace: true });
+    }
+  });
 });
 
 void (async () => {

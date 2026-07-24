@@ -64,6 +64,7 @@ create or replace function public.normalize_referral_code(raw text)
 returns text
 language sql
 immutable
+set search_path = public
 as $$
   select nullif(upper(trim(coalesce(raw, ''))), '');
 $$;

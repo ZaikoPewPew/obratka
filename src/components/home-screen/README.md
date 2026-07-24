@@ -59,7 +59,7 @@ Topbar поверх контента (`position: absolute`), появление 
 - При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.
 - Баланс: `profiles.balance` ↔ `session.balance`.
 - Репутация: `profiles.reputation` ↔ `session.reputation`; чип в топбаре → explainer (без весов тегов).
-- Клик по чипу баланса (dev): `creditBalance(+10)`.
+- Клик по чипу баланса: в **DEV** только локальный кэш (`creditBalance`); в production no-op. Серверный баланс — RPC `spend_submit_cost` / награда в review trigger.
 - Клик по аватару профиля → модалка «Твой реферальный код»: код, слоты `left/max` (лимит 2), копировать код / ссылку `?ref=`. API: `fetchMyReferral` / `buildReferralShareUrl`. Без наград — только шаринг.
 
 ### Dev: сброс сессии

@@ -4,14 +4,17 @@
 
 | Файл | Роль |
 |------|------|
-| `profiles.sql` | таблица `public.profiles` (1:1 с `auth.users`), триггер `handle_new_user` (в т.ч. Google `app_metadata.provider`), RLS, колонки онбординга / balance / avatar / `tier` (`free`\|`pro`\|`legendary`, клиент read-only), `banned_at` / `ban_reason` / `reputation` (клиент read-only) + `is_profile_banned()`, referral-колонки |
-| `referrals.sql` | персональный `referral_code` (max 2 uses), `referral_seed_codes` (bootstrap `YTHWKPDWAK`), RPC `validate_referral` (anon) / `redeem_referral` (auth); без наград |
-| `portfolios.sql` | `public.portfolios` + `public.reviews`, лиги матчинга (`grade_league` / `can_review_portfolio`), RLS (лента только в лиге; INSERT review с проверкой лиги), триггер инкремента / `done` |
-| `review_claims.sql` | `public.review_claims` + RPC claim/heartbeat/release/slots; `reviews.answers`; BEFORE-триггер требует живой claim |
-| `review_complaints.sql` | `profiles.reputation` + `review_complaints` + RPC `submit_review_complaint` (штраф max(весов тегов) → автобан) |
-| `ban-templates.sql` | операторские шаблоны: бан / разбан / поиск (см. [`../BAN.md`](../BAN.md)) |
-| `delete-account-templates.sql` | полное удаление тестового аккаунта: `DELETE` из `auth.users` → cascade `profiles` / `portfolios` / `reviews` |
-| `subscribers_count.sql` | RPC `public.subscribers_count()` + `grant execute` для `anon` / `authenticated` |
+| `profiles.sql` | `public.profiles`, protect tier/ban/reputation/**balance**/grade, `is_profile_banned` (self-only), telegram_id из app_metadata |
+| `wallet.sql` | `protect_profiles_balance` + RPC `spend_submit_cost` (после profiles) |
+| `referrals.sql` | персональный `referral_code` (max 2 uses), seed `YTHWKPDWAK`, RPC validate/redeem; без наград |
+| `portfolios.sql` | portfolios/reviews, лиги; INSERT WITH CHECK pending/0/target=3 |
+| `review_claims.sql` | claims + award balance (+1) в `handle_review_inserted` |
+| `review_complaints.sql` | reputation + RPC complaint |
+| `subscribers_count.sql` | RPC count (legacy) |
+| `subscribers_rls.sql` | RLS + revoke на live `subscribers`, если таблица есть |
+| `ban-templates.sql` | операторский бан / разбан |
+| `delete-account-templates.sql` | удаление тестового аккаунта |
 
-Применять в SQL Editor Dashboard или через CLI. Обзор — [`../README.md`](../README.md).  
+Применять в SQL Editor Dashboard или через CLI. Порядок: `profiles` → `wallet` → `portfolios` → `review_claims` → `review_complaints` / `referrals`; при legacy — `subscribers_rls`.  
+Обзор — [`../README.md`](../README.md).  
 **Как банить юзеров:** [`../BAN.md`](../BAN.md).

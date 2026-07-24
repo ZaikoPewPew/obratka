@@ -24,8 +24,9 @@ alwaysApply: true
 1. Новая таблица → сразу `enable row level security` + политики (не «потом»).
 2. Mutations claims / referrals / ban / tier — RPC `security definer` + `set search_path = public`, не прямой INSERT/UPDATE с клиента.
 3. Не `grant` лишнего на `anon`/`authenticated`; seed-таблицы без прямого SELECT.
-4. Клиент не пишет: `banned_at`, `ban_reason`, `tier`, чужой `balance` / reputation.
-5. Не ослаблять лиги / claim-триггеры «для удобства UI».
+4. Клиент не пишет: `banned_at`, `ban_reason`, `tier`, `balance`, `reputation`; grade/role — только до `onboarding_done`.
+5. Баланс: `spend_submit_cost` RPC; награда за ревью — в `handle_review_inserted`; не `updateMyProfile({ balance })`.
+6. Не ослаблять лиги / claim-триггеры «для удобства UI».
 
 ## Клиент / сессия
 

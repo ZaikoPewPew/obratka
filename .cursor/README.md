@@ -104,6 +104,7 @@ API: `src/api/auth.js`. Edge: `supabase/functions/telegram-auth/`.
 - **Anon ок** в клиенте / `.env.production` / Pages; защита = **RLS**, не секретность ключа.
 - **`service_role` / `TELEGRAM_BOT_TOKEN` / Google Client Secret** — никогда в клиент, git или чат.
 - Клиент только через `src/lib/supabaseClient.js` (anon).
+- **Balance** — только RPC `spend_submit_cost` / award в review trigger; не client UPDATE.
 - Подробно — `security.mdc`.
 
 ## Supabase SQL map

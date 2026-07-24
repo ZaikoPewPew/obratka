@@ -46,7 +46,7 @@ Env / Dashboard: `.env.example`, `src/components/auth-screen/README.md`, `supaba
 
 | Файл | Роль |
 |------|------|
-| `wallet.js` | `getBalance` / `creditBalance` / `spendForSubmit` / `REVIEW_REWARD` / `SUBMIT_COST`; `refreshSessionFromProfile` + `refreshWalletFromServer` (`profiles.balance` ↔ session) |
+| `wallet.js` | `getBalance` / `spendSubmitCost` (RPC) / `awardReviewReward` (= refresh) / `creditBalance` (DEV local-only) / `REVIEW_REWARD` / `SUBMIT_COST`; `refreshSessionFromProfile` |
 | `leagues.js` | матчинг лиг по `grade` (зеркало SQL): `gradeToLeague` / `canReviewGrades` |
 | `portfolios.js` | `listPortfoliosForReview` (чужие pending в лиге + слоты; до 3/3 completed) / `listMyPortfolios` / claim·heartbeat·release / `submitPortfolio` / `submitPortfolioReview` (+ answers) + `formatPortfolioRole` |
 | `reviewComplaints.js` | жалобы на листы: `listPortfolioReviewSheets` / `submitReviewComplaint` / `getReputation`; теги v1 без весов на клиенте; RPC `submit_review_complaint` |

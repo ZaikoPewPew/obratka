@@ -11,19 +11,20 @@ alwaysApply: false
 ## Порядок apply
 
 1. `profiles.sql`
-2. `portfolios.sql`
-3. `review_claims.sql` (обязателен после portfolios)
-4. `review_complaints.sql` (после profiles + portfolios/reviews)
-5. `referrals.sql` (можно параллельно с portfolios, зависит от profiles)
+2. `wallet.sql` (protect balance + `spend_submit_cost`)
+3. `portfolios.sql`
+4. `review_claims.sql` (после portfolios; award balance в триггере)
+5. `review_complaints.sql` / `referrals.sql` (зависят от profiles)
+6. `subscribers_rls.sql` — если есть legacy `subscribers`
 
 Не ломать зависимости: `is_profile_banned`, `can_review_portfolio`, claim BEFORE INSERT.
 
 ## Паттерны
 
 - Mutations: `security definer` + `set search_path = public`; revoke direct write где нужно.
-- Claims / referrals — только RPC (`claim_*`, `validate_referral`, `redeem_referral`).
+- Claims / referrals / spend — только RPC; balance не через client UPDATE.
 - `portfolio_reviewer_slots` — **VOLATILE**, не STABLE (иначе PostgREST 405).
-- Клиент read-only: `tier`, `banned_at`, `ban_reason` (protect-триггеры).
+- Клиент read-only: `tier`, `banned_at`, `ban_reason`, `balance`, `reputation`; grade после onboarding.
 
 ## Оператор vs app
 
@@ -31,7 +32,7 @@ alwaysApply: false
 |------|------|
 | `BAN.md`, `ban-templates.sql` | бан / разбан руками |
 | `delete-account-templates.sql` | полное удаление тестового аккаунта |
-| `subscribers_count.sql` | legacy waitlist, не entry UX |
+| `subscribers_count.sql` / `subscribers_rls.sql` | legacy waitlist |
 
 Не путать операторские шаблоны с app-schema. Документация рядом с SQL.
 
