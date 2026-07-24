@@ -515,9 +515,12 @@
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-  width: fit-content;
-  max-width: 100%;
-  height: var(--home-screen-progress-slots-height);
+  justify-content: center;
+  width: var(--home-screen-progress-width);
+  height: var(--home-screen-progress-height);
+  padding: var(--home-screen-progress-padding-y)
+    var(--home-screen-progress-padding-x);
+  border-radius: var(--home-screen-progress-radius);
   background: var(--home-screen-progress-bg);
 }
 
@@ -528,7 +531,7 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: flex-start;
-  width: fit-content;
+  width: var(--home-screen-progress-slots-width);
   height: var(--home-screen-progress-slots-height);
 }
 
@@ -563,6 +566,7 @@
 
 .home-screen__reviewer-slot--completed {
   opacity: 1;
+  background: var(--home-screen-reviewer-slot-empty-bg);
 }
 
 .home-screen__reviewer-slot--letter {

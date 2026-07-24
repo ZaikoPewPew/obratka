@@ -73,11 +73,11 @@ Topbar поверх контента (`position: absolute`), появление 
 | Аватар | `item.avatarUrl` или буква из `item.name` |
 | ФИО | `item.name` |
 | Роль | EN Title Case: `formatPortfolioRole` |
-| Слоты | Стек `.home-screen__card-progress` — hug по трём кружкам 24×24, L→R |
-| Пустой слот | Фон `surface-muted`, плюс; обводка 3px белая, радиус 16 |
-| Active / completed | Аватарка (временный claim / отчёт) |
+| Слоты | Белый чип `.home-screen__card-progress` 96×52 r16 (Figma Frame 140); внутри стек 64×24 |
+| Пустой слот | 24×24, фон muted, обводка 3px белая, плюс 18×18 |
+| Active / completed | Аватарка; overlap −4px, L→R |
 
-Заполнение слотов слева направо; по умолчанию три плюса. Текст «N из 3» не показываем (есть в aria).
+Заполнение слотов слева направо; по умолчанию три плюса. Текста «N из 3» нет (есть в aria).
 
 `refresh()` при `open`, смене вкладки, `visibilitychange` и poll (~15с), пока home открыт — чтобы active-слоты подтягивались живо.
 | Своя | `isOwn` только во вкладке «Мои» → клик открывает report |
