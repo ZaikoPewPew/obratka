@@ -21,12 +21,16 @@ import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import boneIconUrl from "../../assets/home/bone.svg";
 import bellIconUrl from "../../assets/home/bell.svg";
 import plusIconUrl from "../../assets/home/plus.svg";
+import slotPlusIconUrl from "../../assets/home/slot-plus.svg";
 
 /** Сколько монет даёт клик по чипу баланса (dev). */
 const DEV_CREDIT_AMOUNT = 10;
 
 /** Сколько skeleton-карточек показывать, пока грузится лента. */
 const SKELETON_CARD_COUNT = 5;
+
+/** Обновление active-слотов, пока home открыт. */
+const HOME_SLOTS_POLL_MS = 15_000;
 
 /**
  * Порог только для hide: show — при любом скролле вверх.
@@ -57,6 +61,7 @@ const TABBAR_HIDE_DELTA = 6;
  *   reviewsCount?: number;
  *   targetReviews?: number;
  *   status?: string;
+ *   reviewedByMe?: boolean;
  *   reviewerSlots?: HomeReviewerSlot[];
  * }} HomePortfolioItem
  */
@@ -281,6 +286,8 @@ export function createHomeScreen({
   /** @type {HomePortfolioItem[]} */
   let items = [];
   let loading = false;
+  /** @type {ReturnType<typeof window.setInterval> | null} */
+  let slotsPollId = null;
   /** Показать stagger-reveal при смене skeleton → контент. */
   let revealItems = false;
   /** @type {HomeTabId} */
@@ -717,6 +724,10 @@ export function createHomeScreen({
       total,
       Math.max(0, Number(item.reviewsCount) || 0),
     );
+
+    const progress = document.createElement("div");
+    progress.className = "home-screen__card-progress";
+
     const count = document.createElement("span");
     count.className = "home-screen__card-count";
     count.textContent = formatString(t.homeCardProgress, {
@@ -744,6 +755,15 @@ export function createHomeScreen({
       if (!slotData) {
         slot.classList.add("home-screen__reviewer-slot--empty");
         slot.setAttribute("aria-hidden", "true");
+        const plusImg = document.createElement("img");
+        plusImg.className = "home-screen__reviewer-slot-plus";
+        plusImg.src = slotPlusIconUrl;
+        plusImg.alt = "";
+        plusImg.width = 18;
+        plusImg.height = 18;
+        plusImg.decoding = "async";
+        plusImg.setAttribute("aria-hidden", "true");
+        slot.append(plusImg);
         slots.append(slot);
         continue;
       }
@@ -788,9 +808,7 @@ export function createHomeScreen({
       slots.append(slot);
     }
 
-    const progress = document.createElement("div");
-    progress.className = "home-screen__card-progress";
-    progress.append(slots, count);
+    progress.append(count, slots);
 
     meta.append(person, progress);
     button.append(preview, meta);
@@ -801,6 +819,13 @@ export function createHomeScreen({
       button.setAttribute("aria-label", t.homeCardReportAria);
       button.addEventListener("click", () => {
         void onOpenReport?.(item);
+      });
+    } else if (item.reviewedByMe) {
+      button.classList.add("home-screen__card--reviewed");
+      button.title = t.homeAlreadyReviewedTitle;
+      button.setAttribute("aria-label", t.homeAlreadyReviewedTitle);
+      button.addEventListener("click", () => {
+        void onOpenPortfolio(item);
       });
     } else {
       button.addEventListener("click", () => {
@@ -857,6 +882,21 @@ export function createHomeScreen({
     setItems(next);
   }
 
+  function stopSlotsPoll() {
+    if (slotsPollId != null) {
+      window.clearInterval(slotsPollId);
+      slotsPollId = null;
+    }
+  }
+
+  function startSlotsPoll() {
+    stopSlotsPoll();
+    slotsPollId = window.setInterval(() => {
+      if (root.hidden || document.visibilityState !== "visible") return;
+      void refresh();
+    }, HOME_SLOTS_POLL_MS);
+  }
+
   async function open() {
     root.hidden = false;
     root.classList.remove("home-screen--open");
@@ -874,6 +914,7 @@ export function createHomeScreen({
       });
     });
     await refresh();
+    startSlotsPoll();
     scheduleTabThumbSync(true);
     scheduleTabbarContrastSync();
   }
@@ -882,6 +923,7 @@ export function createHomeScreen({
    * @returns {Promise<void>}
    */
   function close() {
+    stopSlotsPoll();
     root.classList.remove("home-screen--open");
     loading = false;
     revealItems = false;

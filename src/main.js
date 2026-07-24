@@ -46,7 +46,7 @@ import { resolvePortfolioMeta } from "./utils/portfolioMeta.js";
 import { getMotionFocusDelayMs } from "./utils/motionTokens.js";
 import brandLogoUrl from "./assets/brand/logo.svg";
 
-const SESSION_SECONDS = 5;
+const SESSION_SECONDS = 10;
 const SESSION_TOTAL_MS = SESSION_SECONDS * 1000;
 const TIMER_TICK_MS = 10;
 /** Продление claim TTL, пока пользователь на review/quiz. */
@@ -280,6 +280,25 @@ async function releaseHeldClaim() {
   await releasePortfolioClaim(id);
 }
 
+/**
+ * Сброс локальной review-сессии после ухода с /review|/quiz|/done.
+ * Claim к этому моменту уже released или снят триггером после submit.
+ */
+function clearReviewSessionState() {
+  stopTimer();
+  sessionEnded = false;
+  sessionStarted = false;
+  remainingMs = SESSION_TOTAL_MS;
+  renderTimer();
+  portfolioUrl = null;
+  portfolioId = null;
+  reviewSubmitted = false;
+  reviewSubmitPromise = null;
+  claimHeld = false;
+  embedPlan = null;
+  portfolioName = getStrings().brandName;
+}
+
 function formatTime(totalMs) {
   const clampedMs = Math.max(0, totalMs);
   const minutes = Math.floor(clampedMs / 60000);
@@ -429,7 +448,10 @@ async function applyPortfolio(url, options = {}) {
 }
 
 function openReview() {
-  if (!frameWrap) return;
+  /* Только живая review-сессия с claim — иначе ghost-quiz после abort. */
+  if (!frameWrap || activeRouteId !== "review" || !claimHeld || reviewSubmitted) {
+    return;
+  }
 
   void homeScreen.close();
   void urlScreen.close();
@@ -461,6 +483,7 @@ async function closeReview() {
 
 function lockFrameAndShowReview() {
   if (!frameWrap || !frame || sessionEnded) return;
+  if (activeRouteId !== "review" || !claimHeld || reviewSubmitted) return;
   sessionEnded = true;
   openReview();
 }
@@ -576,6 +599,17 @@ const homeScreen = createHomeScreen({
     const id = typeof item?.id === "string" ? item.id : "";
     if (!id) return;
 
+    if (item?.reviewedByMe) {
+      const t = getStrings();
+      homeScreen.showNotice({
+        title: t.homeAlreadyReviewedTitle,
+        body: t.homeAlreadyReviewedBody,
+        closeLabel: t.homeAlreadyReviewedClose,
+        closeAria: t.homeAlreadyReviewedCloseAria,
+      });
+      return;
+    }
+
     try {
       await claimPortfolioReview(id);
     } catch (err) {
@@ -587,6 +621,17 @@ const homeScreen = createHomeScreen({
           body: t.homeNoSlotsBody,
           closeLabel: t.homeNoSlotsClose,
           closeAria: t.homeNoSlotsCloseAria,
+        });
+        void homeScreen.refresh();
+        return;
+      }
+      if (code === "already_reviewed") {
+        const t = getStrings();
+        homeScreen.showNotice({
+          title: t.homeAlreadyReviewedTitle,
+          body: t.homeAlreadyReviewedBody,
+          closeLabel: t.homeAlreadyReviewedClose,
+          closeAria: t.homeAlreadyReviewedCloseAria,
         });
         void homeScreen.refresh();
         return;
@@ -932,6 +977,7 @@ async function applyRoute(id, opts = {}) {
   if (id === "banned") {
     leaveSessionShell();
     await releaseHeldClaim();
+    clearReviewSessionState();
     await closeReview();
     await closeOthers();
     openTarget("banned");
@@ -961,6 +1007,7 @@ async function applyRoute(id, opts = {}) {
 
   leaveSessionShell();
   await releaseHeldClaim();
+  clearReviewSessionState();
   await closeReview();
 
   // Handoff: сначала новый экран поверх, потом убрать предыдущий — visual не мигает.

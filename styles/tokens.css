@@ -347,11 +347,30 @@
   --report-screen-body-size: var(--success-screen-body-size);
   --report-screen-actions-gap: var(--success-screen-actions-gap);
 
-  /* Слоты ревьюеров на карточке home */
+  /* Слоты ревьюеров + счётчик в одном блоке на карточке */
+  --home-screen-progress-width: 96px;
+  --home-screen-progress-height: 52px;
+  --home-screen-progress-padding-x: var(--space-4);
+  --home-screen-progress-padding-y: var(--space-1);
+  --home-screen-progress-gap: 0;
+  --home-screen-progress-bg: var(--color-surface);
+  --home-screen-progress-radius: var(--radius-md);
+  --home-screen-progress-slots-width: 64px;
+  --home-screen-progress-slots-height: var(--space-6);
   --home-screen-reviewer-slot-size: var(--space-6);
   --home-screen-reviewer-slots-gap: calc(var(--space-1) * -1);
-  --home-screen-reviewer-slot-empty-bg: var(--color-surface-muted);
-  --home-screen-reviewer-slot-ring: var(--color-bg);
+  --home-screen-reviewer-slot-radius: var(--radius-md);
+  --home-screen-reviewer-slot-border: 3px;
+  --home-screen-reviewer-slot-ring: var(--home-screen-progress-bg);
+  --home-screen-reviewer-slot-empty-bg: transparent;
+  --home-screen-reviewer-slot-plus-size: 18px;
+  --home-screen-reviewer-slot-plus-color: color-mix(
+    in srgb,
+    var(--color-text) 25%,
+    transparent
+  );
+  --home-screen-reviewer-slot-active-opacity: 0.72;
+  --home-screen-reviewer-slot-padding: 3px;
 
   /* Ban screen (locked account — same layout as success, red mesh) */
   --ban-screen-z: var(--z-modal);
@@ -454,10 +473,10 @@
   --home-screen-meta-font-size: var(--font-size-base);
   --home-screen-name-weight: var(--font-weight-medium);
   --home-screen-role-weight: var(--font-weight-regular);
-  --home-screen-count-height: 52px;
-  --home-screen-count-padding: var(--space-4);
-  --home-screen-count-radius: var(--radius-md);
-  --home-screen-count-bg: var(--color-surface);
+  --home-screen-count-height: var(--home-screen-progress-height);
+  --home-screen-count-padding: 0;
+  --home-screen-count-radius: 0;
+  --home-screen-count-bg: transparent;
   --home-screen-hint-size: var(--font-size-sm);
   --home-screen-skeleton-base: var(--color-surface-muted-active);
   --home-screen-skeleton-shine: var(--color-surface);

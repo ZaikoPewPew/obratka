@@ -25,6 +25,7 @@ import { getSupabase } from "../lib/supabaseClient.js";
  *   reviewsCount?: number;
  *   targetReviews?: number;
  *   status?: 'pending' | 'done' | 'skipped';
+ *   reviewedByMe?: boolean;
  *   reviewerSlots?: PortfolioReviewerSlot[];
  * }} PortfolioQueueItem
  */
@@ -316,9 +317,10 @@ export function clearSubmittedPortfolios() {
 }
 
 /**
- * Очередь на ревью: чужие pending в лиге ревьюера (RLS), без своих,
- * минус уже отревьюенные этим пользователем,
- * минус карточки без свободных слотов (completed + active claims).
+ * Очередь на ревью: чужие pending в лиге ревьюера (RLS), без своих.
+ * Карточка остаётся до 3/3 completed-отчётов (`status=pending`);
+ * уже отревьюенные текущим юзером помечаются `reviewedByMe` (клик → notice).
+ * Active claims не прячут карточку — только `no_slots` при открытии.
  *
  * @returns {Promise<PortfolioQueueItem[]>}
  */
@@ -362,19 +364,13 @@ export async function listPortfoliosForReview() {
       .filter(Boolean),
   );
 
-  const mapped = (rows || [])
-    .map((row) => mapPortfolioRow(row, user.id))
-    .filter((item) => !reviewedIds.has(item.id));
-
-  const withSlots = await attachReviewerSlots(mapped);
-
-  return withSlots.filter((item) => {
-    const target = Math.max(1, Number(item.targetReviews) || DEFAULT_TARGET_REVIEWS);
-    const slotOccupied = (item.reviewerSlots || []).length;
-    const countOccupied = Math.max(0, Number(item.reviewsCount) || 0);
-    const occupied = Math.max(slotOccupied, countOccupied);
-    return occupied < target;
+  const mapped = (rows || []).map((row) => {
+    const item = mapPortfolioRow(row, user.id);
+    item.reviewedByMe = reviewedIds.has(item.id);
+    return item;
   });
+
+  return attachReviewerSlots(mapped);
 }
 
 /**

@@ -10,7 +10,7 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 
 | Вкладка | API | Содержимое |
 |---------|-----|------------|
-| **На ревью** (`feed`, default) | `listPortfoliosForReview()` | Чужие `pending` **в лиге** грейда ревьюера (RLS), без своих; уже отревьюенные этим юзером скрыты |
+| **На ревью** (`feed`, default) | `listPortfoliosForReview()` | Чужие `pending` **в лиге** грейда ревьюера (RLS), без своих; карточка до `target_reviews` completed-отчётов; уже отревьюенные этим юзером помечены `reviewedByMe` (клик → notice) |
 | **Мои посты** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …) |
 
 Переключатель: `home-screen__tabbar` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`). Вкладки: **На ревью** / **Мои посты**.
@@ -73,10 +73,15 @@ Topbar поверх контента (`position: absolute`), появление 
 | Аватар | `item.avatarUrl` или буква из `item.name` |
 | ФИО | `item.name` |
 | Роль | EN Title Case: `formatPortfolioRole` |
-| Счётчик | `{current} из {total}` = `reviewsCount` / `targetReviews` (только completed) |
-| Слоты ревьюеров | `.home-screen__reviewer-slots` — completed + active claims (аватарки); RPC `portfolio_reviewer_slots`, fallback через RLS |
+| Счётчик + слоты | Один блок `.home-screen__card-progress` (96×52): сверху `{current} из {total}`, снизу 3 слота L→R |
+| Пустой слот | Плюс (`slot-plus.svg`) |
+| Active / completed | Аватарка (временный claim / отчёт) |
 
-`refresh()` при `open`, смене вкладки и `visibilitychange` (вкладка снова видима).
+Счётчик `{current} из {total}` = только completed. Карточка уходит из ленты при `status=done` (набрано `target_reviews` отчётов).
+
+Заполнение слотов слева направо; по умолчанию три плюса.
+
+`refresh()` при `open`, смене вкладки, `visibilitychange` и poll (~15с), пока home открыт — чтобы active-слоты подтягивались живо.
 | Своя | `isOwn` только во вкладке «Мои» → клик открывает report |
 
 ## Разметка таббара
