@@ -1226,6 +1226,9 @@ body {
   display: block;
   width: var(--url-screen-brand-width);
   height: var(--url-screen-brand-height);
+  transition:
+    width var(--shell-review-brand-mark-morph-duration) var(--shell-review-brand-mark-morph-ease),
+    height var(--shell-review-brand-mark-morph-duration) var(--shell-review-brand-mark-morph-ease);
 }
 
 .review-screen--done:not(.review-screen--report) .review-screen__brand-slot {
@@ -2235,6 +2238,9 @@ body {
   display: block;
   width: var(--url-screen-brand-width);
   height: var(--url-screen-brand-height);
+  transition:
+    width var(--shell-review-brand-mark-morph-duration) var(--shell-review-brand-mark-morph-ease),
+    height var(--shell-review-brand-mark-morph-duration) var(--shell-review-brand-mark-morph-ease);
 }
 
 .url-screen--done:not(.url-screen--preview) .url-screen__brand-slot {
@@ -2295,8 +2301,10 @@ body {
 
   .review-screen__report,
   .review-screen__brand-slot,
+  .review-screen__brand-mark,
   .url-screen__preview,
-  .url-screen__brand-slot {
+  .url-screen__brand-slot,
+  .url-screen__brand-mark {
     transition-duration: 0.01ms;
   }
 

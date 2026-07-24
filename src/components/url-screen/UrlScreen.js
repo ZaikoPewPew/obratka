@@ -1,12 +1,14 @@
 import { getStrings } from "../../i18n.js";
 import {
   brandMarkSvg,
-  logoDoneMarkSvg,
+  morphBrandMarkToDone,
+  resetBrandMarkToDefault,
 } from "../../assets/brand/brandMarks.js";
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
 import { normalizePortfolioUrl } from "../../utils/portfolioMeta.js";
 import { resolvePlatformIcon } from "../../utils/platformBrandIcon.js";
 import {
+  getBrandMarkMorphMotion,
   getMotionReveal,
   getReportLaunchMotion,
   getReviewMeshDoneMotion,
@@ -278,15 +280,34 @@ export function createUrlScreen({ onSubmit, onExit }) {
   }
 
   const BRAND_MARK_CLASS = "url-screen__brand-mark";
-  const BRAND_MARK_SVG = brandMarkSvg(BRAND_MARK_CLASS);
-  const LOGO_DONE_SVG = logoDoneMarkSvg(BRAND_MARK_CLASS);
+
+  function brandMarkEl() {
+    return /** @type {SVGElement | null} */ (
+      brandSlot.querySelector("svg")
+    );
+  }
 
   function setDefaultBrandMark() {
-    brandSlot.innerHTML = BRAND_MARK_SVG;
+    const svg = brandMarkEl();
+    if (svg) {
+      resetBrandMarkToDefault(svg);
+      return;
+    }
+    brandSlot.innerHTML = brandMarkSvg(BRAND_MARK_CLASS);
   }
 
   function setLogoDoneMark() {
-    brandSlot.innerHTML = LOGO_DONE_SVG;
+    let svg = brandMarkEl();
+    if (!svg) {
+      brandSlot.innerHTML = brandMarkSvg(BRAND_MARK_CLASS);
+      svg = brandMarkEl();
+    }
+    const { durationMs, easing } = getBrandMarkMorphMotion();
+    morphBrandMarkToDone(svg, {
+      durationMs,
+      easing,
+      reducedMotion: prefersReducedMotion(),
+    });
   }
 
   function clearDoneMesh() {
@@ -299,8 +320,8 @@ export function createUrlScreen({ onSubmit, onExit }) {
   /** Зелёный mesh + logo-done: старт вместе со спуском лого. */
   function activateDoneMesh() {
     if (root.classList.contains("url-screen--done")) return;
-    setLogoDoneMark();
     root.classList.add("url-screen--done");
+    setLogoDoneMark();
     const { durationMs, easing } = getReviewMeshDoneMotion();
     meshWash.transitionToCssColors({ durationMs, easing });
   }

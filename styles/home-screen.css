@@ -318,6 +318,10 @@
   list-style: none;
 }
 
+.home-screen__list:empty {
+  display: none;
+}
+
 .home-screen__card {
   box-sizing: border-box;
   display: flex;

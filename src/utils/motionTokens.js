@@ -149,3 +149,20 @@ export function getReviewMeshDoneMotion() {
       "cubic-bezier(0.16, 1, 0.3, 1)",
   };
 }
+
+/**
+ * Морф mark → logo-done (нимб + корона) вместе с done-mesh.
+ * @returns {{ durationMs: number; easing: string }}
+ */
+export function getBrandMarkMorphMotion() {
+  const mesh = getReviewMeshDoneMotion();
+  const morphMs = parseCssTimeMs(
+    readCssVar("--shell-review-brand-mark-morph-duration"),
+    mesh.durationMs,
+  );
+  return {
+    durationMs: morphMs > 0 ? morphMs : mesh.durationMs,
+    easing:
+      readCssVar("--shell-review-brand-mark-morph-ease") || mesh.easing,
+  };
+}

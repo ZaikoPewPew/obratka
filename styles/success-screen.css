@@ -201,7 +201,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  /* logo-done: crown extends up; blob stays on default mark center */
+  /* logo-done: crown + wings; blob bottom-aligned with default mark */
   transform: translate(
     -50%,
     calc(-50% + var(--url-screen-brand-done-align-y))

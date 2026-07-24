@@ -1,10 +1,12 @@
 import { getStrings } from "../../i18n.js";
 import {
   brandMarkSvg,
-  logoDoneMarkSvg,
+  morphBrandMarkToDone,
+  resetBrandMarkToDefault,
 } from "../../assets/brand/brandMarks.js";
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
 import {
+  getBrandMarkMorphMotion,
   getReportLaunchMotion,
   getReviewMeshDoneMotion,
   getScreenCloseFallbackMs,
@@ -13,7 +15,6 @@ import { buildReportSections } from "../../utils/reviewReport.js";
 
 const BRAND_MARK_CLASS = "review-screen__brand-mark";
 const BRAND_MARK_SVG = brandMarkSvg(BRAND_MARK_CLASS);
-const LOGO_DONE_SVG = logoDoneMarkSvg(BRAND_MARK_CLASS);
 
 
 /**
@@ -144,12 +145,37 @@ export function createReviewScreen({ content }) {
     reportSubtitle.textContent = "";
   }
 
+  function brandMarkEl() {
+    return /** @type {SVGElement | null} */ (
+      brandSlot.querySelector("svg")
+    );
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
   function setDefaultBrandMark() {
+    const svg = brandMarkEl();
+    if (svg) {
+      resetBrandMarkToDefault(svg);
+      return;
+    }
     brandSlot.innerHTML = BRAND_MARK_SVG;
   }
 
   function setLogoDoneMark() {
-    brandSlot.innerHTML = LOGO_DONE_SVG;
+    let svg = brandMarkEl();
+    if (!svg) {
+      brandSlot.innerHTML = BRAND_MARK_SVG;
+      svg = brandMarkEl();
+    }
+    const { durationMs, easing } = getBrandMarkMorphMotion();
+    morphBrandMarkToDone(svg, {
+      durationMs,
+      easing,
+      reducedMotion: prefersReducedMotion(),
+    });
   }
 
   function clearDoneMesh() {
@@ -162,8 +188,8 @@ export function createReviewScreen({ content }) {
   /** Зелёный mesh + logo-done: старт вместе со спуском лого. */
   function activateDoneMesh() {
     if (root.classList.contains("review-screen--done")) return;
-    setLogoDoneMark();
     root.classList.add("review-screen--done");
+    setLogoDoneMark();
     const { durationMs, easing } = getReviewMeshDoneMotion();
     meshWash.transitionToCssColors({ durationMs, easing });
   }
@@ -174,10 +200,6 @@ export function createReviewScreen({ content }) {
       pendingDoneMesh = false;
       activateDoneMesh();
     }
-  }
-
-  function prefersReducedMotion() {
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }
 
   function cancelReportLaunch() {

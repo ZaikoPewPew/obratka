@@ -120,7 +120,7 @@ order by banned_at desc;
 
 | Поле | Эффект |
 |------|--------|
-| `banned_at IS NOT NULL` | Экран «Ваш аккаунт заблокирован»; кнопки «Связаться» / «Выйти» |
+| `banned_at IS NOT NULL` | Экран «Твой аккаунт заблокирован»; кнопки «Связаться» / «Выйти» |
 | Deep link `/home`, back, … | Схлопывается обратно на `/banned` (пока сессия с `banned`) |
 | «Выйти» | sign-out → `/referral` (повторный логин того же аккаунта снова на `/banned`) |
 | INSERT portfolio / review | RLS отклоняет (`is_profile_banned`) |

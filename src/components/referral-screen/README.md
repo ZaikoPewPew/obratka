@@ -6,7 +6,7 @@ Path: **`/referral`**. Визуально 1:1 с `url-screen` (split, mesh, moti
 
 | Элемент | Значение |
 |---------|----------|
-| Заголовок | `referralTitle` — «Введите реферальный код» |
+| Заголовок | `referralTitle` — «Введи реферальный код» |
 | Placeholder | `referralPlaceholder` — `YTHWKPDWAK` |
 | Аватары | 4 тёмных круга (`url-screen__avatar--placeholder`) |
 | Текст под полем | `referralColleagues` — «140 твоих коллег уже внутри» |

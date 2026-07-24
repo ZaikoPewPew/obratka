@@ -581,6 +581,9 @@
   /* Done-mesh: к середине спуска лого (доля от brand-motion-duration) */
   --shell-review-mesh-done-midpoint: 0.5;
   --shell-review-mesh-done-duration: 800ms;
+  /* mark → logo-done: path morph + crown fade (вместе с done-mesh) */
+  --shell-review-brand-mark-morph-duration: var(--shell-review-mesh-done-duration);
+  --shell-review-brand-mark-morph-ease: var(--shell-review-brand-motion-ease);
   --shell-review-mesh-done-1: var(--palette-glow-mint);
   --shell-review-mesh-done-2: var(--palette-glow-foam);
   --shell-review-mesh-done-3: var(--palette-glow-leaf);
@@ -645,8 +648,8 @@
   --url-screen-preview-stub-bone-width-short: 42%;
   --url-screen-brand-width: 44px;
   --url-screen-brand-height: 43px;
-  /* logo-done (crown): same width, taller; nudge keeps blob aligned with default mark */
-  --url-screen-brand-done-width: 44px;
+  /* logo-done: wider (wings) + taller (crown); bottom-align blob with default mark */
+  --url-screen-brand-done-width: 115px;
   --url-screen-brand-done-height: 58px;
   --url-screen-brand-done-align-y: calc(
     (var(--url-screen-brand-done-height) - var(--url-screen-brand-height)) / -2
