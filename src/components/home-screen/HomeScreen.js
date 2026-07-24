@@ -922,6 +922,12 @@ export function createHomeScreen({
     scheduleTabbarContrastSync();
   });
 
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible") return;
+    if (root.hidden) return;
+    void refresh();
+  });
+
   feedTab.addEventListener("click", () => {
     void setActiveTab("feed");
   });

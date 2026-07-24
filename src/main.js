@@ -72,6 +72,8 @@ let portfolioId = null;
 let claimHeld = false;
 /** Ревью уже отправлено — claim не освобождаем (триггер снял его). */
 let reviewSubmitted = false;
+/** @type {Promise<void> | null} */
+let reviewSubmitPromise = null;
 /** @type {ReturnType<typeof window.setInterval> | null} */
 let claimHeartbeatId = null;
 /** @type {import("./utils/portfolioEmbed.js").PortfolioEmbedPlan | null} */
@@ -134,20 +136,22 @@ const reviewPanel = createReviewPanel({
     setReviewReportReveal(active, payload);
   },
   onComplete: (answers) => {
-    void (async () => {
+    reviewSubmitPromise = (async () => {
       try {
         if (portfolioId) {
           await submitPortfolioReview(portfolioId, answers ?? null);
           reviewSubmitted = true;
           claimHeld = false;
           stopClaimHeartbeat();
+          await awardReviewReward();
         }
       } catch (err) {
         if (import.meta.env.DEV) {
           console.warn("[review] submitPortfolioReview", err);
         }
+      } finally {
+        reviewSubmitPromise = null;
       }
-      await awardReviewReward();
     })();
   },
   onDoneChange: (done) => {
@@ -158,12 +162,24 @@ const reviewPanel = createReviewPanel({
     if (activeRouteId === "done") syncRoute("quiz");
   },
   onExit: () => {
-    void releaseHeldClaim();
-    go("home", { replace: true });
+    void (async () => {
+      const pending = reviewSubmitPromise;
+      if (pending) {
+        await pending.catch(() => {});
+      }
+      await releaseHeldClaim();
+      go("home", { replace: true });
+    })();
   },
   onNextCase: () => {
-    void releaseHeldClaim();
-    go("home", { replace: true });
+    void (async () => {
+      const pending = reviewSubmitPromise;
+      if (pending) {
+        await pending.catch(() => {});
+      }
+      await releaseHeldClaim();
+      go("home", { replace: true });
+    })();
   },
 });
 const reviewScreen = createReviewScreen({
@@ -584,6 +600,7 @@ const homeScreen = createHomeScreen({
 
     claimHeld = true;
     reviewSubmitted = false;
+    reviewSubmitPromise = null;
     enterSessionShell();
     await closeReview();
     await applyPortfolio(item.url, { portfolioId: id });
@@ -1025,6 +1042,11 @@ if (shell) {
 }
 
 window.addEventListener("pagehide", () => {
+  if (reviewSubmitPromise) {
+    /* submit ещё идёт — не трогаем claim; триггер снимет после insert */
+    stopClaimHeartbeat();
+    return;
+  }
   if (claimHeld && !reviewSubmitted && portfolioId) {
     void releasePortfolioClaim(portfolioId);
     claimHeld = false;

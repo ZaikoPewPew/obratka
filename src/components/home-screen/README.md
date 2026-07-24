@@ -74,7 +74,9 @@ Topbar поверх контента (`position: absolute`), появление 
 | ФИО | `item.name` |
 | Роль | EN Title Case: `formatPortfolioRole` |
 | Счётчик | `{current} из {total}` = `reviewsCount` / `targetReviews` (только completed) |
-| Слоты ревьюеров | `.home-screen__reviewer-slots` — completed + active claims (аватарки) |
+| Слоты ревьюеров | `.home-screen__reviewer-slots` — completed + active claims (аватарки); RPC `portfolio_reviewer_slots`, fallback через RLS |
+
+`refresh()` при `open`, смене вкладки и `visibilitychange` (вкладка снова видима).
 | Своя | `isOwn` только во вкладке «Мои» → клик открывает report |
 
 ## Разметка таббара

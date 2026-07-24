@@ -212,6 +212,8 @@ end;
 $$;
 
 -- Слоты аватаров: completed (reviews) + active (claims). Только если caller видит портфолио.
+-- VOLATILE (не STABLE): иначе PostgREST отдаёт RPC 405; колонки через subquery —
+-- без clash с OUT-параметрами RETURNS TABLE (display_name / avatar_url / …).
 create or replace function public.portfolio_reviewer_slots(p_ids uuid[])
 returns table (
   portfolio_id uuid,
@@ -222,7 +224,7 @@ returns table (
   occupied_at timestamptz
 )
 language plpgsql
-stable
+volatile
 security definer
 set search_path = public
 as $$
@@ -233,62 +235,69 @@ begin
     return;
   end if;
 
-  perform public.purge_expired_review_claims();
-
   return query
-  with visible as (
-    select p.id
-    from public.portfolios p
-    where p.id = any (p_ids)
-      and (
-        p.owner_id = uid
-        or (
-          p.status = 'pending'
-          and public.can_review_portfolio(p.owner_id, uid)
+  select
+    s.portfolio_id,
+    s.slot_kind,
+    s.reviewer_id,
+    s.avatar_url,
+    s.display_name,
+    s.occupied_at
+  from (
+    with visible as (
+      select p.id
+      from public.portfolios p
+      where p.id = any (p_ids)
+        and (
+          p.owner_id = uid
+          or (
+            p.status = 'pending'
+            and public.can_review_portfolio(p.owner_id, uid)
+          )
         )
-      )
-  ),
-  completed as (
-    select
-      r.portfolio_id,
-      'completed'::text as slot_kind,
-      r.reviewer_id,
-      coalesce(
-        nullif(trim(r.reviewer_avatar_url), ''),
-        nullif(trim(pr.avatar_url), '')
-      ) as avatar_url,
-      coalesce(
-        nullif(trim(r.reviewer_display_name), ''),
-        nullif(trim(pr.display_name), '')
-      ) as display_name,
-      r.created_at as occupied_at
-    from public.reviews r
-    join visible v on v.id = r.portfolio_id
-    left join public.profiles pr on pr.id = r.reviewer_id
-  ),
-  active as (
-    select
-      c.portfolio_id,
-      'active'::text as slot_kind,
-      c.reviewer_id,
-      coalesce(
-        nullif(trim(c.reviewer_avatar_url), ''),
-        nullif(trim(pr.avatar_url), '')
-      ) as avatar_url,
-      coalesce(
-        nullif(trim(c.reviewer_display_name), ''),
-        nullif(trim(pr.display_name), '')
-      ) as display_name,
-      c.claimed_at as occupied_at
-    from public.review_claims c
-    join visible v on v.id = c.portfolio_id
-    left join public.profiles pr on pr.id = c.reviewer_id
-    where c.expires_at > now()
-  )
-  select * from completed
-  union all
-  select * from active
-  order by 1, 2 desc, 6;
+    ),
+    completed as (
+      select
+        r.portfolio_id as portfolio_id,
+        'completed'::text as slot_kind,
+        r.reviewer_id as reviewer_id,
+        coalesce(
+          nullif(trim(r.reviewer_avatar_url), ''),
+          nullif(trim(pr.avatar_url), '')
+        ) as avatar_url,
+        coalesce(
+          nullif(trim(r.reviewer_display_name), ''),
+          nullif(trim(pr.display_name), '')
+        ) as display_name,
+        r.created_at as occupied_at
+      from public.reviews r
+      join visible v on v.id = r.portfolio_id
+      left join public.profiles pr on pr.id = r.reviewer_id
+    ),
+    active as (
+      select
+        c.portfolio_id as portfolio_id,
+        'active'::text as slot_kind,
+        c.reviewer_id as reviewer_id,
+        coalesce(
+          nullif(trim(c.reviewer_avatar_url), ''),
+          nullif(trim(pr.avatar_url), '')
+        ) as avatar_url,
+        coalesce(
+          nullif(trim(c.reviewer_display_name), ''),
+          nullif(trim(pr.display_name), '')
+        ) as display_name,
+        c.claimed_at as occupied_at
+      from public.review_claims c
+      join visible v on v.id = c.portfolio_id
+      left join public.profiles pr on pr.id = c.reviewer_id
+      where c.expires_at > now()
+    )
+    select * from completed
+    union all
+    select * from active
+  ) as s
+  order by s.portfolio_id, s.slot_kind desc, s.occupied_at;
 end;
 $$;
 

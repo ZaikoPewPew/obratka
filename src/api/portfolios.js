@@ -170,6 +170,98 @@ function mapSlotRow(row) {
 }
 
 /**
+ * @param {Map<string, PortfolioReviewerSlot[]>} map
+ * @param {string} portfolioId
+ * @param {PortfolioReviewerSlot | null} slot
+ */
+function pushSlot(map, portfolioId, slot) {
+  if (!portfolioId || !slot) return;
+  const list = map.get(portfolioId) || [];
+  list.push(slot);
+  map.set(portfolioId, list);
+}
+
+/**
+ * @param {Map<string, PortfolioReviewerSlot[]>} map
+ */
+function sortSlotsMap(map) {
+  for (const [id, list] of map) {
+    list.sort((a, b) => {
+      if (a.kind === b.kind) return 0;
+      return a.kind === "completed" ? -1 : 1;
+    });
+    map.set(id, list);
+  }
+}
+
+/**
+ * Fallback без RPC (RLS: автор видит все ревью своих кейсов; ревьюер — свои).
+ * @param {import("@supabase/supabase-js").SupabaseClient} supabase
+ * @param {string[]} ids
+ * @returns {Promise<Map<string, PortfolioReviewerSlot[]>>}
+ */
+async function fetchReviewerSlotsFallback(supabase, ids) {
+  /** @type {Map<string, PortfolioReviewerSlot[]>} */
+  const map = new Map();
+
+  const [reviewsRes, claimsRes] = await Promise.all([
+    supabase
+      .from("reviews")
+      .select(
+        "portfolio_id, reviewer_id, reviewer_avatar_url, reviewer_display_name, created_at",
+      )
+      .in("portfolio_id", ids),
+    supabase
+      .from("review_claims")
+      .select(
+        "portfolio_id, reviewer_id, reviewer_avatar_url, reviewer_display_name, claimed_at, expires_at",
+      )
+      .in("portfolio_id", ids)
+      .gt("expires_at", new Date().toISOString()),
+  ]);
+
+  if (reviewsRes.error && import.meta.env.DEV) {
+    console.warn("[portfolios] slots fallback reviews", reviewsRes.error.message);
+  }
+  if (claimsRes.error && import.meta.env.DEV) {
+    console.warn("[portfolios] slots fallback claims", claimsRes.error.message);
+  }
+
+  for (const row of reviewsRes.data || []) {
+    const portfolioId =
+      row && typeof row.portfolio_id === "string" ? row.portfolio_id : "";
+    pushSlot(
+      map,
+      portfolioId,
+      mapSlotRow({
+        slot_kind: "completed",
+        reviewer_id: row.reviewer_id,
+        avatar_url: row.reviewer_avatar_url,
+        display_name: row.reviewer_display_name,
+      }),
+    );
+  }
+
+  for (const row of claimsRes.data || []) {
+    const portfolioId =
+      row && typeof row.portfolio_id === "string" ? row.portfolio_id : "";
+    pushSlot(
+      map,
+      portfolioId,
+      mapSlotRow({
+        slot_kind: "active",
+        reviewer_id: row.reviewer_id,
+        avatar_url: row.reviewer_avatar_url,
+        display_name: row.reviewer_display_name,
+      }),
+    );
+  }
+
+  sortSlotsMap(map);
+  return map;
+}
+
+/**
  * @param {string[]} portfolioIds
  * @returns {Promise<Map<string, PortfolioReviewerSlot[]>>}
  */
@@ -190,27 +282,16 @@ async function fetchReviewerSlotsByPortfolio(portfolioIds) {
     if (import.meta.env.DEV) {
       console.warn("[portfolios] portfolio_reviewer_slots", error.message);
     }
-    return map;
+    return fetchReviewerSlotsFallback(supabase, ids);
   }
 
   for (const row of data || []) {
     const portfolioId =
       row && typeof row.portfolio_id === "string" ? row.portfolio_id : "";
-    const slot = mapSlotRow(row);
-    if (!portfolioId || !slot) continue;
-    const list = map.get(portfolioId) || [];
-    list.push(slot);
-    map.set(portfolioId, list);
+    pushSlot(map, portfolioId, mapSlotRow(row));
   }
 
-  for (const [id, list] of map) {
-    list.sort((a, b) => {
-      if (a.kind === b.kind) return 0;
-      return a.kind === "completed" ? -1 : 1;
-    });
-    map.set(id, list);
-  }
-
+  sortSlotsMap(map);
   return map;
 }
 
@@ -289,7 +370,9 @@ export async function listPortfoliosForReview() {
 
   return withSlots.filter((item) => {
     const target = Math.max(1, Number(item.targetReviews) || DEFAULT_TARGET_REVIEWS);
-    const occupied = (item.reviewerSlots || []).length;
+    const slotOccupied = (item.reviewerSlots || []).length;
+    const countOccupied = Math.max(0, Number(item.reviewsCount) || 0);
+    const occupied = Math.max(slotOccupied, countOccupied);
     return occupied < target;
   });
 }
