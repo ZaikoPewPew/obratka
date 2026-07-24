@@ -1,7 +1,11 @@
 import { requestEmailOtp, verifyEmailOtp } from "../../api/auth.js";
-import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import { formatString, getStrings } from "../../i18n.js";
-import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
+import { createBrandScreenVisual } from "../brand-screen-visual/BrandScreenVisual.js";
+import { ensureFieldErrorInner } from "../../utils/fieldError.js";
+import {
+  isFieldErrorVisible,
+  setUrlScreenOtpInvalid,
+} from "../../utils/urlScreenField.js";
 import {
   getAuthCodeResendCooldownMs,
   getScreenCloseFallbackMs,
@@ -135,8 +139,9 @@ export function createAuthCodeScreen({ onSuccess, onBack }) {
   const error = document.createElement("p");
   error.className = "url-screen__error auth-code-screen__error";
   error.hidden = true;
+  error.setAttribute("aria-hidden", "true");
   error.setAttribute("role", "alert");
-  error.textContent = t.authOtpInvalid;
+  ensureFieldErrorInner(error).textContent = t.authOtpInvalid;
 
   const resend = document.createElement("button");
   resend.type = "button";
@@ -148,27 +153,11 @@ export function createAuthCodeScreen({ onSuccess, onBack }) {
   stage.append(block);
   formPane.append(top, stage);
 
-  const visual = document.createElement("div");
-  visual.className = "url-screen__visual";
-  visual.setAttribute("aria-hidden", "true");
+  const brandVisual = createBrandScreenVisual();
+  brandVisual.bindScreenRoot(root);
+  const { meshWash } = brandVisual;
 
-  const glow = document.createElement("div");
-  glow.className = "url-screen__glow";
-
-  const noise = document.createElement("span");
-  noise.className = "url-screen__noise";
-
-  const brand = document.createElement("div");
-  brand.className = "url-screen__brand";
-  brand.innerHTML = `
-    ${brandMarkSvg("url-screen__brand-mark")}
-  `;
-
-  visual.append(glow, noise, brand);
-  const meshWash = mountMeshGradientWash(glow);
-  meshWash.setActive(false);
-
-  layout.append(formPane, visual);
+  layout.append(formPane, brandVisual.root);
   root.append(layout);
 
   /**
@@ -272,10 +261,11 @@ export function createAuthCodeScreen({ onSuccess, onBack }) {
    * @param {string} [message]
    */
   function setError(visible, message) {
-    error.hidden = !visible;
-    error.textContent = message || t.authOtpInvalid;
-    cells.classList.toggle("auth-code-screen__cells--invalid", visible);
-    otpInput.setAttribute("aria-invalid", visible ? "true" : "false");
+    setUrlScreenOtpInvalid(
+      { cells, input: otpInput, error },
+      { visible, message: message || t.authOtpInvalid },
+    );
+    brandVisual.setVariant(visible ? "invalid" : "default");
   }
 
   /**
@@ -409,7 +399,7 @@ export function createAuthCodeScreen({ onSuccess, onBack }) {
   });
 
   otpInput.addEventListener("input", () => {
-    if (!error.hidden) setError(false);
+    if (isFieldErrorVisible(error)) setError(false);
     otpInput.value = getCode();
     syncDigits();
     void maybeVerify();

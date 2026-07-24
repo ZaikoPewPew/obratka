@@ -21,8 +21,10 @@ const BAN_MARK_PATH =
 
 const VIEWBOX_DEFAULT = "0 0 44 43";
 const VIEWBOX_DONE = "0 0 115 58";
+const VIEWBOX_EVIL = "0 0 44 52";
 const SIZE_DEFAULT = { width: "44", height: "43" };
 const SIZE_DONE = { width: "115", height: "58" };
+const SIZE_EVIL = { width: "44", height: "52" };
 
 /** @type {WeakMap<SVGElement, Animation[]>} */
 const morphAnims = new WeakMap();
@@ -57,10 +59,30 @@ export function brandMarkSvg(className) {
  * @returns {string}
  */
 export function banBrandMarkSvg(className = "ban-screen__brand-mark") {
-  return `<svg class="${className}" width="44" height="52" viewBox="0 0 44 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path fill-rule="evenodd" clip-rule="evenodd" d="${BAN_FLAME_PATH}" fill="white" />
-  <path fill-rule="evenodd" clip-rule="evenodd" d="${BAN_MARK_PATH}" fill="white" />
+  return `<svg class="${className}" width="${SIZE_EVIL.width}" height="${SIZE_EVIL.height}" viewBox="${VIEWBOX_EVIL}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" data-brand-mark="evil">
+  <path data-brand-part="flame" fill-rule="evenodd" clip-rule="evenodd" d="${BAN_FLAME_PATH}" fill="white" />
+  <path data-brand-part="blob" fill-rule="evenodd" clip-rule="evenodd" d="${BAN_MARK_PATH}" fill="white" />
 </svg>`;
+}
+
+/**
+ * @param {{ flameOpacity?: number }} [opts]
+ * @returns {string}
+ */
+function evilMarkInnerHtml(opts = {}) {
+  const flameOp = opts.flameOpacity ?? 1;
+  return `
+  <path data-brand-part="flame" fill-rule="evenodd" clip-rule="evenodd" d="${BAN_FLAME_PATH}" fill="white" opacity="${flameOp}" />
+  <path data-brand-part="blob" fill-rule="evenodd" clip-rule="evenodd" d="${BAN_MARK_PATH}" fill="white" />
+`;
+}
+
+/**
+ * @param {SVGElement} svg
+ * @returns {Element | null}
+ */
+function evilFlame(svg) {
+  return svg.querySelector("[data-brand-part='flame']");
 }
 
 /**
@@ -124,6 +146,7 @@ export function morphBrandMarkToDone(svg, opts = {}) {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
   cancelBrandMarkMorph(svg);
+  svg.classList.remove("brand-mark--evil");
   svg.classList.add("logo-done");
   svg.dataset.brandMark = "done";
   svg.setAttribute("viewBox", VIEWBOX_DONE);
@@ -168,6 +191,129 @@ export function morphBrandMarkToDone(svg, opts = {}) {
 }
 
 /**
+ * Default mark → evil (flame + lowered blob), same SVG node.
+ *
+ * @param {SVGElement | null | undefined} svg
+ * @param {{
+ *   durationMs?: number;
+ *   easing?: string;
+ *   reducedMotion?: boolean;
+ * }} [opts]
+ */
+export function morphBrandMarkToEvil(svg, opts = {}) {
+  if (!svg || !(svg instanceof SVGElement)) return;
+
+  const durationMs = opts.durationMs ?? 600;
+  const easing = opts.easing || "cubic-bezier(0.16, 1, 0.3, 1)";
+  const reduced =
+    opts.reducedMotion === true ||
+    (typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+  cancelBrandMarkMorph(svg);
+
+  if (svg.dataset.brandMark === "evil") {
+    const flame = evilFlame(svg);
+    if (flame) {
+      flame.style.opacity = "";
+      flame.setAttribute("opacity", "1");
+    }
+    return;
+  }
+
+  svg.classList.remove("logo-done");
+  svg.classList.add("brand-mark--evil");
+  svg.dataset.brandMark = "evil";
+  svg.setAttribute("viewBox", VIEWBOX_EVIL);
+  svg.setAttribute("width", SIZE_EVIL.width);
+  svg.setAttribute("height", SIZE_EVIL.height);
+  svg.innerHTML = evilMarkInnerHtml({ flameOpacity: reduced ? 1 : 0 });
+
+  if (reduced) return;
+
+  const flame = evilFlame(svg);
+  if (!flame) return;
+
+  const anim = flame.animate([{ opacity: 0 }, { opacity: 1 }], {
+    duration: durationMs,
+    easing,
+    fill: "forwards",
+  });
+  morphAnims.set(svg, [anim]);
+
+  void anim.finished.catch(() => undefined).then(() => {
+    if (morphAnims.get(svg)?.[0] !== anim) return;
+    if (svg.dataset.brandMark === "evil") {
+      flame.style.opacity = "";
+      flame.setAttribute("opacity", "1");
+    }
+    try {
+      anim.cancel();
+    } catch {
+      /* ignore */
+    }
+    morphAnims.delete(svg);
+  });
+}
+
+/**
+ * Evil (or done) → default: flame fades out, then snap to mark.
+ *
+ * @param {SVGElement | null | undefined} svg
+ * @param {{
+ *   durationMs?: number;
+ *   easing?: string;
+ *   reducedMotion?: boolean;
+ * }} [opts]
+ */
+export function morphBrandMarkToDefault(svg, opts = {}) {
+  if (!svg || !(svg instanceof SVGElement)) return;
+  if (svg.dataset.brandMark === "default") return;
+
+  const durationMs = opts.durationMs ?? 600;
+  const easing = opts.easing || "cubic-bezier(0.16, 1, 0.3, 1)";
+  const reduced =
+    opts.reducedMotion === true ||
+    (typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+  if (svg.dataset.brandMark !== "evil" || reduced) {
+    resetBrandMarkToDefault(svg);
+    return;
+  }
+
+  cancelBrandMarkMorph(svg);
+  const flame = evilFlame(svg);
+  if (!flame) {
+    resetBrandMarkToDefault(svg);
+    return;
+  }
+
+  const anim = flame.animate(
+    [{ opacity: Number.parseFloat(flame.getAttribute("opacity") || "1") || 1 }, { opacity: 0 }],
+    {
+      duration: durationMs,
+      easing,
+      fill: "forwards",
+    },
+  );
+  morphAnims.set(svg, [anim]);
+
+  void anim.finished.catch(() => undefined).then(() => {
+    if (morphAnims.get(svg)?.[0] !== anim) return;
+    try {
+      anim.cancel();
+    } catch {
+      /* ignore */
+    }
+    morphAnims.delete(svg);
+    if (svg.dataset.brandMark === "evil") {
+      resetBrandMarkToDefault(svg);
+    }
+  });
+}
+
+/**
  * Snap mark back to default (cancel in-flight morph).
  *
  * @param {SVGElement | null | undefined} svg
@@ -176,7 +322,7 @@ export function resetBrandMarkToDefault(svg) {
   if (!svg || !(svg instanceof SVGElement)) return;
 
   cancelBrandMarkMorph(svg);
-  svg.classList.remove("logo-done");
+  svg.classList.remove("logo-done", "brand-mark--evil");
   svg.dataset.brandMark = "default";
   svg.setAttribute("viewBox", VIEWBOX_DEFAULT);
   svg.setAttribute("width", SIZE_DEFAULT.width);

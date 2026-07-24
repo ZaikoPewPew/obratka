@@ -4,8 +4,11 @@
 
 ## Сейчас
 
-- API: `BrandScreenShell.js` — `createBrandScreenShell(opts)` → `{ root, open, close, setContent, getVisualRoot }`.
-- Пока **referral / auth / onboarding / url** копируют разметку `.url-screen*` напрямую (shell API готов, миграция впереди).
+- API: `BrandScreenShell.js` — `createBrandScreenShell(opts)` →  
+  `{ root, open, close, setContent, getVisualRoot, getBrandVisual, setVariant, meshWash }`.
+- Правый visual: [`brand-screen-visual`](../brand-screen-visual/README.md) (`markPending: true` — SVG марки вставляет consumer).
+- Пока **referral / auth / url / auth-code** ещё собирают layout сами, но visual берут из того же компонента.
+- Onboarding уже на shell (`rootClassName: "url-screen"`).
 - Стили shell не вынесены (`styles/brand-screen.css` — заготовка).
 
 ## Цель
@@ -13,15 +16,13 @@
 | Зона | Роль |
 |------|------|
 | Левая `form-pane` | Слот контента экрана |
-| Правая `visual` | mesh + noise + бренд (общий) |
+| Правая `visual` | `createBrandScreenVisual` — mesh + noise + бренд |
 
-Потребители после миграции: url, referral, auth, onboarding.
-
-Open/close + handoff: `src/utils/brandScreenTransition.js` (сейчас на классах url-screen).
+Open/close + handoff: `src/utils/brandScreenTransition.js` (классы url-screen).
 
 ## Не делать
 
 - Не дублировать visual в каждом экране.
 - Только токены в CSS.
 
-См. [`SCREENS.md`](../../../SCREENS.md), [`url-screen/README.md`](../url-screen/README.md).
+См. [`SCREENS.md`](../../../SCREENS.md), [`brand-screen-visual/README.md`](../brand-screen-visual/README.md), [`url-screen/README.md`](../url-screen/README.md).

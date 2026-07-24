@@ -1,17 +1,18 @@
 import { getStrings } from "../../i18n.js";
-import {
-  brandMarkSvg,
-  morphBrandMarkToDone,
-  resetBrandMarkToDefault,
-} from "../../assets/brand/brandMarks.js";
-import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
+import { createBrandScreenVisual } from "../brand-screen-visual/BrandScreenVisual.js";
 import { normalizePortfolioUrl } from "../../utils/portfolioMeta.js";
 import { resolvePlatformIcon } from "../../utils/platformBrandIcon.js";
 import {
-  getBrandMarkMorphMotion,
+  ensureFieldErrorInner,
+  setFieldErrorMessage,
+} from "../../utils/fieldError.js";
+import {
+  isFieldErrorVisible,
+  setUrlScreenFieldInvalid,
+} from "../../utils/urlScreenField.js";
+import {
   getMotionReveal,
   getReportLaunchMotion,
-  getReviewMeshDoneMotion,
   getScreenCloseFallbackMs,
 } from "../../utils/motionTokens.js";
 import {
@@ -151,7 +152,8 @@ export function createUrlScreen({ onSubmit, onExit }) {
   const error = document.createElement("p");
   error.className = "url-screen__error";
   error.hidden = true;
-  error.textContent = t.urlModalInvalid;
+  error.setAttribute("aria-hidden", "true");
+  ensureFieldErrorInner(error).textContent = t.urlModalInvalid;
 
   field.append(inputWrap, error);
 
@@ -193,12 +195,9 @@ export function createUrlScreen({ onSubmit, onExit }) {
   done.append(doneTitle, doneActions);
   formPane.append(block, done);
 
-  const visual = document.createElement("div");
-  visual.className = "url-screen__visual";
-  visual.setAttribute("aria-hidden", "true");
-
-  const glow = document.createElement("div");
-  glow.className = "url-screen__glow";
+  const brandVisual = createBrandScreenVisual({ withBrandSlot: true });
+  brandVisual.bindScreenRoot(root);
+  const { meshWash } = brandVisual;
 
   const preview = document.createElement("div");
   preview.className = "url-screen__preview";
@@ -226,23 +225,9 @@ export function createUrlScreen({ onSubmit, onExit }) {
   previewStub.append(stubTitle, stubBones);
   previewSheet.append(previewStub);
   preview.append(previewSheet);
+  brandVisual.root.insertBefore(preview, brandVisual.brand);
 
-  const noise = document.createElement("span");
-  noise.className = "url-screen__noise";
-
-  const brand = document.createElement("div");
-  brand.className = "url-screen__brand";
-
-  const brandSlot = document.createElement("div");
-  brandSlot.className = "url-screen__brand-slot";
-  brandSlot.innerHTML = brandMarkSvg("url-screen__brand-mark");
-  brand.append(brandSlot);
-
-  visual.append(glow, noise, preview, brand);
-  const meshWash = mountMeshGradientWash(glow);
-  meshWash.setActive(false);
-
-  layout.append(formPane, visual);
+  layout.append(formPane, brandVisual.root);
   root.append(layout);
 
   let closing = false;
@@ -261,7 +246,7 @@ export function createUrlScreen({ onSubmit, onExit }) {
     input.placeholder = strings.urlModalPlaceholder;
     submit.setAttribute("aria-label", strings.urlModalSubmit);
     submit.title = strings.urlModalSubmit;
-    error.textContent = strings.urlModalInvalid;
+    setFieldErrorMessage(error, strings.urlModalInvalid);
     platformsText.textContent = strings.urlScreenPlatforms;
     stubTitle.textContent = strings.urlPreviewStubTitle;
     doneTitle.textContent = strings.successPortfolioTitle;
@@ -269,8 +254,11 @@ export function createUrlScreen({ onSubmit, onExit }) {
   }
 
   function setError(visible) {
-    error.hidden = !visible;
-    input.setAttribute("aria-invalid", visible ? "true" : "false");
+    setUrlScreenFieldInvalid(
+      { wrap: inputWrap, input, error },
+      { visible },
+    );
+    brandVisual.setVariant(visible ? "invalid" : "default");
   }
 
   function syncSubmitVisibility() {
@@ -279,51 +267,14 @@ export function createUrlScreen({ onSubmit, onExit }) {
     inputWrap.classList.toggle("url-screen__input-wrap--ready", hasValue);
   }
 
-  const BRAND_MARK_CLASS = "url-screen__brand-mark";
-
-  function brandMarkEl() {
-    return /** @type {SVGElement | null} */ (
-      brandSlot.querySelector("svg")
-    );
-  }
-
-  function setDefaultBrandMark() {
-    const svg = brandMarkEl();
-    if (svg) {
-      resetBrandMarkToDefault(svg);
-      return;
-    }
-    brandSlot.innerHTML = brandMarkSvg(BRAND_MARK_CLASS);
-  }
-
-  function setLogoDoneMark() {
-    let svg = brandMarkEl();
-    if (!svg) {
-      brandSlot.innerHTML = brandMarkSvg(BRAND_MARK_CLASS);
-      svg = brandMarkEl();
-    }
-    const { durationMs, easing } = getBrandMarkMorphMotion();
-    morphBrandMarkToDone(svg, {
-      durationMs,
-      easing,
-      reducedMotion: prefersReducedMotion(),
-    });
-  }
-
   function clearDoneMesh() {
     pendingDoneMesh = false;
-    root.classList.remove("url-screen--done");
-    setDefaultBrandMark();
-    meshWash.refresh();
+    brandVisual.setVariant("default");
   }
 
   /** Зелёный mesh + logo-done: старт вместе со спуском лого. */
   function activateDoneMesh() {
-    if (root.classList.contains("url-screen--done")) return;
-    root.classList.add("url-screen--done");
-    setLogoDoneMark();
-    const { durationMs, easing } = getReviewMeshDoneMotion();
-    meshWash.transitionToCssColors({ durationMs, easing });
+    brandVisual.setVariant("done");
   }
 
   function releasePreviewBrand() {
@@ -650,7 +601,7 @@ export function createUrlScreen({ onSubmit, onExit }) {
   });
 
   input.addEventListener("input", () => {
-    if (!error.hidden) setError(false);
+    if (isFieldErrorVisible(error)) setError(false);
     syncSubmitVisibility();
     if (submitting || transitioning || !done.hidden) return;
     schedulePreviewSync();

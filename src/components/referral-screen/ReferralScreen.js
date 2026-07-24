@@ -1,12 +1,16 @@
 import { getStrings } from "../../i18n.js";
-import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
-import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
+import { createBrandScreenVisual } from "../brand-screen-visual/BrandScreenVisual.js";
 import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
 import {
   closeBrandScreen,
   openBrandScreen,
 } from "../../utils/brandScreenTransition.js";
 import { normalizeReferralCode } from "../../utils/referralCode.js";
+import { ensureFieldErrorInner } from "../../utils/fieldError.js";
+import {
+  isFieldErrorVisible,
+  setUrlScreenFieldInvalid,
+} from "../../utils/urlScreenField.js";
 
 const PLACEHOLDER_AVATAR_COUNT = 4;
 
@@ -93,7 +97,8 @@ export function createReferralScreen({ onSubmit }) {
   const error = document.createElement("p");
   error.className = "url-screen__error";
   error.hidden = true;
-  error.textContent = t.referralInvalid;
+  error.setAttribute("aria-hidden", "true");
+  ensureFieldErrorInner(error).textContent = t.referralInvalid;
 
   field.append(inputWrap, error);
 
@@ -117,27 +122,11 @@ export function createReferralScreen({ onSubmit }) {
   block.append(title, form);
   formPane.append(block);
 
-  const visual = document.createElement("div");
-  visual.className = "url-screen__visual";
-  visual.setAttribute("aria-hidden", "true");
+  const brandVisual = createBrandScreenVisual();
+  brandVisual.bindScreenRoot(root);
+  const { meshWash } = brandVisual;
 
-  const glow = document.createElement("div");
-  glow.className = "url-screen__glow";
-
-  const noise = document.createElement("span");
-  noise.className = "url-screen__noise";
-
-  const brand = document.createElement("div");
-  brand.className = "url-screen__brand";
-  brand.innerHTML = `
-    ${brandMarkSvg("url-screen__brand-mark")}
-  `;
-
-  visual.append(glow, noise, brand);
-  const meshWash = mountMeshGradientWash(glow);
-  meshWash.setActive(false);
-
-  layout.append(formPane, visual);
+  layout.append(formPane, brandVisual.root);
   root.append(layout);
 
   let closing = false;
@@ -149,8 +138,11 @@ export function createReferralScreen({ onSubmit }) {
   function setError(reason) {
     const strings = getStrings();
     if (!reason) {
-      error.hidden = true;
-      input.setAttribute("aria-invalid", "false");
+      setUrlScreenFieldInvalid(
+        { wrap: inputWrap, input, error },
+        { visible: false },
+      );
+      brandVisual.setVariant("default");
       return;
     }
     const messages = {
@@ -160,9 +152,14 @@ export function createReferralScreen({ onSubmit }) {
       rpc_failed: strings.referralValidateError,
       self_referral: strings.referralInvalid,
     };
-    error.textContent = messages[reason] || strings.referralInvalid;
-    error.hidden = false;
-    input.setAttribute("aria-invalid", "true");
+    setUrlScreenFieldInvalid(
+      { wrap: inputWrap, input, error },
+      {
+        visible: true,
+        message: messages[reason] || strings.referralInvalid,
+      },
+    );
+    brandVisual.setVariant("invalid");
   }
 
   function syncSubmitVisibility() {
@@ -240,7 +237,7 @@ export function createReferralScreen({ onSubmit }) {
   });
 
   input.addEventListener("input", () => {
-    if (!error.hidden) setError(null);
+    if (isFieldErrorVisible(error)) setError(null);
     syncSubmitVisibility();
   });
 

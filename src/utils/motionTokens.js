@@ -64,6 +64,33 @@ export function getScreenCloseFallbackMs() {
 }
 
 /**
+ * Выезд ошибки под инпутом (`.url-screen__error`).
+ * @returns {{ durationMs: number; easing: string }}
+ */
+export function getMotionFieldError() {
+  return {
+    durationMs: parseCssTimeMs(readCssVar("--motion-field-error-duration"), 600),
+    easing: readCssVar("--motion-field-error-ease") || "cubic-bezier(0.16, 1, 0.3, 1)",
+  };
+}
+
+/**
+ * Красный mesh + evil-марк при ошибке поля.
+ * @returns {{ durationMs: number; easing: string }}
+ */
+export function getMotionFieldErrorVisual() {
+  return {
+    durationMs: parseCssTimeMs(
+      readCssVar("--motion-field-error-visual-duration"),
+      600,
+    ),
+    easing:
+      readCssVar("--motion-field-error-visual-ease") ||
+      "cubic-bezier(0.16, 1, 0.3, 1)",
+  };
+}
+
+/**
  * Cooldown кнопки «Отправить ещё раз» на экране email OTP.
  * @returns {number}
  */

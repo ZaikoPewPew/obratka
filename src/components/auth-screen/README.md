@@ -13,6 +13,8 @@ Path: **`/registration`**. Split как `url-screen`; форма — email → d
 ## Файл
 
 - `AuthScreen.js` — `createAuthScreen({ onSuccess, mode? })` → `{ root, open, close, setMode }`.
+- Visual: [`brand-screen-visual`](../brand-screen-visual/README.md).
+- Email-ошибка: `setUrlScreenFieldInvalid` (обводка + текст); provider-ошибка — только текст; visual `invalid`, если любая ошибка видна.
 
 ## Поведение
 

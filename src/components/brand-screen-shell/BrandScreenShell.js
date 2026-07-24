@@ -1,4 +1,4 @@
-import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
+import { createBrandScreenVisual } from "../brand-screen-visual/BrandScreenVisual.js";
 import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
 import {
   closeBrandScreen,
@@ -20,6 +20,9 @@ import {
  *   close: (opts?: { handoff?: boolean }) => Promise<void>;
  *   setContent: (el: HTMLElement) => void;
  *   getVisualRoot: () => HTMLElement;
+ *   getBrandVisual: () => ReturnType<typeof createBrandScreenVisual>;
+ *   setVariant: (variant: "default" | "invalid" | "done") => void;
+ *   meshWash: ReturnType<typeof createBrandScreenVisual>["meshWash"];
  * }}
  */
 export function createBrandScreenShell({
@@ -39,25 +42,15 @@ export function createBrandScreenShell({
   formPane.className = `${rootClassName}__form-pane`;
   formPane.append(content);
 
-  const visual = document.createElement("div");
-  visual.className = `${rootClassName}__visual`;
-  visual.setAttribute("aria-hidden", "true");
+  const brandVisual = createBrandScreenVisual({
+    classPrefix: rootClassName,
+    markClassName: `${rootClassName}__brand-mark`,
+    markPending: true,
+  });
+  brandVisual.bindScreenRoot(root);
+  const { meshWash } = brandVisual;
 
-  const glow = document.createElement("div");
-  glow.className = `${rootClassName}__glow`;
-
-  const noise = document.createElement("span");
-  noise.className = `${rootClassName}__noise`;
-
-  const brand = document.createElement("div");
-  brand.className = `${rootClassName}__brand`;
-  brand.dataset.brandMark = "pending";
-
-  visual.append(glow, noise, brand);
-  const meshWash = mountMeshGradientWash(glow);
-  meshWash.setActive(false);
-
-  layout.append(formPane, visual);
+  layout.append(formPane, brandVisual.root);
   root.append(layout);
 
   let closing = false;
@@ -96,6 +89,9 @@ export function createBrandScreenShell({
     open,
     close,
     setContent,
-    getVisualRoot: () => visual,
+    getVisualRoot: () => brandVisual.root,
+    getBrandVisual: () => brandVisual,
+    setVariant: (variant) => brandVisual.setVariant(variant),
+    meshWash,
   };
 }

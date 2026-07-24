@@ -12,6 +12,8 @@ Path: **`/registration/code`**. Split как `auth-screen` / `url-screen`.
 ## Файл
 
 - `AuthCodeScreen.js` — `createAuthCodeScreen({ onSuccess, onBack })` → `{ root, open(email), close }`.
+- Visual: [`brand-screen-visual`](../brand-screen-visual/README.md).
+- Ошибка OTP: `setUrlScreenOtpInvalid` ([`urlScreenField.js`](../../utils/urlScreenField.js)) + `setVariant("invalid")`.
 
 ## Поведение
 

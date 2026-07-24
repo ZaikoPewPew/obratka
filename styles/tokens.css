@@ -200,6 +200,14 @@
   --motion-report-launch-ease-dive: cubic-bezier(0.55, 0.05, 0.9, 0.3);
   /* JS close fallback ≈ screen duration + запас */
   --motion-screen-close-fallback: 700ms;
+  /* Выезд ошибки под инпутом */
+  --motion-field-error-duration: var(--motion-screen-duration);
+  --motion-field-error-ease: var(--ease-reveal);
+  --motion-field-error-shift: var(--motion-screen-shift);
+  --motion-field-error-blur: var(--motion-reveal-blur);
+  /* Mesh + evil-марк вместе с ошибкой */
+  --motion-field-error-visual-duration: var(--motion-screen-duration);
+  --motion-field-error-visual-ease: var(--ease-reveal);
 
   /* Слои */
   --z-base: 1;
@@ -657,6 +665,18 @@
   --url-screen-form-width: 500px;
   --url-screen-form-gap: var(--space-6);
   --url-screen-field-gap: var(--space-4);
+  --url-screen-error-open-gap: var(--space-2);
+  --url-screen-error-duration: var(--motion-field-error-duration);
+  --url-screen-error-ease: var(--motion-field-error-ease);
+  --url-screen-error-shift: var(--motion-field-error-shift);
+  --url-screen-error-blur: var(--motion-field-error-blur);
+  --url-screen-error-visual-duration: var(--motion-field-error-visual-duration);
+  --url-screen-error-visual-ease: var(--motion-field-error-visual-ease);
+  --url-screen-error-mesh-1: var(--shell-ban-mesh-1);
+  --url-screen-error-mesh-2: var(--shell-ban-mesh-2);
+  --url-screen-error-mesh-3: var(--shell-ban-mesh-3);
+  --url-screen-error-mesh-4: var(--shell-ban-mesh-4);
+  --url-screen-error-mesh-wash: var(--shell-ban-mesh-wash);
   --url-screen-title-size: var(--font-size-3xl);
   --url-screen-title-weight: var(--font-weight-regular);
   --url-screen-input-height: 75px;

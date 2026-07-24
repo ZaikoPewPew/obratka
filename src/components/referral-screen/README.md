@@ -17,6 +17,7 @@ Invite-only gate: код проверяется через RPC `validate_referra
 
 - `ReferralScreen.js` — `createReferralScreen({ onSubmit })` → `{ root, open, close, setError }`.
 - `open(prefill?, { handoff? })`, `close({ handoff? })`.
+- Visual: [`brand-screen-visual`](../brand-screen-visual/README.md); ошибка поля: `setUrlScreenFieldInvalid` ([`urlScreenField.js`](../../utils/urlScreenField.js)) — текст + обводка + `setVariant("invalid")`.
 - Стили: `.url-screen*` + `--placeholder` в `iframe-shell.css` / `tokens.css`.
 
 ## Поведение

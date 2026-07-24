@@ -3,10 +3,17 @@ import {
   signInWithGoogle,
   signInWithTelegram,
 } from "../../api/auth.js";
-import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import { getStrings } from "../../i18n.js";
+import { createBrandScreenVisual } from "../brand-screen-visual/BrandScreenVisual.js";
 import { isValidEmail } from "../../utils/emailValidation.js";
-import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
+import {
+  ensureFieldErrorInner,
+  setFieldErrorVisible,
+} from "../../utils/fieldError.js";
+import {
+  isFieldErrorVisible,
+  setUrlScreenFieldInvalid,
+} from "../../utils/urlScreenField.js";
 import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
 import {
   closeBrandScreen,
@@ -165,12 +172,15 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
   const error = document.createElement("p");
   error.className = "url-screen__error";
   error.hidden = true;
-  error.textContent = t.authEmailInvalid;
+  error.setAttribute("aria-hidden", "true");
+  ensureFieldErrorInner(error).textContent = t.authEmailInvalid;
 
   const providerError = document.createElement("p");
   providerError.className = "url-screen__error auth-screen__provider-error";
   providerError.hidden = true;
+  providerError.setAttribute("aria-hidden", "true");
   providerError.setAttribute("role", "alert");
+  ensureFieldErrorInner(providerError);
 
   field.append(inputWrap, error);
 
@@ -210,27 +220,11 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
   block.append(title, form);
   formPane.append(block);
 
-  const visual = document.createElement("div");
-  visual.className = "url-screen__visual";
-  visual.setAttribute("aria-hidden", "true");
+  const brandVisual = createBrandScreenVisual();
+  brandVisual.bindScreenRoot(root);
+  const { meshWash } = brandVisual;
 
-  const glow = document.createElement("div");
-  glow.className = "url-screen__glow";
-
-  const noise = document.createElement("span");
-  noise.className = "url-screen__noise";
-
-  const brand = document.createElement("div");
-  brand.className = "url-screen__brand";
-  brand.innerHTML = `
-    ${brandMarkSvg("url-screen__brand-mark")}
-  `;
-
-  visual.append(glow, noise, brand);
-  const meshWash = mountMeshGradientWash(glow);
-  meshWash.setActive(false);
-
-  layout.append(formPane, visual);
+  layout.append(formPane, brandVisual.root);
   root.append(layout);
 
   let closing = false;
@@ -243,10 +237,11 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
    * @param {string} [message]
    */
   function setError(visible, message) {
-    error.hidden = !visible;
-    error.textContent = message || t.authEmailInvalid;
-    input.setAttribute("aria-invalid", visible ? "true" : "false");
-    inputWrap.classList.toggle("url-screen__input-wrap--invalid", visible);
+    setUrlScreenFieldInvalid(
+      { wrap: inputWrap, input, error },
+      { visible, message: message || t.authEmailInvalid },
+    );
+    syncInvalidVisual();
   }
 
   /**
@@ -254,12 +249,18 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
    */
   function setProviderError(message) {
     if (!message) {
-      providerError.hidden = true;
-      providerError.textContent = "";
+      setFieldErrorVisible(providerError, false);
+      syncInvalidVisual();
       return;
     }
-    providerError.hidden = false;
-    providerError.textContent = message;
+    setFieldErrorVisible(providerError, true, message);
+    syncInvalidVisual();
+  }
+
+  function syncInvalidVisual() {
+    const invalid =
+      isFieldErrorVisible(error) || isFieldErrorVisible(providerError);
+    brandVisual.setVariant(invalid ? "invalid" : "default");
   }
 
   /**
@@ -478,7 +479,7 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
   });
 
   input.addEventListener("input", () => {
-    if (!error.hidden) setError(false);
+    if (isFieldErrorVisible(error)) setError(false);
     syncSubmitVisibility();
   });
 

@@ -6,7 +6,8 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 
 | Модуль | Path | Статус |
 |--------|------|--------|
-| `brand-screen-shell/` | — | каркас API (миграция впереди) |
+| `brand-screen-shell/` | — | каркас API + visual из `brand-screen-visual` |
+| `brand-screen-visual/` | — | mesh + марка, variants default/invalid/done |
 | `referral-screen/` | `/referral` | Invite gate + validate RPC |
 | `auth-screen/` | `/registration` | UI + Email → auth-code / Telegram / Google; identity conflict |
 | `auth-code-screen/` | `/registration/code` | UI + OTP verify + resend cooldown |
