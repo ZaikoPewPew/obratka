@@ -720,20 +720,9 @@ export function createHomeScreen({
     person.append(badges, text);
 
     const total = Math.max(1, Number(item.targetReviews) || 1);
-    const current = Math.min(
-      total,
-      Math.max(0, Number(item.reviewsCount) || 0),
-    );
 
     const progress = document.createElement("div");
     progress.className = "home-screen__card-progress";
-
-    const count = document.createElement("span");
-    count.className = "home-screen__card-count";
-    count.textContent = formatString(t.homeCardProgress, {
-      current,
-      total,
-    });
 
     const slots = document.createElement("div");
     slots.className = "home-screen__reviewer-slots";
@@ -808,7 +797,7 @@ export function createHomeScreen({
       slots.append(slot);
     }
 
-    progress.append(count, slots);
+    progress.append(slots);
 
     meta.append(person, progress);
     button.append(preview, meta);

@@ -73,13 +73,11 @@ Topbar поверх контента (`position: absolute`), появление 
 | Аватар | `item.avatarUrl` или буква из `item.name` |
 | ФИО | `item.name` |
 | Роль | EN Title Case: `formatPortfolioRole` |
-| Счётчик + слоты | Один блок `.home-screen__card-progress` (96×52): сверху `{current} из {total}`, снизу 3 слота L→R |
-| Пустой слот | Плюс (`slot-plus.svg`) |
+| Слоты | Стек `.home-screen__card-progress` — hug по трём кружкам 24×24, L→R |
+| Пустой слот | Фон `surface-muted`, плюс; обводка 3px белая, радиус 16 |
 | Active / completed | Аватарка (временный claim / отчёт) |
 
-Счётчик `{current} из {total}` = только completed. Карточка уходит из ленты при `status=done` (набрано `target_reviews` отчётов).
-
-Заполнение слотов слева направо; по умолчанию три плюса.
+Заполнение слотов слева направо; по умолчанию три плюса. Текст «N из 3» не показываем (есть в aria).
 
 `refresh()` при `open`, смене вкладки, `visibilitychange` и poll (~15с), пока home открыт — чтобы active-слоты подтягивались живо.
 | Своя | `isOwn` только во вкладке «Мои» → клик открывает report |

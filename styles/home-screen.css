@@ -510,35 +510,15 @@
   color: var(--color-text);
 }
 
-.home-screen__card-count {
-  box-sizing: border-box;
-  display: block;
-  flex-shrink: 0;
-  margin: 0;
-  padding: 0;
-  font-size: var(--home-screen-meta-font-size);
-  font-weight: var(--home-screen-role-weight);
-  line-height: 1.2;
-  text-align: start;
-  white-space: nowrap;
-  color: var(--color-text);
-}
-
 .home-screen__card-progress {
   box-sizing: border-box;
   display: inline-flex;
-  flex-direction: column;
   flex-shrink: 0;
-  align-items: flex-start;
-  justify-content: center;
-  gap: var(--home-screen-progress-gap);
-  width: var(--home-screen-progress-width);
-  height: var(--home-screen-progress-height);
-  padding: var(--home-screen-progress-padding-y)
-    var(--home-screen-progress-padding-x);
-  border-radius: var(--home-screen-progress-radius);
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  height: var(--home-screen-progress-slots-height);
   background: var(--home-screen-progress-bg);
-  min-width: 0;
 }
 
 .home-screen__reviewer-slots {
@@ -548,7 +528,7 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: flex-start;
-  width: var(--home-screen-progress-slots-width);
+  width: fit-content;
   height: var(--home-screen-progress-slots-height);
 }
 
@@ -566,7 +546,7 @@
   border: var(--home-screen-reviewer-slot-border) solid
     var(--home-screen-reviewer-slot-ring);
   border-radius: var(--home-screen-reviewer-slot-radius);
-  background: var(--home-screen-progress-bg);
+  background: var(--home-screen-reviewer-slot-empty-bg);
 }
 
 .home-screen__reviewer-slot:last-child {
@@ -575,8 +555,6 @@
 
 .home-screen__reviewer-slot--empty {
   background: var(--home-screen-reviewer-slot-empty-bg);
-  padding: var(--home-screen-reviewer-slot-padding);
-  color: var(--home-screen-reviewer-slot-plus-color);
 }
 
 .home-screen__reviewer-slot--active {
