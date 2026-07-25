@@ -13,19 +13,32 @@
 | Path-роутинг + entry по сессии | wired |
 | Auth: Email OTP, Telegram, Google | wired → `auth.users` + `profiles` |
 | Онбординг → `profiles` | wired |
-| Home: очередь по лигам `portfolios` / `reviews`, баланс, репутация | wired |
-| Review iframe + таймер + **надиктовка** (rec) + квиз | wired |
+| Home: лента/мои по лигам, баланс, репутация, account-menu | wired |
+| Home: SWR-кэш вкладок + silent slot patch | wired (`homeListCache.js`) |
+| Home tabbar: glass + контраст над превью | wired (`backdropLuminance`, `--on-dark`) |
+| Review claim / heartbeat / release | wired (награда только после submit) |
+| Review iframe + таймер 45 s + **надиктовка** (rec) + квиз | wired |
 | Подача URL + done на url-screen | wired |
-| Report: листы (+ `dictation`) + жалоба → репутация / автобан | wired |
-| Referrals validate/redeem | wired (1 код / 2 слота, seed `YTHWKPDWAK`, без наград) |
-| Legacy waitlist UI | код есть, **не смонтирован** из `main.js` / `index.html` |
+| Report: листы (+ `dictation`) + жалоба + PDF | wired |
+| Referrals validate/redeem / share | wired (1 код / 2 слота, seed `YTHWKPDWAK`, без наград) |
+| App modal (shared overlays) | wired |
+| Settings `/settings` | UI-заглушка |
+| Legacy waitlist UI | **удалён** (спека в `mobile.md` § Архив) |
+
+### Home — что нового в UX
+
+- **SWR ленты:** `feed` / `mine` в memory + `sessionStorage` (`obratka.homeLists.<userId>`); open / смена таба / F5 без skeleton при hit; тихий `refresh`; logout → `clearHomeListCache`.
+- **Silent refresh:** при тех же id карточек — патч только reviewer-слотов (без thum.io); новые id — rebuild + reveal только для них.
+- **Порядок feed:** `sortFeedForSlotClosure` — open slot → ближе к 3/3 → FIFO; `reviewedByMe` / full вниз (не newest-first). См. home-screen README.
+- **Tabbar glass:** светлый фон — gray-900 20% + blur 20, неактивный текст `--color-text`; тёмный превью → `--on-dark` — white 20%, неактивный `--home-screen-tabbar-tab-color-on-dark`.
+- Подробно: [`home-screen/README.md`](src/components/home-screen/README.md).
 
 ## Продуктовый флоу
 
 ```text
 /referral → /registration → /onboarding → /home
-                              ├─ pick → /review → /quiz → /quiz/done
-                              ├─ mine → /report (листы + жалоба)
+                              ├─ pick → intro-модалка → /review → /quiz → /quiz/done
+                              ├─ mine → /report (все ревью собраны) / модалка «ещё собирается»
                               └─ submit → /portfolio → done (URL sync /done)
 ```
 
@@ -69,7 +82,7 @@
 | Redeem | после логина `redeem_referral` (один раз на аккаунт) |
 | Код юзера | `profiles.referral_code`, max **2** активации |
 | Seed | `YTHWKPDWAK` в `referral_seed_codes` (холодный старт) |
-| Шаринг | home → аватар → копировать код / ссылку `?ref=` |
+| Шаринг | home → аватар → account-menu → «Пригласить» (`homeInvite*`) |
 | SQL / API | [`supabase/sql/referrals.sql`](supabase/sql/referrals.sql), [`src/api/referrals.js`](src/api/referrals.js) |
 
 ## Данные (Supabase)
@@ -109,13 +122,13 @@ SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabas
 | Brand split (referral / auth / auth-code / onboarding / url) | `.url-screen*` + [`brand-screen-visual`](src/components/brand-screen-visual/README.md); цель — `brand-screen-shell` |
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
-| Home | `home-screen` + `account-menu` (лента и меню профиля, не split) |
+| Home | `home-screen` + `account-menu`; лента SWR; tabbar glass / `--on-dark`; чипы баланс + репутация |
 | Review | `index.html` `.iframe-shell` + таймер + чип **rec** (диктовка) в `main.js` |
 | Quiz | `review-screen` + `review-panel` |
 | Success | `success-screen` (`/done`) |
 | Ban | `ban-screen` — статичный красный mesh + `banBrandMarkSvg` |
-| Report | `report-screen` — листы ревью (+ секция надиктовки) + жалоба |
-| Home | чип баланса + чип репутации (explainer) |
+| Report | `report-screen` — листы (+ надиктовка) + жалоба + PDF |
+| Settings | `settings-screen` (`/settings`, заглушка) |
 
 Handoff соседних brand-экранов: `go(id, { handoff: true })` — правый visual без повторной анимации.
 
@@ -132,15 +145,17 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 - Строки: `content/locales.json` + `src/i18n.js` (правило `.cursor/rules/i18n.mdc`); close aria модалки — `modalCloseAria`.
 - Тема: `<html data-theme="dark">` (семантика в токенах).
 
-## Entrypoint vs legacy waitlist
+## Entrypoint
 
-**Сейчас подключено** (`index.html` + `main.js`):
+**Подключено** (`index.html` + `main.js`):
 
 - CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `success-screen`, `home-screen`, `account-menu`, `settings-screen`, `ban-screen`, `report-screen`
-- Экраны: referral, auth, auth-code, onboarding, home, url, review-shell (+ rec dictation), review/quiz, success, report, ban
-- Shared UI: `brand-screen-visual`, `brand-screen-shell` (referral / auth / auth-code / onboarding / url), `app-modal`, `account-menu`
+- Экраны: referral, auth, auth-code, onboarding, home, settings, url, review-shell (+ rec), quiz, success, report, ban
+- Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `account-menu`
+- Home cache: `src/utils/homeListCache.js` (сброс в `exitAuthenticatedSession`)
 - Dictation: `src/lib/dictation/` (Web Speech MVP)
-Архив waitlist (`apply-card`, `email-field`, dual-layout CSS) удалён. Спека: раздел «Архив» в [`mobile.md`](mobile.md).
+
+Waitlist dual-layout удалён; историческая спека — [`mobile.md`](mobile.md) § Архив.
 
 ## Env (кратко)
 

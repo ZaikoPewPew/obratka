@@ -9,7 +9,7 @@ alwaysApply: true
 
 ## Жёсткие правила
 
-1. Открытие карточки: `claimPortfolioReview` → при успехе `claimHeld = true` → `go("review")`.
+1. Клик по карточке → intro-модалка home; `claimPortfolioReview` — только по CTA «Проревьюить» → при успехе `claimHeld = true` → `go("review")`.
 2. Пока review/quiz открыт: `heartbeatPortfolioClaim` (TTL **20 min**).
 3. Уход без submit (back / home / pagehide / abort): `releasePortfolioClaim` — **без** монет.
 4. Награда только после успешного `submitPortfolioReview` → `awardReviewReward()` (`REVIEW_REWARD`).
@@ -30,4 +30,4 @@ alwaysApply: true
 - SQL: `supabase/sql/review_claims.sql` (после `portfolios.sql`)
 - API: `src/api/portfolios.js` (`claim` / `heartbeat` / `release`)
 - Оркестрация: `src/main.js` (`claimHeld`, heartbeat, `releaseHeldClaim`)
-- UI слотов: `src/components/home-screen/README.md`
+- UI слотов: `src/components/home-screen/README.md` (silent patch при poll / visibility без skeleton)

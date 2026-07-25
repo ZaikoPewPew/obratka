@@ -27,7 +27,10 @@ alwaysApply: true
 - `--control-*` (в т.ч. `--control-rec-*` для чипа надиктовки), `--shell-*`, `--frame-*`, `--recall-*`. Аватар / «Заметки»: `--radius-xs`.
 - Recording indicator: `--color-recording` (алиас на `--palette-google-red`).
 - Ban: `--shell-ban-mesh-*`, `--ban-screen-*`.
-- Home tabbar: `--home-screen-tabbar-*` (hide / thumb / on-dark / contrast).
+- Home tabbar: `--home-screen-tabbar-*` (hide / thumb / contrast / glass track).
+  - Светлый фон: `--home-screen-tabbar-track-bg` = gray-900 **20%** + `--home-screen-tabbar-blur`; неактивный `--home-screen-tabbar-tab-color`.
+  - Тёмный (`--on-dark`): `--home-screen-tabbar-track-bg-on-dark` = white **20%**; неактивный `--home-screen-tabbar-tab-color-on-dark`.
+  - Сэмплинг: `src/utils/backdropLuminance.js` → класс `home-screen__tabbar--on-dark`.
 - Auth OTP: `--auth-code-resend-cooldown`.
 - Brand mark: `--url-screen-brand-*` vs `--url-screen-brand-done-*`; **invalid не меняет size**.
 - App modal: `--app-modal-*` (`styles/app-modal.css`, [`app-modal/README.md`](../../src/components/app-modal/README.md)).

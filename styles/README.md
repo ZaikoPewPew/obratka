@@ -6,7 +6,7 @@
 - `app-modal.css` — универсальная модалка (`createAppModal`, `--app-modal-*`).
 - `iframe-shell.css` — оболочка `/review` (таймер, **`.iframe-shell__rec`**), `.url-screen*` (в т.ч. `__error*`, `__input-wrap--invalid`), `.auth-screen*` / `.auth-code-screen*` (в т.ч. `__cells--invalid`), `.review-screen*` / `.review-panel*`.
 - `brand-screen.css` — **заготовка** выноса общих split-стилей из iframe-shell.
-- `home-screen.css` — главная `/home` (absolute topbar + лента карточек).
+- `home-screen.css` — главная `/home` (topbar, лента, glass-tabbar `--on-dark`).
 - `success-screen.css` — `/done` (пресеты успеха).
 - `ban-screen.css` — `/banned` (блок аккаунта, красный mesh).
 - `report-screen.css` — `/report` (листы + жалоба).
@@ -38,6 +38,7 @@
 | `--shell-review-*` | квиз / report / done |
 | `--control-rec-*` / `--color-recording` | чип надиктовки в шапке `/review` |
 | `--home-screen-*` | topbar / feed / avatar / locked-modal |
+| `--home-screen-tabbar-*` | glass track (20% / blur 20), `--on-dark`, hide/thumb/label/contrast |
 | `--app-modal-*` | универсальная модалка (Figma Modal) |
 
 Handoff без анимации visual: класс `.url-screen--handoff` + `brandScreenTransition.js`.

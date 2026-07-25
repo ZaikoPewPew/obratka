@@ -30,7 +30,7 @@ UI: чип **rec** в шапке iframe-shell (после reload), макет Fi
 4. `submitPortfolioReview` → в `answers` добавить `dictation`, если непусто.
 5. Новая сессия → `resetDictationSession()`.
 
-Таймер просмотра: `SESSION_SECONDS = 45` (отдельно от claim TTL 20 min).
+Таймер просмотра: `REVIEW_SESSION_SECONDS = 45` в [`src/config/review.js`](../../config/review.js) — отдельно от claim TTL 20 min; ту же величину показывает intro-модалка home.
 
 ## Отчёт
 

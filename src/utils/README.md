@@ -21,6 +21,8 @@
 | `reviewReport.js` | сводка квиза → тексты PDF (+ опционально `dictation`) |
 | `shareReviewPdf.js` | печать PDF-отчёта (1 ревьюер = 1 страница; `onComplete`) |
 | `referralCode.js` | нормализация referral-кода / URL |
+| `backdropLuminance.js` | яркость фона под элементом (home tabbar → `--on-dark`) |
+| `homeListCache.js` | SWR-кэш ленты home (`feed`/`mine`, memory + `sessionStorage`) |
 
 Тесты: `*.test.js` рядом (в т.ч. `reviewReport.dictation.test.js`) + `src/app/routes.test.js` (`npm test`).
 

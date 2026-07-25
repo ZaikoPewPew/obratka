@@ -27,6 +27,7 @@ import { getSupabase } from "../lib/supabaseClient.js";
  *   status?: 'pending' | 'done' | 'skipped';
  *   reviewedByMe?: boolean;
  *   reviewerSlots?: PortfolioReviewerSlot[];
+ *   createdAt?: string;
  * }} PortfolioQueueItem
  */
 
@@ -171,6 +172,9 @@ function mapPortfolioRow(row, viewerId) {
   };
   if (typeof row.avatar_url === "string" && row.avatar_url.trim()) {
     item.avatarUrl = row.avatar_url.trim();
+  }
+  if (typeof row.created_at === "string" && row.created_at.trim()) {
+    item.createdAt = row.created_at;
   }
   return item;
 }
@@ -337,6 +341,53 @@ async function attachReviewerSlots(items) {
 }
 
 /**
+ * Число занятых live-claim слотов (kind === 'active') на карточке.
+ *
+ * @param {PortfolioQueueItem} item
+ * @returns {number}
+ */
+function activeSlotCount(item) {
+  const slots = Array.isArray(item.reviewerSlots) ? item.reviewerSlots : [];
+  return slots.reduce((n, slot) => (slot && slot.kind === "active" ? n + 1 : n), 0);
+}
+
+/**
+ * Порядок ленты «На ревью» под быстрое закрытие 3 слотов автора:
+ * 1) уже отревьюенные мной — вниз (клик → notice, не claim);
+ * 2) без свободного слота — вниз (`openSlots = target - completed - active`);
+ * 3) меньше остаётся до target — выше (сначала 2/3, потом 1/3, потом 0/3);
+ * 4) tie-break: старше выше (`createdAt` ASC, FIFO).
+ * Стабильный сорт: не мутирует вход.
+ *
+ * @param {PortfolioQueueItem[]} items
+ * @returns {PortfolioQueueItem[]}
+ */
+function sortFeedForSlotClosure(items) {
+  return items
+    .map((item, index) => {
+      const target = item.targetReviews ?? DEFAULT_TARGET_REVIEWS;
+      const completed = item.reviewsCount ?? 0;
+      const openSlots = target - completed - activeSlotCount(item);
+      return {
+        item,
+        index,
+        reviewedByMe: item.reviewedByMe ? 1 : 0,
+        hasOpenSlot: openSlots > 0 ? 0 : 1,
+        remaining: Math.max(0, target - completed),
+        createdAt: typeof item.createdAt === "string" ? item.createdAt : "",
+      };
+    })
+    .sort((a, b) => {
+      if (a.reviewedByMe !== b.reviewedByMe) return a.reviewedByMe - b.reviewedByMe;
+      if (a.hasOpenSlot !== b.hasOpenSlot) return a.hasOpenSlot - b.hasOpenSlot;
+      if (a.remaining !== b.remaining) return a.remaining - b.remaining;
+      if (a.createdAt !== b.createdAt) return a.createdAt < b.createdAt ? -1 : 1;
+      return a.index - b.index;
+    })
+    .map((entry) => entry.item);
+}
+
+/**
  * No-op: очередь живёт в Supabase (раньше чистила localStorage).
  */
 export function clearSubmittedPortfolios() {
@@ -348,6 +399,10 @@ export function clearSubmittedPortfolios() {
  * Карточка остаётся до 3/3 completed-отчётов (`status=pending`);
  * уже отревьюенные текущим юзером помечаются `reviewedByMe` (клик → notice).
  * Active claims не прячут карточку — только `no_slots` при открытии.
+ *
+ * Порядок (после слотов) — `sortFeedForSlotClosure`: свободный слот →
+ * ближе к target (больше completed) → старше (FIFO), а `reviewedByMe`
+ * и заполненные карточки уходят вниз. Не newest-first.
  *
  * @returns {Promise<PortfolioQueueItem[]>}
  */
@@ -397,7 +452,7 @@ export async function listPortfoliosForReview() {
     return item;
   });
 
-  return attachReviewerSlots(mapped);
+  return sortFeedForSlotClosure(await attachReviewerSlots(mapped));
 }
 
 /**

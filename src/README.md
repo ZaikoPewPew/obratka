@@ -17,7 +17,7 @@
 |-------|------|
 | `app/` | routes, router, flow, login-session (`obratka.session`) |
 | `components/` | UI-экраны; brand: `brand-screen-visual`, `brand-screen-shell` |
-| `utils/` | field errors, motion, handoff, mesh, portfolio, PDF — см. [`utils/README.md`](utils/README.md) |
+| `utils/` | field errors, motion, handoff, mesh, homeListCache, backdropLuminance, PDF — [`utils/README.md`](utils/README.md) |
 | `api/` | Auth, profiles, wallet, portfolios, referrals, reviewComplaints |
 | `assets/` | brand marks / morph — [`assets/README.md`](assets/README.md) |
 | `lib/` | supabase client + **dictation** |

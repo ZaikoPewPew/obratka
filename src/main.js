@@ -22,6 +22,7 @@ import { createAppRouter } from "./app/router.js";
 import { getSession, setSession, clearSession } from "./app/session.js";
 import { completeOAuthFromUrl, signOut } from "./api/auth.js";
 import { submitPortfolio, clearSubmittedPortfolios, submitPortfolioReview, claimPortfolioReview, heartbeatPortfolioClaim, releasePortfolioClaim, portfolioRpcErrorCode } from "./api/portfolios.js";
+import { clearHomeListCache } from "./utils/homeListCache.js";
 import { fetchMyProfile, isProfileBanned, updateMyProfile } from "./api/profiles.js";
 import {
   redeemReferral,
@@ -46,6 +47,7 @@ import { createReportScreen } from "./components/report-screen/ReportScreen.js";
 import { createBanScreen } from "./components/ban-screen/BanScreen.js";
 import { createUrlScreen } from "./components/url-screen/UrlScreen.js";
 import { createSettingsScreen } from "./components/settings-screen/SettingsScreen.js";
+import { REVIEW_SESSION_SECONDS } from "./config/review.js";
 import {
   resolvePortfolioEmbed,
 } from "./utils/portfolioEmbed.js";
@@ -53,8 +55,7 @@ import { resolvePortfolioMeta } from "./utils/portfolioMeta.js";
 import { getMotionFocusDelayMs } from "./utils/motionTokens.js";
 import brandLogoUrl from "./assets/brand/logo.svg";
 
-const SESSION_SECONDS = 45;
-const SESSION_TOTAL_MS = SESSION_SECONDS * 1000;
+const SESSION_TOTAL_MS = REVIEW_SESSION_SECONDS * 1000;
 const TIMER_TICK_MS = 10;
 /** Продление claim TTL, пока пользователь на review/quiz. */
 const CLAIM_HEARTBEAT_MS = 2 * 60 * 1000;
@@ -233,11 +234,13 @@ const reportScreen = createReportScreen({
 document.body.append(reportScreen.root);
 
 async function exitAuthenticatedSession() {
+  const sessionUserId = getSession()?.userId;
   try {
     await signOut();
   } catch {
     /* Локальную сессию всё равно закрываем. */
   }
+  clearHomeListCache(sessionUserId);
   clearSession();
   clearSubmittedPortfolios();
   setPendingAuthEmail(null);

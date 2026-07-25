@@ -22,7 +22,7 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 
 ### Контраст над тёмным превью
 
-Пока таббар виден, сэмплим яркость фона под ним (`src/utils/backdropLuminance.js`, scroll / resize / load превью). Если фон тёмный → класс `home-screen__tabbar--on-dark`: светлая подложка; цвет текста табов как обычно (тёмный неактивный / светлый на активном пилле). Токен: `--home-screen-tabbar-track-bg-on-dark`, transition `--home-screen-tabbar-contrast-*`.
+Пока таббар виден, сэмплим яркость фона под ним (`src/utils/backdropLuminance.js`, scroll / resize / load превью). Треки полупрозрачные + blur 20: на светлом — gray-900 20% (`--home-screen-tabbar-track-bg`), неактивный текст `--color-text`; на тёмном → `--on-dark` — white 20% (`--home-screen-tabbar-track-bg-on-dark`), неактивный текст `--home-screen-tabbar-tab-color-on-dark`. Transition `--home-screen-tabbar-contrast-*`.
 
 ### Переключение таба (UI)
 
@@ -35,11 +35,48 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 
 Синхрон позиции thumb: после `open` / смены таба / `syncCopy` (смена языка меняет ширину) / `ResizeObserver` / `window.resize`.
 
+### Порядок ленты «На ревью»
+
+Цель: ревьюер чаще открывает то, что **быстрее даёт completed и закрывает слот автора** (дойти до `target_reviews`, default 3). Не newest-first.
+
+Сорт — **клиентский**, в [`src/api/portfolios.js`](../../api/portfolios.js) (`sortFeedForSlotClosure`), **после** `attachReviewerSlots` (нужны live claims). Home / кэш порядок не меняют — сохраняют то, что вернул API. Вкладка **Мои** — без этого сорта: `created_at` DESC.
+
+Конвейер:
+
+```
+list pending (RLS лига) → reviewedByMe → attachReviewerSlots → sortFeedForSlotClosure → setItems / cache
+```
+
+Ключи (по убыванию приоритета; стабильный sort, вход не мутируется):
+
+| # | Ключ | Выше | Ниже |
+|---|------|------|------|
+| 1 | `reviewedByMe` | ещё не ревьюил | уже ревьюил (клик → notice, не claim) |
+| 2 | свободный слот | `openSlots > 0` | `openSlots ≤ 0` (claim даст `no_slots`) |
+| 3 | remaining | меньше осталось (`2/3` → `1/3` → `0/3`) | свежие без прогресса |
+| 4 | `createdAt` | старше (FIFO) | новее |
+
+Формулы (как claim-квота: completed + live claims):
+
+- `activeCount` = число `reviewerSlots` с `kind === "active"`
+- `openSlots = targetReviews − reviewsCount − activeCount`
+- `remaining = max(0, targetReviews − reviewsCount)`
+
+`createdAt` мапится из `portfolios.created_at` в `PortfolioQueueItem` (нужен только tie-break; в UI не показывается).
+
+**Почему не SQL `ORDER BY`:** live claims приходят вторым RPC (`portfolio_reviewer_slots`); сервер без join не знает «занято claim’ом». PostgREST `.order("created_at")` — только грубый pre-order; финальный порядок после `sortFeedForSlotClosure`.
+
+**Что не меняем этим сортом:** видимость карточек (full / `reviewedByMe` остаются в ленте), claim TTL, лиги, `target_reviews`. Весов / explainer порядка в UI нет.
+
 ### Лента и карточки
 
-При `open` / смене таба: skeleton только у ленты (5 карточек как Figma `Type=Skeleton`: кости + один shimmer-sweep по карточке), хедер без изменений; затем данные с `motion-reveal` stagger.  
-Клик по чужой карточке → `claimPortfolioReview` → `onOpenPortfolio` → `/review` (таймер + опц. надиктовка).  
-Своя (`isOwn`, вкладка «Мои») → `onOpenReport` → `/report` (листы + жалоба).
+SWR: при `open` / смене таба / F5 — если есть кэш вкладки (`feed` / `mine`, memory + `sessionStorage` по `userId`), карточки сразу; иначе skeleton (cold miss). Затем тихий `refresh()` поверх кэша. Пустой `[]` — валидный hit. Кэш сбрасывается на logout (`clearHomeListCache`). Порядок feed в кэше = уже отсортированный ответ `listPortfoliosForReview`.
+
+После skeleton данные с `motion-reveal` stagger; после тихого refetch при тех же id — только патч reviewer-слотов (без пересборки DOM / thum.io); новые карточки — full rebuild + reveal только для новых id.
+
+Клик по чужой карточке → intro-модалка «Как проходит ревью» (`createAppModal`, шаги `homeReviewIntroStep1…4`, таймер из [`src/config/review.js`](../../config/review.js)) → CTA «Проревьюить» → `onOpenPortfolio` → `claimPortfolioReview` → `/review` (таймер + опц. надиктовка). «Не сейчас» / закрытие — без claim.  
+Своя (`isOwn`, вкладка «Мои») кликабельна всегда: собраны все ревью (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report` (листы + жалоба); иначе модалка `homeMineNotReady*` с прогрессом. Title / aria карточки — `homeCardReport*` либо `homeCardReportPending*`, пересинхронизируются при silent-патче слотов.  
+Уже отревьюенная карточка (`reviewedByMe`) intro не показывает — сразу notice из `main.js`.
 CTA «Закинуть своё» — всегда активна (чёрная). Баланс ≥ `SUBMIT_COST` → `onAddPortfolio` → `/portfolio`; иначе `createAppModal` «не хватает монет».
 
 Лиги (тихий матчинг): junior → junior; middle → junior+middle; senior/lead/head → middle+senior+.  
@@ -82,8 +119,7 @@ Topbar поверх контента (`position: absolute`), появление 
 
 Заполнение слотов слева направо; по умолчанию три плюса. Текста «N из 3» нет (есть в aria).
 
-`refresh()` при `open`, смене вкладки, `visibilitychange` и poll (~15с), пока home открыт — чтобы active-слоты подтягивались живо.
-| Своя | `isOwn` только во вкладке «Мои» → клик открывает report |
+`refresh()` при `open`, смене вкладки, `visibilitychange` и poll (~15с), пока home открыт — слоты и новые карточки подтягиваются без skeleton (поверх кэша). Своя карточка (`isOwn` только во вкладке «Мои») → клик открывает report.
 
 ## Разметка таббара
 
@@ -99,13 +135,15 @@ Topbar поверх контента (`position: absolute`), появление 
 
 `createHomeScreen({ onOpenPortfolio, onAddPortfolio?, onOpenSettings?, onSignOut? })` → `{ root, open, close, setItems, refresh }`.
 
-Внутреннее: `activeTab` `feed` \| `mine`; `refresh` читает соответствующий list API.
+Внутреннее: `activeTab` `feed` \| `mine`; `refresh` читает соответствующий list API; кэш вкладок — [`homeListCache.js`](../../utils/homeListCache.js).
 
 ## Стили / i18n / a11y
 
-Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, motion hide/thumb/label/contrast, on-dark track).
+Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, translucent track / on-dark track+label, motion hide/thumb/label/contrast).
 
-Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeTabFeed`, `homeTabMine`, `homeTabsAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeCardProgress`, `homeCardOwnTitle`, `homeCardOwnAria`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`.
+Токены intro-модалки: `--home-screen-review-intro-indent` / `--home-screen-review-intro-step-gap`.
+
+Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeTabFeed`, `homeTabMine`, `homeTabsAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeCardProgress`, `homeCardOwnTitle`, `homeCardOwnAria`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`.
 
 `prefers-reduced-motion: reduce` — hide/thumb/label transitions ≈ мгновенные.
 

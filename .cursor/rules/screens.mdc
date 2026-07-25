@@ -30,9 +30,9 @@ alwaysApply: true
 
 ## Ключевые флоу
 
-- Home pick → **claim** → `/review` (опц. надиктовка) → quiz; abort → home **без** награды (см. `review-claims.mdc`, `dictation.mdc`).
+- Home pick → intro-модалка «Как проходит ревью» → CTA → **claim** → `/review` (опц. надиктовка) → quiz; abort → home **без** награды (см. `review-claims.mdc`, `dictation.mdc`).
 - Submit URL → `setVariant("done")` на url-screen + `syncRoute("success")`; не прыгать на success-screen.
-- Mine / `isOwn` → `onOpenReport` → `/report` (листы + жалоба).
+- Mine / `isOwn` → `onOpenReport` → `/report` (листы + жалоба) только когда собраны все ревью; иначе модалка `homeMineNotReady*`.
 - Ban: любой route → `banned` (`flow.js`); см. `ban.mdc`.
 - Auth: `src/api/auth.js`; UI — `auth-screen` + `auth-code-screen`. Automatic linking Email↔Google; OTP cooldown; Manual `linkIdentity` — вне скоупа.
 
@@ -44,8 +44,8 @@ alwaysApply: true
 4. **Общие оверлеи** — `createAppModal` (`app-modal/`); слот `content` + CTA; без `history` / `go()`. Не путать с экраном флоу.
 5. **Handoff** соседних brand: `go(id, { handoff: true })` — правый visual без повторной анимации.
 6. **Ошибки полей** + `setVariant("invalid")` — `brand-ui.mdc` / `FIELD_ERROR.md`.
-7. **home-screen** — другой лейаут; вкладки Лента / Мои (`listPortfoliosForReview` / `listMyPortfolios`); лиги — `leagues.mdc`.
-8. **Монтаж** — из `main.js`, не из HTML-слотов. Waitlist dual-layout удалён (не восстанавливать без явной задачи).
+7. **home-screen** — другой лейаут; вкладки Лента / Мои (`listPortfoliosForReview` / `listMyPortfolios`); SWR-кэш `homeListCache` (без skeleton на hit); glass-tabbar + `--on-dark`; лиги — `leagues.mdc`.
+8. **Монтаж** — из `main.js`, не из HTML-слотов. Waitlist dual-layout удалён (не восстанавливать без явной задачи). Logout чистит `clearHomeListCache`.
 
 ## Motion / docs
 

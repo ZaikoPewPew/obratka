@@ -25,10 +25,15 @@ import {
   resolveImageLumaProbes,
   sampleBackdropLuminance,
 } from "../../utils/backdropLuminance.js";
+import {
+  getCachedHomeList,
+  setCachedHomeList,
+} from "../../utils/homeListCache.js";
 import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import { createAppModal } from "../app-modal/AppModal.js";
 import { createAccountMenu } from "../account-menu/AccountMenu.js";
 import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
+import { REVIEW_SESSION_SECONDS } from "../../config/review.js";
 import boneIconUrl from "../../assets/home/bone.svg";
 import bellIconUrl from "../../assets/home/bell.svg";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
@@ -121,6 +126,109 @@ function bindImageFallbacks(img, candidates) {
       return;
     }
     img.hidden = true;
+  });
+}
+
+/**
+ * Заполняет `.home-screen__reviewer-slots` по данным карточки (create + silent patch).
+ *
+ * @param {HTMLElement} slots
+ * @param {HomePortfolioItem} item
+ */
+function fillReviewerSlots(slots, item) {
+  const t = getStrings();
+  const total = Math.max(1, Number(item.targetReviews) || 1);
+  const filledSlots = Array.isArray(item.reviewerSlots)
+    ? item.reviewerSlots.slice(0, total)
+    : [];
+  slots.replaceChildren();
+  slots.setAttribute(
+    "aria-label",
+    formatString(t.homeCardReviewerSlotsAria, {
+      filled: filledSlots.length,
+      total,
+    }),
+  );
+
+  for (let i = 0; i < total; i += 1) {
+    const slotData = filledSlots[i];
+    const slot = document.createElement("span");
+    slot.className = "home-screen__reviewer-slot";
+    if (!slotData) {
+      slot.classList.add("home-screen__reviewer-slot--empty");
+      slot.setAttribute("aria-hidden", "true");
+      const plusImg = document.createElement("img");
+      plusImg.className = "home-screen__reviewer-slot-plus";
+      plusImg.src = slotPlusIconUrl;
+      plusImg.alt = "";
+      plusImg.width = 18;
+      plusImg.height = 18;
+      plusImg.decoding = "async";
+      plusImg.setAttribute("aria-hidden", "true");
+      slot.append(plusImg);
+      slots.append(slot);
+      continue;
+    }
+    if (slotData.kind === "active") {
+      slot.classList.add("home-screen__reviewer-slot--active");
+    } else {
+      slot.classList.add("home-screen__reviewer-slot--completed");
+    }
+    const slotAvatar =
+      typeof slotData.avatarUrl === "string" ? slotData.avatarUrl.trim() : "";
+    const slotLetter = initialFromLabel(
+      slotData.displayName || slotData.reviewerId || "?",
+    );
+    if (slotAvatar) {
+      const slotImg = document.createElement("img");
+      slotImg.className = "home-screen__reviewer-slot-img";
+      slotImg.alt = "";
+      slotImg.width = 24;
+      slotImg.height = 24;
+      slotImg.decoding = "async";
+      slotImg.loading = "lazy";
+      slotImg.referrerPolicy = "no-referrer";
+      slotImg.addEventListener("error", () => {
+        slotImg.remove();
+        slot.classList.add("home-screen__reviewer-slot--letter");
+        const letterEl = document.createElement("span");
+        letterEl.className = "home-screen__reviewer-slot-letter";
+        letterEl.textContent = slotLetter;
+        letterEl.setAttribute("aria-hidden", "true");
+        slot.append(letterEl);
+      });
+      slotImg.src = slotAvatar;
+      slot.append(slotImg);
+    } else {
+      slot.classList.add("home-screen__reviewer-slot--letter");
+      const letterEl = document.createElement("span");
+      letterEl.className = "home-screen__reviewer-slot-letter";
+      letterEl.textContent = slotLetter;
+      letterEl.setAttribute("aria-hidden", "true");
+      slot.append(letterEl);
+    }
+    slots.append(slot);
+  }
+}
+
+/**
+ * Можно ли обновить только слоты без полной пересборки списка.
+ *
+ * @param {HomePortfolioItem[]} prev
+ * @param {HomePortfolioItem[]} next
+ * @returns {boolean}
+ */
+function canPatchListSlots(prev, next) {
+  if (prev.length !== next.length) return false;
+  return prev.every((p, i) => {
+    const n = next[i];
+    return (
+      p.id === n.id &&
+      Boolean(p.reviewedByMe) === Boolean(n.reviewedByMe) &&
+      Boolean(p.isOwn) === Boolean(n.isOwn) &&
+      Math.max(1, Number(p.targetReviews) || 1) ===
+        Math.max(1, Number(n.targetReviews) || 1)
+    );
   });
 }
 
@@ -320,6 +428,27 @@ export function createHomeScreen({
     },
   });
 
+  const reviewIntroSteps = document.createElement("ol");
+  reviewIntroSteps.className = "home-screen__review-intro-steps";
+
+  const reviewIntroModal = createAppModal({
+    size: "md",
+    onPrimary: () => {
+      const item = reviewIntroItem;
+      void reviewIntroModal.close();
+      if (item) {
+        void onOpenPortfolio(item);
+      }
+    },
+    onSecondary: () => {
+      void reviewIntroModal.close();
+    },
+    onClose: () => {
+      reviewIntroItem = null;
+    },
+  });
+  reviewIntroModal.content.append(reviewIntroSteps);
+
   const inviteCode = document.createElement("p");
   inviteCode.className = "home-screen__invite-code";
   inviteCode.setAttribute("aria-live", "polite");
@@ -376,6 +505,7 @@ export function createHomeScreen({
     body,
     tabbar,
     noticeModal.root,
+    reviewIntroModal.root,
     inviteModal.root,
     contactsModal.root,
   );
@@ -402,6 +532,11 @@ export function createHomeScreen({
   let tabbarContrastRaf = 0;
   /** @type {string | null} */
   let tabbarContrastProbeKey = null;
+  /**
+   * Карточка, ждущая подтверждения в intro-модалке (claim — только по CTA).
+   * @type {HomePortfolioItem | null}
+   */
+  let reviewIntroItem = null;
   /** @type {string | null} */
   let inviteCodeValue = null;
   /** @type {ReturnType<typeof window.setTimeout> | null} */
@@ -546,6 +681,100 @@ export function createHomeScreen({
 
   function closeSubmitLockedModal() {
     void noticeModal.close();
+  }
+
+  /**
+   * Свежие данные карточки: после silent-патча слотов closure в обработчике
+   * клика держит устаревший item.
+   *
+   * @param {string} id
+   * @returns {HomePortfolioItem | null}
+   */
+  function latestItem(id) {
+    if (!id) return null;
+    return items.find((entry) => entry.id === id) ?? null;
+  }
+
+  /**
+   * Промежуточный шаг перед claim: что будет на `/review` + CTA «Проревьюить».
+   *
+   * @param {HomePortfolioItem} item
+   */
+  function openReviewIntro(item) {
+    const t = getStrings();
+    reviewIntroItem = item;
+    const steps = [
+      formatString(t.homeReviewIntroStep1, { seconds: REVIEW_SESSION_SECONDS }),
+      t.homeReviewIntroStep2,
+      t.homeReviewIntroStep3,
+      t.homeReviewIntroStep4,
+    ];
+    reviewIntroSteps.replaceChildren();
+    reviewIntroSteps.setAttribute("aria-label", t.homeReviewIntroStepsAria ?? "");
+    for (const text of steps) {
+      const step = document.createElement("li");
+      step.className = "home-screen__review-intro-step";
+      step.textContent = text ?? "";
+      reviewIntroSteps.append(step);
+    }
+    reviewIntroModal.setTitle(t.homeReviewIntroTitle ?? "");
+    reviewIntroModal.setDescription(t.homeReviewIntroBody ?? "");
+    reviewIntroModal.setPrimaryLabel(t.homeReviewIntroStart ?? "");
+    reviewIntroModal.setSecondaryLabel(t.homeReviewIntroCancel ?? "");
+    reviewIntroModal.setCloseAriaLabel(t.homeReviewIntroCloseAria ?? "");
+    reviewIntroModal.setActionsVisible({ primary: true, secondary: true });
+    reviewIntroModal.open();
+  }
+
+  function closeReviewIntroModal() {
+    reviewIntroItem = null;
+    void reviewIntroModal.close();
+  }
+
+  /**
+   * Число ревьюеров, которых ждёт автор, и сколько уже сдали отчёт.
+   *
+   * @param {HomePortfolioItem} item
+   * @returns {{ completed: number; total: number; ready: boolean }}
+   */
+  function reportProgress(item) {
+    const total = Math.max(1, Number(item.targetReviews) || 1);
+    const completed = Math.max(0, Number(item.reviewsCount) || 0);
+    return { completed, total, ready: completed >= total };
+  }
+
+  /**
+   * Своя карточка: отчёт — только когда собраны все ревью, иначе модалка.
+   *
+   * @param {HomePortfolioItem} item
+   */
+  function openOwnCard(item) {
+    const { completed, total, ready } = reportProgress(item);
+    if (ready) {
+      void onOpenReport?.(item);
+      return;
+    }
+    const t = getStrings();
+    showNotice({
+      title: t.homeMineNotReadyTitle,
+      body: formatString(t.homeMineNotReadyBody, { completed, total }),
+      closeLabel: t.homeMineNotReadyClose,
+      closeAria: t.homeMineNotReadyCloseAria,
+    });
+  }
+
+  /**
+   * @param {HTMLElement} button
+   * @param {HomePortfolioItem} item
+   */
+  function syncOwnCardCopy(button, item) {
+    const t = getStrings();
+    const { ready } = reportProgress(item);
+    button.title = ready ? t.homeCardReportTitle : t.homeCardReportPendingTitle;
+    button.setAttribute(
+      "aria-label",
+      ready ? t.homeCardReportAria : t.homeCardReportPendingAria,
+    );
   }
 
   function closeInviteModal() {
@@ -746,8 +975,12 @@ export function createHomeScreen({
     showTabbar();
     body.scrollTop = 0;
     lastScrollTop = 0;
-    setLoading(true);
     syncCopy();
+    if (showTabFromCache(tab)) {
+      void refresh();
+      return;
+    }
+    setLoading(true);
     await refresh();
   }
 
@@ -963,84 +1196,12 @@ export function createHomeScreen({
     text.append(name, role);
     person.append(badges, text);
 
-    const total = Math.max(1, Number(item.targetReviews) || 1);
-
     const progress = document.createElement("div");
     progress.className = "home-screen__card-progress";
 
     const slots = document.createElement("div");
     slots.className = "home-screen__reviewer-slots";
-    const filledSlots = Array.isArray(item.reviewerSlots)
-      ? item.reviewerSlots.slice(0, total)
-      : [];
-    slots.setAttribute(
-      "aria-label",
-      formatString(t.homeCardReviewerSlotsAria, {
-        filled: filledSlots.length,
-        total,
-      }),
-    );
-
-    for (let i = 0; i < total; i += 1) {
-      const slotData = filledSlots[i];
-      const slot = document.createElement("span");
-      slot.className = "home-screen__reviewer-slot";
-      if (!slotData) {
-        slot.classList.add("home-screen__reviewer-slot--empty");
-        slot.setAttribute("aria-hidden", "true");
-        const plusImg = document.createElement("img");
-        plusImg.className = "home-screen__reviewer-slot-plus";
-        plusImg.src = slotPlusIconUrl;
-        plusImg.alt = "";
-        plusImg.width = 18;
-        plusImg.height = 18;
-        plusImg.decoding = "async";
-        plusImg.setAttribute("aria-hidden", "true");
-        slot.append(plusImg);
-        slots.append(slot);
-        continue;
-      }
-      if (slotData.kind === "active") {
-        slot.classList.add("home-screen__reviewer-slot--active");
-      } else {
-        slot.classList.add("home-screen__reviewer-slot--completed");
-      }
-      const slotAvatar =
-        typeof slotData.avatarUrl === "string" ? slotData.avatarUrl.trim() : "";
-      const slotLetter = initialFromLabel(
-        slotData.displayName || slotData.reviewerId || "?",
-      );
-      if (slotAvatar) {
-        const slotImg = document.createElement("img");
-        slotImg.className = "home-screen__reviewer-slot-img";
-        slotImg.alt = "";
-        slotImg.width = 24;
-        slotImg.height = 24;
-        slotImg.decoding = "async";
-        slotImg.loading = "lazy";
-        slotImg.referrerPolicy = "no-referrer";
-        slotImg.addEventListener("error", () => {
-          slotImg.remove();
-          slot.classList.add("home-screen__reviewer-slot--letter");
-          const letterEl = document.createElement("span");
-          letterEl.className = "home-screen__reviewer-slot-letter";
-          letterEl.textContent = slotLetter;
-          letterEl.setAttribute("aria-hidden", "true");
-          slot.append(letterEl);
-        });
-        slotImg.src = slotAvatar;
-        slot.append(slotImg);
-      } else {
-        slot.classList.add("home-screen__reviewer-slot--letter");
-        const letterEl = document.createElement("span");
-        letterEl.className = "home-screen__reviewer-slot-letter";
-        letterEl.textContent = slotLetter;
-        letterEl.setAttribute("aria-hidden", "true");
-        slot.append(letterEl);
-      }
-      slots.append(slot);
-    }
-
+    fillReviewerSlots(slots, item);
     progress.append(slots);
 
     meta.append(person, progress);
@@ -1048,10 +1209,9 @@ export function createHomeScreen({
 
     if (item.isOwn) {
       button.classList.add("home-screen__card--own");
-      button.title = t.homeCardReportTitle;
-      button.setAttribute("aria-label", t.homeCardReportAria);
+      syncOwnCardCopy(button, item);
       button.addEventListener("click", () => {
-        void onOpenReport?.(item);
+        openOwnCard(latestItem(item.id) ?? item);
       });
     } else if (item.reviewedByMe) {
       button.classList.add("home-screen__card--reviewed");
@@ -1062,15 +1222,24 @@ export function createHomeScreen({
       });
     } else {
       button.addEventListener("click", () => {
-        void onOpenPortfolio(item);
+        openReviewIntro(latestItem(item.id) ?? item);
       });
     }
 
+    li.dataset.portfolioId = item.id;
     li.append(button);
     return li;
   }
 
-  function renderList() {
+  /**
+   * @param {{
+   *   revealNewOnly?: boolean;
+   *   prevIds?: Set<string>;
+   * }} [opts]
+   */
+  function renderList(opts = {}) {
+    const revealNewOnly = opts.revealNewOnly === true;
+    const prevIds = opts.prevIds instanceof Set ? opts.prevIds : null;
     list.replaceChildren();
     empty.hidden = items.length > 0;
     const t = getStrings();
@@ -1081,8 +1250,10 @@ export function createHomeScreen({
 
     for (const [index, item] of items.entries()) {
       const li = createCard(item);
+      const isNew =
+        revealNewOnly && prevIds != null && item.id && !prevIds.has(item.id);
       // Не стартуем с opacity:0 после скелетона — иначе гэп/скачок.
-      if (revealItems && !wasSkeletonLoading) {
+      if ((revealItems && !wasSkeletonLoading) || isNew) {
         li.classList.add("motion-reveal");
         li.style.setProperty(
           "--reveal-delay",
@@ -1097,11 +1268,78 @@ export function createHomeScreen({
   }
 
   /**
-   * @param {HomePortfolioItem[]} next
+   * @param {HomePortfolioItem[]} nextItems
    */
-  function setItems(next) {
-    items = Array.isArray(next) ? next : [];
+  function patchListSlots(nextItems) {
+    const children = [...list.children];
+    for (let i = 0; i < nextItems.length; i += 1) {
+      const li = children[i];
+      if (!(li instanceof HTMLElement)) continue;
+      const item = nextItems[i];
+      const slots = li.querySelector(".home-screen__reviewer-slots");
+      if (slots instanceof HTMLElement) {
+        fillReviewerSlots(slots, item);
+      }
+      /* `canPatchListSlots` держит isOwn-паритет → класс = своя карточка. */
+      const ownCard = li.querySelector(".home-screen__card--own");
+      if (ownCard instanceof HTMLElement) {
+        syncOwnCardCopy(ownCard, item);
+      }
+    }
+    empty.hidden = nextItems.length > 0;
+    scheduleTabbarContrastSync();
+  }
+
+  /**
+   * Показать кэш вкладки без skeleton. `[]` — валидный hit.
+   * @param {HomeTabId} tab
+   * @returns {boolean}
+   */
+  function showTabFromCache(tab) {
+    const userId = getSession()?.userId;
+    const cached = getCachedHomeList(userId, tab);
+    if (cached == null) return false;
+    loading = false;
+    revealItems = false;
+    wasSkeletonLoading = false;
+    root.setAttribute("aria-busy", "false");
+    const t = getStrings();
+    list.setAttribute(
+      "aria-label",
+      tab === "mine" ? t.homeListMineAria : t.homeListAria,
+    );
+    items = /** @type {HomePortfolioItem[]} */ (cached);
     renderList();
+    return true;
+  }
+
+  /**
+   * @param {HomePortfolioItem[]} next
+   * @param {{ silent?: boolean }} [opts]
+   */
+  function setItems(next, opts = {}) {
+    const nextItems = Array.isArray(next) ? next : [];
+    const silent = opts.silent === true;
+    if (
+      silent &&
+      !loading &&
+      !list.querySelector(".home-screen__item--skeleton") &&
+      canPatchListSlots(items, nextItems)
+    ) {
+      items = nextItems;
+      patchListSlots(nextItems);
+      return;
+    }
+    const prevIds = new Set(items.map((item) => item.id).filter(Boolean));
+    const hadRenderedItems =
+      silent &&
+      items.length > 0 &&
+      !list.querySelector(".home-screen__item--skeleton");
+    items = nextItems;
+    renderList({
+      revealNewOnly: hadRenderedItems,
+      prevIds,
+    });
   }
 
   async function refresh() {
@@ -1115,10 +1353,12 @@ export function createHomeScreen({
         ? await listMyPortfolios()
         : await listPortfoliosForReview();
     if (epoch !== refreshEpoch) return;
-    revealItems = loading;
+    const wasLoading = loading;
+    revealItems = wasLoading;
     loading = false;
     root.setAttribute("aria-busy", "false");
-    setItems(next);
+    setCachedHomeList(getSession()?.userId, tab, next);
+    setItems(next, { silent: !wasLoading });
   }
 
   function stopSlotsPoll() {
@@ -1146,7 +1386,9 @@ export function createHomeScreen({
     lastScrollTop = 0;
     body.scrollTop = 0;
     syncCopy();
-    setLoading(true);
+    if (!showTabFromCache(activeTab)) {
+      setLoading(true);
+    }
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         root.classList.add("home-screen--open");
@@ -1172,6 +1414,7 @@ export function createHomeScreen({
     wasSkeletonLoading = false;
     showTabbar();
     closeSubmitLockedModal();
+    closeReviewIntroModal();
     closeInviteModal();
     void closeAccountMenu();
     void contactsModal.close();

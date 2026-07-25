@@ -177,6 +177,25 @@
   white-space: var(--home-screen-reputation-body-pre);
 }
 
+.home-screen__review-intro-steps {
+  margin: 0;
+  padding-left: var(--home-screen-review-intro-indent);
+  color: var(--color-text-muted);
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-loose);
+}
+
+.home-screen__review-intro-step + .home-screen__review-intro-step {
+  margin-top: var(--home-screen-review-intro-step-gap);
+}
+
+.home-screen__review-intro-step::marker {
+  color: var(--color-text-strong);
+  font-weight: var(--font-weight-semibold);
+}
+
 .home-screen__chip--submit {
   width: var(--home-screen-submit-chip-width);
   padding: var(--home-screen-submit-chip-padding);
@@ -376,14 +395,8 @@
   opacity: var(--opacity-disabled);
 }
 
-.home-screen__card--own {
-  cursor: not-allowed;
-}
-
 .home-screen__card:disabled:hover,
-.home-screen__card--own:hover,
-.home-screen__card:disabled:active,
-.home-screen__card--own:active {
+.home-screen__card:disabled:active {
   --home-screen-card-surface: var(--home-screen-card-bg);
 }
 
@@ -1020,6 +1033,14 @@
 
 .home-screen__tabbar--on-dark {
   background: var(--home-screen-tabbar-track-bg-on-dark);
+}
+
+.home-screen__tabbar--on-dark .home-screen__tab {
+  color: var(--home-screen-tabbar-tab-color-on-dark);
+}
+
+.home-screen__tabbar--on-dark .home-screen__tab--active {
+  color: var(--home-screen-tabbar-tab-active-color);
 }
 
 .home-screen__tabbar-thumb {

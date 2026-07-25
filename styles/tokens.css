@@ -602,6 +602,8 @@
   --home-screen-locked-modal-title-weight: var(--font-weight-semibold);
   --home-screen-locked-modal-body-size: var(--font-size-base);
   --home-screen-locked-modal-z: calc(var(--home-screen-z) + 1);
+  --home-screen-review-intro-indent: var(--space-5);
+  --home-screen-review-intro-step-gap: var(--space-2);
   --home-screen-invite-code-size: var(--font-size-xl);
   --home-screen-invite-code-tracking: 0.08em;
   --home-screen-invite-actions-gap: var(--space-2);
@@ -654,10 +656,14 @@
   --home-screen-tabbar-offset: var(--space-4);
   --home-screen-tabbar-padding: var(--space-1);
   --home-screen-tabbar-radius: var(--radius-md);
-  --home-screen-tabbar-track-bg: var(--color-surface-muted);
+  --home-screen-tabbar-track-bg: color-mix(
+    in srgb,
+    var(--palette-gray-900) 20%,
+    transparent
+  );
   --home-screen-tabbar-track-bg-on-dark: color-mix(
     in srgb,
-    var(--palette-white) 78%,
+    var(--palette-white) 20%,
     transparent
   );
   --home-screen-tabbar-blur: 20px;
@@ -670,6 +676,7 @@
   --home-screen-tabbar-tab-active-bg: var(--color-accent);
   --home-screen-tabbar-tab-active-color: var(--color-on-accent);
   --home-screen-tabbar-tab-color: var(--color-text);
+  --home-screen-tabbar-tab-color-on-dark: var(--color-on-accent);
   --home-screen-tabbar-z: 3;
   --home-screen-tabbar-hide-duration: var(--motion-screen-duration);
   --home-screen-tabbar-hide-ease: var(--motion-screen-ease);

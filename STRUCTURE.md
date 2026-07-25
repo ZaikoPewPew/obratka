@@ -77,11 +77,13 @@
 ```
 
 `/referral` — invite-only gate (`validate_referral`); после входа у юзера свой код (лимит 2), шаринг с home.  
+`/home` — лента/мои с SWR-кэшем (`homeListCache`); glass-tabbar с контрастом над превью.  
 `/review` = просмотр портфолио + таймер **45 s** + опциональная надиктовка (чип rec → `answers.dictation`).  
 `/quiz` = опрос. Не путать с login-`session.js` (`obratka.session`).  
 `/report` = листы ревью автора (+ секция надиктовки) + жалоба → `reputation`.  
 `/banned` = бан (в т.ч. автобан по репутации).
 
+Клиентский кэш ленты: `sessionStorage` ключ `obratka.homeLists.<userId>` (сброс на logout).  
 Диктовка: [`src/lib/dictation/README.md`](src/lib/dictation/README.md).
 ## Auth (кратко)
 

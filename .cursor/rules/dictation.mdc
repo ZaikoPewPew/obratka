@@ -12,7 +12,7 @@ alwaysApply: true
 - Движок: Web Speech API + AnalyserNode для волны.
 - Контракт: `DictationEngine` в `src/lib/dictation/` (`createDictationEngine` → Web Speech).
 - UI: `.iframe-shell__rec` после reload (Figma `rec` 470:1374).
-- Таймер просмотра: **45 s** (`SESSION_SECONDS` в `main.js`); claim TTL по-прежнему 20 min.
+- Таймер просмотра: **45 s** (`REVIEW_SESSION_SECONDS` в `src/config/review.js`); claim TTL по-прежнему 20 min.
 - Аудио **не** upload / **не** Storage.
 - Без поддержки SpeechRecognition — кнопка скрыта.
 

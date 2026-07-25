@@ -44,7 +44,7 @@
 | `/registration` | Email → `/registration/code` / Telegram / Google |
 | `/registration/code` | 6 ячеек OTP |
 | `/onboarding` | Онбординг → `profiles` |
-| `/home` | Hub: лента (лиги) + мои + шаринг кода |
+| `/home` | Hub: SWR лента/мои + glass-tabbar + шаринг кода |
 | `/portfolio` | Подача URL; done через `setVariant("done")` |
 | `/review` | iframe + таймер 45 s + **rec** (надиктовка; нужен claim) |
 | `/quiz` | Квиз |
@@ -63,6 +63,9 @@
 | Онбординг-контент | `content/onboarding.json`, `content/onboarding.md` |
 
 Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `success-screen`, `ban-screen`, `report-screen`.
+
+**Home (новое):** SWR `homeListCache` (memory + `obratka.homeLists.<userId>`); silent slot patch; tabbar glass 20%/blur + `--on-dark` через `backdropLuminance`. Logout → `clearHomeListCache`.  
+Подробно: [`home-screen/README.md`](../src/components/home-screen/README.md).
 
 **Не восстанавливать** waitlist dual-layout (`apply-card`, `desktop.css` / `mobile.css`) без явной задачи.
 
