@@ -63,6 +63,18 @@
   }
 }
 
+/** Пульс красного индикатора во время записи. */
+@keyframes motion-recording-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: var(--motion-recording-blink-opacity-min);
+  }
+}
+
 /**
  * Shimmer-sweep: блик уезжает за край и появляется с другой стороны.
  * Старт/финиш вне видимой области → infinite без рывка на стыке цикла.
@@ -112,6 +124,10 @@
   }
 
   .auth-screen__provider-loader {
+    animation: none;
+  }
+
+  .review-panel__rec-dot {
     animation: none;
   }
 }

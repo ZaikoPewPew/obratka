@@ -27,8 +27,8 @@
 | `home` | `/home` | Хаб: SWR лента/мои + tabbar-dock + меню профиля |
 | `settings` | `/settings` | Отдельный экран настроек (пока заглушка) |
 | `url` | `/portfolio` | Подача своего портфолио |
-| `review` | `/review` | Ревью: iframe + таймер 45 s + чип rec (надиктовка) |
-| `quiz` | `/quiz` | Квиз / опрос после таймера |
+| `review` | `/review` | Ревью: iframe + таймер 45 s + чип rec (заметки) |
+| `quiz` | `/quiz` | Квиз / опрос после таймера; микрофон в поле «Главный совет» |
 | `done` | `/quiz/done` | Финал квиза (review-panel done + улет отчёта) |
 | `success` | `/done` | Успех подачи портфолио (success-screen) |
 | `report` | `/report` | Отчёт автору (листы + жалоба) |
@@ -54,7 +54,7 @@ referral → auth → (authCode) → onboarding → home
 Auth-защита и Dashboard: [`auth-screen/README.md`](../components/auth-screen/README.md).  
 Brand visual / field errors: [`brand-screen-visual`](../components/brand-screen-visual/README.md), [`FIELD_ERROR.md`](../utils/FIELD_ERROR.md).  
 Home: [`home-screen/README.md`](../components/home-screen/README.md) (SWR `homeListCache`, intro до claim, mine report gate, tabbar-dock + submit).  
-Надиктовка на `/review`: [`lib/dictation/README.md`](../lib/dictation/README.md).  
+Надиктовка (`/review` + поле совета): [`lib/dictation/README.md`](../lib/dictation/README.md).  
 См. корневой [`SCREENS.md`](../../SCREENS.md).
 
 ## Правило

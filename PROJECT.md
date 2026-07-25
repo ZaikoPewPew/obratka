@@ -17,7 +17,7 @@
 | Home: SWR-кэш вкладок + silent slot patch | wired (`homeListCache.js`) |
 | Home tabbar dock: glass + «Закинуть своё» справа | wired (`tabbar-dock`, `--on-dark`) |
 | Review claim / heartbeat / release | wired (награда только после submit) |
-| Review iframe + таймер 45 s + **надиктовка** (rec) + квиз | wired |
+| Review iframe + таймер 45 s + **надиктовка** (rec на `/review` + микрофон в поле совета) + квиз | wired |
 | Подача URL + done на url-screen | wired |
 | Report: листы (+ `dictation`) + жалоба + PDF | wired |
 | Referrals validate/redeem / share | wired (1 код / 2 слота, seed `YTHWKPDWAK`, без наград) |
@@ -34,7 +34,8 @@
 - **Mine report gate:** `reviewsCount < targetReviews` → `homeMineNotReady*`; иначе `/report`. Own-карточки всегда `cursor: pointer` (не `not-allowed`).
 - **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 45` (review shell + intro copy).
 - **Tabbar dock:** glass-таббар + кнопка «Закинуть своё» справа (56×56, Google blue, gap 8px); hide при скролле уезжает весь док. Светлый трек — gray-900 20% + blur 20; тёмный превью → `--on-dark` — white 20%.
-- **Чипы шапки:** репутация → баланс → временный «войс» (QA Web Speech) → уведомления → аватар. Submit больше не в topbar.
+- **Чипы шапки:** репутация → баланс → аватар. Submit и уведомления из topbar убраны.
+- **Точка на «Мои посты»:** красная 6px в углу вкладки, когда своё портфолио собрало все ревью (`hasReadyOwnReport` на ленте, свои карточки на «Мои»).
 - Подробно: [`home-screen/README.md`](src/components/home-screen/README.md).
 
 ## Продуктовый флоу
@@ -126,9 +127,9 @@ SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabas
 | Brand split (referral / auth / auth-code / onboarding / url) | `.url-screen*` + [`brand-screen-visual`](src/components/brand-screen-visual/README.md); цель — `brand-screen-shell` |
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
-| Home | `home-screen` + `account-menu`; лента SWR; tabbar-dock (tabs + submit) / `--on-dark`; чипы репутация + баланс + «войс» |
-| Review | `index.html` `.iframe-shell` + таймер + чип **rec** (диктовка) в `main.js` |
-| Quiz | `review-screen` + `review-panel` |
+| Home | `home-screen` + `account-menu`; лента SWR; tabbar-dock (tabs + submit + точка 3/3) / `--on-dark`; чипы репутация + баланс |
+| Review | `index.html` `.iframe-shell` + таймер + чип **rec** (заметки → `answers.dictation`) в `main.js` |
+| Quiz | `review-screen` + `review-panel` (микрофон в поле «Главный совет» → `advice`) |
 | Success | `success-screen` (`/done`) |
 | Ban | `ban-screen` — статичный красный mesh + `banBrandMarkSvg` |
 | Report | `report-screen` — листы (+ надиктовка) + жалоба + PDF |

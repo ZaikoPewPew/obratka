@@ -6,8 +6,19 @@
 
 ## API
 
-`createReviewPanel({ getPortfolioName?, onReportReveal?, onComplete?, onDoneChange?, onExit?, onNextCase? })`  
-→ `{ root, form, open, close, reset, focus, openDone }`.
+`createReviewPanel({ getPortfolioName?, onReportReveal?, onComplete?, onDoneChange?, onExit?, onNextCase?, onDictationToggle? })`  
+→ `{ root, form, open, close, reset, focus, openDone, setDictationSupported, setDictationRecording, setDictationTranscript }`.
+
+## Надиктовка в шаге advice
+
+В поле «Главный совет» — кнопка `.review-panel__rec` (правый нижний угол). Panel только рисует состояние и складывает текст, STT живёт в `main.js`:
+
+- клик → `onDictationToggle()` наверх;
+- `setDictationSupported(bool)` — показать / скрыть кнопку (Web Speech);
+- `setDictationRecording(bool)` — мигающий красный индикатор вместо микрофона; на переходе `false → true` запоминает текущий текст поля как базу;
+- `setDictationTranscript(text)` — база + транскрипт в `textarea` (cap 1000), счётчик и reveal листа обновляются как при ручном вводе.
+
+Во время записи поле readonly, `reset()` гасит состояние надиктовки.
 
 ## Флоу
 
@@ -21,7 +32,8 @@
 
 ## Стили / i18n
 
-Классы `.review-panel__*` в `iframe-shell.css`; токены `--shell-review-*`.  
-Ключи: `review*`, `reviewDone*`, `reviewContinue`, шкалы и варианты.
+Классы `.review-panel__*` в `iframe-shell.css`; токены `--shell-review-*` / `--shell-review-rec-*`.  
+Ключи: `review*`, `reviewDone*`, `reviewContinue`, `reviewAdviceRec*`, шкалы и варианты.  
+Мигание индикатора записи: `motion-recording-blink` в `styles/entrance.css`.
 
-См. [`review-screen/README.md`](../review-screen/README.md), [`SCREENS.md`](../../../SCREENS.md).
+См. [`review-screen/README.md`](../review-screen/README.md), [`lib/dictation/README.md`](../../lib/dictation/README.md), [`SCREENS.md`](../../../SCREENS.md).

@@ -24,7 +24,7 @@ referral → auth → authCode → onboarding → home
 | 4a | `settings-screen` | `/settings` | Настройки аккаунта (пока заглушка) |
 | 5a | iframe-shell | `/review` | Ревью: iframe + таймер **45 s** + чип **rec** (надиктовка → `answers.dictation`) |
 | 5b | `url-screen` | `/portfolio` | Подача своего URL (нужен баланс) |
-| 6 | `review-screen` + `review-panel` | `/quiz` → `/quiz/done` | Квиз; финал слева + улет отчёта |
+| 6 | `review-screen` + `review-panel` | `/quiz` → `/quiz/done` | Квиз (микрофон в поле «Главный совет»); финал слева + улет отчёта |
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
 | 8 | `report-screen` | `/report` | Отчёт автору: листы + жалоба + PDF (мокап листа → done после скачивания) |
 | — | `ban-screen` | `/banned` | Аккаунт заблокирован; «Выйти» + «Связаться» (242px); красный mesh; deep link escape-proof |
@@ -87,7 +87,7 @@ Handoff соседних brand-экранов: `handoff: true` (`brandScreenTran
 `success-screen` — запасной `/done` (deep link); основной submit больше не прыгает сюда.  
 `review-screen` — split для квиза (слева panel, справа visual + PDF-лист).  
 `ban-screen` — статичный красный mesh + `banBrandMarkSvg` (не `setVariant`).  
-На `/review` в шапке — опциональная надиктовка (`.iframe-shell__rec`); таймер `REVIEW_SESSION_SECONDS` из [`src/config/review.js`](src/config/review.js); см. [`src/lib/dictation/README.md`](src/lib/dictation/README.md).
+На `/review` в шапке — опциональная надиктовка (`.iframe-shell__rec`), в квизе — микрофон в поле «Главный совет» (`.review-panel__rec`); таймер `REVIEW_SESSION_SECONDS` из [`src/config/review.js`](src/config/review.js); см. [`src/lib/dictation/README.md`](src/lib/dictation/README.md).
 
 ## Дерево файлов
 
@@ -176,8 +176,8 @@ Shared (не экраны флоу):
 | `createHomeScreen` | `/home` | UI (hub + SWR + intro modal + mine report gate + `onOpenReport` + tabbar-dock) |
 | `createSettingsScreen` | `/settings` | UI (заглушка настроек) |
 | `createUrlScreen` | `/portfolio` | UI (submit + done via `setVariant`; shell) |
-| iframe-shell + timer + rec | `/review` | UI (диктовка → `answers.dictation`) |
-| `createReviewScreen` + `createReviewPanel` | `/quiz` | UI |
+| iframe-shell + timer + rec | `/review` | UI (заметки → `answers.dictation`) |
+| `createReviewScreen` + `createReviewPanel` | `/quiz` | UI (микрофон в поле совета → `advice`) |
 | `createSuccessScreen` | `/done` | UI (portfolio submitted) |
 | `createReportScreen` | `/report` | UI (листы + жалоба на лист) |
 | `createBanScreen` | `/banned` | UI (блок аккаунта; static evil mark) |
@@ -199,7 +199,7 @@ Home tabbar-dock: `--home-screen-tabbar-*` + `--home-screen-tabbar-dock-gap` / `
 
 ## i18n
 
-Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*`, `homeReviewIntro*` / `homeMineNotReady*` / `homeCardReport*` / `homeCardReportPending*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*` / `homeReputation*`, `modalCloseAria`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `reviewRec*` / `report*` / `reportDictationTitle`, `frame*` / `controls*`).
+Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*`, `homeReviewIntro*` / `homeMineNotReady*` / `homeCardReport*` / `homeCardReportPending*` / `homeTabMineReadyAria`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*` / `homeReputation*`, `modalCloseAria`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `reviewRec*` / `reviewAdviceRec*` / `report*` / `reportDictationTitle`, `frame*` / `controls*`).
 Правило: `.cursor/rules/i18n.mdc`.
 
 Таймер `/review` и intro copy: `REVIEW_SESSION_SECONDS` в [`src/config/review.js`](src/config/review.js).
@@ -232,7 +232,7 @@ Home tabbar-dock: `--home-screen-tabbar-*` + `--home-screen-tabbar-dock-gap` / `
 - [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — лента SWR, intro до claim, mine gate, tabbar-dock + submit, репутация
 - [`src/config/review.js`](src/config/review.js) — `REVIEW_SESSION_SECONDS`
 - [`src/utils/homeListCache.js`](src/utils/homeListCache.js) — кэш вкладок home
-- [`src/lib/dictation/README.md`](src/lib/dictation/README.md) — надиктовка на `/review`
+- [`src/lib/dictation/README.md`](src/lib/dictation/README.md) — надиктовка: `/review` + поле совета в квизе
 - [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) — правый visual + variants
 - [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) — split-каркас
 - [`src/components/app-modal/README.md`](src/components/app-modal/README.md) — универсальная модалка

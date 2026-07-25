@@ -35,6 +35,53 @@ function createCheckboxIcon(d) {
   return svg;
 }
 
+const MIC_PATH =
+  "M4.5 8.25C4.5 10.7353 6.51472 12.75 9 12.75M9 12.75C11.4853 12.75 13.5 10.7353 13.5 8.25M9 12.75V15M9 9.75C8.17157 9.75 7.5 9.07843 7.5 8.25V3.75C7.5 2.92157 8.17157 2.25 9 2.25C9.82843 2.25 10.5 2.92157 10.5 3.75V8.25C10.5 9.07843 9.82843 9.75 9 9.75Z";
+
+/**
+ * @returns {SVGSVGElement}
+ */
+function createMicIcon() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "review-panel__rec-mic");
+  svg.setAttribute("width", "18");
+  svg.setAttribute("height", "18");
+  svg.setAttribute("viewBox", "0 0 18 18");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("aria-hidden", "true");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", MIC_PATH);
+  path.setAttribute("stroke", "currentColor");
+  path.setAttribute("stroke-width", "1.3");
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+  svg.append(path);
+  return svg;
+}
+
+/**
+ * @returns {SVGSVGElement}
+ */
+function createRecDot() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "review-panel__rec-dot");
+  svg.setAttribute("width", "10");
+  svg.setAttribute("height", "10");
+  svg.setAttribute("viewBox", "0 0 10 10");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("aria-hidden", "true");
+  const circle = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "circle",
+  );
+  circle.setAttribute("cx", "5");
+  circle.setAttribute("cy", "5");
+  circle.setAttribute("r", "5");
+  circle.setAttribute("fill", "currentColor");
+  svg.append(circle);
+  return svg;
+}
+
 /**
  * @param {HTMLFormElement} form
  * @param {string} name
@@ -404,6 +451,7 @@ function createStep(content) {
  *   onExit?: () => void;
  *   onNextCase?: () => void;
  *   onDoneChange?: (done: boolean) => void;
+ *   onDictationToggle?: () => void;
  * }} [options]
  * @returns {{
  *   root: HTMLElement;
@@ -413,6 +461,9 @@ function createStep(content) {
  *   reset: () => void;
  *   focus: () => void;
  *   openDone: () => void;
+ *   setDictationSupported: (supported: boolean) => void;
+ *   setDictationRecording: (recording: boolean) => void;
+ *   setDictationTranscript: (text: string) => void;
  * }}
  */
 export function createReviewPanel(options = {}) {
@@ -430,6 +481,10 @@ export function createReviewPanel(options = {}) {
     typeof options.onNextCase === "function" ? options.onNextCase : null;
   const onDoneChange =
     typeof options.onDoneChange === "function" ? options.onDoneChange : null;
+  const onDictationToggle =
+    typeof options.onDictationToggle === "function"
+      ? options.onDictationToggle
+      : null;
 
   const root = document.createElement("div");
   root.className = "review-panel";
@@ -581,6 +636,16 @@ export function createReviewPanel(options = {}) {
   const adviceStack = document.createElement("div");
   adviceStack.className = "review-panel__options review-panel__options--advice";
 
+  const adviceField = document.createElement("div");
+  adviceField.className = "review-panel__field";
+
+  const adviceRecBtn = document.createElement("button");
+  adviceRecBtn.type = "button";
+  adviceRecBtn.className = "review-panel__rec";
+  adviceRecBtn.hidden = true;
+  adviceRecBtn.setAttribute("aria-pressed", "false");
+  adviceRecBtn.append(createMicIcon(), createRecDot());
+
   const adviceInput = document.createElement("textarea");
   adviceInput.className = "review-panel__textarea";
   adviceInput.id = "review-advice";
@@ -603,7 +668,8 @@ export function createReviewPanel(options = {}) {
   adviceCount.textContent = `0 / ${ADVICE_MAX_LEN}`;
 
   adviceMeta.append(adviceHint, adviceCount);
-  adviceStack.append(adviceInput, adviceMeta);
+  adviceField.append(adviceInput, adviceRecBtn);
+  adviceStack.append(adviceField, adviceMeta);
 
   /** @type {{
    *   step: HTMLElement;
@@ -746,6 +812,10 @@ export function createReviewPanel(options = {}) {
   root.append(heading, top, form, done);
 
   let currentStep = 0;
+  let dictationSupported = false;
+  let dictationRecording = false;
+  /** Текст поля на момент старта записи — транскрипт дописывается к нему. */
+  let dictationBase = "";
   let transitioning = false;
   /** @type {ReturnType<typeof setTimeout> | null} */
   let advanceTimer = null;
@@ -802,6 +872,9 @@ export function createReviewPanel(options = {}) {
     const isLast = currentStep === totalSteps - 1;
     const auto = Boolean(steps[currentStep]?.autoAdvance);
 
+    // Шаг с полем ушёл — микрофон не должен остаться включённым.
+    if (dictationRecording && !isLast) onDictationToggle?.();
+
     backBtn.hidden = isFirst;
     top.classList.toggle("review-panel__top--first", isFirst);
     nextBtn.hidden = isLast || auto;
@@ -812,6 +885,39 @@ export function createReviewPanel(options = {}) {
     syncQuestion();
     syncProgress();
     syncReportReveal();
+  }
+
+  function syncAdviceMeta() {
+    adviceCount.textContent = `${adviceInput.value.length} / ${ADVICE_MAX_LEN}`;
+    if (!stepError.hidden) showStepError(false);
+    if (currentStep === totalSteps - 1) {
+      syncReportReveal();
+    }
+  }
+
+  function syncDictationChrome() {
+    const strings = getStrings();
+    adviceRecBtn.hidden = !dictationSupported;
+    adviceRecBtn.classList.toggle(
+      "review-panel__rec--recording",
+      dictationRecording,
+    );
+    adviceRecBtn.setAttribute(
+      "aria-pressed",
+      dictationRecording ? "true" : "false",
+    );
+    adviceRecBtn.setAttribute(
+      "aria-label",
+      dictationRecording
+        ? strings.reviewRecStopAria
+        : strings.reviewAdviceRecStartAria,
+    );
+    adviceRecBtn.title = dictationRecording
+      ? strings.reviewRecStopTitle
+      : strings.reviewAdviceRecStartTitle;
+    // Во время записи текст принадлежит движку: ручная правка разъехалась бы
+    // с накопленным транскриптом.
+    adviceInput.readOnly = dictationRecording;
   }
 
   function syncReportReveal() {
@@ -1212,11 +1318,11 @@ export function createReviewPanel(options = {}) {
   });
 
   adviceInput.addEventListener("input", () => {
-    adviceCount.textContent = `${adviceInput.value.length} / ${ADVICE_MAX_LEN}`;
-    if (!stepError.hidden) showStepError(false);
-    if (currentStep === totalSteps - 1) {
-      syncReportReveal();
-    }
+    syncAdviceMeta();
+  });
+
+  adviceRecBtn.addEventListener("click", () => {
+    onDictationToggle?.();
   });
 
   form.addEventListener("change", () => {
@@ -1313,6 +1419,9 @@ export function createReviewPanel(options = {}) {
     clearAllSelections();
     adviceInput.value = "";
     adviceCount.textContent = `0 / ${ADVICE_MAX_LEN}`;
+    dictationRecording = false;
+    dictationBase = "";
+    syncDictationChrome();
     currentStep = 0;
     showForm();
     renderStep();
@@ -1336,6 +1445,7 @@ export function createReviewPanel(options = {}) {
   }
 
   renderStep();
+  syncDictationChrome();
 
   return {
     root,
@@ -1346,6 +1456,27 @@ export function createReviewPanel(options = {}) {
     focus,
     openDone: () => {
       void showDone(completedAnswers);
+    },
+    setDictationSupported: (supported) => {
+      dictationSupported = Boolean(supported);
+      syncDictationChrome();
+    },
+    setDictationRecording: (recording) => {
+      const next = Boolean(recording);
+      if (next && !dictationRecording) {
+        dictationBase = adviceInput.value.trim();
+      }
+      dictationRecording = next;
+      syncDictationChrome();
+    },
+    setDictationTranscript: (text) => {
+      if (!dictationRecording) return;
+      adviceInput.value = [dictationBase, text]
+        .filter(Boolean)
+        .join(" ")
+        .slice(0, ADVICE_MAX_LEN);
+      adviceInput.scrollTop = adviceInput.scrollHeight;
+      syncAdviceMeta();
     },
   };
 }

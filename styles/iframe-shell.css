@@ -920,12 +920,19 @@ body {
   text-align: right;
 }
 
+.review-panel__field {
+  position: relative;
+  width: 100%;
+}
+
 .review-panel__textarea {
   box-sizing: border-box;
+  display: block;
   width: 100%;
   height: calc(var(--shell-review-control-height) * 3);
   max-height: calc(var(--shell-review-control-height) * 3);
   padding: var(--shell-review-control-padding-y) var(--shell-review-control-padding-x);
+  padding-bottom: var(--shell-review-textarea-padding-bottom);
   border: 0;
   border-radius: var(--shell-review-option-radius);
   background: var(--shell-review-control-bg);
@@ -948,6 +955,61 @@ body {
 .review-panel__textarea:focus-visible {
   outline: none;
   box-shadow: none;
+}
+
+.review-panel__rec {
+  appearance: none;
+  box-sizing: border-box;
+  position: absolute;
+  right: var(--shell-review-rec-offset);
+  bottom: var(--shell-review-rec-offset);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--shell-review-rec-size);
+  height: var(--shell-review-rec-size);
+  padding: var(--shell-review-rec-padding);
+  border: none;
+  border-radius: var(--shell-review-rec-radius);
+  background: var(--shell-review-rec-bg);
+  color: var(--shell-review-rec-icon-color);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) ease;
+}
+
+.review-panel__rec:hover {
+  background: var(--shell-review-rec-bg-hover);
+}
+
+.review-panel__rec:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.review-panel__rec[hidden] {
+  display: none;
+}
+
+.review-panel__rec-mic {
+  width: var(--shell-review-rec-icon-size);
+  height: var(--shell-review-rec-icon-size);
+}
+
+.review-panel__rec-dot {
+  display: none;
+  width: var(--shell-review-rec-dot-size);
+  height: var(--shell-review-rec-dot-size);
+  color: var(--shell-review-rec-dot-color);
+  animation: motion-recording-blink var(--shell-review-rec-blink-duration)
+    var(--shell-review-rec-blink-ease) infinite;
+}
+
+.review-panel__rec--recording .review-panel__rec-mic {
+  display: none;
+}
+
+.review-panel__rec--recording .review-panel__rec-dot {
+  display: block;
 }
 
 .review-panel__meta {

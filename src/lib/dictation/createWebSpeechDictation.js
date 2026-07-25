@@ -8,6 +8,7 @@
  *   supported: boolean;
  *   start: () => Promise<boolean>;
  *   stop: () => Promise<void>;
+ *   resetTranscript: () => void;
  *   onTranscript: (cb: (finalText: string, interim: string) => void) => () => void;
  *   onLevel: (cb: (level: number) => void) => () => void;
  *   onError: (cb: (code: string) => void) => () => void;
@@ -330,6 +331,11 @@ export function createWebSpeechDictation(options = {}) {
       }
       running = false;
       tearDownAudio();
+      emitTranscript("");
+    },
+
+    resetTranscript() {
+      finalText = "";
       emitTranscript("");
     },
 

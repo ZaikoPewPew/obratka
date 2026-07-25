@@ -2,9 +2,9 @@
 
 - `tokens.css` — **источник дизайн-токенов** (примитивы → семантика → темы). Правило: `.cursor/rules/design-tokens.mdc`.
 - `base.css` — сброс / база.
-- `entrance.css` — `@keyframes motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` (без filter — для прозрачных хедеров).
+- `entrance.css` — `@keyframes motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-recording-blink` (пульс индикатора записи).
 - `app-modal.css` — универсальная модалка (`createAppModal`, `--app-modal-*`).
-- `iframe-shell.css` — оболочка `/review` (таймер, **`.iframe-shell__rec`**), `.url-screen*` (в т.ч. `__error*`, `__input-wrap--invalid`), `.auth-screen*` / `.auth-code-screen*` (в т.ч. `__cells--invalid`), `.review-screen*` / `.review-panel*`.
+- `iframe-shell.css` — оболочка `/review` (таймер, **`.iframe-shell__rec`**), `.url-screen*` (в т.ч. `__error*`, `__input-wrap--invalid`), `.auth-screen*` / `.auth-code-screen*` (в т.ч. `__cells--invalid`), `.review-screen*` / `.review-panel*` (в т.ч. **`.review-panel__rec`**).
 - `brand-screen.css` — **заготовка** выноса общих split-стилей из iframe-shell.
 - `home-screen.css` — главная `/home` (topbar, лента, tabbar-dock: glass tabs + submit, `--on-dark`).
 - `success-screen.css` — `/done` (пресеты успеха).
@@ -30,6 +30,7 @@
 | `--motion-field-error-visual-*` | красный mesh + evil-рожки |
 | `--motion-advance-delay` / `--motion-focus-delay` | квиз |
 | `--motion-feature-*` / `--motion-report-launch-*` | PDF-лист |
+| `--motion-recording-blink-*` | пульс красного индикатора записи |
 | `--motion-delay-*` / `--motion-stagger` | stagger |
 | `--url-screen-reveal-*` / `--url-screen-error-*` | split + field error aliases |
 | `--url-screen-error-mesh-*` | палитра invalid (= ban) |
@@ -37,9 +38,10 @@
 | `--auth-code-*` | ячейки OTP / caret / `--auth-code-resend-cooldown` |
 | `--shell-review-*` | квиз / report / done |
 | `--control-rec-*` / `--color-recording` | чип надиктовки в шапке `/review` |
+| `--shell-review-rec-*` | кнопка надиктовки в поле «Главный совет» |
 | `--home-screen-*` | topbar / feed / avatar / locked-modal |
 | `--home-screen-review-intro-*` | шаги intro-модалки (`indent` / `step-gap`) |
-| `--home-screen-tabbar-*` | glass track (20% / blur 20), `--on-dark`, hide/thumb/label/contrast; dock-gap + submit (56×56 Google blue) |
+| `--home-screen-tabbar-*` | glass track (20% / blur 20), `--on-dark`, hide/thumb/label/contrast; dock-gap + submit (56×56 Google blue) + tab-dot (6px Google red) |
 | `--app-modal-*` | универсальная модалка (Figma Modal) |
 
 Handoff без анимации visual: класс `.url-screen--handoff` + `brandScreenTransition.js`.

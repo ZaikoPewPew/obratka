@@ -489,6 +489,40 @@ export async function listMyPortfolios() {
 }
 
 /**
+ * Есть ли своё портфолио, собравшее все ревью (индикатор на вкладке «Мои»).
+ * Лёгкий запрос: только счётчики, без слотов и маппинга карточек.
+ *
+ * @returns {Promise<boolean>}
+ */
+export async function hasReadyOwnReport() {
+  const supabase = getSupabase();
+  if (!supabase) return false;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.id) return false;
+
+  const { data: rows, error } = await supabase
+    .from("portfolios")
+    .select("id, target_reviews, reviews_count")
+    .eq("owner_id", user.id);
+
+  if (error) {
+    if (import.meta.env.DEV) {
+      console.warn("[portfolios] hasReadyOwnReport", error.message);
+    }
+    return false;
+  }
+
+  return (rows || []).some(
+    (row) =>
+      (Number(row?.reviews_count) || 0) >=
+      Math.max(1, Number(row?.target_reviews) || 1),
+  );
+}
+
+/**
  * @param {string} id
  * @returns {Promise<PortfolioQueueItem | null>}
  */

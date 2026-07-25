@@ -20,7 +20,8 @@
 | `/onboarding` | шаги, валидация, запись в `profiles` |
 | `/home` | лента SWR (без skeleton на hit), tabbar-dock (tabs + submit) `--on-dark`, intro до claim, mine gate / report, pointer на own, баланс/invite |
 | `/portfolio` | ввод URL, нехватка баланса, done |
-| `/review` | iframe / external, таймер 45 s, чип rec (надиктовка), выход |
+| `/review` | iframe / external, таймер 45 s, чип rec (заметки), выход |
+| `/quiz` | квиз; микрофон в поле «Главный совет» |
 | `/quiz` → done | шаги, PDF reveal |
 | Язык | `?lang=en`, кнопка RU↔EN, aria/title |
 | Тема | `data-theme="dark"`, контраст контролов |

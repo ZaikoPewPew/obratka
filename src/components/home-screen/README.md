@@ -11,7 +11,7 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 | Вкладка | API | Содержимое |
 |---------|-----|------------|
 | **На ревью** (`feed`, default) | `listPortfoliosForReview()` | Чужие `pending` **в лиге** грейда ревьюера (RLS), без своих; карточка до `target_reviews` completed-отчётов; уже отревьюенные этим юзером помечены `reviewedByMe` (клик → notice) |
-| **Мои посты** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …) |
+| **Мои посты** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …); точка на вкладке при готовом отчёте (`hasReadyOwnReport()` при активной ленте) |
 
 Переключатель: `home-screen__tabbar` внутри дока `home-screen__tabbar-dock` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`). Вкладки: **На ревью** / **Мои посты**. Справа от таббара в доке (gap 8px, `--home-screen-tabbar-dock-gap`) — кнопка «Закинуть своё» (56×56, r16, Google blue, плюс 24; токены `--home-screen-tabbar-submit-*`).
 
@@ -19,6 +19,17 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 - Скролл **вверх** (любой delta &lt; 0) / у верхнего края → снова виден сразу.
 - Hide — с небольшим порогом (`TABBAR_HIDE_DELTA`), чтобы трекпад не дёргал.
 - Анимация hide/show: `--home-screen-tabbar-hide-duration` / `--home-screen-tabbar-hide-ease` → `--motion-screen-*`.
+
+### Индикатор на «Мои посты»
+
+Красная точка 6×6 (`--home-screen-tabbar-tab-dot-*`, Google red) в правом верхнем углу вкладки, отступ **8px** сверху и справа. Видна, когда **хотя бы одно своё портфолио собрало все ревью** (`reviewsCount >= targetReviews`, т.е. 3/3) — то есть отчёт уже можно открыть.
+
+Источник состояния:
+
+- вкладка `mine` активна (или есть её кэш) → считаем по своим карточкам;
+- вкладка `feed` → на каждом `refresh` лёгкий `hasReadyOwnReport()` (только счётчики, без слотов).
+
+Точка декоративная (`aria-hidden`); пока она видна, у кнопки таба `aria-label` = `homeTabMineReadyAria`. Текст вкладки живёт в `home-screen__tab-label`, чтобы синк копирайта не затирал точку.
 
 ### Контраст над тёмным превью
 
@@ -95,8 +106,7 @@ Topbar поверх контента (`position: absolute`), появление 
 - Если в `profiles.avatar_url` пусто — при refresh подтягиваем picture из Auth и пишем в профиль.
 - При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.
 - Репутация: `profiles.reputation` ↔ `session.reputation`; чип = иконка + дельта от 100 (`0` / `+10` / `-20`, `formatReputationDelta`); клик → explainer через `createAppModal` (без весов тегов).
-- Порядок чипов в шапке: репутация → баланс → временный «войс» → уведомления → аватар. «Закинуть своё» — не в шапке, а в доке у таббара.
-- «войс» — временный QA-харнесс: открывает `createAppModal`, запускает отдельный `DictationEngine` и показывает live-расшифровку в readonly textarea. При закрытии модалки / home микрофон останавливается; если Web Speech недоступен, чип скрыт.
+- Порядок чипов в шапке: репутация → баланс → аватар. «Закинуть своё» — не в шапке, а в доке у таббара; чип уведомлений убран (готовность отчёта показывает точка на «Мои посты»).
 - Баланс: `profiles.balance` ↔ `session.balance`.
 - Клик по чипу баланса (**временно**): `TEMP_BALANCE_CHIP_CREDIT` → RPC `temp_credit_balance` (+10); иначе DEV local-only. Убрать флаг + RPC после тестов. Серверный spend — `spend_submit_cost`.
 - CTA «Закинуть своё» без монет → `createAppModal` «Монет маловато»; notices (no slots / already reviewed) — тот же `noticeModal`.
@@ -131,6 +141,8 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
   .home-screen__tabbar                role=tablist
     .home-screen__tabbar-thumb        aria-hidden (пилл)
     button.home-screen__tab           role=tab  data-tab=feed|mine
+      .home-screen__tab-label         подпись (только у mine)
+      .home-screen__tab-dot           aria-hidden, hidden пока нет 3/3
   button.home-screen__tabbar-submit   «Закинуть своё» (плюс)
 ```
 
@@ -144,11 +156,11 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 ## Стили / i18n / a11y
 
-Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, translucent track / on-dark track+label, motion hide/thumb/label/contrast) + `--home-screen-tabbar-dock-gap` / `--home-screen-tabbar-submit-*` (кнопка 56×56, r16, Google blue, hover/active через color-mix).
+Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, translucent track / on-dark track+label, motion hide/thumb/label/contrast) + `--home-screen-tabbar-dock-gap` / `--home-screen-tabbar-submit-*` (кнопка 56×56, r16, Google blue, hover/active через color-mix) + `--home-screen-tabbar-tab-dot-*` (точка 6px, offset 8px, Google red).
 
 Токены intro-модалки: `--home-screen-review-intro-indent` / `--home-screen-review-intro-step-gap`.
 
-Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeTabFeed`, `homeTabMine`, `homeTabsAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeVoiceTest*`, `homeNotificationsAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`.
+Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeTabFeed`, `homeTabMine`, `homeTabsAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeTabMineReadyAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`.
 
 `homeCardOwnTitle` / `homeCardOwnAria` в locales — legacy (в UI не используются; own-копирайт = `homeCardReport*` / `Pending*`).
 

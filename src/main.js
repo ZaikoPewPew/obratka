@@ -95,6 +95,13 @@ let portfolioName = getStrings().brandName;
 /** Надиктовка с /review → answers.dictation */
 let dictationText = "";
 let dictationRecording = false;
+/**
+ * Куда уходит транскрипт: заметки на `/review` или поле «Главный совет» в квизе.
+ * @type {"notes" | "advice"}
+ */
+let dictationTarget = "notes";
+/** Идёт start/stop — второй клик игнорируем. */
+let dictationBusy = false;
 /** @type {ReturnType<typeof createDictationEngine>} */
 let dictationEngine = null;
 
@@ -154,7 +161,12 @@ const reviewPanel = createReviewPanel({
   onReportReveal: (active, payload) => {
     setReviewReportReveal(active, payload);
   },
+  onDictationToggle: () => {
+    if (activeRouteId !== "quiz") return;
+    void toggleDictation("advice");
+  },
   onComplete: (answers) => {
+    void stopDictation();
     const dictation = dictationText.trim().slice(0, DICTATION_MAX_LEN);
     const payload =
       answers && dictation
@@ -364,22 +376,26 @@ function syncDictationButtonChrome() {
     }
     return;
   }
+  const recording = dictationRecording && dictationTarget === "notes";
   dictationBtn.hidden = false;
-  dictationBtn.classList.toggle(
-    "iframe-shell__rec--recording",
-    dictationRecording,
-  );
-  dictationBtn.setAttribute(
-    "aria-pressed",
-    dictationRecording ? "true" : "false",
-  );
+  dictationBtn.classList.toggle("iframe-shell__rec--recording", recording);
+  dictationBtn.setAttribute("aria-pressed", recording ? "true" : "false");
   dictationBtn.setAttribute(
     "aria-label",
-    dictationRecording ? t.reviewRecStopAria : t.reviewRecStartAria,
+    recording ? t.reviewRecStopAria : t.reviewRecStartAria,
   );
-  dictationBtn.title = dictationRecording
+  dictationBtn.title = recording
     ? t.reviewRecStopTitle
     : t.reviewRecStartTitle;
+}
+
+/** Чип rec на /review + кнопка микрофона в поле «Главный совет». */
+function syncDictationChrome() {
+  syncDictationButtonChrome();
+  reviewPanel.setDictationSupported(isWebSpeechSupported());
+  reviewPanel.setDictationRecording(
+    dictationRecording && dictationTarget === "advice",
+  );
 }
 
 /**
@@ -391,13 +407,17 @@ function ensureDictationEngine() {
   if (!dictationEngine) return null;
   dictationEngine.onTranscript((finalText, interim) => {
     const combined = [finalText, interim].filter(Boolean).join(" ").trim();
+    if (dictationTarget === "advice") {
+      reviewPanel.setDictationTranscript(combined);
+      return;
+    }
     dictationText = combined.slice(0, DICTATION_MAX_LEN);
   });
   dictationEngine.onLevel(setDictationLevel);
   dictationEngine.onError((code) => {
     dictationRecording = false;
     setDictationLevel(0);
-    syncDictationButtonChrome();
+    syncDictationChrome();
     if (import.meta.env.DEV) {
       console.warn("[dictation]", code);
     }
@@ -411,28 +431,45 @@ async function stopDictation() {
   }
   dictationRecording = false;
   setDictationLevel(0);
-  syncDictationButtonChrome();
+  syncDictationChrome();
 }
 
-async function startDictation() {
+/**
+ * @param {"notes" | "advice"} target
+ */
+async function startDictation(target) {
   const engine = ensureDictationEngine();
   if (!engine) {
-    syncDictationButtonChrome();
+    syncDictationChrome();
     return;
   }
+  // Поле «Главный совет» дописывает транскрипт к своему тексту, поэтому
+  // каждая запись начинается с пустого буфера движка.
+  if (target === "advice" || dictationTarget === "advice") {
+    engine.resetTranscript();
+  }
+  dictationTarget = target;
   const ok = await engine.start();
   dictationRecording = Boolean(ok);
   if (!ok) setDictationLevel(0);
-  syncDictationButtonChrome();
+  syncDictationChrome();
 }
 
-async function toggleDictation() {
-  if (activeRouteId !== "review" || sessionEnded) return;
-  if (dictationRecording) {
-    await stopDictation();
-    return;
+/**
+ * @param {"notes" | "advice"} target
+ */
+async function toggleDictation(target) {
+  if (dictationBusy) return;
+  dictationBusy = true;
+  try {
+    if (dictationRecording) {
+      await stopDictation();
+      return;
+    }
+    await startDictation(target);
+  } finally {
+    dictationBusy = false;
   }
-  await startDictation();
 }
 
 function resetDictationSession() {
@@ -441,8 +478,9 @@ function resetDictationSession() {
   dictationEngine = null;
   dictationText = "";
   dictationRecording = false;
+  dictationTarget = "notes";
   setDictationLevel(0);
-  syncDictationButtonChrome();
+  syncDictationChrome();
 }
 
 function formatTime(totalMs) {
@@ -472,7 +510,7 @@ function syncLocaleDependentAttrs() {
     });
   }
 
-  syncDictationButtonChrome();
+  syncDictationChrome();
 }
 
 function openPortfolioExternally() {
@@ -636,7 +674,7 @@ function lockFrameAndShowReview() {
   if (!frameWrap || !frame || sessionEnded) return;
   if (activeRouteId !== "review" || !claimHeld || reviewSubmitted) return;
   sessionEnded = true;
-  syncDictationButtonChrome();
+  syncDictationChrome();
   openReview();
 }
 
@@ -1078,7 +1116,7 @@ async function applyRoute(id, opts = {}) {
   }
 
   activeRouteId = id;
-  syncDictationButtonChrome();
+  syncDictationChrome();
   const closeOpts = handoff ? { handoff: true } : {};
   const openOpts = handoff ? { handoff: true } : {};
 
@@ -1273,13 +1311,14 @@ frameForwardBtn?.addEventListener("click", () => {
 });
 
 dictationBtn?.addEventListener("click", () => {
-  void toggleDictation();
+  if (activeRouteId !== "review" || sessionEnded) return;
+  void toggleDictation("notes");
 });
 
 applyDocumentI18n();
 showBrandChrome();
 renderTimer();
-syncDictationButtonChrome();
+syncDictationChrome();
 if (shell) {
   shell.hidden = true;
   shell.classList.remove("iframe-shell--entered");

@@ -11,7 +11,7 @@
 | `screens.mdc` | Экран = модуль, `go()`, paths, handoff, legacy off |
 | `brand-ui.mdc` | Visual variants, field errors, marks — не копипастить mesh |
 | `review-claims.mdc` | Claim / heartbeat / release; награда только после submit |
-| `dictation.mdc` | Надиктовка на `/review` → `answers.dictation` (Web Speech MVP) |
+| `dictation.mdc` | Надиктовка: `/review` → `answers.dictation` + микрофон в поле совета (Web Speech MVP) |
 | `leagues.mdc` | Тихий матчинг по `profiles.grade` |
 | `referrals.mdc` | Invite-only: validate → redeem, 2 слота, без наград |
 | `ban.mdc` | Escape-proof `/banned`, операторский / автобан |
@@ -46,7 +46,7 @@
 | `/onboarding` | Онбординг → `profiles` |
 | `/home` | Hub: SWR лента/мои + intro до claim + mine report gate + tabbar-dock |
 | `/portfolio` | Подача URL; done через `setVariant("done")` |
-| `/review` | iframe + таймер 45 s + **rec** (надиктовка; нужен claim) |
+| `/review` | iframe + таймер 45 s + **rec** (заметки; нужен claim); в квизе — микрофон в поле совета |
 | `/quiz` | Квиз |
 | `/quiz/done` | Финал квиза |
 | `/done` | Запасной success (deep link) |
@@ -59,7 +59,7 @@
 | Оркестрация | `main.js` → `go()` / `applyRoute()` / `syncRoute()` |
 | Screens | `src/components/*-screen/` |
 | Квиз | `review-screen/` + `review-panel/` |
-| Надиктовка | `src/lib/dictation/` + `.iframe-shell__rec` |
+| Надиктовка | `src/lib/dictation/` + `.iframe-shell__rec` + `.review-panel__rec` |
 | Онбординг-контент | `content/onboarding.json`, `content/onboarding.md` |
 
 Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `success-screen`, `ban-screen`, `report-screen`.
@@ -81,9 +81,10 @@ Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-scre
 ## Dictation (шпаргалка)
 
 1. На `/review` чип rec → Web Speech → текст в памяти.
-2. Submit мержит `answers.dictation` (опционально) → секция листа.
-3. Аудио не upload; Whisper — план B за тем же `DictationEngine`.
-4. Код: `src/lib/dictation/`; правило `dictation.mdc`.
+2. В квизе кнопка микрофона в поле «Главный совет» → текст прямо в `advice`.
+3. Submit мержит `answers.dictation` (опционально) → секция листа.
+4. Аудио не upload; Whisper — план B за тем же `DictationEngine`.
+5. Код: `src/lib/dictation/`; правило `dictation.mdc`.
 
 ## Referrals (шпаргалка)
 

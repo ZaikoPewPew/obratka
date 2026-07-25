@@ -211,6 +211,10 @@
   /* Mesh + evil-марк вместе с ошибкой */
   --motion-field-error-visual-duration: var(--motion-screen-duration);
   --motion-field-error-visual-ease: var(--ease-reveal);
+  /* Пульс индикатора записи */
+  --motion-recording-blink-duration: 1100ms;
+  --motion-recording-blink-ease: ease-in-out;
+  --motion-recording-blink-opacity-min: 0.25;
 
   /* Слои */
   --z-base: 1;
@@ -302,6 +306,22 @@
   --shell-review-control-text: var(--color-text);
   --shell-review-control-active-bg: var(--color-choice-selected);
   --shell-review-control-active-text: var(--color-on-choice-selected);
+  /* Кнопка надиктовки внутри поля «Главный совет» */
+  --shell-review-rec-size: 34px;
+  --shell-review-rec-offset: var(--space-2);
+  --shell-review-rec-padding: var(--space-2);
+  --shell-review-rec-radius: var(--radius-xs);
+  --shell-review-rec-bg: var(--color-surface);
+  --shell-review-rec-bg-hover: var(--color-surface-muted-hover);
+  --shell-review-rec-icon-size: 18px;
+  --shell-review-rec-icon-color: var(--color-text);
+  --shell-review-rec-dot-size: 10px;
+  --shell-review-rec-dot-color: var(--color-recording);
+  --shell-review-rec-blink-duration: var(--motion-recording-blink-duration);
+  --shell-review-rec-blink-ease: var(--motion-recording-blink-ease);
+  --shell-review-textarea-padding-bottom: calc(
+    var(--shell-review-rec-size) + var(--shell-review-rec-offset) * 2
+  );
   --shell-review-slider-width: 500px;
   --shell-review-slider-height: 106px;
   --shell-review-slider-track-height: 63px;
@@ -530,23 +550,6 @@
   --home-screen-chip-font-weight: var(--font-weight-medium);
   --home-screen-reputation-chip-gap: var(--space-2);
   --home-screen-reputation-body-pre: pre-line;
-  --home-screen-voice-test-field-gap: var(--space-2);
-  --home-screen-voice-test-label-gap: var(--space-2);
-  --home-screen-voice-test-label-color: var(--color-text);
-  --home-screen-voice-test-label-size: var(--font-size-sm);
-  --home-screen-voice-test-label-weight: var(--font-weight-medium);
-  --home-screen-voice-test-transcript-min-height: 180px;
-  --home-screen-voice-test-transcript-padding: var(--space-4);
-  --home-screen-voice-test-transcript-radius: var(--radius-md);
-  --home-screen-voice-test-transcript-border-width: var(--border-width);
-  --home-screen-voice-test-transcript-border: var(--color-border-subtle);
-  --home-screen-voice-test-transcript-bg: var(--color-surface-muted);
-  --home-screen-voice-test-transcript-color: var(--color-text);
-  --home-screen-voice-test-transcript-placeholder: var(--color-text-muted);
-  --home-screen-voice-test-transcript-size: var(--font-size-base);
-  --home-screen-voice-test-transcript-line-height: var(--line-height-loose);
-  --home-screen-voice-test-status-color: var(--color-error);
-  --home-screen-voice-test-status-size: var(--font-size-sm);
   --home-screen-profile-size: var(--space-12);
   --home-screen-avatar-radius: var(--radius-pill);
   --home-screen-avatar-letter-bg: var(--palette-gray-900);
@@ -687,6 +690,11 @@
   --home-screen-tabbar-tab-active-color: var(--color-on-accent);
   --home-screen-tabbar-tab-color: var(--color-text);
   --home-screen-tabbar-tab-color-on-dark: var(--color-on-accent);
+  /* Точка «отчёт собран 3/3» на вкладке «Мои посты» */
+  --home-screen-tabbar-tab-dot-size: 6px;
+  --home-screen-tabbar-tab-dot-offset: var(--space-2);
+  --home-screen-tabbar-tab-dot-radius: var(--radius-pill);
+  --home-screen-tabbar-tab-dot-color: var(--palette-google-red);
   --home-screen-tabbar-z: 3;
   --home-screen-tabbar-hide-duration: var(--motion-screen-duration);
   --home-screen-tabbar-hide-ease: var(--motion-screen-ease);

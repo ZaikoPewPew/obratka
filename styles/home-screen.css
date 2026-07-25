@@ -156,11 +156,6 @@
   cursor: pointer;
 }
 
-.home-screen__chip--icon {
-  width: var(--home-screen-chip-height);
-  padding: var(--home-screen-chip-padding-y);
-}
-
 .home-screen__chip--balance,
 .home-screen__chip--reputation {
   gap: var(--home-screen-reputation-chip-gap);
@@ -175,56 +170,6 @@
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-loose);
   white-space: var(--home-screen-reputation-body-pre);
-}
-
-.home-screen__voice-test-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--home-screen-voice-test-field-gap);
-}
-
-.home-screen__voice-test-label {
-  display: flex;
-  flex-direction: column;
-  gap: var(--home-screen-voice-test-label-gap);
-  color: var(--home-screen-voice-test-label-color);
-  font-family: var(--font-family);
-  font-size: var(--home-screen-voice-test-label-size);
-  font-weight: var(--home-screen-voice-test-label-weight);
-}
-
-.home-screen__voice-test-transcript {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: var(--home-screen-voice-test-transcript-min-height);
-  margin: 0;
-  padding: var(--home-screen-voice-test-transcript-padding);
-  resize: vertical;
-  border: var(--home-screen-voice-test-transcript-border-width) solid
-    var(--home-screen-voice-test-transcript-border);
-  border-radius: var(--home-screen-voice-test-transcript-radius);
-  background: var(--home-screen-voice-test-transcript-bg);
-  color: var(--home-screen-voice-test-transcript-color);
-  font-family: var(--font-family);
-  font-size: var(--home-screen-voice-test-transcript-size);
-  line-height: var(--home-screen-voice-test-transcript-line-height);
-}
-
-.home-screen__voice-test-transcript::placeholder {
-  color: var(--home-screen-voice-test-transcript-placeholder);
-}
-
-.home-screen__voice-test-transcript:focus-visible {
-  outline: var(--focus-ring-width) solid var(--color-focus-ring);
-  outline-offset: var(--focus-ring-offset);
-}
-
-.home-screen__voice-test-status {
-  margin: 0;
-  color: var(--home-screen-voice-test-status-color);
-  font-family: var(--font-family);
-  font-size: var(--home-screen-voice-test-status-size);
-  line-height: var(--line-height-normal);
 }
 
 .home-screen__review-intro-steps {
@@ -1147,6 +1092,22 @@
 
 .home-screen__tab--active {
   color: var(--home-screen-tabbar-tab-active-color);
+}
+
+/* Точка «есть собранный отчёт 3/3» на вкладке «Мои посты» */
+.home-screen__tab-dot {
+  position: absolute;
+  top: var(--home-screen-tabbar-tab-dot-offset);
+  right: var(--home-screen-tabbar-tab-dot-offset);
+  width: var(--home-screen-tabbar-tab-dot-size);
+  height: var(--home-screen-tabbar-tab-dot-size);
+  border-radius: var(--home-screen-tabbar-tab-dot-radius);
+  background: var(--home-screen-tabbar-tab-dot-color);
+  pointer-events: none;
+}
+
+.home-screen__tab-dot[hidden] {
+  display: none !important;
 }
 
 .home-screen__tab:focus-visible {

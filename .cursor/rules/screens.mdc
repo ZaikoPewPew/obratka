@@ -20,7 +20,7 @@ alwaysApply: true
 | `home` | `/home` |
 | `url` | `/portfolio` |
 | `review` | `/review` (iframe + таймер 45 s + rec; нужен claim) |
-| `quiz` | `/quiz` |
+| `quiz` | `/quiz` (микрофон в поле «Главный совет») |
 | `done` | `/quiz/done` |
 | `success` | `/done` (deep link / запасной; submit URL остаётся на url-screen) |
 | `report` | `/report` (листы + жалоба; только «Мои») |
@@ -30,7 +30,7 @@ alwaysApply: true
 
 ## Ключевые флоу
 
-- Home pick → intro-модалка «Как проходит ревью» → CTA → **claim** → `/review` (опц. надиктовка) → quiz; abort → home **без** награды (см. `review-claims.mdc`, `dictation.mdc`).
+- Home pick → intro-модалка «Как проходит ревью» → CTA → **claim** → `/review` (опц. надиктовка заметок) → quiz (опц. микрофон в поле совета); abort → home **без** награды (см. `review-claims.mdc`, `dictation.mdc`).
 - Submit URL → `setVariant("done")` на url-screen + `syncRoute("success")`; не прыгать на success-screen.
 - Mine / `isOwn` → `onOpenReport` → `/report` (листы + жалоба) только когда собраны все ревью; иначе модалка `homeMineNotReady*`.
 - Ban: любой route → `banned` (`flow.js`); см. `ban.mdc`.

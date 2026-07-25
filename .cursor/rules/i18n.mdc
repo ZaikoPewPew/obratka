@@ -32,7 +32,7 @@ alwaysApply: true
 | `modalCloseAria` | общая модалка (`app-modal`) |
 | `ban*` | `/banned` |
 | `reportScreen*` | `/report` |
-| `reviewRec*` / `reportDictationTitle` | чип rec на `/review` + секция надиктовки в листе |
+| `reviewRec*` / `reviewAdviceRec*` / `reportDictationTitle` | чип rec на `/review`, микрофон в поле совета, секция надиктовки в листе |
 
 ## Добавление ключа
 

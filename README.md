@@ -26,8 +26,8 @@ npm run dev
 | `/onboarding` | Вопросы профиля |
 | `/home` | Очередь (SWR + sort) / мои (report gate) + intro до claim + tabbar-dock (tabs + submit) |
 | `/portfolio` | Подача своего URL |
-| `/review` | Просмотр портфолио + таймер 45 s + надиктовка (rec) |
-| `/quiz` → `/quiz/done` | Квиз и финал |
+| `/review` | Просмотр портфолио + таймер 45 s + надиктовка заметок (rec) |
+| `/quiz` → `/quiz/done` | Квиз (микрофон в поле «Главный совет») и финал |
 | `/done` | Успех подачи (deep link / sync) |
 | `/report` | Листы автору (+ заметки с просмотра) + жалоба |
 
@@ -94,7 +94,7 @@ API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](
 | [`src/components/referral-screen/README.md`](src/components/referral-screen/README.md) | Invite gate + validate RPC |
 | [`src/components/home-screen/README.md`](src/components/home-screen/README.md) | Лента SWR, review intro, mine report gate, tabbar-dock + submit, баланс, репутация, invite |
 | [`src/components/report-screen/README.md`](src/components/report-screen/README.md) | Листы ревью + жалоба |
-| [`src/lib/dictation/README.md`](src/lib/dictation/README.md) | Надиктовка на `/review` (Web Speech → `answers.dictation`) |
+| [`src/lib/dictation/README.md`](src/lib/dictation/README.md) | Надиктовка: `/review` → `answers.dictation` + микрофон в поле совета |
 | [`supabase/README.md`](supabase/README.md) | SQL и Edge Functions |
 | [`supabase/BAN.md`](supabase/BAN.md) | Бан / автобан по репутации (Table/SQL + шаблоны) |
 | [`.cursor/README.md`](.cursor/README.md) | Карта для агента Cursor |
