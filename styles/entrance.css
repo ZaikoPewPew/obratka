@@ -63,10 +63,17 @@
   }
 }
 
-/** Shimmer для skeleton-заглушек (home и др.). */
+/**
+ * Shimmer-sweep: блик уезжает за край и появляется с другой стороны.
+ * Старт/финиш вне видимой области → infinite без рывка на стыке цикла.
+ */
 @keyframes motion-skeleton-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+
   to {
-    background-position: left;
+    transform: translateX(100%);
   }
 }
 

@@ -628,13 +628,21 @@
   --home-screen-count-radius: 0;
   --home-screen-count-bg: transparent;
   --home-screen-hint-size: var(--font-size-sm);
+  /* Skeleton card (Figma Type=Skeleton 473:1415): кости + один sweep по карточке */
   --home-screen-skeleton-base: var(--color-surface-muted-active);
-  --home-screen-skeleton-shine: var(--color-surface);
-  --home-screen-skeleton-duration: 1.4s;
+  --home-screen-skeleton-shine: color-mix(
+    in srgb,
+    var(--color-surface) 55%,
+    transparent
+  );
+  --home-screen-skeleton-duration: 1.6s;
+  --home-screen-skeleton-ease: linear;
   --home-screen-skeleton-meta-height: var(--home-screen-badge-size);
-  --home-screen-skeleton-line-height: var(--space-3);
-  --home-screen-skeleton-line-name-width: 42%;
-  --home-screen-skeleton-line-role-width: 58%;
+  --home-screen-skeleton-line-height: 20px;
+  --home-screen-skeleton-line-gap: var(--space-1);
+  --home-screen-skeleton-line-name-width: 119px;
+  --home-screen-skeleton-line-role-width: 206px;
+  --home-screen-skeleton-line-radius: var(--radius-pill);
   --home-screen-skeleton-badge-width: var(--home-screen-badge-size);
   --home-screen-skeleton-badge-height: var(--home-screen-badge-size);
   --home-screen-skeleton-card-height: calc(

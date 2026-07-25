@@ -763,8 +763,7 @@ export function createHomeScreen({
     card.className = "home-screen__card home-screen__card--skeleton";
 
     const preview = document.createElement("div");
-    preview.className =
-      "home-screen__preview home-screen__preview--loading home-screen__preview--skeleton";
+    preview.className = "home-screen__preview home-screen__preview--skeleton";
 
     const meta = document.createElement("div");
     meta.className = "home-screen__card-meta home-screen__card-meta--skeleton";
@@ -776,9 +775,11 @@ export function createHomeScreen({
     badges.className = "home-screen__skeleton-badges";
 
     const platformBone = document.createElement("div");
-    platformBone.className = "home-screen__skeleton-badge";
+    platformBone.className =
+      "home-screen__skeleton-badge home-screen__skeleton-badge--platform";
     const avatarBone = document.createElement("div");
-    avatarBone.className = "home-screen__skeleton-badge";
+    avatarBone.className =
+      "home-screen__skeleton-badge home-screen__skeleton-badge--avatar";
     badges.append(platformBone, avatarBone);
 
     const text = document.createElement("div");
