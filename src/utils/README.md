@@ -18,11 +18,13 @@
 | `embedHosts.js` | каталог хостов (см. `content/embed-hosts.md`) |
 | `portfolioEmbed.js` | Figma/YouTube embed / iframe / внешняя вкладка |
 | `meshGradientWash.js` | WebGL mesh (Paper Shaders); `transitionToCssColors` |
-| `reviewReport.js` | сводка квиза → тексты PDF |
+| `reviewReport.js` | сводка квиза → тексты PDF (+ опционально `dictation`) |
 | `shareReviewPdf.js` | печать PDF-отчёта (1 ревьюер = 1 страница; `onComplete`) |
 | `referralCode.js` | нормализация referral-кода / URL |
 
-Тесты: `*.test.js` рядом + `src/app/routes.test.js` (`npm test`).
+Тесты: `*.test.js` рядом (в т.ч. `reviewReport.dictation.test.js`) + `src/app/routes.test.js` (`npm test`).
+
+Движок надиктовки (не utils): [`src/lib/dictation/README.md`](../lib/dictation/README.md).
 
 ## Ошибки полей brand-экранов
 

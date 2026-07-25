@@ -6,6 +6,7 @@ import { buildReportSections } from "./reviewReport.js";
  *   answers: import("./reviewReport.js").ReviewAnswers;
  *   reviewerName?: string;
  *   sheetLabel?: string;
+ *   seed?: string;
  * }} ReviewPdfPage
  */
 
@@ -160,7 +161,7 @@ function buildReportDocumentHtml({ title, portfolioName, pages, t }) {
   const theme = readReportTheme();
   const pagesHtml = pages
     .map((page, index) => {
-      const sections = buildReportSections(page.answers, t);
+      const sections = buildReportSections(page.answers, t, { seed: page.seed });
       const sectionHtml = sections
         .map(
           (section) => `

@@ -20,7 +20,7 @@
 | `/onboarding` | шаги, валидация, запись в `profiles` |
 | `/home` | лента, баланс, CTA; аватар → модалка «скопировать код / ссылку» |
 | `/portfolio` | ввод URL, нехватка баланса, done |
-| `/review` | iframe / external, таймер, выход |
+| `/review` | iframe / external, таймер 45 s, чип rec (надиктовка), выход |
 | `/quiz` → done | шаги, PDF reveal |
 | Язык | `?lang=en`, кнопка RU↔EN, aria/title |
 | Тема | `data-theme="dark"`, контраст контролов |

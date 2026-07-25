@@ -22,7 +22,7 @@ referral → auth → authCode → onboarding → home
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |
 | 4 | `home-screen` | `/home` | Хаб: очередь + баланс + CTA |
 | 4a | `settings-screen` | `/settings` | Настройки аккаунта (пока заглушка) |
-| 5a | iframe-shell | `/review` | Ревью выбранного портфолио (после claim слота) |
+| 5a | iframe-shell | `/review` | Ревью: iframe + таймер **45 s** + чип **rec** (надиктовка → `answers.dictation`) |
 | 5b | `url-screen` | `/portfolio` | Подача своего URL (нужен баланс) |
 | 6 | `review-screen` + `review-panel` | `/quiz` → `/quiz/done` | Квиз; финал слева + улет отчёта |
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
@@ -86,7 +86,8 @@ Handoff соседних brand-экранов: `handoff: true` (`brandScreenTran
 `url-screen` — split; при URL справа заглушка «Портфолио»; submit → done на том же экране (`setVariant("done")`).  
 `success-screen` — запасной `/done` (deep link); основной submit больше не прыгает сюда.  
 `review-screen` — split для квиза (слева panel, справа visual + PDF-лист).  
-`ban-screen` — статичный красный mesh + `banBrandMarkSvg` (не `setVariant`).
+`ban-screen` — статичный красный mesh + `banBrandMarkSvg` (не `setVariant`).  
+На `/review` в шапке — опциональная надиктовка (`.iframe-shell__rec`); см. [`src/lib/dictation/README.md`](src/lib/dictation/README.md).
 
 ## Дерево файлов
 
@@ -119,6 +120,11 @@ src/utils/
   FIELD_ERROR.md          ← fieldError + urlScreenField
   fieldError.js / urlScreenField.js
   brandScreenTransition.js / meshGradientWash.js / motionTokens.js
+  reviewReport.js         ← answers → секции PDF (+ dictation)
+
+src/lib/
+  supabaseClient.js
+  dictation/              ← DictationEngine (Web Speech MVP; закладка Whisper)
 
 src/assets/brand/
   brandMarks.js           ← SVG + morph (evil без resize / done)
@@ -164,7 +170,7 @@ Shared (не экраны флоу):
 | `createHomeScreen` | `/home` | UI (hub + feed + invite modal) |
 | `createSettingsScreen` | `/settings` | UI (заглушка настроек) |
 | `createUrlScreen` | `/portfolio` | UI (submit + done via `setVariant`; shell) |
-| iframe-shell + timer | `/review` | UI |
+| iframe-shell + timer + rec | `/review` | UI (диктовка → `answers.dictation`) |
 | `createReviewScreen` + `createReviewPanel` | `/quiz` | UI |
 | `createSuccessScreen` | `/done` | UI (portfolio submitted) |
 | `createReportScreen` | `/report` | UI (листы + жалоба на лист) |
@@ -186,7 +192,7 @@ App modal: `--app-modal-*` + `styles/app-modal.css` ([`app-modal/README.md`](src
 
 ## i18n
 
-Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*` / `homeReputation*`, `modalCloseAria`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `report*`).
+Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*` / `homeReputation*`, `modalCloseAria`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `reviewRec*` / `report*` / `reportDictationTitle`, `frame*` / `controls*`).
 Правило: `.cursor/rules/i18n.mdc`.
 
 ## App-слой
@@ -207,12 +213,14 @@ App modal: `--app-modal-*` + `styles/app-modal.css` ([`app-modal/README.md`](src
 1. Вынести CSS в `brand-screen.css` (классы пока `.url-screen*`).
 2. Manual identity linking (`linkIdentity`) + UNIQUE `profiles.email` + Telegram↔email — вне текущего скоупа.
 3. Редизайн жалоб / списка листов на `report-screen` (PDF уже есть).
+4. Диктовка план B (Whisper Edge) — контракт готов, MVP = Web Speech.
 
 ## Связанные документы
 
 - [`STRUCTURE.md`](STRUCTURE.md)
 - [`PROJECT.md`](PROJECT.md)
 - [`src/app/README.md`](src/app/README.md)
+- [`src/lib/dictation/README.md`](src/lib/dictation/README.md) — надиктовка на `/review`
 - [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) — правый visual + variants
 - [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) — split-каркас
 - [`src/components/app-modal/README.md`](src/components/app-modal/README.md) — универсальная модалка

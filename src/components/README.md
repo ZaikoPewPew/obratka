@@ -32,8 +32,9 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 
 | Модуль | Path | Роль |
 |--------|------|------|
-| iframe-shell (`index.html` + `main.js`) | `/review` | Просмотр портфолио + таймер |
+| iframe-shell (`index.html` + `main.js`) | `/review` | Просмотр + таймер 45 s + чип **rec** (надиктовка) |
 | `review-screen/` | `/quiz` | Оболочка квиза + PDF reveal |
 | `review-panel/` | `/quiz` → `/quiz/done` | Шаги опроса + локальный done |
 
+Движок диктовки: [`../lib/dictation/README.md`](../lib/dictation/README.md).  
 См. [`PROJECT.md`](../../PROJECT.md) — Entrypoint.

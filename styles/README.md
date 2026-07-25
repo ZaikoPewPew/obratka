@@ -4,11 +4,13 @@
 - `base.css` — сброс / база.
 - `entrance.css` — `@keyframes motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` (без filter — для прозрачных хедеров).
 - `app-modal.css` — универсальная модалка (`createAppModal`, `--app-modal-*`).
-- `iframe-shell.css` — оболочка `/review`, `.url-screen*` (в т.ч. `__error*`, `__input-wrap--invalid`), `.auth-screen*` / `.auth-code-screen*` (в т.ч. `__cells--invalid`), `.review-screen*` / `.review-panel*`.
+- `iframe-shell.css` — оболочка `/review` (таймер, **`.iframe-shell__rec`**), `.url-screen*` (в т.ч. `__error*`, `__input-wrap--invalid`), `.auth-screen*` / `.auth-code-screen*` (в т.ч. `__cells--invalid`), `.review-screen*` / `.review-panel*`.
 - `brand-screen.css` — **заготовка** выноса общих split-стилей из iframe-shell.
 - `home-screen.css` — главная `/home` (absolute topbar + лента карточек).
 - `success-screen.css` — `/done` (пресеты успеха).
 - `ban-screen.css` — `/banned` (блок аккаунта, красный mesh).
+- `report-screen.css` — `/report` (листы + жалоба).
+- `account-menu.css` / `settings-screen.css` — меню профиля / settings.
 
 ## Что подключено из `index.html`
 
@@ -34,6 +36,7 @@
 | `--auth-screen-*` | divider / providers / OTP hint / links |
 | `--auth-code-*` | ячейки OTP / caret / `--auth-code-resend-cooldown` |
 | `--shell-review-*` | квиз / report / done |
+| `--control-rec-*` / `--color-recording` | чип надиктовки в шапке `/review` |
 | `--home-screen-*` | topbar / feed / avatar / locked-modal |
 | `--app-modal-*` | универсальная модалка (Figma Modal) |
 

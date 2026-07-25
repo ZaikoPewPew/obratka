@@ -10,6 +10,7 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 - Одна жалоба на лист (`review_complaints`, RPC `submit_review_complaint`) → штраф репутации ревьюера на сервере
 - Справа: дефолт mesh + мокап листа; **Скачать PDF** можно много раз (лист снова выезжает → улетает → done)
 - В строке листа — EN Title Case должность ревьюера (`formatPortfolioRole`: Senior Product Designer / Product Design Lead / Head Of Design)
+- Секции листа из `answers` (шкалы + `advice` + опционально **`dictation`** / «Заметки с просмотра»)
 - PDF: все ревьюеры, **1 дизайнер = 1 страница** (`shareReviewPdf`)
 - CTA: серая «На главную» + тёмная «Скачать PDF»
 
@@ -22,7 +23,8 @@ reportScreen.open({ portfolioId: item.id, portfolioName: item.name });
 ```
 
 Клиент: [`src/api/reviewComplaints.js`](../../api/reviewComplaints.js) — `listPortfolioReviewSheets` (с `answers`) / `submitReviewComplaint`.  
-PDF: [`src/utils/shareReviewPdf.js`](../../utils/shareReviewPdf.js).
+PDF / секции: [`src/utils/reviewReport.js`](../../utils/reviewReport.js), [`src/utils/shareReviewPdf.js`](../../utils/shareReviewPdf.js).  
+Надиктовка: [`src/lib/dictation/README.md`](../../lib/dictation/README.md).
 
 ## Стили
 

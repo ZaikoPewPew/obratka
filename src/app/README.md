@@ -27,7 +27,7 @@
 | `home` | `/home` | Главная (хаб + меню профиля) |
 | `settings` | `/settings` | Отдельный экран настроек (пока заглушка) |
 | `url` | `/portfolio` | Подача своего портфолио |
-| `review` | `/review` | Ревью: iframe + таймер |
+| `review` | `/review` | Ревью: iframe + таймер 45 s + чип rec (надиктовка) |
 | `quiz` | `/quiz` | Квиз / опрос после таймера |
 | `done` | `/quiz/done` | Финал квиза (review-panel done + улет отчёта) |
 | `success` | `/done` | Успех подачи портфолио (success-screen) |
@@ -51,6 +51,7 @@ referral → auth → (authCode) → onboarding → home
 
 Auth-защита и Dashboard: [`auth-screen/README.md`](../components/auth-screen/README.md).  
 Brand visual / field errors: [`brand-screen-visual`](../components/brand-screen-visual/README.md), [`FIELD_ERROR.md`](../utils/FIELD_ERROR.md).  
+Надиктовка на `/review`: [`lib/dictation/README.md`](../lib/dictation/README.md).  
 См. корневой [`SCREENS.md`](../../SCREENS.md).
 
 ## Правило

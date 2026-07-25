@@ -97,6 +97,8 @@
   /* Цвета: статусы */
   --color-error: var(--palette-red);
   --color-error-surface: var(--palette-red-soft);
+  /* Индикатор записи (Figma rec / Google red) */
+  --color-recording: var(--palette-google-red);
   --color-success: var(--palette-green);
   --color-logo-hover: var(--palette-brand-hot);
 
@@ -243,6 +245,21 @@
   --control-icon-btn-size: 32px;
   --control-icon-btn-padding: 7px;
   --control-icon-size: 18px;
+  /* Figma rec 470:1374 — рядом с reload в шапке /review */
+  --control-rec-width: 90px;
+  --control-rec-height: 32px;
+  --control-rec-radius: var(--radius-xs);
+  --control-rec-padding-x: 7px;
+  --control-rec-gap: 4px;
+  --control-rec-mic-size: 18px;
+  --control-rec-wave-width: 46px;
+  --control-rec-wave-height: 18px;
+  --control-rec-wave-gap: 2px;
+  --control-rec-bar-width: 2px;
+  --control-rec-bar-radius: 5px;
+  --control-rec-wave-color: color-mix(in srgb, var(--color-text) 25%, transparent);
+  --control-rec-dot-size: 4px;
+  --control-rec-level: 0;
   --control-mobile-name-max-width: 160px;
   --frame-border-color: var(--color-border);
   --frame-bg: var(--color-surface-muted);

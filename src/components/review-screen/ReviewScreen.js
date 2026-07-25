@@ -122,7 +122,7 @@ export function createReviewScreen({ content }) {
     reportBody.replaceChildren();
     if (!answers) return;
 
-    const sections = buildReportSections(answers, strings);
+    const sections = buildReportSections(answers, strings, { mode: "preview" });
     for (const section of sections) {
       const block = document.createElement("section");
       block.className = "review-screen__report-section";

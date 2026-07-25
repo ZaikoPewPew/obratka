@@ -11,6 +11,7 @@ import "@fontsource/montserrat/cyrillic-ext-600.css";
 import {
   applyDocumentI18n,
   formatString,
+  getLocale,
   getStrings,
 } from "./i18n.js";
 import {
@@ -32,6 +33,7 @@ import {
   refreshSessionFromProfile,
   spendSubmitCost,
 } from "./api/wallet.js";
+import { createDictationEngine, isWebSpeechSupported } from "./lib/dictation/createDictationEngine.js";
 import { createReviewPanel } from "./components/review-panel/ReviewPanel.js";
 import { createReviewScreen } from "./components/review-screen/ReviewScreen.js";
 import { createAuthScreen } from "./components/auth-screen/AuthScreen.js";
@@ -51,11 +53,13 @@ import { resolvePortfolioMeta } from "./utils/portfolioMeta.js";
 import { getMotionFocusDelayMs } from "./utils/motionTokens.js";
 import brandLogoUrl from "./assets/brand/logo.svg";
 
-const SESSION_SECONDS = 10;
+const SESSION_SECONDS = 45;
 const SESSION_TOTAL_MS = SESSION_SECONDS * 1000;
 const TIMER_TICK_MS = 10;
 /** Продление claim TTL, пока пользователь на review/quiz. */
 const CLAIM_HEARTBEAT_MS = 2 * 60 * 1000;
+/** Потолок длины надиктовки в answers.dictation. */
+const DICTATION_MAX_LEN = 4000;
 
 const frameWrap = document.querySelector("[data-frame]");
 const frame = document.querySelector("#portfolio-frame");
@@ -68,6 +72,7 @@ const nameEl = document.querySelector("[data-portfolio-name]");
 const frameReloadBtn = document.querySelector('[data-action="reload-frame"]');
 const frameBackBtn = document.querySelector('[data-action="frame-back"]');
 const frameForwardBtn = document.querySelector('[data-action="frame-forward"]');
+const dictationBtn = document.querySelector('[data-action="toggle-dictation"]');
 
 /** @type {string | null} */
 let portfolioUrl = null;
@@ -85,6 +90,12 @@ let claimHeartbeatId = null;
 let embedPlan = null;
 /** @type {string} */
 let portfolioName = getStrings().brandName;
+
+/** Надиктовка с /review → answers.dictation */
+let dictationText = "";
+let dictationRecording = false;
+/** @type {ReturnType<typeof createDictationEngine>} */
+let dictationEngine = null;
 
 /** @type {string | null} */
 let pendingReportPortfolioId = null;
@@ -143,10 +154,15 @@ const reviewPanel = createReviewPanel({
     setReviewReportReveal(active, payload);
   },
   onComplete: (answers) => {
+    const dictation = dictationText.trim().slice(0, DICTATION_MAX_LEN);
+    const payload =
+      answers && dictation
+        ? { ...answers, dictation }
+        : answers;
     reviewSubmitPromise = (async () => {
       try {
         if (portfolioId) {
-          await submitPortfolioReview(portfolioId, answers ?? null);
+          await submitPortfolioReview(portfolioId, payload ?? null);
           reviewSubmitted = true;
           claimHeld = false;
           stopClaimHeartbeat();
@@ -232,6 +248,7 @@ async function exitAuthenticatedSession() {
   }
   stopTimer();
   await releaseHeldClaim();
+  resetDictationSession();
   portfolioUrl = null;
   portfolioId = null;
   claimHeld = false;
@@ -303,6 +320,7 @@ async function releaseHeldClaim() {
  * Claim к этому моменту уже released или снят триггером после submit.
  */
 function clearReviewSessionState() {
+  resetDictationSession();
   stopTimer();
   sessionEnded = false;
   sessionStarted = false;
@@ -315,6 +333,113 @@ function clearReviewSessionState() {
   claimHeld = false;
   embedPlan = null;
   portfolioName = getStrings().brandName;
+}
+
+/**
+ * @returns {string}
+ */
+function speechLangForLocale() {
+  return getLocale() === "en" ? "en-US" : "ru-RU";
+}
+
+function setDictationLevel(level) {
+  dictationBtn?.style.setProperty(
+    "--control-rec-level",
+    String(Math.max(0, Math.min(1, level))),
+  );
+}
+
+function syncDictationButtonChrome() {
+  if (!dictationBtn) return;
+  const t = getStrings();
+  const onLiveReview =
+    activeRouteId === "review" && !sessionEnded && Boolean(claimHeld);
+  if (!isWebSpeechSupported() || !onLiveReview) {
+    dictationBtn.hidden = true;
+    if (!isWebSpeechSupported()) {
+      dictationBtn.title = t.reviewRecUnsupportedTitle;
+    }
+    return;
+  }
+  dictationBtn.hidden = false;
+  dictationBtn.classList.toggle(
+    "iframe-shell__rec--recording",
+    dictationRecording,
+  );
+  dictationBtn.setAttribute(
+    "aria-pressed",
+    dictationRecording ? "true" : "false",
+  );
+  dictationBtn.setAttribute(
+    "aria-label",
+    dictationRecording ? t.reviewRecStopAria : t.reviewRecStartAria,
+  );
+  dictationBtn.title = dictationRecording
+    ? t.reviewRecStopTitle
+    : t.reviewRecStartTitle;
+}
+
+/**
+ * @returns {NonNullable<ReturnType<typeof createDictationEngine>> | null}
+ */
+function ensureDictationEngine() {
+  if (dictationEngine) return dictationEngine;
+  dictationEngine = createDictationEngine({ lang: speechLangForLocale() });
+  if (!dictationEngine) return null;
+  dictationEngine.onTranscript((finalText, interim) => {
+    const combined = [finalText, interim].filter(Boolean).join(" ").trim();
+    dictationText = combined.slice(0, DICTATION_MAX_LEN);
+  });
+  dictationEngine.onLevel(setDictationLevel);
+  dictationEngine.onError((code) => {
+    dictationRecording = false;
+    setDictationLevel(0);
+    syncDictationButtonChrome();
+    if (import.meta.env.DEV) {
+      console.warn("[dictation]", code);
+    }
+  });
+  return dictationEngine;
+}
+
+async function stopDictation() {
+  if (dictationEngine) {
+    await dictationEngine.stop();
+  }
+  dictationRecording = false;
+  setDictationLevel(0);
+  syncDictationButtonChrome();
+}
+
+async function startDictation() {
+  const engine = ensureDictationEngine();
+  if (!engine) {
+    syncDictationButtonChrome();
+    return;
+  }
+  const ok = await engine.start();
+  dictationRecording = Boolean(ok);
+  if (!ok) setDictationLevel(0);
+  syncDictationButtonChrome();
+}
+
+async function toggleDictation() {
+  if (activeRouteId !== "review" || sessionEnded) return;
+  if (dictationRecording) {
+    await stopDictation();
+    return;
+  }
+  await startDictation();
+}
+
+function resetDictationSession() {
+  void stopDictation();
+  dictationEngine?.destroy();
+  dictationEngine = null;
+  dictationText = "";
+  dictationRecording = false;
+  setDictationLevel(0);
+  syncDictationButtonChrome();
 }
 
 function formatTime(totalMs) {
@@ -343,6 +468,8 @@ function syncLocaleDependentAttrs() {
       host: embedPlan.hostLabel,
     });
   }
+
+  syncDictationButtonChrome();
 }
 
 function openPortfolioExternally() {
@@ -471,6 +598,8 @@ function openReview() {
     return;
   }
 
+  void stopDictation();
+
   void homeScreen.close();
   void settingsScreen.close();
   void urlScreen.close();
@@ -504,6 +633,7 @@ function lockFrameAndShowReview() {
   if (!frameWrap || !frame || sessionEnded) return;
   if (activeRouteId !== "review" || !claimHeld || reviewSubmitted) return;
   sessionEnded = true;
+  syncDictationButtonChrome();
   openReview();
 }
 
@@ -945,6 +1075,7 @@ async function applyRoute(id, opts = {}) {
   }
 
   activeRouteId = id;
+  syncDictationButtonChrome();
   const closeOpts = handoff ? { handoff: true } : {};
   const openOpts = handoff ? { handoff: true } : {};
 
@@ -1138,15 +1269,21 @@ frameForwardBtn?.addEventListener("click", () => {
   navigateFrame((win) => win?.history.forward());
 });
 
+dictationBtn?.addEventListener("click", () => {
+  void toggleDictation();
+});
+
 applyDocumentI18n();
 showBrandChrome();
 renderTimer();
+syncDictationButtonChrome();
 if (shell) {
   shell.hidden = true;
   shell.classList.remove("iframe-shell--entered");
 }
 
 window.addEventListener("pagehide", () => {
+  void stopDictation();
   if (reviewSubmitPromise) {
     /* submit ещё идёт — не трогаем claim; триггер снимет после insert */
     stopClaimHeartbeat();

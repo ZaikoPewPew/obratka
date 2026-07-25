@@ -1,6 +1,6 @@
 # Обратка — продукт и архитектура
 
-Взаимное ревью портфолио: пользователь регистрируется, проходит онбординг, смотрит чужие работы (таймер + квиз) и/или подаёт свой URL в общую очередь.
+Взаимное ревью портфолио: пользователь регистрируется, проходит онбординг, смотрит чужие работы (таймер + опциональная надиктовка + квиз) и/или подаёт свой URL в общую очередь.
 
 **Стек:** Vite + vanilla JS, Supabase Auth / Postgres / Edge Function, i18n из `content/locales.json`, дизайн-токены в `styles/tokens.css`.
 
@@ -14,9 +14,9 @@
 | Auth: Email OTP, Telegram, Google | wired → `auth.users` + `profiles` |
 | Онбординг → `profiles` | wired |
 | Home: очередь по лигам `portfolios` / `reviews`, баланс, репутация | wired |
-| Review iframe + таймер + квиз | wired |
+| Review iframe + таймер + **надиктовка** (rec) + квиз | wired |
 | Подача URL + done на url-screen | wired |
-| Report: листы + жалоба → репутация / автобан | wired |
+| Report: листы (+ `dictation`) + жалоба → репутация / автобан | wired |
 | Referrals validate/redeem | wired (1 код / 2 слота, seed `YTHWKPDWAK`, без наград) |
 | Legacy waitlist UI | код есть, **не смонтирован** из `main.js` / `index.html` |
 
@@ -110,11 +110,11 @@ SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabas
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
 | Home | `home-screen` + `account-menu` (лента и меню профиля, не split) |
-| Review | `index.html` `.iframe-shell` + таймер в `main.js` |
+| Review | `index.html` `.iframe-shell` + таймер + чип **rec** (диктовка) в `main.js` |
 | Quiz | `review-screen` + `review-panel` |
 | Success | `success-screen` (`/done`) |
 | Ban | `ban-screen` — статичный красный mesh + `banBrandMarkSvg` |
-| Report | `report-screen` — листы ревью + жалоба |
+| Report | `report-screen` — листы ревью (+ секция надиктовки) + жалоба |
 | Home | чип баланса + чип репутации (explainer) |
 
 Handoff соседних brand-экранов: `go(id, { handoff: true })` — правый visual без повторной анимации.
@@ -137,9 +137,9 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 **Сейчас подключено** (`index.html` + `main.js`):
 
 - CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `success-screen`, `home-screen`, `account-menu`, `settings-screen`, `ban-screen`, `report-screen`
-- Экраны: referral, auth, auth-code, onboarding, home, url, review-shell, review/quiz, success, report, ban
+- Экраны: referral, auth, auth-code, onboarding, home, url, review-shell (+ rec dictation), review/quiz, success, report, ban
 - Shared UI: `brand-screen-visual`, `brand-screen-shell` (referral / auth / auth-code / onboarding / url), `app-modal`, `account-menu`
-
+- Dictation: `src/lib/dictation/` (Web Speech MVP)
 Архив waitlist (`apply-card`, `email-field`, dual-layout CSS) удалён. Спека: раздел «Архив» в [`mobile.md`](mobile.md).
 
 ## Env (кратко)
@@ -157,6 +157,7 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
    Email↔Google закрывается **Automatic linking** в Supabase Auth (verified email = один user); см. [`auth-screen/README.md`](src/components/auth-screen/README.md).
 3. Троттлинг злоупотреблений жалобой / тег `misleading` / очередь модерации.
 4. Редизайн жалоб / списка листов на `report-screen` (PDF-сводка уже есть).
+5. Диктовка план B: Whisper через Edge (контракт `DictationEngine` уже есть; MVP = Web Speech) — [`src/lib/dictation/README.md`](src/lib/dictation/README.md).
 
 ## Команды
 

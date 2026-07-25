@@ -1,0 +1,43 @@
+---
+description: Голосовая надиктовка на /review — Web Speech MVP, answers.dictation, закладка под Whisper
+alwaysApply: true
+---
+
+# Голосовая надиктовка (dictation)
+
+На `/review` ревьюер может **надиктовать заметки** (чип rec в шапке). Текст → `answers.dictation` → секция листа. Квиз и `advice` **не** заменяет.
+
+## MVP (A)
+
+- Движок: Web Speech API + AnalyserNode для волны.
+- Контракт: `DictationEngine` в `src/lib/dictation/` (`createDictationEngine` → Web Speech).
+- UI: `.iframe-shell__rec` после reload (Figma `rec` 470:1374).
+- Таймер просмотра: **45 s** (`SESSION_SECONDS` в `main.js`); claim TTL по-прежнему 20 min.
+- Аудио **не** upload / **не** Storage.
+- Без поддержки SpeechRecognition — кнопка скрыта.
+
+## Данные
+
+- `answers.dictation?: string` в jsonb `reviews.answers` (миграция SQL не нужна).
+- Cap длины на клиенте (`DICTATION_MAX_LEN`).
+- `parseReviewAnswers` / `buildReportSections` → `reportDictationTitle` после advice.
+- Submit: `main.js` мержит `dictation` в payload `submitPortfolioReview`.
+
+## Жёсткие правила
+
+1. Mutations / оркестрация start-stop — в `main.js`; не плодить прямой STT в panel.
+2. Стоп при конце таймера, уходе с review workspace, `pagehide`, logout.
+3. Новая review-сессия → полный reset текста и engine.
+4. UI-строки только `reviewRec*` / `reportDictationTitle` (i18n).
+5. Стили только токены `--control-rec-*`, `--color-recording`.
+6. Секреты Whisper / STT cloud — **не** в клиент; только когда будет Edge (план B).
+
+## План B (позже)
+
+Та же фабрика `createDictationEngine` → MediaRecorder + Edge + Whisper. UI и поле `dictation` не ломать.
+
+## Код
+
+- Engine: `src/lib/dictation/` ([README](../../src/lib/dictation/README.md))
+- Shell UI: `index.html`, `styles/iframe-shell.css`
+- Отчёт: `src/utils/reviewReport.js`, `report-screen`

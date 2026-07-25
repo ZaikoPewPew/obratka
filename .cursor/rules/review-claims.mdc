@@ -15,6 +15,7 @@ alwaysApply: true
 4. Награда только после успешного `submitPortfolioReview` → `awardReviewReward()` (`REVIEW_REWARD`).
 5. Не открывать quiz без `claimHeld` (анти ghost-quiz).
 6. Mutations claims — только security definer RPC, не прямой INSERT/UPDATE с клиента.
+7. Опциональная надиктовка на `/review` (чип rec) не меняет claim-правила; стоп STT при abort/pagehide — см. `dictation.mdc`.
 
 ## Слоты на карточке
 

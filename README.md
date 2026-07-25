@@ -26,9 +26,10 @@ npm run dev
 | `/onboarding` | Вопросы профиля |
 | `/home` | Очередь + баланс; аватар → свой реферальный код |
 | `/portfolio` | Подача своего URL |
-| `/review` | Просмотр портфолио + таймер |
+| `/review` | Просмотр портфолио + таймер 45 s + надиктовка (rec) |
 | `/quiz` → `/quiz/done` | Квиз и финал |
 | `/done` | Успех подачи (deep link / sync) |
+| `/report` | Листы автору (+ заметки с просмотра) + жалоба |
 
 ### Переменные окружения
 
@@ -57,7 +58,7 @@ npm run dev
 | `npm run dev` | Разработка (Vite HMR) |
 | `npm run build` | `dist/` + `404.html` (SPA-fallback для Pages) |
 | `npm run preview` | Просмотр production-сборки |
-| `npm test` | Юнит-тесты (embed, meta, routes, referral code) |
+| `npm test` | Юнит-тесты (embed, meta, routes, referral, reviewReport/dictation) |
 
 ## Auth
 
@@ -93,6 +94,7 @@ API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](
 | [`src/components/referral-screen/README.md`](src/components/referral-screen/README.md) | Invite gate + validate RPC |
 | [`src/components/home-screen/README.md`](src/components/home-screen/README.md) | Лента, баланс, репутация, шаринг реферального кода |
 | [`src/components/report-screen/README.md`](src/components/report-screen/README.md) | Листы ревью + жалоба |
+| [`src/lib/dictation/README.md`](src/lib/dictation/README.md) | Надиктовка на `/review` (Web Speech → `answers.dictation`) |
 | [`supabase/README.md`](supabase/README.md) | SQL и Edge Functions |
 | [`supabase/BAN.md`](supabase/BAN.md) | Бан / автобан по репутации (Table/SQL + шаблоны) |
 | [`.cursor/README.md`](.cursor/README.md) | Карта для агента Cursor |

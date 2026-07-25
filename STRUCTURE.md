@@ -49,7 +49,7 @@
 
 | Папка | Роль |
 |-------|------|
-| `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `lib/`, `assets/` |
+| `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `lib/` (supabase + **dictation**), `assets/` |
 | `styles/` | Токены + UI. Entry: tokens/base/entrance/app-modal/iframe-shell/home/success/ban/report |
 | `content/` | `locales.json`, onboarding, embed-hosts, privacy, founder-avatars |
 | `public/` | Статика по URL (favicon и т.п.) |
@@ -77,11 +77,12 @@
 ```
 
 `/referral` — invite-only gate (`validate_referral`); после входа у юзера свой код (лимит 2), шаринг с home.  
-`/review` = просмотр портфолио + таймер.  
+`/review` = просмотр портфолио + таймер **45 s** + опциональная надиктовка (чип rec → `answers.dictation`).  
 `/quiz` = опрос. Не путать с login-`session.js` (`obratka.session`).  
-`/report` = листы ревью автора + жалоба → `reputation`.  
+`/report` = листы ревью автора (+ секция надиктовки) + жалоба → `reputation`.  
 `/banned` = бан (в т.ч. автобан по репутации).
 
+Диктовка: [`src/lib/dictation/README.md`](src/lib/dictation/README.md).
 ## Auth (кратко)
 
 | Провайдер | Модуль |

@@ -19,7 +19,7 @@
 | `url*` / `urlModal*` / `urlScreen*` | `/portfolio` |
 | `success*` | `/done` |
 | `ban*` | `/banned` |
-| `review*` / `report*` | `/quiz`, `/quiz/done`, PDF |
+| `review*` / `reviewRec*` / `report*` / `reportDictationTitle` | `/quiz`, PDF; rec на `/review` |
 | `frame*` / `controls*` | iframe-shell `/review` |
 
 ### Auth-защита (ключи)

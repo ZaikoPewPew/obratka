@@ -5,10 +5,11 @@
 
 ## Верхний уровень
 
-- `main.js` — точка входа: Google OAuth return, роутер (`go` / `applyRoute`), монтаж экранов, iframe-таймер, квиз; email/Telegram завершаются через `AuthScreen` → `applyProviderUser`.
+- `main.js` — точка входа: Google OAuth return, роутер (`go` / `applyRoute`), монтаж экранов, iframe-таймер, **надиктовка** (rec), квиз; email/Telegram завершаются через `AuthScreen` → `applyProviderUser`.
 - `i18n.js` — локали из `content/locales.json` (+ privacy / founder-avatars).
 - `config.js` — константы.
 - `lib/supabaseClient.js` — клиент Supabase (URL + anon).
+- `lib/dictation/` — `DictationEngine` (Web Speech MVP) — [`lib/dictation/README.md`](lib/dictation/README.md).
 
 ## Подпапки
 
@@ -19,4 +20,4 @@
 | `utils/` | field errors, motion, handoff, mesh, portfolio, PDF — см. [`utils/README.md`](utils/README.md) |
 | `api/` | Auth, profiles, wallet, portfolios, referrals, reviewComplaints |
 | `assets/` | brand marks / morph — [`assets/README.md`](assets/README.md) |
-| `lib/` | supabase client |
+| `lib/` | supabase client + **dictation** |

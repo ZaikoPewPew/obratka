@@ -26,10 +26,10 @@ Path: **`/quiz`**, финал **`/quiz/done`**. Split: слева слот по�
 На шаге advice лист выезжает (`getReportLaunchMotion`); после submit — уезд + `.review-screen--done` (`getReviewMeshDoneMotion`). Марка: in-place morph `morphBrandMarkToDone` (нимб + fade короны), без `innerHTML`-swap. Слева одновременно входит `review-panel__done`.
 
 Токены `--shell-review-*`, `--motion-report-launch-*`. Классы в `iframe-shell.css`.  
-PDF-тексты: `src/utils/reviewReport.js` (`buildReportSections`).
+PDF-тексты: `src/utils/reviewReport.js` (`buildReportSections` — в т.ч. `dictation` → `reportDictationTitle`).
 
 ## i18n
 
-`reviewPanelAria`, `reportDocumentTitle`, `brandName`, плюс ключи секций отчёта (`report*`).
+`reviewPanelAria`, `reportDocumentTitle`, `brandName`, плюс ключи секций отчёта (`report*`, `reportDictationTitle`).
 
-См. [`review-panel/README.md`](../review-panel/README.md), [`SCREENS.md`](../../../SCREENS.md).
+См. [`review-panel/README.md`](../review-panel/README.md), [`lib/dictation/README.md`](../../lib/dictation/README.md), [`SCREENS.md`](../../../SCREENS.md).

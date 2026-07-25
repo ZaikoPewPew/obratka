@@ -24,7 +24,8 @@ alwaysApply: true
 
 ## Оболочка и экраны
 
-- `--control-*`, `--shell-*`, `--frame-*`, `--recall-*`. Аватар / «Заметки»: `--radius-xs`.
+- `--control-*` (в т.ч. `--control-rec-*` для чипа надиктовки), `--shell-*`, `--frame-*`, `--recall-*`. Аватар / «Заметки»: `--radius-xs`.
+- Recording indicator: `--color-recording` (алиас на `--palette-google-red`).
 - Ban: `--shell-ban-mesh-*`, `--ban-screen-*`.
 - Home tabbar: `--home-screen-tabbar-*` (hide / thumb / on-dark / contrast).
 - Auth OTP: `--auth-code-resend-cooldown`.

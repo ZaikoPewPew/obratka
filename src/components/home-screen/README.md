@@ -38,7 +38,7 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 ### Лента и карточки
 
 При `open` / смене таба: skeleton только у ленты (5 целых карточек-шиммеров), хедер без изменений; затем данные с `motion-reveal` stagger.  
-Клик по чужой карточке → `claimPortfolioReview` → `onOpenPortfolio` → `/review`.  
+Клик по чужой карточке → `claimPortfolioReview` → `onOpenPortfolio` → `/review` (таймер + опц. надиктовка).  
 Своя (`isOwn`, вкладка «Мои») → `onOpenReport` → `/report` (листы + жалоба).
 CTA «Закинуть своё» — всегда активна (чёрная). Баланс ≥ `SUBMIT_COST` → `onAddPortfolio` → `/portfolio`; иначе `createAppModal` «не хватает монет».
 

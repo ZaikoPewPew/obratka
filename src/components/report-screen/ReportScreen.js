@@ -315,8 +315,9 @@ export function createReportScreen(opts = {}) {
   /**
    * @param {import("../../utils/reviewReport.js").ReviewAnswers | null | undefined} answers
    * @param {string} [subtitle]
+   * @param {string} [seed] Стабильный seed (review_id) для разнообразия между листами.
    */
-  function fillReportSheet(answers, subtitle) {
+  function fillReportSheet(answers, subtitle, seed) {
     const strings = getStrings();
     reportEyebrow.textContent = strings.brandName;
     reportTitle.textContent = strings.reportDocumentTitle;
@@ -326,7 +327,7 @@ export function createReportScreen(opts = {}) {
     reportBody.replaceChildren();
     if (!answers) return;
 
-    const sections = buildReportSections(answers, strings);
+    const sections = buildReportSections(answers, strings, { seed });
     for (const section of sections) {
       const block = document.createElement("section");
       block.className = "report-screen__report-section";
@@ -455,6 +456,7 @@ export function createReportScreen(opts = {}) {
     fillReportSheet(
       firstWithAnswers.answers,
       [gradeLabel, name].filter(Boolean).join(" · "),
+      firstWithAnswers.id,
     );
     root.classList.add("report-screen--report");
   }
@@ -784,6 +786,7 @@ export function createReportScreen(opts = {}) {
           answers: sheet.answers,
           reviewerName,
           sheetLabel: sheetGradeLabel(sheet, index),
+          seed: sheet.id,
         };
       })
       .filter(Boolean);
