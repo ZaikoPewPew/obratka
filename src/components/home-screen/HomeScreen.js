@@ -30,6 +30,7 @@ import {
   hasUnseenMineReady,
   markMineReadySeen,
 } from "../../utils/mineReadySeen.js";
+import { isReportOpened } from "../../utils/reportOpenedIds.js";
 import {
   getCachedHomeList,
   setCachedHomeList,
@@ -37,6 +38,7 @@ import {
 import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import { createAppModal } from "../app-modal/AppModal.js";
 import { createAccountMenu } from "../account-menu/AccountMenu.js";
+import { createTabsPanel } from "../tabs-panel/TabsPanel.js";
 import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
 import { REVIEW_SESSION_SECONDS } from "../../config/review.js";
 import boneIconUrl from "../../assets/home/bone.svg";
@@ -80,6 +82,10 @@ const TABBAR_HIDE_DELTA = 6;
 
 /**
  * @typedef {'feed' | 'mine'} HomeTabId
+ */
+
+/**
+ * @typedef {'active' | 'archived'} MineFilterId
  */
 
 /**
@@ -255,6 +261,20 @@ function readyOwnCardIds(list) {
 }
 
 /**
+ * Архив: все ревью собраны и автор хотя бы раз открывал `/report`.
+ *
+ * @param {HomePortfolioItem} item
+ * @param {string | null | undefined} userId
+ * @returns {boolean}
+ */
+function isArchivedOwnItem(item, userId) {
+  const total = Math.max(1, Number(item?.targetReviews) || 1);
+  const completed = Math.max(0, Number(item?.reviewsCount) || 0);
+  if (completed < total) return false;
+  return isReportOpened(userId, item?.id);
+}
+
+/**
  * Главная: шапка + лента карточек портфолио (Figma home).
  *
  * @param {{
@@ -406,6 +426,18 @@ export function createHomeScreen({
   const feed = document.createElement("div");
   feed.className = "home-screen__feed";
 
+  const mineFilterPanel = createTabsPanel({
+    tabs: [
+      { id: "active", label: "" },
+      { id: "archived", label: "" },
+    ],
+    activeId: "active",
+    onChange: (id) => {
+      setMineFilter(/** @type {MineFilterId} */ (id));
+    },
+  });
+  mineFilterPanel.root.hidden = true;
+
   const list = document.createElement("ul");
   list.className = "home-screen__list";
 
@@ -413,7 +445,7 @@ export function createHomeScreen({
   empty.className = "home-screen__empty";
   empty.hidden = true;
 
-  feed.append(list, empty);
+  feed.append(mineFilterPanel.root, list, empty);
   /* Рейтинг (`createRatingPanel`) пока не монтируем — см. src/components/rating/. */
   cluster.append(feed);
   body.append(cluster);
@@ -538,6 +570,8 @@ export function createHomeScreen({
   let wasSkeletonLoading = false;
   /** @type {HomeTabId} */
   let activeTab = "feed";
+  /** @type {MineFilterId} */
+  let mineFilter = "active";
   /**
    * Инкремент при каждом refresh / смене вкладки — отбрасываем устаревшие
    * ответы (полл или предыдущий таб), иначе на секунду мелькает чужой список.
@@ -628,12 +662,24 @@ export function createHomeScreen({
           ? t.homeListMineAria
           : t.homeListAria,
     );
-    empty.textContent =
-      activeTab === "mine" ? t.homeEmptyMine : t.homeEmpty;
+    if (activeTab === "mine") {
+      empty.textContent =
+        mineFilter === "archived"
+          ? (t.homeEmptyMineArchived ?? t.homeEmptyMine)
+          : (t.homeEmptyMineActive ?? t.homeEmptyMine);
+    } else {
+      empty.textContent = t.homeEmpty;
+    }
     feedTab.textContent = t.homeTabFeed;
     mineTabLabel.textContent = t.homeTabMine;
     syncMineTabAria();
     tabbar.setAttribute("aria-label", t.homeTabsAria);
+    mineFilterPanel.setLabels({
+      active: t.homeMineFilterActive ?? "",
+      archived: t.homeMineFilterArchived ?? "",
+    });
+    mineFilterPanel.setAriaLabel(t.homeMineFilterAria ?? "");
+    syncMineFilterPanel();
     addBtn.setAttribute("aria-label", t.homeAddPortfolio);
     addBtn.title = t.homeAddPortfolio;
 
@@ -961,6 +1007,39 @@ export function createHomeScreen({
     syncMineTabAria();
   }
 
+  function syncMineFilterPanel() {
+    mineFilterPanel.root.hidden = activeTab !== "mine";
+  }
+
+  /**
+   * @param {MineFilterId} next
+   */
+  function setMineFilter(next) {
+    if (mineFilter === next) return;
+    mineFilter = next;
+    mineFilterPanel.setActive(next);
+    body.scrollTop = 0;
+    lastScrollTop = 0;
+    syncCopy();
+    renderList();
+  }
+
+  /**
+   * На `mine` режет список по Активные/Архивные; на `feed` — как есть.
+   *
+   * @param {HomePortfolioItem[]} listItems
+   * @returns {HomePortfolioItem[]}
+   */
+  function visibleFor(listItems) {
+    const source = Array.isArray(listItems) ? listItems : [];
+    if (activeTab !== "mine") return source;
+    const userId = getSession()?.userId;
+    return source.filter((item) => {
+      const archived = isArchivedOwnItem(item, userId);
+      return mineFilter === "archived" ? archived : !archived;
+    });
+  }
+
   /**
    * @param {HomeTabId} tab
    */
@@ -1008,6 +1087,7 @@ export function createHomeScreen({
     activeTab = tab;
     refreshEpoch += 1;
     syncTabButtons(tab);
+    syncMineFilterPanel();
     showTabbar();
     body.scrollTop = 0;
     lastScrollTop = 0;
@@ -1280,15 +1360,16 @@ export function createHomeScreen({
   function renderList(opts = {}) {
     const revealNewOnly = opts.revealNewOnly === true;
     const prevIds = opts.prevIds instanceof Set ? opts.prevIds : null;
+    const visible = visibleFor(items);
     list.replaceChildren();
-    empty.hidden = items.length > 0;
+    empty.hidden = visible.length > 0;
     const t = getStrings();
     list.setAttribute(
       "aria-label",
       activeTab === "mine" ? t.homeListMineAria : t.homeListAria,
     );
 
-    for (const [index, item] of items.entries()) {
+    for (const [index, item] of visible.entries()) {
       const li = createCard(item);
       const isNew =
         revealNewOnly && prevIds != null && item.id && !prevIds.has(item.id);
@@ -1311,11 +1392,12 @@ export function createHomeScreen({
    * @param {HomePortfolioItem[]} nextItems
    */
   function patchListSlots(nextItems) {
+    const visible = visibleFor(nextItems);
     const children = [...list.children];
-    for (let i = 0; i < nextItems.length; i += 1) {
+    for (let i = 0; i < visible.length; i += 1) {
       const li = children[i];
       if (!(li instanceof HTMLElement)) continue;
-      const item = nextItems[i];
+      const item = visible[i];
       const slots = li.querySelector(".home-screen__reviewer-slots");
       if (slots instanceof HTMLElement) {
         fillReviewerSlots(slots, item);
@@ -1326,7 +1408,7 @@ export function createHomeScreen({
         syncOwnCardCopy(ownCard, item);
       }
     }
-    empty.hidden = nextItems.length > 0;
+    empty.hidden = visible.length > 0;
     scheduleTabbarContrastSync();
   }
 
@@ -1385,20 +1467,22 @@ export function createHomeScreen({
   function setItems(next, opts = {}) {
     const nextItems = Array.isArray(next) ? next : [];
     const silent = opts.silent === true;
+    const prevVisible = visibleFor(items);
+    const nextVisible = visibleFor(nextItems);
     if (
       silent &&
       !loading &&
       !list.querySelector(".home-screen__item--skeleton") &&
-      canPatchListSlots(items, nextItems)
+      canPatchListSlots(prevVisible, nextVisible)
     ) {
       items = nextItems;
       patchListSlots(nextItems);
       return;
     }
-    const prevIds = new Set(items.map((item) => item.id).filter(Boolean));
+    const prevIds = new Set(prevVisible.map((item) => item.id).filter(Boolean));
     const hadRenderedItems =
       silent &&
-      items.length > 0 &&
+      prevVisible.length > 0 &&
       !list.querySelector(".home-screen__item--skeleton");
     items = nextItems;
     renderList({
@@ -1448,6 +1532,7 @@ export function createHomeScreen({
     root.hidden = false;
     root.classList.remove("home-screen--open");
     syncTabButtons(activeTab);
+    syncMineFilterPanel();
     showTabbar();
     lastScrollTop = 0;
     body.scrollTop = 0;
@@ -1488,6 +1573,9 @@ export function createHomeScreen({
     loading = false;
     revealItems = false;
     wasSkeletonLoading = false;
+    mineFilter = "active";
+    mineFilterPanel.setActive("active");
+    syncMineFilterPanel();
     showTabbar();
     closeSubmitLockedModal();
     closeReviewIntroModal();

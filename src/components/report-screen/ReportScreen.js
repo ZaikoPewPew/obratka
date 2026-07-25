@@ -13,6 +13,7 @@ import {
 } from "../../utils/motionTokens.js";
 import { buildReportSections } from "../../utils/reviewReport.js";
 import { shareReviewPdf } from "../../utils/shareReviewPdf.js";
+import { DEFAULT_TARGET_REVIEWS } from "../../api/portfolios.js";
 import {
   REVIEW_COMPLAINT_TAGS,
   formatReviewerTitle,
@@ -22,6 +23,9 @@ import {
 
 const BRAND_MARK_CLASS = "report-screen__brand-mark";
 const BRAND_MARK_SVG = brandMarkSvg(BRAND_MARK_CLASS);
+
+/** Сколько skeleton-строк показывать, пока грузятся листы. */
+const SKELETON_SHEET_COUNT = DEFAULT_TARGET_REVIEWS;
 
 const DOWNLOAD_ICON_SVG = `<svg class="report-screen__btn-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <path d="M7 19L5.78311 18.9954C3.12231 18.8818 1 16.6888 1 14C1 11.3501 3.06139 9.18169 5.66806 9.01084C6.78942 6.64027 9.20316 5 12 5C15.5268 5 18.4445 7.60822 18.9293 11.001L19 11C21.2091 11 23 12.7909 23 15C23 17.1422 21.316 18.8911 19.1996 18.9951L17 19M12 10V18M9 15L12 18L15 15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
@@ -77,6 +81,7 @@ export function createReportScreen(opts = {}) {
   /** @type {Set<string>} */
   let selectedTags = new Set();
   let submitting = false;
+  let loading = false;
   let loadToken = 0;
   /** @type {Animation | null} */
   let reportLaunchAnim = null;
@@ -104,10 +109,6 @@ export function createReportScreen(opts = {}) {
   sheetsList.className = "report-screen__sheets";
   sheetsList.hidden = true;
 
-  const sheetsEmpty = document.createElement("p");
-  sheetsEmpty.className = "report-screen__sheets-empty";
-  sheetsEmpty.hidden = true;
-
   const actions = document.createElement("div");
   actions.className = "report-screen__actions";
 
@@ -128,7 +129,7 @@ export function createReportScreen(opts = {}) {
   downloadBtn.append(downloadLabel);
 
   actions.append(homeBtn, downloadBtn);
-  card.append(title, sheetsList, sheetsEmpty, actions);
+  card.append(title, sheetsList, actions);
   panel.append(card);
 
   const visual = document.createElement("div");
@@ -505,7 +506,6 @@ export function createReportScreen(opts = {}) {
       "aria-label",
       t.reportScreenDownloadPdfAria ?? t.reportScreenDownloadPdf ?? "",
     );
-    sheetsEmpty.textContent = t.reportSheetsEmpty ?? "";
     modalTitle.textContent = t.reportComplaintModalTitle ?? "";
     modalBody.textContent = t.reportComplaintModalBody ?? "";
     modalSubmit.textContent = t.reportComplaintSubmit ?? "";
@@ -655,16 +655,58 @@ export function createReportScreen(opts = {}) {
     return li;
   }
 
+  /**
+   * @returns {HTMLLIElement}
+   */
+  function buildSheetSkeleton() {
+    const li = document.createElement("li");
+    li.className = "report-screen__sheet report-screen__sheet--skeleton";
+    li.setAttribute("aria-hidden", "true");
+
+    const meta = document.createElement("div");
+    meta.className = "report-screen__sheet-meta";
+
+    const avatar = document.createElement("div");
+    avatar.className =
+      "report-screen__sheet-avatar report-screen__sheet-avatar--skeleton";
+
+    const textCol = document.createElement("div");
+    textCol.className = "report-screen__sheet-text";
+
+    const nameBone = document.createElement("div");
+    nameBone.className = "report-screen__sheet-bone report-screen__sheet-bone--name";
+
+    const labelBone = document.createElement("div");
+    labelBone.className =
+      "report-screen__sheet-bone report-screen__sheet-bone--label";
+
+    textCol.append(nameBone, labelBone);
+    meta.append(avatar, textCol);
+
+    const actionBone = document.createElement("div");
+    actionBone.className =
+      "report-screen__sheet-bone report-screen__sheet-bone--action";
+
+    li.append(meta, actionBone);
+    return li;
+  }
+
   function renderSheets() {
     sheetsList.replaceChildren();
+    if (loading) {
+      sheetsList.hidden = false;
+      for (let i = 0; i < SKELETON_SHEET_COUNT; i += 1) {
+        sheetsList.append(buildSheetSkeleton());
+      }
+      syncDownloadButton();
+      return;
+    }
     if (sheets.length === 0) {
       sheetsList.hidden = true;
-      sheetsEmpty.hidden = false;
       syncDownloadButton();
       showReportMockup();
       return;
     }
-    sheetsEmpty.hidden = true;
     sheetsList.hidden = false;
     sheets.forEach((sheet, index) => {
       sheetsList.append(buildSheetRow(sheet, index));
@@ -692,6 +734,7 @@ export function createReportScreen(opts = {}) {
         ? openOpts.portfolioName.trim()
         : "";
     sheets = [];
+    loading = Boolean(portfolioId);
     applyCopy();
     renderSheets();
     root.hidden = false;
@@ -707,16 +750,18 @@ export function createReportScreen(opts = {}) {
 
     const token = ++loadToken;
     if (!portfolioId) {
-      sheetsEmpty.hidden = false;
       syncDownloadButton();
       return;
     }
 
-    void listPortfolioReviewSheets(portfolioId).then((rows) => {
-      if (token !== loadToken) return;
-      sheets = rows;
-      renderSheets();
-    });
+    void listPortfolioReviewSheets(portfolioId)
+      .catch(() => [])
+      .then((rows) => {
+        if (token !== loadToken) return;
+        loading = false;
+        sheets = rows;
+        renderSheets();
+      });
   }
 
   /**
@@ -729,6 +774,7 @@ export function createReportScreen(opts = {}) {
 
     closeComplaintModal();
     loadToken += 1;
+    loading = false;
     cancelReportLaunch();
 
     if (!root.classList.contains("report-screen--open")) {

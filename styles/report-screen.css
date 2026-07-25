@@ -110,17 +110,8 @@
   text-align: left;
 }
 
-.report-screen__sheets[hidden],
-.report-screen__sheets-empty[hidden] {
+.report-screen__sheets[hidden] {
   display: none !important;
-}
-
-.report-screen__sheets-empty {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-family: var(--font-family);
-  font-size: var(--report-screen-body-size);
-  line-height: normal;
 }
 
 .report-screen__sheet {
@@ -189,6 +180,60 @@
   color: var(--color-text-muted);
   font-size: var(--report-screen-sheet-label-size);
   font-weight: var(--font-weight-regular);
+}
+
+/* Skeleton листа: кости + один shimmer-sweep по строке */
+.report-screen__sheet--skeleton {
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.report-screen__sheet--skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--report-screen-skeleton-shine) 50%,
+    transparent 100%
+  );
+  animation-name: motion-skeleton-shimmer;
+  animation-duration: var(--report-screen-skeleton-duration);
+  animation-timing-function: var(--report-screen-skeleton-ease);
+  animation-iteration-count: infinite;
+}
+
+.report-screen__sheet-avatar--skeleton {
+  background: var(--report-screen-skeleton-base);
+}
+
+.report-screen__sheet-bone {
+  border-radius: var(--report-screen-skeleton-line-radius);
+  background-color: var(--report-screen-skeleton-base);
+}
+
+.report-screen__sheet-bone--name {
+  width: var(--report-screen-skeleton-line-name-width);
+  max-width: 100%;
+  height: var(--report-screen-skeleton-line-name-height);
+}
+
+.report-screen__sheet-bone--label {
+  width: var(--report-screen-skeleton-line-label-width);
+  max-width: 100%;
+  height: var(--report-screen-skeleton-line-label-height);
+}
+
+.report-screen__sheet-bone--action {
+  flex: 0 0 auto;
+  width: var(--report-screen-skeleton-action-width);
+  max-width: 100%;
+  height: var(--report-screen-complain-height);
+  border-radius: var(--report-screen-complain-radius);
 }
 
 .report-screen__complain {
@@ -454,8 +499,7 @@
 }
 
 .report-screen__btn--download:disabled {
-  cursor: default;
-  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .report-screen__visual {
@@ -655,6 +699,11 @@
 
   .report-screen__report {
     transition: none;
+  }
+
+  .report-screen__sheet--skeleton::after {
+    content: none;
+    animation: none;
   }
 
   .report-screen__brand-slot,

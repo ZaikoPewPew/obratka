@@ -11,7 +11,7 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 | Вкладка | API | Содержимое |
 |---------|-----|------------|
 | **На ревью** (`feed`, default) | `listPortfoliosForReview()` | Чужие `pending` **в лиге** грейда ревьюера (RLS), без своих; карточка до `target_reviews` completed-отчётов; уже отревьюенные этим юзером помечены `reviewedByMe` (клик → notice) |
-| **Мои посты** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …); точка на вкладке при **непросмотренном** готовом отчёте (`listReadyOwnReportIds` + `mineReadySeen` при активной ленте) |
+| **Мои посты** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …); сверху сегмент **Активные / Архивные** ([`tabs-panel`](../tabs-panel/README.md)); точка на вкладке при **непросмотренном** готовом отчёте (`listReadyOwnReportIds` + `mineReadySeen` при активной ленте) |
 
 Переключатель: `home-screen__tabbar` внутри дока `home-screen__tabbar-dock` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`). Вкладки: **На ревью** / **Мои посты**. Справа от таббара в доке (gap 8px, `--home-screen-tabbar-dock-gap`) — кнопка «Закинуть своё» (56×56, r16, Google blue, плюс 24; токены `--home-screen-tabbar-submit-*`).
 
@@ -19,6 +19,17 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 - Скролл **вверх** (любой delta &lt; 0) / у верхнего края → снова виден сразу.
 - Hide — с небольшим порогом (`TABBAR_HIDE_DELTA`), чтобы трекпад не дёргал.
 - Анимация hide/show: `--home-screen-tabbar-hide-duration` / `--home-screen-tabbar-hide-ease` → `--motion-screen-*`.
+
+### Фильтр «Активные / Архивные» (только `mine`)
+
+Над списком — [`createTabsPanel`](../tabs-panel/README.md) (Figma `476:1762`). Виден только на вкладке «Мои»; на `feed` скрыт. Переключение **без** refetch / skeleton — режет уже загруженный `items`.
+
+| Сегмент | Критерий |
+|---------|----------|
+| **Активные** (`active`, default) | всё, что не архив: ещё собираются ревью **или** 3/3, но автор ещё не открывал `/report` |
+| **Архивные** (`archived`) | `reviewsCount >= targetReviews` **и** id в `obratka.reportOpened.<userId>` (`reportOpenedIds.js`) |
+
+Пометка «открывали»: `markReportOpened` в `main.js` при входе на `/report` (клик из home и deep link). Logout → `clearReportOpened`. Empty: `homeEmptyMineActive` / `homeEmptyMineArchived`. Фильтр сбрасывается в `active` на `close()`.
 
 ### Индикатор на «Мои посты»
 
@@ -122,7 +133,7 @@ Topbar поверх контента (`position: absolute`), появление 
 
 | Элемент | Источник |
 |---------|----------|
-| Превью | thum.io (`width/1200/crop/620`); в фрейме `object-fit: contain` + `object-position: top`; до load — skeleton (`--loading`), при error — `--empty` |
+| Превью | thum.io (`width/1200/crop/620/wait/3`); в фрейме `object-fit: contain` + `object-position: top`; до load — skeleton (`--loading`), при error — `--empty` |
 | Иконка площадки | Simple Icons; иначе литера **W** |
 | Аватар | `item.avatarUrl` или буква из `item.name` |
 | ФИО | `item.name` |
@@ -155,7 +166,7 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 `createHomeScreen({ onOpenPortfolio, onOpenReport?, onAddPortfolio?, onOpenSettings?, onSignOut? })` → `{ root, open, close, setItems, refresh, showNotice }`.
 
-Внутреннее: `activeTab` `feed` \| `mine`; `refresh` читает соответствующий list API; кэш вкладок — [`homeListCache.js`](../../utils/homeListCache.js).
+Внутреннее: `activeTab` `feed` \| `mine`; `mineFilter` `active` \| `archived`; `refresh` читает соответствующий list API; кэш вкладок — [`homeListCache.js`](../../utils/homeListCache.js).
 
 ## Стили / i18n / a11y
 
@@ -163,7 +174,7 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 Токены intro-модалки: `--home-screen-review-intro-indent` / `--home-screen-review-intro-step-gap`.
 
-Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeTabFeed`, `homeTabMine`, `homeTabsAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeTabMineReadyAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`.
+Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeEmptyMineActive`, `homeEmptyMineArchived`, `homeTabFeed`, `homeTabMine`, `homeTabsAria`, `homeMineFilterActive`, `homeMineFilterArchived`, `homeMineFilterAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeTabMineReadyAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`.
 
 `homeCardOwnTitle` / `homeCardOwnAria` в locales — legacy (в UI не используются; own-копирайт = `homeCardReport*` / `Pending*`).
 

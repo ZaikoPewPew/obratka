@@ -24,6 +24,7 @@
 | `backdropLuminance.js` | яркость фона под элементом (home tabbar → `--on-dark`) |
 | `homeListCache.js` | SWR-кэш ленты home (`feed`/`mine`, memory + `sessionStorage` `obratka.homeLists.<userId>`); `clearHomeListCache` на logout |
 | `mineReadySeen.js` | seen id готовых отчётов для точки на «Мои» (`localStorage` `obratka.mineReadySeen.<userId>`); визит вкладки гасит; `clearMineReadySeen` на logout |
+| `reportOpenedIds.js` | id отчётов, которые автор открывал на `/report` (`localStorage` `obratka.reportOpened.<userId>`); архив «Мои»; `clearReportOpened` на logout |
 
 Тесты: `*.test.js` рядом (в т.ч. `reviewReport.dictation.test.js`) + `src/app/routes.test.js` (`npm test`).
 

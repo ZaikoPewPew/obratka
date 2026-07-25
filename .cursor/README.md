@@ -64,7 +64,7 @@
 
 Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `account-menu`, `settings-screen`, `success-screen`, `ban-screen`, `report-screen`.
 
-**Home (новое):** SWR `homeListCache` (memory + `obratka.homeLists.<userId>`); silent slot patch; feed sort `sortFeedForSlotClosure`; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); точка на «Мои» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) 20%/blur + `--on-dark` через `backdropLuminance`. Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache` + `clearMineReadySeen`.  
+**Home (новое):** SWR `homeListCache` (memory + `obratka.homeLists.<userId>`); silent slot patch; feed sort `sortFeedForSlotClosure`; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); фильтр Активные/Архивные (`tabs-panel` + `reportOpenedIds`); точка на «Мои» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) 20%/blur + `--on-dark` через `backdropLuminance`. Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache` + `clearMineReadySeen` + `clearReportOpened`.  
 **Url-screen:** чип `.url-screen__back` (`urlScreenBack*`) → home; на done скрыт.  
 Подробно: [`home-screen/README.md`](../src/components/home-screen/README.md), [`url-screen/README.md`](../src/components/url-screen/README.md).
 
