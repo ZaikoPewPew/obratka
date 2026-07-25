@@ -14,7 +14,7 @@
 | `referral*` | `/referral` (validate errors: `referralExhausted`, …) |
 | `auth*` / `authEmail*` / `authCode*` / `authOtp*` / `authIdentityConflict` | `/registration`, `/registration/code` |
 | `onboarding*` | `/onboarding` |
-| `home*` / `homeInvite*` | `/home` (карточки, баланс, модалка реферального кода) |
+| `home*` / `homeInvite*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeCardReport*` / `homeCardReportPending*` | `/home` (лента SWR, intro до claim, mine gate, invite) |
 | `modalCloseAria` | общая модалка (`app-modal`) |
 | `url*` / `urlModal*` / `urlScreen*` | `/portfolio` |
 | `success*` | `/done` |

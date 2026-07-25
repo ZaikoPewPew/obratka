@@ -24,7 +24,7 @@ npm run dev
 | `/registration` | Email → code / Telegram / Google |
 | `/registration/code` | Код из письма (6 ячеек) |
 | `/onboarding` | Вопросы профиля |
-| `/home` | Очередь + мои (SWR), баланс/репутация; аватар → меню / invite |
+| `/home` | Очередь (SWR + sort) / мои (report gate) + intro до claim + glass-tabbar |
 | `/portfolio` | Подача своего URL |
 | `/review` | Просмотр портфолио + таймер 45 s + надиктовка (rec) |
 | `/quiz` → `/quiz/done` | Квиз и финал |
@@ -92,7 +92,7 @@ API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](
 | [`src/components/auth-screen/README.md`](src/components/auth-screen/README.md) | Dashboard Auth + identity linking |
 | [`src/components/auth-code-screen/README.md`](src/components/auth-code-screen/README.md) | OTP UI + resend cooldown |
 | [`src/components/referral-screen/README.md`](src/components/referral-screen/README.md) | Invite gate + validate RPC |
-| [`src/components/home-screen/README.md`](src/components/home-screen/README.md) | Лента SWR, glass-tabbar, баланс, репутация, invite |
+| [`src/components/home-screen/README.md`](src/components/home-screen/README.md) | Лента SWR, review intro, mine report gate, glass-tabbar, баланс, репутация, invite |
 | [`src/components/report-screen/README.md`](src/components/report-screen/README.md) | Листы ревью + жалоба |
 | [`src/lib/dictation/README.md`](src/lib/dictation/README.md) | Надиктовка на `/review` (Web Speech → `answers.dictation`) |
 | [`supabase/README.md`](supabase/README.md) | SQL и Edge Functions |

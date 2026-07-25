@@ -49,7 +49,7 @@
 
 | Папка | Роль |
 |-------|------|
-| `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `lib/` (supabase + **dictation**), `assets/` |
+| `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `config/` (review session + contacts), `lib/` (supabase + **dictation**), `assets/` |
 | `styles/` | Токены + UI. Entry: tokens/base/entrance/app-modal/iframe-shell/home/success/ban/report |
 | `content/` | `locales.json`, onboarding, embed-hosts, privacy, founder-avatars |
 | `public/` | Статика по URL (favicon и т.п.) |
@@ -72,18 +72,19 @@
 
 ```text
 /referral → /registration → /onboarding → /home
-  → /portfolio | /review → /quiz → /quiz/done
-  → /report (Мои) | /done | /banned
+  → pick → intro → claim → /review → /quiz → /quiz/done
+  → mine → gate → /report | /portfolio → /done | /banned
 ```
 
 `/referral` — invite-only gate (`validate_referral`); после входа у юзера свой код (лимит 2), шаринг с home.  
-`/home` — лента/мои с SWR-кэшем (`homeListCache`); glass-tabbar с контрастом над превью.  
-`/review` = просмотр портфолио + таймер **45 s** + опциональная надиктовка (чип rec → `answers.dictation`).  
+`/home` — лента/мои с SWR-кэшем (`homeListCache`); intro до claim; mine report gate; glass-tabbar с контрастом над превью.  
+`/review` = просмотр портфолио + таймер **45 s** (`REVIEW_SESSION_SECONDS` в `src/config/review.js`) + опциональная надиктовка (чип rec → `answers.dictation`).  
 `/quiz` = опрос. Не путать с login-`session.js` (`obratka.session`).  
-`/report` = листы ревью автора (+ секция надиктовки) + жалоба → `reputation`.  
+`/report` = листы ревью автора (+ секция надиктовки) + жалоба → `reputation` (вход только когда собраны все ревью).  
 `/banned` = бан (в т.ч. автобан по репутации).
 
 Клиентский кэш ленты: `sessionStorage` ключ `obratka.homeLists.<userId>` (сброс на logout).  
+Таймер просмотра: `REVIEW_SESSION_SECONDS` в `src/config/review.js` (не путать с claim TTL 20 min).  
 Диктовка: [`src/lib/dictation/README.md`](src/lib/dictation/README.md).
 ## Auth (кратко)
 

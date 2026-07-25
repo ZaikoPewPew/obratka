@@ -44,7 +44,7 @@ alwaysApply: true
 4. **Общие оверлеи** — `createAppModal` (`app-modal/`); слот `content` + CTA; без `history` / `go()`. Не путать с экраном флоу.
 5. **Handoff** соседних brand: `go(id, { handoff: true })` — правый visual без повторной анимации.
 6. **Ошибки полей** + `setVariant("invalid")` — `brand-ui.mdc` / `FIELD_ERROR.md`.
-7. **home-screen** — другой лейаут; вкладки Лента / Мои (`listPortfoliosForReview` / `listMyPortfolios`); SWR-кэш `homeListCache` (без skeleton на hit); glass-tabbar + `--on-dark`; лиги — `leagues.mdc`.
+7. **home-screen** — другой лейаут; вкладки Лента / Мои (`listPortfoliosForReview` / `listMyPortfolios`); SWR-кэш `homeListCache` (без skeleton на hit); glass-tabbar + `--on-dark`; intro до claim; mine report gate; own (`--own`) всегда pointer; `reviewedByMe` → notice без intro; лиги — `leagues.mdc`.
 8. **Монтаж** — из `main.js`, не из HTML-слотов. Waitlist dual-layout удалён (не восстанавливать без явной задачи). Logout чистит `clearHomeListCache`.
 
 ## Motion / docs

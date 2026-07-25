@@ -2,6 +2,8 @@
 
 Path: **`/report`** (`report`). Только для **автора** из вкладки «Мои».
 
+Вход с home «Мои» только после `reviewsCount >= targetReviews` (`onOpenReport`); иначе home показывает `homeMineNotReady*` и сюда не ведёт.
+
 ## Сейчас
 
 - Список завершённых листов ревью по `portfolioId`

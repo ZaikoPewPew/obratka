@@ -119,7 +119,9 @@ Topbar поверх контента (`position: absolute`), появление 
 
 Заполнение слотов слева направо; по умолчанию три плюса. Текста «N из 3» нет (есть в aria).
 
-`refresh()` при `open`, смене вкладки, `visibilitychange` и poll (~15с), пока home открыт — слоты и новые карточки подтягиваются без skeleton (поверх кэша). Своя карточка (`isOwn` только во вкладке «Мои») → клик открывает report.
+`refresh()` при `open`, смене вкладки, `visibilitychange` и poll (~15с), пока home открыт — слоты и новые карточки подтягиваются без skeleton (поверх кэша). Своя карточка (`isOwn`, «Мои») всегда кликабельна (`cursor: pointer`, класс `--own`): готово (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report`; иначе `homeMineNotReady*` (не «сразу report»). Title / aria — `homeCardReport*` / `homeCardReportPending*`, синк при silent-патче.
+
+Own-карточки: cursor наследуется от `.home-screen__card` (pointer); `not-allowed` только у `:disabled` — правило `.home-screen__card--own { cursor: not-allowed }` снято.
 
 ## Разметка таббара
 
@@ -133,7 +135,7 @@ Topbar поверх контента (`position: absolute`), появление 
 
 ## API модуля
 
-`createHomeScreen({ onOpenPortfolio, onAddPortfolio?, onOpenSettings?, onSignOut? })` → `{ root, open, close, setItems, refresh }`.
+`createHomeScreen({ onOpenPortfolio, onOpenReport?, onAddPortfolio?, onOpenSettings?, onSignOut? })` → `{ root, open, close, setItems, refresh, showNotice }`.
 
 Внутреннее: `activeTab` `feed` \| `mine`; `refresh` читает соответствующий list API; кэш вкладок — [`homeListCache.js`](../../utils/homeListCache.js).
 
@@ -143,7 +145,9 @@ Topbar поверх контента (`position: absolute`), появление 
 
 Токены intro-модалки: `--home-screen-review-intro-indent` / `--home-screen-review-intro-step-gap`.
 
-Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeTabFeed`, `homeTabMine`, `homeTabsAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeCardProgress`, `homeCardOwnTitle`, `homeCardOwnAria`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`.
+Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeTabFeed`, `homeTabMine`, `homeTabsAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`.
+
+`homeCardOwnTitle` / `homeCardOwnAria` в locales — legacy (в UI не используются; own-копирайт = `homeCardReport*` / `Pending*`).
 
 `prefers-reduced-motion: reduce` — hide/thumb/label transitions ≈ мгновенные.
 

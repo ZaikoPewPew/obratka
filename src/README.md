@@ -7,7 +7,9 @@
 
 - `main.js` — точка входа: Google OAuth return, роутер (`go` / `applyRoute`), монтаж экранов, iframe-таймер, **надиктовка** (rec), квиз; email/Telegram завершаются через `AuthScreen` → `applyProviderUser`.
 - `i18n.js` — локали из `content/locales.json` (+ privacy / founder-avatars).
-- `config.js` — константы.
+- `config.js` — legacy waitlist count (не продуктовый флоу).
+- `config/review.js` — `REVIEW_SESSION_SECONDS` (таймер `/review` + intro copy на home).
+- `config/contacts.js` — community Telegram URL.
 - `lib/supabaseClient.js` — клиент Supabase (URL + anon).
 - `lib/dictation/` — `DictationEngine` (Web Speech MVP) — [`lib/dictation/README.md`](lib/dictation/README.md).
 
@@ -17,6 +19,7 @@
 |-------|------|
 | `app/` | routes, router, flow, login-session (`obratka.session`) |
 | `components/` | UI-экраны; brand: `brand-screen-visual`, `brand-screen-shell` |
+| `config/` | review session + contacts |
 | `utils/` | field errors, motion, handoff, mesh, homeListCache, backdropLuminance, PDF — [`utils/README.md`](utils/README.md) |
 | `api/` | Auth, profiles, wallet, portfolios, referrals, reviewComplaints |
 | `assets/` | brand marks / morph — [`assets/README.md`](assets/README.md) |

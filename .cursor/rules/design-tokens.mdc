@@ -31,6 +31,7 @@ alwaysApply: true
   - Светлый фон: `--home-screen-tabbar-track-bg` = gray-900 **20%** + `--home-screen-tabbar-blur`; неактивный `--home-screen-tabbar-tab-color`.
   - Тёмный (`--on-dark`): `--home-screen-tabbar-track-bg-on-dark` = white **20%**; неактивный `--home-screen-tabbar-tab-color-on-dark`.
   - Сэмплинг: `src/utils/backdropLuminance.js` → класс `home-screen__tabbar--on-dark`.
+- Intro-модалка home: `--home-screen-review-intro-indent` / `--home-screen-review-intro-step-gap` (не хардкодить gap/indent в CSS).
 - Auth OTP: `--auth-code-resend-cooldown`.
 - Brand mark: `--url-screen-brand-*` vs `--url-screen-brand-done-*`; **invalid не меняет size**.
 - App modal: `--app-modal-*` (`styles/app-modal.css`, [`app-modal/README.md`](../../src/components/app-modal/README.md)).

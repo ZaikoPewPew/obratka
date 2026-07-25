@@ -20,7 +20,7 @@ referral → auth → authCode → onboarding → home
 | 2 | `auth-screen` | `/registration` | Email → OTP screen / Telegram / Google |
 | 2b | `auth-code-screen` | `/registration/code` | 6 ячеек кода из письма |
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |
-| 4 | `home-screen` | `/home` | Хаб: лента/мои (SWR-кэш) + баланс/репутация + glass-tabbar + CTA |
+| 4 | `home-screen` | `/home` | Хаб: лента/мои (SWR) + intro до claim + mine report gate + glass-tabbar |
 | 4a | `settings-screen` | `/settings` | Настройки аккаунта (пока заглушка) |
 | 5a | iframe-shell | `/review` | Ревью: iframe + таймер **45 s** + чип **rec** (надиктовка → `answers.dictation`) |
 | 5b | `url-screen` | `/portfolio` | Подача своего URL (нужен баланс) |
@@ -80,14 +80,14 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 
 Handoff соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
-`home-screen` — полноэкранный слой (absolute topbar поверх ленты); SWR `homeListCache`; tabbar glass + контраст (`backdropLuminance` → `--on-dark`).  
+`home-screen` — полноэкранный слой (absolute topbar поверх ленты); SWR `homeListCache`; intro до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*`); tabbar glass + контраст (`backdropLuminance` → `--on-dark`).  
 `account-menu` — поповер под аватаром; identity read-only; settings / invite / contacts / sign out.  
 `settings-screen` — side-route `/settings` (заглушка).
 `url-screen` — split; при URL справа заглушка «Портфолио»; submit → done на том же экране (`setVariant("done")`).  
 `success-screen` — запасной `/done` (deep link); основной submit больше не прыгает сюда.  
 `review-screen` — split для квиза (слева panel, справа visual + PDF-лист).  
 `ban-screen` — статичный красный mesh + `banBrandMarkSvg` (не `setVariant`).  
-На `/review` в шапке — опциональная надиктовка (`.iframe-shell__rec`); см. [`src/lib/dictation/README.md`](src/lib/dictation/README.md).
+На `/review` в шапке — опциональная надиктовка (`.iframe-shell__rec`); таймер `REVIEW_SESSION_SECONDS` из [`src/config/review.js`](src/config/review.js); см. [`src/lib/dictation/README.md`](src/lib/dictation/README.md).
 
 ## Дерево файлов
 
@@ -123,6 +123,10 @@ src/utils/
   backdropLuminance.js    ← яркость фона под tabbar → --on-dark
   homeListCache.js        ← SWR feed/mine (memory + sessionStorage)
   reviewReport.js         ← answers → секции PDF (+ dictation)
+
+src/config/
+  review.js               ← REVIEW_SESSION_SECONDS (таймер /review + intro)
+  contacts.js             ← community Telegram URL
 
 src/lib/
   supabaseClient.js
@@ -169,7 +173,7 @@ Shared (не экраны флоу):
 | `createAuthScreen` | `/registration` | UI + Email → authCode / Telegram / Google (shell) |
 | `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` (shell) |
 | `createOnboardingScreen` | `/onboarding` | UI → profiles (shell) |
-| `createHomeScreen` | `/home` | UI (hub + SWR feed/mine + glass tabbar + invite) |
+| `createHomeScreen` | `/home` | UI (hub + SWR + intro modal + mine report gate + `onOpenReport` + glass tabbar) |
 | `createSettingsScreen` | `/settings` | UI (заглушка настроек) |
 | `createUrlScreen` | `/portfolio` | UI (submit + done via `setVariant`; shell) |
 | iframe-shell + timer + rec | `/review` | UI (диктовка → `answers.dictation`) |
@@ -195,8 +199,10 @@ Home tabbar: `--home-screen-tabbar-*` (translucent track / on-dark / blur / cont
 
 ## i18n
 
-Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*` / `homeReputation*`, `modalCloseAria`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `reviewRec*` / `report*` / `reportDictationTitle`, `frame*` / `controls*`).
+Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*`, `homeReviewIntro*` / `homeMineNotReady*` / `homeCardReport*` / `homeCardReportPending*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*` / `homeReputation*`, `modalCloseAria`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `reviewRec*` / `report*` / `reportDictationTitle`, `frame*` / `controls*`).
 Правило: `.cursor/rules/i18n.mdc`.
+
+Таймер `/review` и intro copy: `REVIEW_SESSION_SECONDS` в [`src/config/review.js`](src/config/review.js).
 
 ## App-слой
 
@@ -223,7 +229,8 @@ Home tabbar: `--home-screen-tabbar-*` (translucent track / on-dark / blur / cont
 - [`STRUCTURE.md`](STRUCTURE.md)
 - [`PROJECT.md`](PROJECT.md)
 - [`src/app/README.md`](src/app/README.md)
-- [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — лента SWR, tabbar glass, репутация
+- [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — лента SWR, intro до claim, mine gate, tabbar glass, репутация
+- [`src/config/review.js`](src/config/review.js) — `REVIEW_SESSION_SECONDS`
 - [`src/utils/homeListCache.js`](src/utils/homeListCache.js) — кэш вкладок home
 - [`src/lib/dictation/README.md`](src/lib/dictation/README.md) — надиктовка на `/review`
 - [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) — правый visual + variants

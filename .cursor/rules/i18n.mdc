@@ -28,7 +28,7 @@ alwaysApply: true
 |---------|---------|
 | `referral*` | invite gate |
 | `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict` | регистрация / OTP |
-| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` | home + notices |
+| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeCardReport*` / `homeCardReportPending*` | home + notices / intro / mine gate |
 | `modalCloseAria` | общая модалка (`app-modal`) |
 | `ban*` | `/banned` |
 | `reportScreen*` | `/report` |

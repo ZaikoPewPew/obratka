@@ -45,13 +45,15 @@ Google OAuth return обрабатывается в `main.js` до роутин�
 ```text
 referral → auth → (authCode) → onboarding → home
   home → settings
-  home → review → quiz → /quiz/done
+  home → (intro modal) → claim → review → quiz → /quiz/done
+  home (Мои, все слоты) → report
+  home (Мои, не готово) → homeMineNotReady*
   home → url → /done (portfolioSubmitted)
 ```
 
 Auth-защита и Dashboard: [`auth-screen/README.md`](../components/auth-screen/README.md).  
 Brand visual / field errors: [`brand-screen-visual`](../components/brand-screen-visual/README.md), [`FIELD_ERROR.md`](../utils/FIELD_ERROR.md).  
-Home: [`home-screen/README.md`](../components/home-screen/README.md) (SWR `homeListCache`, tabbar contrast).  
+Home: [`home-screen/README.md`](../components/home-screen/README.md) (SWR `homeListCache`, intro до claim, mine report gate, tabbar contrast).  
 Надиктовка на `/review`: [`lib/dictation/README.md`](../lib/dictation/README.md).  
 См. корневой [`SCREENS.md`](../../SCREENS.md).
 

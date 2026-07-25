@@ -121,7 +121,9 @@ await modal.close();
 |----|---------------------|
 | Новый кейс с title + слот + 1–2 CTA | Inline notice без оверлея |
 | Общий каркас под разные тела | Ban / brand split-экраны |
-| | Legacy home locked / invite / report complaint — пока свои DOM; миграция по задаче |
+| Home: review intro (`homeReviewIntro*`), mine not-ready (`homeMineNotReady*` via notice), invite, submit-locked, reputation explainer, contacts | Complaint-модалка на `report-screen` (свой DOM, не app-modal) |
+
+Слот intro на home: `<ol class="home-screen__review-intro-steps">` + токены `--home-screen-review-intro-*`.
 
 ## Связанные доки
 

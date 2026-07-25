@@ -19,7 +19,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `auth-screen/` | `/registration` | Email → auth-code / Telegram / Google (shell) |
 | `auth-code-screen/` | `/registration/code` | OTP verify + resend cooldown (shell) |
 | `onboarding-screen/` | `/onboarding` | UI → `profiles` (shell) |
-| `home-screen/` | `/home` | хаб + SWR feed/mine + glass-tabbar + wallet + репутация + invite |
+| `home-screen/` | `/home` | хаб + SWR feed/mine + intro modal + mine report gate + glass-tabbar + wallet + репутация + invite |
 | `account-menu/` | — | поповер профиля (settings / invite / contacts / sign out) |
 | `settings-screen/` | `/settings` | заглушка настроек |
 | `url-screen/` | `/portfolio` | submit own + done (`setVariant("done")`; shell) |

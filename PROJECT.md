@@ -30,6 +30,9 @@
 - **SWR ленты:** `feed` / `mine` в memory + `sessionStorage` (`obratka.homeLists.<userId>`); open / смена таба / F5 без skeleton при hit; тихий `refresh`; logout → `clearHomeListCache`.
 - **Silent refresh:** при тех же id карточек — патч только reviewer-слотов (без thum.io); новые id — rebuild + reveal только для них.
 - **Порядок feed:** `sortFeedForSlotClosure` — open slot → ближе к 3/3 → FIFO; `reviewedByMe` / full вниз (не newest-first). См. home-screen README.
+- **Intro до claim:** клик по чужой карточке → `createAppModal` `homeReviewIntro*` (шаг 1 с `{seconds}` = `REVIEW_SESSION_SECONDS`) → CTA «Проревьюить» → claim → `/review`. «Не сейчас» / закрытие — без claim.
+- **Mine report gate:** `reviewsCount < targetReviews` → `homeMineNotReady*`; иначе `/report`. Own-карточки всегда `cursor: pointer` (не `not-allowed`).
+- **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 45` (review shell + intro copy).
 - **Tabbar glass:** светлый фон — gray-900 20% + blur 20, неактивный текст `--color-text`; тёмный превью → `--on-dark` — white 20%, неактивный `--home-screen-tabbar-tab-color-on-dark`.
 - Подробно: [`home-screen/README.md`](src/components/home-screen/README.md).
 
@@ -153,6 +156,7 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 - Экраны: referral, auth, auth-code, onboarding, home, settings, url, review-shell (+ rec), quiz, success, report, ban
 - Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `account-menu`
 - Home cache: `src/utils/homeListCache.js` (сброс в `exitAuthenticatedSession`)
+- Review timer: `src/config/review.js` (`REVIEW_SESSION_SECONDS`)
 - Dictation: `src/lib/dictation/` (Web Speech MVP)
 
 Waitlist dual-layout удалён; историческая спека — [`mobile.md`](mobile.md) § Архив.

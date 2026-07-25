@@ -38,6 +38,7 @@
 | `--shell-review-*` | квиз / report / done |
 | `--control-rec-*` / `--color-recording` | чип надиктовки в шапке `/review` |
 | `--home-screen-*` | topbar / feed / avatar / locked-modal |
+| `--home-screen-review-intro-*` | шаги intro-модалки (`indent` / `step-gap`) |
 | `--home-screen-tabbar-*` | glass track (20% / blur 20), `--on-dark`, hide/thumb/label/contrast |
 | `--app-modal-*` | универсальная модалка (Figma Modal) |
 
