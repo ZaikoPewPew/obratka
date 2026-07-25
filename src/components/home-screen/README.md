@@ -122,7 +122,7 @@ Topbar поверх контента (`position: absolute`), появление 
 
 | Элемент | Источник |
 |---------|----------|
-| Превью | thum.io; до load — skeleton (`--loading`), при error — `--empty` |
+| Превью | thum.io (`width/1200/crop/620`); в фрейме `object-fit: contain` + `object-position: top`; до load — skeleton (`--loading`), при error — `--empty` |
 | Иконка площадки | Simple Icons; иначе литера **W** |
 | Аватар | `item.avatarUrl` или буква из `item.name` |
 | ФИО | `item.name` |

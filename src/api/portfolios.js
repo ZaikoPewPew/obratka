@@ -115,11 +115,13 @@ export function formatPortfolioRole(grade, role) {
 
 /**
  * Превью-скриншот страницы (внешний сервис; fallback в UI при ошибке).
+ * width ≈ viewport (без даунскейла), crop ≈ AR фрейма карточки (~500×250).
+ * В UI — `object-fit: contain`, без дополнительной обрезки.
  * @param {string} url
  * @returns {string}
  */
 export function portfolioPreviewUrl(url) {
-  return `https://image.thum.io/get/maxAge/24/width/1000/crop/500/${url}`;
+  return `https://image.thum.io/get/maxAge/24/width/1200/crop/620/${url}`;
 }
 
 /**
