@@ -1,4 +1,4 @@
-import { formatString, getStrings } from "../../i18n.js";
+import { formatString, getLocale, getStrings } from "../../i18n.js";
 import {
   listMyPortfolios,
   listPortfoliosForReview,
@@ -34,6 +34,10 @@ import { createAppModal } from "../app-modal/AppModal.js";
 import { createAccountMenu } from "../account-menu/AccountMenu.js";
 import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
 import { REVIEW_SESSION_SECONDS } from "../../config/review.js";
+import {
+  createDictationEngine,
+  isWebSpeechSupported,
+} from "../../lib/dictation/createDictationEngine.js";
 import boneIconUrl from "../../assets/home/bone.svg";
 import bellIconUrl from "../../assets/home/bell.svg";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
@@ -41,7 +45,8 @@ import reputationIconUrl from "../../assets/home/reputation.svg";
 import slotPlusIconUrl from "../../assets/home/slot-plus.svg";
 
 /**
- * Plus для accent-чипа — inline SVG: в `<img>` currentColor не наследует color кнопки.
+ * Plus для кнопки «Закинуть своё» — inline SVG: в `<img>` currentColor не
+ * наследует color кнопки.
  * @returns {SVGElement}
  */
 function createSubmitPlusIcon() {
@@ -51,7 +56,7 @@ function createSubmitPlusIcon() {
   if (!(svg instanceof SVGElement)) {
     throw new Error("plus.svg must be a root <svg>");
   }
-  svg.classList.add("home-screen__chip-icon");
+  svg.classList.add("home-screen__tabbar-submit-icon");
   svg.setAttribute("aria-hidden", "true");
   svg.setAttribute("width", "24");
   svg.setAttribute("height", "24");
@@ -66,6 +71,9 @@ const SKELETON_CARD_COUNT = 5;
 
 /** Обновление active-слотов, пока home открыт. */
 const HOME_SLOTS_POLL_MS = 15_000;
+
+/** Потолок текста во временной QA-песочнице надиктовки. */
+const VOICE_TEST_MAX_LEN = 4000;
 
 /**
  * Порог только для hide: show — при любом скролле вверх.
@@ -278,13 +286,11 @@ export function createHomeScreen({
   const topActions = document.createElement("div");
   topActions.className = "home-screen__top-actions";
 
+  /* «Закинуть своё»: квадратная кнопка справа от таббара (не в шапке). */
   const addBtn = document.createElement("button");
   addBtn.type = "button";
-  addBtn.className = "home-screen__chip home-screen__chip--submit";
-
-  const addLabel = document.createElement("span");
-  addLabel.className = "home-screen__chip-label";
-  addBtn.append(createSubmitPlusIcon(), addLabel);
+  addBtn.className = "home-screen__tabbar-submit";
+  addBtn.append(createSubmitPlusIcon());
 
   const balanceChip = document.createElement("button");
   balanceChip.type = "button";
@@ -333,6 +339,14 @@ export function createHomeScreen({
   bellImg.decoding = "async";
   notifyBtn.append(bellImg);
 
+  const voiceTestBtn = document.createElement("button");
+  voiceTestBtn.type = "button";
+  voiceTestBtn.className = "home-screen__chip home-screen__chip--voice-test";
+
+  const voiceTestBtnLabel = document.createElement("span");
+  voiceTestBtnLabel.className = "home-screen__voice-test-button-label";
+  voiceTestBtn.append(voiceTestBtnLabel);
+
   const profileBtn = document.createElement("button");
   profileBtn.type = "button";
   profileBtn.className = "home-screen__profile home-screen__profile--letter";
@@ -366,6 +380,40 @@ export function createHomeScreen({
     },
   });
 
+  const voiceTestField = document.createElement("div");
+  voiceTestField.className = "home-screen__voice-test-field";
+
+  const voiceTestLabel = document.createElement("label");
+  voiceTestLabel.className = "home-screen__voice-test-label";
+
+  const voiceTestLabelText = document.createElement("span");
+  voiceTestLabelText.className = "home-screen__voice-test-label-text";
+
+  const voiceTestTranscript = document.createElement("textarea");
+  voiceTestTranscript.className = "home-screen__voice-test-transcript";
+  voiceTestTranscript.readOnly = true;
+  voiceTestTranscript.rows = 7;
+  voiceTestTranscript.maxLength = VOICE_TEST_MAX_LEN;
+
+  const voiceTestStatus = document.createElement("p");
+  voiceTestStatus.className = "home-screen__voice-test-status";
+  voiceTestStatus.setAttribute("role", "status");
+  voiceTestStatus.setAttribute("aria-live", "polite");
+  voiceTestStatus.hidden = true;
+
+  voiceTestLabel.append(voiceTestLabelText, voiceTestTranscript);
+  voiceTestField.append(voiceTestLabel, voiceTestStatus);
+
+  const voiceTestModal = createAppModal({
+    size: "md",
+    showSecondary: false,
+    onPrimary: () => toggleVoiceTest(),
+    onBeforeClose: () => {
+      resetVoiceTest();
+    },
+  });
+  voiceTestModal.content.append(voiceTestField);
+
   const accountMenu = createAccountMenu({
     onClose: () => {
       profileBtn.setAttribute("aria-expanded", "false");
@@ -388,9 +436,9 @@ export function createHomeScreen({
 
   profileMenuAnchor.append(profileBtn, accountMenu.root);
   topActions.append(
-    addBtn,
     reputationChip,
     balanceChip,
+    voiceTestBtn,
     notifyBtn,
     profileMenuAnchor,
   );
@@ -499,15 +547,21 @@ export function createHomeScreen({
   mineTab.dataset.tab = "mine";
 
   tabbar.append(tabThumb, feedTab, mineTab);
+
+  const tabbarDock = document.createElement("div");
+  tabbarDock.className = "home-screen__tabbar-dock";
+  tabbarDock.append(tabbar, addBtn);
+
   root.append(
     title,
     topbar,
     body,
-    tabbar,
+    tabbarDock,
     noticeModal.root,
     reviewIntroModal.root,
     inviteModal.root,
     contactsModal.root,
+    voiceTestModal.root,
   );
 
   /** @type {HomePortfolioItem[]} */
@@ -541,6 +595,129 @@ export function createHomeScreen({
   let inviteCodeValue = null;
   /** @type {ReturnType<typeof window.setTimeout> | null} */
   let inviteCopyResetId = null;
+  /** @type {ReturnType<typeof createDictationEngine>} */
+  let voiceTestEngine = null;
+  let voiceTestRecording = false;
+  let voiceTestBusy = false;
+  let voiceTestHasError = false;
+  let voiceTestOperation = 0;
+
+  function syncVoiceTestCopy() {
+    const t = getStrings();
+    voiceTestBtn.hidden = !isWebSpeechSupported();
+    voiceTestBtnLabel.textContent = t.homeVoiceTestButton ?? "";
+    voiceTestBtn.setAttribute("aria-label", t.homeVoiceTestButtonAria ?? "");
+    voiceTestBtn.title = t.homeVoiceTestButton ?? "";
+    voiceTestModal.setTitle(t.homeVoiceTestTitle ?? "");
+    voiceTestModal.setDescription(t.homeVoiceTestBody ?? "");
+    voiceTestModal.setCloseAriaLabel(t.homeVoiceTestCloseAria ?? "");
+    voiceTestModal.setPrimaryLabel(
+      voiceTestRecording
+        ? (t.homeVoiceTestStop ?? "")
+        : (t.homeVoiceTestStart ?? ""),
+    );
+    voiceTestModal.setActionsVisible({ primary: true, secondary: false });
+    voiceTestLabelText.textContent = t.homeVoiceTestLabel ?? "";
+    voiceTestTranscript.placeholder = t.homeVoiceTestPlaceholder ?? "";
+  }
+
+  function ensureVoiceTestEngine() {
+    if (voiceTestEngine) return voiceTestEngine;
+    voiceTestEngine = createDictationEngine({
+      lang: getLocale() === "en" ? "en-US" : "ru-RU",
+    });
+    if (!voiceTestEngine) return null;
+    voiceTestEngine.onTranscript((finalText, interim) => {
+      voiceTestTranscript.value = [finalText, interim]
+        .filter(Boolean)
+        .join(" ")
+        .trim()
+        .slice(0, VOICE_TEST_MAX_LEN);
+      voiceTestTranscript.scrollTop = voiceTestTranscript.scrollHeight;
+    });
+    voiceTestEngine.onError((code) => {
+      voiceTestRecording = false;
+      voiceTestHasError = true;
+      const t = getStrings();
+      voiceTestStatus.textContent =
+        code === "not_allowed"
+          ? (t.homeVoiceTestPermissionError ?? "")
+          : (t.homeVoiceTestError ?? "");
+      voiceTestStatus.hidden = false;
+      syncVoiceTestCopy();
+    });
+    return voiceTestEngine;
+  }
+
+  async function startVoiceTest() {
+    if (voiceTestBusy) return;
+    const engine = ensureVoiceTestEngine();
+    if (!engine) return;
+    const operation = ++voiceTestOperation;
+    voiceTestBusy = true;
+    voiceTestHasError = false;
+    voiceTestStatus.hidden = false;
+    voiceTestStatus.textContent = getStrings().homeVoiceTestStarting ?? "";
+    try {
+      const started = await engine.start();
+      if (operation !== voiceTestOperation) return;
+      voiceTestRecording = Boolean(started);
+      if (!voiceTestHasError) {
+        voiceTestStatus.hidden = !voiceTestRecording;
+        voiceTestStatus.textContent = voiceTestRecording
+          ? (getStrings().homeVoiceTestRecording ?? "")
+          : "";
+      }
+    } finally {
+      if (operation === voiceTestOperation) {
+        voiceTestBusy = false;
+        syncVoiceTestCopy();
+      }
+    }
+  }
+
+  async function stopVoiceTest() {
+    if (voiceTestBusy) return;
+    voiceTestBusy = true;
+    if (voiceTestEngine) await voiceTestEngine.stop();
+    voiceTestRecording = false;
+    voiceTestBusy = false;
+    voiceTestHasError = false;
+    voiceTestStatus.hidden = true;
+    voiceTestStatus.textContent = "";
+    syncVoiceTestCopy();
+  }
+
+  async function toggleVoiceTest() {
+    if (voiceTestBusy) return;
+    if (voiceTestRecording) {
+      await stopVoiceTest();
+      return;
+    }
+    await startVoiceTest();
+  }
+
+  function resetVoiceTest() {
+    voiceTestOperation += 1;
+    const engine = voiceTestEngine;
+    voiceTestEngine = null;
+    voiceTestRecording = false;
+    voiceTestBusy = false;
+    voiceTestHasError = false;
+    engine?.destroy();
+    voiceTestStatus.hidden = true;
+    voiceTestStatus.textContent = "";
+    syncVoiceTestCopy();
+  }
+
+  function openVoiceTestModal() {
+    if (!isWebSpeechSupported()) return;
+    voiceTestTranscript.value = "";
+    voiceTestStatus.hidden = true;
+    voiceTestStatus.textContent = "";
+    syncVoiceTestCopy();
+    voiceTestModal.open();
+  }
 
   /** Нет фото → фон + буква; картинку прячем. */
   function showProfileLetter(letter) {
@@ -615,7 +792,6 @@ export function createHomeScreen({
     feedTab.textContent = t.homeTabFeed;
     mineTab.textContent = t.homeTabMine;
     tabbar.setAttribute("aria-label", t.homeTabsAria);
-    addLabel.textContent = t.homeAddPortfolio;
     addBtn.setAttribute("aria-label", t.homeAddPortfolio);
     addBtn.title = t.homeAddPortfolio;
 
@@ -638,6 +814,7 @@ export function createHomeScreen({
     });
 
     notifyBtn.setAttribute("aria-label", t.homeNotificationsAria);
+    syncVoiceTestCopy();
     profileBtn.setAttribute("aria-label", t.homeProfileAria);
     profileBtn.setAttribute("aria-haspopup", "menu");
     accountMenu.syncContent();
@@ -876,7 +1053,7 @@ export function createHomeScreen({
   function setTabbarHidden(hidden) {
     if (tabbarHidden === hidden) return;
     tabbarHidden = hidden;
-    tabbar.classList.toggle("home-screen__tabbar--hidden", hidden);
+    tabbarDock.classList.toggle("home-screen__tabbar-dock--hidden", hidden);
     if (!hidden) {
       scheduleTabbarContrastSync();
     }
@@ -1418,6 +1595,8 @@ export function createHomeScreen({
     closeInviteModal();
     void closeAccountMenu();
     void contactsModal.close();
+    resetVoiceTest();
+    void voiceTestModal.close();
     root.setAttribute("aria-busy", "false");
     root.hidden = true;
     return Promise.resolve();
@@ -1517,6 +1696,8 @@ export function createHomeScreen({
   notifyBtn.addEventListener("click", () => {
     /* Заглушка: уведомления появятся позже */
   });
+
+  voiceTestBtn.addEventListener("click", openVoiceTestModal);
 
   profileBtn.addEventListener("click", () => {
     if (profileBtn.getAttribute("aria-expanded") === "true") {

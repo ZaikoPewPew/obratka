@@ -44,7 +44,7 @@
 | `/registration` | Email → `/registration/code` / Telegram / Google |
 | `/registration/code` | 6 ячеек OTP |
 | `/onboarding` | Онбординг → `profiles` |
-| `/home` | Hub: SWR лента/мои + intro до claim + mine report gate + glass-tabbar |
+| `/home` | Hub: SWR лента/мои + intro до claim + mine report gate + tabbar-dock |
 | `/portfolio` | Подача URL; done через `setVariant("done")` |
 | `/review` | iframe + таймер 45 s + **rec** (надиктовка; нужен claim) |
 | `/quiz` | Квиз |
@@ -64,7 +64,7 @@
 
 Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `success-screen`, `ban-screen`, `report-screen`.
 
-**Home (новое):** SWR `homeListCache` (memory + `obratka.homeLists.<userId>`); silent slot patch; feed sort `sortFeedForSlotClosure`; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); own-карточки с `cursor: pointer`; tabbar glass 20%/blur + `--on-dark` через `backdropLuminance`. Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache`.  
+**Home (новое):** SWR `homeListCache` (memory + `obratka.homeLists.<userId>`); silent slot patch; feed sort `sortFeedForSlotClosure`; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) 20%/blur + `--on-dark` через `backdropLuminance`. Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache`.  
 Подробно: [`home-screen/README.md`](../src/components/home-screen/README.md).
 
 **Не восстанавливать** waitlist dual-layout (`apply-card`, `desktop.css` / `mobile.css`) без явной задачи.

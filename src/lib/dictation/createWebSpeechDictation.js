@@ -16,6 +16,93 @@
  */
 
 const BAR_TICK_MS = 50;
+const MAX_ALTERNATIVES = 3;
+const MIN_FINAL_CONFIDENCE = 0.4;
+
+function normalizeTranscript(value) {
+  return String(value || "")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
+
+function comparableWord(value) {
+  return value.toLocaleLowerCase().replace(/[.,!?;:…]+$/gu, "");
+}
+
+/**
+ * Выбирает наиболее уверенную гипотезу, сохраняя fallback на первый вариант,
+ * если браузер не сообщает confidence.
+ *
+ * @param {SpeechRecognitionResult | ArrayLike<SpeechRecognitionAlternative>} result
+ * @returns {{ transcript: string; confidence: number | null } | null}
+ */
+export function selectSpeechAlternative(result) {
+  if (!result || result.length < 1) return null;
+  const alternatives = Array.from(
+    { length: result.length },
+    (_, index) => result[index],
+  ).filter(Boolean);
+  if (!alternatives.length) return null;
+  const primaryConfidence =
+    typeof alternatives[0].confidence === "number" &&
+    Number.isFinite(alternatives[0].confidence) &&
+    alternatives[0].confidence > 0
+      ? alternatives[0].confidence
+      : null;
+  const withConfidence = alternatives.filter(
+    (alternative) =>
+      typeof alternative.confidence === "number" &&
+      Number.isFinite(alternative.confidence) &&
+      alternative.confidence > 0,
+  );
+  const selected = primaryConfidence !== null && withConfidence.length
+    ? withConfidence.reduce((best, alternative) =>
+        alternative.confidence > best.confidence ? alternative : best,
+      )
+    : alternatives[0];
+  return {
+    transcript: normalizeTranscript(selected.transcript),
+    confidence:
+      typeof selected.confidence === "number" &&
+      Number.isFinite(selected.confidence) &&
+      selected.confidence > 0
+        ? selected.confidence
+        : null,
+  };
+}
+
+/**
+ * Добавляет final-фрагмент без повторения хвоста после авто-restart.
+ *
+ * @param {string} current
+ * @param {string} incoming
+ * @returns {string}
+ */
+export function appendFinalTranscript(current, incoming) {
+  const existing = normalizeTranscript(current);
+  const next = normalizeTranscript(incoming);
+  if (!existing) return next;
+  if (!next) return existing;
+
+  const existingWords = existing.split(" ");
+  const nextWords = next.split(" ");
+  const maxOverlap = Math.min(existingWords.length, nextWords.length);
+  let overlap = 0;
+  for (let size = maxOverlap; size >= 1; size -= 1) {
+    const existingTail = existingWords
+      .slice(-size)
+      .map(comparableWord)
+      .join(" ");
+    const nextHead = nextWords.slice(0, size).map(comparableWord).join(" ");
+    if (existingTail === nextHead && (size >= 2 || size === nextWords.length)) {
+      overlap = size;
+      break;
+    }
+  }
+  return normalizeTranscript(
+    [existing, nextWords.slice(overlap).join(" ")].filter(Boolean).join(" "),
+  );
+}
 
 /**
  * @returns {boolean}
@@ -130,21 +217,32 @@ export function createWebSpeechDictation(options = {}) {
     const rec = new Recognition();
     rec.continuous = true;
     rec.interimResults = true;
+    rec.maxAlternatives = MAX_ALTERNATIVES;
     rec.lang = typeof options.lang === "string" && options.lang ? options.lang : "ru-RU";
 
     rec.onresult = (event) => {
-      let interim = "";
-      let newlyFinal = "";
+      const interimPieces = [];
+      const finalPieces = [];
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
         const result = event.results[i];
-        const piece = result?.[0]?.transcript || "";
-        if (result.isFinal) newlyFinal += piece;
-        else interim += piece;
+        const alternative = selectSpeechAlternative(result);
+        if (!alternative?.transcript) continue;
+        if (result.isFinal) {
+          if (
+            alternative.confidence !== null &&
+            alternative.confidence < MIN_FINAL_CONFIDENCE
+          ) {
+            continue;
+          }
+          finalPieces.push(alternative.transcript);
+        } else {
+          interimPieces.push(alternative.transcript);
+        }
       }
-      if (newlyFinal) {
-        finalText = `${finalText}${finalText && !/\s$/.test(finalText) ? " " : ""}${newlyFinal.trim()}`.trim();
+      if (finalPieces.length) {
+        finalText = appendFinalTranscript(finalText, finalPieces.join(" "));
       }
-      emitTranscript(interim.trim());
+      emitTranscript(normalizeTranscript(interimPieces.join(" ")));
     };
 
     rec.onerror = (event) => {
@@ -192,6 +290,10 @@ export function createWebSpeechDictation(options = {}) {
         emitError("not_allowed");
         return false;
       }
+      if (!wantRunning) {
+        tearDownAudio();
+        return false;
+      }
       recognition = bindRecognition();
       if (!recognition) {
         wantRunning = false;
@@ -219,6 +321,8 @@ export function createWebSpeechDictation(options = {}) {
       if (rec) {
         try {
           rec.onend = null;
+          rec.onerror = null;
+          rec.onresult = null;
           rec.stop();
         } catch {
           /* already stopped */

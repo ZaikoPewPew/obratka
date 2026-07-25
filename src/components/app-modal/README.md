@@ -47,6 +47,7 @@ const modal = createAppModal({
   closeAriaLabel: undefined,  // иначе getStrings().modalCloseAria
   closeOnBackdrop: true,
   closeOnEscape: true,
+  onBeforeClose: () => { /* до анимации закрытия */ },
   onPrimary: () => { /* … */ },
   onSecondary: () => { void modal.close(); },
   onClose: () => { /* после анимации закрытия */ },
@@ -75,6 +76,8 @@ await modal.close();
 | `setPrimaryLabel` / `setSecondaryLabel` | кнопки |
 | `setActionsVisible({ primary, secondary })` | скрыть ряд / кнопки |
 | `setCloseAriaLabel` | aria у крестика |
+
+`onBeforeClose` вызывается синхронно в начале любого закрытия (CTA, крестик, backdrop, Escape); подходит для немедленного teardown микрофона и других ресурсов. `onClose` остаётся post-animation callback.
 
 ### Опции создания
 

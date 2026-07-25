@@ -77,7 +77,7 @@
 ```
 
 `/referral` — invite-only gate (`validate_referral`); после входа у юзера свой код (лимит 2), шаринг с home.  
-`/home` — лента/мои с SWR-кэшем (`homeListCache`); intro до claim; mine report gate; glass-tabbar с контрастом над превью.  
+`/home` — лента/мои с SWR-кэшем (`homeListCache`); intro до claim; mine report gate; tabbar-dock (glass tabs + «Закинуть своё») с контрастом над превью.  
 `/review` = просмотр портфолио + таймер **45 s** (`REVIEW_SESSION_SECONDS` в `src/config/review.js`) + опциональная надиктовка (чип rec → `answers.dictation`).  
 `/quiz` = опрос. Не путать с login-`session.js` (`obratka.session`).  
 `/report` = листы ревью автора (+ секция надиктовки) + жалоба → `reputation` (вход только когда собраны все ревью).  

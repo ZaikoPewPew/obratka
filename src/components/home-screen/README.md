@@ -1,6 +1,6 @@
 # `home-screen` — главная (лента + мои)
 
-Path: **`/home`**. После onboarding: шапка (лого, баланс, уведомления, аватар) + лента карточек портфолио + нижний переключатель **На ревью / Мои посты**.
+Path: **`/home`**. После onboarding: шапка (лого, баланс, уведомления, аватар) + лента карточек портфолио + нижний док: переключатель **На ревью / Мои посты** и кнопка **«Закинуть своё»** (квадрат с плюсом справа от таббара).
 
 Файл: [`HomeScreen.js`](./HomeScreen.js). Стили: [`styles/home-screen.css`](../../../styles/home-screen.css). Токены: `--home-screen-*` в [`styles/tokens.css`](../../../styles/tokens.css).
 
@@ -13,9 +13,9 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 | **На ревью** (`feed`, default) | `listPortfoliosForReview()` | Чужие `pending` **в лиге** грейда ревьюера (RLS), без своих; карточка до `target_reviews` completed-отчётов; уже отревьюенные этим юзером помечены `reviewedByMe` (клик → notice) |
 | **Мои посты** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …) |
 
-Переключатель: `home-screen__tabbar` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`). Вкладки: **На ревью** / **Мои посты**.
+Переключатель: `home-screen__tabbar` внутри дока `home-screen__tabbar-dock` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`). Вкладки: **На ревью** / **Мои посты**. Справа от таббара в доке (gap 8px, `--home-screen-tabbar-dock-gap`) — кнопка «Закинуть своё» (56×56, r16, Google blue, плюс 24; токены `--home-screen-tabbar-submit-*`).
 
-- Скролл **вниз** по `home-screen__body` → таббар уезжает за нижний край (`--hidden`).
+- Скролл **вниз** по `home-screen__body` → док (таббар + кнопка) уезжает за нижний край (`home-screen__tabbar-dock--hidden`).
 - Скролл **вверх** (любой delta &lt; 0) / у верхнего края → снова виден сразу.
 - Hide — с небольшим порогом (`TABBAR_HIDE_DELTA`), чтобы трекпад не дёргал.
 - Анимация hide/show: `--home-screen-tabbar-hide-duration` / `--home-screen-tabbar-hide-ease` → `--motion-screen-*`.
@@ -77,7 +77,7 @@ SWR: при `open` / смене таба / F5 — если есть кэш вк�
 Клик по чужой карточке → intro-модалка «Как проходит ревью» (`createAppModal`, шаги `homeReviewIntroStep1…4`, таймер из [`src/config/review.js`](../../config/review.js)) → CTA «Проревьюить» → `onOpenPortfolio` → `claimPortfolioReview` → `/review` (таймер + опц. надиктовка). «Не сейчас» / закрытие — без claim.  
 Своя (`isOwn`, вкладка «Мои») кликабельна всегда: собраны все ревью (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report` (листы + жалоба); иначе модалка `homeMineNotReady*` с прогрессом. Title / aria карточки — `homeCardReport*` либо `homeCardReportPending*`, пересинхронизируются при silent-патче слотов.  
 Уже отревьюенная карточка (`reviewedByMe`) intro не показывает — сразу notice из `main.js`.
-CTA «Закинуть своё» — всегда активна (чёрная). Баланс ≥ `SUBMIT_COST` → `onAddPortfolio` → `/portfolio`; иначе `createAppModal` «не хватает монет».
+CTA «Закинуть своё» (кнопка в доке у таббара) — всегда активна. Баланс ≥ `SUBMIT_COST` → `onAddPortfolio` → `/portfolio`; иначе `createAppModal` «не хватает монет».
 
 Лиги (тихий матчинг): junior → junior; middle → junior+middle; senior/lead/head → middle+senior+.  
 Клиент-зеркало: [`src/api/leagues.js`](../../api/leagues.js). Сервер: [`supabase/sql/portfolios.sql`](../../../supabase/sql/portfolios.sql) + [`review_claims.sql`](../../../supabase/sql/review_claims.sql) (`can_review_portfolio`, claim-слоты, RLS).
@@ -95,7 +95,8 @@ Topbar поверх контента (`position: absolute`), появление 
 - Если в `profiles.avatar_url` пусто — при refresh подтягиваем picture из Auth и пишем в профиль.
 - При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.
 - Репутация: `profiles.reputation` ↔ `session.reputation`; чип = иконка + дельта от 100 (`0` / `+10` / `-20`, `formatReputationDelta`); клик → explainer через `createAppModal` (без весов тегов).
-- Порядок чипов: «Закинуть своё» → репутация → баланс → уведомления → аватар.
+- Порядок чипов в шапке: репутация → баланс → временный «войс» → уведомления → аватар. «Закинуть своё» — не в шапке, а в доке у таббара.
+- «войс» — временный QA-харнесс: открывает `createAppModal`, запускает отдельный `DictationEngine` и показывает live-расшифровку в readonly textarea. При закрытии модалки / home микрофон останавливается; если Web Speech недоступен, чип скрыт.
 - Баланс: `profiles.balance` ↔ `session.balance`.
 - Клик по чипу баланса (**временно**): `TEMP_BALANCE_CHIP_CREDIT` → RPC `temp_credit_balance` (+10); иначе DEV local-only. Убрать флаг + RPC после тестов. Серверный spend — `spend_submit_cost`.
 - CTA «Закинуть своё» без монет → `createAppModal` «Монет маловато»; notices (no slots / already reviewed) — тот же `noticeModal`.
@@ -126,12 +127,14 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 ## Разметка таббара
 
 ```
-.home-screen__tabbar          role=tablist
-  .home-screen__tabbar-thumb  aria-hidden (пилл)
-  button.home-screen__tab     role=tab  data-tab=feed|mine
+.home-screen__tabbar-dock             (центрирование + hide)
+  .home-screen__tabbar                role=tablist
+    .home-screen__tabbar-thumb        aria-hidden (пилл)
+    button.home-screen__tab           role=tab  data-tab=feed|mine
+  button.home-screen__tabbar-submit   «Закинуть своё» (плюс)
 ```
 
-Классы состояния: `--active` на табе; `--hidden` на tabbar при скролле вниз; `--on-dark` при тёмном фоне под баром.
+Классы состояния: `--active` на табе; `home-screen__tabbar-dock--hidden` на доке при скролле вниз; `--on-dark` на tabbar при тёмном фоне под баром.
 
 ## API модуля
 
@@ -141,11 +144,11 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 ## Стили / i18n / a11y
 
-Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, translucent track / on-dark track+label, motion hide/thumb/label/contrast).
+Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, translucent track / on-dark track+label, motion hide/thumb/label/contrast) + `--home-screen-tabbar-dock-gap` / `--home-screen-tabbar-submit-*` (кнопка 56×56, r16, Google blue, hover/active через color-mix).
 
 Токены intro-модалки: `--home-screen-review-intro-indent` / `--home-screen-review-intro-step-gap`.
 
-Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeTabFeed`, `homeTabMine`, `homeTabsAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeNotificationsAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`.
+Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeTabFeed`, `homeTabMine`, `homeTabsAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeVoiceTest*`, `homeNotificationsAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`.
 
 `homeCardOwnTitle` / `homeCardOwnAria` в locales — legacy (в UI не используются; own-копирайт = `homeCardReport*` / `Pending*`).
 

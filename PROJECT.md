@@ -15,7 +15,7 @@
 | Онбординг → `profiles` | wired |
 | Home: лента/мои по лигам, баланс, репутация, account-menu | wired |
 | Home: SWR-кэш вкладок + silent slot patch | wired (`homeListCache.js`) |
-| Home tabbar: glass + контраст над превью | wired (`backdropLuminance`, `--on-dark`) |
+| Home tabbar dock: glass + «Закинуть своё» справа | wired (`tabbar-dock`, `--on-dark`) |
 | Review claim / heartbeat / release | wired (награда только после submit) |
 | Review iframe + таймер 45 s + **надиктовка** (rec) + квиз | wired |
 | Подача URL + done на url-screen | wired |
@@ -33,7 +33,8 @@
 - **Intro до claim:** клик по чужой карточке → `createAppModal` `homeReviewIntro*` (шаг 1 с `{seconds}` = `REVIEW_SESSION_SECONDS`) → CTA «Проревьюить» → claim → `/review`. «Не сейчас» / закрытие — без claim.
 - **Mine report gate:** `reviewsCount < targetReviews` → `homeMineNotReady*`; иначе `/report`. Own-карточки всегда `cursor: pointer` (не `not-allowed`).
 - **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 45` (review shell + intro copy).
-- **Tabbar glass:** светлый фон — gray-900 20% + blur 20, неактивный текст `--color-text`; тёмный превью → `--on-dark` — white 20%, неактивный `--home-screen-tabbar-tab-color-on-dark`.
+- **Tabbar dock:** glass-таббар + кнопка «Закинуть своё» справа (56×56, Google blue, gap 8px); hide при скролле уезжает весь док. Светлый трек — gray-900 20% + blur 20; тёмный превью → `--on-dark` — white 20%.
+- **Чипы шапки:** репутация → баланс → временный «войс» (QA Web Speech) → уведомления → аватар. Submit больше не в topbar.
 - Подробно: [`home-screen/README.md`](src/components/home-screen/README.md).
 
 ## Продуктовый флоу
@@ -125,7 +126,7 @@ SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabas
 | Brand split (referral / auth / auth-code / onboarding / url) | `.url-screen*` + [`brand-screen-visual`](src/components/brand-screen-visual/README.md); цель — `brand-screen-shell` |
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
-| Home | `home-screen` + `account-menu`; лента SWR; tabbar glass / `--on-dark`; чипы баланс + репутация |
+| Home | `home-screen` + `account-menu`; лента SWR; tabbar-dock (tabs + submit) / `--on-dark`; чипы репутация + баланс + «войс» |
 | Review | `index.html` `.iframe-shell` + таймер + чип **rec** (диктовка) в `main.js` |
 | Quiz | `review-screen` + `review-panel` |
 | Success | `success-screen` (`/done`) |

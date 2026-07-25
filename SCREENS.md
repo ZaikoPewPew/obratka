@@ -20,7 +20,7 @@ referral → auth → authCode → onboarding → home
 | 2 | `auth-screen` | `/registration` | Email → OTP screen / Telegram / Google |
 | 2b | `auth-code-screen` | `/registration/code` | 6 ячеек кода из письма |
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |
-| 4 | `home-screen` | `/home` | Хаб: лента/мои (SWR) + intro до claim + mine report gate + glass-tabbar |
+| 4 | `home-screen` | `/home` | Хаб: лента/мои (SWR) + intro до claim + mine report gate + tabbar-dock (tabs + submit) |
 | 4a | `settings-screen` | `/settings` | Настройки аккаунта (пока заглушка) |
 | 5a | iframe-shell | `/review` | Ревью: iframe + таймер **45 s** + чип **rec** (надиктовка → `answers.dictation`) |
 | 5b | `url-screen` | `/portfolio` | Подача своего URL (нужен баланс) |
@@ -80,7 +80,7 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 
 Handoff соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
-`home-screen` — полноэкранный слой (absolute topbar поверх ленты); SWR `homeListCache`; intro до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*`); tabbar glass + контраст (`backdropLuminance` → `--on-dark`).  
+`home-screen` — полноэкранный слой (absolute topbar поверх ленты); SWR `homeListCache`; intro до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`).  
 `account-menu` — поповер под аватаром; identity read-only; settings / invite / contacts / sign out.  
 `settings-screen` — side-route `/settings` (заглушка).
 `url-screen` — split; при URL справа заглушка «Портфолио»; submit → done на том же экране (`setVariant("done")`).  
@@ -173,7 +173,7 @@ Shared (не экраны флоу):
 | `createAuthScreen` | `/registration` | UI + Email → authCode / Telegram / Google (shell) |
 | `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` (shell) |
 | `createOnboardingScreen` | `/onboarding` | UI → profiles (shell) |
-| `createHomeScreen` | `/home` | UI (hub + SWR + intro modal + mine report gate + `onOpenReport` + glass tabbar) |
+| `createHomeScreen` | `/home` | UI (hub + SWR + intro modal + mine report gate + `onOpenReport` + tabbar-dock) |
 | `createSettingsScreen` | `/settings` | UI (заглушка настроек) |
 | `createUrlScreen` | `/portfolio` | UI (submit + done via `setVariant`; shell) |
 | iframe-shell + timer + rec | `/review` | UI (диктовка → `answers.dictation`) |
@@ -194,7 +194,7 @@ go("auth", { handoff: true }); // referral → auth: visual статичен
 Field error: `--motion-field-error-*`, `--motion-field-error-visual-*`.  
 Auth: `--auth-screen-*`, `--auth-code-*` (в т.ч. `--auth-code-resend-cooldown`).  
 App modal: `--app-modal-*` + `styles/app-modal.css` ([`app-modal/README.md`](src/components/app-modal/README.md)).  
-Home tabbar: `--home-screen-tabbar-*` (translucent track / on-dark / blur / contrast).  
+Home tabbar-dock: `--home-screen-tabbar-*` + `--home-screen-tabbar-dock-gap` / `--home-screen-tabbar-submit-*` (translucent track / on-dark / blur / contrast; кнопка «Закинуть своё» 56×56 Google blue).  
 Правило: `.cursor/rules/design-tokens.mdc`.
 
 ## i18n
@@ -229,7 +229,7 @@ Home tabbar: `--home-screen-tabbar-*` (translucent track / on-dark / blur / cont
 - [`STRUCTURE.md`](STRUCTURE.md)
 - [`PROJECT.md`](PROJECT.md)
 - [`src/app/README.md`](src/app/README.md)
-- [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — лента SWR, intro до claim, mine gate, tabbar glass, репутация
+- [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — лента SWR, intro до claim, mine gate, tabbar-dock + submit, репутация
 - [`src/config/review.js`](src/config/review.js) — `REVIEW_SESSION_SECONDS`
 - [`src/utils/homeListCache.js`](src/utils/homeListCache.js) — кэш вкладок home
 - [`src/lib/dictation/README.md`](src/lib/dictation/README.md) — надиктовка на `/review`

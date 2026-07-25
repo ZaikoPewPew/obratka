@@ -18,7 +18,7 @@
 | `/registration` | email → `/registration/code` (OTP + cooldown resend / назад); Telegram; Google (редирект) |
 | `/registration/code` | 6 ячеек; cooldown «Повторно через N с»; ошибки identity / rate-limit |
 | `/onboarding` | шаги, валидация, запись в `profiles` |
-| `/home` | лента SWR (без skeleton на hit), glass-tabbar `--on-dark`, intro до claim, mine gate / report, pointer на own, баланс/invite |
+| `/home` | лента SWR (без skeleton на hit), tabbar-dock (tabs + submit) `--on-dark`, intro до claim, mine gate / report, pointer на own, баланс/invite |
 | `/portfolio` | ввод URL, нехватка баланса, done |
 | `/review` | iframe / external, таймер 45 s, чип rec (надиктовка), выход |
 | `/quiz` → done | шаги, PDF reveal |

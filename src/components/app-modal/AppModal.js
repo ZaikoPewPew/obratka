@@ -37,6 +37,7 @@ function normalizeSize(value) {
  *   showSecondary?: boolean;
  *   closeOnBackdrop?: boolean;
  *   closeOnEscape?: boolean;
+ *   onBeforeClose?: () => void;
  *   onClose?: () => void;
  *   onPrimary?: () => void | Promise<void>;
  *   onSecondary?: () => void | Promise<void>;
@@ -58,6 +59,8 @@ function normalizeSize(value) {
  * }}
  */
 export function createAppModal(opts = {}) {
+  const onBeforeClose =
+    typeof opts.onBeforeClose === "function" ? opts.onBeforeClose : null;
   const onClose = typeof opts.onClose === "function" ? opts.onClose : null;
   const onPrimary = typeof opts.onPrimary === "function" ? opts.onPrimary : null;
   const onSecondary =
@@ -249,6 +252,7 @@ export function createAppModal(opts = {}) {
     }
 
     closing = true;
+    onBeforeClose?.();
     if (openAnimFrame) {
       cancelAnimationFrame(openAnimFrame);
       openAnimFrame = 0;
