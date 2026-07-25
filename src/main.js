@@ -23,6 +23,7 @@ import { getSession, setSession, clearSession } from "./app/session.js";
 import { completeOAuthFromUrl, signOut } from "./api/auth.js";
 import { submitPortfolio, clearSubmittedPortfolios, submitPortfolioReview, claimPortfolioReview, heartbeatPortfolioClaim, releasePortfolioClaim, portfolioRpcErrorCode } from "./api/portfolios.js";
 import { clearHomeListCache } from "./utils/homeListCache.js";
+import { clearMineReadySeen } from "./utils/mineReadySeen.js";
 import { fetchMyProfile, isProfileBanned, updateMyProfile } from "./api/profiles.js";
 import {
   redeemReferral,
@@ -253,6 +254,7 @@ async function exitAuthenticatedSession() {
     /* Локальную сессию всё равно закрываем. */
   }
   clearHomeListCache(sessionUserId);
+  clearMineReadySeen(sessionUserId);
   clearSession();
   clearSubmittedPortfolios();
   setPendingAuthEmail(null);
@@ -408,9 +410,12 @@ function ensureDictationEngine() {
   dictationEngine.onTranscript((finalText, interim) => {
     const combined = [finalText, interim].filter(Boolean).join(" ").trim();
     if (dictationTarget === "advice") {
+      // Пустой flush (stop без речи) не должен затирать уже набранный/надиктованный текст.
+      if (!combined) return;
       reviewPanel.setDictationTranscript(combined);
       return;
     }
+    if (!combined) return;
     dictationText = combined.slice(0, DICTATION_MAX_LEN);
   });
   dictationEngine.onLevel(setDictationLevel);

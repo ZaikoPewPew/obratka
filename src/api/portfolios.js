@@ -489,19 +489,19 @@ export async function listMyPortfolios() {
 }
 
 /**
- * Есть ли своё портфолио, собравшее все ревью (индикатор на вкладке «Мои»).
+ * Id своих портфолио, собравших все ревью (для точки на вкладке «Мои»).
  * Лёгкий запрос: только счётчики, без слотов и маппинга карточек.
  *
- * @returns {Promise<boolean>}
+ * @returns {Promise<string[]>}
  */
-export async function hasReadyOwnReport() {
+export async function listReadyOwnReportIds() {
   const supabase = getSupabase();
-  if (!supabase) return false;
+  if (!supabase) return [];
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user?.id) return false;
+  if (!user?.id) return [];
 
   const { data: rows, error } = await supabase
     .from("portfolios")
@@ -510,16 +510,29 @@ export async function hasReadyOwnReport() {
 
   if (error) {
     if (import.meta.env.DEV) {
-      console.warn("[portfolios] hasReadyOwnReport", error.message);
+      console.warn("[portfolios] listReadyOwnReportIds", error.message);
     }
-    return false;
+    return [];
   }
 
-  return (rows || []).some(
-    (row) =>
-      (Number(row?.reviews_count) || 0) >=
-      Math.max(1, Number(row?.target_reviews) || 1),
-  );
+  return (rows || [])
+    .filter(
+      (row) =>
+        (Number(row?.reviews_count) || 0) >=
+        Math.max(1, Number(row?.target_reviews) || 1),
+    )
+    .map((row) => (row?.id != null ? String(row.id) : ""))
+    .filter(Boolean);
+}
+
+/**
+ * Есть ли своё портфолио, собравшее все ревью.
+ *
+ * @returns {Promise<boolean>}
+ */
+export async function hasReadyOwnReport() {
+  const ids = await listReadyOwnReportIds();
+  return ids.length > 0;
 }
 
 /**

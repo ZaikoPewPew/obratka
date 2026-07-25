@@ -1,6 +1,8 @@
 /**
  * Оценка яркости фона под элементом (для адаптивного контраста UI).
  * Картинки: CORS-probe в кэш; при ошибке — эвристика «превью ≈ тёмное».
+ * Hit-test пропускает target / потомков / предков и прозрачные обёртки —
+ * иначе dock или opaque screen перехватывают сэмпл вместо превью под баром.
  */
 
 /** Порог relative luminance: ниже → считаем фон тёмным. */
@@ -182,7 +184,51 @@ function sampleElementLuma(el, clientX, clientY) {
 }
 
 /**
- * Средняя яркость «за» target (сам target и его потомки пропускаются).
+ * Элемент из hit-stack «за» target: не target/потомки, не предки target
+ * (иначе dock / screen с opaque bg перехватывают сэмпл вместо превью).
+ *
+ * @param {Element} el
+ * @param {HTMLElement} target
+ * @returns {boolean}
+ */
+function isBackdropCandidate(el, target) {
+  return !target.contains(el) && !el.contains(target);
+}
+
+/**
+ * Первый осмысленный слой под точкой: превью/картинка или свой opaque bg.
+ * Прозрачные обёртки пропускаем — иначе solidAncestor уезжает на светлый screen.
+ *
+ * @param {Element[]} stack
+ * @param {HTMLElement} target
+ * @param {number} clientX
+ * @param {number} clientY
+ * @returns {{ luma: number; pendingSrc?: string }}
+ */
+function sampleStackLuma(stack, target, clientX, clientY) {
+  for (const el of stack) {
+    if (!(el instanceof Element) || !isBackdropCandidate(el, target)) {
+      continue;
+    }
+
+    if (
+      el instanceof HTMLImageElement ||
+      el.classList.contains("home-screen__preview")
+    ) {
+      return sampleElementLuma(el, clientX, clientY);
+    }
+
+    const bg = parseCssColor(getComputedStyle(el).backgroundColor);
+    if (bg && bg.a >= 0.85) {
+      return { luma: relativeLuminance(bg.r, bg.g, bg.b) };
+    }
+  }
+
+  return { luma: UI_SURFACE_LUMA };
+}
+
+/**
+ * Средняя яркость «за» target (target, потомки и предки пропускаются).
  *
  * @param {HTMLElement} target
  * @param {{ sampleCount?: number }} [opts]
@@ -209,15 +255,7 @@ export function sampleBackdropLuminance(target, opts = {}) {
       const t = sampleCount === 1 ? 0.5 : i / (sampleCount - 1);
       const x = rect.left + rect.width * (0.15 + t * 0.7);
       const stack = document.elementsFromPoint(x, y);
-      const hit =
-        stack.find(
-          (el) => el instanceof Element && !target.contains(el),
-        ) ?? null;
-      if (!hit) {
-        samples.push(UI_SURFACE_LUMA);
-        continue;
-      }
-      const { luma, pendingSrc } = sampleElementLuma(hit, x, y);
+      const { luma, pendingSrc } = sampleStackLuma(stack, target, x, y);
       samples.push(luma);
       if (pendingSrc) pending.add(pendingSrc);
     }

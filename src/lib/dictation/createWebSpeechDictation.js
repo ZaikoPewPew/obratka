@@ -146,9 +146,12 @@ export function createWebSpeechDictation(options = {}) {
   let running = false;
   let wantRunning = false;
   let finalText = "";
+  /** Последний interim — на stop коммитим в final, иначе текст «пропадает». */
+  let lastInterim = "";
 
   function emitTranscript(interim = "") {
-    for (const cb of transcriptListeners) cb(finalText, interim);
+    lastInterim = normalizeTranscript(interim);
+    for (const cb of transcriptListeners) cb(finalText, lastInterim);
   }
 
   function emitLevel(level) {
@@ -330,12 +333,18 @@ export function createWebSpeechDictation(options = {}) {
         }
       }
       running = false;
+      // Interim ещё не в final — иначе UI теряет всё, что видел во время записи.
+      if (lastInterim) {
+        finalText = appendFinalTranscript(finalText, lastInterim);
+        lastInterim = "";
+      }
       tearDownAudio();
       emitTranscript("");
     },
 
     resetTranscript() {
       finalText = "";
+      lastInterim = "";
       emitTranscript("");
     },
 

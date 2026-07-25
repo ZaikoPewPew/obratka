@@ -134,3 +134,94 @@ test("stopping during microphone permission prevents a late recognition start", 
     }
   }
 });
+
+test("stop commits interim transcript into final so text is not lost", async () => {
+  const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+  const originalNavigator = Object.getOwnPropertyDescriptor(
+    globalThis,
+    "navigator",
+  );
+  /** @type {FakeRecognition | null} */
+  let activeRec = null;
+
+  class FakeRecognition {
+    constructor() {
+      activeRec = this;
+      this.onresult = null;
+      this.onerror = null;
+      this.onend = null;
+    }
+
+    start() {}
+
+    stop() {}
+  }
+
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: {
+      SpeechRecognition: FakeRecognition,
+      AudioContext: class {
+        createMediaStreamSource() {
+          return { connect() {} };
+        }
+        createAnalyser() {
+          return { fftSize: 256, getByteTimeDomainData() {} };
+        }
+        close() {
+          return Promise.resolve();
+        }
+      },
+      clearInterval,
+      setInterval: () => 1,
+    },
+  });
+  Object.defineProperty(globalThis, "navigator", {
+    configurable: true,
+    value: {
+      mediaDevices: {
+        getUserMedia: async () => ({
+          getTracks: () => [{ stop() {} }],
+        }),
+      },
+    },
+  });
+
+  try {
+    const engine = createWebSpeechDictation();
+    /** @type {Array<[string, string]>} */
+    const updates = [];
+    engine.onTranscript((finalText, interim) => {
+      updates.push([finalText, interim]);
+    });
+
+    assert.equal(await engine.start(), true);
+    assert.ok(activeRec?.onresult);
+
+    activeRec.onresult({
+      resultIndex: 0,
+      results: [
+        Object.assign(
+          [{ transcript: "Как тебе кандидат", confidence: 0.8 }],
+          { isFinal: false, length: 1 },
+        ),
+      ],
+    });
+
+    await engine.stop();
+
+    const last = updates.at(-1);
+    assert.deepEqual(last, ["Как тебе кандидат", ""]);
+  } finally {
+    if (originalWindow) {
+      Object.defineProperty(globalThis, "window", originalWindow);
+    } else {
+      delete globalThis.window;
+    }
+    if (originalNavigator) {
+      Object.defineProperty(globalThis, "navigator", originalNavigator);
+    } else {
+      delete globalThis.navigator;
+    }
+  }
+});

@@ -1,8 +1,8 @@
 import { formatString, getStrings } from "../../i18n.js";
 import {
-  hasReadyOwnReport,
   listMyPortfolios,
   listPortfoliosForReview,
+  listReadyOwnReportIds,
   portfolioPreviewUrl,
 } from "../../api/portfolios.js";
 import {
@@ -26,6 +26,10 @@ import {
   resolveImageLumaProbes,
   sampleBackdropLuminance,
 } from "../../utils/backdropLuminance.js";
+import {
+  hasUnseenMineReady,
+  markMineReadySeen,
+} from "../../utils/mineReadySeen.js";
 import {
   getCachedHomeList,
   setCachedHomeList,
@@ -234,17 +238,20 @@ function canPatchListSlots(prev, next) {
 }
 
 /**
- * Есть ли среди своих карточек хотя бы одна с собранными ревью (3/3).
+ * Id своих карточек с собранными ревью (3/3).
  *
  * @param {HomePortfolioItem[] | null | undefined} list
- * @returns {boolean}
+ * @returns {string[]}
  */
-function hasReadyOwnCard(list) {
-  return (Array.isArray(list) ? list : []).some(
-    (item) =>
-      (Number(item?.reviewsCount) || 0) >=
-      Math.max(1, Number(item?.targetReviews) || 1),
-  );
+function readyOwnCardIds(list) {
+  return (Array.isArray(list) ? list : [])
+    .filter(
+      (item) =>
+        (Number(item?.reviewsCount) || 0) >=
+        Math.max(1, Number(item?.targetReviews) || 1),
+    )
+    .map((item) => (item?.id != null ? String(item.id) : ""))
+    .filter(Boolean);
 }
 
 /**
@@ -537,7 +544,7 @@ export function createHomeScreen({
    */
   let refreshEpoch = 0;
   let lastScrollTop = 0;
-  /** Хотя бы один свой отчёт собран (3/3) → точка на вкладке «Мои». */
+  /** Непросмотренный готовый отчёт (3/3) → точка на вкладке «Мои». */
   let mineReady = false;
   let tabbarHidden = false;
   let tabbarOnDark = false;
@@ -1005,6 +1012,10 @@ export function createHomeScreen({
     body.scrollTop = 0;
     lastScrollTop = 0;
     syncCopy();
+    if (tab === "mine") {
+      // Визит раздела сразу гасит точку; id допишем в refreshMineReady.
+      setMineReady(false);
+    }
     if (showTabFromCache(tab)) {
       void refresh();
       return;
@@ -1339,21 +1350,31 @@ export function createHomeScreen({
     );
     items = /** @type {HomePortfolioItem[]} */ (cached);
     if (tab === "mine") {
-      setMineReady(hasReadyOwnCard(items));
+      acknowledgeMineReady(readyOwnCardIds(items));
     }
     renderList();
     return true;
   }
 
-  /** Точка на «Мои»: из своих карточек, иначе — лёгкий запрос счётчиков. */
+  /**
+   * Визит «Мои»: текущие готовые id считаются просмотренными, точка гаснет.
+   *
+   * @param {string[]} readyIds
+   */
+  function acknowledgeMineReady(readyIds) {
+    markMineReadySeen(getSession()?.userId, readyIds);
+    setMineReady(false);
+  }
+
+  /** Точка на «Мои»: непросмотренный 3/3; на вкладке mine — acknowledge. */
   async function refreshMineReady(epoch, tab, mineItems) {
     if (tab === "mine") {
-      setMineReady(hasReadyOwnCard(mineItems));
+      acknowledgeMineReady(readyOwnCardIds(mineItems));
       return;
     }
-    const ready = await hasReadyOwnReport();
+    const readyIds = await listReadyOwnReportIds();
     if (epoch === refreshEpoch) {
-      setMineReady(ready);
+      setMineReady(hasUnseenMineReady(getSession()?.userId, readyIds));
     }
   }
 
@@ -1432,9 +1453,12 @@ export function createHomeScreen({
     body.scrollTop = 0;
     syncCopy();
     setMineReady(
-      hasReadyOwnCard(
-        /** @type {HomePortfolioItem[] | null} */ (
-          getCachedHomeList(getSession()?.userId, "mine")
+      hasUnseenMineReady(
+        getSession()?.userId,
+        readyOwnCardIds(
+          /** @type {HomePortfolioItem[] | null} */ (
+            getCachedHomeList(getSession()?.userId, "mine")
+          ),
         ),
       ),
     );

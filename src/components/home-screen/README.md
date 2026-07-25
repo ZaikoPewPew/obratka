@@ -11,7 +11,7 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 | Вкладка | API | Содержимое |
 |---------|-----|------------|
 | **На ревью** (`feed`, default) | `listPortfoliosForReview()` | Чужие `pending` **в лиге** грейда ревьюера (RLS), без своих; карточка до `target_reviews` completed-отчётов; уже отревьюенные этим юзером помечены `reviewedByMe` (клик → notice) |
-| **Мои посты** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …); точка на вкладке при готовом отчёте (`hasReadyOwnReport()` при активной ленте) |
+| **Мои посты** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …); точка на вкладке при **непросмотренном** готовом отчёте (`listReadyOwnReportIds` + `mineReadySeen` при активной ленте) |
 
 Переключатель: `home-screen__tabbar` внутри дока `home-screen__tabbar-dock` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`). Вкладки: **На ревью** / **Мои посты**. Справа от таббара в доке (gap 8px, `--home-screen-tabbar-dock-gap`) — кнопка «Закинуть своё» (56×56, r16, Google blue, плюс 24; токены `--home-screen-tabbar-submit-*`).
 
@@ -22,18 +22,21 @@ Path: **`/home`**. После onboarding: шапка (лого, баланс, у
 
 ### Индикатор на «Мои посты»
 
-Красная точка 6×6 (`--home-screen-tabbar-tab-dot-*`, Google red) в правом верхнем углу вкладки, отступ **8px** сверху и справа. Видна, когда **хотя бы одно своё портфолио собрало все ревью** (`reviewsCount >= targetReviews`, т.е. 3/3) — то есть отчёт уже можно открыть.
+Красная точка 6×6 (`--home-screen-tabbar-tab-dot-*`, Google red) в правом верхнем углу вкладки, отступ **8px** сверху и справа. Видна, когда есть **непросмотренный** готовый отчёт: своё портфолио набрало все ревью (`reviewsCount >= targetReviews`, т.е. 3/3), и пользователь ещё не заходил во вкладку «Мои» после появления этих id.
 
-Источник состояния:
+Поведение:
 
-- вкладка `mine` активна (или есть её кэш) → считаем по своим карточкам;
-- вкладка `feed` → на каждом `refresh` лёгкий `hasReadyOwnReport()` (только счётчики, без слотов).
+- заход на вкладку `mine` → текущие готовые id пишутся в `obratka.mineReadySeen.<userId>` (`markMineReadySeen`), точка гаснет сразу;
+- снова загорается, только когда появится **новый** готовый id (ещё не в seen);
+- logout → `clearMineReadySeen`.
+
+Источник состояния на ленте (`feed`): на каждом `refresh` лёгкий `listReadyOwnReportIds()` (только счётчики) + `hasUnseenMineReady`. На `mine` — acknowledge по своим карточкам (кэш / список).
 
 Точка декоративная (`aria-hidden`); пока она видна, у кнопки таба `aria-label` = `homeTabMineReadyAria`. Текст вкладки живёт в `home-screen__tab-label`, чтобы синк копирайта не затирал точку.
 
 ### Контраст над тёмным превью
 
-Пока таббар виден, сэмплим яркость фона под ним (`src/utils/backdropLuminance.js`, scroll / resize / load превью). Треки полупрозрачные + blur 20: на светлом — gray-900 20% (`--home-screen-tabbar-track-bg`), неактивный текст `--color-text`; на тёмном → `--on-dark` — white 20% (`--home-screen-tabbar-track-bg-on-dark`), неактивный текст `--home-screen-tabbar-tab-color-on-dark`. Transition `--home-screen-tabbar-contrast-*`.
+Пока таббар виден, сэмплим яркость фона под ним (`src/utils/backdropLuminance.js`, scroll / resize / load превью). Сэмплер игнорирует сам tabbar, dock и opaque `home-screen` (иначе светлый screen перехватывает hit-test поверх тёмного превью). Треки полупрозрачные + blur 20: на светлом — gray-900 20% (`--home-screen-tabbar-track-bg`), неактивный текст `--color-text`; на тёмном → `--on-dark` — white 20% (`--home-screen-tabbar-track-bg-on-dark`), неактивный текст `--home-screen-tabbar-tab-color-on-dark`. Transition `--home-screen-tabbar-contrast-*`.
 
 ### Переключение таба (UI)
 
@@ -106,7 +109,7 @@ Topbar поверх контента (`position: absolute`), появление 
 - Если в `profiles.avatar_url` пусто — при refresh подтягиваем picture из Auth и пишем в профиль.
 - При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.
 - Репутация: `profiles.reputation` ↔ `session.reputation`; чип = иконка + дельта от 100 (`0` / `+10` / `-20`, `formatReputationDelta`); клик → explainer через `createAppModal` (без весов тегов).
-- Порядок чипов в шапке: репутация → баланс → аватар. «Закинуть своё» — не в шапке, а в доке у таббара; чип уведомлений убран (готовность отчёта показывает точка на «Мои посты»).
+- Порядок чипов в шапке: репутация → баланс → аватар. «Закинуть своё» — не в шапке, а в доке у таббара; чип уведомлений убран (непросмотренный готовый отчёт — точка на «Мои посты»).
 - Баланс: `profiles.balance` ↔ `session.balance`.
 - Клик по чипу баланса (**временно**): `TEMP_BALANCE_CHIP_CREDIT` → RPC `temp_credit_balance` (+10); иначе DEV local-only. Убрать флаг + RPC после тестов. Серверный spend — `spend_submit_cost`.
 - CTA «Закинуть своё» без монет → `createAppModal` «Монет маловато»; notices (no slots / already reviewed) — тот же `noticeModal`.
@@ -142,7 +145,7 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
     .home-screen__tabbar-thumb        aria-hidden (пилл)
     button.home-screen__tab           role=tab  data-tab=feed|mine
       .home-screen__tab-label         подпись (только у mine)
-      .home-screen__tab-dot           aria-hidden, hidden пока нет 3/3
+      .home-screen__tab-dot           aria-hidden, hidden пока нет непросмотренного 3/3
   button.home-screen__tabbar-submit   «Закинуть своё» (плюс)
 ```
 
