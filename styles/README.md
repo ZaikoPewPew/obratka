@@ -4,9 +4,9 @@
 - `base.css` — сброс / база.
 - `entrance.css` — `@keyframes motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-recording-blink` (пульс индикатора записи).
 - `app-modal.css` — универсальная модалка (`createAppModal`, `--app-modal-*`).
-- `iframe-shell.css` — оболочка `/review` (таймер, **`.iframe-shell__rec`**), `.url-screen*` (в т.ч. `__error*`, `__input-wrap--invalid`), `.auth-screen*` / `.auth-code-screen*` (в т.ч. `__cells--invalid`), `.review-screen*` / `.review-panel*` (в т.ч. **`.review-panel__rec`**).
+- `iframe-shell.css` — оболочка `/review` (таймер, **`.iframe-shell__rec`**), `.url-screen*` (в т.ч. **`.url-screen__back`**, `__error*`, `__input-wrap--invalid`), `.auth-screen*` / `.auth-code-screen*` (в т.ч. `__cells--invalid`), `.review-screen*` / `.review-panel*` (в т.ч. **`.review-panel__rec`**).
 - `brand-screen.css` — **заготовка** выноса общих split-стилей из iframe-shell.
-- `home-screen.css` — главная `/home` (topbar, лента, tabbar-dock: glass tabs + submit, `--on-dark`).
+- `home-screen.css` — главная `/home` (topbar, лента, tabbar-dock: glass tabs + submit + tab-dot 3/3, `--on-dark`).
 - `success-screen.css` — `/done` (пресеты успеха).
 - `ban-screen.css` — `/banned` (блок аккаунта, красный mesh).
 - `report-screen.css` — `/report` (листы + жалоба).
@@ -14,7 +14,7 @@
 
 ## Что подключено из `index.html`
 
-`tokens.css` → `base.css` → `entrance.css` → `app-modal.css` → `iframe-shell.css` → `success-screen.css` → `report-screen.css` → `ban-screen.css` → `home-screen.css`.
+`tokens.css` → `base.css` → `entrance.css` → `app-modal.css` → `iframe-shell.css` → `success-screen.css` → `report-screen.css` → `ban-screen.css` → `home-screen.css` → `account-menu.css` → `settings-screen.css`.
 
 Архив waitlist-CSS удалён (`desktop` / `mobile` / `apply` / `access-modal` / `notification` / `privacy-policy-panel`). Историческая спека: [`mobile.md`](../mobile.md).
 

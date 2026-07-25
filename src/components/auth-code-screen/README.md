@@ -4,7 +4,7 @@ Path: **`/registration/code`**. Split как `auth-screen` / `url-screen`.
 
 ## Левая панель
 
-1. Кнопка «Назад» в верхнем левом углу form-pane (как `review-panel__top` в квизе)
+1. Кнопка «Назад» в верхнем левом углу form-pane (паттерн `review-panel__back`; тот же чип на [`url-screen`](../url-screen/README.md))
 2. Заголовок `authCodeTitle` («Отправили код»)
 3. 6 квадратных ячеек на ширину email-инпута (`--url-screen-form-width`); единый скрытый input
 4. «Отправить ещё раз» — текст как `auth-screen__divider-label`; во время cooldown — `authCodeResendWait`

@@ -27,10 +27,11 @@ Referral / auth / auth-code / onboarding — тот же shell и классы `
 
 ## Поведение
 
-1. Валидный URL (debounce) → справа белый лист: заголовок «Портфолио» + серые скелетоны строк (без скриншотов).
-2. Очистка поля → лист улетает вниз.
-3. Submit → сразу done-UI («Портфолио отправлено»); `onSubmit(url)` и persist идут в фоне. URL → `/done` через `syncRoute` (без скачка на success-screen). При ошибке сети → home.
-4. «На главную» → `onExit` → home.
+1. Слева сверху формы — чип «На главную» (`review-panel__back` + `urlScreenBack`) → `onExit` → home; на done-состоянии скрыт.
+2. Валидный URL (debounce) → справа белый лист: заголовок «Портфолио» + серые скелетоны строк (без скриншотов).
+3. Очистка поля → лист улетает вниз.
+4. Submit → сразу done-UI («Портфолио отправлено»); `onSubmit(url)` и persist идут в фоне. URL → `/done` через `syncRoute` (без скачка на success-screen). При ошибке сети → home.
+5. Done CTA «На главную» → `onExit` → home.
 
 ## Motion
 
@@ -40,4 +41,5 @@ Done: `getMotionReveal` leave/enter + `getReportLaunchMotion` для листа 
 
 ## Стили
 
-`.url-screen*` в `iframe-shell.css`, токены `--url-screen-*` в `tokens.css`.
+`.url-screen*` в `iframe-shell.css`, токены `--url-screen-*` в `tokens.css`.  
+Back-чип: `.url-screen__back` — `position: absolute; top/left: 0` в `__form-pane`; класс `review-panel__back` для визуала чипа (как на auth-code / quiz).

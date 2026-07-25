@@ -18,7 +18,7 @@
 | Home tabbar dock: glass + «Закинуть своё» справа | wired (`tabbar-dock`, `--on-dark`) |
 | Review claim / heartbeat / release | wired (награда только после submit) |
 | Review iframe + таймер 45 s + **надиктовка** (rec на `/review` + микрофон в поле совета) + квиз | wired |
-| Подача URL + done на url-screen | wired |
+| Подача URL + back-chip + done на url-screen | wired |
 | Report: листы (+ `dictation`) + жалоба + PDF | wired |
 | Referrals validate/redeem / share | wired (1 код / 2 слота, seed `YTHWKPDWAK`, без наград) |
 | App modal (shared overlays) | wired |
@@ -124,7 +124,7 @@ SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabas
 
 | Слой | Где |
 |------|-----|
-| Brand split (referral / auth / auth-code / onboarding / url) | `.url-screen*` + [`brand-screen-visual`](src/components/brand-screen-visual/README.md); цель — `brand-screen-shell` |
+| Brand split (referral / auth / auth-code / onboarding / url) | `.url-screen*` + [`brand-screen-visual`](src/components/brand-screen-visual/README.md); цель — `brand-screen-shell`; на `/portfolio` — back-chip top-left |
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
 | Home | `home-screen` + `account-menu`; лента SWR; tabbar-dock (tabs + submit + точка 3/3) / `--on-dark`; чипы репутация + баланс |
@@ -157,9 +157,10 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 - CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `success-screen`, `home-screen`, `account-menu`, `settings-screen`, `ban-screen`, `report-screen`
 - Экраны: referral, auth, auth-code, onboarding, home, settings, url, review-shell (+ rec), quiz, success, report, ban
 - Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `account-menu`
-- Home cache: `src/utils/homeListCache.js` (сброс в `exitAuthenticatedSession`)
+- Home cache: `src/utils/homeListCache.js` + `mineReadySeen.js` (сброс обоих в `exitAuthenticatedSession`)
 - Review timer: `src/config/review.js` (`REVIEW_SESSION_SECONDS`)
 - Dictation: `src/lib/dictation/` (Web Speech MVP)
+- Url-screen: чип «На главную» (`.url-screen__back`, скрыт на done) → `onExit` → home
 
 Waitlist dual-layout удалён; историческая спека — [`mobile.md`](mobile.md) § Архив.
 

@@ -14,11 +14,12 @@
 | `referral*` | `/referral` (validate errors: `referralExhausted`, …) |
 | `auth*` / `authEmail*` / `authCode*` / `authOtp*` / `authIdentityConflict` | `/registration`, `/registration/code` |
 | `onboarding*` | `/onboarding` |
-| `home*` / `homeInvite*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeCardReport*` / `homeCardReportPending*` | `/home` (лента SWR, intro до claim, mine gate, invite) |
+| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeCardReport*` / `homeCardReportPending*` / `homeTabMineReadyAria` / `homeReputation*` | `/home` (лента SWR, intro, mine gate, seen-dot, invite, репутация) |
 | `modalCloseAria` | общая модалка (`app-modal`) |
-| `url*` / `urlModal*` / `urlScreen*` | `/portfolio` |
+| `url*` / `urlModal*` / `urlScreen*` / `urlScreenBack*` | `/portfolio` (в т.ч. чип «На главную») |
 | `success*` | `/done` |
 | `ban*` | `/banned` |
+| `reportScreen*` / `reportComplaint*` / `complaintTag*` | `/report` (листы + жалоба) |
 | `review*` / `reviewRec*` / `reviewAdviceRec*` / `report*` / `reportDictationTitle` | `/quiz` (в т.ч. микрофон в поле совета), PDF; rec на `/review` |
 | `frame*` / `controls*` | iframe-shell `/review` |
 

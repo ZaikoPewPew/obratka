@@ -18,6 +18,8 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 | `sql/review_complaints.sql` | жалобы на листы → `reputation` → автобан |
 | `sql/subscribers_rls.sql` | RLS на legacy `subscribers` (если таблица есть) |
 | `sql/ban-templates.sql` | Copy-paste SQL: бан / разбан / поиск |
+| `sql/delete-account-templates.sql` | полное удаление тестового аккаунта |
+| `sql/portfolio-role-backfill.sql` | одноразовый backfill `portfolios.role` |
 | `sql/subscribers_count.sql` | RPC `subscribers_count()` (legacy waitlist) |
 | `functions/telegram-auth/` | Telegram Login Widget → сессия Supabase Auth |
 

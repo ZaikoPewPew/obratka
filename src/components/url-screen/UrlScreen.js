@@ -92,6 +92,32 @@ export function createUrlScreen({ onSubmit, onExit }) {
   const formContent = document.createElement("div");
   formContent.className = "url-screen__form-content";
 
+  const backBtn = document.createElement("button");
+  backBtn.type = "button";
+  backBtn.className = "review-panel__back url-screen__back";
+  backBtn.setAttribute("aria-label", t.urlScreenBackAria);
+
+  const backIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  backIcon.setAttribute("class", "review-panel__back-icon");
+  backIcon.setAttribute("width", "24");
+  backIcon.setAttribute("height", "24");
+  backIcon.setAttribute("viewBox", "0 0 24 24");
+  backIcon.setAttribute("fill", "none");
+  backIcon.setAttribute("aria-hidden", "true");
+  const backPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  backPath.setAttribute("d", "M11 18L5 12L11 6M5 12H19");
+  backPath.setAttribute("stroke", "currentColor");
+  backPath.setAttribute("stroke-width", "1.3");
+  backPath.setAttribute("stroke-linecap", "round");
+  backPath.setAttribute("stroke-linejoin", "round");
+  backIcon.append(backPath);
+
+  const backLabel = document.createElement("span");
+  backLabel.className = "review-panel__back-label";
+  backLabel.textContent = t.urlScreenBack;
+
+  backBtn.append(backIcon, backLabel);
+
   const block = document.createElement("div");
   block.className = "url-screen__block";
 
@@ -180,7 +206,7 @@ export function createUrlScreen({ onSubmit, onExit }) {
 
   doneActions.append(exitBtn);
   done.append(doneTitle, doneActions);
-  formContent.append(block, done);
+  formContent.append(backBtn, block, done);
 
   const shell = createBrandScreenShell({
     labelledById: "url-screen-title",
@@ -230,6 +256,8 @@ export function createUrlScreen({ onSubmit, onExit }) {
 
   function syncCopy() {
     const strings = getStrings();
+    backLabel.textContent = strings.urlScreenBack;
+    backBtn.setAttribute("aria-label", strings.urlScreenBackAria);
     title.textContent = strings.urlModalTitle;
     input.setAttribute("aria-label", strings.urlModalTitle);
     input.placeholder = strings.urlModalPlaceholder;
@@ -240,6 +268,11 @@ export function createUrlScreen({ onSubmit, onExit }) {
     stubTitle.textContent = strings.urlPreviewStubTitle;
     doneTitle.textContent = strings.successPortfolioTitle;
     exitBtn.textContent = strings.successGenericPrimary;
+  }
+
+  /** @param {boolean} visible */
+  function setBackVisible(visible) {
+    backBtn.hidden = !visible;
   }
 
   function setError(visible) {
@@ -406,6 +439,7 @@ export function createUrlScreen({ onSubmit, onExit }) {
     submit.disabled = false;
     root.classList.remove("url-screen--preview", "url-screen--to-done");
     clearDoneMesh();
+    setBackVisible(true);
     block.hidden = false;
     done.hidden = true;
     formPane.style.minHeight = "";
@@ -422,6 +456,8 @@ export function createUrlScreen({ onSubmit, onExit }) {
    * @returns {Promise<void>}
    */
   async function showDone() {
+    setBackVisible(false);
+
     if (!done.hidden && block.hidden) {
       pendingDoneMesh = true;
       void launchPreviewAway();
@@ -571,6 +607,10 @@ export function createUrlScreen({ onSubmit, onExit }) {
       submitting = false;
       submit.disabled = false;
     });
+  });
+
+  backBtn.addEventListener("click", () => {
+    void onExit?.();
   });
 
   exitBtn.addEventListener("click", () => {

@@ -1,6 +1,6 @@
 # `success-screen` — экран успеха (пресеты)
 
-Path: **`/done`** (`success`). Только для **подачи своего портфолио** (и generic). Финал квиза — в `review-panel` на `/quiz/done`.
+Path: **`/done`** (`success`). Запасной / deep-link экран после подачи портфолио. Основной submit остаётся на `url-screen` (`setVariant("done")` + `syncRoute("success")`); финал квиза — в `review-panel` на `/quiz/done`.
 
 ## Layout
 
@@ -10,8 +10,8 @@ Split: слева тайтл + кнопка «На главную», справ�
 
 | Id | Когда | CTA |
 |----|--------|-----|
-| `portfolioSubmitted` | после подачи портфолио | На главную (`successGenericPrimary`) |
-| `generic` | deep link / запасной | На главную |
+| `generic` | deep link `/done`, `applyRoute("success")` | На главную (`successGenericPrimary`) |
+| `portfolioSubmitted` | в `successPresets.js` (legacy); рантайм сейчас всегда `generic` | На главную |
 
 Конфиг: `successPresets.js`. Копирайт: `success*` в `locales.json`.
 
@@ -20,13 +20,13 @@ Split: слева тайтл + кнопка «На главную», справ�
 `createSuccessScreen({ onPrimary?, onSecondary? })` → `{ root, open, close }`
 
 ```js
-successScreen.open({ preset: "portfolioSubmitted" });
+successScreen.open({ preset: "generic" });
 ```
 
-Пресет в рантайме задаёт `main.js` (`pendingSuccessPreset`) перед `go("success")`.
+Пресет в рантайме: `main.js` (`pendingSuccessPreset`, по умолчанию `"generic"`) перед `applyRoute("success")` / open при deep link.
 
 ## Стили
 
 `styles/success-screen.css` + токены `--success-screen-*`.
 
-См. [`SCREENS.md`](../../../SCREENS.md).
+См. [`SCREENS.md`](../../../SCREENS.md), [`url-screen/README.md`](../url-screen/README.md).

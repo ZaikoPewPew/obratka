@@ -28,8 +28,9 @@ alwaysApply: true
 |---------|---------|
 | `referral*` | invite gate |
 | `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict` | регистрация / OTP |
-| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeCardReport*` / `homeCardReportPending*` | home + notices / intro / mine gate |
+| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeCardReport*` / `homeCardReportPending*` / `homeTabMineReadyAria` | home + notices / intro / mine gate / seen-dot |
 | `modalCloseAria` | общая модалка (`app-modal`) |
+| `url*` / `urlScreenBack*` | `/portfolio` (в т.ч. чип «На главную») |
 | `ban*` | `/banned` |
 | `reportScreen*` | `/report` |
 | `reviewRec*` / `reviewAdviceRec*` / `reportDictationTitle` | чип rec на `/review`, микрофон в поле совета, секция надиктовки в листе |

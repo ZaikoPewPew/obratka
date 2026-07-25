@@ -24,9 +24,9 @@
 | `auth` | `/registration` | Email → code screen / Telegram / Google |
 | `authCode` | `/registration/code` | 6-digit Email OTP + resend cooldown |
 | `onboarding` | `/onboarding` | Онбординг → profiles |
-| `home` | `/home` | Хаб: SWR лента/мои + tabbar-dock + меню профиля |
+| `home` | `/home` | Хаб: SWR лента/мои + seen-dot + tabbar-dock + меню профиля |
 | `settings` | `/settings` | Отдельный экран настроек (пока заглушка) |
-| `url` | `/portfolio` | Подача своего портфолио |
+| `url` | `/portfolio` | Подача URL; back-chip → home; done на том же экране |
 | `review` | `/review` | Ревью: iframe + таймер 45 s + чип rec (заметки) |
 | `quiz` | `/quiz` | Квиз / опрос после таймера; микрофон в поле «Главный совет» |
 | `done` | `/quiz/done` | Финал квиза (review-panel done + улет отчёта) |
@@ -48,12 +48,13 @@ referral → auth → (authCode) → onboarding → home
   home → (intro modal) → claim → review → quiz → /quiz/done
   home (Мои, все слоты) → report
   home (Мои, не готово) → homeMineNotReady*
-  home → url → /done (portfolioSubmitted)
+  home → url → done на url-screen (+ syncRoute /done; success-screen — deep link / generic)
 ```
 
 Auth-защита и Dashboard: [`auth-screen/README.md`](../components/auth-screen/README.md).  
 Brand visual / field errors: [`brand-screen-visual`](../components/brand-screen-visual/README.md), [`FIELD_ERROR.md`](../utils/FIELD_ERROR.md).  
-Home: [`home-screen/README.md`](../components/home-screen/README.md) (SWR `homeListCache`, intro до claim, mine report gate, tabbar-dock + submit).  
+Home: [`home-screen/README.md`](../components/home-screen/README.md) (SWR `homeListCache`, intro до claim, mine report gate, seen-dot, tabbar-dock + submit).  
+Url: [`url-screen/README.md`](../components/url-screen/README.md) (back-chip + done).  
 Надиктовка (`/review` + поле совета): [`lib/dictation/README.md`](../lib/dictation/README.md).  
 См. корневой [`SCREENS.md`](../../SCREENS.md).
 

@@ -44,8 +44,8 @@
 | `/registration` | Email → `/registration/code` / Telegram / Google |
 | `/registration/code` | 6 ячеек OTP |
 | `/onboarding` | Онбординг → `profiles` |
-| `/home` | Hub: SWR лента/мои + intro до claim + mine report gate + tabbar-dock |
-| `/portfolio` | Подача URL; done через `setVariant("done")` |
+| `/home` | Hub: SWR лента/мои + intro до claim + mine report gate + seen-dot 3/3 + tabbar-dock |
+| `/portfolio` | Подача URL; back-chip «На главную»; done через `setVariant("done")` |
 | `/review` | iframe + таймер 45 s + **rec** (заметки; нужен claim); в квизе — микрофон в поле совета |
 | `/quiz` | Квиз |
 | `/quiz/done` | Финал квиза |
@@ -62,10 +62,11 @@
 | Надиктовка | `src/lib/dictation/` + `.iframe-shell__rec` + `.review-panel__rec` |
 | Онбординг-контент | `content/onboarding.json`, `content/onboarding.md` |
 
-Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `success-screen`, `ban-screen`, `report-screen`.
+Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `account-menu`, `settings-screen`, `success-screen`, `ban-screen`, `report-screen`.
 
-**Home (новое):** SWR `homeListCache` (memory + `obratka.homeLists.<userId>`); silent slot patch; feed sort `sortFeedForSlotClosure`; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) 20%/blur + `--on-dark` через `backdropLuminance`. Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache`.  
-Подробно: [`home-screen/README.md`](../src/components/home-screen/README.md).
+**Home (новое):** SWR `homeListCache` (memory + `obratka.homeLists.<userId>`); silent slot patch; feed sort `sortFeedForSlotClosure`; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); точка на «Мои» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) 20%/blur + `--on-dark` через `backdropLuminance`. Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache` + `clearMineReadySeen`.  
+**Url-screen:** чип `.url-screen__back` (`urlScreenBack*`) → home; на done скрыт.  
+Подробно: [`home-screen/README.md`](../src/components/home-screen/README.md), [`url-screen/README.md`](../src/components/url-screen/README.md).
 
 **Не восстанавливать** waitlist dual-layout (`apply-card`, `desktop.css` / `mobile.css`) без явной задачи.
 

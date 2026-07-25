@@ -37,6 +37,6 @@ Senior → Junior **нельзя** (ликвидность мидлов). Grade 
 - Клиент-зеркало: `src/api/leagues.js`
 - Списки: `listPortfoliosForReview` / `listMyPortfolios` — `src/api/portfolios.js`
 - Порядок ленты после слотов — `sortFeedForSlotClosure` в `portfolios.js` (не SQL)
-- Home UI: [`src/components/home-screen/`](../../src/components/home-screen/) — SWR-кэш вкладок, silent patch слотов, glass-tabbar, intro до claim, mine report gate.
+- Home UI: [`src/components/home-screen/`](../../src/components/home-screen/) — SWR-кэш вкладок, silent patch слотов, glass-tabbar + tabbar-dock submit, intro до claim, mine report gate, seen-dot 3/3.
 
 Награды v1 пока 1:1; дифференциал экономики — позже.

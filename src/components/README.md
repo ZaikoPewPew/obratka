@@ -19,10 +19,10 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `auth-screen/` | `/registration` | Email → auth-code / Telegram / Google (shell) |
 | `auth-code-screen/` | `/registration/code` | OTP verify + resend cooldown (shell) |
 | `onboarding-screen/` | `/onboarding` | UI → `profiles` (shell) |
-| `home-screen/` | `/home` | хаб + SWR feed/mine + intro modal + mine report gate + tabbar-dock (tabs + submit) + wallet + репутация + invite |
+| `home-screen/` | `/home` | хаб + SWR feed/mine + intro + mine gate + seen-dot 3/3 + tabbar-dock + wallet + репутация + invite |
 | `account-menu/` | — | поповер профиля (settings / invite / contacts / sign out) |
 | `settings-screen/` | `/settings` | заглушка настроек |
-| `url-screen/` | `/portfolio` | submit own + done (`setVariant("done")`; shell) |
+| `url-screen/` | `/portfolio` | back-chip → home; submit + done (`setVariant("done")`; shell) |
 | `review-screen/` | `/quiz` | квиз + PDF-лист |
 | `success-screen/` | `/done` | пресеты успеха (deep link) |
 | `report-screen/` | `/report` | листы ревью + жалоба + PDF |
