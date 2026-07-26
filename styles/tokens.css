@@ -693,6 +693,7 @@
   --home-screen-badge-overlap: calc(var(--space-4) * -1);
   --home-screen-badge-ring: 3px;
   --home-screen-badge-ring-color: var(--home-screen-card-bg);
+  --home-screen-badge-web-font-size: var(--font-size-xs);
   --home-screen-meta-gap: 13px;
   --home-screen-meta-text-gap: var(--space-1);
   --home-screen-meta-font-size: var(--font-size-base);

@@ -482,6 +482,10 @@
   text-align: center;
 }
 
+.home-screen__badge--web .home-screen__badge-letter {
+  font-size: var(--home-screen-badge-web-font-size);
+}
+
 .home-screen__badge--avatar {
   z-index: 1;
   overflow: visible;
