@@ -172,6 +172,73 @@
   white-space: var(--home-screen-reputation-body-pre);
 }
 
+.home-screen__balance-explainer {
+  box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+  gap: var(--home-screen-balance-explainer-gap);
+  min-width: 0;
+}
+
+.home-screen__balance-explainer-media {
+  box-sizing: border-box;
+  display: block;
+  flex: 0 0 auto;
+  width: var(--home-screen-balance-explainer-media-width);
+  height: var(--home-screen-balance-explainer-media-height);
+  object-fit: cover;
+  border-radius: var(--home-screen-balance-explainer-media-radius);
+}
+
+.home-screen__balance-explainer-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-screen-balance-explainer-card-gap);
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--home-screen-balance-explainer-media-height);
+  padding: var(--home-screen-balance-explainer-card-padding);
+  border-radius: var(--home-screen-balance-explainer-card-radius);
+  background: var(--home-screen-balance-explainer-card-bg);
+}
+
+.home-screen__balance-explainer-card-title,
+.home-screen__balance-explainer-card-body {
+  margin: 0;
+  font-family: var(--font-family);
+}
+
+.home-screen__balance-explainer-card-title {
+  color: var(--color-text);
+  font-size: var(--home-screen-balance-explainer-card-title-size);
+  font-weight: var(--home-screen-balance-explainer-card-title-weight);
+  line-height: var(--home-screen-balance-explainer-card-title-line);
+}
+
+.home-screen__balance-explainer-card-body {
+  color: var(--home-screen-balance-explainer-card-body-color);
+  font-size: var(--home-screen-balance-explainer-card-body-size);
+  font-weight: var(--home-screen-balance-explainer-card-body-weight);
+  line-height: var(--home-screen-balance-explainer-card-body-line);
+}
+
+@media (max-width: 560px) {
+  .home-screen__balance-explainer {
+    flex-direction: column;
+  }
+
+  .home-screen__balance-explainer-media {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 260 / 216;
+  }
+
+  .home-screen__balance-explainer-card {
+    min-height: 0;
+  }
+}
+
 .home-screen__review-intro-steps {
   margin: 0;
   padding-left: var(--home-screen-review-intro-indent);

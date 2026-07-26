@@ -17,11 +17,8 @@ import {
 import { fetchMyReferral } from "../../api/referrals.js";
 import {
   canSubmitPortfolio,
-  creditBalance,
   getBalance,
   refreshWalletFromServer,
-  TEMP_BALANCE_CHIP_AMOUNT,
-  TEMP_BALANCE_CHIP_CREDIT,
 } from "../../api/wallet.js";
 import {
   formatReputationDelta,
@@ -63,6 +60,7 @@ import { createContactFab } from "../contact-fab/ContactFab.js";
 import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
 import { REVIEW_SESSION_SECONDS } from "../../config/review.js";
 import boneIconUrl from "../../assets/home/bone.svg";
+import currencyDuckUrl from "../../assets/home/currency-duck.jpg";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
 import reviewedCheckIconSvg from "../../assets/home/reviewed-check.svg?raw";
 import reputationNeutralIconUrl from "../../assets/home/reputation-neutral.svg";
@@ -121,9 +119,6 @@ function createReviewedCheckIcon() {
   svg.setAttribute("height", "24");
   return svg;
 }
-
-/** Сколько монет даёт клик по чипу баланса (temp / DEV). */
-const DEV_CREDIT_AMOUNT = TEMP_BALANCE_CHIP_AMOUNT;
 
 /** Сколько skeleton-карточек показывать, пока грузится лента. */
 const SKELETON_CARD_COUNT = 5;
@@ -625,6 +620,41 @@ export function createHomeScreen({
     },
   });
 
+  const balanceExplainer = document.createElement("div");
+  balanceExplainer.className = "home-screen__balance-explainer";
+
+  const balanceMedia = document.createElement("img");
+  balanceMedia.className = "home-screen__balance-explainer-media";
+  balanceMedia.src = currencyDuckUrl;
+  balanceMedia.alt = "";
+  balanceMedia.width = 260;
+  balanceMedia.height = 216;
+  balanceMedia.decoding = "async";
+
+  const balanceCard = document.createElement("div");
+  balanceCard.className = "home-screen__balance-explainer-card";
+
+  const balanceCardTitle = document.createElement("p");
+  balanceCardTitle.className = "home-screen__balance-explainer-card-title";
+
+  const balanceCardBody = document.createElement("p");
+  balanceCardBody.className = "home-screen__balance-explainer-card-body";
+
+  balanceCard.append(balanceCardTitle, balanceCardBody);
+  balanceExplainer.append(balanceMedia, balanceCard);
+
+  const balanceModal = createAppModal({
+    size: "md",
+    onPrimary: () => {
+      void balanceModal.close();
+      void setActiveTab("feed");
+    },
+    onSecondary: () => {
+      void balanceModal.close();
+    },
+  });
+  balanceModal.content.append(balanceExplainer);
+
   const reviewIntroSteps = document.createElement("ol");
   reviewIntroSteps.className = "home-screen__review-intro-steps";
 
@@ -740,6 +770,7 @@ export function createHomeScreen({
     tabbarDock,
     legendaryOnlinePanel.root,
     noticeModal.root,
+    balanceModal.root,
     reviewIntroModal.root,
     inviteModal.root,
     contactsModal.root,
@@ -2362,22 +2393,23 @@ export function createHomeScreen({
   });
 
   balanceChip.addEventListener("click", () => {
-    if (!TEMP_BALANCE_CHIP_CREDIT && !import.meta.env.DEV) return;
-    balanceChip.disabled = true;
-    void creditBalance(DEV_CREDIT_AMOUNT)
-      .then((next) => {
-        syncCopy();
-        if (import.meta.env.DEV || TEMP_BALANCE_CHIP_CREDIT) {
-          console.info("[home] balance credit →", next);
-        }
-      })
-      .catch((err) => {
-        console.warn("[home] balance credit failed", err);
-      })
-      .finally(() => {
-        balanceChip.disabled = false;
-      });
+    openBalanceModal();
   });
+
+  function openBalanceModal() {
+    const t = getStrings();
+    balanceCardTitle.textContent = t.homeBalanceCardTitle ?? "";
+    balanceCardBody.textContent = t.homeBalanceCardBody ?? "";
+    balanceModal.setTitle(t.homeBalanceTitle ?? "");
+    balanceModal.setDescription(t.homeBalanceDesc ?? "");
+    balanceModal.setPrimaryLabel(t.homeBalanceReview ?? "");
+    balanceModal.setSecondaryLabel(t.homeBalanceClose ?? "");
+    balanceModal.setCloseAriaLabel(
+      t.homeBalanceCloseAria ?? t.homeBalanceClose ?? "",
+    );
+    balanceModal.setActionsVisible({ primary: true, secondary: true });
+    balanceModal.open();
+  }
 
   function openReputationModal() {
     const t = getStrings();
