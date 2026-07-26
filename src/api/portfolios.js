@@ -9,7 +9,7 @@ import { getSupabase } from "../lib/supabaseClient.js";
  *
  * @typedef {{
  *   kind: 'completed' | 'active';
- *   reviewerId: string;
+ *   reviewerId?: string;
  *   avatarUrl?: string;
  *   displayName?: string;
  *   grade?: string;
@@ -203,9 +203,11 @@ function mapSlotRow(row) {
   const kind = r.slot_kind === "active" ? "active" : "completed";
   const reviewerId =
     typeof r.reviewer_id === "string" ? r.reviewer_id : "";
-  if (!reviewerId) return null;
+  if (kind === "completed" && !reviewerId) return null;
   /** @type {PortfolioReviewerSlot} */
-  const slot = { kind, reviewerId };
+  const slot = { kind };
+  if (reviewerId) slot.reviewerId = reviewerId;
+  if (kind === "active") return slot;
   if (typeof r.avatar_url === "string" && r.avatar_url.trim()) {
     slot.avatarUrl = r.avatar_url.trim();
   }
@@ -262,9 +264,7 @@ async function fetchReviewerSlotsFallback(supabase, ids) {
       .in("portfolio_id", ids),
     supabase
       .from("review_claims")
-      .select(
-        "portfolio_id, reviewer_id, reviewer_avatar_url, reviewer_display_name, reviewer_grade, claimed_at, expires_at",
-      )
+      .select("portfolio_id, claimed_at, expires_at")
       .in("portfolio_id", ids)
       .gt("expires_at", new Date().toISOString()),
   ]);
@@ -300,10 +300,6 @@ async function fetchReviewerSlotsFallback(supabase, ids) {
       portfolioId,
       mapSlotRow({
         slot_kind: "active",
-        reviewer_id: row.reviewer_id,
-        avatar_url: row.reviewer_avatar_url,
-        display_name: row.reviewer_display_name,
-        grade: row.reviewer_grade,
       }),
     );
   }

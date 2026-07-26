@@ -516,12 +516,15 @@
   --home-screen-reviewer-slot-ring: var(--color-surface);
   --home-screen-reviewer-slot-empty-bg: var(--color-surface-muted);
   --home-screen-reviewer-slot-plus-size: 18px;
-  --home-screen-reviewer-slot-active-opacity: 0.72;
+  --home-screen-reviewer-slot-anonymous-bg: var(--color-surface-muted);
+  --home-screen-reviewer-slot-anonymous-color: var(--color-text);
+  --home-screen-reviewer-slot-anonymous-opacity: 0.25;
+  --home-screen-reviewer-slot-anonymous-icon-size: 18px;
   --home-screen-reviewer-slot-tooltip-padding-x: var(--space-2);
   --home-screen-reviewer-slot-tooltip-padding-y: var(--space-1);
   --home-screen-reviewer-slot-tooltip-radius: var(--radius-xs);
-  --home-screen-reviewer-slot-tooltip-bg: var(--palette-gray-900);
-  --home-screen-reviewer-slot-tooltip-color: var(--palette-white);
+  --home-screen-reviewer-slot-tooltip-bg: var(--color-text);
+  --home-screen-reviewer-slot-tooltip-color: var(--color-surface);
   --home-screen-reviewer-slot-tooltip-font-size: var(--font-size-xs);
   --home-screen-reviewer-slot-tooltip-font-weight: var(--font-weight-medium);
   --home-screen-reviewer-slot-tooltip-offset: var(--space-2);

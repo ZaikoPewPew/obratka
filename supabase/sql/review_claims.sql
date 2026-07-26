@@ -293,23 +293,13 @@ begin
       select
         c.portfolio_id as portfolio_id,
         'active'::text as slot_kind,
-        c.reviewer_id as reviewer_id,
-        coalesce(
-          nullif(trim(c.reviewer_avatar_url), ''),
-          nullif(trim(pr.avatar_url), '')
-        ) as avatar_url,
-        coalesce(
-          nullif(trim(c.reviewer_display_name), ''),
-          nullif(trim(pr.display_name), '')
-        ) as display_name,
-        coalesce(
-          nullif(trim(c.reviewer_grade), ''),
-          nullif(trim(pr.grade), '')
-        ) as grade,
+        null::uuid as reviewer_id,
+        null::text as avatar_url,
+        null::text as display_name,
+        null::text as grade,
         c.claimed_at as occupied_at
       from public.review_claims c
       join visible v on v.id = c.portfolio_id
-      left join public.profiles pr on pr.id = c.reviewer_id
       where c.expires_at > now()
     )
     select * from completed

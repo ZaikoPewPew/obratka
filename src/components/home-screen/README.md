@@ -139,10 +139,11 @@ Topbar поверх контента (`position: absolute`), появление 
 | ФИО | `item.name` |
 | Роль | EN Title Case: `formatPortfolioRole` (Lead → `… Design Lead`, Head → `Head Of …`) |
 | Слоты | Белый чип `.home-screen__card-progress` 108×52 r pill, padding 10; внутри стек 88×32 |
-| Пустой слот | 32×32, фон muted, **внешняя** обводка 3px (box-shadow), плюс 18×18 |
-| Active / completed | Аватарка; margin −4px между слотами, L→R; hover → тултип с грейдом (EN) |
+| Пустой слот | 32×32, фон muted, **внешняя** обводка 3px (box-shadow), плюс 18×18; hover → `homeCardReviewerEmpty` |
+| Active claim | Анонимный muted-круг с иконкой (`homeCardReviewerAnonymous`); RPC не отдаёт личные данные до завершения ревью |
+| Completed | Аватарка; hover → тултип с грейдом (EN) |
 
-Заполнение слотов слева направо; по умолчанию три плюса. Текста «N из 3» нет (есть в aria).
+Заполнение слотов слева направо, margin −4px; по умолчанию три плюса. Текста «N из 3» нет (есть в aria).
 
 `refresh()` при `open`, смене вкладки, `visibilitychange` и poll (~15с), пока home открыт — слоты и новые карточки подтягиваются без skeleton (поверх кэша). Своя карточка (`isOwn`, «Мои») всегда кликабельна (`cursor: pointer`, класс `--own`): готово (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report`; иначе `homeMineNotReady*` (не «сразу report»). Title / aria — `homeCardReport*` / `homeCardReportPending*`, синк при silent-патче.
 

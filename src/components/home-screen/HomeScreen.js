@@ -127,6 +127,40 @@ function initialFromLabel(label) {
 }
 
 /**
+ * Иконка занятого, но ещё не завершённого анонимного ревью.
+ * @returns {SVGSVGElement}
+ */
+function createAnonymousReviewerIcon() {
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.classList.add("home-screen__reviewer-slot-anonymous-icon");
+  svg.setAttribute("viewBox", "0 0 18 18");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("aria-hidden", "true");
+
+  const body = document.createElementNS(ns, "path");
+  body.setAttribute(
+    "d",
+    "M12.25 15C13.3546 15 14.3258 14.0723 13.957 13.0311C13.3593 11.3437 11.8124 10.5 9 10.5C6.18759 10.5 4.64072 11.3437 4.04302 13.0311C3.67422 14.0723 4.64543 15 5.75 15H12.25Z",
+  );
+
+  const head = document.createElementNS(ns, "path");
+  head.setAttribute(
+    "d",
+    "M9 8.25C10.5 8.25 11.25 7.5 11.25 5.625C11.25 3.75 10.5 3 9 3C7.5 3 6.75 3.75 6.75 5.625C6.75 7.5 7.5 8.25 9 8.25Z",
+  );
+
+  for (const path of [body, head]) {
+    path.setAttribute("stroke", "currentColor");
+    path.setAttribute("stroke-width", "1.3");
+    path.setAttribute("stroke-linecap", "round");
+    path.setAttribute("stroke-linejoin", "round");
+  }
+  svg.append(body, head);
+  return svg;
+}
+
+/**
  * @param {HTMLImageElement} img
  * @param {string[]} candidates
  */
@@ -140,6 +174,21 @@ function bindImageFallbacks(img, candidates) {
     }
     img.hidden = true;
   });
+}
+
+/**
+ * @param {HTMLElement} slot
+ * @param {string} label
+ */
+function attachReviewerSlotTooltip(slot, label) {
+  const text = typeof label === "string" ? label.trim() : "";
+  if (!text) return;
+  slot.setAttribute("aria-label", text);
+  const tooltip = document.createElement("span");
+  tooltip.className = "home-screen__reviewer-slot-tooltip";
+  tooltip.setAttribute("role", "tooltip");
+  tooltip.textContent = text;
+  slot.append(tooltip);
 }
 
 /**
@@ -169,7 +218,6 @@ function fillReviewerSlots(slots, item) {
     slot.className = "home-screen__reviewer-slot";
     if (!slotData) {
       slot.classList.add("home-screen__reviewer-slot--empty");
-      slot.setAttribute("aria-hidden", "true");
       const plusImg = document.createElement("img");
       plusImg.className = "home-screen__reviewer-slot-plus";
       plusImg.src = slotPlusIconUrl;
@@ -179,14 +227,18 @@ function fillReviewerSlots(slots, item) {
       plusImg.decoding = "async";
       plusImg.setAttribute("aria-hidden", "true");
       slot.append(plusImg);
+      attachReviewerSlotTooltip(slot, t.homeCardReviewerEmpty);
       slots.append(slot);
       continue;
     }
     if (slotData.kind === "active") {
       slot.classList.add("home-screen__reviewer-slot--active");
-    } else {
-      slot.classList.add("home-screen__reviewer-slot--completed");
+      slot.append(createAnonymousReviewerIcon());
+      attachReviewerSlotTooltip(slot, t.homeCardReviewerAnonymous);
+      slots.append(slot);
+      continue;
     }
+    slot.classList.add("home-screen__reviewer-slot--completed");
     const slotAvatar =
       typeof slotData.avatarUrl === "string" ? slotData.avatarUrl.trim() : "";
     const slotLetter = initialFromLabel(
@@ -196,12 +248,7 @@ function fillReviewerSlots(slots, item) {
       typeof slotData.grade === "string" ? slotData.grade.trim() : "";
     const gradeLabel = formatPortfolioGrade(gradeKey);
     if (gradeLabel) {
-      slot.setAttribute("aria-label", gradeLabel);
-      const tooltip = document.createElement("span");
-      tooltip.className = "home-screen__reviewer-slot-tooltip";
-      tooltip.setAttribute("role", "tooltip");
-      tooltip.textContent = gradeLabel;
-      slot.append(tooltip);
+      attachReviewerSlotTooltip(slot, gradeLabel);
     }
     if (slotAvatar) {
       const slotImg = document.createElement("img");

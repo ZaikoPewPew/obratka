@@ -639,7 +639,8 @@
 }
 
 .home-screen__reviewer-slot--active {
-  opacity: var(--home-screen-reviewer-slot-active-opacity);
+  background: var(--home-screen-reviewer-slot-anonymous-bg);
+  color: var(--home-screen-reviewer-slot-anonymous-color);
 }
 
 .home-screen__reviewer-slot--completed {
@@ -650,6 +651,14 @@
 .home-screen__reviewer-slot--letter {
   background: var(--home-screen-avatar-letter-bg);
   color: var(--home-screen-avatar-letter-color);
+}
+
+.home-screen__reviewer-slot-anonymous-icon {
+  display: block;
+  width: var(--home-screen-reviewer-slot-anonymous-icon-size);
+  height: var(--home-screen-reviewer-slot-anonymous-icon-size);
+  flex-shrink: 0;
+  opacity: var(--home-screen-reviewer-slot-anonymous-opacity);
 }
 
 .home-screen__reviewer-slot-img {
