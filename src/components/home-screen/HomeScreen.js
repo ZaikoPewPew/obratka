@@ -98,6 +98,24 @@ function createReviewedCheckIcon() {
   return svg;
 }
 
+/**
+ * Старые строки портфолио уже хранят объединённый `grade + role`.
+ * Вытаскиваем из них грейд для компактной подписи карточки.
+ * @param {string | null | undefined} role
+ * @returns {string}
+ */
+function gradeFromPortfolioRole(role) {
+  const value = typeof role === "string" ? role.trim() : "";
+  if (!value) return "";
+  if (/^Junior\b/i.test(value)) return "Junior";
+  if (/^Middle\b/i.test(value)) return "Middle";
+  if (/^Senior\b/i.test(value)) return "Senior";
+  if (/^Staff\b/i.test(value)) return "Staff";
+  if (/\bLead$/i.test(value)) return "Lead";
+  if (/^Head Of\b/i.test(value)) return "Head";
+  return "";
+}
+
 /** Сколько монет даёт клик по чипу баланса (temp / DEV). */
 const DEV_CREDIT_AMOUNT = TEMP_BALANCE_CHIP_AMOUNT;
 
@@ -1365,17 +1383,11 @@ export function createHomeScreen({
       "home-screen__skeleton-badge home-screen__skeleton-badge--avatar";
     badges.append(platformBone, avatarBone);
 
-    const text = document.createElement("div");
-    text.className = "home-screen__skeleton-text";
+    const gradeBone = document.createElement("div");
+    gradeBone.className =
+      "home-screen__skeleton-line home-screen__skeleton-line--grade";
 
-    const lineName = document.createElement("div");
-    lineName.className = "home-screen__skeleton-line home-screen__skeleton-line--name";
-
-    const lineRole = document.createElement("div");
-    lineRole.className = "home-screen__skeleton-line home-screen__skeleton-line--role";
-
-    text.append(lineName, lineRole);
-    person.append(badges, text);
+    person.append(badges, gradeBone);
 
     const progress = document.createElement("div");
     progress.className = "home-screen__skeleton-progress";
@@ -1669,8 +1681,8 @@ export function createHomeScreen({
       const platformImg = document.createElement("img");
       platformImg.className = "home-screen__badge-img";
       platformImg.alt = "";
-      platformImg.width = 52;
-      platformImg.height = 52;
+      platformImg.width = 32;
+      platformImg.height = 32;
       platformImg.decoding = "async";
       platformImg.loading = "lazy";
       platformImg.referrerPolicy = "no-referrer";
@@ -1690,8 +1702,8 @@ export function createHomeScreen({
       const avatarImg = document.createElement("img");
       avatarImg.className = "home-screen__badge-img";
       avatarImg.alt = "";
-      avatarImg.width = 52;
-      avatarImg.height = 52;
+      avatarImg.width = 32;
+      avatarImg.height = 32;
       avatarImg.decoding = "async";
       avatarImg.loading = "lazy";
       avatarImg.referrerPolicy = "no-referrer";
@@ -1717,19 +1729,11 @@ export function createHomeScreen({
 
     badges.append(platform, avatar);
 
-    const text = document.createElement("div");
-    text.className = "home-screen__card-text";
+    const grade = document.createElement("p");
+    grade.className = "home-screen__card-grade";
+    grade.textContent = gradeFromPortfolioRole(item.role) || t.homeDefaultRole;
 
-    const name = document.createElement("p");
-    name.className = "home-screen__card-name";
-    name.textContent = item.name || item.url;
-
-    const role = document.createElement("p");
-    role.className = "home-screen__card-role";
-    role.textContent = item.role || t.homeDefaultRole;
-
-    text.append(name, role);
-    person.append(badges, text);
+    person.append(badges, grade);
 
     const progress = document.createElement("div");
     progress.className = "home-screen__card-progress";

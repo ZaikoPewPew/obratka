@@ -770,16 +770,25 @@
 }
 
 .home-screen__card-person {
+  box-sizing: border-box;
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: var(--home-screen-meta-gap);
+  width: var(--home-screen-person-width);
+  height: var(--home-screen-person-height);
+  padding: var(--home-screen-person-padding);
   min-width: 0;
+  border-radius: var(--home-screen-person-radius);
+  background: var(--home-screen-person-bg);
 }
 
 .home-screen__card-badges {
   display: flex;
   flex-shrink: 0;
   align-items: center;
+  width: var(--home-screen-badges-width);
+  height: var(--home-screen-badges-height);
 }
 
 .home-screen__badge {
@@ -821,11 +830,9 @@
 
 .home-screen__badge--avatar {
   z-index: 1;
-  overflow: visible;
-  border: none;
+  border: var(--home-screen-badge-ring) solid
+    var(--home-screen-badge-ring-color);
   border-radius: var(--home-screen-avatar-radius);
-  box-shadow: 0 0 0 var(--home-screen-badge-ring)
-    var(--home-screen-card-surface, var(--home-screen-badge-ring-color));
 }
 
 .home-screen__badge--avatar .home-screen__badge-img {
@@ -855,31 +862,15 @@
   filter: var(--home-screen-badge-platform-icon-filter);
 }
 
-.home-screen__card-text {
-  display: flex;
-  flex-direction: column;
-  gap: var(--home-screen-meta-text-gap);
-  min-width: 0;
-}
-
-.home-screen__card-name,
-.home-screen__card-role {
+.home-screen__card-grade {
   margin: 0;
   overflow: hidden;
   font-size: var(--home-screen-meta-font-size);
+  font-weight: var(--home-screen-grade-weight);
   line-height: normal;
+  color: var(--home-screen-grade-color);
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.home-screen__card-name {
-  font-weight: var(--home-screen-name-weight);
-  color: var(--color-text);
-}
-
-.home-screen__card-role {
-  font-weight: var(--home-screen-role-weight);
-  color: var(--color-text);
 }
 
 .home-screen__card-progress {
@@ -1264,17 +1255,8 @@
 }
 
 .home-screen__card-person--skeleton {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-width: 0;
-}
-
-.home-screen__skeleton-text {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--home-screen-skeleton-line-gap);
-  min-width: 0;
-  flex: 1 1 auto;
 }
 
 .home-screen__skeleton-line {
@@ -1284,18 +1266,16 @@
   background-color: var(--home-screen-skeleton-base);
 }
 
-.home-screen__skeleton-line--name {
-  width: var(--home-screen-skeleton-line-name-width);
-}
-
-.home-screen__skeleton-line--role {
-  width: var(--home-screen-skeleton-line-role-width);
+.home-screen__skeleton-line--grade {
+  width: var(--home-screen-skeleton-line-grade-width);
 }
 
 .home-screen__skeleton-badges {
   display: flex;
   flex-shrink: 0;
   align-items: center;
+  width: var(--home-screen-badges-width);
+  height: var(--home-screen-badges-height);
 }
 
 .home-screen__skeleton-badge {
@@ -1315,8 +1295,8 @@
 .home-screen__skeleton-badge--avatar {
   z-index: 1;
   border-radius: var(--home-screen-avatar-radius);
-  box-shadow: 0 0 0 var(--home-screen-badge-ring)
-    var(--home-screen-card-surface, var(--home-screen-badge-ring-color));
+  border: var(--home-screen-badge-ring) solid
+    var(--home-screen-badge-ring-color);
 }
 
 .home-screen__skeleton-progress {

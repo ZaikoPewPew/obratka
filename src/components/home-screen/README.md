@@ -140,12 +140,12 @@ Topbar поверх контента (`position: absolute`), появление 
 
 | Элемент | Источник |
 |---------|----------|
-| Превью | thum.io (`width/1200/crop/620/wait/3`); в фрейме `object-fit: contain` + `object-position: top`; до load — skeleton (`--loading`), при error — `--empty` |
+| Превью | thum.io (`width/1200/crop/620/wait/3`); внутри browser-frame `object-fit: cover` + `object-position: top`; до load — skeleton (`--loading`), при error — `--empty` |
 | Отчёт отправлен (`reviewedByMe`) | Только после submit отчёта; оверлей на превью (`--home-screen-reviewed-*` + `homeCardReviewedLabel`); карточка `disabled`, без клика/модалки |
-| Иконка площадки | Simple Icons; иначе литера **W** |
-| Аватар | `item.avatarUrl` или буква из `item.name` |
-| ФИО | `item.name` |
-| Роль | EN Title Case: `formatPortfolioRole` (Lead → `… Design Lead`, Head → `Head Of …`) |
+| Автор | Белая pill-плашка 214×52: стек площадки + аватара 60×32 и грейд |
+| Иконка площадки | Simple Icons; иначе литера **W**; 32×32 |
+| Аватар | `item.avatarUrl` или буква из `item.name`; 32×32 с белой обводкой 3px |
+| Грейд | EN: Junior / Middle / Senior / Staff / Lead / Head; извлекается из сохранённой `role` |
 | Слоты | Белый чип `.home-screen__card-progress` 108×52 r pill, padding 10; внутри стек 88×32 |
 | Пустой слот | 32×32, фон muted, **внешняя** обводка 3px (box-shadow), плюс 18×18; hover → `homeCardReviewerEmpty` |
 | Active claim | Анонимный muted-круг с иконкой (`homeCardReviewerAnonymous`); RPC не отдаёт личные данные до завершения ревью |
