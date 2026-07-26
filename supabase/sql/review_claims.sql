@@ -421,10 +421,10 @@ create policy "review_claims_select_visible"
       from public.portfolios p
       where p.id = portfolio_id
         and (
-          p.owner_id = auth.uid()
+          p.owner_id = (select auth.uid())
           or (
             p.status = 'pending'
-            and public.can_review_portfolio(p.owner_id, auth.uid())
+            and public.can_review_portfolio(p.owner_id, (select auth.uid()))
           )
         )
     )
@@ -442,12 +442,12 @@ create policy "reviews_select_reviewer_or_owner"
   on public.reviews for select
   to authenticated
   using (
-    reviewer_id = auth.uid()
+    reviewer_id = (select auth.uid())
     or exists (
       select 1
       from public.portfolios p
       where p.id = portfolio_id
-        and p.owner_id = auth.uid()
+        and p.owner_id = (select auth.uid())
     )
   );
 

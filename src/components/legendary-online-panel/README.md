@@ -11,7 +11,7 @@ Fixed-чип слева снизу на `/home` (Figma `489:3318`). Показы
 - `setItems(items)` — `{ id, displayName?, avatarUrl? }[]` (только online; пустой → `hidden`)
 - `syncCopy()` — i18n (`homeLegendaryOnline*`)
 
-Монтаж: [`HomeScreen.js`](../home-screen/HomeScreen.js) на root рядом с `contact-fab` (`left/bottom: 16px`). Poll вместе с home (~15 с). Heartbeat пишет только legendary-клиент (`main.js` + `heartbeat_legendary_presence`).
+Монтаж: [`HomeScreen.js`](../home-screen/HomeScreen.js) на root рядом с `contact-fab` (`left/bottom: 16px`). Poll вместе с home (`HOME_SLOTS_POLL_MS` = 45 с). Heartbeat пишет только legendary-клиент (`main.js` + `heartbeat_legendary_presence`).
 
 При переходе 0 → N — класс `--enter` + `motion-reveal` (въезд снизу). До 3 аватаров в чипе; точка онлайна сверху справа на каждом. Hover/focus по аватару — тултип с ФИО (`displayName`, `legendary-online-panel__tip`).
 

@@ -67,6 +67,7 @@ order by 1;
 | `review_complaints` | insert только RPC | `reporter_id` ревьюеру не виден |
 | `referral_seed_codes` | нет доступа | seed `YTHWKPDWAK` только через RPC |
 | `subscribers` | нет доступа | legacy waitlist |
+| Storage `portfolio-previews` | select (публичный CDN, `public = true`) | insert/update/delete — только Edge `portfolio-preview` через `service_role`; политик на `storage.objects` нет — default-deny для anon/authenticated |
 
 ---
 
@@ -105,6 +106,7 @@ UI-часть: [`src/components/home-screen/README.md`](../src/components/home-s
 | `20260726021238` | `revoke_league_helpers_public` | revoke на `grade_league` / `can_review_grades` |
 | *(MCP)* | `legendary_presence_last_seen` | `last_seen_at` + heartbeat/list для legendary online |
 | *(MCP)* | `grade_league_null_as_league_1` | null/unknown grade → лига 1 (как junior) |
+| *(MCP)* | `wrap_auth_uid_rls_initplan` | `auth.uid()` → `(select auth.uid())` в 6 RLS-политиках (`profiles_select_own`, `profiles_update_own`, `portfolios_select_feed`, `reviews_insert_own`, `review_claims_select_visible`, `reviews_select_reviewer_or_owner`, `review_complaints_select_own`) — снят `auth_rls_initplan` WARN, доступ не менялся |
 
 Отражены в `sql/*.sql`, чтобы файлы оставались источником правды при чистом развёртывании.
 
@@ -119,6 +121,35 @@ UI-часть: [`src/components/home-screen/README.md`](../src/components/home-s
 **`validate_referral` доступна `anon` (WARN).** Без этого invite gate не сможет проверить код до логина.
 
 ---
+
+## Наплыв регистраций: custom SMTP (Free-план)
+
+На Free-плане Email OTP (`signInWithOtp` → `/auth/v1/otp`) уходит через встроенный почтовый релей Supabase, у которого низкий и недокументированно жёсткий лимит писем без своего SMTP. При резком наплыве регистраций (сотни за короткое окно) это выглядит как «код не пришёл» массово.
+
+**Проверить перед любым анонсом/ростом:**
+
+1. Dashboard → **Authentication → Emails → SMTP Settings** — включён ли custom SMTP.
+2. Если нет — завести аккаунт у провайдера (Resend / Postmark / SendGrid и т.п., бесплатных тиров на сотни писем/день обычно достаточно) и вписать креды в Dashboard. Это ручной шаг с реальными секретами провайдера — не делается через MCP/агента, только руками владельца проекта.
+3. Dashboard → **Authentication → Rate Limits** → `Email OTP` — поднять лимит `/auth/v1/otp` (по умолчанию 360/час), если ожидается всплеск плотнее.
+4. После подключения custom SMTP лимит писем перестаёт быть общим релеем Supabase — им управляет сам провайдер.
+
+Пока custom SMTP не настроен — не рассчитывать на устойчивую доставку OTP при одновременной регистрации десятков+ пользователей.
+
+## Наплыв регистраций: thum.io без ключа (превью карточек)
+
+Анонимный (без ключа) тир thum.io имеет жёсткие лимиты запросов; при резком наплюве это давало массовые 429/битые превью по всей ленте.
+
+**Решение (код):** Edge Function `portfolio-preview` (`supabase/functions/portfolio-preview/`) — кэш успешных скриншотов в Storage (`portfolio-previews`, 24 ч) + retry с бэкоффом на 429 + fallback на протухший кэш вместо ошибки. Клиент теперь ходит в неё (`portfolioPreviewUrl` в `src/api/portfolios.js`), а не напрямую в `image.thum.io`. Бакет самоочищается (без `pg_cron`) — вероятностный фоновый sweep удаляет объекты, не просматриваемые дольше 30 дней, так что размер бакета ограничен реально активными портфолио, а не растёт бесконечно.
+
+**Опционально:** если появится платный ключ thum.io — `supabase secrets set THUMIO_AUTH_KEY=<key>`, код менять не нужно.
+
+Подробности: [`functions/portfolio-preview/README.md`](functions/portfolio-preview/README.md).
+
+## Наплыв регистраций: холодный старт ленты
+
+Новый профиль стартует с `balance = 0`; `submit_portfolio` стоит 30, `handle_review_inserted` начисляет 10 за ревью — подать своё портфолио можно только после 3 чужих ревью. Стартовый бонус балансом сознательно **не** даём (риск нарушить экономику / фарм мультиаккаунтами — решение продукта 2026-07-26).
+
+**План перед анонсом:** до наплыва закинуть в очередь несколько портфолио вручную с оператора аккаунтов (обычный флоу `submit_portfolio`, за реальные монеты оператора — не бесплатный кредит), чтобы у первых волн новых пользователей в ленте «На ревью» сразу было что ревьюить. Как только они заработают на первых ревью — начнут подавать свои, и очередь пойдёт органически.
 
 ## Отложено до Pro-плана
 

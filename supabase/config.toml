@@ -4,3 +4,8 @@
 [functions.telegram-auth]
 # Telegram Login signs the payload; callers use the anon key only as a gateway.
 verify_jwt = false
+
+[functions.portfolio-preview]
+# Called directly from <img src> (no Authorization/apikey header available);
+# public thum.io proxy/cache, see functions/portfolio-preview/README.md.
+verify_jwt = false

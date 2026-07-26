@@ -53,8 +53,14 @@ revoke all on table public.referral_seed_codes from anon;
 revoke all on table public.referral_seed_codes from authenticated;
 
 insert into public.referral_seed_codes (code, max_uses, uses)
-values ('YTHWKPDWAK', 100, 0)
+values ('YTHWKPDWAK', 600, 0)
 on conflict (code) do nothing;
+
+-- Раздвинуть потолок на существующих установках (наплыв 200-500 регистраций).
+update public.referral_seed_codes
+set max_uses = 600
+where code = 'YTHWKPDWAK'
+  and max_uses < 600;
 
 -- ---------------------------------------------------------------------------
 -- Helpers

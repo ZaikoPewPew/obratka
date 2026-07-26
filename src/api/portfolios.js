@@ -1,6 +1,6 @@
 import { getSession } from "../app/session.js";
 import { getStrings } from "../i18n.js";
-import { getSupabase } from "../lib/supabaseClient.js";
+import { getSupabase, getSupabaseUrl } from "../lib/supabaseClient.js";
 
 /**
  * Очередь портфолио на ревью (Supabase) + свои карточки.
@@ -37,6 +37,13 @@ export const DEFAULT_TARGET_REVIEWS = 3;
 
 /** Макс. одновременных pending у автора (сервер: max_mine_pending). */
 export const MAX_MINE_PENDING = 1;
+
+/**
+ * Верхняя граница ленты «На ревью» за один запрос — защита от неограниченного
+ * select при резком наплыве регистраций (Free-план Supabase, shared CPU).
+ * Лента и так режется RLS по лиге; лимит подрезает только очень длинный хвост.
+ */
+export const FEED_QUERY_LIMIT = 300;
 
 /**
  * Подписи роли на карточке всегда на английском (Title Case),
@@ -147,15 +154,23 @@ export function formatPortfolioRole(grade, role) {
 }
 
 /**
- * Превью-скриншот страницы (внешний сервис; fallback в UI при ошибке).
+ * Превью-скриншот страницы: прокси/кэш Edge Function `portfolio-preview`
+ * перед thum.io (кэш в Storage 24ч, retry + fallback на протухший кэш
+ * при 429 — см. `supabase/functions/portfolio-preview/README.md`).
+ * Без сконфигурированного Supabase — прямой fallback на thum.io.
  * width ≈ viewport (без даунскейла), crop ≈ AR фрейма карточки (~500×250),
  * wait/3 — после load, чтобы дождаться intro-анимаций.
- * В UI — `object-fit: contain`, без дополнительной обрезки.
+ * В UI — `object-fit: contain`, без дополнительной обрезки; на ошибку
+ * `<img>` реагирует своим `--empty` состоянием (fallback уже в UI).
  * @param {string} url
  * @returns {string}
  */
 export function portfolioPreviewUrl(url) {
-  return `https://image.thum.io/get/maxAge/24/width/1200/crop/620/wait/3/${url}`;
+  const supabaseUrl = getSupabaseUrl();
+  if (!supabaseUrl) {
+    return `https://image.thum.io/get/maxAge/24/width/1200/crop/620/wait/3/${url}`;
+  }
+  return `${supabaseUrl}/functions/v1/portfolio-preview?url=${encodeURIComponent(url)}`;
 }
 
 
@@ -518,7 +533,8 @@ export async function listPortfoliosForReview() {
     )
     .eq("status", "pending")
     .neq("owner_id", user.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(FEED_QUERY_LIMIT);
 
   if (error) {
     if (import.meta.env.DEV) {
@@ -603,7 +619,9 @@ export async function listFeedPortfolioIds() {
     .from("portfolios")
     .select("id")
     .eq("status", "pending")
-    .neq("owner_id", user.id);
+    .neq("owner_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(FEED_QUERY_LIMIT);
 
   if (error) {
     if (import.meta.env.DEV) {

@@ -98,7 +98,7 @@ drop policy if exists "review_complaints_select_own" on public.review_complaints
 create policy "review_complaints_select_own"
   on public.review_complaints for select
   to authenticated
-  using (reporter_id = auth.uid());
+  using (reporter_id = (select auth.uid()));
 
 -- INSERT только через RPC (revoke direct insert).
 revoke all on table public.review_complaints from public;

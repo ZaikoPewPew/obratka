@@ -28,6 +28,7 @@ alwaysApply: false
 - Claims / referrals / spend — только RPC; balance не через client UPDATE.
 - `portfolio_reviewer_slots` — **VOLATILE**, не STABLE (иначе PostgREST 405).
 - Клиент read-only: `tier`, `banned_at`, `ban_reason`, `balance`, `reputation`, `last_seen_at`; grade после onboarding.
+- **RLS-политики:** `auth.uid()` / `auth.jwt()` внутри `using` / `with check` всегда через `(select auth.uid())`, не голым вызовом — иначе Postgres пересчитывает его на каждую строку (`auth_rls_initplan` в `get_advisors`, ощутимо при большой ленте). Проверять адвайзором после любой новой/изменённой политики.
 
 ## Оператор vs app
 

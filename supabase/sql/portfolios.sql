@@ -188,10 +188,10 @@ create policy "portfolios_select_feed"
   on public.portfolios for select
   to authenticated
   using (
-    owner_id = auth.uid()
+    owner_id = (select auth.uid())
     or (
       status = 'pending'
-      and public.can_review_portfolio(owner_id, auth.uid())
+      and public.can_review_portfolio(owner_id, (select auth.uid()))
     )
   );
 
@@ -211,15 +211,15 @@ create policy "reviews_insert_own"
   on public.reviews for insert
   to authenticated
   with check (
-    reviewer_id = auth.uid()
-    and not public.is_profile_banned(auth.uid())
+    reviewer_id = (select auth.uid())
+    and not public.is_profile_banned((select auth.uid()))
     and exists (
       select 1
       from public.portfolios p
       where p.id = portfolio_id
         and p.status = 'pending'
-        and p.owner_id <> auth.uid()
-        and public.can_review_portfolio(p.owner_id, auth.uid())
+        and p.owner_id <> (select auth.uid())
+        and public.can_review_portfolio(p.owner_id, (select auth.uid()))
     )
   );
 

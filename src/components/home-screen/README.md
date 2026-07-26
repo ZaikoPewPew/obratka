@@ -10,7 +10,7 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 
 | Вкладка | API | Содержимое |
 |---------|-----|------------|
-| **На ревью** (`feed`, default) | `listPortfoliosForReview()` | Чужие `pending` **в лиге** грейда ревьюера (RLS), без своих; карточка до `target_reviews` completed-отчётов; `reviewedByMe` = отправленный отчёт (`reviews`), не claim/abort — disabled + оверлей, без модалки; точка на вкладке при **новом** кейсе (`listFeedPortfolioIds` + `feedSeen`) |
+| **На ревью** (`feed`, default) | `listPortfoliosForReview()` | Чужие `pending` **в лиге** грейда ревьюера (RLS), без своих; карточка до `target_reviews` completed-отчётов; `reviewedByMe` = отправленный отчёт (`reviews`), не claim/abort — disabled + оверлей, без модалки; точка на вкладке при **новом** кейсе (`listFeedPortfolioIds` + `feedSeen`); оба запроса режутся `FEED_QUERY_LIMIT` (=300, `created_at` DESC) — защита от неограниченного select при резком наплыве регистраций |
 | **Мои посты** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …); сверху сегмент **Мои на ревью / Мои завершенные** ([`tabs-panel`](../tabs-panel/README.md)); точка на вкладке и на «Мои завершенные» при **непросмотренном** готовом отчёте (`listReadyOwnReportIds` + `mineReadySeen`) |
 | **Рейтинг** (`rating`) | `listRatingTop()` | Топ-50 по балансу (Figma `RaitingCard` 482:2123) в `.home-screen__rating-list`: аватар 52 + бейдж места (синий, 20), имя/роль (`formatPortfolioRole`), белая плашка баланса (`min-width`/`height` 52px, padding-x 16px — `--home-screen-rating-balance-*`); skeleton `--skeleton`-модификаторы; empty `.home-screen__rating-empty` (`homeRatingEmpty`); кэш вкладки в `homeListCache` (`rating`); снапшот на сервере обновляется раз в сутки (`rating_leaderboard.sql`) |
 
@@ -154,7 +154,7 @@ Topbar поверх контента (`position: absolute`), появление 
 
 | Элемент | Источник |
 |---------|----------|
-| Превью | thum.io (`width/1200/crop/620/wait/3`); внутри browser-frame `object-fit: cover` + `object-position: top`; до load — skeleton (`--loading`), при error — `--empty` + заглушка viewport `--home-screen-preview-empty-fill` (`#FDEED9`) |
+| Превью | thum.io через кэш-прокси Edge `portfolio-preview` (`width/1200/crop/620/wait/3`, кэш 24ч + 429-hardening, см. `supabase/functions/portfolio-preview/README.md`); внутри browser-frame `object-fit: cover` + `object-position: top`; до load — skeleton (`--loading`), при error — `--empty` + заглушка viewport `--home-screen-preview-empty-fill` (`#FDEED9`) |
 | Карточка | Скругление верх 24 / низ 32 (`--home-screen-card-radius*`); empty-стейты ленты/рейтинга остаются 24 со всех сторон |
 | Отчёт отправлен (`reviewedByMe`) | Только после submit отчёта; оверлей на превью (`--home-screen-reviewed-*` + `homeCardReviewedLabel`): колонка иконка → 8px → текст, по центру превью; карточка `disabled`, без клика/модалки |
 | Автор | Белая pill-плашка hug по ширине ×52: стек площадки + аватара 60×32 и полный `role` (EN Title Case) |
@@ -168,7 +168,7 @@ Topbar поверх контента (`position: absolute`), появление 
 
 Заполнение слотов слева направо, margin −4px; по умолчанию три плюса. Текста «N из 3» нет (есть в aria).
 
-`refresh()` при `open`, смене вкладки, `visibilitychange` и poll (~15с), пока home открыт — слоты и новые карточки подтягиваются без skeleton (поверх кэша). Своя карточка (`isOwn`, «Мои») всегда кликабельна (`cursor: pointer`, класс `--own`): готово (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report`; иначе `homeMineNotReady*` (не «сразу report»). Title / aria — `homeCardReport*` / `homeCardReportPending*`, синк при silent-патче.
+`refresh()` при `open`, смене вкладки, `visibilitychange` и poll (`HOME_SLOTS_POLL_MS` = 45с), пока home открыт — слоты и новые карточки подтягиваются без skeleton (поверх кэша). Своя карточка (`isOwn`, «Мои») всегда кликабельна (`cursor: pointer`, класс `--own`): готово (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report`; иначе `homeMineNotReady*` (не «сразу report»). Title / aria — `homeCardReport*` / `homeCardReportPending*`, синк при silent-патче.
 
 Own-карточки: cursor наследуется от `.home-screen__card` (pointer); `not-allowed` только у `:disabled` — правило `.home-screen__card--own { cursor: not-allowed }` снято.
 

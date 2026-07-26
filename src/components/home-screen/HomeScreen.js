@@ -115,8 +115,13 @@ const SKELETON_CARD_COUNT = 5;
 /** Сколько skeleton-карточек показывать, пока грузится рейтинг. */
 const RATING_SKELETON_CARD_COUNT = 8;
 
-/** Обновление active-слотов, пока home открыт. */
-const HOME_SLOTS_POLL_MS = 15_000;
+/**
+ * Обновление active-слотов, пока home открыт. Каждый тик — полный `refresh()`
+ * (лента/мои + `refreshMineReady` + `refreshFeedUnseen` + online-легендарки),
+ * поэтому интервал держим не слишком частым: при наплыве регистраций сотни
+ * открытых вкладок × несколько запросов на тик быстро упрутся в Free-план БД.
+ */
+const HOME_SLOTS_POLL_MS = 45_000;
 
 /**
  * Порог только для hide: show — при любом скролле вверх / у низа ленты.

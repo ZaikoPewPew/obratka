@@ -18,6 +18,7 @@
 | `ban-templates.sql` | операторский бан / разбан |
 | `delete-account-templates.sql` | удаление тестового аккаунта |
 | `portfolio-role-backfill.sql` | одноразовый backfill `portfolios.role` (Lead/Head naming) |
+| `portfolio_preview_cache.sql` | Storage-бакет `portfolio-previews` (публичный read, без client write) для Edge `portfolio-preview` |
 
 Применять в SQL Editor Dashboard или через CLI. Порядок: `profiles` → `legendary_presence` → `rating_leaderboard` → `wallet` → `portfolios` → `portfolio_submit` → `review_claims` → `review_complaints` / `referrals`; при legacy — `subscribers_rls`.  
 Обзор — [`../README.md`](../README.md).  
