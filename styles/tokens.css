@@ -590,7 +590,7 @@
   --home-screen-chip-icon: 24px;
   --home-screen-chip-font-size: var(--font-size-base);
   --home-screen-chip-font-weight: var(--font-weight-medium);
-  --home-screen-reputation-chip-gap: var(--space-2);
+  --home-screen-reputation-chip-gap: var(--space-1);
   --home-screen-reputation-body-pre: pre-line;
   --home-screen-profile-size: var(--space-12);
   --home-screen-avatar-radius: var(--radius-pill);

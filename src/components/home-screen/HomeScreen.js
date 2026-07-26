@@ -23,7 +23,10 @@ import {
   TEMP_BALANCE_CHIP_AMOUNT,
   TEMP_BALANCE_CHIP_CREDIT,
 } from "../../api/wallet.js";
-import { formatReputationDelta } from "../../api/reviewComplaints.js";
+import {
+  formatReputationDelta,
+  getReputationDelta,
+} from "../../api/reviewComplaints.js";
 import { listOnlineLegendaries } from "../../api/presence.js";
 import { getSession, setSession } from "../../app/session.js";
 import { resolvePlatformIcon } from "../../utils/platformBrandIcon.js";
@@ -62,12 +65,25 @@ import { REVIEW_SESSION_SECONDS } from "../../config/review.js";
 import boneIconUrl from "../../assets/home/bone.svg";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
 import reviewedCheckIconSvg from "../../assets/home/reviewed-check.svg?raw";
-import reputationIconUrl from "../../assets/home/reputation.svg";
+import reputationNeutralIconUrl from "../../assets/home/reputation-neutral.svg";
+import reputationPositiveIconUrl from "../../assets/home/reputation-positive.svg";
+import reputationNegativeIconUrl from "../../assets/home/reputation-negative.svg";
 import slotPlusIconUrl from "../../assets/home/slot-plus.svg";
 
 const PREVIEW_BROWSER_CONTROLS_URL = `${
   import.meta.env.BASE_URL || "/"
 }assets/svg/home-preview-browser-controls.svg`;
+
+/**
+ * Иконка чипа репутации: нейтральная (0) / позитивная (>0) / негативная (<0).
+ * @param {number} delta
+ * @returns {string}
+ */
+function reputationIconUrlFor(delta) {
+  if (delta > 0) return reputationPositiveIconUrl;
+  if (delta < 0) return reputationNegativeIconUrl;
+  return reputationNeutralIconUrl;
+}
 
 /**
  * Plus для кнопки «Закинуть своё» — inline SVG: в `<img>` currentColor не
@@ -483,7 +499,7 @@ export function createHomeScreen({
 
   const reputationImg = document.createElement("img");
   reputationImg.className = "home-screen__chip-icon";
-  reputationImg.src = reputationIconUrl;
+  reputationImg.src = reputationNeutralIconUrl;
   reputationImg.alt = "";
   reputationImg.width = 24;
   reputationImg.height = 24;
@@ -716,13 +732,13 @@ export function createHomeScreen({
 
   const contactFab = createContactFab();
 
+  // Временно скрыт с фронта (оставляем компонент и логику нетронутыми).
   root.append(
     title,
     topbar,
     body,
     tabbarDock,
     legendaryOnlinePanel.root,
-    contactFab.root,
     noticeModal.root,
     reviewIntroModal.root,
     inviteModal.root,
@@ -870,6 +886,7 @@ export function createHomeScreen({
 
     const reputationDelta = formatReputationDelta();
     reputationValue.textContent = reputationDelta;
+    reputationImg.src = reputationIconUrlFor(getReputationDelta());
     reputationChip.setAttribute(
       "aria-label",
       formatString(t.homeReputationAria, { reputation: reputationDelta }),
