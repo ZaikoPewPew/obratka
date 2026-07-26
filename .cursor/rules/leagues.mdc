@@ -11,19 +11,21 @@ alwaysApply: true
 
 | Лига | `profiles.grade` |
 |------|------------------|
-| 1 | `junior` |
+| 1 | `junior`, **null / unknown** |
 | 2 | `middle` |
 | 3 | `senior`, `lead`, `head` |
+
+Null/unknown **не** пишем в `junior` в БД: матчинг = лига 1 (`grade_league` / `gradeToLeague`), UI = `gradeUndefined` («Грейд не определён»). Оператор может поправить grade руками.
 
 ## Кто кого ревьюит
 
 | Портфолио | Ревьюеры |
 |-----------|----------|
-| Junior | Junior, Middle |
+| Junior (и null) | Junior (и null), Middle |
 | Middle | Middle, Senior+ |
 | Senior+ | Senior+ |
 
-Senior → Junior **нельзя** (ликвидность мидлов). Grade обязателен в онбординге.
+Senior → Junior **нельзя** (ликвидность мидлов). Grade обязателен в онбординге UI; серверный fallback лиги 1 — safety net.
 
 ## Claims и слоты
 

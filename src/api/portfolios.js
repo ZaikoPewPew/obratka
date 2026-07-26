@@ -62,14 +62,29 @@ const GRADE_LABELS_EN = Object.freeze({
   head: "Head",
 });
 
+/** Известные грейды для UI/лиг; остальное → `gradeUndefined` + лига 1. */
+const KNOWN_GRADES = new Set(["junior", "middle", "senior", "lead", "head"]);
+
+/**
+ * @param {string | null | undefined} grade
+ * @returns {string}
+ */
+function normalizeKnownGrade(grade) {
+  const key = typeof grade === "string" ? grade.trim() : "";
+  return key && KNOWN_GRADES.has(key) ? key : "";
+}
+
 /**
  * Только грейд (EN) — тултип слота ревьюера и т.п.
+ * Пустой / неизвестный → локализованное «Грейд не определён».
  * @param {string | null | undefined} grade
  * @returns {string}
  */
 export function formatPortfolioGrade(grade) {
-  const key = typeof grade === "string" ? grade.trim() : "";
-  return key ? GRADE_LABELS_EN[key] || "" : "";
+  const t = getStrings();
+  const key = normalizeKnownGrade(grade);
+  if (!key) return t.gradeUndefined ?? "";
+  return GRADE_LABELS_EN[key] || t.gradeUndefined || "";
 }
 
 /**
@@ -102,6 +117,7 @@ function labelFromUrl(url) {
  * Junior/Middle/Senior/Staff: `{Grade} {Role}`.
  * Lead: `Product Design Lead` (не `Lead Product Designer`).
  * Head: `Head Of Design` / `Head Of Emotional Design` / …
+ * Без известного грейда → локализованное `gradeUndefined`.
  *
  * @param {string | null | undefined} grade
  * @param {string | null | undefined} role
@@ -109,20 +125,23 @@ function labelFromUrl(url) {
  */
 export function formatPortfolioRole(grade, role) {
   const t = getStrings();
+  const gradeKey = normalizeKnownGrade(grade);
+  if (!gradeKey) return t.gradeUndefined ?? "";
+
   const roleKey = typeof role === "string" ? role : "";
   const roleLabel = roleKey ? ROLE_LABELS_EN[roleKey] || "" : "";
 
-  if (grade === "head") {
+  if (gradeKey === "head") {
     return HEAD_ROLE_LABELS_EN[roleKey] || "Head Of Design";
   }
 
-  if (grade === "lead") {
+  if (gradeKey === "lead") {
     if (!roleLabel) return "Design Lead";
     if (/^Designer$/i.test(roleLabel)) return "Design Lead";
     return roleLabel.replace(/\s*Designer$/i, " Design Lead");
   }
 
-  const gradeLabel = grade ? GRADE_LABELS_EN[grade] || "" : "";
+  const gradeLabel = GRADE_LABELS_EN[gradeKey] || "";
   const combined = [gradeLabel, roleLabel].filter(Boolean).join(" ").trim();
   return combined || t.homeDefaultRole;
 }

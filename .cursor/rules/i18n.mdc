@@ -20,7 +20,7 @@ alwaysApply: true
 - разметка: `data-i18n`, `data-i18n-aria`, `data-i18n-title` + `applyDocumentI18n()`;
 - динамика: `getStrings()` / `formatString()`;
 - запрещён хардкод UI-строк без ключа (имена людей / URL портфолио — данные, не UI-copy).
-- `formatPortfolioRole` — всегда EN Title Case (не UI-локаль).
+- `formatPortfolioRole` — всегда EN Title Case (не UI-локаль); исключение без грейда — `gradeUndefined`.
 
 ## Префиксы ключей
 
@@ -29,7 +29,9 @@ alwaysApply: true
 | `referral*` | invite gate |
 | `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict` | регистрация / OTP |
 | `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeCardReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeMineSlotFree*` / `homePendingLimit*` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeAccount*` / `homeContacts*` / `homeContactFab*` / `homeLegendaryOnline*` / `homeRating*` | home + notices / intro / mine gate / Активные·Завершенные / free-slot / pending-limit / seen-dot / слоты ревьюеров / репутация / меню профиля / контакты / FAB связи / «Топы в сети» / рейтинг топ-50 |
+| `gradeUndefined` | подпись без известного `profiles.grade` (карточки / рейтинг / report / submit `portfolios.role`) |
 | `modalCloseAria` | общая модалка (`app-modal`) |
+| `onboarding*` | `/onboarding` (в т.ч. `onboardingSaveFailed`) |
 | `url*` / `urlScreenBack*` | `/portfolio` (в т.ч. чип «На главную») |
 | `ban*` | `/banned` |
 | `reportScreen*` / `reportComplaint*` / `complaintTag*` | `/report` + жалоба на лист |

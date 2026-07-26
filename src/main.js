@@ -1172,7 +1172,10 @@ async function applyProviderUser(user, provider) {
           : next.reputation,
       onboardingDone: Boolean(profile.onboarding_done),
       role: profile.role ?? next.role,
-      grade: profile.grade ?? next.grade,
+      grade:
+        typeof profile.grade === "string" && profile.grade.trim()
+          ? profile.grade.trim()
+          : null,
       tier: profile.tier ?? next.tier ?? "free",
       banned: isProfileBanned(profile),
       myReferralCode:

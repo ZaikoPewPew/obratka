@@ -312,11 +312,19 @@ export function createOnboardingScreen({ onComplete }) {
     }
   }
 
-  function showStepError(visible) {
+  function showStepError(visible, message) {
     if (visible) {
-      stepError.textContent = t.onboardingStepRequired;
+      stepError.textContent = message || t.onboardingStepRequired;
     }
     stepError.hidden = !visible;
+  }
+
+  /**
+   * Индекс первого невалидного required-шага, иначе -1.
+   * @returns {number}
+   */
+  function findFirstInvalidStep() {
+    return steps.findIndex((step) => !step.validate());
   }
 
   function syncChrome() {
@@ -544,6 +552,9 @@ export function createOnboardingScreen({ onComplete }) {
       if (import.meta.env.DEV) {
         console.warn("[onboarding] saveOnboardingAnswers failed", err);
       }
+      showStepError(true, t.onboardingSaveFailed);
+      focusActiveStep();
+      return;
     }
     await onComplete(answers);
   }
@@ -575,9 +586,17 @@ export function createOnboardingScreen({ onComplete }) {
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     if (transitioning) return;
-    if (!steps[currentStep]?.validate()) {
-      showStepError(true);
-      focusActiveStep();
+    const invalid = findFirstInvalidStep();
+    if (invalid >= 0) {
+      const reveal = () => {
+        showStepError(true);
+        focusActiveStep();
+      };
+      if (invalid !== currentStep) {
+        void goToStep(invalid).then(reveal);
+      } else {
+        reveal();
+      }
       return;
     }
     void finish();

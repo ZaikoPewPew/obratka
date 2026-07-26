@@ -117,7 +117,10 @@ export async function refreshSessionFromProfile() {
         ? profile.onboarding_done
         : session.onboardingDone,
     role: profile.role ?? session.role,
-    grade: profile.grade ?? session.grade,
+    grade:
+      typeof profile.grade === "string" && profile.grade.trim()
+        ? profile.grade.trim()
+        : null,
     tier: profile.tier ?? session.tier ?? "free",
     banned: Boolean(profile.banned_at),
     myReferralCode:

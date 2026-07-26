@@ -79,13 +79,14 @@ language sql
 immutable
 set search_path = public
 as $$
+  -- null / unknown → лига 1 (как junior); UI показывает «Грейд не определён»
   select case grade
     when 'junior' then 1
     when 'middle' then 2
     when 'senior' then 3
     when 'lead' then 3
     when 'head' then 3
-    else null
+    else 1
   end;
 $$;
 

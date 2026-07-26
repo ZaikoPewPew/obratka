@@ -104,6 +104,7 @@ UI-часть: [`src/components/home-screen/README.md`](../src/components/home-s
 | `20260726021218` | `revoke_anon_rpc_drop_temp_credit` | revoke anon/public на RPC; `drop function temp_credit_balance` |
 | `20260726021238` | `revoke_league_helpers_public` | revoke на `grade_league` / `can_review_grades` |
 | *(MCP)* | `legendary_presence_last_seen` | `last_seen_at` + heartbeat/list для legendary online |
+| *(MCP)* | `grade_league_null_as_league_1` | null/unknown grade → лига 1 (как junior) |
 
 Отражены в `sql/*.sql`, чтобы файлы оставались источником правды при чистом развёртывании.
 
