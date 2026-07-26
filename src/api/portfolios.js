@@ -12,6 +12,7 @@ import { getSupabase } from "../lib/supabaseClient.js";
  *   reviewerId: string;
  *   avatarUrl?: string;
  *   displayName?: string;
+ *   grade?: string;
  * }} PortfolioReviewerSlot
  *
  * @typedef {{
@@ -57,6 +58,16 @@ const GRADE_LABELS_EN = Object.freeze({
   lead: "Lead",
   head: "Head",
 });
+
+/**
+ * Только грейд (EN) — тултип слота ревьюера и т.п.
+ * @param {string | null | undefined} grade
+ * @returns {string}
+ */
+export function formatPortfolioGrade(grade) {
+  const key = typeof grade === "string" ? grade.trim() : "";
+  return key ? GRADE_LABELS_EN[key] || "" : "";
+}
 
 /**
  * Head Of {Discipline} — product/other → «Head Of Design».
@@ -201,6 +212,9 @@ function mapSlotRow(row) {
   if (typeof r.display_name === "string" && r.display_name.trim()) {
     slot.displayName = r.display_name.trim();
   }
+  if (typeof r.grade === "string" && r.grade.trim()) {
+    slot.grade = r.grade.trim();
+  }
   return slot;
 }
 
@@ -243,13 +257,13 @@ async function fetchReviewerSlotsFallback(supabase, ids) {
     supabase
       .from("reviews")
       .select(
-        "portfolio_id, reviewer_id, reviewer_avatar_url, reviewer_display_name, created_at",
+        "portfolio_id, reviewer_id, reviewer_avatar_url, reviewer_display_name, reviewer_grade, created_at",
       )
       .in("portfolio_id", ids),
     supabase
       .from("review_claims")
       .select(
-        "portfolio_id, reviewer_id, reviewer_avatar_url, reviewer_display_name, claimed_at, expires_at",
+        "portfolio_id, reviewer_id, reviewer_avatar_url, reviewer_display_name, reviewer_grade, claimed_at, expires_at",
       )
       .in("portfolio_id", ids)
       .gt("expires_at", new Date().toISOString()),
@@ -273,6 +287,7 @@ async function fetchReviewerSlotsFallback(supabase, ids) {
         reviewer_id: row.reviewer_id,
         avatar_url: row.reviewer_avatar_url,
         display_name: row.reviewer_display_name,
+        grade: row.reviewer_grade,
       }),
     );
   }
@@ -288,8 +303,50 @@ async function fetchReviewerSlotsFallback(supabase, ids) {
         reviewer_id: row.reviewer_id,
         avatar_url: row.reviewer_avatar_url,
         display_name: row.reviewer_display_name,
+        grade: row.reviewer_grade,
       }),
     );
+  }
+
+  /** @type {string[]} */
+  const missingGradeIds = [];
+  for (const list of map.values()) {
+    for (const slot of list) {
+      if (!slot.grade && slot.reviewerId) missingGradeIds.push(slot.reviewerId);
+    }
+  }
+  const uniqueMissing = [...new Set(missingGradeIds)];
+  if (uniqueMissing.length > 0) {
+    const { data: profiles, error: profilesError } = await supabase
+      .from("profiles")
+      .select("id, grade")
+      .in("id", uniqueMissing);
+    if (profilesError && import.meta.env.DEV) {
+      console.warn(
+        "[portfolios] slots fallback grades",
+        profilesError.message,
+      );
+    }
+    /** @type {Map<string, string>} */
+    const gradeById = new Map();
+    for (const row of profiles || []) {
+      if (
+        row &&
+        typeof row.id === "string" &&
+        typeof row.grade === "string" &&
+        row.grade.trim()
+      ) {
+        gradeById.set(row.id, row.grade.trim());
+      }
+    }
+    for (const list of map.values()) {
+      for (const slot of list) {
+        if (!slot.grade && slot.reviewerId) {
+          const grade = gradeById.get(slot.reviewerId);
+          if (grade) slot.grade = grade;
+        }
+      }
+    }
   }
 
   sortSlotsMap(map);

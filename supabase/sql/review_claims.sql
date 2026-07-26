@@ -227,6 +227,7 @@ returns table (
   reviewer_id uuid,
   avatar_url text,
   display_name text,
+  grade text,
   occupied_at timestamptz
 )
 language plpgsql
@@ -248,6 +249,7 @@ begin
     s.reviewer_id,
     s.avatar_url,
     s.display_name,
+    s.grade,
     s.occupied_at
   from (
     with visible as (
@@ -275,6 +277,10 @@ begin
           nullif(trim(r.reviewer_display_name), ''),
           nullif(trim(pr.display_name), '')
         ) as display_name,
+        coalesce(
+          nullif(trim(r.reviewer_grade), ''),
+          nullif(trim(pr.grade), '')
+        ) as grade,
         r.created_at as occupied_at
       from public.reviews r
       join visible v on v.id = r.portfolio_id
@@ -293,6 +299,10 @@ begin
           nullif(trim(c.reviewer_display_name), ''),
           nullif(trim(pr.display_name), '')
         ) as display_name,
+        coalesce(
+          nullif(trim(c.reviewer_grade), ''),
+          nullif(trim(pr.grade), '')
+        ) as grade,
         c.claimed_at as occupied_at
       from public.review_claims c
       join visible v on v.id = c.portfolio_id

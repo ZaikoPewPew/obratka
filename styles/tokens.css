@@ -499,24 +499,33 @@
   --app-modal-dialog-blur: var(--motion-reveal-blur);
   --app-modal-dialog-scale-from: var(--motion-reveal-scale-from);
 
-  /* Слоты ревьюеров на карточке (Figma Frame 140: 96×52 chip) */
-  --home-screen-progress-width: 96px;
+  /* Слоты ревьюеров на карточке (чип 108×52, аватары 32) */
+  --home-screen-progress-width: 108px;
   --home-screen-progress-height: 52px;
-  --home-screen-progress-padding-x: var(--space-4);
-  --home-screen-progress-padding-y: 14px;
+  --home-screen-progress-padding: 10px;
   --home-screen-progress-bg: var(--color-surface);
-  --home-screen-progress-radius: var(--radius-md);
-  --home-screen-progress-slots-width: 64px;
-  --home-screen-progress-slots-height: var(--space-6);
-  --home-screen-reviewer-slot-size: var(--space-6);
-  /* Figma: старт каждые 20px при size 24 → margin −4 */
+  --home-screen-progress-radius: var(--radius-pill);
+  /* 3×32 + 2×(−4) = 88 */
+  --home-screen-progress-slots-width: 88px;
+  --home-screen-progress-slots-height: var(--space-8);
+  --home-screen-reviewer-slot-size: var(--space-8);
+  /* Старт каждые 28px при size 32 → margin −4 */
   --home-screen-reviewer-slots-gap: -4px;
-  --home-screen-reviewer-slot-radius: var(--radius-md);
+  --home-screen-reviewer-slot-radius: var(--radius-pill);
   --home-screen-reviewer-slot-border: 3px;
   --home-screen-reviewer-slot-ring: var(--color-surface);
   --home-screen-reviewer-slot-empty-bg: var(--color-surface-muted);
   --home-screen-reviewer-slot-plus-size: 18px;
   --home-screen-reviewer-slot-active-opacity: 0.72;
+  --home-screen-reviewer-slot-tooltip-padding-x: var(--space-2);
+  --home-screen-reviewer-slot-tooltip-padding-y: var(--space-1);
+  --home-screen-reviewer-slot-tooltip-radius: var(--radius-xs);
+  --home-screen-reviewer-slot-tooltip-bg: var(--palette-gray-900);
+  --home-screen-reviewer-slot-tooltip-color: var(--palette-white);
+  --home-screen-reviewer-slot-tooltip-font-size: var(--font-size-xs);
+  --home-screen-reviewer-slot-tooltip-font-weight: var(--font-weight-medium);
+  --home-screen-reviewer-slot-tooltip-offset: var(--space-2);
+  --home-screen-reviewer-slot-tooltip-z: var(--z-sticky);
 
   /* Ban screen (locked account — same layout as success, red mesh) */
   --ban-screen-z: var(--z-modal);
@@ -620,6 +629,8 @@
   --tabs-panel-tab-active-color: var(--color-on-accent);
   --tabs-panel-tab-duration: var(--motion-screen-duration);
   --tabs-panel-tab-ease: var(--motion-screen-ease);
+  --tabs-panel-thumb-duration: var(--motion-screen-duration);
+  --tabs-panel-thumb-ease: var(--motion-screen-ease);
 
   --home-screen-body-padding: var(--space-4);
   --home-screen-body-padding-top: var(--space-4);

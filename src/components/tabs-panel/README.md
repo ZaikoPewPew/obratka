@@ -16,7 +16,7 @@ Shared UI: не экран флоу — не пишет `history`, не вызы
 | Inactive transparent + `#242426` | `--tabs-panel-tab-color` |
 | Montserrat 16 regular | `--font-size-base` / `--font-weight-regular` |
 
-Без sliding thumb — активный таб заливается целиком.
+В макете фон активного таба статичен; в коде — скользящий `.tabs-panel__thumb` (`transform` + `width`, `--tabs-panel-thumb-*`), у кнопок меняется только `color`.
 
 ## Файлы
 
@@ -47,8 +47,10 @@ const panel = createTabsPanel({
 
 panel.setLabels({ active: "Active", archived: "Archived" });
 panel.setAriaLabel("My posts filter");
-panel.setActive("archived");
-panel.getActive(); // "archived"
+panel.setActive("archived"); // с анимацией thumb
+panel.setActive("active", { instant: true }); // без анимации
+panel.syncThumb(true); // после unhide / layout
+panel.getActive(); // "active"
 ```
 
 ## Где используется

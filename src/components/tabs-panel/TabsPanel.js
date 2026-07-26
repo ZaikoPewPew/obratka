@@ -1,6 +1,7 @@
 /**
  * Сегментированный tabs-panel (Figma `tabspanel` 476:1762).
  * Shared UI: не пишет history / go(), только onChange наверх.
+ * Активный фон — скользящий thumb (как home tabbar).
  *
  * @param {{
  *   tabs: Array<{ id: string; label?: string }>;
@@ -10,10 +11,11 @@
  * }} opts
  * @returns {{
  *   root: HTMLElement;
- *   setActive: (id: string) => void;
+ *   setActive: (id: string, opts?: { instant?: boolean }) => void;
  *   getActive: () => string;
  *   setLabels: (labels: Record<string, string>) => void;
  *   setAriaLabel: (label: string) => void;
+ *   syncThumb: (instant?: boolean) => void;
  * }}
  */
 export function createTabsPanel({
@@ -35,6 +37,11 @@ export function createTabsPanel({
     root.setAttribute("aria-label", ariaLabel);
   }
 
+  const thumb = document.createElement("div");
+  thumb.className = "tabs-panel__thumb";
+  thumb.setAttribute("aria-hidden", "true");
+  root.append(thumb);
+
   /** @type {Map<string, HTMLButtonElement>} */
   const buttons = new Map();
 
@@ -55,10 +62,44 @@ export function createTabsPanel({
   }
 
   /**
-   * @param {string} id
+   * Скользящий пилл активного таба.
+   * @param {boolean} [instant]
    */
-  function setActive(id) {
+  function syncThumb(instant = false) {
+    const activeBtn = buttons.get(currentId);
+    if (!activeBtn) return;
+    if (root.hidden) return;
+    const barRect = root.getBoundingClientRect();
+    const tabRect = activeBtn.getBoundingClientRect();
+    if (!barRect.width || !tabRect.width) return;
+    const left = tabRect.left - barRect.left;
+    if (instant) {
+      thumb.style.transition = "none";
+    }
+    thumb.style.width = `${tabRect.width}px`;
+    thumb.style.transform = `translateX(${left}px)`;
+    if (instant) {
+      void thumb.offsetWidth;
+      thumb.style.transition = "";
+    }
+  }
+
+  /**
+   * @param {boolean} [instant]
+   */
+  function scheduleThumbSync(instant = false) {
+    requestAnimationFrame(() => {
+      syncThumb(instant);
+    });
+  }
+
+  /**
+   * @param {string} id
+   * @param {{ instant?: boolean }} [opts]
+   */
+  function setActive(id, opts = {}) {
     if (!buttons.has(id)) return;
+    const instant = opts.instant === true;
     currentId = id;
     for (const [tabId, btn] of buttons) {
       const selected = tabId === currentId;
@@ -66,6 +107,7 @@ export function createTabsPanel({
       btn.setAttribute("aria-selected", selected ? "true" : "false");
       btn.tabIndex = selected ? 0 : -1;
     }
+    scheduleThumbSync(instant);
   }
 
   /**
@@ -79,6 +121,7 @@ export function createTabsPanel({
         btn.textContent = label;
       }
     }
+    scheduleThumbSync();
   }
 
   /**
@@ -92,7 +135,21 @@ export function createTabsPanel({
     root.removeAttribute("aria-label");
   }
 
-  setActive(currentId);
+  if (typeof ResizeObserver === "function") {
+    const resize = new ResizeObserver(() => {
+      syncThumb(true);
+    });
+    resize.observe(root);
+    for (const btn of buttons.values()) {
+      resize.observe(btn);
+    }
+  }
+
+  window.addEventListener("resize", () => {
+    scheduleThumbSync(true);
+  });
+
+  setActive(currentId, { instant: true });
 
   return {
     root,
@@ -100,5 +157,6 @@ export function createTabsPanel({
     getActive: () => currentId,
     setLabels,
     setAriaLabel,
+    syncThumb,
   };
 }

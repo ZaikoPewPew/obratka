@@ -550,8 +550,7 @@
   justify-content: center;
   width: var(--home-screen-progress-width);
   height: var(--home-screen-progress-height);
-  padding: var(--home-screen-progress-padding-y)
-    var(--home-screen-progress-padding-x);
+  padding: var(--home-screen-progress-padding);
   border-radius: var(--home-screen-progress-radius);
   background: var(--home-screen-progress-bg);
 }
@@ -577,12 +576,38 @@
   width: var(--home-screen-reviewer-slot-size);
   height: var(--home-screen-reviewer-slot-size);
   margin-inline-end: var(--home-screen-reviewer-slots-gap);
-  /* Обводка снаружи, не съедает 24×24 */
+  /* Обводка снаружи, не съедает 32×32 */
   border: none;
   border-radius: var(--home-screen-reviewer-slot-radius);
   background: var(--home-screen-reviewer-slot-empty-bg);
   box-shadow: 0 0 0 var(--home-screen-reviewer-slot-border)
     var(--home-screen-reviewer-slot-ring);
+}
+
+.home-screen__reviewer-slot-tooltip {
+  box-sizing: border-box;
+  position: absolute;
+  bottom: calc(100% + var(--home-screen-reviewer-slot-tooltip-offset));
+  left: 50%;
+  z-index: var(--home-screen-reviewer-slot-tooltip-z);
+  display: none;
+  padding: var(--home-screen-reviewer-slot-tooltip-padding-y)
+    var(--home-screen-reviewer-slot-tooltip-padding-x);
+  border-radius: var(--home-screen-reviewer-slot-tooltip-radius);
+  background: var(--home-screen-reviewer-slot-tooltip-bg);
+  color: var(--home-screen-reviewer-slot-tooltip-color);
+  font-family: var(--font-family);
+  font-size: var(--home-screen-reviewer-slot-tooltip-font-size);
+  font-weight: var(--home-screen-reviewer-slot-tooltip-font-weight);
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.home-screen__reviewer-slot:hover .home-screen__reviewer-slot-tooltip,
+.home-screen__reviewer-slot:focus-visible .home-screen__reviewer-slot-tooltip {
+  display: block;
 }
 
 .home-screen__reviewer-slot:nth-child(1) {
@@ -595,6 +620,11 @@
 
 .home-screen__reviewer-slot:nth-child(3) {
   z-index: 3;
+}
+
+.home-screen__reviewer-slot:hover,
+.home-screen__reviewer-slot:focus-visible {
+  z-index: 4;
 }
 
 .home-screen__reviewer-slot:last-child {

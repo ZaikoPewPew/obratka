@@ -8,7 +8,7 @@
 |------|--------|
 | `design-tokens.mdc` | Только `var(--…)` из `tokens.css`, Montserrat, motion |
 | `i18n.mdc` | UI-строки только из `locales.json` (ru/en) |
-| `screens.mdc` | Экран = модуль, `go()`, paths, handoff, legacy off |
+| `screens.mdc` | Экран = модуль, `go()`, paths, home Активные/Архивные, handoff |
 | `brand-ui.mdc` | Visual variants, field errors, marks — не копипастить mesh |
 | `review-claims.mdc` | Claim / heartbeat / release; награда только после submit |
 | `dictation.mdc` | Надиктовка: `/review` → `answers.dictation` + микрофон в поле совета (Web Speech MVP) |
@@ -31,6 +31,7 @@
 | Brand visual / variants | `src/components/brand-screen-visual/` |
 | Brand split-shell | `src/components/brand-screen-shell/` |
 | App modal | `src/components/app-modal/` (`createAppModal`, `--app-modal-*`) |
+| Tabs panel | `src/components/tabs-panel/` (`createTabsPanel`, `--tabs-panel-*`) |
 | Brand marks / morph | `src/assets/brand/brandMarks.js` |
 | Шрифт | `@fontsource/montserrat` → `src/main.js` |
 
@@ -44,13 +45,14 @@
 | `/registration` | Email → `/registration/code` / Telegram / Google |
 | `/registration/code` | 6 ячеек OTP |
 | `/onboarding` | Онбординг → `profiles` |
-| `/home` | Hub: SWR лента/мои + intro до claim + mine report gate + seen-dot 3/3 + tabbar-dock |
+| `/home` | Hub: SWR лента/мои + intro до claim + mine report gate + Активные/Архивные + seen-dot 3/3 + tabbar-dock |
+| `/settings` | Заглушка настроек (из account-menu) |
 | `/portfolio` | Подача URL; back-chip «На главную»; done через `setVariant("done")` |
 | `/review` | iframe + таймер 45 s + **rec** (заметки; нужен claim); в квизе — микрофон в поле совета |
 | `/quiz` | Квиз |
 | `/quiz/done` | Финал квиза |
 | `/done` | Запасной success (deep link) |
-| `/report` | Листы ревью автора + жалоба → репутация |
+| `/report` | Листы ревью автора + жалоба → репутация; `markReportOpened` |
 | `/banned` | Аккаунт заблокирован (escape-proof; в т.ч. автобан) |
 
 | Что | Где |
@@ -62,7 +64,7 @@
 | Надиктовка | `src/lib/dictation/` + `.iframe-shell__rec` + `.review-panel__rec` |
 | Онбординг-контент | `content/onboarding.json`, `content/onboarding.md` |
 
-Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `account-menu`, `settings-screen`, `success-screen`, `ban-screen`, `report-screen`.
+Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `tabs-panel`, `account-menu`, `settings-screen`, `success-screen`, `ban-screen`, `report-screen`.
 
 **Home (новое):** SWR `homeListCache` (memory + `obratka.homeLists.<userId>`); silent slot patch; feed sort `sortFeedForSlotClosure`; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); фильтр Активные/Архивные (`tabs-panel` + `reportOpenedIds`); точка на «Мои» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) 20%/blur + `--on-dark` через `backdropLuminance`. Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache` + `clearMineReadySeen` + `clearReportOpened`.  
 **Url-screen:** чип `.url-screen__back` (`urlScreenBack*`) → home; на done скрыт.  

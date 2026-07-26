@@ -1,5 +1,6 @@
 import { formatString, getStrings } from "../../i18n.js";
 import {
+  formatPortfolioGrade,
   listMyPortfolios,
   listPortfoliosForReview,
   listReadyOwnReportIds,
@@ -94,6 +95,7 @@ const TABBAR_HIDE_DELTA = 6;
  *   reviewerId?: string;
  *   avatarUrl?: string;
  *   displayName?: string;
+ *   grade?: string;
  * }} HomeReviewerSlot
  *
  * @typedef {{
@@ -190,12 +192,23 @@ function fillReviewerSlots(slots, item) {
     const slotLetter = initialFromLabel(
       slotData.displayName || slotData.reviewerId || "?",
     );
+    const gradeKey =
+      typeof slotData.grade === "string" ? slotData.grade.trim() : "";
+    const gradeLabel = formatPortfolioGrade(gradeKey);
+    if (gradeLabel) {
+      slot.setAttribute("aria-label", gradeLabel);
+      const tooltip = document.createElement("span");
+      tooltip.className = "home-screen__reviewer-slot-tooltip";
+      tooltip.setAttribute("role", "tooltip");
+      tooltip.textContent = gradeLabel;
+      slot.append(tooltip);
+    }
     if (slotAvatar) {
       const slotImg = document.createElement("img");
       slotImg.className = "home-screen__reviewer-slot-img";
       slotImg.alt = "";
-      slotImg.width = 24;
-      slotImg.height = 24;
+      slotImg.width = 32;
+      slotImg.height = 32;
       slotImg.decoding = "async";
       slotImg.loading = "lazy";
       slotImg.referrerPolicy = "no-referrer";
@@ -1008,7 +1021,13 @@ export function createHomeScreen({
   }
 
   function syncMineFilterPanel() {
+    const wasHidden = mineFilterPanel.root.hidden;
     mineFilterPanel.root.hidden = activeTab !== "mine";
+    if (wasHidden && !mineFilterPanel.root.hidden) {
+      requestAnimationFrame(() => {
+        mineFilterPanel.syncThumb(true);
+      });
+    }
   }
 
   /**
@@ -1574,7 +1593,7 @@ export function createHomeScreen({
     revealItems = false;
     wasSkeletonLoading = false;
     mineFilter = "active";
-    mineFilterPanel.setActive("active");
+    mineFilterPanel.setActive("active", { instant: true });
     syncMineFilterPanel();
     showTabbar();
     closeSubmitLockedModal();

@@ -138,9 +138,9 @@ Topbar поверх контента (`position: absolute`), появление 
 | Аватар | `item.avatarUrl` или буква из `item.name` |
 | ФИО | `item.name` |
 | Роль | EN Title Case: `formatPortfolioRole` (Lead → `… Design Lead`, Head → `Head Of …`) |
-| Слоты | Белый чип `.home-screen__card-progress` 96×52 r16 (Figma Frame 140); внутри стек 64×24 |
-| Пустой слот | 24×24, фон muted, **внешняя** обводка 3px (box-shadow), плюс 18×18 |
-| Active / completed | Аватарка; margin −4px между слотами, L→R |
+| Слоты | Белый чип `.home-screen__card-progress` 108×52 r pill, padding 10; внутри стек 88×32 |
+| Пустой слот | 32×32, фон muted, **внешняя** обводка 3px (box-shadow), плюс 18×18 |
+| Active / completed | Аватарка; margin −4px между слотами, L→R; hover → тултип с грейдом (EN) |
 
 Заполнение слотов слева направо; по умолчанию три плюса. Текста «N из 3» нет (есть в aria).
 
