@@ -2241,6 +2241,10 @@ body {
   background: var(--url-screen-avatar-framer-bg);
 }
 
+.url-screen__avatar--behance {
+  background: var(--url-screen-avatar-behance-bg);
+}
+
 .url-screen__avatar--notion {
   background: var(--url-screen-avatar-notion-bg);
 }
@@ -2263,14 +2267,17 @@ body {
 }
 
 .url-screen__avatar--framer .url-screen__avatar-img,
+.url-screen__avatar--behance .url-screen__avatar-img,
 .url-screen__avatar--notion .url-screen__avatar-img {
   width: var(--url-screen-avatar-logo-size);
   height: var(--url-screen-avatar-logo-size);
   object-fit: contain;
 }
 
-/* Чёрный глиф Framer на прозрачном → белый на чёрном фоне */
-.url-screen__avatar--framer .url-screen__avatar-img {
+/* Чёрный глиф Simple Icons → белый на тёмном / цветном фоне */
+.url-screen__avatar--framer .url-screen__avatar-img,
+.url-screen__avatar--behance .url-screen__avatar-img,
+.url-screen__avatar--notion .url-screen__avatar-img {
   filter: invert(1);
 }
 
