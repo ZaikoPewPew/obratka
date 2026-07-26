@@ -676,7 +676,7 @@
   --home-screen-rating-empty-font-weight: var(--home-screen-empty-font-weight);
   --home-screen-rating-empty-color: var(--home-screen-empty-color);
   /* Карточка топ-50 (Figma RaitingCard 482:2123) */
-  --home-screen-rating-list-gap: var(--home-screen-feed-gap);
+  --home-screen-rating-list-gap: var(--space-2);
   --home-screen-rating-card-height: 68px;
   --home-screen-rating-card-padding: var(--space-2);
   --home-screen-rating-card-gap: var(--space-3);
@@ -742,6 +742,15 @@
   --legendary-online-dot-border-width: 1px;
   --legendary-online-dot-border-color: var(--legendary-online-bg);
   --legendary-online-dot-bg: var(--color-online);
+  --legendary-online-tooltip-padding-x: var(--space-2);
+  --legendary-online-tooltip-padding-y: var(--space-1);
+  --legendary-online-tooltip-radius: var(--radius-xs);
+  --legendary-online-tooltip-bg: var(--color-text);
+  --legendary-online-tooltip-color: var(--color-surface);
+  --legendary-online-tooltip-font-size: var(--font-size-xs);
+  --legendary-online-tooltip-font-weight: var(--font-weight-medium);
+  --legendary-online-tooltip-offset: var(--space-2);
+  --legendary-online-tooltip-z: 10;
   --home-screen-locked-modal-max-width: 360px;
   --home-screen-locked-modal-padding: var(--space-6);
   --home-screen-locked-modal-gap: var(--space-4);

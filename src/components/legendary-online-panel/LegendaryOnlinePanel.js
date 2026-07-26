@@ -70,7 +70,14 @@ export function createLegendaryOnlinePanel() {
       typeof item.displayName === "string" && item.displayName.trim()
         ? item.displayName.trim()
         : fallback;
-    li.title = name;
+    if (name) {
+      li.setAttribute("aria-label", name);
+      const tip = document.createElement("span");
+      tip.className = "legendary-online-panel__tip";
+      tip.setAttribute("role", "tooltip");
+      tip.textContent = name;
+      li.append(tip);
+    }
 
     const letter = initialFromLabel(name);
     const avatarSrc =

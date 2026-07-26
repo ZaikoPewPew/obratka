@@ -346,7 +346,7 @@
   display: none !important;
 }
 
-/* Топ-50: колонка карточек по центру, первая — от верха body (16px), далее 16px */
+/* Топ-50: колонка карточек по центру, первая — от верха body (16px), далее 8px */
 .home-screen__rating-list {
   display: flex;
   flex-direction: column;

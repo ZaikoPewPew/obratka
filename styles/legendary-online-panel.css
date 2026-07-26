@@ -56,6 +56,8 @@
   color: var(--legendary-online-avatar-letter-color);
   box-shadow: 0 0 0 var(--legendary-online-avatar-ring-width)
     var(--legendary-online-avatar-ring-color);
+  pointer-events: auto;
+  cursor: default;
 }
 
 .legendary-online-panel__avatar:last-child {
@@ -72,6 +74,32 @@
 
 .legendary-online-panel__avatar:nth-child(3) {
   z-index: 3;
+}
+
+.legendary-online-panel__tip {
+  box-sizing: border-box;
+  position: absolute;
+  bottom: calc(100% + var(--legendary-online-tooltip-offset));
+  left: 50%;
+  z-index: var(--legendary-online-tooltip-z);
+  display: none;
+  padding: var(--legendary-online-tooltip-padding-y)
+    var(--legendary-online-tooltip-padding-x);
+  border-radius: var(--legendary-online-tooltip-radius);
+  background: var(--legendary-online-tooltip-bg);
+  color: var(--legendary-online-tooltip-color);
+  font-family: var(--font-family);
+  font-size: var(--legendary-online-tooltip-font-size);
+  font-weight: var(--legendary-online-tooltip-font-weight);
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.legendary-online-panel__avatar:hover .legendary-online-panel__tip,
+.legendary-online-panel__avatar:focus-visible .legendary-online-panel__tip {
+  display: block;
 }
 
 .legendary-online-panel__avatar-img {

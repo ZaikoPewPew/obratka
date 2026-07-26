@@ -13,6 +13,6 @@ Fixed-чип слева снизу на `/home` (Figma `489:3318`). Показы
 
 Монтаж: [`HomeScreen.js`](../home-screen/HomeScreen.js) на root рядом с `contact-fab` (`left/bottom: 16px`). Poll вместе с home (~15 с). Heartbeat пишет только legendary-клиент (`main.js` + `heartbeat_legendary_presence`).
 
-При переходе 0 → N — класс `--enter` + `motion-reveal` (въезд снизу). До 3 аватаров в чипе; точка онлайна сверху справа на каждом.
+При переходе 0 → N — класс `--enter` + `motion-reveal` (въезд снизу). До 3 аватаров в чипе; точка онлайна сверху справа на каждом. Hover/focus по аватару — тултип с ФИО (`displayName`, `legendary-online-panel__tip`).
 
 Рейтинг валюты на вкладке `?tab=rating` — внутри [`home-screen`](../home-screen/README.md) (`listRatingTop`). Папка [`rating/`](../rating/) — неиспользуемый aside, не путать.
