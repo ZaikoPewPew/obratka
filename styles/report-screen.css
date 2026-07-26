@@ -280,6 +280,8 @@
   place-items: center;
   padding: var(--report-screen-padding);
   background: var(--color-overlay);
+  -webkit-backdrop-filter: blur(var(--overlay-blur));
+  backdrop-filter: blur(var(--overlay-blur));
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--motion-reveal-duration) var(--motion-reveal-ease);

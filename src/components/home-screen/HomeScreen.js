@@ -60,7 +60,8 @@ import { createContactFab } from "../contact-fab/ContactFab.js";
 import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
 import { REVIEW_SESSION_SECONDS } from "../../config/review.js";
 import boneIconUrl from "../../assets/home/bone.svg";
-import currencyDuckUrl from "../../assets/home/currency-duck.jpg";
+import balanceCardDucksUrl from "../../assets/home/modal/balance-card-ducks.svg";
+import currencyDuckUrl from "../../assets/home/modal/currency-duck.jpg";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
 import reviewedCheckIconSvg from "../../assets/home/reviewed-check.svg?raw";
 import reputationNeutralIconUrl from "../../assets/home/reputation-neutral.svg";
@@ -640,16 +641,22 @@ export function createHomeScreen({
   const balanceCardBody = document.createElement("p");
   balanceCardBody.className = "home-screen__balance-explainer-card-body";
 
-  balanceCard.append(balanceCardTitle, balanceCardBody);
+  const balanceCardDeco = document.createElement("img");
+  balanceCardDeco.className = "home-screen__balance-explainer-card-deco";
+  balanceCardDeco.src = balanceCardDucksUrl;
+  balanceCardDeco.alt = "";
+  balanceCardDeco.width = 66;
+  balanceCardDeco.height = 73;
+  balanceCardDeco.decoding = "async";
+  balanceCardDeco.setAttribute("aria-hidden", "true");
+
+  balanceCard.append(balanceCardTitle, balanceCardBody, balanceCardDeco);
   balanceExplainer.append(balanceMedia, balanceCard);
 
   const balanceModal = createAppModal({
     size: "md",
+    showSecondary: false,
     onPrimary: () => {
-      void balanceModal.close();
-      void setActiveTab("feed");
-    },
-    onSecondary: () => {
       void balanceModal.close();
     },
   });
@@ -1660,12 +1667,25 @@ export function createHomeScreen({
 
     const balance = document.createElement("span");
     balance.className = "home-screen__rating-balance";
-    balance.textContent = Number(item.balance).toLocaleString(getLocale());
     balance.setAttribute(
       "aria-label",
       formatString(t.homeRatingBalanceAria, { balance: item.balance }),
     );
 
+    const balanceIcon = document.createElement("img");
+    balanceIcon.className = "home-screen__rating-balance-icon";
+    balanceIcon.src = boneIconUrl;
+    balanceIcon.alt = "";
+    balanceIcon.width = 24;
+    balanceIcon.height = 24;
+    balanceIcon.decoding = "async";
+    balanceIcon.setAttribute("aria-hidden", "true");
+
+    const balanceValue = document.createElement("span");
+    balanceValue.className = "home-screen__rating-balance-value";
+    balanceValue.textContent = Number(item.balance).toLocaleString(getLocale());
+
+    balance.append(balanceIcon, balanceValue);
     card.append(avatar, text, balance);
     li.append(card);
     return li;
@@ -2402,12 +2422,11 @@ export function createHomeScreen({
     balanceCardBody.textContent = t.homeBalanceCardBody ?? "";
     balanceModal.setTitle(t.homeBalanceTitle ?? "");
     balanceModal.setDescription(t.homeBalanceDesc ?? "");
-    balanceModal.setPrimaryLabel(t.homeBalanceReview ?? "");
-    balanceModal.setSecondaryLabel(t.homeBalanceClose ?? "");
+    balanceModal.setPrimaryLabel(t.homeBalanceClose ?? "");
     balanceModal.setCloseAriaLabel(
       t.homeBalanceCloseAria ?? t.homeBalanceClose ?? "",
     );
-    balanceModal.setActionsVisible({ primary: true, secondary: true });
+    balanceModal.setActionsVisible({ primary: true, secondary: false });
     balanceModal.open();
   }
 

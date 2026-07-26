@@ -115,6 +115,7 @@
   --color-border-subtle: rgba(36, 36, 38, 0.12);
   --border-width: 1px;
   --color-overlay: rgba(36, 36, 38, 0.45);
+  --overlay-blur: 8px;
   --color-focus-ring: rgba(36, 36, 38, 0.35);
   --color-focus-ring-on-accent: rgba(255, 255, 255, 0.55);
   --focus-ring-width: 2px;
@@ -506,6 +507,8 @@
   --app-modal-btn-secondary-bg-hover: var(--color-surface-muted-hover);
   --app-modal-btn-secondary-bg-active: var(--color-surface-muted-active);
   --app-modal-btn-secondary-color: var(--color-text);
+  --app-modal-backdrop-bg: var(--color-overlay);
+  --app-modal-backdrop-blur: var(--overlay-blur);
   --app-modal-backdrop-duration: var(--motion-screen-duration);
   --app-modal-backdrop-ease: var(--motion-screen-ease);
   --app-modal-dialog-duration: var(--motion-reveal-duration);
@@ -608,6 +611,10 @@
   --home-screen-balance-explainer-card-body-weight: var(--font-weight-regular);
   --home-screen-balance-explainer-card-body-line: var(--line-height-snug);
   --home-screen-balance-explainer-card-body-color: var(--color-text);
+  --home-screen-balance-explainer-card-deco-width: 66px;
+  --home-screen-balance-explainer-card-deco-height: 73px;
+  --home-screen-balance-explainer-card-deco-right: 20px;
+  --home-screen-balance-explainer-card-deco-bottom: 13px;
   --home-screen-profile-size: var(--space-12);
   --home-screen-avatar-radius: var(--radius-pill);
   --home-screen-avatar-letter-bg: var(--palette-gray-900);
@@ -721,6 +728,8 @@
   --home-screen-rating-balance-padding-x: var(--space-4);
   --home-screen-rating-balance-radius: var(--radius-md);
   --home-screen-rating-balance-bg: var(--color-surface);
+  --home-screen-rating-balance-gap: var(--space-1);
+  --home-screen-rating-balance-icon: var(--home-screen-chip-icon);
   --home-screen-rating-balance-size: var(--home-screen-meta-font-size);
   --home-screen-rating-balance-weight: var(--font-weight-medium);
   /* Skeleton карточки рейтинга: базы/шиммер общие с лентой */

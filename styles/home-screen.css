@@ -192,6 +192,7 @@
 
 .home-screen__balance-explainer-card {
   box-sizing: border-box;
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--home-screen-balance-explainer-card-gap);
@@ -199,12 +200,15 @@
   min-width: 0;
   min-height: var(--home-screen-balance-explainer-media-height);
   padding: var(--home-screen-balance-explainer-card-padding);
+  overflow: hidden;
   border-radius: var(--home-screen-balance-explainer-card-radius);
   background: var(--home-screen-balance-explainer-card-bg);
 }
 
 .home-screen__balance-explainer-card-title,
 .home-screen__balance-explainer-card-body {
+  position: relative;
+  z-index: 1;
   margin: 0;
   font-family: var(--font-family);
 }
@@ -221,6 +225,17 @@
   font-size: var(--home-screen-balance-explainer-card-body-size);
   font-weight: var(--home-screen-balance-explainer-card-body-weight);
   line-height: var(--home-screen-balance-explainer-card-body-line);
+}
+
+.home-screen__balance-explainer-card-deco {
+  box-sizing: border-box;
+  position: absolute;
+  right: var(--home-screen-balance-explainer-card-deco-right);
+  bottom: var(--home-screen-balance-explainer-card-deco-bottom);
+  width: var(--home-screen-balance-explainer-card-deco-width);
+  height: var(--home-screen-balance-explainer-card-deco-height);
+  pointer-events: none;
+  user-select: none;
 }
 
 @media (max-width: 560px) {
@@ -531,6 +546,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  gap: var(--home-screen-rating-balance-gap);
   min-width: var(--home-screen-rating-balance-min-width);
   height: var(--home-screen-rating-balance-height);
   padding-inline: var(--home-screen-rating-balance-padding-x);
@@ -542,6 +558,13 @@
   font-weight: var(--home-screen-rating-balance-weight);
   line-height: normal;
   white-space: nowrap;
+}
+
+.home-screen__rating-balance-icon {
+  display: block;
+  flex-shrink: 0;
+  width: var(--home-screen-rating-balance-icon);
+  height: var(--home-screen-rating-balance-icon);
 }
 
 /* Skeleton рейтинга: кости static + общий shimmer-sweep по карточке */
@@ -1178,6 +1201,8 @@
   justify-content: center;
   padding: var(--space-6);
   background: var(--color-overlay);
+  -webkit-backdrop-filter: blur(var(--overlay-blur));
+  backdrop-filter: blur(var(--overlay-blur));
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--motion-screen-duration) var(--motion-screen-ease);
