@@ -56,6 +56,7 @@ import { createAppModal } from "../app-modal/AppModal.js";
 import { createAccountMenu } from "../account-menu/AccountMenu.js";
 import { createTabsPanel } from "../tabs-panel/TabsPanel.js";
 import { createLegendaryOnlinePanel } from "../legendary-online-panel/LegendaryOnlinePanel.js";
+import { createContactFab } from "../contact-fab/ContactFab.js";
 import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
 import { REVIEW_SESSION_SECONDS } from "../../config/review.js";
 import boneIconUrl from "../../assets/home/bone.svg";
@@ -589,7 +590,7 @@ export function createHomeScreen({
   ratingView.append(ratingList, ratingEmpty);
 
   const legendaryOnlinePanel = createLegendaryOnlinePanel();
-  cluster.append(legendaryOnlinePanel.root, feed, ratingView);
+  cluster.append(feed, ratingView);
   body.append(cluster);
 
   const reputationBody = document.createElement("p");
@@ -708,11 +709,15 @@ export function createHomeScreen({
   tabbarDock.className = "home-screen__tabbar-dock";
   tabbarDock.append(tabbar, addBtn);
 
+  const contactFab = createContactFab();
+
   root.append(
     title,
     topbar,
     body,
     tabbarDock,
+    legendaryOnlinePanel.root,
+    contactFab.root,
     noticeModal.root,
     reviewIntroModal.root,
     inviteModal.root,
@@ -873,6 +878,7 @@ export function createHomeScreen({
     accountMenu.syncContent();
 
     legendaryOnlinePanel.syncCopy();
+    contactFab.syncCopy();
     syncProfileAvatar();
     scheduleTabThumbSync();
   }
@@ -1269,7 +1275,7 @@ export function createHomeScreen({
   }
 
   /**
-   * На `mine` режет список по Активные/Завершённые; на `feed` — как есть.
+   * На `mine` режет список по Мои на ревью / Мои завершенные; на `feed` — как есть.
    *
    * @param {HomePortfolioItem[]} listItems
    * @returns {HomePortfolioItem[]}
@@ -1651,7 +1657,7 @@ export function createHomeScreen({
   }
 
   /**
-   * Placeholder свободного слота (Figma Type=Queue) на «Мои → Активные».
+   * Placeholder свободного слота (Figma Type=Queue) на «Мои → Мои на ревью».
    * @returns {HTMLLIElement}
    */
   function createEmptySlotCard() {

@@ -288,30 +288,9 @@
   box-sizing: border-box;
   display: flex;
   align-items: flex-start;
-  gap: var(--home-screen-aside-gap);
   width: 100%;
   max-width: var(--home-screen-feed-width);
   min-width: 0;
-}
-
-/* Desktop: лента по центру экрана; sticky aside слева вплотную к ней */
-@media (min-width: 960px) {
-  .home-screen__body {
-    justify-content: flex-start;
-  }
-
-  .home-screen__cluster {
-    width: var(--home-screen-cluster-width-with-aside);
-    max-width: none;
-    margin-inline-start: max(
-      0px,
-      calc(
-        50% - (var(--home-screen-feed-width) / 2) -
-          var(--home-screen-aside-width) - var(--home-screen-aside-gap)
-      )
-    );
-    margin-inline-end: auto;
-  }
 }
 
 .home-screen__feed {
@@ -615,23 +594,33 @@
 }
 
 /* Свободный слот «Мои → Активные» (Figma Type=Queue) */
+.home-screen__card--slot-empty {
+  width: 100%;
+  max-width: var(--home-screen-slot-empty-width);
+  height: var(--home-screen-slot-empty-height);
+  padding: var(--home-screen-slot-empty-padding);
+  border: var(--home-screen-slot-empty-border);
+  border-radius: var(--home-screen-slot-empty-radius);
+  --home-screen-card-surface: var(--home-screen-slot-empty-card-bg);
+}
+
 .home-screen__card--slot-empty:hover {
-  --home-screen-card-surface: var(--home-screen-card-bg-hover);
+  --home-screen-card-surface: var(--home-screen-slot-empty-card-bg);
 }
 
 .home-screen__card--slot-empty:active {
-  --home-screen-card-surface: var(--home-screen-card-bg-active);
+  --home-screen-card-surface: var(--home-screen-slot-empty-card-bg);
 }
 
 .home-screen__slot-empty-preview {
   box-sizing: border-box;
   display: grid;
+  flex: 1 1 auto;
   place-items: center;
   width: 100%;
-  height: var(--home-screen-preview-height);
+  min-height: 0;
   border-radius: var(--home-screen-preview-radius);
-  border: var(--home-screen-slot-empty-dash) dashed
-    var(--home-screen-slot-empty-border-color);
+  border: var(--home-screen-slot-empty-border);
   background: var(--home-screen-slot-empty-preview-bg);
 }
 
@@ -660,8 +649,7 @@
   flex-shrink: 0;
   height: var(--home-screen-slot-empty-meta-height);
   border-radius: var(--home-screen-slot-empty-meta-radius);
-  border: var(--home-screen-slot-empty-dash) dashed
-    var(--home-screen-slot-empty-border-color);
+  border: var(--home-screen-slot-empty-border);
   background: var(--home-screen-slot-empty-preview-bg);
 }
 

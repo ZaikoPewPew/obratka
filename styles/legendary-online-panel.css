@@ -1,58 +1,44 @@
-/* Легенды онлайн — sticky aside на home (desktop ≥960px). */
+/* «Топы в сети» — fixed-чип слева снизу на home (Figma 489:3318). */
 
 .legendary-online-panel {
-  display: none;
-}
-
-.legendary-online-panel__surface {
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
+  position: absolute;
+  left: var(--legendary-online-offset);
+  bottom: var(--legendary-online-offset);
+  z-index: var(--legendary-online-z);
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
   gap: var(--legendary-online-gap);
-  width: 100%;
-  height: fit-content;
-  padding: var(--legendary-online-padding);
-  border-radius: var(--home-screen-aside-radius);
-  background: var(--home-screen-aside-bg);
-}
-
-.legendary-online-panel__title {
+  height: var(--legendary-online-height);
   margin: 0;
+  padding: var(--legendary-online-padding-y) var(--legendary-online-padding-right)
+    var(--legendary-online-padding-y) var(--legendary-online-padding-left);
+  border-radius: var(--legendary-online-radius);
+  background: var(--legendary-online-bg);
   font-family: var(--font-family);
-  font-size: var(--legendary-online-title-size);
-  font-weight: var(--legendary-online-title-weight);
-  line-height: var(--line-height-tight);
   color: var(--color-text);
+  pointer-events: none;
 }
 
-.legendary-online-panel__list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--legendary-online-list-gap);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.legendary-online-panel__list[hidden],
-.legendary-online-panel__empty[hidden] {
+.legendary-online-panel[hidden] {
   display: none !important;
 }
 
-.legendary-online-panel__empty {
-  margin: 0;
-  font-family: var(--font-family);
-  font-size: var(--legendary-online-empty-size);
-  font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-snug);
-  color: var(--color-text-muted);
+.legendary-online-panel--enter {
+  animation-name: motion-reveal;
+  animation-duration: var(--motion-reveal-duration);
+  animation-timing-function: var(--motion-reveal-ease);
+  animation-fill-mode: both;
 }
 
-.legendary-online-panel__item {
+.legendary-online-panel__avatars {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: var(--legendary-online-item-gap);
-  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .legendary-online-panel__avatar {
@@ -64,9 +50,28 @@
   justify-content: center;
   width: var(--legendary-online-avatar-size);
   height: var(--legendary-online-avatar-size);
+  margin-inline-end: var(--legendary-online-avatars-gap);
   border-radius: var(--legendary-online-avatar-radius);
   background: var(--legendary-online-avatar-letter-bg);
   color: var(--legendary-online-avatar-letter-color);
+  box-shadow: 0 0 0 var(--legendary-online-avatar-ring-width)
+    var(--legendary-online-avatar-ring-color);
+}
+
+.legendary-online-panel__avatar:last-child {
+  margin-inline-end: 0;
+}
+
+.legendary-online-panel__avatar:nth-child(1) {
+  z-index: 1;
+}
+
+.legendary-online-panel__avatar:nth-child(2) {
+  z-index: 2;
+}
+
+.legendary-online-panel__avatar:nth-child(3) {
+  z-index: 3;
 }
 
 .legendary-online-panel__avatar-img {
@@ -86,8 +91,8 @@
 
 .legendary-online-panel__dot {
   position: absolute;
+  top: var(--legendary-online-dot-offset);
   right: var(--legendary-online-dot-offset);
-  bottom: var(--legendary-online-dot-offset);
   box-sizing: border-box;
   width: var(--legendary-online-dot-size);
   height: var(--legendary-online-dot-size);
@@ -97,24 +102,17 @@
   background: var(--legendary-online-dot-bg);
 }
 
-.legendary-online-panel__name {
-  overflow: hidden;
+.legendary-online-panel__label {
   font-family: var(--font-family);
-  font-size: var(--legendary-online-name-size);
-  font-weight: var(--legendary-online-name-weight);
+  font-size: var(--legendary-online-label-size);
+  font-weight: var(--legendary-online-label-weight);
   line-height: var(--line-height-snug);
   color: var(--color-text);
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-@media (min-width: 960px) {
-  .legendary-online-panel {
-    display: block;
-    position: sticky;
-    top: var(--home-screen-aside-sticky-top);
-    flex-shrink: 0;
-    align-self: flex-start;
-    width: var(--home-screen-aside-width);
+@media (prefers-reduced-motion: reduce) {
+  .legendary-online-panel--enter {
+    animation: none;
   }
 }

@@ -22,6 +22,7 @@
   --palette-gray-50: #fafafa;
   --palette-gray-100: #f3f4f7;
   --palette-gray-150: #eceef3;
+  --palette-gray-175: #e9eaed;
   --palette-gray-200: #e8eaef;
   --palette-gray-400: #9a9a9e;
   --palette-gray-500: #797979;
@@ -32,6 +33,8 @@
   --palette-red: #c43c3c;
   --palette-red-soft: #fff8f8;
   --palette-green: #00c023;
+  /* Online presence (Figma legendary chip) */
+  --palette-online: #62c554;
   --palette-brand-hot: #f9392a;
   /* Ban-screen mesh (accent #FF4837 family) */
   --palette-ban: #ff4837;
@@ -104,6 +107,7 @@
   /* Индикатор записи (Figma rec / Google red) */
   --color-recording: var(--palette-google-red);
   --color-success: var(--palette-green);
+  --color-online: var(--palette-online);
   --color-logo-hover: var(--palette-brand-hot);
 
   /* Цвета: границы и фокус */
@@ -706,35 +710,38 @@
   --home-screen-rating-skeleton-line-name-width: 119px;
   --home-screen-rating-skeleton-line-role-width: 206px;
   --home-screen-rating-skeleton-balance-width: 94px;
+  /* Aside (rating-panel stub / legacy); legendary online — fixed-чип */
   --home-screen-aside-width: 278px;
   --home-screen-aside-min-height: 462px;
   --home-screen-aside-radius: var(--radius-xl);
   --home-screen-aside-bg: var(--color-surface-muted);
   --home-screen-aside-gap: var(--space-4);
   --home-screen-aside-sticky-top: 0px;
-  --home-screen-cluster-width-with-aside: calc(
-    var(--home-screen-aside-width) + var(--home-screen-aside-gap) +
-      var(--home-screen-feed-width)
-  );
-  --legendary-online-padding: var(--space-4);
-  --legendary-online-gap: var(--space-4);
-  --legendary-online-list-gap: var(--space-3);
-  --legendary-online-item-gap: var(--space-3);
-  --legendary-online-title-size: var(--font-size-base);
-  --legendary-online-title-weight: var(--font-weight-semibold);
-  --legendary-online-empty-size: var(--font-size-sm);
-  --legendary-online-name-size: var(--font-size-sm);
-  --legendary-online-name-weight: var(--font-weight-medium);
-  --legendary-online-avatar-size: 36px;
+  /* «Топы в сети» — fixed-чип слева снизу (Figma 489:3318) */
+  --legendary-online-offset: var(--space-4);
+  --legendary-online-z: var(--home-screen-tabbar-z);
+  --legendary-online-height: 52px;
+  --legendary-online-padding-y: 10px;
+  --legendary-online-padding-left: 10px;
+  --legendary-online-padding-right: var(--space-4);
+  --legendary-online-gap: var(--space-2);
+  --legendary-online-radius: var(--radius-pill);
+  --legendary-online-bg: var(--color-surface-muted);
+  --legendary-online-label-size: var(--font-size-base);
+  --legendary-online-label-weight: var(--font-weight-regular);
+  --legendary-online-avatar-size: var(--space-8);
   --legendary-online-avatar-radius: var(--radius-pill);
+  --legendary-online-avatars-gap: -4px;
+  --legendary-online-avatar-ring-width: 1px;
+  --legendary-online-avatar-ring-color: var(--legendary-online-bg);
   --legendary-online-avatar-letter-bg: var(--home-screen-avatar-letter-bg);
   --legendary-online-avatar-letter-color: var(--home-screen-avatar-letter-color);
-  --legendary-online-avatar-letter-size: var(--font-size-sm);
-  --legendary-online-dot-size: 10px;
+  --legendary-online-avatar-letter-size: var(--font-size-xs);
+  --legendary-online-dot-size: var(--space-2);
   --legendary-online-dot-offset: 0px;
-  --legendary-online-dot-border-width: 2px;
-  --legendary-online-dot-border-color: var(--home-screen-aside-bg);
-  --legendary-online-dot-bg: var(--color-success);
+  --legendary-online-dot-border-width: 1px;
+  --legendary-online-dot-border-color: var(--legendary-online-bg);
+  --legendary-online-dot-bg: var(--color-online);
   --home-screen-locked-modal-max-width: 360px;
   --home-screen-locked-modal-padding: var(--space-6);
   --home-screen-locked-modal-gap: var(--space-4);
@@ -757,8 +764,13 @@
   --home-screen-card-bg-hover: var(--color-surface-muted-hover);
   --home-screen-card-bg-active: var(--color-surface-muted-active);
   /* Свободный слот на «Мои → Активные» (Figma Type=Queue 487:3222) */
-  --home-screen-slot-empty-dash: 1.5px;
-  --home-screen-slot-empty-border-color: var(--palette-gray-200);
+  --home-screen-slot-empty-width: var(--home-screen-feed-width);
+  --home-screen-slot-empty-height: var(--home-screen-empty-height);
+  --home-screen-slot-empty-padding: var(--space-2);
+  --home-screen-slot-empty-radius: var(--radius-xl) var(--radius-xl)
+    var(--radius-2xl) var(--radius-2xl);
+  --home-screen-slot-empty-border: 2px dashed var(--palette-gray-175);
+  --home-screen-slot-empty-card-bg: transparent;
   --home-screen-slot-empty-preview-bg: var(--color-surface);
   --home-screen-slot-empty-label-size: var(--font-size-base);
   --home-screen-slot-empty-label-weight: var(--font-weight-regular);
@@ -901,6 +913,28 @@
     var(--home-screen-tabbar-offset) + var(--home-screen-tabbar-height) +
       var(--space-4)
   );
+
+  /* FAB «быстрая связь» (Telegram), Figma 478:1814 */
+  --contact-fab-size: 56px;
+  --contact-fab-offset: var(--space-4);
+  --contact-fab-radius: var(--radius-md);
+  --contact-fab-icon: 24px;
+  --contact-fab-z: var(--home-screen-tabbar-z);
+  --contact-fab-bg: var(--color-accent);
+  --contact-fab-bg-hover: var(--color-accent-hover);
+  --contact-fab-bg-active: var(--color-accent-active);
+  --contact-fab-color: var(--color-on-accent);
+  --contact-fab-color-hover: var(--color-on-accent-hover);
+  --contact-fab-color-active: var(--color-on-accent-active);
+  --contact-fab-tooltip-padding-x: var(--space-2);
+  --contact-fab-tooltip-padding-y: var(--space-1);
+  --contact-fab-tooltip-radius: var(--radius-xs);
+  --contact-fab-tooltip-bg: var(--color-text);
+  --contact-fab-tooltip-color: var(--color-surface);
+  --contact-fab-tooltip-font-size: var(--font-size-xs);
+  --contact-fab-tooltip-font-weight: var(--font-weight-medium);
+  --contact-fab-tooltip-offset: var(--space-2);
+  --contact-fab-tooltip-z: 1;
 
   /* Отдельный экран настроек (пока заглушка) */
   --settings-screen-z: var(--home-screen-z);

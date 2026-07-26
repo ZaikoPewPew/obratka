@@ -83,7 +83,7 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 
 Handoff соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
-`home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки feed/mine/rating (топ-50 `listRatingTop`); SWR `homeListCache`; aside «Легенды онлайн» (`legendary-online-panel`); intro до claim (`homeReviewIntro*`); `reviewedByMe` после submit → disabled + оверлей; mine report gate (`homeMineNotReady*`); фильтр Активные/Завершенные (`tabs-panel`); точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`).
+`home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки feed/mine/rating (топ-50 `listRatingTop`); SWR `homeListCache`; fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB «быстрая связь» (`contact-fab`, Telegram); intro до claim (`homeReviewIntro*`); `reviewedByMe` после submit → disabled + оверлей; mine report gate (`homeMineNotReady*`); фильтр Активные/Завершенные (`tabs-panel`); точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`).
 `account-menu` — поповер под аватаром; identity read-only; settings / invite / contacts / sign out.  
 `settings-screen` — side-route `/settings` (заглушка).
 `url-screen` — split; чип «На главную» (`.url-screen__back` / `urlScreenBack*`, скрыт на done); при URL справа заглушка «Портфолио»; submit → done на том же экране (`setVariant("done")`).  
@@ -111,7 +111,8 @@ src/components/
   auth-code-screen/
   onboarding-screen/
   home-screen/
-  legendary-online-panel/ ← aside «Легенды онлайн» (desktop)
+  legendary-online-panel/ ← fixed-чип «Топы в сети» (слева снизу)
+  contact-fab/            ← fixed FAB Telegram «быстрая связь»
   account-menu/          ← поповер профиля под аватаром
   settings-screen/       ← /settings (пока заглушка)
   url-screen/
@@ -184,7 +185,7 @@ Shared (не экраны флоу):
 | `createAuthScreen` | `/registration` | UI + Email → authCode / Telegram / Google (shell) |
 | `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` (shell) |
 | `createOnboardingScreen` | `/onboarding` | UI → profiles (shell) |
-| `createHomeScreen` | `/home` + query | UI (feed/mine/rating топ-50 + SWR + intro + mine gate + Активные/Завершенные + feedSeen/3/3 + legendary aside + tabbar-dock) |
+| `createHomeScreen` | `/home` + query | UI (feed/mine/rating топ-50 + SWR + intro + mine gate + Активные/Завершенные + feedSeen/3/3 + «Топы в сети» + tabbar-dock) |
 | `createSettingsScreen` | `/settings` | UI (заглушка настроек) |
 | `createUrlScreen` | `/portfolio` | UI (back-chip → home; submit + done via `setVariant`; shell) |
 | iframe-shell + timer + rec | `/review` | UI (заметки → `answers.dictation`) |
@@ -242,8 +243,9 @@ Home tabbar-dock: `--home-screen-tabbar-*` + `--home-screen-tabbar-dock-gap` / `
 - [`STRUCTURE.md`](STRUCTURE.md)
 - [`PROJECT.md`](PROJECT.md)
 - [`src/app/README.md`](src/app/README.md)
-- [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — feed/mine/rating, URL-query, SWR, intro до claim, mine gate, feedSeen/3/3, legendary aside, tabbar-dock
-- [`src/components/legendary-online-panel/README.md`](src/components/legendary-online-panel/README.md) — aside «Легенды онлайн»
+- [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — feed/mine/rating, URL-query, SWR, intro до claim, mine gate, feedSeen/3/3, «Топы в сети», contact FAB, tabbar-dock
+- [`src/components/legendary-online-panel/README.md`](src/components/legendary-online-panel/README.md) — fixed-чип «Топы в сети»
+- [`src/components/contact-fab/README.md`](src/components/contact-fab/README.md) — fixed FAB Telegram «быстрая связь»
 - [`src/api/rating.js`](src/api/rating.js) — `listRatingTop` (топ-50)
 - [`src/components/url-screen/README.md`](src/components/url-screen/README.md) — back-chip + done
 - [`src/config/review.js`](src/config/review.js) — `REVIEW_SESSION_SECONDS`
