@@ -775,7 +775,8 @@
   flex: 0 0 auto;
   align-items: center;
   gap: var(--home-screen-meta-gap);
-  width: var(--home-screen-person-width);
+  width: fit-content;
+  max-width: 100%;
   height: var(--home-screen-person-height);
   padding: var(--home-screen-person-padding);
   min-width: 0;
@@ -799,9 +800,11 @@
   justify-content: center;
   width: var(--home-screen-badge-size);
   height: var(--home-screen-badge-size);
-  overflow: hidden;
   border-radius: var(--home-screen-badge-radius);
   background: var(--color-surface);
+  /* Обводка снаружи, не съедает 32×32 */
+  box-shadow: 0 0 0 var(--home-screen-badge-ring)
+    var(--home-screen-badge-ring-color);
 }
 
 .home-screen__badge--platform {
@@ -830,8 +833,6 @@
 
 .home-screen__badge--avatar {
   z-index: 1;
-  border: var(--home-screen-badge-ring) solid
-    var(--home-screen-badge-ring-color);
   border-radius: var(--home-screen-avatar-radius);
 }
 
@@ -853,6 +854,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: inherit;
 }
 
 .home-screen__badge--platform .home-screen__badge-img {
@@ -864,6 +866,7 @@
 
 .home-screen__card-grade {
   margin: 0;
+  min-width: 0;
   overflow: hidden;
   font-size: var(--home-screen-meta-font-size);
   font-weight: var(--home-screen-grade-weight);
@@ -917,7 +920,7 @@
     var(--home-screen-reviewer-slot-ring);
 }
 
-.home-screen__reviewer-slot-tooltip {
+.home-screen__tip {
   box-sizing: border-box;
   position: absolute;
   bottom: calc(100% + var(--home-screen-reviewer-slot-tooltip-offset));
@@ -938,8 +941,10 @@
   transform: translateX(-50%);
 }
 
-.home-screen__reviewer-slot:hover .home-screen__reviewer-slot-tooltip,
-.home-screen__reviewer-slot:focus-visible .home-screen__reviewer-slot-tooltip {
+.home-screen__reviewer-slot:hover .home-screen__tip,
+.home-screen__reviewer-slot:focus-visible .home-screen__tip,
+.home-screen__badge:hover .home-screen__tip,
+.home-screen__badge:focus-visible .home-screen__tip {
   display: block;
 }
 
@@ -1290,12 +1295,14 @@
   margin-inline-end: var(--home-screen-badge-overlap);
   border-radius: var(--home-screen-badge-radius);
   z-index: 0;
+  box-shadow: 0 0 0 var(--home-screen-badge-ring)
+    var(--home-screen-badge-ring-color);
 }
 
 .home-screen__skeleton-badge--avatar {
   z-index: 1;
   border-radius: var(--home-screen-avatar-radius);
-  border: var(--home-screen-badge-ring) solid
+  box-shadow: 0 0 0 var(--home-screen-badge-ring)
     var(--home-screen-badge-ring-color);
 }
 

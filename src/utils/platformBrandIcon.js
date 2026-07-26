@@ -16,6 +16,7 @@ const SIMPLE_ICONS_VERSION = "v15";
 /**
  * @typedef {{
  *   suffix: string;
+ *   label: string;
  *   slug?: string;
  *   faviconHost?: string;
  * }} PlatformBrandEntry
@@ -28,32 +29,86 @@ const SIMPLE_ICONS_VERSION = "v15";
  * @type {readonly PlatformBrandEntry[]}
  */
 export const PLATFORM_BRAND_ICONS = Object.freeze([
-  { suffix: "docs.google.com", slug: "googledocs", faviconHost: "docs.google.com" },
-  { suffix: "drive.google.com", slug: "googledrive", faviconHost: "drive.google.com" },
-  { suffix: "sheets.google.com", slug: "googlesheets", faviconHost: "sheets.google.com" },
-  { suffix: "slides.google.com", slug: "googleslides", faviconHost: "slides.google.com" },
-  { suffix: "behance.net", slug: "behance" },
-  { suffix: "dribbble.com", slug: "dribbble" },
-  { suffix: "instagram.com", slug: "instagram" },
-  { suffix: "facebook.com", slug: "facebook" },
-  { suffix: "fb.com", slug: "facebook", faviconHost: "facebook.com" },
-  { suffix: "twitter.com", slug: "x", faviconHost: "x.com" },
-  { suffix: "x.com", slug: "x" },
-  { suffix: "pinterest.com", slug: "pinterest" },
-  { suffix: "medium.com", slug: "medium" },
-  { suffix: "notion.so", slug: "notion", faviconHost: "notion.so" },
-  { suffix: "notion.site", slug: "notion", faviconHost: "notion.so" },
-  { suffix: "notion.com", slug: "notion", faviconHost: "notion.so" },
-  { suffix: "miro.com", slug: "miro" },
-  { suffix: "artstation.com", slug: "artstation" },
-  { suffix: "framer.com", slug: "framer" },
-  { suffix: "framer.website", slug: "framer", faviconHost: "framer.com" },
-  { suffix: "framer.ai", slug: "framer", faviconHost: "framer.com" },
-  { suffix: "webflow.com", slug: "webflow" },
-  { suffix: "figma.com", slug: "figma" },
-  { suffix: "awwwards.com", slug: "awwwards" },
+  {
+    suffix: "docs.google.com",
+    slug: "googledocs",
+    faviconHost: "docs.google.com",
+    label: "Google Docs",
+  },
+  {
+    suffix: "drive.google.com",
+    slug: "googledrive",
+    faviconHost: "drive.google.com",
+    label: "Google Drive",
+  },
+  {
+    suffix: "sheets.google.com",
+    slug: "googlesheets",
+    faviconHost: "sheets.google.com",
+    label: "Google Sheets",
+  },
+  {
+    suffix: "slides.google.com",
+    slug: "googleslides",
+    faviconHost: "slides.google.com",
+    label: "Google Slides",
+  },
+  { suffix: "behance.net", slug: "behance", label: "Behance" },
+  { suffix: "dribbble.com", slug: "dribbble", label: "Dribbble" },
+  { suffix: "instagram.com", slug: "instagram", label: "Instagram" },
+  { suffix: "facebook.com", slug: "facebook", label: "Facebook" },
+  {
+    suffix: "fb.com",
+    slug: "facebook",
+    faviconHost: "facebook.com",
+    label: "Facebook",
+  },
+  { suffix: "twitter.com", slug: "x", faviconHost: "x.com", label: "X" },
+  { suffix: "x.com", slug: "x", label: "X" },
+  { suffix: "pinterest.com", slug: "pinterest", label: "Pinterest" },
+  { suffix: "medium.com", slug: "medium", label: "Medium" },
+  {
+    suffix: "notion.so",
+    slug: "notion",
+    faviconHost: "notion.so",
+    label: "Notion",
+  },
+  {
+    suffix: "notion.site",
+    slug: "notion",
+    faviconHost: "notion.so",
+    label: "Notion",
+  },
+  {
+    suffix: "notion.com",
+    slug: "notion",
+    faviconHost: "notion.so",
+    label: "Notion",
+  },
+  { suffix: "miro.com", slug: "miro", label: "Miro" },
+  { suffix: "artstation.com", slug: "artstation", label: "ArtStation" },
+  { suffix: "framer.com", slug: "framer", label: "Framer" },
+  {
+    suffix: "framer.website",
+    slug: "framer",
+    faviconHost: "framer.com",
+    label: "Framer",
+  },
+  {
+    suffix: "framer.ai",
+    slug: "framer",
+    faviconHost: "framer.com",
+    label: "Framer",
+  },
+  { suffix: "webflow.com", slug: "webflow", label: "Webflow" },
+  { suffix: "figma.com", slug: "figma", label: "Figma" },
+  { suffix: "awwwards.com", slug: "awwwards", label: "Awwwards" },
   /** Нет в Simple Icons — favicon с designfolio.me */
-  { suffix: "designfolio.me", faviconHost: "designfolio.me" },
+  {
+    suffix: "designfolio.me",
+    faviconHost: "designfolio.me",
+    label: "Designfolio",
+  },
 ]);
 
 /**
@@ -105,8 +160,10 @@ export function findPlatformBrandIcon(hostname) {
  *   kind: "brand";
  *   src: string;
  *   fallbacks: string[];
+ *   label: string;
  * } | {
  *   kind: "web";
+ *   label: null;
  * }} PlatformIconResolved
  */
 
@@ -128,14 +185,16 @@ export function resolvePlatformIcon(hostnameOrUrl) {
         kind: "brand",
         src: googleIcon,
         fallbacks: [ddgIcon, `https://${faviconHost}/favicon.ico`],
+        label: brand.label,
       };
     }
     return {
       kind: "brand",
       src: simpleIconsUrl(brand.slug),
       fallbacks: [googleIcon, ddgIcon],
+      label: brand.label,
     };
   }
 
-  return { kind: "web" };
+  return { kind: "web", label: null };
 }

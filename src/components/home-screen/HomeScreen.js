@@ -98,24 +98,6 @@ function createReviewedCheckIcon() {
   return svg;
 }
 
-/**
- * Старые строки портфолио уже хранят объединённый `grade + role`.
- * Вытаскиваем из них грейд для компактной подписи карточки.
- * @param {string | null | undefined} role
- * @returns {string}
- */
-function gradeFromPortfolioRole(role) {
-  const value = typeof role === "string" ? role.trim() : "";
-  if (!value) return "";
-  if (/^Junior\b/i.test(value)) return "Junior";
-  if (/^Middle\b/i.test(value)) return "Middle";
-  if (/^Senior\b/i.test(value)) return "Senior";
-  if (/^Staff\b/i.test(value)) return "Staff";
-  if (/\bLead$/i.test(value)) return "Lead";
-  if (/^Head Of\b/i.test(value)) return "Head";
-  return "";
-}
-
 /** Сколько монет даёт клик по чипу баланса (temp / DEV). */
 const DEV_CREDIT_AMOUNT = TEMP_BALANCE_CHIP_AMOUNT;
 
@@ -233,18 +215,27 @@ function bindImageFallbacks(img, candidates) {
 }
 
 /**
+ * Hover/focus tip над хостом (слоты ревьюеров, бейджи автора).
+ * @param {HTMLElement} host
+ * @param {string} label
+ */
+function attachHomeTooltip(host, label) {
+  const text = typeof label === "string" ? label.trim() : "";
+  if (!text) return;
+  host.setAttribute("aria-label", text);
+  const tooltip = document.createElement("span");
+  tooltip.className = "home-screen__tip";
+  tooltip.setAttribute("role", "tooltip");
+  tooltip.textContent = text;
+  host.append(tooltip);
+}
+
+/**
  * @param {HTMLElement} slot
  * @param {string} label
  */
 function attachReviewerSlotTooltip(slot, label) {
-  const text = typeof label === "string" ? label.trim() : "";
-  if (!text) return;
-  slot.setAttribute("aria-label", text);
-  const tooltip = document.createElement("span");
-  tooltip.className = "home-screen__reviewer-slot-tooltip";
-  tooltip.setAttribute("role", "tooltip");
-  tooltip.textContent = text;
-  slot.append(tooltip);
+  attachHomeTooltip(slot, label);
 }
 
 /**
@@ -1677,6 +1668,7 @@ export function createHomeScreen({
       letter.textContent = t.homePlatformWebLetter;
       letter.setAttribute("aria-hidden", "true");
       platform.append(letter);
+      attachHomeTooltip(platform, t.homePlatformSite);
     } else {
       const platformImg = document.createElement("img");
       platformImg.className = "home-screen__badge-img";
@@ -1689,6 +1681,7 @@ export function createHomeScreen({
       platformImg.src = platformIcon.src;
       bindImageFallbacks(platformImg, platformIcon.fallbacks);
       platform.append(platformImg);
+      attachHomeTooltip(platform, platformIcon.label);
     }
 
     const avatar = document.createElement("span");
@@ -1726,12 +1719,16 @@ export function createHomeScreen({
       letterEl.setAttribute("aria-hidden", "true");
       avatar.append(letterEl);
     }
+    if (typeof item.name === "string" && item.name.trim()) {
+      attachHomeTooltip(avatar, item.name.trim());
+    }
 
     badges.append(platform, avatar);
 
     const grade = document.createElement("p");
     grade.className = "home-screen__card-grade";
-    grade.textContent = gradeFromPortfolioRole(item.role) || t.homeDefaultRole;
+    grade.textContent =
+      (typeof item.role === "string" && item.role.trim()) || t.homeDefaultRole;
 
     person.append(badges, grade);
 

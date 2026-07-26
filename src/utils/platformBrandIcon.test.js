@@ -47,6 +47,7 @@ describe("findPlatformBrandIcon", () => {
     assert.ok(brand);
     assert.equal(brand.suffix, "designfolio.me");
     assert.equal(brand.slug, undefined);
+    assert.equal(brand.label, "Designfolio");
   });
 });
 
@@ -58,6 +59,7 @@ describe("resolvePlatformIcon", () => {
     assert.ok(icon);
     assert.equal(icon.kind, "brand");
     assert.equal(icon.src, simpleIconsUrl("behance"));
+    assert.equal(icon.label, "Behance");
     assert.deepEqual(icon.fallbacks, [
       googleFaviconUrl("behance.net"),
       duckDuckGoFaviconUrl("behance.net"),
@@ -86,6 +88,7 @@ describe("resolvePlatformIcon", () => {
     const icon = resolvePlatformIcon("https://janelle.page/work");
     assert.ok(icon);
     assert.equal(icon.kind, "web");
+    assert.equal(icon.label, null);
   });
 
   it("returns web letter mark for GitHub Pages", () => {
