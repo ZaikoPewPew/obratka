@@ -616,11 +616,13 @@
 .home-screen__preview {
   box-sizing: border-box;
   position: relative;
+  display: grid;
+  place-items: center;
   width: 100%;
   height: var(--home-screen-preview-height);
   overflow: hidden;
   border-radius: var(--home-screen-preview-radius);
-  background: var(--color-surface);
+  background: var(--home-screen-preview-bg);
 }
 
 .home-screen__preview--loading {
@@ -648,29 +650,57 @@
 }
 
 .home-screen__preview--empty {
-  background:
-    linear-gradient(
-      135deg,
-      var(--color-surface) 0%,
-      var(--color-surface-muted-active) 100%
-    );
+  background: var(--home-screen-preview-bg);
+}
+
+.home-screen__preview-browser {
+  box-sizing: border-box;
+  width: min(
+    var(--home-screen-preview-browser-width),
+    calc(100% - (var(--home-screen-preview-browser-inline-inset) * 2))
+  );
+}
+
+.home-screen__preview-browser-bar {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--home-screen-preview-browser-bar-padding);
+  overflow: hidden;
+  border-radius: var(--home-screen-preview-browser-bar-radius)
+    var(--home-screen-preview-browser-bar-radius) 0 0;
+  background: var(--home-screen-preview-browser-bar-bg);
+}
+
+.home-screen__preview-browser-controls {
+  display: block;
+  width: var(--home-screen-preview-browser-controls-width);
+  height: var(--home-screen-preview-browser-controls-height);
+}
+
+.home-screen__preview-browser-viewport {
+  box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--home-screen-preview-browser-viewport-ratio);
+  overflow: hidden;
+  border: var(--home-screen-preview-browser-viewport-border) solid
+    var(--home-screen-preview-browser-viewport-border-color);
+  border-top: 0;
+  border-radius: 0 0 var(--home-screen-preview-browser-viewport-radius)
+    var(--home-screen-preview-browser-viewport-radius);
 }
 
 .home-screen__preview-img {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: top center;
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--motion-reveal-duration) var(--motion-reveal-ease);
-}
-
-/* OG/share image — обычно 1.91:1, лучше заполняет кадр, чем скриншот. */
-.home-screen__preview--og .home-screen__preview-img {
-  object-fit: cover;
-  object-position: center;
 }
 
 .home-screen__preview--ready .home-screen__preview-img {

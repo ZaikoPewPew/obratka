@@ -15,19 +15,20 @@ import { getSupabase } from "../lib/supabaseClient.js";
 /**
  * Топ-50 профилей по балансу (вкладка «Рейтинг»).
  * Снапшот обновляется на сервере раз в сутки (`list_rating_top`).
+ * При ошибке RPC — `null` (не кэшировать как пустой топ).
  *
- * @returns {Promise<RatingTopItem[]>}
+ * @returns {Promise<RatingTopItem[] | null>}
  */
 export async function listRatingTop() {
   const supabase = getSupabase();
-  if (!supabase) return [];
+  if (!supabase) return null;
 
   const { data, error } = await supabase.rpc("list_rating_top");
   if (error) {
     if (import.meta.env.DEV) {
       console.warn("[rating] listRatingTop", error.message);
     }
-    return [];
+    return null;
   }
 
   if (!Array.isArray(data)) return [];

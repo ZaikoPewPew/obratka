@@ -33,11 +33,12 @@ revoke all on function public.rating_leaderboard_ttl() from public;
 revoke all on function public.rating_leaderboard_ttl() from anon;
 revoke all on function public.rating_leaderboard_ttl() from authenticated;
 
--- Пересборка снапшота: топ-50 по balance, без banned, только после онбординга
--- (иначе в карточке нет имени / грейда). Не выдаётся клиентам напрямую.
+-- Пересборка снапшота: топ-50 по balance, без banned, только после онбординга.
+-- SECURITY DEFINER: читает чужие profiles.balance, которые закрыты RLS.
 create or replace function public.refresh_rating_leaderboard()
 returns void
 language plpgsql
+security definer
 set search_path = public
 as $$
 begin
@@ -46,7 +47,7 @@ begin
   insert into public.rating_leaderboard
     (place, profile_id, display_name, avatar_url, grade, role, balance, refreshed_at)
   select
-    row_number() over (order by p.balance desc, p.created_at asc, p.id asc),
+    (row_number() over (order by p.balance desc, p.created_at asc, p.id asc))::smallint,
     p.id,
     p.display_name,
     p.avatar_url,

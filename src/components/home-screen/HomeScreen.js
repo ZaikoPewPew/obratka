@@ -1,9 +1,7 @@
 import { formatString, getLocale, getStrings } from "../../i18n.js";
 import {
-  buildPortfolioPreviewCandidates,
   formatPortfolioGrade,
   formatPortfolioRole,
-  HOME_CARD_PREFER_OG_PREVIEW,
   listMyPortfolios,
   listPortfoliosForReview,
   listReadyOwnReportIds,
@@ -58,6 +56,10 @@ import plusIconSvg from "../../assets/home/plus.svg?raw";
 import reviewedCheckIconSvg from "../../assets/home/reviewed-check.svg?raw";
 import reputationIconUrl from "../../assets/home/reputation.svg";
 import slotPlusIconUrl from "../../assets/home/slot-plus.svg";
+
+const PREVIEW_BROWSER_CONTROLS_URL = `${
+  import.meta.env.BASE_URL || "/"
+}assets/svg/home-preview-browser-controls.svg`;
 
 /**
  * Plus для кнопки «Закинуть своё» — inline SVG: в `<img>` currentColor не
@@ -1580,6 +1582,22 @@ export function createHomeScreen({
     const preview = document.createElement("div");
     preview.className = "home-screen__preview home-screen__preview--loading";
 
+    const previewBrowser = document.createElement("div");
+    previewBrowser.className = "home-screen__preview-browser";
+
+    const previewBrowserBar = document.createElement("div");
+    previewBrowserBar.className = "home-screen__preview-browser-bar";
+    previewBrowserBar.setAttribute("aria-hidden", "true");
+
+    const previewBrowserControls = document.createElement("img");
+    previewBrowserControls.className = "home-screen__preview-browser-controls";
+    previewBrowserControls.alt = "";
+    previewBrowserControls.src = PREVIEW_BROWSER_CONTROLS_URL;
+    previewBrowserBar.append(previewBrowserControls);
+
+    const previewBrowserViewport = document.createElement("div");
+    previewBrowserViewport.className = "home-screen__preview-browser-viewport";
+
     const previewImg = document.createElement("img");
     previewImg.className = "home-screen__preview-img";
     previewImg.alt = "";
@@ -1587,24 +1605,10 @@ export function createHomeScreen({
     previewImg.loading = "lazy";
     previewImg.referrerPolicy = "no-referrer";
 
-    const previewCandidates =
-      Array.isArray(item.previewUrls) && item.previewUrls.length > 0
-        ? item.previewUrls.filter((href) => typeof href === "string" && href)
-        : buildPortfolioPreviewCandidates(item.url);
-    const screenshotUrl = portfolioPreviewUrl(item.url);
-    let previewCandidateIndex = 0;
-
-    function syncPreviewFitClass(src) {
-      const isOg =
-        HOME_CARD_PREFER_OG_PREVIEW &&
-        Boolean(src) &&
-        src !== screenshotUrl &&
-        !src.includes("image.thum.io/");
-      preview.classList.toggle("home-screen__preview--og", isOg);
-    }
-
-    const previewSrc = previewCandidates[0] || screenshotUrl;
-    syncPreviewFitClass(previewSrc);
+    const previewSrc =
+      Array.isArray(item.previewUrls) && item.previewUrls[0]
+        ? item.previewUrls[0]
+        : portfolioPreviewUrl(item.url);
     previewImg.src = previewSrc;
     previewImg.addEventListener("load", () => {
       preview.classList.remove("home-screen__preview--loading");
@@ -1612,23 +1616,15 @@ export function createHomeScreen({
       scheduleTabbarContrastSync();
     });
     previewImg.addEventListener("error", () => {
-      previewCandidateIndex += 1;
-      const nextSrc = previewCandidates[previewCandidateIndex];
-      if (nextSrc) {
-        syncPreviewFitClass(nextSrc);
-        previewImg.src = nextSrc;
-        return;
-      }
       previewImg.remove();
-      preview.classList.remove(
-        "home-screen__preview--loading",
-        "home-screen__preview--ready",
-        "home-screen__preview--og",
-      );
+      preview.classList.remove("home-screen__preview--loading");
+      preview.classList.remove("home-screen__preview--ready");
       preview.classList.add("home-screen__preview--empty");
       scheduleTabbarContrastSync();
     });
-    preview.append(previewImg);
+    previewBrowserViewport.append(previewImg);
+    previewBrowser.append(previewBrowserBar, previewBrowserViewport);
+    preview.append(previewBrowser);
 
     if (item.reviewedByMe) {
       const reviewed = document.createElement("div");
@@ -1949,9 +1945,15 @@ export function createHomeScreen({
       if (epoch === refreshEpoch) {
         loading = false;
         root.setAttribute("aria-busy", "false");
-        setCachedHomeList(getSession()?.userId, tab, top);
-        ratingItems = top;
-        renderRatingList();
+        // null = ошибка RPC — не затираем кэш пустым списком
+        if (top != null) {
+          setCachedHomeList(getSession()?.userId, tab, top);
+          ratingItems = top;
+          renderRatingList();
+        } else if (ratingItems.length === 0) {
+          ratingEmpty.hidden = false;
+          ratingList.hidden = true;
+        }
       }
       const online = await onlineLegendariesPromise;
       if (epoch === refreshEpoch) {

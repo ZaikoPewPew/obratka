@@ -30,7 +30,7 @@
 | `legendary_presence_ttl()` | нет | нет | internal TTL 2 min |
 | `list_rating_top()` | нет | да | топ-50 по balance из снапшота (пересборка раз в 24 ч) |
 | `rating_leaderboard_ttl()` | нет | нет | internal TTL 24 h |
-| `refresh_rating_leaderboard()` | нет | нет | internal, зовётся из `list_rating_top` |
+| `refresh_rating_leaderboard()` | нет | нет | internal security definer, зовётся из `list_rating_top` |
 | `protect_profiles_last_seen()` | нет | нет | trigger-only |
 | `handle_new_user()` | нет | **нет** | trigger-only, не через PostgREST |
 | `profile_grade(uuid)` | нет | нет | оракул грейдов, только internal |
