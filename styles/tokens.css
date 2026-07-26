@@ -470,7 +470,7 @@
   --app-modal-width-md: 600px;
   --app-modal-width-lg: 800px;
   --app-modal-width-xl: 1000px;
-  --app-modal-padding: var(--space-8);
+  --app-modal-padding: var(--space-6);
   --app-modal-gap: var(--space-4);
   --app-modal-radius: var(--radius-xl);
   --app-modal-bg: var(--color-surface);

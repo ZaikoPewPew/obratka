@@ -18,7 +18,7 @@
 | Красная зона `#EA4335` | слот `.app-modal__content` (**без** красного фона — только placeholder в макете) |
 | Primary (тёмная) / Secondary (muted) | `.app-modal__btn--primary` / `--secondary` |
 
-Padding 32, gap секций 16, radius диалога 24 — всё через `--app-modal-*`.
+Padding 24, gap секций 16, radius диалога 24 — всё через `--app-modal-*`.
 
 ## Файлы
 
