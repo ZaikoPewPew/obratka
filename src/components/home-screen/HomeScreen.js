@@ -536,9 +536,14 @@ export function createHomeScreen({
 
   feed.append(mineFilterPanel.root, list, empty);
 
-  const ratingView = document.createElement("p");
-  ratingView.className = "home-screen__empty";
+  const ratingView = document.createElement("div");
+  ratingView.className = "home-screen__rating";
   ratingView.hidden = true;
+
+  const ratingEmpty = document.createElement("p");
+  ratingEmpty.className = "home-screen__rating-empty";
+
+  ratingView.append(ratingEmpty);
 
   /* Рейтинг (`createRatingPanel`) пока не монтируем — см. src/components/rating/. */
   cluster.append(feed, ratingView);
@@ -774,7 +779,7 @@ export function createHomeScreen({
     feedTab.textContent = t.homeTabFeed;
     mineTabLabel.textContent = t.homeTabMine;
     ratingTab.textContent = t.homeTabRating;
-    ratingView.textContent = t.homeRatingSoon;
+    ratingEmpty.textContent = t.homeRatingSoon;
     syncMineTabAria();
     tabbar.setAttribute("aria-label", t.homeTabsAria);
     mineFilterPanel.setLabels({

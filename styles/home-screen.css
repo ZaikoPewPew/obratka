@@ -305,6 +305,44 @@
   min-width: 0;
 }
 
+.home-screen__feed[hidden] {
+  display: none !important;
+}
+
+.home-screen__rating {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--home-screen-feed-width);
+  min-width: 0;
+}
+
+.home-screen__rating[hidden] {
+  display: none !important;
+}
+
+.home-screen__rating-empty {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: var(--home-screen-rating-empty-width);
+  height: var(--home-screen-rating-empty-height);
+  margin: 0;
+  padding: var(--home-screen-rating-empty-padding);
+  border-radius: var(--home-screen-rating-empty-radius);
+  background: var(--home-screen-rating-empty-bg);
+  color: var(--home-screen-rating-empty-color);
+  font-family: var(--font-family);
+  font-size: var(--home-screen-rating-empty-font-size);
+  font-weight: var(--home-screen-rating-empty-font-weight);
+  line-height: normal;
+  text-align: center;
+}
+
 .home-screen__list {
   display: flex;
   flex-direction: column;

@@ -17,7 +17,7 @@ alwaysApply: true
 | `auth` | `/registration` (Email → OTP / Telegram / Google) |
 | `authCode` | `/registration/code` |
 | `onboarding` | `/onboarding` |
-| `home` | `/home` |
+| `home` | `/home` (+ `?tab=mine\|rating`, `?tab=mine&filter=completed`) |
 | `settings` | `/settings` (stub из account-menu) |
 | `url` | `/portfolio` |
 | `review` | `/review` (iframe + таймер 45 s + rec; нужен claim) |
@@ -46,7 +46,7 @@ alwaysApply: true
 4. **Общие оверлеи / сегменты** — `createAppModal` (`app-modal/`); слот `content` + CTA; без `history` / `go()`. Сегмент Активные/Завершенные — `createTabsPanel` (`tabs-panel/`); не экран флоу. Не путать с экраном флоу.
 5. **Handoff** соседних brand: `go(id, { handoff: true })` — правый visual без повторной анимации.
 6. **Ошибки полей** + `setVariant("invalid")` — `brand-ui.mdc` / `FIELD_ERROR.md`.
-7. **home-screen** — другой лейаут; вкладки Лента / Мои (`listPortfoliosForReview` / `listMyPortfolios`); SWR-кэш `homeListCache` (без skeleton на hit); silent slot patch + `sortFeedForSlotClosure`; glass-tabbar + tabbar-dock submit + `--on-dark`; intro до claim; mine report gate; на «Мои» — фильтр **Активные / Завершенные** (`tabs-panel`; без refetch); завершённые = `reviewsCount >= targetReviews`; seen-dot 3/3 (`mineReadySeen`) гаснет при открытии сегмента «Завершенные» (и на табе «Мои», и на сегменте); own (`--own`) всегда pointer; `reviewedByMe` (после submit отчёта) → disabled + оверлей, без notice; лиги — `leagues.mdc`. Подробно: `home-screen/README.md`, `tabs-panel/README.md`.
+7. **home-screen** — другой лейаут; вкладки Лента / Мои (`listPortfoliosForReview` / `listMyPortfolios`); вид в query (`homeRoute.js`: `?tab=` push, `?filter=` replace, дефолты не пишем) — экран шлёт `onViewChange` наверх, URL пишет `main.js`, обратно `setView` без remount; SWR-кэш `homeListCache` (без skeleton на hit); silent slot patch + `sortFeedForSlotClosure`; glass-tabbar + tabbar-dock submit + `--on-dark`; intro до claim; mine report gate; на «Мои» — фильтр **Активные / Завершенные** (`tabs-panel`; без refetch); завершённые = `reviewsCount >= targetReviews`; seen-dot 3/3 (`mineReadySeen`) гаснет при открытии сегмента «Завершенные» (и на табе «Мои», и на сегменте); own (`--own`) всегда pointer; `reviewedByMe` (после submit отчёта) → disabled + оверлей, без notice; лиги — `leagues.mdc`. Подробно: `home-screen/README.md`, `tabs-panel/README.md`.
 8. **Монтаж** — из `main.js`, не из HTML-слотов. Waitlist dual-layout удалён (не восстанавливать без явной задачи). Logout чистит `clearHomeListCache` + `clearMineReadySeen`.
 
 ## Motion / docs

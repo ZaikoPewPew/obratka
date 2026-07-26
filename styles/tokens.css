@@ -661,6 +661,14 @@
   --home-screen-empty-font-size: var(--font-size-base);
   --home-screen-empty-font-weight: var(--font-weight-regular);
   --home-screen-empty-color: var(--color-text);
+  --home-screen-rating-empty-radius: var(--home-screen-empty-radius);
+  --home-screen-rating-empty-padding: var(--home-screen-empty-padding);
+  --home-screen-rating-empty-width: var(--home-screen-empty-width);
+  --home-screen-rating-empty-height: var(--home-screen-empty-height);
+  --home-screen-rating-empty-bg: var(--home-screen-empty-bg);
+  --home-screen-rating-empty-font-size: var(--home-screen-empty-font-size);
+  --home-screen-rating-empty-font-weight: var(--home-screen-empty-font-weight);
+  --home-screen-rating-empty-color: var(--home-screen-empty-color);
   --home-screen-aside-width: 278px;
   --home-screen-aside-min-height: 462px;
   --home-screen-aside-radius: var(--radius-xl);

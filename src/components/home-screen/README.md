@@ -12,7 +12,7 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 |---------|-----|------------|
 | **На ревью** (`feed`, default) | `listPortfoliosForReview()` | Чужие `pending` **в лиге** грейда ревьюера (RLS), без своих; карточка до `target_reviews` completed-отчётов; `reviewedByMe` = отправленный отчёт (`reviews`), не claim/abort — disabled + оверлей, без модалки |
 | **Мои посты** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …); сверху сегмент **Активные / Завершенные** ([`tabs-panel`](../tabs-panel/README.md)); точка на вкладке и на «Завершенные» при **непросмотренном** готовом отчёте (`listReadyOwnReportIds` + `mineReadySeen`) |
-| **Рейтинг** (`rating`) | — | Placeholder «скоро» (`homeRatingSoon`); без API / skeleton / кэша |
+| **Рейтинг** (`rating`) | — | Отдельный блок `.home-screen__rating` + empty `.home-screen__rating-empty` (`homeRatingSoon`); лента скрыта (`feed[hidden]`); без API / skeleton / кэша |
 
 Переключатель: `home-screen__tabbar` внутри дока `home-screen__tabbar-dock` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`). Вкладки: **На ревью** / **Мои посты** / **Рейтинг**. Справа от таббара в доке (gap 8px, `--home-screen-tabbar-dock-gap`) — кнопка «Закинуть своё» (56×56, r16, Google blue, плюс 24; токены `--home-screen-tabbar-submit-*`).
 
@@ -30,7 +30,7 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 | **Активные** (`active`, default) | `reviewsCount < targetReviews` (ещё собираются ревью, 0…2) |
 | **Завершенные** (`completed`) | `reviewsCount >= targetReviews` (все слоты заполнены, 3/3) |
 
-Empty: `homeEmptyMineActive` / `homeEmptyMineCompleted`. Фильтр сбрасывается в `active` на `close()`.
+Empty: `homeEmptyMineActive` / `homeEmptyMineCompleted`. Фильтр сбрасывается в `active` на `close()`; при следующем `open()` вид берётся из URL.
 
 ### Индикатор на «Мои посты» и «Завершенные»
 
@@ -171,6 +171,8 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 Классы состояния: `--active` на табе; `home-screen__tabbar-dock--hidden` на доке при скролле вниз; `--on-dark` на tabbar при тёмном фоне под баром.
 
+На `rating`: `.home-screen__feed[hidden]` (карточки не видны — `display: none !important`, иначе flex перебивает `hidden`), рядом `.home-screen__rating` с `.home-screen__rating-empty`.
+
 ## API модуля
 
 `createHomeScreen({ onOpenPortfolio, onOpenReport?, onAddPortfolio?, onOpenSettings?, onSignOut?, onViewChange? })` → `{ root, open(view?), close, setItems, setView, getView, refresh, showNotice }`.
@@ -187,6 +189,10 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 - `/home?tab=rating` — placeholder рейтинга.
 
 [`homeRoute.js`](../../utils/homeRoute.js) парсит и канонизирует query. Клик по основной вкладке добавляет запись History, смена фильтра заменяет текущую; Back/Forward вызывает `setView()` без повторного монтажа экрана и без эха в URL.
+
+- `filter` имеет смысл только при `tab=mine`; мусорный `tab` / `filter` → дефолт + `replace` на канонический URL.
+- Экран history **не** трогает: `onViewChange` наверх → `main.js` пишет URL (silent navigate, без re-open).
+- Возврат с `/report` и `/settings` — на ту же вкладку (`lastHomeView` в `main.js`).
 
 ## Стили / i18n / a11y
 
