@@ -435,6 +435,7 @@
   gap: var(--home-screen-meta-gap);
   width: 100%;
   min-width: 0;
+  overflow: visible;
 }
 
 .home-screen__card-person {
@@ -553,6 +554,7 @@
   padding: var(--home-screen-progress-padding);
   border-radius: var(--home-screen-progress-radius);
   background: var(--home-screen-progress-bg);
+  overflow: visible;
 }
 
 .home-screen__reviewer-slots {
@@ -564,6 +566,7 @@
   justify-content: flex-start;
   width: var(--home-screen-progress-slots-width);
   height: var(--home-screen-progress-slots-height);
+  overflow: visible;
 }
 
 .home-screen__reviewer-slot {

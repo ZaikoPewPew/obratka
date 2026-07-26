@@ -220,6 +220,9 @@ $$;
 -- Слоты аватаров: completed (reviews) + active (claims). Только если caller видит портфолио.
 -- VOLATILE (не STABLE): иначе PostgREST отдаёт RPC 405; колонки через subquery —
 -- без clash с OUT-параметрами RETURNS TABLE (display_name / avatar_url / …).
+-- Смена OUT-колонок: сначала DROP (CREATE OR REPLACE не меняет return type).
+drop function if exists public.portfolio_reviewer_slots(uuid[]);
+
 create or replace function public.portfolio_reviewer_slots(p_ids uuid[])
 returns table (
   portfolio_id uuid,
