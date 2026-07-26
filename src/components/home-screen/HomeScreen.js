@@ -43,6 +43,7 @@ import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
 import { REVIEW_SESSION_SECONDS } from "../../config/review.js";
 import boneIconUrl from "../../assets/home/bone.svg";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
+import reviewedCheckIconSvg from "../../assets/home/reviewed-check.svg?raw";
 import reputationIconUrl from "../../assets/home/reputation.svg";
 import slotPlusIconUrl from "../../assets/home/slot-plus.svg";
 
@@ -62,6 +63,24 @@ function createSubmitPlusIcon() {
   svg.setAttribute("aria-hidden", "true");
   svg.setAttribute("width", "24");
   svg.setAttribute("height", "24");
+  return svg;
+}
+
+/**
+ * Галочка «уже ревьюил» на превью карточки ленты.
+ * @returns {SVGElement}
+ */
+function createReviewedCheckIcon() {
+  const wrap = document.createElement("span");
+  wrap.innerHTML = reviewedCheckIconSvg.trim();
+  const svg = wrap.firstElementChild;
+  if (!(svg instanceof SVGElement)) {
+    throw new Error("reviewed-check.svg must be a root <svg>");
+  }
+  svg.classList.add("home-screen__preview-reviewed-badge-icon");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("width", "18");
+  svg.setAttribute("height", "18");
   return svg;
 }
 
@@ -1293,6 +1312,24 @@ export function createHomeScreen({
       scheduleTabbarContrastSync();
     });
     preview.append(previewImg);
+
+    if (item.reviewedByMe) {
+      const reviewed = document.createElement("div");
+      reviewed.className = "home-screen__preview-reviewed";
+      reviewed.setAttribute("aria-hidden", "true");
+
+      const badge = document.createElement("span");
+      badge.className = "home-screen__preview-reviewed-badge";
+      badge.append(createReviewedCheckIcon());
+
+      const label = document.createElement("p");
+      label.className = "home-screen__preview-reviewed-label";
+      label.setAttribute("data-i18n", "homeCardReviewedLabel");
+      label.textContent = t.homeCardReviewedLabel ?? "";
+
+      reviewed.append(badge, label);
+      preview.append(reviewed);
+    }
 
     const meta = document.createElement("div");
     meta.className = "home-screen__card-meta";

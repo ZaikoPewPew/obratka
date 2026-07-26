@@ -417,6 +417,52 @@
   opacity: 1;
 }
 
+.home-screen__preview-reviewed {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--home-screen-reviewed-overlay-bg);
+  backdrop-filter: blur(var(--home-screen-reviewed-overlay-blur));
+  -webkit-backdrop-filter: blur(var(--home-screen-reviewed-overlay-blur));
+}
+
+.home-screen__preview-reviewed-badge {
+  position: absolute;
+  top: var(--home-screen-reviewed-badge-inset);
+  left: var(--home-screen-reviewed-badge-inset);
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: var(--home-screen-reviewed-badge-size);
+  height: var(--home-screen-reviewed-badge-size);
+  padding: var(--home-screen-reviewed-badge-padding);
+  border-radius: var(--home-screen-reviewed-badge-radius);
+  background: var(--home-screen-reviewed-badge-bg);
+  color: var(--home-screen-reviewed-badge-icon-color);
+}
+
+.home-screen__preview-reviewed-badge-icon {
+  display: block;
+  width: var(--home-screen-reviewed-badge-icon-size);
+  height: var(--home-screen-reviewed-badge-icon-size);
+}
+
+.home-screen__preview-reviewed-label {
+  margin: 0;
+  font-family: var(--font-family);
+  font-weight: var(--home-screen-reviewed-label-weight);
+  font-size: var(--home-screen-reviewed-label-size);
+  line-height: var(--line-height-normal);
+  text-align: center;
+  color: var(--home-screen-reviewed-label-color);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .home-screen__preview--loading::after {
     content: none;

@@ -688,6 +688,23 @@
   --home-screen-card-bg-active: var(--color-surface-muted-active);
   --home-screen-preview-height: 250px;
   --home-screen-preview-radius: var(--radius-md);
+  /* Reviewed-by-me overlay on feed preview */
+  --home-screen-reviewed-overlay-bg: color-mix(
+    in srgb,
+    var(--palette-gray-900) 25%,
+    transparent
+  );
+  --home-screen-reviewed-overlay-blur: 4px;
+  --home-screen-reviewed-label-size: var(--font-size-base);
+  --home-screen-reviewed-label-weight: var(--font-weight-medium);
+  --home-screen-reviewed-label-color: var(--color-on-accent);
+  --home-screen-reviewed-badge-size: var(--space-8);
+  --home-screen-reviewed-badge-inset: var(--space-2);
+  --home-screen-reviewed-badge-radius: var(--radius-xs);
+  --home-screen-reviewed-badge-padding: 3px;
+  --home-screen-reviewed-badge-bg: var(--color-surface-muted);
+  --home-screen-reviewed-badge-icon-size: 18px;
+  --home-screen-reviewed-badge-icon-color: var(--color-success);
   --home-screen-badge-size: 52px;
   --home-screen-badge-radius: var(--radius-md);
   --home-screen-badge-overlap: calc(var(--space-4) * -1);

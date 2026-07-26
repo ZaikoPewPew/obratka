@@ -140,6 +140,7 @@ Topbar поверх контента (`position: absolute`), появление 
 | Элемент | Источник |
 |---------|----------|
 | Превью | thum.io (`width/1200/crop/620/wait/3`); в фрейме `object-fit: contain` + `object-position: top`; до load — skeleton (`--loading`), при error — `--empty` |
+| Уже ревьюил (`reviewedByMe`) | Оверлей на превью: blur + dim (`--home-screen-reviewed-*`), центр `homeCardReviewedLabel`, бейдж-галочка сверху слева; клик → notice |
 | Иконка площадки | Simple Icons; иначе литера **W** |
 | Аватар | `item.avatarUrl` или буква из `item.name` |
 | ФИО | `item.name` |
