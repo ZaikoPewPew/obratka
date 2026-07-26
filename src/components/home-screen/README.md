@@ -54,7 +54,7 @@ Empty: `homeEmptyMineActive` / `homeEmptyMineCompleted`. Фильтр сбрас
 
 ### Контраст над тёмным превью
 
-Пока таббар виден, сэмплим яркость фона под ним (`src/utils/backdropLuminance.js`, scroll / resize / load превью). Сэмплер игнорирует сам tabbar, dock и opaque `home-screen` (иначе светлый screen перехватывает hit-test поверх тёмного превью). Треки полупрозрачные + blur 20: на светлом — gray-900 20% (`--home-screen-tabbar-track-bg`), неактивный текст `--color-text`; на тёмном → `--on-dark` — white 20% (`--home-screen-tabbar-track-bg-on-dark`), неактивный текст `--home-screen-tabbar-tab-color-on-dark`. Transition `--home-screen-tabbar-contrast-*`.
+Пока таббар виден, сэмплим яркость фона под ним (`src/utils/backdropLuminance.js`, scroll / resize / load превью). Сэмплер игнорирует сам tabbar, dock и opaque `home-screen` (иначе светлый screen перехватывает hit-test поверх тёмного превью). Треки полупрозрачные + blur 20: на светлом — gray-900 10% (`--home-screen-tabbar-track-bg`), неактивный текст `--color-text`; на тёмном → `--on-dark` — white 20% (`--home-screen-tabbar-track-bg-on-dark`), неактивный текст `--home-screen-tabbar-tab-color-on-dark`. Transition `--home-screen-tabbar-contrast-*`.
 
 ### Переключение таба (UI)
 

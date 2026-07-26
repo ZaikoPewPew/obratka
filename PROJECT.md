@@ -37,7 +37,7 @@
 - **Вкладка «Рейтинг»:** третий tab `rating`; пока локализованный placeholder без API, skeleton и list-кэша.
 - **Deep links home:** `/home`, `?tab=mine`, `?tab=mine&filter=completed`, `?tab=rating`; query канонизирует `homeRoute.js`, Back/Forward переключает вид без remount.
 - **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 45` (review shell + intro copy).
-- **Tabbar dock:** glass-таббар + кнопка «Закинуть своё» справа (56×56, Google blue, gap 8px); hide при скролле уезжает весь док. Светлый трек — gray-900 20% + blur 20; тёмный превью → `--on-dark` — white 20%.
+- **Tabbar dock:** glass-таббар + кнопка «Закинуть своё» справа (56×56, Google blue, gap 8px); hide при скролле уезжает весь док. Светлый трек — gray-900 10% + blur 20; тёмный превью → `--on-dark` — white 20%.
 - **Чипы шапки:** репутация → баланс → аватар. Submit и уведомления из topbar убраны.
 - **Точка на «Мои посты»:** красная 6px в углу вкладки при **непросмотренном** готовом отчёте (3/3); визит «Мои» гасит (`mineReadySeen`), новый готовый id снова зажигает.
 - Подробно: [`home-screen/README.md`](src/components/home-screen/README.md).

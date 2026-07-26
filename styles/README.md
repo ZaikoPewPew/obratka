@@ -42,7 +42,7 @@
 | `--shell-review-rec-*` | кнопка надиктовки в поле «Главный совет» |
 | `--home-screen-*` | topbar / feed / avatar / locked-modal |
 | `--home-screen-review-intro-*` | шаги intro-модалки (`indent` / `step-gap`) |
-| `--home-screen-tabbar-*` | glass track (20% / blur 20), `--on-dark`, hide/thumb/label/contrast; dock-gap + submit (56×56 Google blue) + tab-dot (6px Google red) |
+| `--home-screen-tabbar-*` | glass track (gray-900 10% / white on-dark 20% / blur 20), hide/thumb/label/contrast; dock-gap + submit (56×56 Google blue) + tab-dot (6px Google red) |
 | `--tabs-panel-*` | сегмент Активные/Завершенные (track / tab / thumb / tab-dot) |
 | `--app-modal-*` | универсальная модалка (Figma Modal) |
 

@@ -28,7 +28,7 @@ alwaysApply: true
 - Recording indicator: `--color-recording` (алиас на `--palette-google-red`); пульс — `--motion-recording-blink-*` + `motion-recording-blink` в `entrance.css`.
 - Ban: `--shell-ban-mesh-*`, `--ban-screen-*`.
 - Home tabbar: `--home-screen-tabbar-*` (hide / thumb / contrast / glass track).
-  - Светлый фон: `--home-screen-tabbar-track-bg` = gray-900 **20%** + `--home-screen-tabbar-blur`; неактивный `--home-screen-tabbar-tab-color`.
+  - Светлый фон: `--home-screen-tabbar-track-bg` = gray-900 **10%** + `--home-screen-tabbar-blur`; неактивный `--home-screen-tabbar-tab-color`.
   - Тёмный (`--on-dark`): `--home-screen-tabbar-track-bg-on-dark` = white **20%**; неактивный `--home-screen-tabbar-tab-color-on-dark`.
   - Сэмплинг: `src/utils/backdropLuminance.js` → класс `home-screen__tabbar--on-dark`.
 - Tabs panel (Активные/Завершенные на «Мои»): `--tabs-panel-*` (`styles/tabs-panel.css`, [`tabs-panel/README.md`](../../src/components/tabs-panel/README.md)); не хардкодить цвета/размеры сегмента.
