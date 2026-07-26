@@ -54,6 +54,7 @@
   --palette-notion-amber: #ffad00;
   --palette-behance-blue: #0058ff;
   --palette-framer-blue: #294ef8;
+  --palette-designfolio-coral: #ff5c4d;
   --palette-telegram-start: #2aabee;
   --palette-telegram-end: #229ed9;
   --palette-google-blue: #4285f4;
@@ -981,7 +982,9 @@
   --url-screen-avatar-stack-width: 113px;
   --url-screen-done-btn-width: var(--auth-screen-provider-width);
   --url-screen-avatar-logo-size: calc(var(--url-screen-avatar-size) * 0.4);
+  --url-screen-avatar-logo-size-lg: calc(var(--url-screen-avatar-size) * 0.72);
   --url-screen-avatar-framer-bg: var(--palette-framer-blue);
+  --url-screen-avatar-designfolio-bg: var(--palette-designfolio-coral);
   --url-screen-avatar-behance-bg: var(--palette-behance-blue);
   --url-screen-avatar-notion-bg: var(--palette-black);
   --url-screen-avatar-placeholder-bg: var(--palette-gray-900);

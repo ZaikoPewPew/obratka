@@ -2241,6 +2241,10 @@ body {
   background: var(--url-screen-avatar-framer-bg);
 }
 
+.url-screen__avatar--designfolio {
+  background: var(--url-screen-avatar-designfolio-bg);
+}
+
 .url-screen__avatar--behance {
   background: var(--url-screen-avatar-behance-bg);
 }
@@ -2271,6 +2275,12 @@ body {
 .url-screen__avatar--notion .url-screen__avatar-img {
   width: var(--url-screen-avatar-logo-size);
   height: var(--url-screen-avatar-logo-size);
+  object-fit: contain;
+}
+
+.url-screen__avatar--designfolio .url-screen__avatar-img {
+  width: var(--url-screen-avatar-logo-size-lg);
+  height: var(--url-screen-avatar-logo-size-lg);
   object-fit: contain;
 }
 

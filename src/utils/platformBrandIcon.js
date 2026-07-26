@@ -1,5 +1,5 @@
 /**
- * Иконка площадки портфолио: Simple Icons для известных брендов,
+ * Иконка площадки портфолио: Simple Icons / favicon для известных брендов,
  * иначе литера «W» (кастомный / личный сайт).
  */
 
@@ -16,13 +16,13 @@ const SIMPLE_ICONS_VERSION = "v15";
 /**
  * @typedef {{
  *   suffix: string;
- *   slug: string;
+ *   slug?: string;
  *   faviconHost?: string;
  * }} PlatformBrandEntry
  */
 
 /**
- * Известные площадки с SVG в Simple Icons (jsDelivr).
+ * Известные площадки: SVG в Simple Icons (jsDelivr) или favicon (без slug).
  * Более специфичные суффиксы — раньше общих.
  *
  * @type {readonly PlatformBrandEntry[]}
@@ -52,6 +52,8 @@ export const PLATFORM_BRAND_ICONS = Object.freeze([
   { suffix: "webflow.com", slug: "webflow" },
   { suffix: "figma.com", slug: "figma" },
   { suffix: "awwwards.com", slug: "awwwards" },
+  /** Нет в Simple Icons — favicon с designfolio.me */
+  { suffix: "designfolio.me", faviconHost: "designfolio.me" },
 ]);
 
 /**
@@ -119,13 +121,19 @@ export function resolvePlatformIcon(hostnameOrUrl) {
   const brand = findPlatformBrandIcon(host);
   if (brand) {
     const faviconHost = brand.faviconHost || host;
+    const googleIcon = googleFaviconUrl(faviconHost);
+    const ddgIcon = duckDuckGoFaviconUrl(faviconHost);
+    if (!brand.slug) {
+      return {
+        kind: "brand",
+        src: googleIcon,
+        fallbacks: [ddgIcon, `https://${faviconHost}/favicon.ico`],
+      };
+    }
     return {
       kind: "brand",
       src: simpleIconsUrl(brand.slug),
-      fallbacks: [
-        googleFaviconUrl(faviconHost),
-        duckDuckGoFaviconUrl(faviconHost),
-      ],
+      fallbacks: [googleIcon, ddgIcon],
     };
   }
 

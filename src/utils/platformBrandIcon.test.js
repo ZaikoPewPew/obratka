@@ -41,6 +41,13 @@ describe("findPlatformBrandIcon", () => {
     );
     assert.equal(findPlatformBrandIcon("dprofile.ru"), null);
   });
+
+  it("matches Designfolio favicon brand (no Simple Icons slug)", () => {
+    const brand = findPlatformBrandIcon("www.designfolio.me");
+    assert.ok(brand);
+    assert.equal(brand.suffix, "designfolio.me");
+    assert.equal(brand.slug, undefined);
+  });
 });
 
 describe("resolvePlatformIcon", () => {
@@ -62,6 +69,17 @@ describe("resolvePlatformIcon", () => {
     assert.ok(icon);
     assert.equal(icon.kind, "brand");
     assert.equal(icon.src, simpleIconsUrl("framer"));
+  });
+
+  it("returns Designfolio favicon brand without Simple Icons", () => {
+    const icon = resolvePlatformIcon("https://www.designfolio.me/u/demo");
+    assert.ok(icon);
+    assert.equal(icon.kind, "brand");
+    assert.equal(icon.src, googleFaviconUrl("designfolio.me"));
+    assert.deepEqual(icon.fallbacks, [
+      duckDuckGoFaviconUrl("designfolio.me"),
+      "https://designfolio.me/favicon.ico",
+    ]);
   });
 
   it("returns web letter mark for personal domains", () => {

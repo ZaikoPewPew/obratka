@@ -15,10 +15,10 @@ import {
   getReportLaunchMotion,
 } from "../../utils/motionTokens.js";
 
-/** Платформы в стеке иконок под полем URL (Framer → Dprofile → Behance → Notion). */
+/** Платформы в стеке иконок под полем URL (Framer → Designfolio → Behance → Notion). */
 const PLATFORM_ICONS = Object.freeze([
   { id: "framer", host: "framer.com" },
-  { id: "dprofile", host: "dprofile.ru" },
+  { id: "designfolio", host: "designfolio.me" },
   { id: "behance", host: "behance.net" },
   { id: "notion", host: "notion.com" },
 ]);
