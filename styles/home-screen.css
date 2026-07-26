@@ -575,7 +575,8 @@
   margin: 0;
   padding: var(--home-screen-card-padding);
   border: none;
-  border-radius: var(--home-screen-card-radius);
+  border-radius: var(--home-screen-card-radius) var(--home-screen-card-radius)
+    var(--home-screen-card-radius-bottom) var(--home-screen-card-radius-bottom);
   --home-screen-card-surface: var(--home-screen-card-bg);
   background: var(--home-screen-card-surface);
   color: var(--color-text);
@@ -652,6 +653,10 @@
 
 .home-screen__preview--empty {
   background: var(--home-screen-preview-bg);
+}
+
+.home-screen__preview--empty .home-screen__preview-browser-viewport {
+  background: var(--home-screen-preview-empty-fill);
 }
 
 .home-screen__preview-browser {

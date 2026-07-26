@@ -43,6 +43,7 @@
   --palette-glow-cyan: #e1fbff;
   --palette-glow-azure: #0094ff;
   --palette-glow-peach: #fdeeee;
+  --palette-preview-stub: #fdeed9;
   --palette-glow-lilac: #f0ebff;
   --palette-glow-mist: #e8f4ff;
   --palette-glow-sky: #d7ebff;
@@ -157,6 +158,7 @@
   --radius-sm: 2px;
   --radius-md: 16px;
   --radius-xl: 24px;
+  --radius-2xl: 32px;
   --radius-lg: 40px;
   --radius-pill: 500px;
 
@@ -749,12 +751,15 @@
   --home-screen-card-padding: var(--space-2);
   --home-screen-card-gap: var(--space-2);
   --home-screen-card-radius: var(--radius-xl);
+  /* Низ 32: визуальная компенсация под pill-meta; empty-стейты ленты остаются 24 */
+  --home-screen-card-radius-bottom: var(--radius-2xl);
   --home-screen-card-bg: var(--color-surface-muted);
   --home-screen-card-bg-hover: var(--color-surface-muted-hover);
   --home-screen-card-bg-active: var(--color-surface-muted-active);
   --home-screen-preview-height: 250px;
   --home-screen-preview-radius: var(--radius-md);
   --home-screen-preview-bg: var(--palette-white);
+  --home-screen-preview-empty-fill: var(--palette-preview-stub);
   --home-screen-preview-browser-width: 358px;
   --home-screen-preview-browser-inline-inset: var(--space-4);
   --home-screen-preview-browser-bar-padding: var(--space-2);
