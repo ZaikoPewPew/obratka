@@ -10,7 +10,7 @@
   flex-direction: column;
   gap: var(--legendary-online-gap);
   width: 100%;
-  min-height: var(--home-screen-aside-min-height);
+  height: fit-content;
   padding: var(--legendary-online-padding);
   border-radius: var(--home-screen-aside-radius);
   background: var(--home-screen-aside-bg);

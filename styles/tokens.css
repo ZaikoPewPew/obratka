@@ -759,7 +759,8 @@
   --home-screen-preview-browser-inline-inset: var(--space-4);
   --home-screen-preview-browser-bar-padding: var(--space-2);
   --home-screen-preview-browser-bar-bg: var(--color-surface-muted);
-  --home-screen-preview-browser-bar-radius: var(--radius-sm);
+  /* Figma Menu 483:2606 — верхние углы 8px */
+  --home-screen-preview-browser-bar-radius: var(--space-2);
   --home-screen-preview-browser-controls-width: 26px;
   --home-screen-preview-browser-controls-height: 6px;
   --home-screen-preview-browser-viewport-ratio: 358 / 185;
@@ -771,13 +772,13 @@
   /* Reviewed-by-me overlay on feed preview */
   --home-screen-reviewed-overlay-bg: color-mix(
     in srgb,
-    var(--palette-gray-900) 25%,
+    var(--palette-white) 25%,
     transparent
   );
   --home-screen-reviewed-overlay-blur: 4px;
   --home-screen-reviewed-label-size: var(--font-size-base);
   --home-screen-reviewed-label-weight: var(--font-weight-medium);
-  --home-screen-reviewed-label-color: var(--color-on-accent);
+  --home-screen-reviewed-label-color: var(--palette-gray-900);
   --home-screen-reviewed-badge-size: var(--space-8);
   --home-screen-reviewed-badge-inset: var(--space-2);
   --home-screen-reviewed-badge-radius: var(--radius-xs);
