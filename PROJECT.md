@@ -74,7 +74,7 @@
 | Identity conflict | `mapSupabaseAuthErrorCode` → `auth_identity_conflict` → `authIdentityConflict` |
 | Busy-lock UI | На `/registration` нельзя жать второй провайдер, пока занят первый |
 
-**Вне скоупа (roadmap #4):** Manual `linkIdentity` UI, UNIQUE `profiles.email`, склейка Telegram↔email.
+**Вне скоупа (roadmap #2):** Manual `linkIdentity` UI, UNIQUE `profiles.email`, склейка Telegram↔email.
 
 Документация: [`auth-screen/README.md`](src/components/auth-screen/README.md), [`auth-code-screen/README.md`](src/components/auth-code-screen/README.md), [`src/api/README.md`](src/api/README.md).
 
@@ -107,6 +107,18 @@ SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabas
 Бан / автобан по репутации: [`supabase/BAN.md`](supabase/BAN.md).
 Доступы к RPC, адвайзоры, отложенное до Pro: [`supabase/SECURITY.md`](supabase/SECURITY.md).
 
+## Лиги ревью
+
+Тихий матчинг по `profiles.grade` (UI «лиг» нет). Клиент-зеркало: [`src/api/leagues.js`](src/api/leagues.js). Правило: `.cursor/rules/leagues.mdc`.
+
+| Портфолио | Ревьюеры |
+|-----------|----------|
+| Junior | Junior, Middle |
+| Middle | Middle, Senior+ |
+| Senior+ | Senior+ |
+
+Senior → Junior нельзя. Grade обязателен в онбординге. Claims / INSERT тоже проверяют лигу.
+
 ## Репутация и жалобы на листы
 
 Цель: ловить халяву / спам / травлю / нецелевое, не превращая обиду на жёсткую критику в бан.
@@ -120,7 +132,7 @@ SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabas
 | Апелляция | вручную («Связаться» на `/banned`) |
 | SQL / API | [`review_complaints.sql`](supabase/sql/review_complaints.sql), [`reviewComplaints.js`](src/api/reviewComplaints.js) |
 
-**Вне v1:** `misleading`, очередь модерации, троттлинг жалобщиков, влияние на лиги.
+**Вне v1:** `misleading`, очередь модерации, троттлинг жалобщиков, публичный рейтинг репутации, влияние на лиги.
 
 ## Слои UI
 

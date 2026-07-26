@@ -6,11 +6,11 @@
 ## Верхний уровень
 
 - `main.js` — точка входа: Google OAuth return, роутер (`go` / `applyRoute`), монтаж экранов, iframe-таймер, **надиктовка** (чип rec + микрофон в поле совета), квиз; email/Telegram завершаются через `AuthScreen` → `applyProviderUser`.
-- `i18n.js` — локали из `content/locales.json` (+ privacy / founder-avatars).
+- `i18n.js` — локали из `content/locales.json` (+ founder-avatars).
 - `config.js` — legacy waitlist count (не продуктовый флоу).
-- `config/review.js` — `REVIEW_SESSION_SECONDS` (таймер `/review` + intro copy на home).
+- `config/review.js` — `REVIEW_SESSION_SECONDS` (таймер `/review` + intro copy на home) — [`config/README.md`](config/README.md).
 - `config/contacts.js` — community Telegram URL.
-- `lib/supabaseClient.js` — клиент Supabase (URL + anon).
+- `lib/supabaseClient.js` — клиент Supabase (URL + anon) — [`lib/README.md`](lib/README.md).
 - `lib/dictation/` — `DictationEngine` (Web Speech MVP) — [`lib/dictation/README.md`](lib/dictation/README.md).
 
 ## Подпапки

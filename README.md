@@ -24,12 +24,14 @@ npm run dev
 | `/registration` | Email → code / Telegram / Google |
 | `/registration/code` | Код из письма (6 ячеек) |
 | `/onboarding` | Вопросы профиля |
-| `/home` | Очередь (SWR + sort) / мои (report gate + точка 3/3) + intro до claim + tabbar-dock (tabs + submit) |
+| `/home` | Очередь (SWR + sort) / мои (Активные·Завершенные, report gate + точка 3/3) + intro до claim + tabbar-dock (tabs + submit) |
+| `/settings` | Заглушка настроек (из account-menu) |
 | `/portfolio` | Подача URL; чип «На главную»; done на том же экране |
 | `/review` | Просмотр портфолио + таймер 45 s + надиктовка заметок (rec) |
 | `/quiz` → `/quiz/done` | Квиз (микрофон в поле «Главный совет») и финал |
 | `/done` | Успех подачи (deep link / sync) |
 | `/report` | Листы автору (+ заметки с просмотра) + жалоба |
+| `/banned` | Аккаунт заблокирован (escape-proof; в т.ч. автобан по репутации) |
 
 ### Переменные окружения
 
@@ -95,6 +97,7 @@ API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](
 | [`src/components/home-screen/README.md`](src/components/home-screen/README.md) | Лента SWR, review intro, mine report gate, seen-dot, tabbar-dock + submit, баланс, репутация, invite |
 | [`src/components/url-screen/README.md`](src/components/url-screen/README.md) | Подача URL: back-chip + done |
 | [`src/components/report-screen/README.md`](src/components/report-screen/README.md) | Листы ревью + жалоба |
+| [`src/config/README.md`](src/config/README.md) | `REVIEW_SESSION_SECONDS`, contacts |
 | [`src/lib/dictation/README.md`](src/lib/dictation/README.md) | Надиктовка: `/review` → `answers.dictation` + микрофон в поле совета |
 | [`supabase/README.md`](supabase/README.md) | SQL и Edge Functions |
 | [`supabase/BAN.md`](supabase/BAN.md) | Бан / автобан по репутации (Table/SQL + шаблоны) |

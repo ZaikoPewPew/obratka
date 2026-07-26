@@ -82,7 +82,7 @@ Visual `invalid`, пока видна **любая** ошибка (email **ил�
 
 1. Providers → Email и Google включены; Google отдаёт verified email.
 2. Redirect URLs только ваши origins (localhost + Pages), Site URL корректен.
-3. **Manual linking** (`linkIdentity`) **не включать** — UI привязки провайдеров вне скоупа (см. `PROJECT.md` roadmap #4).
+3. **Manual linking** (`linkIdentity`) **не включать** — UI привязки провайдеров вне скоупа (см. `PROJECT.md` roadmap #2).
 4. Telegram изолирован (`tg{id}@t.me`) и **не** склеивается с Email/Google через automatic linking.
 
 Если Auth вернёт конфликт identity — UI показывает `authIdentityConflict`.

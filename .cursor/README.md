@@ -113,7 +113,7 @@ SQL / API: `supabase/sql/referrals.sql`, `src/api/referrals.js`.
 | Automatic linking Email↔Google | Supabase Auth; чеклист — `auth-screen/README.md` |
 | Resend cooldown 60s | `--auth-code-resend-cooldown` + `auth-code-screen` |
 | Identity conflict / rate-limit | `mapSupabaseAuthErrorCode` |
-| Manual `linkIdentity` | **не** строить — `PROJECT.md` roadmap #4 |
+| Manual `linkIdentity` | **не** строить — `PROJECT.md` roadmap #2 |
 
 API: `src/api/auth.js`. Edge: `supabase/functions/telegram-auth/`.
 

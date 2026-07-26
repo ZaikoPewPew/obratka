@@ -226,8 +226,9 @@ Home tabbar-dock: `--home-screen-tabbar-*` + `--home-screen-tabbar-dock-gap` / `
 
 1. Вынести CSS в `brand-screen.css` (классы пока `.url-screen*`).
 2. Manual identity linking (`linkIdentity`) + UNIQUE `profiles.email` + Telegram↔email — вне текущего скоупа.
-3. Редизайн жалоб / списка листов на `report-screen` (PDF уже есть).
-4. Диктовка план B (Whisper Edge) — контракт готов, MVP = Web Speech.
+3. Троттлинг злоупотреблений жалобой / тег `misleading` / очередь модерации.
+4. Редизайн жалоб / списка листов на `report-screen` (PDF уже есть).
+5. Диктовка план B (Whisper Edge) — контракт готов, MVP = Web Speech.
 
 ## Связанные документы
 

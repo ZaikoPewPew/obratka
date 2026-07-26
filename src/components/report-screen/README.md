@@ -16,6 +16,25 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 - PDF: все ревьюеры, **1 дизайнер = 1 страница** (`shareReviewPdf`)
 - CTA: серая «На главную» + тёмная «Скачать PDF» (пока нет листов — та же тёмная, только `cursor: not-allowed`)
 
+## Жалоба (теги v1)
+
+| Тег | Ключ i18n |
+|-----|-----------|
+| `low_effort` | `complaintTagLowEffort` |
+| `spam` | `complaintTagSpam` |
+| `harassment` | `complaintTagHarassment` |
+| `offensive` | `complaintTagOffensive` |
+| `irrelevant` | `complaintTagIrrelevant` |
+
+- **Не** добавлять теги «не согласен с грейдом» / useful-useless.
+- Веса и порог бана — **только SQL**; в UI и explainer репутации на home весов нет.
+- Штраф = `max(weight(tag))` по выбранным тегам; при `reputation <= 0` → автобан (`ban_reason = reputation`).
+- Ревьюер не видит `reporter_id`.
+
+Правило: `.cursor/rules/reputation.mdc`. Оператор / разбан: [`supabase/BAN.md`](../../../supabase/BAN.md).
+
+**Вне v1 (не делать без задачи):** `misleading`, очередь модерации, троттлинг жалобщиков, редизайн списка листов.
+
 ## API
 
 `createReportScreen({ onPrimary? })` → `{ root, open, close, getPortfolioId }`
@@ -32,4 +51,4 @@ PDF / секции: [`src/utils/reviewReport.js`](../../utils/reviewReport.js), 
 
 `styles/report-screen.css` + токены `--report-screen-*` / `--shell-review-report-*`.
 
-См. [`SCREENS.md`](../../../SCREENS.md), [`supabase/sql/review_complaints.sql`](../../../supabase/sql/review_complaints.sql).
+См. [`SCREENS.md`](../../../SCREENS.md), [`supabase/sql/review_complaints.sql`](../../../supabase/sql/review_complaints.sql), [`PROJECT.md`](../../../PROJECT.md) § Репутация.

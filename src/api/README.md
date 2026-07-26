@@ -36,7 +36,7 @@ OAuth callback с ошибкой: `main.js` кладёт код в `sessionStora
 
 - **Automatic linking** (Supabase, по умолчанию): Email ↔ Google с одной **verified** email → один `auth.users`. В приложении отдельного `linkIdentity` нет.
 - **Telegram:** synthetic `tg{id}@t.me` — не участвует в automatic linking с реальным email.
-- **Manual linking** / UNIQUE `profiles.email` — roadmap (`PROJECT.md` #4).
+- **Manual linking** / UNIQUE `profiles.email` — roadmap (`PROJECT.md` #2).
 
 Env / Dashboard: `.env.example`, `src/components/auth-screen/README.md`, `supabase/README.md`.
 
@@ -48,7 +48,7 @@ Env / Dashboard: `.env.example`, `src/components/auth-screen/README.md`, `supaba
 |------|------|
 | `wallet.js` | `getBalance` / `spendSubmitCost` (RPC) / `awardReviewReward` (= refresh) / `creditBalance` (DEV local-only) / `REVIEW_REWARD` / `SUBMIT_COST`; `refreshSessionFromProfile` |
 | `leagues.js` | матчинг лиг по `grade` (зеркало SQL): `gradeToLeague` / `canReviewGrades` |
-| `portfolios.js` | `listPortfoliosForReview` (чужие pending в лиге + слоты; до 3/3 completed; порядок `sortFeedForSlotClosure`: open slot → closer to target → FIFO; `reviewedByMe` / full вниз) / `listMyPortfolios` (`created_at` DESC) / `listReadyOwnReportIds` (+ `hasReadyOwnReport`) для точки на «Мои» / claim·heartbeat·release (**claim только после CTA intro на home**) / `submitPortfolio` / `submitPortfolioReview` (+ answers) + `formatPortfolioRole` |
+| `portfolios.js` | `listPortfoliosForReview` (чужие pending в лиге + слоты; до 3/3 completed; порядок `sortFeedForSlotClosure`: open slot → closer to target → FIFO; `reviewedByMe` / full вниз) / `listMyPortfolios` (`created_at` DESC) / `listReadyOwnReportIds` (+ `hasReadyOwnReport`) для точки на «Мои» / claim·heartbeat·release (**claim только после CTA intro на home**) / `submitPortfolio` / `submitPortfolioReview` (answers + опционально `dictation`) + `formatPortfolioRole`; active-слоты на карточке **анонимны** (`homeCardReviewerAnonymous` — без PII до завершения ревью) |
 | `reviewComplaints.js` | жалобы на листы: `listPortfolioReviewSheets` (с `answers`) / `submitReviewComplaint` / `getReputation` / `formatReputationDelta`; теги v1 без весов на клиенте; RPC `submit_review_complaint` |
 | `referrals.js` | `validateReferral` / `redeemReferral` / `fetchMyReferral`; реэкспорт `normalizeReferralCode` / `buildReferralShareUrl` / `REFERRAL_MAX_USES` из `utils/referralCode.js` (RPC + seed `YTHWKPDWAK`; **без наград**) |
 

@@ -21,4 +21,6 @@ Path: **`/onboarding`**. После регистрации; split через [`b
 
 Финиш → `saveOnboardingAnswers` (`src/api/onboarding.js` → `public.profiles`: `role`, `grade`, `domains`, `goals`, `onboarding` jsonb, `onboarding_done: true`) → `onComplete(answers)` → `go("home")`.
 
+**Grade** обязателен: по нему тихий матчинг лиг (лента / claim / INSERT). Матрица — `.cursor/rules/leagues.mdc`, клиент — [`src/api/leagues.js`](../../api/leagues.js).
+
 См. [`SCREENS.md`](../../../SCREENS.md), [`review-panel/README.md`](../review-panel/README.md).

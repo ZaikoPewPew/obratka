@@ -7,6 +7,7 @@
 - `iframe-shell.css` — оболочка `/review` (таймер, **`.iframe-shell__rec`**), `.url-screen*` (в т.ч. **`.url-screen__back`**, `__error*`, `__input-wrap--invalid`), `.auth-screen*` / `.auth-code-screen*` (в т.ч. `__cells--invalid`), `.review-screen*` / `.review-panel*` (в т.ч. **`.review-panel__rec`**).
 - `brand-screen.css` — **заготовка** выноса общих split-стилей из iframe-shell.
 - `home-screen.css` — главная `/home` (topbar, лента, tabbar-dock: glass tabs + submit + tab-dot 3/3, `--on-dark`).
+- `tabs-panel.css` — сегмент Активные / Завершенные на «Мои» (`createTabsPanel`, `--tabs-panel-*`).
 - `success-screen.css` — `/done` (пресеты успеха).
 - `ban-screen.css` — `/banned` (блок аккаунта, красный mesh).
 - `report-screen.css` — `/report` (листы + жалоба).
@@ -14,7 +15,7 @@
 
 ## Что подключено из `index.html`
 
-`tokens.css` → `base.css` → `entrance.css` → `app-modal.css` → `iframe-shell.css` → `success-screen.css` → `report-screen.css` → `ban-screen.css` → `home-screen.css` → `account-menu.css` → `settings-screen.css`.
+`tokens.css` → `base.css` → `entrance.css` → `app-modal.css` → `iframe-shell.css` → `success-screen.css` → `report-screen.css` → `ban-screen.css` → `home-screen.css` → `tabs-panel.css` → `account-menu.css` → `settings-screen.css`.
 
 Архив waitlist-CSS удалён (`desktop` / `mobile` / `apply` / `access-modal` / `notification` / `privacy-policy-panel`). Историческая спека: [`mobile.md`](../mobile.md).
 
@@ -42,6 +43,7 @@
 | `--home-screen-*` | topbar / feed / avatar / locked-modal |
 | `--home-screen-review-intro-*` | шаги intro-модалки (`indent` / `step-gap`) |
 | `--home-screen-tabbar-*` | glass track (20% / blur 20), `--on-dark`, hide/thumb/label/contrast; dock-gap + submit (56×56 Google blue) + tab-dot (6px Google red) |
+| `--tabs-panel-*` | сегмент Активные/Завершенные (track / tab / thumb / tab-dot) |
 | `--app-modal-*` | универсальная модалка (Figma Modal) |
 
 Handoff без анимации visual: класс `.url-screen--handoff` + `brandScreenTransition.js`.

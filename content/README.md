@@ -14,12 +14,13 @@
 | `referral*` | `/referral` (validate errors: `referralExhausted`, …) |
 | `auth*` / `authEmail*` / `authCode*` / `authOtp*` / `authIdentityConflict` | `/registration`, `/registration/code` |
 | `onboarding*` | `/onboarding` |
-| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeCardReport*` / `homeCardReportPending*` / `homeTabMineReadyAria` / `homeReputation*` | `/home` (лента SWR, intro, mine gate, Активные/Завершенные, seen-dot, invite, репутация) |
+| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeReputation*` / `homeAccount*` | `/home` (лента SWR, intro, mine gate, Активные/Завершенные, seen-dot, слоты ревьюеров, invite, репутация, меню профиля) |
 | `modalCloseAria` | общая модалка (`app-modal`) |
 | `url*` / `urlModal*` / `urlScreen*` / `urlScreenBack*` | `/portfolio` (в т.ч. чип «На главную») |
 | `success*` | `/done` |
+| `settings*` | `/settings` (заглушка) |
 | `ban*` | `/banned` |
-| `reportScreen*` / `reportComplaint*` / `complaintTag*` | `/report` (листы + жалоба) |
+| `reportScreen*` / `reportComplaint*` / `complaintTag*` | `/report` (листы + жалоба; теги v1: `low_effort` · `spam` · `harassment` · `offensive` · `irrelevant`) |
 | `review*` / `reviewRec*` / `reviewAdviceRec*` / `report*` / `reportDictationTitle` | `/quiz` (в т.ч. микрофон в поле совета), PDF; rec на `/review` |
 | `frame*` / `controls*` | iframe-shell `/review` |
 

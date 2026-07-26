@@ -9,6 +9,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | [`brand-screen-visual/`](brand-screen-visual/README.md) | Правый mesh + марка; `setVariant("default"\|"invalid"\|"done")` |
 | [`brand-screen-shell/`](brand-screen-shell/README.md) | Split-каркас (form-pane + visual); все brand-gate экраны |
 | [`app-modal/`](app-modal/README.md) | Универсальная модалка (слот контента + primary/secondary) |
+| [`tabs-panel/`](tabs-panel/README.md) | Сегмент Активные / Завершенные на «Мои» (`createTabsPanel`) |
 | Field errors | [`../utils/FIELD_ERROR.md`](../utils/FIELD_ERROR.md) — обводка + текст ошибки |
 
 ## Продуктовый флоу
@@ -28,7 +29,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `report-screen/` | `/report` | листы ревью + жалоба + PDF |
 | `ban-screen/` | `/banned` | блок аккаунта; статичный evil mark |
 | `rating/` | — | топ по валюте на home (пока не монтируется) |
-| `locale-toggle/` | — | переключатель языка (не в entry; стили не подключены) |
+| `locale-toggle/` | — | legacy waitlist/lang UI; **не в entry**, стили не подключены — [`README`](locale-toggle/README.md) |
 
 ## Ревью и квиз
 

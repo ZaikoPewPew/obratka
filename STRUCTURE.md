@@ -49,9 +49,9 @@
 
 | Папка | Роль |
 |-------|------|
-| `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `config/` (review session + contacts), `lib/` (supabase + **dictation**), `assets/` |
+| `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `config/` ([README](src/config/README.md): review session + contacts), `lib/` ([README](src/lib/README.md): supabase + **dictation**), `assets/` |
 | `styles/` | Токены + UI. Entry: tokens/base/entrance/app-modal/iframe-shell/home/tabs-panel/success/ban/report |
-| `content/` | `locales.json`, onboarding, embed-hosts, privacy, founder-avatars |
+| `content/` | `locales.json`, onboarding, embed-hosts, founder-avatars |
 | `public/` | Статика по URL (favicon и т.п.) |
 | `supabase/` | SQL (`profiles`, `referrals`, `portfolios`, `review_claims`, `review_complaints`, …) + Edge `telegram-auth`; доступы и адвайзоры — `SECURITY.md` |
 | `.cursor/` | Правила агента (`rules/*.mdc`) и карта (`.cursor/README.md`) |
