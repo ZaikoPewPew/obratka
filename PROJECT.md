@@ -13,7 +13,7 @@
 | Path-роутинг + entry по сессии | wired |
 | Auth: Email OTP, Telegram, Google | wired → `auth.users` + `profiles` |
 | Онбординг → `profiles` | wired |
-| Home: лента/мои по лигам, баланс, репутация, account-menu | wired |
+| Home: лента/мои/рейтинг, URL-query, баланс, репутация, account-menu | wired (рейтинг — placeholder) |
 | Home: SWR-кэш вкладок + silent slot patch | wired (`homeListCache.js`) |
 | Home tabbar dock: glass + «Закинуть своё» справа | wired (`tabbar-dock`, `--on-dark`) |
 | Review claim / heartbeat / release | wired (награда только после submit) |
@@ -30,9 +30,12 @@
 - **SWR ленты:** `feed` / `mine` в memory + `sessionStorage` (`obratka.homeLists.<userId>`); open / смена таба / F5 без skeleton при hit; тихий `refresh`; logout → `clearHomeListCache`.
 - **Silent refresh:** при тех же id карточек — патч только reviewer-слотов (без thum.io); новые id — rebuild + reveal только для них.
 - **Порядок feed:** `sortFeedForSlotClosure` — open slot → ближе к 3/3 → FIFO; `reviewedByMe` / full вниз (не newest-first). См. home-screen README.
+- **Отправленный отчёт:** `reviewedByMe` появляется только после INSERT в `reviews`; карточка disabled с оверлеем «Отчёт отправлен», без intro/notice и повторного claim.
 - **Intro до claim:** клик по чужой карточке → `createAppModal` `homeReviewIntro*` (шаг 1 с `{seconds}` = `REVIEW_SESSION_SECONDS`) → CTA «Проревьюить» → claim → `/review`. «Не сейчас» / закрытие — без claim.
 - **Mine report gate:** `reviewsCount < targetReviews` → `homeMineNotReady*`; иначе `/report`. Own-карточки всегда `cursor: pointer` (не `not-allowed`).
 - **Фильтр «Мои»:** сегмент Активные / Завершенные (`tabs-panel`); завершённые = 3/3 (`reviewsCount >= targetReviews`).
+- **Вкладка «Рейтинг»:** третий tab `rating`; пока локализованный placeholder без API, skeleton и list-кэша.
+- **Deep links home:** `/home`, `?tab=mine`, `?tab=mine&filter=completed`, `?tab=rating`; query канонизирует `homeRoute.js`, Back/Forward переключает вид без remount.
 - **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 45` (review shell + intro copy).
 - **Tabbar dock:** glass-таббар + кнопка «Закинуть своё» справа (56×56, Google blue, gap 8px); hide при скролле уезжает весь док. Светлый трек — gray-900 20% + blur 20; тёмный превью → `--on-dark` — white 20%.
 - **Чипы шапки:** репутация → баланс → аватар. Submit и уведомления из topbar убраны.
@@ -48,7 +51,7 @@
                               └─ submit → /portfolio → done (URL sync /done)
 ```
 
-Корень `/` → `resolveEntryScreen(getSession())` в `src/app/flow.js`.  
+Корень `/` → `resolveEntryScreen(getSession())` в `src/app/flow.js`. Auth-gated deep links без живой сессии идут в referral/auth; пользователь без завершённого онбординга — в `/onboarding`. На boot cached `userId` проверяется через Supabase Auth, stale UX-кэш очищается с сохранением referral-кода.
 Оркестрация: `src/main.js` (`go` / `applyRoute` / `syncRoute`).
 
 Подробная таблица path ↔ экран — [`SCREENS.md`](SCREENS.md).
@@ -141,7 +144,7 @@ Senior → Junior нельзя. Grade обязателен в онбординг
 | Brand split (referral / auth / auth-code / onboarding / url) | `.url-screen*` + [`brand-screen-visual`](src/components/brand-screen-visual/README.md); цель — `brand-screen-shell`; на `/portfolio` — back-chip top-left |
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
-| Home | `home-screen` + `account-menu` + `tabs-panel`; лента SWR; Активные/Завершенные; tabbar-dock (tabs + submit + точка 3/3) / `--on-dark`; чипы репутация + баланс |
+| Home | `home-screen` + `account-menu` + `tabs-panel`; feed/mine/rating; URL-query; лента SWR; Активные/Завершенные; tabbar-dock (tabs + submit + точка 3/3) / `--on-dark` |
 | Review | `index.html` `.iframe-shell` + таймер + чип **rec** (заметки → `answers.dictation`) в `main.js` |
 | Quiz | `review-screen` + `review-panel` (микрофон в поле «Главный совет» → `advice`) |
 | Success | `success-screen` (`/done`) |
@@ -171,7 +174,7 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 - CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `success-screen`, `home-screen`, `tabs-panel`, `account-menu`, `settings-screen`, `ban-screen`, `report-screen`
 - Экраны: referral, auth, auth-code, onboarding, home, settings, url, review-shell (+ rec), quiz, success, report, ban
 - Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `account-menu`, `tabs-panel`
-- Home cache: `src/utils/homeListCache.js` + `mineReadySeen.js` (сброс обоих в `exitAuthenticatedSession`)
+- Home state: `src/utils/homeRoute.js` (query) + `homeListCache.js` + `mineReadySeen.js` (кэши сбрасываются в `exitAuthenticatedSession`)
 - Review timer: `src/config/review.js` (`REVIEW_SESSION_SECONDS`)
 - Dictation: `src/lib/dictation/` (Web Speech MVP)
 - Url-screen: чип «На главную» (`.url-screen__back`, скрыт на done) → `onExit` → home

@@ -35,6 +35,12 @@ import {
   getCachedHomeList,
   setCachedHomeList,
 } from "../../utils/homeListCache.js";
+import {
+  DEFAULT_MINE_FILTER,
+  HOME_TAB_IDS,
+  MINE_FILTER_IDS,
+  parseHomeView,
+} from "../../utils/homeRoute.js";
 import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import { createAppModal } from "../app-modal/AppModal.js";
 import { createAccountMenu } from "../account-menu/AccountMenu.js";
@@ -67,7 +73,7 @@ function createSubmitPlusIcon() {
 }
 
 /**
- * Галочка «уже ревьюил» на превью карточки ленты.
+ * Галочка «отчёт отправлен» на превью карточки ленты.
  * @returns {SVGElement}
  */
 function createReviewedCheckIcon() {
@@ -103,7 +109,7 @@ const TABBAR_HIDE_DELTA = 6;
 const TABBAR_BOTTOM_EPS = 8;
 
 /**
- * @typedef {'feed' | 'mine'} HomeTabId
+ * @typedef {'feed' | 'mine' | 'rating'} HomeTabId
  */
 
 /**
@@ -362,12 +368,15 @@ function isCompletedOwnItem(item) {
  *   onAddPortfolio?: () => void | Promise<void>;
  *   onOpenSettings?: () => void | Promise<void>;
  *   onSignOut?: () => void | Promise<void>;
+ *   onViewChange?: (view: { tab: HomeTabId; filter: MineFilterId; reason: 'tab' | 'filter' }) => void;
  * }} opts
  * @returns {{
  *   root: HTMLElement;
- *   open: () => void | Promise<void>;
+ *   open: (view?: { tab?: HomeTabId; filter?: MineFilterId }) => void | Promise<void>;
  *   close: () => Promise<void>;
  *   setItems: (items: HomePortfolioItem[]) => void;
+ *   setView: (view: { tab?: HomeTabId; filter?: MineFilterId }) => Promise<void>;
+ *   getView: () => { tab: HomeTabId; filter: MineFilterId };
  *   refresh: () => Promise<void>;
  *   showNotice: (opts: { title: string; body: string; closeLabel?: string; closeAria?: string }) => void;
  * }}
@@ -378,6 +387,7 @@ export function createHomeScreen({
   onAddPortfolio,
   onOpenSettings,
   onSignOut,
+  onViewChange,
 }) {
   const root = document.createElement("section");
   root.className = "home-screen";
@@ -525,8 +535,13 @@ export function createHomeScreen({
   empty.hidden = true;
 
   feed.append(mineFilterPanel.root, list, empty);
+
+  const ratingView = document.createElement("p");
+  ratingView.className = "home-screen__empty";
+  ratingView.hidden = true;
+
   /* Рейтинг (`createRatingPanel`) пока не монтируем — см. src/components/rating/. */
-  cluster.append(feed);
+  cluster.append(feed, ratingView);
   body.append(cluster);
 
   const reputationBody = document.createElement("p");
@@ -621,7 +636,14 @@ export function createHomeScreen({
 
   mineTab.append(mineTabLabel, mineTabDot);
 
-  tabbar.append(tabThumb, feedTab, mineTab);
+  const ratingTab = document.createElement("button");
+  ratingTab.type = "button";
+  ratingTab.className = "home-screen__tab";
+  ratingTab.setAttribute("role", "tab");
+  ratingTab.setAttribute("aria-selected", "false");
+  ratingTab.dataset.tab = "rating";
+
+  tabbar.append(tabThumb, feedTab, mineTab, ratingTab);
 
   const tabbarDock = document.createElement("div");
   tabbarDock.className = "home-screen__tabbar-dock";
@@ -751,6 +773,8 @@ export function createHomeScreen({
     }
     feedTab.textContent = t.homeTabFeed;
     mineTabLabel.textContent = t.homeTabMine;
+    ratingTab.textContent = t.homeTabRating;
+    ratingView.textContent = t.homeRatingSoon;
     syncMineTabAria();
     tabbar.setAttribute("aria-label", t.homeTabsAria);
     mineFilterPanel.setLabels({
@@ -1097,10 +1121,26 @@ export function createHomeScreen({
     }
   }
 
+  function syncActiveView() {
+    const isRating = activeTab === "rating";
+    feed.hidden = isRating;
+    ratingView.hidden = !isRating;
+  }
+
+  /**
+   * Текущий вид наверх (main.js пишет его в URL). Экран сам history не трогает.
+   *
+   * @param {'tab' | 'filter'} reason
+   */
+  function emitViewChange(reason) {
+    onViewChange?.({ tab: activeTab, filter: mineFilter, reason });
+  }
+
   /**
    * @param {MineFilterId} next
+   * @param {{ silent?: boolean }} [opts]
    */
-  function setMineFilter(next) {
+  function setMineFilter(next, opts = {}) {
     if (mineFilter === next) return;
     mineFilter = next;
     mineFilterPanel.setActive(next);
@@ -1111,6 +1151,7 @@ export function createHomeScreen({
     }
     syncCopy();
     renderList();
+    if (!opts.silent) emitViewChange("filter");
   }
 
   /**
@@ -1133,16 +1174,25 @@ export function createHomeScreen({
    */
   function syncTabButtons(tab) {
     const isFeed = tab === "feed";
+    const isMine = tab === "mine";
+    const isRating = tab === "rating";
     feedTab.classList.toggle("home-screen__tab--active", isFeed);
-    mineTab.classList.toggle("home-screen__tab--active", !isFeed);
+    mineTab.classList.toggle("home-screen__tab--active", isMine);
+    ratingTab.classList.toggle("home-screen__tab--active", isRating);
     feedTab.setAttribute("aria-selected", isFeed ? "true" : "false");
-    mineTab.setAttribute("aria-selected", isFeed ? "false" : "true");
+    mineTab.setAttribute("aria-selected", isMine ? "true" : "false");
+    ratingTab.setAttribute("aria-selected", isRating ? "true" : "false");
     syncTabThumb();
   }
 
   /** Скользящий пилл активного таба (ширина/смещение по layout). */
   function syncTabThumb(instant = false) {
-    const activeEl = activeTab === "mine" ? mineTab : feedTab;
+    const activeEl =
+      activeTab === "mine"
+        ? mineTab
+        : activeTab === "rating"
+          ? ratingTab
+          : feedTab;
     const barRect = tabbar.getBoundingClientRect();
     const tabRect = activeEl.getBoundingClientRect();
     if (!barRect.width || !tabRect.width) return;
@@ -1169,23 +1219,99 @@ export function createHomeScreen({
 
   /**
    * @param {HomeTabId} tab
+   * @param {{ silent?: boolean }} [opts]
    */
-  async function setActiveTab(tab) {
+  async function setActiveTab(tab, opts = {}) {
     if (activeTab === tab) return;
     activeTab = tab;
     refreshEpoch += 1;
     syncTabButtons(tab);
     syncMineFilterPanel();
+    syncActiveView();
     showTabbar();
     body.scrollTop = 0;
     lastScrollTop = 0;
     syncCopy();
+    if (!opts.silent) emitViewChange("tab");
+    if (tab === "rating") {
+      void refresh();
+      return;
+    }
     if (showTabFromCache(tab)) {
       void refresh();
       return;
     }
     setLoading(true);
     await refresh();
+  }
+
+  /**
+   * @param {unknown} value
+   * @param {HomeTabId} fallback
+   * @returns {HomeTabId}
+   */
+  function normalizeTab(value, fallback) {
+    return HOME_TAB_IDS.includes(/** @type {HomeTabId} */ (value))
+      ? /** @type {HomeTabId} */ (value)
+      : fallback;
+  }
+
+  /**
+   * @param {unknown} value
+   * @param {MineFilterId} fallback
+   * @returns {MineFilterId}
+   */
+  function normalizeFilter(value, fallback) {
+    return MINE_FILTER_IDS.includes(/** @type {MineFilterId} */ (value))
+      ? /** @type {MineFilterId} */ (value)
+      : fallback;
+  }
+
+  /**
+   * Состояние вида без refetch — для `open()`, который сам тянет данные.
+   *
+   * @param {{ tab?: HomeTabId; filter?: MineFilterId }} [view]
+   */
+  function applyViewState(view = {}) {
+    const nextTab = normalizeTab(view.tab, activeTab);
+    const nextFilter =
+      nextTab === "mine"
+        ? normalizeFilter(view.filter, mineFilter)
+        : DEFAULT_MINE_FILTER;
+
+    if (activeTab !== nextTab) {
+      activeTab = nextTab;
+      refreshEpoch += 1;
+    }
+    if (mineFilter !== nextFilter) {
+      mineFilter = nextFilter;
+      mineFilterPanel.setActive(nextFilter, { instant: true });
+    }
+  }
+
+  /**
+   * Применить вид снаружи (deep link / Back-Forward) — без эха в URL.
+   *
+   * @param {{ tab?: HomeTabId; filter?: MineFilterId }} [view]
+   * @returns {Promise<void>}
+   */
+  async function setView(view = {}) {
+    const nextTab = normalizeTab(view.tab, activeTab);
+    const nextFilter =
+      nextTab === "mine"
+        ? normalizeFilter(view.filter, mineFilter)
+        : DEFAULT_MINE_FILTER;
+
+    // Фильтр до вкладки: renderList внутри setActiveTab уже режет по нему.
+    if (nextTab === activeTab) {
+      setMineFilter(nextFilter, { silent: true });
+      return;
+    }
+    if (mineFilter !== nextFilter) {
+      mineFilter = nextFilter;
+      mineFilterPanel.setActive(nextFilter, { instant: true });
+    }
+    await setActiveTab(nextTab, { silent: true });
   }
 
   /**
@@ -1436,12 +1562,14 @@ export function createHomeScreen({
         openOwnCard(latestItem(item.id) ?? item);
       });
     } else if (item.reviewedByMe) {
+      // Только после submit отчёта (`reviews` row), не claim / abort.
       button.classList.add("home-screen__card--reviewed");
-      button.title = t.homeAlreadyReviewedTitle;
-      button.setAttribute("aria-label", t.homeAlreadyReviewedTitle);
-      button.addEventListener("click", () => {
-        void onOpenPortfolio(item);
-      });
+      button.disabled = true;
+      button.title = t.homeCardReviewedLabel ?? t.homeAlreadyReviewedTitle;
+      button.setAttribute(
+        "aria-label",
+        t.homeCardReviewedLabel ?? t.homeAlreadyReviewedTitle,
+      );
     } else {
       button.addEventListener("click", () => {
         openReviewIntro(latestItem(item.id) ?? item);
@@ -1615,6 +1743,7 @@ export function createHomeScreen({
     await refreshWalletFromServer();
     if (epoch !== refreshEpoch) return;
     syncCopy();
+    if (tab === "rating") return;
     const next =
       tab === "mine"
         ? await listMyPortfolios()
@@ -1646,11 +1775,22 @@ export function createHomeScreen({
     }, HOME_SLOTS_POLL_MS);
   }
 
-  async function open() {
+  /**
+   * @param {{ tab?: HomeTabId; filter?: MineFilterId }} [view]
+   *   Явный вид от main.js; иначе читаем текущий query (deep link / reload).
+   */
+  async function open(view) {
+    applyViewState(
+      view ??
+        parseHomeView(
+          typeof window !== "undefined" ? window.location.search : "",
+        ),
+    );
     root.hidden = false;
     root.classList.remove("home-screen--open");
     syncTabButtons(activeTab);
     syncMineFilterPanel();
+    syncActiveView();
     showTabbar();
     lastScrollTop = 0;
     body.scrollTop = 0;
@@ -1665,7 +1805,7 @@ export function createHomeScreen({
         ),
       ),
     );
-    if (!showTabFromCache(activeTab)) {
+    if (activeTab !== "rating" && !showTabFromCache(activeTab)) {
       setLoading(true);
     }
     requestAnimationFrame(() => {
@@ -1730,6 +1870,7 @@ export function createHomeScreen({
     tabbarResize.observe(tabbar);
     tabbarResize.observe(feedTab);
     tabbarResize.observe(mineTab);
+    tabbarResize.observe(ratingTab);
   }
 
   window.addEventListener("resize", () => {
@@ -1749,6 +1890,10 @@ export function createHomeScreen({
 
   mineTab.addEventListener("click", () => {
     void setActiveTab("mine");
+  });
+
+  ratingTab.addEventListener("click", () => {
+    void setActiveTab("rating");
   });
 
   addBtn.addEventListener("click", () => {
@@ -1819,5 +1964,14 @@ export function createHomeScreen({
   syncCopy();
   renderList();
 
-  return { root, open, close, setItems, refresh, showNotice };
+  return {
+    root,
+    open,
+    close,
+    setItems,
+    setView,
+    getView: () => ({ tab: activeTab, filter: mineFilter }),
+    refresh,
+    showNotice,
+  };
 }

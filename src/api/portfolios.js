@@ -409,7 +409,7 @@ function activeSlotCount(item) {
 
 /**
  * Порядок ленты «На ревью» под быстрое закрытие 3 слотов автора:
- * 1) уже отревьюенные мной — вниз (клик → notice, не claim);
+ * 1) уже отправил отчёт (`reviews`) — вниз (на home disabled);
  * 2) без свободного слота — вниз (`openSlots = target - completed - active`);
  * 3) меньше остаётся до target — выше (сначала 2/3, потом 1/3, потом 0/3);
  * 4) tie-break: старше выше (`createdAt` ASC, FIFO).
@@ -453,7 +453,8 @@ export function clearSubmittedPortfolios() {
 /**
  * Очередь на ревью: чужие pending в лиге ревьюера (RLS), без своих.
  * Карточка остаётся до 3/3 completed-отчётов (`status=pending`);
- * уже отревьюенные текущим юзером помечаются `reviewedByMe` (клик → notice).
+ * `reviewedByMe` — только после INSERT в `reviews` (submit отчёта), не claim /
+ * abort / уход с квиза. На home такие карточки disabled + оверлей, без модалки.
  * Active claims не прячут карточку — только `no_slots` при открытии.
  *
  * Порядок (после слотов) — `sortFeedForSlotClosure`: свободный слот →

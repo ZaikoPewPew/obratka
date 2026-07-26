@@ -85,6 +85,25 @@ export function resolveEntryScreen(state = {}) {
 }
 
 /**
+ * Экраны, которым нужен логин (`session.userId`).
+ * Без сессии deep link → `resolveEntryScreen` (referral / auth).
+ * @type {ReadonlySet<AppScreenId>}
+ */
+const AUTH_GATED_ROUTES = Object.freeze(
+  new Set([
+    "home",
+    "settings",
+    "onboarding",
+    "report",
+    "url",
+    "success",
+    "review",
+    "quiz",
+    "done",
+  ]),
+);
+
+/**
  * Можно ли открыть deep link при текущем runtime-состоянии.
  * @param {AppScreenId} id
  * @param {{
@@ -98,17 +117,13 @@ export function resolveEntryScreen(state = {}) {
  */
 export function resolveAccessibleRoute(id, state = {}) {
   const banned = Boolean(state.banned);
+  const hasSession = Boolean(state.hasSession);
+  const onboardingDone = Boolean(state.onboardingDone);
 
   if (banned) return "banned";
 
   if (id === "banned") {
     return resolveEntryScreen(state);
-  }
-
-  const hasPortfolio = Boolean(state.hasPortfolio);
-
-  if (id === "review" || id === "quiz" || id === "done") {
-    if (!hasPortfolio) return "home";
   }
 
   if (id === "authCode") {
@@ -124,19 +139,31 @@ export function resolveAccessibleRoute(id, state = {}) {
   // Invite-only: auth без кода / без сессии → обратно на referral.
   if (
     (id === "auth" || id === "authCode") &&
-    !state.hasSession &&
+    !hasSession &&
     !state.referralDone
   ) {
     return "referral";
   }
 
+  // Защищённые маршруты: без логина → entry (referral / auth по state).
+  if (AUTH_GATED_ROUTES.has(id) && !hasSession) {
+    return resolveEntryScreen(state);
+  }
+
+  // Залогинен, онбординг не завершён — только onboarding (не home / report / …).
   if (
-    id === "home" ||
-    id === "settings" ||
-    id === "onboarding" ||
-    id === "report"
+    hasSession &&
+    !onboardingDone &&
+    AUTH_GATED_ROUTES.has(id) &&
+    id !== "onboarding"
   ) {
-    return id;
+    return "onboarding";
+  }
+
+  const hasPortfolio = Boolean(state.hasPortfolio);
+
+  if (id === "review" || id === "quiz" || id === "done") {
+    if (!hasPortfolio) return "home";
   }
 
   return id;

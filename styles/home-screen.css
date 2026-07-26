@@ -359,6 +359,12 @@
   --home-screen-card-surface: var(--home-screen-card-bg);
 }
 
+/* Уже отправил отчёт: без клика/модалки; оверлей на превью сам даёт статус. */
+.home-screen__card--reviewed:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
 .home-screen__preview {
   box-sizing: border-box;
   position: relative;

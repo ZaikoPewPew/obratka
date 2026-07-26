@@ -24,7 +24,7 @@ npm run dev
 | `/registration` | Email → code / Telegram / Google |
 | `/registration/code` | Код из письма (6 ячеек) |
 | `/onboarding` | Вопросы профиля |
-| `/home` | Очередь (SWR + sort) / мои (Активные·Завершенные, report gate + точка 3/3) + intro до claim + tabbar-dock (tabs + submit) |
+| `/home` | Очередь / мои / рейтинг; SWR, report gate, точка 3/3, intro до claim, tabbar-dock + submit; вид синхронизирован с query |
 | `/settings` | Заглушка настроек (из account-menu) |
 | `/portfolio` | Подача URL; чип «На главную»; done на том же экране |
 | `/review` | Просмотр портфолио + таймер 45 s + надиктовка заметок (rec) |
@@ -60,7 +60,7 @@ npm run dev
 | `npm run dev` | Разработка (Vite HMR) |
 | `npm run build` | `dist/` + `404.html` (SPA-fallback для Pages) |
 | `npm run preview` | Просмотр production-сборки |
-| `npm test` | Юнит-тесты (embed, meta, routes, referral, reviewReport/dictation) |
+| `npm test` | Юнит-тесты (embed, meta, app/home routes, referral, reviewReport/dictation) |
 
 ## Auth
 
@@ -70,7 +70,7 @@ npm run dev
 | **Telegram** | Login Widget → Edge Function `telegram-auth` |
 | **Google** | OAuth PKCE → redirect → `completeOAuthFromUrl` |
 
-Сессия приложения: `localStorage` `obratka.session` + JWT Supabase Auth.  
+Сессия приложения: `localStorage` `obratka.session` + JWT Supabase Auth. `obratka.session` — только UX-кэш: на boot сохранённый `userId` сверяется с живым Supabase Auth; при отсутствии Auth кэш очищается, а referral-код сохраняется. Auth-gated deep link без логина возвращает в referral/auth, а незавершённый онбординг — в `/onboarding`.
 **Email ↔ Google:** Automatic linking в Supabase (одна verified email = один user). Telegram (`tg{id}@t.me`) не склеивается.  
 Ошибки identity / rate-limit мапятся в `auth.js` → i18n (`authIdentityConflict`, `authOtpRateLimit`).  
 **Рефералы:** validate до auth / redeem после логина; 1 код на юзера, лимит 2; без наград. Seed: `YTHWKPDWAK`. См. [`supabase/sql/referrals.sql`](supabase/sql/referrals.sql), [`src/api/referrals.js`](src/api/referrals.js).  
@@ -94,7 +94,7 @@ API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](
 | [`src/components/auth-screen/README.md`](src/components/auth-screen/README.md) | Dashboard Auth + identity linking |
 | [`src/components/auth-code-screen/README.md`](src/components/auth-code-screen/README.md) | OTP UI + resend cooldown |
 | [`src/components/referral-screen/README.md`](src/components/referral-screen/README.md) | Invite gate + validate RPC |
-| [`src/components/home-screen/README.md`](src/components/home-screen/README.md) | Лента SWR, review intro, mine report gate, seen-dot, tabbar-dock + submit, баланс, репутация, invite |
+| [`src/components/home-screen/README.md`](src/components/home-screen/README.md) | Лента/мои/рейтинг, URL-query, SWR, review intro, mine report gate, seen-dot, tabbar-dock + submit |
 | [`src/components/url-screen/README.md`](src/components/url-screen/README.md) | Подача URL: back-chip + done |
 | [`src/components/report-screen/README.md`](src/components/report-screen/README.md) | Листы ревью + жалоба |
 | [`src/config/README.md`](src/config/README.md) | `REVIEW_SESSION_SECONDS`, contacts |

@@ -8,6 +8,7 @@
 
 ```text
 referral → auth → authCode → onboarding → home
+                              ├─ tabs → feed / mine / rating
                               ├─ profile → settings
                               ├─ pick → intro-модалка → claim → review → quiz → /quiz/done (review-panel done)
                               ├─ mine card → report (все ревью собраны) / модалка (ещё нет)
@@ -20,7 +21,7 @@ referral → auth → authCode → onboarding → home
 | 2 | `auth-screen` | `/registration` | Email → OTP screen / Telegram / Google |
 | 2b | `auth-code-screen` | `/registration/code` | 6 ячеек кода из письма |
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |
-| 4 | `home-screen` | `/home` | Хаб: лента/мои (SWR) + intro до claim + mine report gate + tabbar-dock (tabs + submit) |
+| 4 | `home-screen` | `/home` + query | Хаб: feed/mine/rating; SWR + intro до claim + mine report gate + tabbar-dock; query хранит активный вид |
 | 4a | `settings-screen` | `/settings` | Настройки аккаунта (пока заглушка) |
 | 5a | iframe-shell | `/review` | Ревью: iframe + таймер **45 s** + чип **rec** (надиктовка → `answers.dictation`) |
 | 5b | `url-screen` | `/portfolio` | Подача URL (баланс); чип «На главную»; done на том же экране |
@@ -33,6 +34,8 @@ referral → auth → authCode → onboarding → home
 
 - **Google return:** hash/query → `completeOAuthFromUrl()` в `main.js` → onboarding / home.
 - **Email OTP / Telegram:** остаются на `/registration` до `onSuccess` → `applyProviderUser`.
+- **Auth gate:** `home/settings/onboarding/report/url/success/review/quiz/done` без сессии → referral/auth; с сессией без завершённого онбординга → `/onboarding`.
+- **Stale session:** cached `userId` на boot сверяется с Supabase Auth; без живого user очищается UX-кэш с сохранением referral-кода.
 - **Ban:** `profiles.banned_at` → всегда `/banned` (login, boot, любой deep link).
   Операторская шпаргалка: [`supabase/BAN.md`](supabase/BAN.md), шаблоны SQL: [`supabase/sql/ban-templates.sql`](supabase/sql/ban-templates.sql).
 
@@ -80,7 +83,7 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 
 Handoff соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
-`home-screen` — полноэкранный слой (absolute topbar поверх ленты); SWR `homeListCache`; intro до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*`); фильтр Активные/Завершенные (`tabs-panel`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`).  
+`home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки feed/mine/rating (рейтинг пока placeholder); SWR `homeListCache`; intro до claim (`homeReviewIntro*`); `reviewedByMe` после submit → disabled + оверлей; mine report gate (`homeMineNotReady*`); фильтр Активные/Завершенные (`tabs-panel`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`).
 `account-menu` — поповер под аватаром; identity read-only; settings / invite / contacts / sign out.  
 `settings-screen` — side-route `/settings` (заглушка).
 `url-screen` — split; чип «На главную» (`.url-screen__back` / `urlScreenBack*`, скрыт на done); при URL справа заглушка «Портфолио»; submit → done на том же экране (`setVariant("done")`).  
@@ -122,6 +125,7 @@ src/utils/
   fieldError.js / urlScreenField.js
   brandScreenTransition.js / meshGradientWash.js / motionTokens.js
   backdropLuminance.js    ← яркость фона под tabbar → --on-dark
+  homeRoute.js            ← /home query ↔ feed/mine/rating + mine filter
   homeListCache.js        ← SWR feed/mine (memory + sessionStorage)
   mineReadySeen.js        ← seen id готовых отчётов → точка на «Мои» / «Завершенные»
   reviewReport.js         ← answers → секции PDF (+ dictation)
@@ -177,7 +181,7 @@ Shared (не экраны флоу):
 | `createAuthScreen` | `/registration` | UI + Email → authCode / Telegram / Google (shell) |
 | `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` (shell) |
 | `createOnboardingScreen` | `/onboarding` | UI → profiles (shell) |
-| `createHomeScreen` | `/home` | UI (hub + SWR + intro + mine gate + Активные/Завершенные + seen-dot + `onOpenReport` + tabbar-dock) |
+| `createHomeScreen` | `/home` + query | UI (feed/mine/rating + SWR + intro + mine gate + Активные/Завершенные + seen-dot + tabbar-dock) |
 | `createSettingsScreen` | `/settings` | UI (заглушка настроек) |
 | `createUrlScreen` | `/portfolio` | UI (back-chip → home; submit + done via `setVariant`; shell) |
 | iframe-shell + timer + rec | `/review` | UI (заметки → `answers.dictation`) |
@@ -215,7 +219,7 @@ Home tabbar-dock: `--home-screen-tabbar-*` + `--home-screen-tabbar-dock-gap` / `
 |------|------|
 | `routes.js` | id ↔ path |
 | `router.js` | History API + `BASE_URL` |
-| `flow.js` | порядок, entry, deep-link access (auth без кода → referral) |
+| `flow.js` | порядок, entry, auth/onboarding gates и deep-link access |
 | `session.js` | login-сессия + balance + referral fields в localStorage (`obratka.session`) — **не** путать с `/review` |
 
 ## API
@@ -235,10 +239,11 @@ Home tabbar-dock: `--home-screen-tabbar-*` + `--home-screen-tabbar-dock-gap` / `
 - [`STRUCTURE.md`](STRUCTURE.md)
 - [`PROJECT.md`](PROJECT.md)
 - [`src/app/README.md`](src/app/README.md)
-- [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — лента SWR, intro до claim, mine gate, Активные/Завершенные, seen-dot, tabbar-dock + submit, репутация
+- [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — feed/mine/rating, URL-query, SWR, intro до claim, mine gate, seen-dot, tabbar-dock
 - [`src/components/url-screen/README.md`](src/components/url-screen/README.md) — back-chip + done
 - [`src/config/review.js`](src/config/review.js) — `REVIEW_SESSION_SECONDS`
 - [`src/utils/homeListCache.js`](src/utils/homeListCache.js) — кэш вкладок home
+- [`src/utils/homeRoute.js`](src/utils/homeRoute.js) — parse/build/canonical home query
 - [`src/utils/mineReadySeen.js`](src/utils/mineReadySeen.js) — seen 3/3 → точка на «Мои» / «Завершенные»
 - [`src/lib/dictation/README.md`](src/lib/dictation/README.md) — надиктовка: `/review` + поле совета в квизе
 - [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) — правый visual + variants

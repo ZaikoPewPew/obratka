@@ -14,7 +14,9 @@
 Баланс и профиль дополнительно синкаются с `public.profiles` через `src/api/wallet.js` (`refreshSessionFromProfile`).
 
 `resolveAccessibleRoute`: `/registration` без `referralCode` и без `userId` → обратно на `/referral`.  
+Auth-gated deep link (`home` / `settings` / `onboarding` / `report` / `url` / `success` / `review` / `quiz` / `done`) без `userId` → `resolveEntryScreen` (referral или auth по state); с `userId` и без онбординга → `onboarding`.
 После логина `main.js` вызывает `redeemReferral` (идемпотентно).
+На boot: localStorage `userId` без живой Supabase Auth → очистка UX-кэша (referral-код сохраняется).
 
 ## URL
 
@@ -53,7 +55,7 @@ referral → auth → (authCode) → onboarding → home
 
 Auth-защита и Dashboard: [`auth-screen/README.md`](../components/auth-screen/README.md).  
 Brand visual / field errors: [`brand-screen-visual`](../components/brand-screen-visual/README.md), [`FIELD_ERROR.md`](../utils/FIELD_ERROR.md).  
-Home: [`home-screen/README.md`](../components/home-screen/README.md) (SWR `homeListCache`, intro до claim, mine report gate, seen-dot, tabbar-dock + submit).  
+Home: [`home-screen/README.md`](../components/home-screen/README.md) (`homeRoute` query, feed/mine/rating, SWR `homeListCache`, intro до claim, mine report gate, seen-dot, tabbar-dock + submit).
 Url: [`url-screen/README.md`](../components/url-screen/README.md) (back-chip + done).  
 Надиктовка (`/review` + поле совета): [`lib/dictation/README.md`](../lib/dictation/README.md).  
 См. корневой [`SCREENS.md`](../../SCREENS.md).

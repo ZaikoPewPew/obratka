@@ -21,9 +21,15 @@ import {
 import { createAppRouter } from "./app/router.js";
 import { getSession, setSession, clearSession } from "./app/session.js";
 import { completeOAuthFromUrl, signOut } from "./api/auth.js";
+import { getSupabase } from "./lib/supabaseClient.js";
 import { submitPortfolio, clearSubmittedPortfolios, submitPortfolioReview, claimPortfolioReview, heartbeatPortfolioClaim, releasePortfolioClaim, portfolioRpcErrorCode } from "./api/portfolios.js";
 import { clearHomeListCache } from "./utils/homeListCache.js";
 import { clearMineReadySeen } from "./utils/mineReadySeen.js";
+import {
+  buildHomeSearch,
+  isCanonicalHomeSearch,
+  parseHomeView,
+} from "./utils/homeRoute.js";
 import { fetchMyProfile, isProfileBanned, updateMyProfile } from "./api/profiles.js";
 import {
   redeemReferral,
@@ -159,6 +165,38 @@ function syncRoute(id, opts = {}) {
   appRouter?.sync(id, opts);
 }
 
+/**
+ * Последний вид home — чтобы возврат с `/report` / `/settings` попадал на ту же
+ * вкладку (отчёт открывается только с «Мои»).
+ * @type {{ tab: import("./utils/homeRoute.js").HomeTabId; filter: import("./utils/homeRoute.js").MineFilterId }}
+ */
+let lastHomeView = { tab: "feed", filter: "active" };
+
+/**
+ * Вкладка / сегмент home из текущего URL.
+ * @returns {{ tab: import("./utils/homeRoute.js").HomeTabId; filter: import("./utils/homeRoute.js").MineFilterId }}
+ */
+function currentHomeView() {
+  lastHomeView = parseHomeView(
+    typeof window !== "undefined" ? window.location.search : "",
+  );
+  return lastHomeView;
+}
+
+/**
+ * Подчистить `/home` query (мусорный `tab`, дефолты) без записи в history-стек.
+ * @param {{ tab?: import("./utils/homeRoute.js").HomeTabId; filter?: import("./utils/homeRoute.js").MineFilterId }} view
+ */
+function canonicalizeHomeSearch(view) {
+  const search = typeof window !== "undefined" ? window.location.search : "";
+  if (isCanonicalHomeSearch(search, view)) return;
+  appRouter?.navigate("home", {
+    search: buildHomeSearch(view),
+    replace: true,
+    silent: true,
+  });
+}
+
 const reviewPanel = createReviewPanel({
   getPortfolioName: () => portfolioName,
   onReportReveal: (active, payload) => {
@@ -243,7 +281,7 @@ const reportScreen = createReportScreen({
   onPrimary: () => {
     pendingReportPortfolioId = null;
     pendingReportPortfolioName = "";
-    go("home", { replace: true });
+    go("home", { replace: true, search: buildHomeSearch(lastHomeView) });
   },
 });
 document.body.append(reportScreen.root);
@@ -815,26 +853,17 @@ const urlScreen = createUrlScreen({
 
 const settingsScreen = createSettingsScreen({
   onBack: () => {
-    go("home");
+    go("home", { search: buildHomeSearch(lastHomeView) });
   },
 });
 
 const homeScreen = createHomeScreen({
   onOpenPortfolio: async (item) => {
     if (item?.isOwn) return;
+    // Отправленный отчёт (`reviews`) — карточка disabled на home; claim не зовём.
+    if (item?.reviewedByMe) return;
     const id = typeof item?.id === "string" ? item.id : "";
     if (!id) return;
-
-    if (item?.reviewedByMe) {
-      const t = getStrings();
-      homeScreen.showNotice({
-        title: t.homeAlreadyReviewedTitle,
-        body: t.homeAlreadyReviewedBody,
-        closeLabel: t.homeAlreadyReviewedClose,
-        closeAria: t.homeAlreadyReviewedCloseAria,
-      });
-      return;
-    }
 
     try {
       await claimPortfolioReview(id);
@@ -852,13 +881,7 @@ const homeScreen = createHomeScreen({
         return;
       }
       if (code === "already_reviewed") {
-        const t = getStrings();
-        homeScreen.showNotice({
-          title: t.homeAlreadyReviewedTitle,
-          body: t.homeAlreadyReviewedBody,
-          closeLabel: t.homeAlreadyReviewedClose,
-          closeAria: t.homeAlreadyReviewedCloseAria,
-        });
+        // Гонка/стейл-кэш: refresh покажет disabled + оверлей, без модалки.
         void homeScreen.refresh();
         return;
       }
@@ -903,6 +926,16 @@ const homeScreen = createHomeScreen({
   },
   onOpenSettings: () => {
     go("settings");
+  },
+  onViewChange: ({ tab, filter, reason }) => {
+    lastHomeView = { tab, filter };
+    // Экран уже переключился сам — URL только догоняем, без re-open.
+    if (activeRouteId !== "home") return;
+    appRouter?.navigate("home", {
+      search: buildHomeSearch({ tab, filter }),
+      replace: reason === "filter",
+      silent: true,
+    });
   },
   onSignOut: exitAuthenticatedSession,
 });
@@ -1120,6 +1153,7 @@ document.body.append(
  */
 async function applyRoute(id, opts = {}) {
   const handoff = Boolean(opts.handoff);
+  const prevRouteId = activeRouteId;
   let session = getSession();
 
   if (session?.userId) {
@@ -1151,6 +1185,15 @@ async function applyRoute(id, opts = {}) {
 
   activeRouteId = id;
   syncDictationChrome();
+
+  // Back/Forward между вкладками home: экран уже смонтирован, меняем только вид.
+  if (id === "home" && prevRouteId === "home" && !handoff) {
+    const view = currentHomeView();
+    canonicalizeHomeSearch(view);
+    await homeScreen.setView(view);
+    return;
+  }
+
   const closeOpts = handoff ? { handoff: true } : {};
   const openOpts = handoff ? { handoff: true } : {};
 
@@ -1189,7 +1232,9 @@ async function applyRoute(id, opts = {}) {
       return;
     }
     if (target === "home") {
-      void homeScreen.open();
+      const view = currentHomeView();
+      canonicalizeHomeSearch(view);
+      void homeScreen.open(view);
       return;
     }
     if (target === "settings") {
@@ -1282,7 +1327,7 @@ async function applyRoute(id, opts = {}) {
 
   // Onboarding → home: home снизу/поверх с fade-in, brand уходит fade-out.
   if (isHomeReveal) {
-    const opening = homeScreen.open();
+    const opening = homeScreen.open(currentHomeView());
     await Promise.all([
       opening,
       referralScreen.close({}),
@@ -1387,9 +1432,26 @@ void (async () => {
     const oauthSession = await completeOAuthFromUrl();
     if (oauthSession) {
       await applyProviderUser(oauthSession.user, "google");
-    } else if (getSession()) {
-      // Re-validate ban from server — do not trust stale localStorage alone.
-      await refreshSessionFromProfile();
+    } else if (getSession()?.userId) {
+      // UX-кэш `obratka.session` без живой Supabase Auth → не пускать на home.
+      const supabase = getSupabase();
+      if (supabase) {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user?.id) {
+          const referralCode = getSession()?.referralCode ?? null;
+          clearSession();
+          if (referralCode) {
+            setSession({ referralCode });
+          }
+        } else {
+          // Re-validate ban from server — do not trust stale localStorage alone.
+          await refreshSessionFromProfile();
+        }
+      } else {
+        await refreshSessionFromProfile();
+      }
     }
   } catch (err) {
     if (import.meta.env.DEV) {
