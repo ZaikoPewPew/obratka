@@ -151,44 +151,26 @@ export async function awardReviewReward() {
 }
 
 /**
- * Временно: клик по чипу баланса на home начисляет кости (RPC + локальный кэш).
- * Выключить / удалить RPC `temp_credit_balance` после тестов.
+ * Клик по чипу баланса на home: только DEV localStorage (без серверного mint).
+ * Раньше был RPC `temp_credit_balance` — удалён.
  */
-export const TEMP_BALANCE_CHIP_CREDIT = true;
+export const TEMP_BALANCE_CHIP_CREDIT = false;
 
-/** Сколько костей даёт один клик по чипу (temp / DEV). */
+/** Сколько костей даёт один клик по чипу (DEV local-only). */
 export const TEMP_BALANCE_CHIP_AMOUNT = 10;
 
 /**
- * Temp / DEV: начислить кости. При `TEMP_BALANCE_CHIP_CREDIT` — RPC `temp_credit_balance`.
+ * DEV: начислить кости только в localStorage (сотрётся на следующем sync).
  * @param {number} amount
  * @returns {Promise<number>} новый баланс
  */
 export async function creditBalance(amount) {
-  if (!TEMP_BALANCE_CHIP_CREDIT && !import.meta.env.DEV) {
+  if (!import.meta.env.DEV) {
     return getBalance();
   }
   const n = typeof amount === "number" && Number.isFinite(amount) ? amount : 0;
   if (n <= 0) return getBalance();
 
-  const supabase = getSupabase();
-  if (TEMP_BALANCE_CHIP_CREDIT && supabase) {
-    const { data, error } = await supabase.rpc("temp_credit_balance", {
-      p_amount: Math.floor(n),
-    });
-    const credited = coerceBalance(data);
-    if (!error && credited != null) {
-      walletMutationGen += 1;
-      return writeBalanceLocal(credited);
-    }
-    console.warn(
-      "[wallet] temp_credit_balance failed",
-      error?.message || error || "bad_payload",
-      data,
-    );
-  }
-
-  /* Fallback без RPC: только localStorage (сотрётся на следующем удачном sync). */
   walletMutationGen += 1;
   return writeBalanceLocal(getBalance() + n);
 }

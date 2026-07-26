@@ -211,6 +211,11 @@ begin
 end;
 $$;
 
+-- Trigger-only: не вызывать через PostgREST RPC.
+revoke all on function public.handle_new_user() from public;
+revoke all on function public.handle_new_user() from anon;
+revoke all on function public.handle_new_user() from authenticated;
+
 -- ---------------------------------------------------------------------------
 -- RPC: validate (anon + authenticated) — does not consume a slot
 -- ---------------------------------------------------------------------------

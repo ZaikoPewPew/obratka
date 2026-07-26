@@ -122,7 +122,7 @@ Topbar поверх контента (`position: absolute`), появление 
 - Репутация: `profiles.reputation` ↔ `session.reputation`; чип = иконка + дельта от 100 (`0` / `+10` / `-20`, `formatReputationDelta`); клик → explainer через `createAppModal` (без весов тегов).
 - Порядок чипов в шапке: репутация → баланс → аватар. «Закинуть своё» — не в шапке, а в доке у таббара; чип уведомлений убран (непросмотренный готовый отчёт — точка на «Мои посты»).
 - Баланс: `profiles.balance` ↔ `session.balance`.
-- Клик по чипу баланса (**временно**): `TEMP_BALANCE_CHIP_CREDIT` → RPC `temp_credit_balance` (+10); иначе DEV local-only. Убрать флаг + RPC после тестов. Серверный spend — `spend_submit_cost`.
+- Клик по чипу баланса (**DEV**): local-only через `creditBalance` (+10). Серверный spend — `spend_submit_cost`; награда за ревью — в `handle_review_inserted`.
 - CTA «Закинуть своё» без монет → `createAppModal` «Монет маловато»; notices (no slots / already reviewed) — тот же `noticeModal`.
 - Клик по аватару профиля → `account-menu` из Figma `467:1320`, раскрывающийся влево от правого края аватара с отступом 16px вниз (без выхода за viewport).
 - В меню `displayName` (из `profiles.display_name`) и email не кликабельны; «Настройки» → `/settings`, «Пригласить» → `homeInvite*`-модалка, «Контакты» → `createAppModal`, «Выйти» → полный Supabase `signOut` + очистка локальной сессии.

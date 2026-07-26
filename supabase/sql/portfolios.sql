@@ -244,8 +244,16 @@ revoke all on function public.profile_grade(uuid) from public;
 revoke all on function public.profile_grade(uuid) from anon;
 revoke all on function public.profile_grade(uuid) from authenticated;
 
+revoke all on function public.grade_league(text) from public;
+revoke all on function public.grade_league(text) from anon;
 grant execute on function public.grade_league(text) to authenticated;
+
+revoke all on function public.can_review_grades(text, text) from public;
+revoke all on function public.can_review_grades(text, text) from anon;
 grant execute on function public.can_review_grades(text, text) to authenticated;
+
+revoke all on function public.can_review_portfolio(uuid, uuid) from public;
+revoke all on function public.can_review_portfolio(uuid, uuid) from anon;
 grant execute on function public.can_review_portfolio(uuid, uuid) to authenticated;
 
 -- Trigger-only: не вызывать через PostgREST RPC.

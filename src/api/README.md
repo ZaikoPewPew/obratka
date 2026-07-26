@@ -46,7 +46,7 @@ Env / Dashboard: `.env.example`, `src/components/auth-screen/README.md`, `supaba
 
 | Файл | Роль |
 |------|------|
-| `wallet.js` | `getBalance` / `spendSubmitCost` (RPC) / `awardReviewReward` (= refresh) / `creditBalance` (temp RPC `temp_credit_balance` / DEV local) / `REVIEW_REWARD` / `SUBMIT_COST`; `refreshSessionFromProfile` |
+| `wallet.js` | `getBalance` / `spendSubmitCost` (RPC) / `awardReviewReward` (= refresh) / `creditBalance` (DEV local-only) / `REVIEW_REWARD` / `SUBMIT_COST`; `refreshSessionFromProfile` |
 | `leagues.js` | матчинг лиг по `grade` (зеркало SQL): `gradeToLeague` / `canReviewGrades` |
 | `portfolios.js` | `listPortfoliosForReview` (чужие pending в лиге + слоты; до 3/3 completed; порядок `sortFeedForSlotClosure`: open slot → closer to target → FIFO; `reviewedByMe` / full вниз) / `listMyPortfolios` (`created_at` DESC) / `listReadyOwnReportIds` (+ `hasReadyOwnReport`) для точки на «Мои» / claim·heartbeat·release (**claim только после CTA intro на home**) / `submitPortfolio` / `submitPortfolioReview` (+ answers) + `formatPortfolioRole` |
 | `reviewComplaints.js` | жалобы на листы: `listPortfolioReviewSheets` (с `answers`) / `submitReviewComplaint` / `getReputation` / `formatReputationDelta`; теги v1 без весов на клиенте; RPC `submit_review_complaint` |

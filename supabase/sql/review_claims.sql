@@ -455,9 +455,21 @@ grant execute on function public.review_claim_ttl() to authenticated;
 revoke all on function public.purge_expired_review_claims() from public;
 revoke all on function public.purge_expired_review_claims() from anon;
 revoke all on function public.purge_expired_review_claims() from authenticated;
+
+revoke all on function public.claim_portfolio_review(uuid) from public;
+revoke all on function public.claim_portfolio_review(uuid) from anon;
 grant execute on function public.claim_portfolio_review(uuid) to authenticated;
+
+revoke all on function public.heartbeat_portfolio_claim(uuid) from public;
+revoke all on function public.heartbeat_portfolio_claim(uuid) from anon;
 grant execute on function public.heartbeat_portfolio_claim(uuid) to authenticated;
+
+revoke all on function public.release_portfolio_claim(uuid) from public;
+revoke all on function public.release_portfolio_claim(uuid) from anon;
 grant execute on function public.release_portfolio_claim(uuid) to authenticated;
+
+revoke all on function public.portfolio_reviewer_slots(uuid[]) from public;
+revoke all on function public.portfolio_reviewer_slots(uuid[]) from anon;
 grant execute on function public.portfolio_reviewer_slots(uuid[]) to authenticated;
 
 revoke all on function public.handle_review_inserted() from public;

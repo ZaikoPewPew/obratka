@@ -247,6 +247,11 @@ revoke all on function public.is_profile_banned(uuid) from public;
 revoke all on function public.is_profile_banned(uuid) from anon;
 grant execute on function public.is_profile_banned(uuid) to authenticated;
 
+-- Trigger-only: не вызывать через PostgREST RPC.
+revoke all on function public.handle_new_user() from public;
+revoke all on function public.handle_new_user() from anon;
+revoke all on function public.handle_new_user() from authenticated;
+
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
