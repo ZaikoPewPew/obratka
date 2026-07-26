@@ -1,6 +1,6 @@
 # `review-panel` — шаги квиза
 
-Левая панель опроса после таймера ревью (`/review` → `/quiz`). После submit последнего шага — **локальный done** (заголовок + «Выйти» / «Следующий кейс»), справа улетает PDF-лист.
+Левая панель опроса после таймера ревью (`/review` → `/quiz`). После submit последнего шага — **локальный done** (заголовок + «На главную» / «Следующий кейс»), справа улетает PDF-лист.
 
 Надиктовка с `/review` **не** в panel: `main.js` мержит `answers.dictation` в `onComplete` перед `submitPortfolioReview`. См. [`lib/dictation/README.md`](../../lib/dictation/README.md).
 
@@ -25,7 +25,7 @@
 1. Шаги single / multi / scale / advice (контент из `content` / локалей `review*`).
 2. Шаг advice → `onReportReveal(true)` (лист справа на `review-screen`).
 3. Submit → `onComplete(answers)` (награда; снаружи могут добавить `dictation`) + `showDone` + `onReportReveal(false, { submitted: true })` + `onDoneChange(true)` → URL `/quiz/done`.
-4. CTA → `onExit` / `onNextCase` → обычно `go("home")`.
+4. CTA → `onExit` → home; `onNextCase` → свежая лента + claim следующего доступного кейса → `/review` (без intro; нет кандидатов → home). Оркестрация в `main.js`.
 
 Смена шага: leave/enter пачки `stage` + footer на `--motion-reveal-*` (`getMotionReveal`).  
 Переход в done: form/top уходят, затем enter `review-panel__done`.

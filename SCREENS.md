@@ -10,7 +10,8 @@
 referral → auth → authCode → onboarding → home
                               ├─ tabs → feed / mine / rating
                               ├─ profile → settings
-                              ├─ pick → intro-модалка → claim → review → quiz → /quiz/done (review-panel done)
+                              ├─ pick → intro-модалка → claim → review → quiz → /quiz/done
+                              │         («На главную» → home; «Следующий кейс» → claim следующего → review)
                               ├─ mine card → report (все ревью собраны) / модалка (ещё нет)
                               └─ submit (url) → done на url-screen → /done (URL sync)
 ```

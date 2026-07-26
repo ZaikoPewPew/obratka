@@ -22,7 +22,18 @@ import { createAppRouter } from "./app/router.js";
 import { getSession, setSession, clearSession } from "./app/session.js";
 import { completeOAuthFromUrl, signOut } from "./api/auth.js";
 import { getSupabase } from "./lib/supabaseClient.js";
-import { submitPortfolio, clearSubmittedPortfolios, submitPortfolioReview, claimPortfolioReview, heartbeatPortfolioClaim, releasePortfolioClaim, portfolioRpcErrorCode, hasFreeMineSlot } from "./api/portfolios.js";
+import {
+  submitPortfolio,
+  clearSubmittedPortfolios,
+  submitPortfolioReview,
+  claimPortfolioReview,
+  heartbeatPortfolioClaim,
+  releasePortfolioClaim,
+  portfolioRpcErrorCode,
+  hasFreeMineSlot,
+  listPortfoliosForReview,
+  isPortfolioOpenForReview,
+} from "./api/portfolios.js";
 import { clearHomeListCache } from "./utils/homeListCache.js";
 import { clearFeedSeen } from "./utils/feedSeen.js";
 import { clearMineReadySeen } from "./utils/mineReadySeen.js";
@@ -254,14 +265,7 @@ const reviewPanel = createReviewPanel({
     })();
   },
   onNextCase: () => {
-    void (async () => {
-      const pending = reviewSubmitPromise;
-      if (pending) {
-        await pending.catch(() => {});
-      }
-      await releaseHeldClaim();
-      go("home", { replace: true });
-    })();
+    void openNextReviewCase();
   },
 });
 const reviewScreen = createReviewScreen({
@@ -424,6 +428,133 @@ async function releaseHeldClaim() {
   const id = portfolioId;
   claimHeld = false;
   await releasePortfolioClaim(id);
+}
+
+/** Защита от двойного клика «Следующий кейс». */
+let nextCaseOpening = false;
+
+/**
+ * Claim + старт `/review`. Тот же путь, что CTA intro на home (без модалки).
+ *
+ * @param {{
+ *   id?: string;
+ *   url?: string;
+ *   name?: string;
+ *   avatarUrl?: string;
+ *   isOwn?: boolean;
+ *   reviewedByMe?: boolean;
+ * }} item
+ * @param {{ showNoSlotsNotice?: boolean }} [opts]
+ * @returns {Promise<boolean>}
+ */
+async function claimAndStartReview(item, opts = {}) {
+  const showNoSlotsNotice = Boolean(opts.showNoSlotsNotice);
+  if (item?.isOwn || item?.reviewedByMe) return false;
+  const id = typeof item?.id === "string" ? item.id : "";
+  if (!id) return false;
+
+  try {
+    await claimPortfolioReview(id);
+  } catch (err) {
+    const code = portfolioRpcErrorCode(err);
+    if (code === "no_slots") {
+      if (showNoSlotsNotice) {
+        const t = getStrings();
+        homeScreen.showNotice({
+          title: t.homeNoSlotsTitle,
+          body: t.homeNoSlotsBody,
+          closeLabel: t.homeNoSlotsClose,
+          closeAria: t.homeNoSlotsCloseAria,
+        });
+        void homeScreen.refresh();
+      }
+      return false;
+    }
+    if (code === "already_reviewed") {
+      if (showNoSlotsNotice) {
+        void homeScreen.refresh();
+      }
+      return false;
+    }
+    if (import.meta.env.DEV) {
+      console.warn("[review] claimPortfolioReview", err);
+    }
+    if (showNoSlotsNotice) {
+      void homeScreen.refresh();
+    }
+    return false;
+  }
+
+  claimHeld = true;
+  reviewSubmitted = false;
+  reviewSubmitPromise = null;
+  resetDictationSession();
+  stopTimer();
+  sessionEnded = false;
+  sessionStarted = false;
+  remainingMs = SESSION_TOTAL_MS;
+  renderTimer();
+  enterSessionShell();
+  await closeReview();
+  applyPortfolio(item.url, {
+    portfolioId: id,
+    applicantName: item.name,
+    applicantAvatar: item.avatarUrl,
+  });
+  startClaimHeartbeat();
+  go("review");
+  void homeScreen.close();
+  if (embedPlan?.mode === "external") {
+    armSession();
+    return true;
+  }
+  startTimer();
+  return true;
+}
+
+/**
+ * После done: свежая лента → первый доступный кейс → claim → `/review`.
+ * Нет кандидатов / все claim провалились → home.
+ * @returns {Promise<void>}
+ */
+async function openNextReviewCase() {
+  if (nextCaseOpening) return;
+  nextCaseOpening = true;
+  try {
+    const pending = reviewSubmitPromise;
+    if (pending) {
+      await pending.catch(() => {});
+    }
+    await releaseHeldClaim();
+
+    const excludeId = portfolioId;
+    let items;
+    try {
+      items = await listPortfoliosForReview();
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.warn("[review] listPortfoliosForReview", err);
+      }
+      go("home", { replace: true });
+      return;
+    }
+
+    for (const item of items) {
+      if (excludeId && item.id === excludeId) continue;
+      if (!isPortfolioOpenForReview(item)) continue;
+      const started = await claimAndStartReview(item, {
+        showNoSlotsNotice: false,
+      });
+      if (started) {
+        clearHomeListCache(getSession()?.userId);
+        return;
+      }
+    }
+
+    go("home", { replace: true });
+  } finally {
+    nextCaseOpening = false;
+  }
 }
 
 /**
@@ -920,57 +1051,8 @@ const settingsScreen = createSettingsScreen({
 
 const homeScreen = createHomeScreen({
   onOpenPortfolio: async (item) => {
-    if (item?.isOwn) return;
-    // Отправленный отчёт (`reviews`) — карточка disabled на home; claim не зовём.
-    if (item?.reviewedByMe) return;
-    const id = typeof item?.id === "string" ? item.id : "";
-    if (!id) return;
-
-    try {
-      await claimPortfolioReview(id);
-    } catch (err) {
-      const code = portfolioRpcErrorCode(err);
-      if (code === "no_slots") {
-        const t = getStrings();
-        homeScreen.showNotice({
-          title: t.homeNoSlotsTitle,
-          body: t.homeNoSlotsBody,
-          closeLabel: t.homeNoSlotsClose,
-          closeAria: t.homeNoSlotsCloseAria,
-        });
-        void homeScreen.refresh();
-        return;
-      }
-      if (code === "already_reviewed") {
-        // Гонка/стейл-кэш: refresh покажет disabled + оверлей, без модалки.
-        void homeScreen.refresh();
-        return;
-      }
-      if (import.meta.env.DEV) {
-        console.warn("[review] claimPortfolioReview", err);
-      }
-      void homeScreen.refresh();
-      return;
-    }
-
-    claimHeld = true;
-    reviewSubmitted = false;
-    reviewSubmitPromise = null;
-    enterSessionShell();
-    await closeReview();
-    applyPortfolio(item.url, {
-      portfolioId: id,
-      applicantName: item.name,
-      applicantAvatar: item.avatarUrl,
-    });
-    startClaimHeartbeat();
-    go("review");
-    void homeScreen.close();
-    if (embedPlan?.mode === "external") {
-      armSession();
-      return;
-    }
-    startTimer();
+    // Intro CTA → тот же claimAndStartReview, что и «Следующий кейс» (без intro).
+    await claimAndStartReview(item, { showNoSlotsNotice: true });
   },
   onOpenReport: async (item) => {
     if (!item?.isOwn || !item.id) return;

@@ -412,6 +412,22 @@ function activeSlotCount(item) {
 }
 
 /**
+ * Клиентский фильтр кандидата на claim (сервер всё равно проверит).
+ * Совпадает с тем, что на home кликабельно: не своё, не reviewedByMe, есть слот.
+ *
+ * @param {PortfolioQueueItem | null | undefined} item
+ * @returns {boolean}
+ */
+export function isPortfolioOpenForReview(item) {
+  if (!item || item.isOwn || item.reviewedByMe) return false;
+  const id = typeof item.id === "string" ? item.id : "";
+  if (!id) return false;
+  const target = item.targetReviews ?? DEFAULT_TARGET_REVIEWS;
+  const completed = item.reviewsCount ?? 0;
+  return target - completed - activeSlotCount(item) > 0;
+}
+
+/**
  * Порядок ленты «На ревью» под быстрое закрытие 3 слотов автора:
  * 1) уже отправил отчёт (`reviews`) — вниз (на home disabled);
  * 2) без свободного слота — вниз (`openSlots = target - completed - active`);
