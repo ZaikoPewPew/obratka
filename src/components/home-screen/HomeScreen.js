@@ -655,8 +655,8 @@ export function createHomeScreen({
 
   const balanceModal = createAppModal({
     size: "md",
-    showSecondary: false,
-    onPrimary: () => {
+    showPrimary: false,
+    onSecondary: () => {
       void balanceModal.close();
     },
   });
@@ -2422,11 +2422,11 @@ export function createHomeScreen({
     balanceCardBody.textContent = t.homeBalanceCardBody ?? "";
     balanceModal.setTitle(t.homeBalanceTitle ?? "");
     balanceModal.setDescription(t.homeBalanceDesc ?? "");
-    balanceModal.setPrimaryLabel(t.homeBalanceClose ?? "");
+    balanceModal.setSecondaryLabel(t.homeBalanceClose ?? "");
     balanceModal.setCloseAriaLabel(
       t.homeBalanceCloseAria ?? t.homeBalanceClose ?? "",
     );
-    balanceModal.setActionsVisible({ primary: true, secondary: false });
+    balanceModal.setActionsVisible({ primary: false, secondary: true });
     balanceModal.open();
   }
 

@@ -2,7 +2,7 @@
 
 - `tokens.css` — **источник дизайн-токенов** (примитивы → семантика → темы). Правило: `.cursor/rules/design-tokens.mdc`.
 - `base.css` — сброс / база.
-- `entrance.css` — `@keyframes motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-recording-blink` (пульс индикатора записи).
+- `entrance.css` — `@keyframes motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock` / `motion-recording-blink` (пульс индикатора записи).
 - `app-modal.css` — универсальная модалка (`createAppModal`, `--app-modal-*`).
 - `iframe-shell.css` — оболочка `/review` (таймер, **`.iframe-shell__rec`**), `.url-screen*` (в т.ч. **`.url-screen__back`**, `__error*`, `__input-wrap--invalid`), `.auth-screen*` / `.auth-code-screen*` (в т.ч. `__cells--invalid`), `.review-screen*` / `.review-panel*` (в т.ч. **`.review-panel__rec`**).
 - `brand-screen.css` — **заготовка** выноса общих split-стилей из iframe-shell.
@@ -46,12 +46,13 @@
 | `--home-screen-*` | topbar / feed / avatar / locked-modal |
 | `--home-screen-review-intro-*` | шаги intro-модалки (`indent` / `step-gap`) |
 | `--home-screen-tabbar-*` | glass track (gray-900 10% / white on-dark 20% / blur 20), hide/thumb/label/contrast; dock-gap + submit (56×56 Google blue) + tab-dot (6px Google red) |
+| `--home-screen-reveal-delay-*` | entrance stagger на `/home` (topbar → body → dock → fab) |
 | `--tabs-panel-*` | сегмент Активные/Завершенные (track / tab / thumb / tab-dot) |
 | `--app-modal-*` | универсальная модалка (Figma Modal) |
 
 Handoff без анимации visual: класс `.url-screen--handoff` + `brandScreenTransition.js`.
 
-CSS: `animation-name: motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar`.  
+CSS: `animation-name: motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock`.  
 JS: `src/utils/motionTokens.js`.  
 Field errors: [`src/utils/FIELD_ERROR.md`](../src/utils/FIELD_ERROR.md).  
 Visual variants: [`brand-screen-visual`](../src/components/brand-screen-visual/README.md).

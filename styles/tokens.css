@@ -948,6 +948,11 @@
     var(--home-screen-tabbar-offset) + var(--home-screen-tabbar-height) +
       var(--space-4)
   );
+  /* Entrance stagger на --open: topbar → body → dock → fab */
+  --home-screen-reveal-delay-topbar: var(--motion-delay-2);
+  --home-screen-reveal-delay-body: var(--motion-delay-3);
+  --home-screen-reveal-delay-tabbar: var(--motion-delay-4);
+  --home-screen-reveal-delay-fab: var(--motion-delay-5);
 
   /* FAB «быстрая связь» (Telegram), Figma 478:1814 */
   --contact-fab-size: 56px;

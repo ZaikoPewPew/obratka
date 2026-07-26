@@ -44,6 +44,22 @@
   }
 }
 
+/**
+ * Reveal без filter + сохранение translateX(-50%) —
+ * для centered bottom dock (таббар + submit на home).
+ */
+@keyframes motion-reveal-dock {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(var(--motion-reveal-shift));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 @keyframes motion-spin {
   to {
     transform: rotate(360deg);

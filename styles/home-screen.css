@@ -35,21 +35,34 @@
 }
 
 .home-screen--open .home-screen__topbar,
-.home-screen--open .home-screen__body {
-  animation-name: motion-reveal;
+.home-screen--open .home-screen__body,
+.home-screen--open .home-screen__tabbar-dock,
+.home-screen--open .contact-fab {
   animation-duration: var(--motion-reveal-duration);
   animation-timing-function: var(--motion-reveal-ease);
   animation-fill-mode: both;
 }
 
 .home-screen--open .home-screen__topbar {
-  animation-delay: var(--url-screen-reveal-delay-title);
+  animation-delay: var(--home-screen-reveal-delay-topbar);
   /* Без filter: иначе браузер рисует шапку как непрозрачный белый слой */
   animation-name: motion-reveal-topbar;
 }
 
 .home-screen--open .home-screen__body {
-  animation-delay: var(--url-screen-reveal-delay-field);
+  animation-name: motion-reveal;
+  animation-delay: var(--home-screen-reveal-delay-body);
+}
+
+/* Док целиком: tabbar + «Закинуть своё»; без filter (glass). */
+.home-screen--open .home-screen__tabbar-dock {
+  animation-name: motion-reveal-dock;
+  animation-delay: var(--home-screen-reveal-delay-tabbar);
+}
+
+.home-screen--open .contact-fab {
+  animation-name: motion-reveal-topbar;
+  animation-delay: var(--home-screen-reveal-delay-fab);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -64,11 +77,22 @@
   }
 
   .home-screen--open .home-screen__topbar,
-  .home-screen--open .home-screen__body {
+  .home-screen--open .home-screen__body,
+  .home-screen--open .home-screen__tabbar-dock,
+  .home-screen--open .contact-fab {
     animation: none;
     opacity: 1;
-    transform: none;
     filter: none;
+  }
+
+  .home-screen--open .home-screen__topbar,
+  .home-screen--open .home-screen__body,
+  .home-screen--open .contact-fab {
+    transform: none;
+  }
+
+  .home-screen--open .home-screen__tabbar-dock {
+    transform: translateX(-50%);
   }
 }
 
@@ -1640,5 +1664,9 @@
   .home-screen__tabbar-thumb,
   .home-screen__tab {
     transition-duration: 0.01ms;
+  }
+
+  .home-screen__tabbar-dock {
+    transform: translateX(-50%);
   }
 }

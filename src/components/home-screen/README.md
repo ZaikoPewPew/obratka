@@ -129,7 +129,7 @@ CTA «Закинуть своё» (кнопка в доке у таббара) �
 Клиент-зеркало: [`src/api/leagues.js`](../../api/leagues.js). Сервер: [`supabase/sql/portfolios.sql`](../../../supabase/sql/portfolios.sql) + [`review_claims.sql`](../../../supabase/sql/review_claims.sql) (`can_review_portfolio`, claim-слоты, RLS).
 
 Лента по центру экрана (`--home-screen-body-padding-top` = 16px сверху); снизу запас под таббар (`--home-screen-body-padding-bottom`).  
-Topbar поверх контента (`position: absolute`), появление без `filter` (`motion-reveal-topbar`).
+При `open` / reload cascade сверху вниз (`--home-screen-reveal-delay-*`): topbar (`motion-reveal-topbar`, без `filter`) → body (`motion-reveal`) → tabbar-dock (`motion-reveal-dock`, без `filter`, с `translateX(-50%)`) → contact-fab. Hide/show дока по скроллу не трогает entrance.
 
 Рейтинг слева (топ по валюте) — компонент [`rating/`](../rating/), пока **не монтируется**.
 
@@ -142,7 +142,7 @@ Topbar поверх контента (`position: absolute`), появление 
 - При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.
 - Репутация: `profiles.reputation` ↔ `session.reputation`; чип = иконка + дельта от 100 (`0` / `+10` / `-20`, `formatReputationDelta`); клик → explainer через `createAppModal` (без весов тегов).
 - Порядок чипов в шапке: репутация → баланс → аватар. «Закинуть своё» — не в шапке, а в доке у таббара; чип уведомлений убран (непросмотренный готовый отчёт — точка на «Мои посты»).
-- Баланс: `profiles.balance` ↔ `session.balance`. Экономика: `REVIEW_REWARD = 10`, `SUBMIT_COST = 30` ([`wallet.js`](../../api/wallet.js) / `wallet.mdc`). Клик по чипу → explainer «Игровая валюта» (`homeBalance*`, Figma `496:4403`): фото + карточка «Уточки» из [`assets/home/modal/`](../../assets/home/modal/) (`currency-duck.jpg`, `balance-card-ducks.svg`), CTA «Ясн» → закрыть.
+- Баланс: `profiles.balance` ↔ `session.balance`. Экономика: `REVIEW_REWARD = 10`, `SUBMIT_COST = 30` ([`wallet.js`](../../api/wallet.js) / `wallet.mdc`). Клик по чипу → explainer «Игровая валюта» (`homeBalance*`, Figma `496:4403`): фото + карточка «Уточки» из [`assets/home/modal/`](../../assets/home/modal/) (`currency-duck.jpg`, `balance-card-ducks.svg`), secondary CTA «Ясн» → закрыть.
 - Подача — RPC `submit_portfolio` (spend 30); legacy `spend_submit_cost`; награда за ревью (+10) — в `handle_review_inserted`.
 - CTA «Закинуть своё» без монет → `createAppModal` «Монет маловато»; notices (no slots / already reviewed) — тот же `noticeModal`.
 - Клик по аватару профиля → `account-menu` из Figma `467:1320`, раскрывающийся влево от правого края аватара с отступом 16px вниз (без выхода за viewport).
