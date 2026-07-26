@@ -91,10 +91,10 @@ function createReviewedCheckIcon() {
   if (!(svg instanceof SVGElement)) {
     throw new Error("reviewed-check.svg must be a root <svg>");
   }
-  svg.classList.add("home-screen__preview-reviewed-badge-icon");
+  svg.classList.add("home-screen__preview-reviewed-chip-icon");
   svg.setAttribute("aria-hidden", "true");
-  svg.setAttribute("width", "18");
-  svg.setAttribute("height", "18");
+  svg.setAttribute("width", "24");
+  svg.setAttribute("height", "24");
   return svg;
 }
 
@@ -1631,16 +1631,16 @@ export function createHomeScreen({
       reviewed.className = "home-screen__preview-reviewed";
       reviewed.setAttribute("aria-hidden", "true");
 
-      const badge = document.createElement("span");
-      badge.className = "home-screen__preview-reviewed-badge";
-      badge.append(createReviewedCheckIcon());
+      const chip = document.createElement("span");
+      chip.className = "home-screen__preview-reviewed-chip";
 
       const label = document.createElement("p");
       label.className = "home-screen__preview-reviewed-label";
       label.setAttribute("data-i18n", "homeCardReviewedLabel");
       label.textContent = t.homeCardReviewedLabel ?? "";
 
-      reviewed.append(badge, label);
+      chip.append(createReviewedCheckIcon(), label);
+      reviewed.append(chip);
       preview.append(reviewed);
     }
 

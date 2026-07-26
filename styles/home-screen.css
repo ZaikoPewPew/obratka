@@ -718,29 +718,24 @@
   pointer-events: none;
   border-radius: inherit;
   background: var(--home-screen-reviewed-overlay-bg);
-  backdrop-filter: blur(var(--home-screen-reviewed-overlay-blur));
-  -webkit-backdrop-filter: blur(var(--home-screen-reviewed-overlay-blur));
 }
 
-.home-screen__preview-reviewed-badge {
-  position: absolute;
-  top: var(--home-screen-reviewed-badge-inset);
-  left: var(--home-screen-reviewed-badge-inset);
+.home-screen__preview-reviewed-chip {
   box-sizing: border-box;
-  display: grid;
-  place-items: center;
-  width: var(--home-screen-reviewed-badge-size);
-  height: var(--home-screen-reviewed-badge-size);
-  padding: var(--home-screen-reviewed-badge-padding);
-  border-radius: var(--home-screen-reviewed-badge-radius);
-  background: var(--home-screen-reviewed-badge-bg);
-  color: var(--home-screen-reviewed-badge-icon-color);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--home-screen-reviewed-chip-gap);
+  width: var(--home-screen-reviewed-chip-width);
+  height: var(--home-screen-reviewed-chip-height);
+  color: var(--home-screen-reviewed-chip-icon-color);
 }
 
-.home-screen__preview-reviewed-badge-icon {
+.home-screen__preview-reviewed-chip-icon {
   display: block;
-  width: var(--home-screen-reviewed-badge-icon-size);
-  height: var(--home-screen-reviewed-badge-icon-size);
+  flex-shrink: 0;
+  width: var(--home-screen-reviewed-chip-icon-size);
+  height: var(--home-screen-reviewed-chip-icon-size);
 }
 
 .home-screen__preview-reviewed-label {
