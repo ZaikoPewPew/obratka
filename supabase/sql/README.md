@@ -18,4 +18,17 @@
 
 Применять в SQL Editor Dashboard или через CLI. Порядок: `profiles` → `wallet` → `portfolios` → `review_claims` → `review_complaints` / `referrals`; при legacy — `subscribers_rls`.  
 Обзор — [`../README.md`](../README.md).  
-**Как банить юзеров:** [`../BAN.md`](../BAN.md).
+**Как банить юзеров:** [`../BAN.md`](../BAN.md).  
+**Кто какие RPC может звать:** [`../SECURITY.md`](../SECURITY.md).
+
+## Новая функция — не забыть revoke
+
+`PUBLIC` получает `EXECUTE` по умолчанию, а `anon` наследует его. Поэтому каждую новую функцию закрываем явно, иначе она сразу окажется в `/rest/v1/rpc/...` для незалогиненных:
+
+```sql
+revoke all on function public.my_rpc(uuid) from public;
+revoke all on function public.my_rpc(uuid) from anon;
+grant execute on function public.my_rpc(uuid) to authenticated;
+```
+
+Trigger-функции (`handle_new_user`, `handle_review_inserted`, `protect_*`) закрываем и от `authenticated`.

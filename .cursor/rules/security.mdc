@@ -22,11 +22,12 @@ alwaysApply: true
 ## RLS / SQL
 
 1. Новая таблица → сразу `enable row level security` + политики (не «потом»).
-2. Mutations claims / referrals / ban / tier — RPC `security definer` + `set search_path = public`, не прямой INSERT/UPDATE с клиента.
-3. Не `grant` лишнего на `anon`/`authenticated`; seed-таблицы без прямого SELECT.
-4. Клиент не пишет: `banned_at`, `ban_reason`, `tier`, `balance`, `reputation`; grade/role — только до `onboarding_done`.
-5. Баланс: `spend_submit_cost` RPC; награда за ревью — в `handle_review_inserted`; не `updateMyProfile({ balance })`.
-6. Не ослаблять лиги / claim-триггеры «для удобства UI».
+2. Новая security definer функция → сразу `revoke all ... from public` + `from anon`, потом `grant execute ... to authenticated` (`PUBLIC` даёт EXECUTE по умолчанию, `anon` его наследует). Матрица доступа — [`supabase/SECURITY.md`](../../supabase/SECURITY.md).
+3. Mutations claims / referrals / ban / tier — RPC `security definer` + `set search_path = public`, не прямой INSERT/UPDATE с клиента.
+4. Не `grant` лишнего на `anon`/`authenticated`; seed-таблицы без прямого SELECT.
+5. Клиент не пишет: `banned_at`, `ban_reason`, `tier`, `balance`, `reputation`; grade/role — только до `onboarding_done`.
+6. Баланс: `spend_submit_cost` RPC; награда за ревью — в `handle_review_inserted`; не `updateMyProfile({ balance })`.
+7. Не ослаблять лиги / claim-триггеры «для удобства UI».
 
 ## Клиент / сессия
 
@@ -38,4 +39,4 @@ alwaysApply: true
 
 - Не коммитить `.env`, `.env.local`; не предлагать `--no-verify` ради секретов.
 - Не вставлять секреты в чат / README / issues.
-- SQL / auth: [`supabase/README.md`](../../supabase/README.md), [`STRUCTURE.md`](../../STRUCTURE.md) § Секреты.
+- SQL / auth: [`supabase/README.md`](../../supabase/README.md), [`supabase/SECURITY.md`](../../supabase/SECURITY.md), [`STRUCTURE.md`](../../STRUCTURE.md) § Секреты.

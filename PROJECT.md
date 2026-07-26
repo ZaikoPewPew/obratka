@@ -103,8 +103,9 @@
 | `public.subscribers` | legacy waitlist API (`subscribers.js`), не entry UX |
 | Edge `telegram-auth` | проверка Telegram hash → сессия |
 
-SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabase/README.md).  
+SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabase/README.md).
 Бан / автобан по репутации: [`supabase/BAN.md`](supabase/BAN.md).
+Доступы к RPC, адвайзоры, отложенное до Pro: [`supabase/SECURITY.md`](supabase/SECURITY.md).
 
 ## Репутация и жалобы на листы
 

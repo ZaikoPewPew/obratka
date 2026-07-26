@@ -10,6 +10,7 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 | Путь | Роль |
 |------|------|
 | `BAN.md` | **Оператор:** как банить (Table Editor + SQL), шаблоны |
+| `SECURITY.md` | Матрица доступа к RPC, состояние адвайзоров, отложенное до Pro |
 | `sql/profiles.sql` | `public.profiles`, protect tier/ban/reputation/balance/grade, referral |
 | `sql/wallet.sql` | protect balance + RPC `spend_submit_cost` |
 | `sql/referrals.sql` | referral-код на профиль (лимит 2), seed `YTHWKPDWAK`, RPC validate/redeem |
@@ -25,6 +26,7 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 
 Подробнее по SQL: [`sql/README.md`](sql/README.md).  
 **Бан юзеров:** [`BAN.md`](BAN.md) ← начинать отсюда.  
+**Доступы / адвайзоры:** [`SECURITY.md`](SECURITY.md).  
 Telegram Edge: [`functions/telegram-auth/README.md`](functions/telegram-auth/README.md).
 
 ## Auth-провайдеры
