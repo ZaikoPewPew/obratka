@@ -54,7 +54,10 @@
   animation-delay: var(--home-screen-reveal-delay-body);
 }
 
-/* Док целиком: tabbar + «Закинуть своё»; без filter (glass). */
+/*
+ * Док: только translateY (opacity ломает backdrop-filter у glass tabbar).
+ * Track bg / blur / --on-dark остаются на .home-screen__tabbar.
+ */
 .home-screen--open .home-screen__tabbar-dock {
   animation-name: motion-reveal-dock;
   animation-delay: var(--home-screen-reveal-delay-tabbar);

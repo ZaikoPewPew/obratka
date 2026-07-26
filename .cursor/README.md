@@ -6,7 +6,7 @@
 
 | Файл | О чём |
 |------|--------|
-| `design-tokens.mdc` | Только `var(--…)` из `tokens.css`, Montserrat, motion |
+| `design-tokens.mdc` | Только `var(--…)` из `tokens.css`, Montserrat, motion (`motion-reveal-dock` / home glass) |
 | `i18n.mdc` | UI-строки только из `locales.json` (ru/en) |
 | `screens.mdc` | Экран = модуль, `go()`, paths, home (feedSeen / 3/3 / rating / legendary), handoff |
 | `brand-ui.mdc` | Visual variants, field errors, marks — не копипастить mesh |
@@ -27,7 +27,7 @@
 |-----|-----|
 | Токены | `styles/tokens.css` |
 | Локали | `content/locales.json`, `src/i18n.js` |
-| Motion | `--motion-*`, `entrance.css`, `motionTokens.js`, `brandScreenTransition.js` |
+| Motion | `--motion-*`, `entrance.css` (`motion-reveal` / `-scale` / `-topbar` / `-dock`), `motionTokens.js`, `brandScreenTransition.js` |
 | Field errors | `src/utils/FIELD_ERROR.md`, `fieldError.js`, `urlScreenField.js` |
 | Brand visual / variants | `src/components/brand-screen-visual/` |
 | Brand split-shell | `src/components/brand-screen-shell/` |
@@ -47,7 +47,7 @@
 | `/registration` | Email → `/registration/code` / Telegram / Google |
 | `/registration/code` | 6 ячеек OTP |
 | `/onboarding` | Онбординг → `profiles` |
-| `/home` | Hub: SWR feed/mine/rating + intro до claim + mine report gate + Активные/Завершенные + feedSeen / 3/3 + «Топы в сети» + tabbar-dock |
+| `/home` | Hub: SWR feed/mine/rating + intro до claim + mine report gate + Активные/Завершенные + feedSeen / 3/3 + «Топы в сети» + tabbar-dock (entrance cascade + glass/`--on-dark`) |
 | `/settings` | Заглушка настроек (из account-menu) |
 | `/portfolio` | Подача URL; back-chip «На главную»; done через `setVariant("done")` |
 | `/review` | iframe + таймер 45 s + **rec** (заметки; нужен claim); в квизе — микрофон в поле совета |
@@ -68,7 +68,7 @@
 
 Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `legendary-online-panel`, `contact-fab`, `tabs-panel`, `account-menu`, `settings-screen`, `success-screen`, `ban-screen`, `report-screen`.
 
-**Home:** вкладки feed/mine/rating (топ-50 `listRatingTop`, кэш `homeListCache`); query через `homeRoute` (`?tab=mine&filter=completed`, Back/Forward без remount); SWR memory + `obratka.homeLists.<userId>`; silent slot patch; feed sort `sortFeedForSlotClosure`; `reviewedByMe` только после submit → disabled + оверлей; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); фильтр Активные/Завершенные (`tabs-panel`; 3/3 → Завершенные); на «Мои на ревью» — free-slot до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / `homePendingLimit*`); точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`; гаснет при открытии feed); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`; гаснет при открытии «Завершенные»); fixed-чип «Топы в сети» (`legendary-online-panel`); FAB «быстрая связь» (`contact-fab`); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) + `--on-dark` через `backdropLuminance`. Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache` + `clearMineReadySeen` + `clearFeedSeen`.
+**Home:** вкладки feed/mine/rating (топ-50 `listRatingTop`, кэш `homeListCache`); query через `homeRoute` (`?tab=mine&filter=completed`, Back/Forward без remount); SWR memory + `obratka.homeLists.<userId>`; silent slot patch; feed sort `sortFeedForSlotClosure`; `reviewedByMe` только после submit → disabled + оверлей; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); фильтр Активные/Завершенные (`tabs-panel`; 3/3 → Завершенные); на «Мои на ревью» — free-slot до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / `homePendingLimit*`); точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`; гаснет при открытии feed); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`; гаснет при открытии «Завершенные»); fixed-чип «Топы в сети» (`legendary-online-panel`); FAB «быстрая связь» (`contact-fab`); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) + `--on-dark` через `backdropLuminance`; на `open`/reload — entrance cascade `--home-screen-reveal-delay-*` (topbar → body → dock `motion-reveal-dock` **без** opacity на предке glass → fab). Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache` + `clearMineReadySeen` + `clearFeedSeen`.
 **Url-screen:** чип `.url-screen__back` (`urlScreenBack*`) → home; на done скрыт.  
 Подробно: [`home-screen/README.md`](../src/components/home-screen/README.md), [`url-screen/README.md`](../src/components/url-screen/README.md).
 

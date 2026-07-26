@@ -129,7 +129,7 @@ CTA «Закинуть своё» (кнопка в доке у таббара) �
 Клиент-зеркало: [`src/api/leagues.js`](../../api/leagues.js). Сервер: [`supabase/sql/portfolios.sql`](../../../supabase/sql/portfolios.sql) + [`review_claims.sql`](../../../supabase/sql/review_claims.sql) (`can_review_portfolio`, claim-слоты, RLS).
 
 Лента по центру экрана (`--home-screen-body-padding-top` = 16px сверху); снизу запас под таббар (`--home-screen-body-padding-bottom`).  
-При `open` / reload cascade сверху вниз (`--home-screen-reveal-delay-*`): topbar (`motion-reveal-topbar`, без `filter`) → body (`motion-reveal`) → tabbar-dock (`motion-reveal-dock`, без `filter`, с `translateX(-50%)`) → contact-fab. Hide/show дока по скроллу не трогает entrance.
+При `open` / reload cascade сверху вниз (`--home-screen-reveal-delay-*`): topbar (`motion-reveal-topbar`, без `filter`) → body (`motion-reveal`) → tabbar-dock (`motion-reveal-dock`: только `translateY`, **без** `opacity` — иначе у glass tabbar пропадает `backdrop-filter`) → contact-fab. Track / blur / `--on-dark` на самом `.home-screen__tabbar`. Hide/show дока по скроллу не трогает entrance.
 
 Рейтинг слева (топ по валюте) — компонент [`rating/`](../rating/), пока **не монтируется**.
 
@@ -213,12 +213,16 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, translucent track / on-dark track+label, motion hide/thumb/label/contrast) + `--home-screen-tabbar-dock-gap` / `--home-screen-tabbar-submit-*` (кнопка 56×56, r16, Google blue, hover/active через color-mix) + `--home-screen-tabbar-tab-dot-*` (точка 6px, offset 8px, Google red). Точка на сегменте «Мои завершенные»: `--tabs-panel-tab-dot-*` (7px, right 22px).
 
+Glass track: `background` + `backdrop-filter: blur(var(--home-screen-tabbar-blur))` на **`.home-screen__tabbar`** (не на dock). Свап темы: `backdropLuminance` → `home-screen__tabbar--on-dark` (track / label). Не анимировать `opacity` на предке dock — иначе blur пропадает.
+
+Entrance на `--open`: `--home-screen-reveal-delay-topbar` / `-body` / `-tabbar` / `-fab` → `motion-reveal-topbar` / `motion-reveal` / `motion-reveal-dock` / `motion-reveal-topbar`. `motion-reveal-dock` = только `translateX(-50%) translateY(…)`.
+
 Токены intro-модалки: `--home-screen-review-intro-indent` / `--home-screen-review-intro-step-gap`.
 
 Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeEmptyMineActive`, `homeEmptyMineCompleted`, `homeMineSlotFree`, `homeMineSlotFreeAria`, `homePendingLimit*`, `homeTabFeed`, `homeTabMine`, `homeTabRating`, `homeRatingEmpty`, `homeRatingListAria`, `homeRatingNameFallback`, `homeRatingPlaceAria`, `homeRatingBalanceAria`, `homeTabsAria`, `homeMineFilterActive`, `homeMineFilterCompleted`, `homeMineFilterAria`, `homeAddPortfolio`, `homeBalance*`, `homeTabMineReadyAria`, `homeTabFeedNewAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeContactFab*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `gradeUndefined`, `homePlatformWebLetter`, `homePlatformSite`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`.
 
 `homeCardOwnTitle` / `homeCardOwnAria` в locales — legacy (в UI не используются; own-копирайт = `homeCardReport*` / `Pending*`).
 
-`prefers-reduced-motion: reduce` — hide/thumb/label transitions ≈ мгновенные.
+`prefers-reduced-motion: reduce` — hide/thumb/label transitions ≈ мгновенные; entrance-анимации topbar/body/dock/fab отключены (dock остаётся `translateX(-50%)`).
 
 См. [`SCREENS.md`](../../../SCREENS.md), [`src/api/README.md`](../../api/README.md).

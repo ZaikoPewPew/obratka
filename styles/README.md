@@ -46,13 +46,14 @@
 | `--home-screen-*` | topbar / feed / avatar / locked-modal |
 | `--home-screen-review-intro-*` | шаги intro-модалки (`indent` / `step-gap`) |
 | `--home-screen-tabbar-*` | glass track (gray-900 10% / white on-dark 20% / blur 20), hide/thumb/label/contrast; dock-gap + submit (56×56 Google blue) + tab-dot (6px Google red) |
-| `--home-screen-reveal-delay-*` | entrance stagger на `/home` (topbar → body → dock → fab) |
+| `--home-screen-reveal-delay-*` | entrance stagger на `/home` (topbar → body → dock → fab); dock = `motion-reveal-dock` **без** opacity (glass `backdrop-filter`) |
 | `--tabs-panel-*` | сегмент Активные/Завершенные (track / tab / thumb / tab-dot) |
 | `--app-modal-*` | универсальная модалка (Figma Modal) |
 
 Handoff без анимации visual: класс `.url-screen--handoff` + `brandScreenTransition.js`.
 
 CSS: `animation-name: motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock`.  
+`motion-reveal-dock` — slide-up с `translateX(-50%)`, без opacity (иначе у `.home-screen__tabbar` пропадает blur).  
 JS: `src/utils/motionTokens.js`.  
 Field errors: [`src/utils/FIELD_ERROR.md`](../src/utils/FIELD_ERROR.md).  
 Visual variants: [`brand-screen-visual`](../src/components/brand-screen-visual/README.md).

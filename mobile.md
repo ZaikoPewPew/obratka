@@ -18,7 +18,7 @@
 | `/registration` | email → `/registration/code` (OTP + cooldown resend / назад); Telegram; Google (редирект) |
 | `/registration/code` | 6 ячеек; cooldown «Повторно через N с»; ошибки identity / rate-limit |
 | `/onboarding` | шаги, валидация, запись в `profiles` |
-| `/home` | feed/mine/rating (топ-50 `listRatingTop`), query + Back/Forward, лента SWR без skeleton на hit, tabbar-dock (3 tabs + submit) `--on-dark`, intro до claim, отправленный отчёт disabled, фильтр Активные/Завершенные, free-slot / pending-limit, mine gate / report, точки feedSeen + 3/3, баланс / репутация / invite; fixed «Топы в сети» слева снизу; FAB «быстрая связь» |
+| `/home` | feed/mine/rating (топ-50 `listRatingTop`), query + Back/Forward, лента SWR без skeleton на hit, tabbar-dock (3 tabs + submit) glass blur + `--on-dark`, entrance cascade на open/reload, intro до claim, отправленный отчёт disabled, фильтр Активные/Завершенные, free-slot / pending-limit, mine gate / report, точки feedSeen + 3/3, баланс / репутация / invite; fixed «Топы в сети» слева снизу; FAB «быстрая связь» |
 | `/settings` | заглушка из account-menu; «На главную» |
 | `/portfolio` | ввод URL, чип «На главную» (скрыт на done), нехватка баланса, done |
 | `/review` | iframe / external, таймер 45 s, чип rec (заметки), выход |

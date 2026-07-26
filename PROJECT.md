@@ -18,7 +18,7 @@
 | Home: точка «новый кейс» на «На ревью» | wired (`feedSeen.js` + `listFeedPortfolioIds`) |
 | Home: «Топы в сети» (fixed-чип) | wired (`legendary-online-panel` + `legendary_presence`) |
 | Home: free-slot «Мои» + max 1 pending | wired (`MAX_MINE_PENDING`, `submit_portfolio`) |
-| Home tabbar dock: glass + «Закинуть своё» справа | wired (`tabbar-dock`, `--on-dark`) |
+| Home tabbar dock: glass + «Закинуть своё» справа | wired (`tabbar-dock`, `--on-dark`, entrance `motion-reveal-dock`) |
 | Review claim / heartbeat / release | wired (награда только после submit) |
 | Review iframe + таймер 45 s + **надиктовка** (rec на `/review` + микрофон в поле совета) + квиз | wired |
 | Подача URL + back-chip + done на url-screen | wired |
@@ -159,7 +159,7 @@ Senior → Junior нельзя. Grade обязателен в онбординг
 | Brand split (referral / auth / auth-code / onboarding / url) | `.url-screen*` + [`brand-screen-visual`](src/components/brand-screen-visual/README.md) + [`brand-screen-shell`](src/components/brand-screen-shell/README.md); на `/portfolio` — back-chip top-left |
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
-| Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `contact-fab`; feed/mine/rating (`listRatingTop`); URL-query; лента SWR; Активные/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` |
+| Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `contact-fab`; feed/mine/rating (`listRatingTop`); URL-query; лента SWR; Активные/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` / entrance cascade |
 | Review | `index.html` `.iframe-shell` + таймер + чип **rec** (заметки → `answers.dictation`) в `main.js` |
 | Quiz | `review-screen` + `review-panel` (микрофон в поле «Главный совет» → `advice`) |
 | Success | `success-screen` (`/done`) |
@@ -175,7 +175,7 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 
 - Токены: `styles/tokens.css` (правило `.cursor/rules/design-tokens.mdc`).  
   В компонентах только `var(--…)`, шрифт Montserrat.
-- Motion: `--motion-*` (в т.ч. `--motion-field-error-*`, `--app-modal-*`), `entrance.css`, `src/utils/motionTokens.js`.
+- Motion: `--motion-*` (в т.ч. `--motion-field-error-*`, `--app-modal-*`), `entrance.css` (`motion-reveal` / `-scale` / `-topbar` / `-dock`), `src/utils/motionTokens.js`. Home: `--home-screen-reveal-delay-*` (cascade на `--open`; dock без opacity ради glass blur).
 - Field errors: [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md).
 - Brand visual: [`brand-screen-visual`](src/components/brand-screen-visual/README.md).
 - App modal: [`app-modal`](src/components/app-modal/README.md).

@@ -28,9 +28,11 @@ alwaysApply: true
 - Recording indicator: `--color-recording` (алиас на `--palette-google-red`); пульс — `--motion-recording-blink-*` + `motion-recording-blink` в `entrance.css`.
 - Ban: `--shell-ban-mesh-*`, `--ban-screen-*`.
 - Home tabbar: `--home-screen-tabbar-*` (hide / thumb / contrast / glass track).
-  - Светлый фон: `--home-screen-tabbar-track-bg` = gray-900 **10%** + `--home-screen-tabbar-blur`; неактивный `--home-screen-tabbar-tab-color`.
+  - Светлый фон: `--home-screen-tabbar-track-bg` = gray-900 **10%** + `--home-screen-tabbar-blur` (20); неактивный `--home-screen-tabbar-tab-color`.
   - Тёмный (`--on-dark`): `--home-screen-tabbar-track-bg-on-dark` = white **20%**; неактивный `--home-screen-tabbar-tab-color-on-dark`.
-  - Сэмплинг: `src/utils/backdropLuminance.js` → класс `home-screen__tabbar--on-dark`.
+  - Сэмплинг: `src/utils/backdropLuminance.js` → класс `home-screen__tabbar--on-dark` (не ломать при entrance).
+  - Glass: `backdrop-filter` / track-bg живут на `.home-screen__tabbar`, **не** на dock.
+- Home entrance: `--home-screen-reveal-delay-*` (topbar → body → dock → fab).
 - Tabs panel (Активные/Завершенные на «Мои»): `--tabs-panel-*` (`styles/tabs-panel.css`, [`tabs-panel/README.md`](../../src/components/tabs-panel/README.md)); не хардкодить цвета/размеры сегмента.
 - Intro-модалка home: `--home-screen-review-intro-indent` / `--home-screen-review-intro-step-gap` (не хардкодить gap/indent в CSS).
 - Auth OTP: `--auth-code-resend-cooldown`.
@@ -41,8 +43,10 @@ alwaysApply: true
 
 `--motion-*`, `--ease-reveal` в `tokens.css`; keyframes в `styles/entrance.css`.
 
-- CSS: `motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` (не дублировать keyframes).
-- Экранные задержки — алиасы (`--url-screen-reveal-delay-*` → `--motion-delay-*`).
+- CSS: `motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock` (не дублировать keyframes).
+- `motion-reveal-topbar` — без `filter` (прозрачные хедеры).
+- `motion-reveal-dock` — только `translateX(-50%)` + `translateY`; **без** `opacity` (иначе у glass tabbar пропадает `backdrop-filter`).
+- Экранные задержки — алиасы (`--url-screen-reveal-delay-*`, `--home-screen-reveal-delay-*` → `--motion-delay-*`).
 - Field error: `--motion-field-error-*`, `--motion-field-error-visual-*` + `--url-screen-error-mesh-*`.
 - App modal open/close: `--app-modal-backdrop-*` / `--app-modal-dialog-*` (алиасы на `--motion-screen-*` / `--motion-reveal-*`).
 - JS (WAAPI / close): `src/utils/motionTokens.js`, без хардкода ms/px/easing.

@@ -21,7 +21,7 @@
 | `reviewReport.js` | сводка квиза → тексты PDF (+ опционально `dictation`) |
 | `shareReviewPdf.js` | печать PDF-отчёта (1 ревьюер = 1 страница; `onComplete`) |
 | `referralCode.js` | нормализация referral-кода / URL |
-| `backdropLuminance.js` | яркость фона под элементом (home tabbar → `--on-dark`) |
+| `backdropLuminance.js` | яркость фона под элементом (home tabbar → `--on-dark`; не ломать glass blur / entrance dock) |
 | `homeRoute.js` | parse/build/canonical query для `/home`: `feed` / `mine` / `rating` и фильтр mine |
 | `homeListCache.js` | SWR-кэш ленты home (`feed`/`mine`/`rating`, memory + `sessionStorage` `obratka.homeLists.<userId>`); `clearHomeListCache` на logout |
 | `feedSeen.js` | seen id кейсов ленты для точки на «На ревью» (`localStorage` `obratka.feedSeen.<userId>`); открытие feed гасит; seed baseline; `clearFeedSeen` на logout |
@@ -38,6 +38,9 @@
 Кратко: `setUrlScreenFieldInvalid` / `setUrlScreenOtpInvalid` + `createBrandScreenVisual().setVariant("invalid")`.
 
 ## Motion helpers (`motionTokens.js`)
+
+CSS keyframes (SoT): `styles/entrance.css` — `motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock` / `motion-recording-blink`.  
+Home dock entrance: только transform (`motion-reveal-dock`); delays — `--home-screen-reveal-delay-*`.
 
 | Функция | Токены |
 |---------|--------|

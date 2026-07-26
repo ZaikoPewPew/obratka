@@ -22,7 +22,7 @@ referral → auth → authCode → onboarding → home
 | 2 | `auth-screen` | `/registration` | Email → OTP screen / Telegram / Google |
 | 2b | `auth-code-screen` | `/registration/code` | 6 ячеек кода из письма |
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |
-| 4 | `home-screen` | `/home` + query | Хаб: feed/mine/rating; SWR + intro до claim + mine report gate + tabbar-dock; query хранит активный вид |
+| 4 | `home-screen` | `/home` + query | Хаб: feed/mine/rating; SWR + intro до claim + mine report gate + tabbar-dock (entrance / glass / `--on-dark`); query хранит активный вид |
 | 4a | `settings-screen` | `/settings` | Настройки аккаунта (пока заглушка) |
 | 5a | iframe-shell | `/review` | Ревью: iframe + таймер **45 s** + чип **rec** (надиктовка → `answers.dictation`) |
 | 5b | `url-screen` | `/portfolio` | Подача URL (баланс); чип «На главную»; done на том же экране |
@@ -84,7 +84,7 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 
 Handoff соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
-`home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки feed/mine/rating (топ-50 `listRatingTop`); SWR `homeListCache`; fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB «быстрая связь» (`contact-fab`, Telegram); intro до claim (`homeReviewIntro*`); `reviewedByMe` после submit → disabled + оверлей; mine report gate (`homeMineNotReady*`); фильтр Активные/Завершенные (`tabs-panel`); free-slot «Мои на ревью» до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / `homePendingLimit*`); точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`).
+`home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки feed/mine/rating (топ-50 `listRatingTop`); SWR `homeListCache`; fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB «быстрая связь» (`contact-fab`, Telegram); intro до claim (`homeReviewIntro*`); `reviewedByMe` после submit → disabled + оверлей; mine report gate (`homeMineNotReady*`); фильтр Активные/Завершенные (`tabs-panel`); free-slot «Мои на ревью» до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / `homePendingLimit*`); точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`); entrance cascade на `--open` (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
 `account-menu` — поповер под аватаром; identity read-only; settings / invite / contacts / sign out.  
 `settings-screen` — side-route `/settings` (заглушка).
 `url-screen` — split; чип «На главную» (`.url-screen__back` / `urlScreenBack*`, скрыт на done); при URL справа заглушка «Портфолио»; submit → done на том же экране (`setVariant("done")`).  
@@ -191,7 +191,7 @@ Shared (не экраны флоу):
 | `createAuthScreen` | `/registration` | UI + Email → authCode / Telegram / Google (shell) |
 | `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` (shell) |
 | `createOnboardingScreen` | `/onboarding` | UI → profiles (shell) |
-| `createHomeScreen` | `/home` + query | UI (feed/mine/rating топ-50 + SWR + intro + mine gate + Активные/Завершенные + free-slot + feedSeen/3/3 + «Топы в сети» + contact-fab + tabbar-dock) |
+| `createHomeScreen` | `/home` + query | UI (feed/mine/rating топ-50 + SWR + intro + mine gate + Активные/Завершенные + free-slot + feedSeen/3/3 + «Топы в сети» + contact-fab + tabbar-dock + entrance cascade) |
 | `createSettingsScreen` | `/settings` | UI (заглушка настроек) |
 | `createUrlScreen` | `/portfolio` | UI (back-chip → home; submit + done via `setVariant`; shell) |
 | iframe-shell + timer + rec | `/review` | UI (заметки → `answers.dictation`) |
@@ -208,12 +208,13 @@ go("auth", { handoff: true }); // referral → auth: visual статичен
 
 ## Стили / motion
 
-Токены: `styles/tokens.css`. Reveal: `--motion-*`, keyframes в `entrance.css` (в т.ч. `motion-reveal-topbar`), JS `motionTokens.js`.  
+Токены: `styles/tokens.css`. Reveal: `--motion-*`, keyframes в `entrance.css` (в т.ч. `motion-reveal-topbar`, `motion-reveal-dock`), JS `motionTokens.js`.  
 Field error: `--motion-field-error-*`, `--motion-field-error-visual-*`.  
 Auth: `--auth-screen-*`, `--auth-code-*` (в т.ч. `--auth-code-resend-cooldown`).  
 App modal: `--app-modal-*` + `styles/app-modal.css` ([`app-modal/README.md`](src/components/app-modal/README.md)).  
 Tabs panel: `--tabs-panel-*` + `styles/tabs-panel.css` ([`tabs-panel/README.md`](src/components/tabs-panel/README.md)).  
 Home tabbar-dock: `--home-screen-tabbar-*` + `--home-screen-tabbar-dock-gap` / `--home-screen-tabbar-submit-*` (translucent track / on-dark / blur / contrast; кнопка «Закинуть своё» 56×56 Google blue).  
+Home entrance: `--home-screen-reveal-delay-*` + `motion-reveal-dock` (только translate; **без** opacity на dock — иначе ломается glass `backdrop-filter` у `.home-screen__tabbar`).  
 Правило: `.cursor/rules/design-tokens.mdc`.
 
 ## i18n
@@ -249,7 +250,7 @@ Home tabbar-dock: `--home-screen-tabbar-*` + `--home-screen-tabbar-dock-gap` / `
 - [`STRUCTURE.md`](STRUCTURE.md)
 - [`PROJECT.md`](PROJECT.md)
 - [`src/app/README.md`](src/app/README.md)
-- [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — feed/mine/rating, URL-query, SWR, intro до claim, mine gate, feedSeen/3/3, «Топы в сети», contact FAB, tabbar-dock
+- [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — feed/mine/rating, URL-query, SWR, intro до claim, mine gate, feedSeen/3/3, «Топы в сети», contact FAB, tabbar-dock, entrance cascade / glass / `--on-dark`
 - [`src/components/legendary-online-panel/README.md`](src/components/legendary-online-panel/README.md) — fixed-чип «Топы в сети»
 - [`src/components/contact-fab/README.md`](src/components/contact-fab/README.md) — fixed FAB Telegram «быстрая связь»
 - [`src/api/rating.js`](src/api/rating.js) — `listRatingTop` (топ-50)

@@ -610,7 +610,7 @@
   --home-screen-balance-explainer-card-body-size: var(--font-size-base);
   --home-screen-balance-explainer-card-body-weight: var(--font-weight-regular);
   --home-screen-balance-explainer-card-body-line: var(--line-height-snug);
-  --home-screen-balance-explainer-card-body-color: var(--color-text);
+  --home-screen-balance-explainer-card-body-color: var(--color-text-muted);
   --home-screen-balance-explainer-card-deco-width: 66px;
   --home-screen-balance-explainer-card-deco-height: 73px;
   --home-screen-balance-explainer-card-deco-right: 20px;

@@ -8,6 +8,7 @@ Fixed-кнопка 56×56 (Figma `478:1814`) в правом нижнем угл
 - Отступы: `--contact-fab-offset` = 16px справа и снизу.
 - Тултип `homeContactFabTooltip` («Для быстрой связи») на hover / focus-visible.
 - Не прячется вместе с tabbar-dock.
+- На `home-screen--open` — entrance `motion-reveal-topbar` с delay `--home-screen-reveal-delay-fab` (когда FAB снова в DOM).
 
 ## API
 
