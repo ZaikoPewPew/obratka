@@ -163,30 +163,6 @@ function createAnonymousReviewerIcon() {
 }
 
 /**
- * Hover-glow обводка карточки: пишет в CSS-переменные угол курсора
- * относительно центра и близость к краю (0–100). Само свечение — CSS
- * (`.home-screen__card::before`), виден только на hover.
- *
- * @param {HTMLElement} card
- * @param {PointerEvent} event
- */
-function syncCardGlow(card, event) {
-  const rect = card.getBoundingClientRect();
-  if (!rect.width || !rect.height) return;
-  const cx = rect.width / 2;
-  const cy = rect.height / 2;
-  const dx = event.clientX - rect.left - cx;
-  const dy = event.clientY - rect.top - cy;
-  const kx = dx === 0 ? Infinity : cx / Math.abs(dx);
-  const ky = dy === 0 ? Infinity : cy / Math.abs(dy);
-  const edge = Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
-  let angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
-  if (angle < 0) angle += 360;
-  card.style.setProperty("--home-screen-card-glow-edge", (edge * 100).toFixed(2));
-  card.style.setProperty("--home-screen-card-glow-angle", `${angle.toFixed(2)}deg`);
-}
-
-/**
  * @param {HTMLImageElement} img
  * @param {string[]} candidates
  */
@@ -1691,20 +1667,6 @@ export function createHomeScreen({
     root.hidden = true;
     return Promise.resolve();
   }
-
-  list.addEventListener("pointermove", (event) => {
-    const card =
-      event.target instanceof Element
-        ? event.target.closest(".home-screen__card")
-        : null;
-    if (
-      !(card instanceof HTMLElement) ||
-      card.classList.contains("home-screen__card--skeleton")
-    ) {
-      return;
-    }
-    syncCardGlow(card, event);
-  });
 
   body.addEventListener(
     "scroll",

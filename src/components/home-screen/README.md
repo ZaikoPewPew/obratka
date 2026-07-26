@@ -105,8 +105,6 @@ SWR: при `open` / смене таба / F5 — если есть кэш вк�
 
 После skeleton данные с `motion-reveal` stagger; после тихого refetch при тех же id — только патч reviewer-слотов (без пересборки DOM / thum.io); новые карточки — full rebuild + reveal только для новых id.
 
-Hover-glow обводка: `.home-screen__card::before` под контентом (`z-index: -1` + `isolation` на карточке) — градиентная рамка (`--home-screen-card-glow-*`): внутренность закрыта слоем `--home-screen-card-surface` (padding-box), градиенты видны только в прозрачном border, conic-маска режет кольцо до конуса вокруг угла курсора. Проявляется только на hover (`@media (hover: hover)`) и чем ближе курсор к краю. Угол и близость к краю пишет делегированный `pointermove` на `.home-screen__list` (`syncCardGlow`); skeleton исключён, touch не затрагивается.
-
 Клик по чужой карточке → intro-модалка «Как проходит ревью» (`createAppModal`, шаги `homeReviewIntroStep1…4`, таймер из [`src/config/review.js`](../../config/review.js)) → CTA «Проревьюить» → `onOpenPortfolio` → `claimPortfolioReview` → `/review` (таймер + опц. надиктовка). «Не сейчас» / закрытие — без claim.  
 Своя (`isOwn`, вкладка «Мои») кликабельна всегда: собраны все ревью (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report` (листы + жалоба); иначе модалка `homeMineNotReady*` с прогрессом. Title / aria карточки — `homeCardReport*` либо `homeCardReportPending*`, пересинхронизируются при silent-патче слотов.  
 Уже отревьюенная карточка (`reviewedByMe`) intro не показывает — сразу notice из `main.js`.
