@@ -467,11 +467,13 @@
 .home-screen__badge--platform {
   margin-inline-end: var(--home-screen-badge-overlap);
   z-index: 0;
+  background: var(--home-screen-badge-platform-bg);
+  color: var(--home-screen-badge-platform-icon-color);
 }
 
 .home-screen__badge--web {
-  background: var(--color-accent);
-  color: var(--color-on-accent);
+  background: var(--home-screen-badge-platform-bg);
+  color: var(--home-screen-badge-platform-icon-color);
 }
 
 .home-screen__badge-letter {
@@ -516,8 +518,10 @@
 }
 
 .home-screen__badge--platform .home-screen__badge-img {
+  width: var(--home-screen-badge-platform-icon-size);
+  height: var(--home-screen-badge-platform-icon-size);
   object-fit: contain;
-  padding: var(--space-2);
+  filter: var(--home-screen-badge-platform-icon-filter);
 }
 
 .home-screen__card-text {

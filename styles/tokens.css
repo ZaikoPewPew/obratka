@@ -694,6 +694,11 @@
   --home-screen-badge-ring: 3px;
   --home-screen-badge-ring-color: var(--home-screen-card-bg);
   --home-screen-badge-web-font-size: var(--font-size-xs);
+  --home-screen-badge-platform-bg: var(--palette-gray-900);
+  --home-screen-badge-platform-icon-color: var(--palette-white);
+  --home-screen-badge-platform-icon-size: calc(var(--home-screen-badge-size) / 3);
+  /* Перекрашивает любой логотип (SVG / favicon) в сплошной белый силуэт. */
+  --home-screen-badge-platform-icon-filter: brightness(0) invert(1);
   --home-screen-meta-gap: 13px;
   --home-screen-meta-text-gap: var(--space-1);
   --home-screen-meta-font-size: var(--font-size-base);
