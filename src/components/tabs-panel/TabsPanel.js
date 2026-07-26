@@ -15,6 +15,7 @@
  *   getActive: () => string;
  *   setLabels: (labels: Record<string, string>) => void;
  *   setAriaLabel: (label: string) => void;
+ *   setTabDot: (id: string, visible: boolean) => void;
  *   syncThumb: (instant?: boolean) => void;
  * }}
  */
@@ -44,6 +45,10 @@ export function createTabsPanel({
 
   /** @type {Map<string, HTMLButtonElement>} */
   const buttons = new Map();
+  /** @type {Map<string, HTMLSpanElement>} */
+  const labels = new Map();
+  /** @type {Map<string, HTMLSpanElement>} */
+  const dots = new Map();
 
   for (const tab of tabDefs) {
     const btn = document.createElement("button");
@@ -51,13 +56,25 @@ export function createTabsPanel({
     btn.className = "tabs-panel__tab";
     btn.setAttribute("role", "tab");
     btn.dataset.tab = tab.id;
-    btn.textContent = typeof tab.label === "string" ? tab.label : "";
+
+    const label = document.createElement("span");
+    label.className = "tabs-panel__tab-label";
+    label.textContent = typeof tab.label === "string" ? tab.label : "";
+
+    const dot = document.createElement("span");
+    dot.className = "tabs-panel__tab-dot";
+    dot.setAttribute("aria-hidden", "true");
+    dot.hidden = true;
+
+    btn.append(label, dot);
     btn.addEventListener("click", () => {
       if (btn.dataset.tab === currentId) return;
       setActive(tab.id);
       onChange?.(tab.id);
     });
     buttons.set(tab.id, btn);
+    labels.set(tab.id, label);
+    dots.set(tab.id, dot);
     root.append(btn);
   }
 
@@ -111,14 +128,14 @@ export function createTabsPanel({
   }
 
   /**
-   * @param {Record<string, string>} labels
+   * @param {Record<string, string>} nextLabels
    */
-  function setLabels(labels) {
-    if (!labels || typeof labels !== "object") return;
-    for (const [id, label] of Object.entries(labels)) {
-      const btn = buttons.get(id);
-      if (btn && typeof label === "string") {
-        btn.textContent = label;
+  function setLabels(nextLabels) {
+    if (!nextLabels || typeof nextLabels !== "object") return;
+    for (const [id, text] of Object.entries(nextLabels)) {
+      const label = labels.get(id);
+      if (label && typeof text === "string") {
+        label.textContent = text;
       }
     }
     scheduleThumbSync();
@@ -133,6 +150,17 @@ export function createTabsPanel({
       return;
     }
     root.removeAttribute("aria-label");
+  }
+
+  /**
+   * Красная точка-индикатор на табе (декоративная, aria-hidden).
+   * @param {string} id
+   * @param {boolean} visible
+   */
+  function setTabDot(id, visible) {
+    const dot = dots.get(id);
+    if (!dot) return;
+    dot.hidden = !visible;
   }
 
   if (typeof ResizeObserver === "function") {
@@ -157,6 +185,7 @@ export function createTabsPanel({
     getActive: () => currentId,
     setLabels,
     setAriaLabel,
+    setTabDot,
     syncThumb,
   };
 }

@@ -80,7 +80,7 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 
 Handoff соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
-`home-screen` — полноэкранный слой (absolute topbar поверх ленты); SWR `homeListCache`; intro до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*`); фильтр Активные/Архивные (`tabs-panel` + `reportOpenedIds`); точка на «Мои» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`).  
+`home-screen` — полноэкранный слой (absolute topbar поверх ленты); SWR `homeListCache`; intro до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*`); фильтр Активные/Завершенные (`tabs-panel`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`).  
 `account-menu` — поповер под аватаром; identity read-only; settings / invite / contacts / sign out.  
 `settings-screen` — side-route `/settings` (заглушка).
 `url-screen` — split; чип «На главную» (`.url-screen__back` / `urlScreenBack*`, скрыт на done); при URL справа заглушка «Портфолио»; submit → done на том же экране (`setVariant("done")`).  
@@ -102,7 +102,7 @@ src/components/
   brand-screen-shell/     ← каркас split + visual
   brand-screen-visual/    ← mesh + марка, variants
   app-modal/              ← универсальная модалка (слот + CTA)
-  tabs-panel/             ← сегмент Активные/Архивные (Figma tabspanel)
+  tabs-panel/             ← сегмент Активные/Завершенные (Figma tabspanel)
   referral-screen/
   auth-screen/
   auth-code-screen/
@@ -123,8 +123,7 @@ src/utils/
   brandScreenTransition.js / meshGradientWash.js / motionTokens.js
   backdropLuminance.js    ← яркость фона под tabbar → --on-dark
   homeListCache.js        ← SWR feed/mine (memory + sessionStorage)
-  mineReadySeen.js        ← seen id готовых отчётов → точка на «Мои»
-  reportOpenedIds.js      ← открытые /report → архив «Мои»
+  mineReadySeen.js        ← seen id готовых отчётов → точка на «Мои» / «Завершенные»
   reviewReport.js         ← answers → секции PDF (+ dictation)
 
 src/config/
@@ -170,7 +169,7 @@ Shared (не экраны флоу):
 | `createBrandScreenShell` | split form + visual |
 | `createBrandScreenVisual` | mesh + марка |
 | `createAppModal` | оверлей-диалог; слот `content` + primary/secondary; без `history` |
-| `createTabsPanel` | сегмент табов (Активные/Архивные на «Мои») |
+| `createTabsPanel` | сегмент табов (Активные/Завершенные на «Мои») |
 
 | Фабрика | Path | Статус |
 |---------|------|--------|
@@ -178,7 +177,7 @@ Shared (не экраны флоу):
 | `createAuthScreen` | `/registration` | UI + Email → authCode / Telegram / Google (shell) |
 | `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` (shell) |
 | `createOnboardingScreen` | `/onboarding` | UI → profiles (shell) |
-| `createHomeScreen` | `/home` | UI (hub + SWR + intro + mine gate + Активные/Архивные + seen-dot + `onOpenReport` + tabbar-dock) |
+| `createHomeScreen` | `/home` | UI (hub + SWR + intro + mine gate + Активные/Завершенные + seen-dot + `onOpenReport` + tabbar-dock) |
 | `createSettingsScreen` | `/settings` | UI (заглушка настроек) |
 | `createUrlScreen` | `/portfolio` | UI (back-chip → home; submit + done via `setVariant`; shell) |
 | iframe-shell + timer + rec | `/review` | UI (заметки → `answers.dictation`) |
@@ -205,7 +204,7 @@ Home tabbar-dock: `--home-screen-tabbar-*` + `--home-screen-tabbar-dock-gap` / `
 
 ## i18n
 
-Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineArchived` / `homeCardReport*` / `homeCardReportPending*` / `homeTabMineReadyAria` / `homeReputation*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*`, `modalCloseAria`, `url*` / `urlScreenBack*`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `reviewRec*` / `reviewAdviceRec*` / `report*` / `reportDictationTitle`, `frame*` / `controls*`).
+Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeCardReport*` / `homeCardReportPending*` / `homeTabMineReadyAria` / `homeReputation*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*`, `modalCloseAria`, `url*` / `urlScreenBack*`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `reviewRec*` / `reviewAdviceRec*` / `report*` / `reportDictationTitle`, `frame*` / `controls*`).
 Правило: `.cursor/rules/i18n.mdc`.
 
 Таймер `/review` и intro copy: `REVIEW_SESSION_SECONDS` в [`src/config/review.js`](src/config/review.js).
@@ -235,12 +234,11 @@ Home tabbar-dock: `--home-screen-tabbar-*` + `--home-screen-tabbar-dock-gap` / `
 - [`STRUCTURE.md`](STRUCTURE.md)
 - [`PROJECT.md`](PROJECT.md)
 - [`src/app/README.md`](src/app/README.md)
-- [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — лента SWR, intro до claim, mine gate, Активные/Архивные, seen-dot, tabbar-dock + submit, репутация
+- [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — лента SWR, intro до claim, mine gate, Активные/Завершенные, seen-dot, tabbar-dock + submit, репутация
 - [`src/components/url-screen/README.md`](src/components/url-screen/README.md) — back-chip + done
 - [`src/config/review.js`](src/config/review.js) — `REVIEW_SESSION_SECONDS`
 - [`src/utils/homeListCache.js`](src/utils/homeListCache.js) — кэш вкладок home
-- [`src/utils/mineReadySeen.js`](src/utils/mineReadySeen.js) — точка на «Мои»
-- [`src/utils/reportOpenedIds.js`](src/utils/reportOpenedIds.js) — открытые отчёты → архив «Мои»
+- [`src/utils/mineReadySeen.js`](src/utils/mineReadySeen.js) — seen 3/3 → точка на «Мои» / «Завершенные»
 - [`src/lib/dictation/README.md`](src/lib/dictation/README.md) — надиктовка: `/review` + поле совета в квизе
 - [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) — правый visual + variants
 - [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) — split-каркас

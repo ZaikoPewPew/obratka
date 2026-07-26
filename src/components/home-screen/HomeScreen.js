@@ -31,7 +31,6 @@ import {
   hasUnseenMineReady,
   markMineReadySeen,
 } from "../../utils/mineReadySeen.js";
-import { isReportOpened } from "../../utils/reportOpenedIds.js";
 import {
   getCachedHomeList,
   setCachedHomeList,
@@ -76,17 +75,20 @@ const SKELETON_CARD_COUNT = 5;
 const HOME_SLOTS_POLL_MS = 15_000;
 
 /**
- * Порог только для hide: show — при любом скролле вверх.
+ * Порог только для hide: show — при любом скролле вверх / у низа ленты.
  * Hide чуть с запасом, чтобы не дёргался от трекпада.
  */
 const TABBAR_HIDE_DELTA = 6;
+
+/** Допуск «у низа» (subpixel / rubber-band), чтобы док снова выехал. */
+const TABBAR_BOTTOM_EPS = 8;
 
 /**
  * @typedef {'feed' | 'mine'} HomeTabId
  */
 
 /**
- * @typedef {'active' | 'archived'} MineFilterId
+ * @typedef {'active' | 'completed'} MineFilterId
  */
 
 /**
@@ -158,6 +160,30 @@ function createAnonymousReviewerIcon() {
   }
   svg.append(body, head);
   return svg;
+}
+
+/**
+ * Hover-glow обводка карточки: пишет в CSS-переменные угол курсора
+ * относительно центра и близость к краю (0–100). Само свечение — CSS
+ * (`.home-screen__card::before`), виден только на hover.
+ *
+ * @param {HTMLElement} card
+ * @param {PointerEvent} event
+ */
+function syncCardGlow(card, event) {
+  const rect = card.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  const cx = rect.width / 2;
+  const cy = rect.height / 2;
+  const dx = event.clientX - rect.left - cx;
+  const dy = event.clientY - rect.top - cy;
+  const kx = dx === 0 ? Infinity : cx / Math.abs(dx);
+  const ky = dy === 0 ? Infinity : cy / Math.abs(dy);
+  const edge = Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
+  let angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
+  if (angle < 0) angle += 360;
+  card.style.setProperty("--home-screen-card-glow-edge", (edge * 100).toFixed(2));
+  card.style.setProperty("--home-screen-card-glow-angle", `${angle.toFixed(2)}deg`);
 }
 
 /**
@@ -321,17 +347,15 @@ function readyOwnCardIds(list) {
 }
 
 /**
- * Архив: все ревью собраны и автор хотя бы раз открывал `/report`.
+ * Завершённые: все ревью собраны (3/3).
  *
  * @param {HomePortfolioItem} item
- * @param {string | null | undefined} userId
  * @returns {boolean}
  */
-function isArchivedOwnItem(item, userId) {
+function isCompletedOwnItem(item) {
   const total = Math.max(1, Number(item?.targetReviews) || 1);
   const completed = Math.max(0, Number(item?.reviewsCount) || 0);
-  if (completed < total) return false;
-  return isReportOpened(userId, item?.id);
+  return completed >= total;
 }
 
 /**
@@ -489,7 +513,7 @@ export function createHomeScreen({
   const mineFilterPanel = createTabsPanel({
     tabs: [
       { id: "active", label: "" },
-      { id: "archived", label: "" },
+      { id: "completed", label: "" },
     ],
     activeId: "active",
     onChange: (id) => {
@@ -638,7 +662,7 @@ export function createHomeScreen({
    */
   let refreshEpoch = 0;
   let lastScrollTop = 0;
-  /** Непросмотренный готовый отчёт (3/3) → точка на вкладке «Мои». */
+  /** Непросмотренный готовый отчёт (3/3) → точки на «Мои» и «Завершённые». */
   let mineReady = false;
   let tabbarHidden = false;
   let tabbarOnDark = false;
@@ -724,8 +748,8 @@ export function createHomeScreen({
     );
     if (activeTab === "mine") {
       empty.textContent =
-        mineFilter === "archived"
-          ? (t.homeEmptyMineArchived ?? t.homeEmptyMine)
+        mineFilter === "completed"
+          ? (t.homeEmptyMineCompleted ?? t.homeEmptyMine)
           : (t.homeEmptyMineActive ?? t.homeEmptyMine);
     } else {
       empty.textContent = t.homeEmpty;
@@ -736,7 +760,7 @@ export function createHomeScreen({
     tabbar.setAttribute("aria-label", t.homeTabsAria);
     mineFilterPanel.setLabels({
       active: t.homeMineFilterActive ?? "",
-      archived: t.homeMineFilterArchived ?? "",
+      completed: t.homeMineFilterCompleted ?? "",
     });
     mineFilterPanel.setAriaLabel(t.homeMineFilterAria ?? "");
     syncMineFilterPanel();
@@ -1064,6 +1088,7 @@ export function createHomeScreen({
     if (mineReady === next) return;
     mineReady = next;
     mineTabDot.hidden = !next;
+    mineFilterPanel.setTabDot("completed", next);
     syncMineTabAria();
   }
 
@@ -1086,12 +1111,15 @@ export function createHomeScreen({
     mineFilterPanel.setActive(next);
     body.scrollTop = 0;
     lastScrollTop = 0;
+    if (next === "completed") {
+      acknowledgeMineReady(readyOwnCardIds(items));
+    }
     syncCopy();
     renderList();
   }
 
   /**
-   * На `mine` режет список по Активные/Архивные; на `feed` — как есть.
+   * На `mine` режет список по Активные/Завершённые; на `feed` — как есть.
    *
    * @param {HomePortfolioItem[]} listItems
    * @returns {HomePortfolioItem[]}
@@ -1099,10 +1127,9 @@ export function createHomeScreen({
   function visibleFor(listItems) {
     const source = Array.isArray(listItems) ? listItems : [];
     if (activeTab !== "mine") return source;
-    const userId = getSession()?.userId;
     return source.filter((item) => {
-      const archived = isArchivedOwnItem(item, userId);
-      return mineFilter === "archived" ? archived : !archived;
+      const completed = isCompletedOwnItem(item);
+      return mineFilter === "completed" ? completed : !completed;
     });
   }
 
@@ -1158,10 +1185,6 @@ export function createHomeScreen({
     body.scrollTop = 0;
     lastScrollTop = 0;
     syncCopy();
-    if (tab === "mine") {
-      // Визит раздела сразу гасит точку; id допишем в refreshMineReady.
-      setMineReady(false);
-    }
     if (showTabFromCache(tab)) {
       void refresh();
       return;
@@ -1498,14 +1521,15 @@ export function createHomeScreen({
     );
     items = /** @type {HomePortfolioItem[]} */ (cached);
     if (tab === "mine") {
-      acknowledgeMineReady(readyOwnCardIds(items));
+      syncMineReadyFromIds(readyOwnCardIds(items));
     }
     renderList();
     return true;
   }
 
   /**
-   * Визит «Мои»: текущие готовые id считаются просмотренными, точка гаснет.
+   * Открыли «Завершённые»: текущие готовые id считаются просмотренными,
+   * точки на «Мои» и на сегменте гаснут.
    *
    * @param {string[]} readyIds
    */
@@ -1514,10 +1538,25 @@ export function createHomeScreen({
     setMineReady(false);
   }
 
-  /** Точка на «Мои»: непросмотренный 3/3; на вкладке mine — acknowledge. */
+  /**
+   * Точки по unseen 3/3; если уже на «Завершённые» — сразу acknowledge.
+   *
+   * @param {string[]} readyIds
+   */
+  function syncMineReadyFromIds(readyIds) {
+    if (activeTab === "mine" && mineFilter === "completed") {
+      acknowledgeMineReady(readyIds);
+      return;
+    }
+    setMineReady(hasUnseenMineReady(getSession()?.userId, readyIds));
+  }
+
+  /** Точка на «Мои» / «Завершённые»: непросмотренный 3/3. */
   async function refreshMineReady(epoch, tab, mineItems) {
     if (tab === "mine") {
-      acknowledgeMineReady(readyOwnCardIds(mineItems));
+      if (epoch === refreshEpoch) {
+        syncMineReadyFromIds(readyOwnCardIds(mineItems));
+      }
       return;
     }
     const readyIds = await listReadyOwnReportIds();
@@ -1653,12 +1692,28 @@ export function createHomeScreen({
     return Promise.resolve();
   }
 
+  list.addEventListener("pointermove", (event) => {
+    const card =
+      event.target instanceof Element
+        ? event.target.closest(".home-screen__card")
+        : null;
+    if (
+      !(card instanceof HTMLElement) ||
+      card.classList.contains("home-screen__card--skeleton")
+    ) {
+      return;
+    }
+    syncCardGlow(card, event);
+  });
+
   body.addEventListener(
     "scroll",
     () => {
       const scrollTop = body.scrollTop;
       const delta = scrollTop - lastScrollTop;
-      if (scrollTop <= 0 || delta < 0) {
+      const atBottom =
+        body.scrollHeight - body.clientHeight - scrollTop <= TABBAR_BOTTOM_EPS;
+      if (scrollTop <= 0 || delta < 0 || atBottom) {
         showTabbar();
       } else if (delta > TABBAR_HIDE_DELTA) {
         setTabbarHidden(true);

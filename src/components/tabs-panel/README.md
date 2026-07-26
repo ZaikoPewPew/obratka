@@ -15,8 +15,11 @@ Shared UI: не экран флоу — не пишет `history`, не вызы
 | Active `#242426` + white | `--tabs-panel-tab-active-bg` / `--tabs-panel-tab-active-color` |
 | Inactive transparent + `#242426` | `--tabs-panel-tab-color` |
 | Montserrat 16 regular | `--font-size-base` / `--font-weight-regular` |
+| Dot 7×7, Google red, right 22px centered | `.tabs-panel__tab-dot` → `--tabs-panel-tab-dot-*` |
 
 В макете фон активного таба статичен; в коде — скользящий `.tabs-panel__thumb` (`transform` + `width`, `--tabs-panel-thumb-*`), у кнопок меняется только `color`.
+
+Подпись таба — в `.tabs-panel__tab-label`, чтобы `setLabels` не затирал точку.
 
 ## Файлы
 
@@ -36,23 +39,24 @@ import { createTabsPanel } from "../tabs-panel/TabsPanel.js";
 const panel = createTabsPanel({
   tabs: [
     { id: "active", label: "Активные" },
-    { id: "archived", label: "Архивные" },
+    { id: "completed", label: "Завершенные" },
   ],
   activeId: "active",
   ariaLabel: "Фильтр моих постов",
   onChange: (id) => {
-    /* id: "active" | "archived" */
+    /* id: "active" | "completed" */
   },
 });
 
-panel.setLabels({ active: "Active", archived: "Archived" });
+panel.setLabels({ active: "Active", completed: "Completed" });
 panel.setAriaLabel("My posts filter");
-panel.setActive("archived"); // с анимацией thumb
+panel.setActive("completed"); // с анимацией thumb
 panel.setActive("active", { instant: true }); // без анимации
+panel.setTabDot("completed", true); // красная точка справа
 panel.syncThumb(true); // после unhide / layout
 panel.getActive(); // "active"
 ```
 
 ## Где используется
 
-- [`home-screen`](../home-screen/README.md) — фильтр «Активные / Архивные» над списком вкладки «Мои посты».
+- [`home-screen`](../home-screen/README.md) — фильтр «Активные / Завершенные» над списком вкладки «Мои посты»; точка на `completed` при непросмотренном 3/3.

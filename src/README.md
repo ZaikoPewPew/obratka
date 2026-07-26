@@ -20,7 +20,7 @@
 | `app/` | routes, router, flow, login-session (`obratka.session`) |
 | `components/` | UI-экраны; brand: `brand-screen-visual`, `brand-screen-shell` |
 | `config/` | review session + contacts |
-| `utils/` | field errors, motion, handoff, mesh, homeListCache, mineReadySeen, reportOpenedIds, backdropLuminance, PDF — [`utils/README.md`](utils/README.md) |
+| `utils/` | field errors, motion, handoff, mesh, homeListCache, mineReadySeen, backdropLuminance, PDF — [`utils/README.md`](utils/README.md) |
 | `api/` | Auth, profiles, wallet, portfolios, referrals, reviewComplaints |
 | `assets/` | brand marks / morph — [`assets/README.md`](assets/README.md) |
 | `lib/` | supabase client + **dictation** |

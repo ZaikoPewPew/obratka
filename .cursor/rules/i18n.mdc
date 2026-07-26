@@ -28,7 +28,7 @@ alwaysApply: true
 |---------|---------|
 | `referral*` | invite gate |
 | `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict` | регистрация / OTP |
-| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineArchived` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeReputation*` / `homeAccount*` | home + notices / intro / mine gate / Активные·Архивные / seen-dot / слоты ревьюеров / репутация / меню профиля |
+| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeReputation*` / `homeAccount*` | home + notices / intro / mine gate / Активные·Завершенные / seen-dot / слоты ревьюеров / репутация / меню профиля |
 | `modalCloseAria` | общая модалка (`app-modal`) |
 | `url*` / `urlScreenBack*` | `/portfolio` (в т.ч. чип «На главную») |
 | `ban*` | `/banned` |

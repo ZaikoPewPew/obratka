@@ -24,7 +24,6 @@ import { completeOAuthFromUrl, signOut } from "./api/auth.js";
 import { submitPortfolio, clearSubmittedPortfolios, submitPortfolioReview, claimPortfolioReview, heartbeatPortfolioClaim, releasePortfolioClaim, portfolioRpcErrorCode } from "./api/portfolios.js";
 import { clearHomeListCache } from "./utils/homeListCache.js";
 import { clearMineReadySeen } from "./utils/mineReadySeen.js";
-import { clearReportOpened, markReportOpened } from "./utils/reportOpenedIds.js";
 import { fetchMyProfile, isProfileBanned, updateMyProfile } from "./api/profiles.js";
 import {
   redeemReferral,
@@ -256,7 +255,6 @@ async function exitAuthenticatedSession() {
   }
   clearHomeListCache(sessionUserId);
   clearMineReadySeen(sessionUserId);
-  clearReportOpened(sessionUserId);
   clearSession();
   clearSubmittedPortfolios();
   setPendingAuthEmail(null);
@@ -1183,7 +1181,6 @@ async function applyRoute(id, opts = {}) {
           ? new URLSearchParams(window.location.search).get("id")
           : null;
       const id = pendingReportPortfolioId || fromSearch || null;
-      markReportOpened(getSession()?.userId, id);
       reportScreen.open({
         portfolioId: id,
         portfolioName: pendingReportPortfolioName || null,

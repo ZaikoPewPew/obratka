@@ -32,7 +32,7 @@
 - **Порядок feed:** `sortFeedForSlotClosure` — open slot → ближе к 3/3 → FIFO; `reviewedByMe` / full вниз (не newest-first). См. home-screen README.
 - **Intro до claim:** клик по чужой карточке → `createAppModal` `homeReviewIntro*` (шаг 1 с `{seconds}` = `REVIEW_SESSION_SECONDS`) → CTA «Проревьюить» → claim → `/review`. «Не сейчас» / закрытие — без claim.
 - **Mine report gate:** `reviewsCount < targetReviews` → `homeMineNotReady*`; иначе `/report`. Own-карточки всегда `cursor: pointer` (не `not-allowed`).
-- **Фильтр «Мои»:** сегмент Активные / Архивные (`tabs-panel`); архив = 3/3 **и** хотя бы раз открывали `/report` (`reportOpenedIds`).
+- **Фильтр «Мои»:** сегмент Активные / Завершенные (`tabs-panel`); завершённые = 3/3 (`reviewsCount >= targetReviews`).
 - **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 45` (review shell + intro copy).
 - **Tabbar dock:** glass-таббар + кнопка «Закинуть своё» справа (56×56, Google blue, gap 8px); hide при скролле уезжает весь док. Светлый трек — gray-900 20% + blur 20; тёмный превью → `--on-dark` — white 20%.
 - **Чипы шапки:** репутация → баланс → аватар. Submit и уведомления из topbar убраны.
@@ -129,7 +129,7 @@ SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabas
 | Brand split (referral / auth / auth-code / onboarding / url) | `.url-screen*` + [`brand-screen-visual`](src/components/brand-screen-visual/README.md); цель — `brand-screen-shell`; на `/portfolio` — back-chip top-left |
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
-| Home | `home-screen` + `account-menu` + `tabs-panel`; лента SWR; Активные/Архивные; tabbar-dock (tabs + submit + точка 3/3) / `--on-dark`; чипы репутация + баланс |
+| Home | `home-screen` + `account-menu` + `tabs-panel`; лента SWR; Активные/Завершенные; tabbar-dock (tabs + submit + точка 3/3) / `--on-dark`; чипы репутация + баланс |
 | Review | `index.html` `.iframe-shell` + таймер + чип **rec** (заметки → `answers.dictation`) в `main.js` |
 | Quiz | `review-screen` + `review-panel` (микрофон в поле «Главный совет» → `advice`) |
 | Success | `success-screen` (`/done`) |
@@ -159,7 +159,7 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 - CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `success-screen`, `home-screen`, `tabs-panel`, `account-menu`, `settings-screen`, `ban-screen`, `report-screen`
 - Экраны: referral, auth, auth-code, onboarding, home, settings, url, review-shell (+ rec), quiz, success, report, ban
 - Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `account-menu`, `tabs-panel`
-- Home cache: `src/utils/homeListCache.js` + `mineReadySeen.js` + `reportOpenedIds.js` (сброс всех в `exitAuthenticatedSession`)
+- Home cache: `src/utils/homeListCache.js` + `mineReadySeen.js` (сброс обоих в `exitAuthenticatedSession`)
 - Review timer: `src/config/review.js` (`REVIEW_SESSION_SECONDS`)
 - Dictation: `src/lib/dictation/` (Web Speech MVP)
 - Url-screen: чип «На главную» (`.url-screen__back`, скрыт на done) → `onExit` → home

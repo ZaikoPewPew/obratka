@@ -24,7 +24,7 @@ alwaysApply: true
 | `quiz` | `/quiz` (микрофон в поле «Главный совет») |
 | `done` | `/quiz/done` |
 | `success` | `/done` (deep link / запасной; submit URL остаётся на url-screen) |
-| `report` | `/report` (листы + жалоба; только «Мои»; `markReportOpened`) |
+| `report` | `/report` (листы + жалоба; только «Мои») |
 | `banned` | `/banned` (escape-proof при `session.banned`) |
 
 `session.js` — login-сессия пользователя, не экран `/review`.
@@ -42,11 +42,11 @@ alwaysApply: true
 1. **Экран = модуль** в `src/components/<name>-screen/` (фабрика → `{ root, open, close, … }`). Не шить следующий шаг внутрь текущего.
 2. **Порядок и URL снаружи** — колбэк наверх → `go(id)` в `main.js`. Компонент не пишет `history`.
 3. **Split-экраны** (referral / auth / auth-code / onboarding / url): visual — `brand-screen-visual` через `brand-screen-shell`. Детали — `brand-ui.mdc`.
-4. **Общие оверлеи / сегменты** — `createAppModal` (`app-modal/`); слот `content` + CTA; без `history` / `go()`. Сегмент Активные/Архивные — `createTabsPanel` (`tabs-panel/`); не экран флоу. Не путать с экраном флоу.
+4. **Общие оверлеи / сегменты** — `createAppModal` (`app-modal/`); слот `content` + CTA; без `history` / `go()`. Сегмент Активные/Завершенные — `createTabsPanel` (`tabs-panel/`); не экран флоу. Не путать с экраном флоу.
 5. **Handoff** соседних brand: `go(id, { handoff: true })` — правый visual без повторной анимации.
 6. **Ошибки полей** + `setVariant("invalid")` — `brand-ui.mdc` / `FIELD_ERROR.md`.
-7. **home-screen** — другой лейаут; вкладки Лента / Мои (`listPortfoliosForReview` / `listMyPortfolios`); SWR-кэш `homeListCache` (без skeleton на hit); silent slot patch + `sortFeedForSlotClosure`; glass-tabbar + tabbar-dock submit + `--on-dark`; intro до claim; mine report gate; на «Мои» — фильтр **Активные / Архивные** (`tabs-panel`; без refetch); архив = `reviewsCount >= targetReviews` **и** id в `reportOpenedIds` после `markReportOpened` при входе на `/report`; seen-dot 3/3 (`mineReadySeen`) и архив (`reportOpenedIds`) — **разные** storage, не смешивать; own (`--own`) всегда pointer; `reviewedByMe` → notice без intro; лиги — `leagues.mdc`. Подробно: `home-screen/README.md`, `tabs-panel/README.md`.
-8. **Монтаж** — из `main.js`, не из HTML-слотов. Waitlist dual-layout удалён (не восстанавливать без явной задачи). Logout чистит `clearHomeListCache` + `clearMineReadySeen` + `clearReportOpened`.
+7. **home-screen** — другой лейаут; вкладки Лента / Мои (`listPortfoliosForReview` / `listMyPortfolios`); SWR-кэш `homeListCache` (без skeleton на hit); silent slot patch + `sortFeedForSlotClosure`; glass-tabbar + tabbar-dock submit + `--on-dark`; intro до claim; mine report gate; на «Мои» — фильтр **Активные / Завершенные** (`tabs-panel`; без refetch); завершённые = `reviewsCount >= targetReviews`; seen-dot 3/3 (`mineReadySeen`) гаснет при открытии сегмента «Завершенные» (и на табе «Мои», и на сегменте); own (`--own`) всегда pointer; `reviewedByMe` → notice без intro; лиги — `leagues.mdc`. Подробно: `home-screen/README.md`, `tabs-panel/README.md`.
+8. **Монтаж** — из `main.js`, не из HTML-слотов. Waitlist dual-layout удалён (не восстанавливать без явной задачи). Logout чистит `clearHomeListCache` + `clearMineReadySeen`.
 
 ## Motion / docs
 

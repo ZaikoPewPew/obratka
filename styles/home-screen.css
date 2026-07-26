@@ -320,6 +320,8 @@
 
 .home-screen__card {
   box-sizing: border-box;
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   gap: var(--home-screen-card-gap);
@@ -329,11 +331,70 @@
   border: none;
   border-radius: var(--home-screen-card-radius);
   --home-screen-card-surface: var(--home-screen-card-bg);
+  /* Состояние hover-glow: JS пишет угол курсора и близость к краю (0–100) */
+  --home-screen-card-glow-angle: 0deg;
+  --home-screen-card-glow-edge: 0;
   background: var(--home-screen-card-surface);
   color: var(--color-text);
   font-family: var(--font-family);
   text-align: left;
   cursor: pointer;
+}
+
+/*
+ * Градиентная обводка по контуру: псевдоэлемент под контентом
+ * (z-index: -1 внутри isolation карточки), внутренность закрыта слоем
+ * цвета поверхности (padding-box), градиенты видны только в прозрачной
+ * рамке (border-box). Conic-маска режет кольцо до конуса вокруг угла
+ * курсора; видно только на hover (media (hover: hover) ниже), сила —
+ * от близости курсора к краю.
+ */
+.home-screen__card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border: var(--home-screen-card-glow-width) solid transparent;
+  border-radius: inherit;
+  background:
+    linear-gradient(var(--home-screen-card-surface) 0 100%) padding-box,
+    radial-gradient(at 80% 12%, var(--home-screen-card-glow-2) 0, transparent 55%)
+      border-box,
+    radial-gradient(at 12% 80%, var(--home-screen-card-glow-3) 0, transparent 55%)
+      border-box,
+    linear-gradient(var(--home-screen-card-glow-1) 0 100%) border-box;
+  mask-image: conic-gradient(
+    from var(--home-screen-card-glow-angle) at center,
+    var(--color-black) calc(var(--home-screen-card-glow-cone) * 1%),
+    transparent
+      calc(
+        (var(--home-screen-card-glow-cone) + var(--home-screen-card-glow-feather)) *
+          1%
+      ),
+    transparent
+      calc(
+        (
+            100 - var(--home-screen-card-glow-cone) -
+              var(--home-screen-card-glow-feather)
+          ) * 1%
+      ),
+    var(--color-black) calc((100 - var(--home-screen-card-glow-cone)) * 1%)
+  );
+  opacity: 0;
+  transition: opacity var(--home-screen-card-glow-fade-out)
+    var(--home-screen-card-glow-fade-ease);
+}
+
+@media (hover: hover) {
+  .home-screen__card:not(:disabled):hover::before {
+    opacity: calc(
+      (var(--home-screen-card-glow-edge) - var(--home-screen-card-glow-sensitivity)) /
+        (100 - var(--home-screen-card-glow-sensitivity))
+    );
+    transition: opacity var(--home-screen-card-glow-fade-in)
+      var(--home-screen-card-glow-fade-ease);
+  }
 }
 
 .home-screen__card:hover {
@@ -992,6 +1053,10 @@
   .home-screen__card.home-screen__card--skeleton::after {
     content: none;
     animation: none;
+  }
+
+  .home-screen__card::before {
+    transition-duration: 0.01ms;
   }
 
   .home-screen__locked-backdrop {

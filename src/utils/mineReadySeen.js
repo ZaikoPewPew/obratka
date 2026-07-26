@@ -1,7 +1,8 @@
 /**
- * Какие готовые отчёты (portfolio id) пользователь уже «видел» на вкладке «Мои».
- * localStorage `obratka.mineReadySeen.<userId>` — точка на табе гаснет после визита,
- * загорается снова только для новых 3/3.
+ * Какие готовые отчёты (portfolio id) пользователь уже «видел» в сегменте
+ * «Завершённые». localStorage `obratka.mineReadySeen.<userId>` — точки на
+ * «Мои посты» и на сегменте гаснут после открытия «Завершённые», загораются
+ * снова только для новых 3/3.
  */
 
 const STORAGE_PREFIX = "obratka.mineReadySeen.";
@@ -34,7 +35,7 @@ export function getMineReadySeenIds(userId) {
 }
 
 /**
- * Добавить текущие готовые id в просмотренные (визит «Мои»).
+ * Добавить текущие готовые id в просмотренные (открытие «Завершённые»).
  * Пустой список не трогает storage — иначе race при холодной загрузке сотрёт seen.
  *
  * @param {string | null | undefined} userId
@@ -58,7 +59,7 @@ export function markMineReadySeen(userId, readyIds) {
 }
 
 /**
- * Есть ли готовый отчёт, который ещё не отмечали на «Мои».
+ * Есть ли готовый отчёт, который ещё не отмечали в «Завершённые».
  *
  * @param {string | null | undefined} userId
  * @param {string[]} readyIds

@@ -57,6 +57,26 @@
   transition: color var(--tabs-panel-tab-duration) var(--tabs-panel-tab-ease);
 }
 
+.tabs-panel__tab-label {
+  min-width: 0;
+}
+
+.tabs-panel__tab-dot {
+  position: absolute;
+  top: 50%;
+  right: var(--tabs-panel-tab-dot-offset-right);
+  width: var(--tabs-panel-tab-dot-size);
+  height: var(--tabs-panel-tab-dot-size);
+  border-radius: var(--tabs-panel-tab-dot-radius);
+  background: var(--tabs-panel-tab-dot-color);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.tabs-panel__tab-dot[hidden] {
+  display: none !important;
+}
+
 .tabs-panel__tab--active {
   color: var(--tabs-panel-tab-active-color);
 }
