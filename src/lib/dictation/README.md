@@ -20,7 +20,8 @@ MVP: **Web Speech API** (браузер) → текст в памяти сесс
 | `stop()` | остановить STT и треки |
 | `resetTranscript()` | обнулить накопленный final-буфер |
 | `onTranscript(cb)` | `(finalText, interim) => void` |
-| `onLevel(cb)` | `0..1` для волны (AnalyserNode) |
+| `onLevel(cb)` | общий уровень `0..1` (AnalyserNode) |
+| `onWaveform(cb)` | отдельный уровень `0..1` для каждой полосы волны |
 | `onError(cb)` | `not_allowed` / `unsupported` / … |
 | `destroy()` | teardown + clear listeners |
 

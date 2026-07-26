@@ -52,7 +52,6 @@ import { REVIEW_SESSION_SECONDS } from "./config/review.js";
 import {
   resolvePortfolioEmbed,
 } from "./utils/portfolioEmbed.js";
-import { resolvePortfolioMeta } from "./utils/portfolioMeta.js";
 import { getMotionFocusDelayMs } from "./utils/motionTokens.js";
 import brandLogoUrl from "./assets/brand/logo.svg";
 
@@ -75,6 +74,9 @@ const frameReloadBtn = document.querySelector('[data-action="reload-frame"]');
 const frameBackBtn = document.querySelector('[data-action="frame-back"]');
 const frameForwardBtn = document.querySelector('[data-action="frame-forward"]');
 const dictationBtn = document.querySelector('[data-action="toggle-dictation"]');
+const dictationBars = Array.from(
+  document.querySelectorAll(".iframe-shell__rec-bar"),
+);
 
 /** @type {string | null} */
 let portfolioUrl = null;
@@ -291,8 +293,6 @@ let timerId = null;
 let sessionEnded = false;
 /** Таймер уже запущен в текущей сессии (для external — после кнопки). */
 let sessionStarted = false;
-/** @type {number} */
-let metaRequestId = 0;
 
 function stopClaimHeartbeat() {
   if (claimHeartbeatId != null) {
@@ -359,11 +359,25 @@ function speechLangForLocale() {
   return getLocale() === "en" ? "en-US" : "ru-RU";
 }
 
-function setDictationLevel(level) {
-  dictationBtn?.style.setProperty(
-    "--control-rec-level",
-    String(Math.max(0, Math.min(1, level))),
-  );
+/** Последние уровни волны shell-чипа — без лишних style writes. */
+const lastDictationBarLevels = dictationBars.map(() => -1);
+
+function setDictationWaveform(levels = []) {
+  // Волна видна только у shell-чипа на /review; в advice DOM не трогаем.
+  const visible =
+    !levels.length ||
+    (dictationRecording && dictationTarget === "notes");
+  if (!visible && levels.length) return;
+
+  for (let index = 0; index < dictationBars.length; index += 1) {
+    const next = Number(levels[index]) || 0;
+    if (Math.abs(lastDictationBarLevels[index] - next) < 0.01) continue;
+    lastDictationBarLevels[index] = next;
+    dictationBars[index].style.setProperty(
+      "--control-rec-bar-level",
+      String(next),
+    );
+  }
 }
 
 function syncDictationButtonChrome() {
@@ -418,10 +432,10 @@ function ensureDictationEngine() {
     if (!combined) return;
     dictationText = combined.slice(0, DICTATION_MAX_LEN);
   });
-  dictationEngine.onLevel(setDictationLevel);
+  dictationEngine.onWaveform(setDictationWaveform);
   dictationEngine.onError((code) => {
     dictationRecording = false;
-    setDictationLevel(0);
+    setDictationWaveform();
     syncDictationChrome();
     if (import.meta.env.DEV) {
       console.warn("[dictation]", code);
@@ -435,7 +449,7 @@ async function stopDictation() {
     await dictationEngine.stop();
   }
   dictationRecording = false;
-  setDictationLevel(0);
+  setDictationWaveform();
   syncDictationChrome();
 }
 
@@ -456,7 +470,7 @@ async function startDictation(target) {
   dictationTarget = target;
   const ok = await engine.start();
   dictationRecording = Boolean(ok);
-  if (!ok) setDictationLevel(0);
+  if (!ok) setDictationWaveform();
   syncDictationChrome();
 }
 
@@ -484,7 +498,7 @@ function resetDictationSession() {
   dictationText = "";
   dictationRecording = false;
   dictationTarget = "notes";
-  setDictationLevel(0);
+  setDictationWaveform();
   syncDictationChrome();
 }
 
@@ -568,74 +582,85 @@ function showBrandChrome() {
     avatarEl.classList.add("iframe-shell__avatar--brand");
     avatarEl.src = brandLogoUrl;
     avatarEl.alt = t.brandLogoAlt;
+    avatarEl.setAttribute("aria-label", t.brandLogoAlt);
   }
   syncLocaleDependentAttrs();
 }
 
-function syncPortfolioChrome({ label, favicon, faviconFallbacks = [] }) {
+function syncPortfolioChrome({ label, avatar }) {
   portfolioName = label;
   if (nameEl) {
     nameEl.textContent = label;
   }
-  setPortfolioAvatar(favicon, faviconFallbacks);
+  setPortfolioAvatar(avatar);
   syncLocaleDependentAttrs();
 }
 
 /**
  * @param {string} primary
- * @param {string[]} [fallbacks]
  */
-function setPortfolioAvatar(primary, fallbacks = []) {
+function setPortfolioAvatar(primary) {
   if (!avatarEl) return;
 
-  const queue = [primary, ...fallbacks].filter(Boolean);
   avatarEl.classList.remove("iframe-shell__avatar--broken", "iframe-shell__avatar--brand");
   avatarEl.alt = "";
+  avatarEl.removeAttribute("aria-label");
 
-  const tryNext = () => {
-    const next = queue.shift();
-    if (!next) {
-      avatarEl.removeAttribute("src");
-      avatarEl.classList.add("iframe-shell__avatar--broken");
-      return;
-    }
-    avatarEl.src = next;
+  const showBroken = () => {
+    avatarEl.removeAttribute("src");
+    avatarEl.classList.add("iframe-shell__avatar--broken");
   };
 
-  avatarEl.onerror = tryNext;
+  avatarEl.onerror = showBroken;
   avatarEl.onload = () => {
-    // 1×1 / пустые заглушки части CDN — считаем провалом и пробуем следующий кандидат.
+    // 1×1 / пустые заглушки части CDN не показываем как аватар кандидата.
     if (avatarEl.naturalWidth < 8 || avatarEl.naturalHeight < 8) {
-      tryNext();
+      showBroken();
       return;
     }
     avatarEl.classList.remove("iframe-shell__avatar--broken");
   };
-  tryNext();
+  if (primary) {
+    avatarEl.src = primary;
+  } else {
+    showBroken();
+  }
 }
 
 /**
  * @param {string} url
- * @param {{ openExternal?: boolean; portfolioId?: string | null }} [options]
+ * @param {{
+ *   openExternal?: boolean;
+ *   portfolioId?: string | null;
+ *   applicantName?: string;
+ *   applicantAvatar?: string;
+ * }} [options]
  */
-async function applyPortfolio(url, options = {}) {
+function applyPortfolio(url, options = {}) {
   portfolioUrl = url;
   portfolioId =
     typeof options.portfolioId === "string" && options.portfolioId.trim()
       ? options.portfolioId.trim()
       : null;
-  const requestId = ++metaRequestId;
+  const applicantName =
+    typeof options.applicantName === "string" && options.applicantName.trim()
+      ? options.applicantName.trim()
+      : url;
+  const applicantAvatar =
+    typeof options.applicantAvatar === "string"
+      ? options.applicantAvatar.trim()
+      : "";
   const plan = resolvePortfolioEmbed(url);
 
+  syncPortfolioChrome({
+    label: applicantName,
+    avatar: applicantAvatar,
+  });
   applyEmbedPlan(plan);
 
   if (options.openExternal && plan.mode === "external") {
     openPortfolioExternally();
   }
-
-  const meta = await resolvePortfolioMeta(url);
-  if (requestId !== metaRequestId) return;
-  syncPortfolioChrome(meta);
 }
 
 function openReview() {
@@ -849,7 +874,11 @@ const homeScreen = createHomeScreen({
     reviewSubmitPromise = null;
     enterSessionShell();
     await closeReview();
-    await applyPortfolio(item.url, { portfolioId: id });
+    applyPortfolio(item.url, {
+      portfolioId: id,
+      applicantName: item.name,
+      applicantAvatar: item.avatarUrl,
+    });
     startClaimHeartbeat();
     go("review");
     void homeScreen.close();

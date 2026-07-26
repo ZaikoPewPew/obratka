@@ -3,8 +3,10 @@ import assert from "node:assert/strict";
 
 import {
   appendFinalTranscript,
+  buildWaveformLevels,
   createWebSpeechDictation,
   selectSpeechAlternative,
+  timeDomainRms,
 } from "./createWebSpeechDictation.js";
 
 test("selectSpeechAlternative chooses the highest-confidence hypothesis", () => {
@@ -64,6 +66,34 @@ test("appendFinalTranscript ignores a fully duplicated fragment", () => {
     appendFinalTranscript("Хорошая типографика", "хорошая типографика"),
     "Хорошая типографика",
   );
+});
+
+test("buildWaveformLevels collapses silence to zero", () => {
+  assert.deepEqual(buildWaveformLevels(new Uint8Array(24).fill(128), 12), [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  ]);
+});
+
+test("timeDomainRms is zero for a silent buffer", () => {
+  assert.equal(timeDomainRms(new Uint8Array(8).fill(128)), 0);
+});
+
+test("buildWaveformLevels keeps bars independently responsive", () => {
+  const samples = new Uint8Array([
+    128, 128,
+    128, 128,
+    128, 128,
+    80, 176,
+    128, 128,
+    128, 128,
+  ]);
+
+  const levels = buildWaveformLevels(samples, 6);
+
+  assert.equal(levels.length, 6);
+  assert.ok(levels[3] > levels[0]);
+  assert.ok(levels[3] > levels[5]);
+  assert.ok(levels.every((level) => level >= 0 && level <= 1));
 });
 
 test("stopping during microphone permission prevents a late recognition start", async () => {

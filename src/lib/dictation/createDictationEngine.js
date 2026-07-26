@@ -5,7 +5,8 @@ import {
 
 /**
  * Фабрика движка диктовки. Сейчас — Web Speech; позже можно вернуть Whisper
- * с тем же контрактом (start/stop/onTranscript/onLevel/onError/destroy).
+ * с тем же контрактом
+ * (start/stop/onTranscript/onLevel/onWaveform/onError/destroy).
  *
  * @param {{ lang?: string }} [options]
  * @returns {import("./createWebSpeechDictation.js").DictationEngine | null}

@@ -1,6 +1,7 @@
 /**
  * DictationEngine на Web Speech API + AnalyserNode для уровней волны.
- * Контракт общий с будущим Whisper-бэкендом (start/stop/onTranscript/onLevel).
+ * Контракт общий с будущим Whisper-бэкендом
+ * (start/stop/onTranscript/onLevel/onWaveform).
  */
 
 /**
@@ -11,12 +12,17 @@
  *   resetTranscript: () => void;
  *   onTranscript: (cb: (finalText: string, interim: string) => void) => () => void;
  *   onLevel: (cb: (level: number) => void) => () => void;
+ *   onWaveform: (cb: (levels: number[]) => void) => () => void;
  *   onError: (cb: (code: string) => void) => () => void;
  *   destroy: () => void;
  * }} DictationEngine
  */
 
 const BAR_TICK_MS = 50;
+const WAVEFORM_BAR_COUNT = 12;
+const WAVEFORM_NOISE_FLOOR = 0.02;
+const WAVEFORM_SENSITIVITY = 4;
+const WAVEFORM_LOCAL_MIX = 0.75;
 const MAX_ALTERNATIVES = 3;
 const MIN_FINAL_CONFIDENCE = 0.4;
 
@@ -28,6 +34,27 @@ function normalizeTranscript(value) {
 
 function comparableWord(value) {
   return value.toLocaleLowerCase().replace(/[.,!?;:…]+$/gu, "");
+}
+
+/**
+ * RMS time-domain сегмента байтового буфера AnalyserNode.
+ *
+ * @param {Uint8Array} samples
+ * @param {number} [start]
+ * @param {number} [end]
+ * @returns {number}
+ */
+export function timeDomainRms(samples, start = 0, end = samples?.length || 0) {
+  const from = Math.max(0, Math.floor(start));
+  const to = Math.min(samples?.length || 0, Math.floor(end));
+  const count = Math.max(1, to - from);
+  if (!samples?.length || to <= from) return 0;
+  let squares = 0;
+  for (let index = from; index < to; index += 1) {
+    const value = (samples[index] - 128) / 128;
+    squares += value * value;
+  }
+  return Math.sqrt(squares / count);
 }
 
 /**
@@ -106,6 +133,45 @@ export function appendFinalTranscript(current, incoming) {
 }
 
 /**
+ * Делит один временной аудиокадр на независимые сегменты-полосы.
+ * Общий RMS добавляет цельную реакцию всей волне, локальный RMS сохраняет
+ * индивидуальную высоту каждой полосы. Ниже noise floor возвращается тишина.
+ *
+ * @param {Uint8Array} samples
+ * @param {number} [barCount]
+ * @returns {number[]}
+ */
+export function buildWaveformLevels(
+  samples,
+  barCount = WAVEFORM_BAR_COUNT,
+) {
+  const count = Math.max(1, Math.floor(barCount));
+  if (!samples?.length) return Array(count).fill(0);
+
+  const overallRms = timeDomainRms(samples);
+  if (overallRms < WAVEFORM_NOISE_FLOOR) return Array(count).fill(0);
+
+  const globalLevel = Math.min(1, overallRms * WAVEFORM_SENSITIVITY);
+  /** @type {number[]} */
+  const levels = new Array(count);
+  for (let barIndex = 0; barIndex < count; barIndex += 1) {
+    const start = Math.floor((barIndex * samples.length) / count);
+    const end = Math.max(
+      start + 1,
+      Math.floor(((barIndex + 1) * samples.length) / count),
+    );
+    const localRms = timeDomainRms(samples, start, end);
+    const localLevel = Math.min(1, localRms * WAVEFORM_SENSITIVITY);
+    levels[barIndex] = Math.min(
+      1,
+      localLevel * WAVEFORM_LOCAL_MIX +
+        globalLevel * (1 - WAVEFORM_LOCAL_MIX),
+    );
+  }
+  return levels;
+}
+
+/**
  * @returns {boolean}
  */
 export function isWebSpeechSupported() {
@@ -127,6 +193,8 @@ export function createWebSpeechDictation(options = {}) {
   const transcriptListeners = new Set();
   /** @type {Set<(level: number) => void>} */
   const levelListeners = new Set();
+  /** @type {Set<(levels: number[]) => void>} */
+  const waveformListeners = new Set();
   /** @type {Set<(code: string) => void>} */
   const errorListeners = new Set();
 
@@ -159,6 +227,10 @@ export function createWebSpeechDictation(options = {}) {
     for (const cb of levelListeners) cb(clamped);
   }
 
+  function emitWaveform(levels) {
+    for (const cb of waveformListeners) cb(levels);
+  }
+
   function emitError(code) {
     for (const cb of errorListeners) cb(code);
   }
@@ -169,6 +241,7 @@ export function createWebSpeechDictation(options = {}) {
       levelTimer = null;
     }
     emitLevel(0);
+    emitWaveform(Array(WAVEFORM_BAR_COUNT).fill(0));
   }
 
   function tearDownAudio() {
@@ -187,14 +260,7 @@ export function createWebSpeechDictation(options = {}) {
 
   function readLevel() {
     if (!analyser || !levelBuffer) return 0;
-    analyser.getByteTimeDomainData(levelBuffer);
-    let sum = 0;
-    for (let i = 0; i < levelBuffer.length; i += 1) {
-      const v = (levelBuffer[i] - 128) / 128;
-      sum += v * v;
-    }
-    const rms = Math.sqrt(sum / levelBuffer.length);
-    return Math.min(1, rms * 4);
+    return Math.min(1, timeDomainRms(levelBuffer) * WAVEFORM_SENSITIVITY);
   }
 
   async function startLevelMeter() {
@@ -212,7 +278,11 @@ export function createWebSpeechDictation(options = {}) {
     source.connect(analyser);
     levelBuffer = new Uint8Array(analyser.fftSize);
     levelTimer = window.setInterval(() => {
-      emitLevel(readLevel());
+      analyser.getByteTimeDomainData(levelBuffer);
+      if (levelListeners.size) emitLevel(readLevel());
+      if (waveformListeners.size) {
+        emitWaveform(buildWaveformLevels(levelBuffer));
+      }
     }, BAR_TICK_MS);
   }
 
@@ -358,6 +428,11 @@ export function createWebSpeechDictation(options = {}) {
       return () => levelListeners.delete(cb);
     },
 
+    onWaveform(cb) {
+      waveformListeners.add(cb);
+      return () => waveformListeners.delete(cb);
+    },
+
     onError(cb) {
       errorListeners.add(cb);
       return () => errorListeners.delete(cb);
@@ -368,6 +443,7 @@ export function createWebSpeechDictation(options = {}) {
       void this.stop();
       transcriptListeners.clear();
       levelListeners.clear();
+      waveformListeners.clear();
       errorListeners.clear();
     },
   };

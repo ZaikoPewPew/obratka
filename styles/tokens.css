@@ -264,9 +264,12 @@
   --control-rec-wave-gap: 2px;
   --control-rec-bar-width: 2px;
   --control-rec-bar-radius: 5px;
+  /* 2px / 18px: минимальная видимая высота полосы в тишине */
+  --control-rec-bar-min-scale: 0.111111;
+  --control-rec-bar-level-scale: 0.888889;
+  --control-rec-bar-transition-duration: 50ms;
   --control-rec-wave-color: color-mix(in srgb, var(--color-text) 25%, transparent);
   --control-rec-dot-size: 4px;
-  --control-rec-level: 0;
   --control-mobile-name-max-width: 160px;
   --frame-border-color: var(--color-border);
   --frame-bg: var(--color-surface-muted);
