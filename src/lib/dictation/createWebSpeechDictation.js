@@ -18,11 +18,18 @@
  * }} DictationEngine
  */
 
-const BAR_TICK_MS = 50;
+const BAR_TICK_MS = 40;
 const WAVEFORM_BAR_COUNT = 12;
-const WAVEFORM_NOISE_FLOOR = 0.02;
-const WAVEFORM_SENSITIVITY = 4;
-const WAVEFORM_LOCAL_MIX = 0.75;
+/** Ниже — тишина; чуть ниже прежнего, чтобы шёпот не резался. */
+const WAVEFORM_NOISE_FLOOR = 0.006;
+/** Усиление RMS: обычная речь должна заполнять полосы без крика. */
+const WAVEFORM_SENSITIVITY = 12;
+/** < 1: тихий голос поднимается сильнее, громкий мягко упирается в 1. */
+const WAVEFORM_CURVE = 0.62;
+const WAVEFORM_LOCAL_MIX = 0.7;
+/** EMA: быстрее вверх, медленнее вниз — меньше дёрганья. */
+const WAVEFORM_SMOOTH_ATTACK = 0.48;
+const WAVEFORM_SMOOTH_RELEASE = 0.16;
 const MAX_ALTERNATIVES = 3;
 const MIN_FINAL_CONFIDENCE = 0.4;
 
@@ -55,6 +62,44 @@ export function timeDomainRms(samples, start = 0, end = samples?.length || 0) {
     squares += value * value;
   }
   return Math.sqrt(squares / count);
+}
+
+/**
+ * Усиливает RMS до визуального уровня 0..1 с мягкой кривой:
+ * тихая речь заметнее, громкая не упирается в потолок рывком.
+ *
+ * @param {number} rms
+ * @returns {number}
+ */
+export function amplifyRms(rms) {
+  const value = Number(rms);
+  if (!Number.isFinite(value) || value <= 0) return 0;
+  return Math.min(1, (value * WAVEFORM_SENSITIVITY) ** WAVEFORM_CURVE);
+}
+
+/**
+ * Сглаживает сырые уровни полос (EMA): атака быстрее, спад медленнее.
+ *
+ * @param {number[]} current
+ * @param {number[]} next
+ * @param {{ attack?: number; release?: number }} [opts]
+ * @returns {number[]}
+ */
+export function smoothWaveformLevels(current, next, opts = {}) {
+  const attack =
+    typeof opts.attack === "number" ? opts.attack : WAVEFORM_SMOOTH_ATTACK;
+  const release =
+    typeof opts.release === "number" ? opts.release : WAVEFORM_SMOOTH_RELEASE;
+  const count = Math.max(current?.length || 0, next?.length || 0);
+  /** @type {number[]} */
+  const smoothed = new Array(count);
+  for (let index = 0; index < count; index += 1) {
+    const from = Number(current?.[index]) || 0;
+    const to = Number(next?.[index]) || 0;
+    const alpha = to > from ? attack : release;
+    smoothed[index] = from + (to - from) * alpha;
+  }
+  return smoothed;
 }
 
 /**
@@ -151,7 +196,7 @@ export function buildWaveformLevels(
   const overallRms = timeDomainRms(samples);
   if (overallRms < WAVEFORM_NOISE_FLOOR) return Array(count).fill(0);
 
-  const globalLevel = Math.min(1, overallRms * WAVEFORM_SENSITIVITY);
+  const globalLevel = amplifyRms(overallRms);
   /** @type {number[]} */
   const levels = new Array(count);
   for (let barIndex = 0; barIndex < count; barIndex += 1) {
@@ -160,8 +205,7 @@ export function buildWaveformLevels(
       start + 1,
       Math.floor(((barIndex + 1) * samples.length) / count),
     );
-    const localRms = timeDomainRms(samples, start, end);
-    const localLevel = Math.min(1, localRms * WAVEFORM_SENSITIVITY);
+    const localLevel = amplifyRms(timeDomainRms(samples, start, end));
     levels[barIndex] = Math.min(
       1,
       localLevel * WAVEFORM_LOCAL_MIX +
@@ -210,6 +254,8 @@ export function createWebSpeechDictation(options = {}) {
   let levelBuffer = null;
   /** @type {ReturnType<typeof window.setInterval> | null} */
   let levelTimer = null;
+  /** @type {number[]} */
+  let smoothedWaveform = Array(WAVEFORM_BAR_COUNT).fill(0);
 
   let running = false;
   let wantRunning = false;
@@ -240,8 +286,9 @@ export function createWebSpeechDictation(options = {}) {
       window.clearInterval(levelTimer);
       levelTimer = null;
     }
+    smoothedWaveform = Array(WAVEFORM_BAR_COUNT).fill(0);
     emitLevel(0);
-    emitWaveform(Array(WAVEFORM_BAR_COUNT).fill(0));
+    emitWaveform(smoothedWaveform.slice());
   }
 
   function tearDownAudio() {
@@ -260,7 +307,7 @@ export function createWebSpeechDictation(options = {}) {
 
   function readLevel() {
     if (!analyser || !levelBuffer) return 0;
-    return Math.min(1, timeDomainRms(levelBuffer) * WAVEFORM_SENSITIVITY);
+    return amplifyRms(timeDomainRms(levelBuffer));
   }
 
   async function startLevelMeter() {
@@ -277,11 +324,16 @@ export function createWebSpeechDictation(options = {}) {
     analyser.fftSize = 256;
     source.connect(analyser);
     levelBuffer = new Uint8Array(analyser.fftSize);
+    smoothedWaveform = Array(WAVEFORM_BAR_COUNT).fill(0);
     levelTimer = window.setInterval(() => {
       analyser.getByteTimeDomainData(levelBuffer);
       if (levelListeners.size) emitLevel(readLevel());
       if (waveformListeners.size) {
-        emitWaveform(buildWaveformLevels(levelBuffer));
+        smoothedWaveform = smoothWaveformLevels(
+          smoothedWaveform,
+          buildWaveformLevels(levelBuffer),
+        );
+        emitWaveform(smoothedWaveform.slice());
       }
     }, BAR_TICK_MS);
   }

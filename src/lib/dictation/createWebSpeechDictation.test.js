@@ -2,10 +2,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  amplifyRms,
   appendFinalTranscript,
   buildWaveformLevels,
   createWebSpeechDictation,
   selectSpeechAlternative,
+  smoothWaveformLevels,
   timeDomainRms,
 } from "./createWebSpeechDictation.js";
 
@@ -76,6 +78,23 @@ test("buildWaveformLevels collapses silence to zero", () => {
 
 test("timeDomainRms is zero for a silent buffer", () => {
   assert.equal(timeDomainRms(new Uint8Array(8).fill(128)), 0);
+});
+
+test("amplifyRms lifts quiet speech above linear gain", () => {
+  assert.equal(amplifyRms(0), 0);
+  const quiet = amplifyRms(0.03);
+  const loud = amplifyRms(0.12);
+  assert.ok(quiet > 0.35);
+  assert.ok(loud > quiet);
+  assert.ok(loud <= 1);
+});
+
+test("smoothWaveformLevels rises faster than it falls", () => {
+  const rising = smoothWaveformLevels([0, 0], [1, 1]);
+  const falling = smoothWaveformLevels([1, 1], [0, 0]);
+  assert.ok(rising[0] > 0.4);
+  assert.ok(falling[0] > 0.7);
+  assert.ok(rising[0] > 1 - falling[0]);
 });
 
 test("buildWaveformLevels keeps bars independently responsive", () => {

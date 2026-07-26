@@ -164,7 +164,7 @@ body {
   gap: var(--control-rec-gap);
   width: var(--control-rec-width);
   height: var(--control-rec-height);
-  padding: 0 var(--control-rec-padding-x);
+  padding: 0 var(--control-rec-padding-right) 0 var(--control-rec-padding-x);
   border: none;
   border-radius: var(--control-rec-radius);
   background: var(--color-surface);
@@ -215,7 +215,8 @@ body {
   border-radius: var(--control-rec-bar-radius);
   background: var(--control-rec-wave-color);
   transform-origin: center;
-  transition: transform var(--control-rec-bar-transition-duration) linear;
+  transition: transform var(--control-rec-bar-transition-duration)
+    var(--control-rec-bar-transition-easing);
 }
 
 .iframe-shell__rec-bar:nth-child(1) {

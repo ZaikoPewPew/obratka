@@ -253,10 +253,12 @@
   --control-icon-btn-padding: 7px;
   --control-icon-size: 18px;
   /* Figma rec 470:1374 — рядом с reload в шапке /review */
-  --control-rec-width: 90px;
+  --control-rec-width: 93px;
   --control-rec-height: 32px;
   --control-rec-radius: var(--radius-xs);
   --control-rec-padding-x: 7px;
+  /* Правый внутренний отступ фиксирован, с точкой записи и без */
+  --control-rec-padding-right: 10px;
   --control-rec-gap: 4px;
   --control-rec-mic-size: 18px;
   --control-rec-wave-width: 46px;
@@ -267,7 +269,8 @@
   /* 2px / 18px: минимальная видимая высота полосы в тишине */
   --control-rec-bar-min-scale: 0.111111;
   --control-rec-bar-level-scale: 0.888889;
-  --control-rec-bar-transition-duration: 50ms;
+  --control-rec-bar-transition-duration: 120ms;
+  --control-rec-bar-transition-easing: ease-out;
   --control-rec-wave-color: color-mix(in srgb, var(--color-text) 25%, transparent);
   --control-rec-dot-size: 4px;
   --control-mobile-name-max-width: 160px;
