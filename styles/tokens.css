@@ -537,7 +537,7 @@
   --home-screen-reviewer-slot-tooltip-font-size: var(--font-size-xs);
   --home-screen-reviewer-slot-tooltip-font-weight: var(--font-weight-medium);
   --home-screen-reviewer-slot-tooltip-offset: var(--space-2);
-  --home-screen-reviewer-slot-tooltip-z: var(--z-sticky);
+  --home-screen-reviewer-slot-tooltip-z: 100;
 
   /* Ban screen (locked account — same layout as success, red mesh) */
   --ban-screen-z: var(--z-modal);
@@ -771,12 +771,10 @@
   --home-screen-preview-browser-viewport-radius: var(--radius-md);
   /* Reviewed-by-me overlay on feed preview */
   --home-screen-reviewed-overlay-bg: var(--palette-white);
-  --home-screen-reviewed-chip-width: 206px;
-  --home-screen-reviewed-chip-height: 52px;
   --home-screen-reviewed-chip-gap: var(--space-2);
   --home-screen-reviewed-label-size: var(--font-size-base);
   --home-screen-reviewed-label-weight: var(--font-weight-regular);
-  --home-screen-reviewed-label-color: var(--palette-black);
+  --home-screen-reviewed-label-color: var(--palette-gray-900);
   --home-screen-reviewed-chip-icon-size: 24px;
   --home-screen-reviewed-chip-icon-color: var(--color-success);
   --home-screen-person-height: 52px;
@@ -790,7 +788,7 @@
   --home-screen-badge-overlap: calc(var(--space-1) * -1);
   --home-screen-badge-ring: 3px;
   --home-screen-badge-ring-color: var(--palette-white);
-  --home-screen-badge-web-font-size: calc(var(--home-screen-badge-size) / 3);
+  --home-screen-badge-web-font-size: calc(var(--home-screen-badge-size) / 6);
   --home-screen-badge-platform-bg: var(--palette-gray-900);
   --home-screen-badge-platform-icon-color: var(--palette-white);
   --home-screen-badge-platform-icon-size: var(--space-4);
@@ -798,8 +796,8 @@
   --home-screen-badge-platform-icon-filter: brightness(0) invert(1);
   --home-screen-meta-gap: var(--space-2);
   --home-screen-meta-font-size: var(--font-size-base);
-  --home-screen-grade-weight: var(--font-weight-medium);
-  --home-screen-grade-color: var(--palette-black);
+  --home-screen-grade-weight: var(--font-weight-regular);
+  --home-screen-grade-color: var(--palette-gray-900);
   --home-screen-name-weight: var(--font-weight-medium);
   --home-screen-role-weight: var(--font-weight-regular);
   --home-screen-count-height: var(--home-screen-progress-height);

@@ -616,6 +616,7 @@
 .home-screen__preview {
   box-sizing: border-box;
   position: relative;
+  z-index: 0;
   display: grid;
   place-items: center;
   width: 100%;
@@ -723,11 +724,10 @@
 .home-screen__preview-reviewed-chip {
   box-sizing: border-box;
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--home-screen-reviewed-chip-gap);
-  width: var(--home-screen-reviewed-chip-width);
-  height: var(--home-screen-reviewed-chip-height);
   color: var(--home-screen-reviewed-chip-icon-color);
 }
 
@@ -760,6 +760,8 @@
 }
 
 .home-screen__card-meta {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -868,6 +870,7 @@
   margin: 0;
   min-width: 0;
   overflow: hidden;
+  font-family: var(--font-family);
   font-size: var(--home-screen-meta-font-size);
   font-weight: var(--home-screen-grade-weight);
   line-height: normal;

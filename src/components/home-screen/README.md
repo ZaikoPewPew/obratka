@@ -141,7 +141,7 @@ Topbar поверх контента (`position: absolute`), появление 
 | Элемент | Источник |
 |---------|----------|
 | Превью | thum.io (`width/1200/crop/620/wait/3`); внутри browser-frame `object-fit: cover` + `object-position: top`; до load — skeleton (`--loading`), при error — `--empty` |
-| Отчёт отправлен (`reviewedByMe`) | Только после submit отчёта; оверлей на превью (`--home-screen-reviewed-*` + `homeCardReviewedLabel`); карточка `disabled`, без клика/модалки |
+| Отчёт отправлен (`reviewedByMe`) | Только после submit отчёта; оверлей на превью (`--home-screen-reviewed-*` + `homeCardReviewedLabel`): колонка иконка → 8px → текст, по центру превью; карточка `disabled`, без клика/модалки |
 | Автор | Белая pill-плашка hug по ширине ×52: стек площадки + аватара 60×32 и полный `role` (EN Title Case) |
 | Иконка площадки | Simple Icons / favicon; иначе литера **www** (~⅓ круга); 32×32 с **внешней** обводкой 3px (box-shadow); hover → тултип `homePlatformSite` / Behance / Notion / … |
 | Аватар | `item.avatarUrl` или буква из `item.name`; 32×32 с внешней белой обводкой 3px; hover → тултип с ФИО |
