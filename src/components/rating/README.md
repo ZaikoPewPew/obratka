@@ -1,6 +1,6 @@
 # `rating` — рейтинг на главной
 
-Топ пользователей по кол-ву игровой валюты (активные). Пока **не монтируется** на `home-screen` — только оболочка под будущий контент.
+Топ пользователей по кол-ву игровой валюты (активные). Пока **не монтируется** на `home-screen` — только оболочка под будущий контент. Левый sticky aside сейчас занят [`legendary-online-panel`](../legendary-online-panel/).
 
 Файл: [`RatingPanel.js`](./RatingPanel.js). Стили: [`styles/rating-panel.css`](../../../styles/rating-panel.css) (подключить в `index.html`, когда включим). Токены: `--home-screen-aside-*` в [`styles/tokens.css`](../../../styles/tokens.css) — переименуем/перенесём при включении.
 

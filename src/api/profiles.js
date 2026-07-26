@@ -75,7 +75,7 @@ export async function updateMyProfile(patch) {
     throw new Error("not_authenticated");
   }
 
-  // tier / ban / reputation / balance / referral / grade-after-onboarding — server-managed.
+  // tier / ban / reputation / balance / referral / last_seen / grade-after-onboarding — server-managed.
   const {
     tier: _tier,
     id: _id,
@@ -83,6 +83,7 @@ export async function updateMyProfile(patch) {
     ban_reason: _banReason,
     reputation: _reputation,
     balance: _balance,
+    last_seen_at: _lastSeenAt,
     referral_code: _referralCode,
     referral_uses: _referralUses,
     referred_by: _referredBy,

@@ -1,11 +1,15 @@
-import { formatString, getStrings } from "../../i18n.js";
+import { formatString, getLocale, getStrings } from "../../i18n.js";
 import {
+  buildPortfolioPreviewCandidates,
   formatPortfolioGrade,
+  formatPortfolioRole,
+  HOME_CARD_PREFER_OG_PREVIEW,
   listMyPortfolios,
   listPortfoliosForReview,
   listReadyOwnReportIds,
   portfolioPreviewUrl,
 } from "../../api/portfolios.js";
+import { listRatingTop } from "../../api/rating.js";
 import {
   buildReferralShareUrl,
   REFERRAL_MAX_USES,
@@ -20,6 +24,7 @@ import {
   TEMP_BALANCE_CHIP_CREDIT,
 } from "../../api/wallet.js";
 import { formatReputationDelta } from "../../api/reviewComplaints.js";
+import { listOnlineLegendaries } from "../../api/presence.js";
 import { getSession, setSession } from "../../app/session.js";
 import { resolvePlatformIcon } from "../../utils/platformBrandIcon.js";
 import {
@@ -45,6 +50,7 @@ import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import { createAppModal } from "../app-modal/AppModal.js";
 import { createAccountMenu } from "../account-menu/AccountMenu.js";
 import { createTabsPanel } from "../tabs-panel/TabsPanel.js";
+import { createLegendaryOnlinePanel } from "../legendary-online-panel/LegendaryOnlinePanel.js";
 import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
 import { REVIEW_SESSION_SECONDS } from "../../config/review.js";
 import boneIconUrl from "../../assets/home/bone.svg";
@@ -95,6 +101,9 @@ const DEV_CREDIT_AMOUNT = TEMP_BALANCE_CHIP_AMOUNT;
 
 /** Сколько skeleton-карточек показывать, пока грузится лента. */
 const SKELETON_CARD_COUNT = 5;
+
+/** Сколько skeleton-карточек показывать, пока грузится рейтинг. */
+const RATING_SKELETON_CARD_COUNT = 8;
 
 /** Обновление active-слотов, пока home открыт. */
 const HOME_SLOTS_POLL_MS = 15_000;
@@ -540,13 +549,17 @@ export function createHomeScreen({
   ratingView.className = "home-screen__rating";
   ratingView.hidden = true;
 
+  const ratingList = document.createElement("ul");
+  ratingList.className = "home-screen__rating-list";
+
   const ratingEmpty = document.createElement("p");
   ratingEmpty.className = "home-screen__rating-empty";
+  ratingEmpty.hidden = true;
 
-  ratingView.append(ratingEmpty);
+  ratingView.append(ratingList, ratingEmpty);
 
-  /* Рейтинг (`createRatingPanel`) пока не монтируем — см. src/components/rating/. */
-  cluster.append(feed, ratingView);
+  const legendaryOnlinePanel = createLegendaryOnlinePanel();
+  cluster.append(legendaryOnlinePanel.root, feed, ratingView);
   body.append(cluster);
 
   const reputationBody = document.createElement("p");
@@ -667,6 +680,8 @@ export function createHomeScreen({
 
   /** @type {HomePortfolioItem[]} */
   let items = [];
+  /** @type {import("../../api/rating.js").RatingTopItem[]} */
+  let ratingItems = [];
   let loading = false;
   /** @type {ReturnType<typeof window.setInterval> | null} */
   let slotsPollId = null;
@@ -779,7 +794,8 @@ export function createHomeScreen({
     feedTab.textContent = t.homeTabFeed;
     mineTabLabel.textContent = t.homeTabMine;
     ratingTab.textContent = t.homeTabRating;
-    ratingEmpty.textContent = t.homeRatingSoon;
+    ratingEmpty.textContent = t.homeRatingEmpty;
+    ratingList.setAttribute("aria-label", t.homeRatingListAria);
     syncMineTabAria();
     tabbar.setAttribute("aria-label", t.homeTabsAria);
     mineFilterPanel.setLabels({
@@ -813,6 +829,7 @@ export function createHomeScreen({
     profileBtn.setAttribute("aria-haspopup", "menu");
     accountMenu.syncContent();
 
+    legendaryOnlinePanel.syncCopy();
     syncProfileAvatar();
     scheduleTabThumbSync();
   }
@@ -1238,10 +1255,6 @@ export function createHomeScreen({
     lastScrollTop = 0;
     syncCopy();
     if (!opts.silent) emitViewChange("tab");
-    if (tab === "rating") {
-      void refresh();
-      return;
-    }
     if (showTabFromCache(tab)) {
       void refresh();
       return;
@@ -1380,6 +1393,151 @@ export function createHomeScreen({
   }
 
   /**
+   * @returns {HTMLLIElement}
+   */
+  function createRatingSkeletonCard() {
+    const li = document.createElement("li");
+    li.className = "home-screen__rating-item";
+    li.setAttribute("aria-hidden", "true");
+
+    const card = document.createElement("div");
+    card.className =
+      "home-screen__rating-card home-screen__rating-card--skeleton";
+
+    const avatar = document.createElement("span");
+    avatar.className =
+      "home-screen__rating-avatar home-screen__rating-avatar--skeleton";
+
+    const text = document.createElement("div");
+    text.className = "home-screen__rating-text";
+
+    const lineName = document.createElement("div");
+    lineName.className =
+      "home-screen__rating-line home-screen__rating-line--name";
+
+    const lineRole = document.createElement("div");
+    lineRole.className =
+      "home-screen__rating-line home-screen__rating-line--role";
+
+    text.append(lineName, lineRole);
+
+    const balance = document.createElement("span");
+    balance.className =
+      "home-screen__rating-balance home-screen__rating-balance--skeleton";
+
+    card.append(avatar, text, balance);
+    li.append(card);
+    return li;
+  }
+
+  function renderRatingSkeleton() {
+    ratingList.replaceChildren();
+    ratingList.hidden = false;
+    ratingEmpty.hidden = true;
+    for (let i = 0; i < RATING_SKELETON_CARD_COUNT; i += 1) {
+      ratingList.append(createRatingSkeletonCard());
+    }
+  }
+
+  /**
+   * Карточка топ-50 (Figma RaitingCard): аватар + место, имя/роль, баланс.
+   *
+   * @param {import("../../api/rating.js").RatingTopItem} item
+   * @returns {HTMLLIElement}
+   */
+  function createRatingCard(item) {
+    const t = getStrings();
+    const li = document.createElement("li");
+    li.className = "home-screen__rating-item";
+
+    const card = document.createElement("div");
+    card.className = "home-screen__rating-card";
+
+    const avatar = document.createElement("span");
+    avatar.className = "home-screen__rating-avatar";
+
+    const name = item.displayName || t.homeRatingNameFallback;
+    const letter = initialFromLabel(name);
+    const avatarSrc =
+      typeof item.avatarUrl === "string" ? item.avatarUrl.trim() : "";
+
+    if (avatarSrc) {
+      const img = document.createElement("img");
+      img.className = "home-screen__rating-avatar-img";
+      img.alt = "";
+      img.width = 52;
+      img.height = 52;
+      img.decoding = "async";
+      img.loading = "lazy";
+      img.referrerPolicy = "no-referrer";
+      img.addEventListener("error", () => {
+        img.remove();
+        avatar.classList.add("home-screen__rating-avatar--letter");
+        const letterEl = document.createElement("span");
+        letterEl.className = "home-screen__rating-avatar-letter";
+        letterEl.textContent = letter;
+        letterEl.setAttribute("aria-hidden", "true");
+        avatar.append(letterEl);
+      });
+      img.src = avatarSrc;
+      avatar.append(img);
+    } else {
+      avatar.classList.add("home-screen__rating-avatar--letter");
+      const letterEl = document.createElement("span");
+      letterEl.className = "home-screen__rating-avatar-letter";
+      letterEl.textContent = letter;
+      letterEl.setAttribute("aria-hidden", "true");
+      avatar.append(letterEl);
+    }
+
+    const place = document.createElement("span");
+    place.className = "home-screen__rating-place";
+    place.textContent = String(item.place);
+    place.setAttribute(
+      "aria-label",
+      formatString(t.homeRatingPlaceAria, { place: item.place }),
+    );
+    avatar.append(place);
+
+    const text = document.createElement("div");
+    text.className = "home-screen__rating-text";
+
+    const nameEl = document.createElement("p");
+    nameEl.className = "home-screen__rating-name";
+    nameEl.textContent = name;
+
+    const roleEl = document.createElement("p");
+    roleEl.className = "home-screen__rating-role";
+    roleEl.textContent =
+      formatPortfolioRole(item.grade, item.role) || t.homeDefaultRole;
+
+    text.append(nameEl, roleEl);
+
+    const balance = document.createElement("span");
+    balance.className = "home-screen__rating-balance";
+    balance.textContent = Number(item.balance).toLocaleString(getLocale());
+    balance.setAttribute(
+      "aria-label",
+      formatString(t.homeRatingBalanceAria, { balance: item.balance }),
+    );
+
+    card.append(avatar, text, balance);
+    li.append(card);
+    return li;
+  }
+
+  function renderRatingList() {
+    ratingList.replaceChildren();
+    const hasItems = ratingItems.length > 0;
+    ratingList.hidden = !hasItems;
+    ratingEmpty.hidden = hasItems;
+    for (const item of ratingItems) {
+      ratingList.append(createRatingCard(item));
+    }
+    scheduleTabbarContrastSync();
+  }
+
+  /**
    * @param {boolean} next
    */
   function setLoading(next) {
@@ -1398,6 +1556,10 @@ export function createHomeScreen({
           : t.homeListAria,
     );
     if (loading) {
+      if (activeTab === "rating") {
+        renderRatingSkeleton();
+        return;
+      }
       renderSkeleton();
     }
   }
@@ -1425,10 +1587,24 @@ export function createHomeScreen({
     previewImg.loading = "lazy";
     previewImg.referrerPolicy = "no-referrer";
 
-    const previewSrc =
-      Array.isArray(item.previewUrls) && item.previewUrls[0]
-        ? item.previewUrls[0]
-        : portfolioPreviewUrl(item.url);
+    const previewCandidates =
+      Array.isArray(item.previewUrls) && item.previewUrls.length > 0
+        ? item.previewUrls.filter((href) => typeof href === "string" && href)
+        : buildPortfolioPreviewCandidates(item.url);
+    const screenshotUrl = portfolioPreviewUrl(item.url);
+    let previewCandidateIndex = 0;
+
+    function syncPreviewFitClass(src) {
+      const isOg =
+        HOME_CARD_PREFER_OG_PREVIEW &&
+        Boolean(src) &&
+        src !== screenshotUrl &&
+        !src.includes("image.thum.io/");
+      preview.classList.toggle("home-screen__preview--og", isOg);
+    }
+
+    const previewSrc = previewCandidates[0] || screenshotUrl;
+    syncPreviewFitClass(previewSrc);
     previewImg.src = previewSrc;
     previewImg.addEventListener("load", () => {
       preview.classList.remove("home-screen__preview--loading");
@@ -1436,9 +1612,19 @@ export function createHomeScreen({
       scheduleTabbarContrastSync();
     });
     previewImg.addEventListener("error", () => {
+      previewCandidateIndex += 1;
+      const nextSrc = previewCandidates[previewCandidateIndex];
+      if (nextSrc) {
+        syncPreviewFitClass(nextSrc);
+        previewImg.src = nextSrc;
+        return;
+      }
       previewImg.remove();
-      preview.classList.remove("home-screen__preview--loading");
-      preview.classList.remove("home-screen__preview--ready");
+      preview.classList.remove(
+        "home-screen__preview--loading",
+        "home-screen__preview--ready",
+        "home-screen__preview--og",
+      );
       preview.classList.add("home-screen__preview--empty");
       scheduleTabbarContrastSync();
     });
@@ -1660,6 +1846,13 @@ export function createHomeScreen({
     revealItems = false;
     wasSkeletonLoading = false;
     root.setAttribute("aria-busy", "false");
+    if (tab === "rating") {
+      ratingItems = /** @type {import("../../api/rating.js").RatingTopItem[]} */ (
+        cached
+      );
+      renderRatingList();
+      return true;
+    }
     const t = getStrings();
     list.setAttribute(
       "aria-label",
@@ -1748,7 +1941,24 @@ export function createHomeScreen({
     await refreshWalletFromServer();
     if (epoch !== refreshEpoch) return;
     syncCopy();
-    if (tab === "rating") return;
+
+    const onlineLegendariesPromise = listOnlineLegendaries();
+
+    if (tab === "rating") {
+      const top = await listRatingTop();
+      if (epoch === refreshEpoch) {
+        loading = false;
+        root.setAttribute("aria-busy", "false");
+        setCachedHomeList(getSession()?.userId, tab, top);
+        ratingItems = top;
+        renderRatingList();
+      }
+      const online = await onlineLegendariesPromise;
+      if (epoch === refreshEpoch) {
+        legendaryOnlinePanel.setItems(online);
+      }
+      return;
+    }
     const next =
       tab === "mine"
         ? await listMyPortfolios()
@@ -1761,6 +1971,11 @@ export function createHomeScreen({
     setCachedHomeList(getSession()?.userId, tab, next);
     setItems(next, { silent: !wasLoading });
     await refreshMineReady(epoch, tab, next);
+
+    const online = await onlineLegendariesPromise;
+    if (epoch === refreshEpoch) {
+      legendaryOnlinePanel.setItems(online);
+    }
   }
 
   function stopSlotsPoll() {
@@ -1810,7 +2025,7 @@ export function createHomeScreen({
         ),
       ),
     );
-    if (activeTab !== "rating" && !showTabFromCache(activeTab)) {
+    if (!showTabFromCache(activeTab)) {
       setLoading(true);
     }
     requestAnimationFrame(() => {

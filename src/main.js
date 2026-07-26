@@ -31,6 +31,7 @@ import {
   parseHomeView,
 } from "./utils/homeRoute.js";
 import { fetchMyProfile, isProfileBanned, updateMyProfile } from "./api/profiles.js";
+import { heartbeatLegendaryPresence } from "./api/presence.js";
 import {
   redeemReferral,
   validateReferral,
@@ -65,6 +66,8 @@ const SESSION_TOTAL_MS = REVIEW_SESSION_SECONDS * 1000;
 const TIMER_TICK_MS = 10;
 /** Продление claim TTL, пока пользователь на review/quiz. */
 const CLAIM_HEARTBEAT_MS = 2 * 60 * 1000;
+/** Ping last_seen для legendary (серверный online TTL = 2 min). */
+const LEGENDARY_PRESENCE_HEARTBEAT_MS = 60 * 1000;
 /** Потолок длины надиктовки в answers.dictation. */
 const DICTATION_MAX_LEN = 4000;
 
@@ -306,6 +309,7 @@ async function exitAuthenticatedSession() {
   stopTimer();
   await releaseHeldClaim();
   resetDictationSession();
+  stopLegendaryPresenceHeartbeat();
   portfolioUrl = null;
   portfolioId = null;
   claimHeld = false;
@@ -353,6 +357,55 @@ function startClaimHeartbeat() {
       }
     });
   }, CLAIM_HEARTBEAT_MS);
+}
+
+/** @type {ReturnType<typeof window.setInterval> | null} */
+let legendaryPresenceHeartbeatId = null;
+
+function stopLegendaryPresenceHeartbeat() {
+  if (legendaryPresenceHeartbeatId != null) {
+    window.clearInterval(legendaryPresenceHeartbeatId);
+    legendaryPresenceHeartbeatId = null;
+  }
+}
+
+function pingLegendaryPresence() {
+  void heartbeatLegendaryPresence().catch((err) => {
+    if (import.meta.env.DEV) {
+      console.warn("[presence] heartbeat", err);
+    }
+  });
+}
+
+/**
+ * Heartbeat only while tab visible and session.tier === legendary.
+ */
+function syncLegendaryPresenceHeartbeat() {
+  const session = getSession();
+  const shouldRun =
+    session?.tier === "legendary" &&
+    !session?.banned &&
+    document.visibilityState === "visible";
+
+  if (!shouldRun) {
+    stopLegendaryPresenceHeartbeat();
+    return;
+  }
+
+  if (legendaryPresenceHeartbeatId != null) return;
+
+  pingLegendaryPresence();
+  legendaryPresenceHeartbeatId = window.setInterval(() => {
+    if (
+      getSession()?.tier !== "legendary" ||
+      getSession()?.banned ||
+      document.visibilityState !== "visible"
+    ) {
+      stopLegendaryPresenceHeartbeat();
+      return;
+    }
+    pingLegendaryPresence();
+  }, LEGENDARY_PRESENCE_HEARTBEAT_MS);
 }
 
 /**
@@ -1040,6 +1093,7 @@ async function applyProviderUser(user, provider) {
   }
 
   setSession(next);
+  syncLegendaryPresenceHeartbeat();
   return next;
 }
 
@@ -1405,6 +1459,7 @@ if (shell) {
 
 window.addEventListener("pagehide", () => {
   void stopDictation();
+  stopLegendaryPresenceHeartbeat();
   if (reviewSubmitPromise) {
     /* submit ещё идёт — не трогаем claim; триггер снимет после insert */
     stopClaimHeartbeat();
@@ -1418,9 +1473,14 @@ window.addEventListener("pagehide", () => {
 });
 
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState !== "visible") return;
+  if (document.visibilityState !== "visible") {
+    stopLegendaryPresenceHeartbeat();
+    return;
+  }
   if (!getSession()?.userId) return;
+  syncLegendaryPresenceHeartbeat();
   void refreshSessionFromProfile().then((session) => {
+    syncLegendaryPresenceHeartbeat();
     if (session?.banned && activeRouteId !== "banned") {
       go("banned", { replace: true });
     }
@@ -1466,5 +1526,6 @@ void (async () => {
       /* ignore quota / private mode */
     }
   }
+  syncLegendaryPresenceHeartbeat();
   appRouter.start();
 })();

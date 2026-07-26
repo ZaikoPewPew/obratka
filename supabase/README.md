@@ -12,6 +12,7 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 | `BAN.md` | **Оператор:** как банить (Table Editor + SQL), шаблоны |
 | `SECURITY.md` | Матрица доступа к RPC, состояние адвайзоров, отложенное до Pro |
 | `sql/profiles.sql` | `public.profiles`, protect tier/ban/reputation/balance/grade, referral |
+| `sql/legendary_presence.sql` | `last_seen_at` + heartbeat/list для legendary online |
 | `sql/wallet.sql` | protect balance + RPC `spend_submit_cost` |
 | `sql/referrals.sql` | referral-код на профиль (лимит 2), seed `YTHWKPDWAK`, RPC validate/redeem |
 | `sql/portfolios.sql` | portfolios/reviews, лиги; INSERT pending/0/target=3 |

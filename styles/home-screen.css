@@ -294,6 +294,26 @@
   min-width: 0;
 }
 
+/* Desktop: лента по центру экрана; sticky aside слева вплотную к ней */
+@media (min-width: 960px) {
+  .home-screen__body {
+    justify-content: flex-start;
+  }
+
+  .home-screen__cluster {
+    width: var(--home-screen-cluster-width-with-aside);
+    max-width: none;
+    margin-inline-start: max(
+      0px,
+      calc(
+        50% - (var(--home-screen-feed-width) / 2) -
+          var(--home-screen-aside-width) - var(--home-screen-aside-gap)
+      )
+    );
+    margin-inline-end: auto;
+  }
+}
+
 .home-screen__feed {
   box-sizing: border-box;
   display: flex;
@@ -341,6 +361,196 @@
   font-weight: var(--home-screen-rating-empty-font-weight);
   line-height: normal;
   text-align: center;
+}
+
+.home-screen__rating-empty[hidden] {
+  display: none !important;
+}
+
+/* Топ-50: колонка карточек по центру, первая — от верха body (16px), далее 16px */
+.home-screen__rating-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-screen-rating-list-gap);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-screen__rating-list[hidden] {
+  display: none !important;
+}
+
+.home-screen__rating-card {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--home-screen-rating-card-gap);
+  width: 100%;
+  min-height: var(--home-screen-rating-card-height);
+  padding: var(--home-screen-rating-card-padding);
+  border-radius: var(--home-screen-rating-card-radius);
+  background: var(--home-screen-rating-card-bg);
+}
+
+.home-screen__rating-avatar {
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--home-screen-rating-avatar-size);
+  height: var(--home-screen-rating-avatar-size);
+  border-radius: var(--home-screen-rating-avatar-radius);
+}
+
+.home-screen__rating-avatar--letter {
+  background: var(--home-screen-rating-avatar-letter-bg);
+  color: var(--home-screen-rating-avatar-letter-color);
+}
+
+.home-screen__rating-avatar-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--home-screen-rating-avatar-radius);
+}
+
+.home-screen__rating-avatar-letter {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  color: inherit;
+}
+
+.home-screen__rating-place {
+  box-sizing: border-box;
+  position: absolute;
+  top: var(--home-screen-rating-place-offset);
+  right: var(--home-screen-rating-place-offset);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--home-screen-rating-place-size);
+  height: var(--home-screen-rating-place-size);
+  border-radius: var(--home-screen-rating-place-radius);
+  background: var(--home-screen-rating-place-bg);
+  box-shadow: 0 0 0 var(--home-screen-rating-place-ring)
+    var(--home-screen-rating-place-ring-color);
+  color: var(--home-screen-rating-place-color);
+  font-family: var(--font-family);
+  font-size: var(--home-screen-rating-place-font-size);
+  font-weight: var(--home-screen-rating-place-font-weight);
+  line-height: 1;
+}
+
+.home-screen__rating-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--home-screen-rating-text-gap);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.home-screen__rating-name,
+.home-screen__rating-role {
+  margin: 0;
+  overflow: hidden;
+  color: var(--color-text);
+  font-family: var(--font-family);
+  line-height: normal;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.home-screen__rating-name {
+  font-size: var(--home-screen-rating-name-size);
+  font-weight: var(--home-screen-rating-name-weight);
+}
+
+.home-screen__rating-role {
+  font-size: var(--home-screen-rating-role-size);
+  font-weight: var(--home-screen-rating-role-weight);
+}
+
+.home-screen__rating-balance {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: var(--home-screen-rating-balance-height);
+  padding-inline: var(--home-screen-rating-balance-padding-x);
+  border-radius: var(--home-screen-rating-balance-radius);
+  background: var(--home-screen-rating-balance-bg);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--home-screen-rating-balance-size);
+  font-weight: var(--home-screen-rating-balance-weight);
+  line-height: normal;
+  white-space: nowrap;
+}
+
+/* Skeleton рейтинга: кости static + общий shimmer-sweep по карточке */
+.home-screen__rating-card--skeleton {
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.home-screen__rating-card--skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  pointer-events: none;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--home-screen-skeleton-shine) 50%,
+    transparent 100%
+  );
+  animation-name: motion-skeleton-shimmer;
+  animation-duration: var(--home-screen-skeleton-duration);
+  animation-timing-function: var(--home-screen-skeleton-ease);
+  animation-iteration-count: infinite;
+}
+
+.home-screen__rating-avatar--skeleton {
+  background-color: var(--home-screen-skeleton-base);
+}
+
+.home-screen__rating-line {
+  height: var(--home-screen-skeleton-line-height);
+  max-width: 100%;
+  border-radius: var(--home-screen-skeleton-line-radius);
+  background-color: var(--home-screen-skeleton-base);
+}
+
+.home-screen__rating-line--name {
+  width: var(--home-screen-rating-skeleton-line-name-width);
+}
+
+.home-screen__rating-line--role {
+  width: var(--home-screen-rating-skeleton-line-role-width);
+}
+
+.home-screen__rating-balance--skeleton {
+  width: var(--home-screen-rating-skeleton-balance-width);
+  background-color: var(--home-screen-skeleton-base);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-screen__rating-card--skeleton::after {
+    content: none;
+    animation: none;
+  }
 }
 
 .home-screen__list {
@@ -455,6 +665,12 @@
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--motion-reveal-duration) var(--motion-reveal-ease);
+}
+
+/* OG/share image — обычно 1.91:1, лучше заполняет кадр, чем скриншот. */
+.home-screen__preview--og .home-screen__preview-img {
+  object-fit: cover;
+  object-position: center;
 }
 
 .home-screen__preview--ready .home-screen__preview-img {

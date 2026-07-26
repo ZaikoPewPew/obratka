@@ -11,11 +11,13 @@ alwaysApply: false
 ## Порядок apply
 
 1. `profiles.sql`
-2. `wallet.sql` (protect balance + `spend_submit_cost`)
-3. `portfolios.sql`
-4. `review_claims.sql` (после portfolios; award balance в триггере)
-5. `review_complaints.sql` / `referrals.sql` (зависят от profiles)
-6. `subscribers_rls.sql` — если есть legacy `subscribers`
+2. `legendary_presence.sql` (`last_seen_at` + heartbeat/list)
+3. `rating_leaderboard.sql` (снапшот топ-50 + `list_rating_top`)
+4. `wallet.sql` (protect balance + `spend_submit_cost`)
+5. `portfolios.sql`
+6. `review_claims.sql` (после portfolios; award balance в триггере)
+7. `review_complaints.sql` / `referrals.sql` (зависят от profiles)
+8. `subscribers_rls.sql` — если есть legacy `subscribers`
 
 Не ломать зависимости: `is_profile_banned`, `can_review_portfolio`, claim BEFORE INSERT.
 
@@ -24,7 +26,7 @@ alwaysApply: false
 - Mutations: `security definer` + `set search_path = public`; revoke direct write где нужно.
 - Claims / referrals / spend — только RPC; balance не через client UPDATE.
 - `portfolio_reviewer_slots` — **VOLATILE**, не STABLE (иначе PostgREST 405).
-- Клиент read-only: `tier`, `banned_at`, `ban_reason`, `balance`, `reputation`; grade после onboarding.
+- Клиент read-only: `tier`, `banned_at`, `ban_reason`, `balance`, `reputation`, `last_seen_at`; grade после onboarding.
 
 ## Оператор vs app
 

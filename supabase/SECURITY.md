@@ -25,6 +25,13 @@
 | `redeem_referral(text)` | нет | да | один раз на аккаунт |
 | `spend_submit_cost()` | нет | да | списание за подачу |
 | `submit_review_complaint(uuid, text[])` | нет | да | жалоба на лист |
+| `heartbeat_legendary_presence()` | нет | да | ping `last_seen_at` только для `tier=legendary` |
+| `list_online_legendaries()` | нет | да | список онлайн VIP (id/name/avatar) |
+| `legendary_presence_ttl()` | нет | нет | internal TTL 2 min |
+| `list_rating_top()` | нет | да | топ-50 по balance из снапшота (пересборка раз в 24 ч) |
+| `rating_leaderboard_ttl()` | нет | нет | internal TTL 24 h |
+| `refresh_rating_leaderboard()` | нет | нет | internal, зовётся из `list_rating_top` |
+| `protect_profiles_last_seen()` | нет | нет | trigger-only |
 | `handle_new_user()` | нет | **нет** | trigger-only, не через PostgREST |
 | `profile_grade(uuid)` | нет | нет | оракул грейдов, только internal |
 | `purge_expired_review_claims()` | нет | нет | internal |
@@ -53,7 +60,7 @@ order by 1;
 
 | Таблица | Клиент | Комментарий |
 |---|---|---|
-| `profiles` | select/update своих | `banned_at`, `ban_reason`, `tier`, `balance`, `reputation` режут триггеры `protect_profiles_*`; grade — только до `onboarding_done` |
+| `profiles` | select/update своих | `banned_at`, `ban_reason`, `tier`, `balance`, `reputation`, `last_seen_at` режут триггеры `protect_profiles_*`; grade — только до `onboarding_done` |
 | `portfolios` / `reviews` | по RLS (лиги, own) | `anon` отозван; INSERT review требует живой claim |
 | `review_claims` | только `select` | mutations — исключительно через RPC |
 | `review_complaints` | insert только RPC | `reporter_id` ревьюеру не виден |
@@ -94,8 +101,9 @@ UI-часть: [`src/components/home-screen/README.md`](../src/components/home-s
 | `20260726021140` | `portfolio_reviewer_slots_anonymous_active` | анонимные active-слоты, конец ошибок `reviewer_grade` |
 | `20260726021218` | `revoke_anon_rpc_drop_temp_credit` | revoke anon/public на RPC; `drop function temp_credit_balance` |
 | `20260726021238` | `revoke_league_helpers_public` | revoke на `grade_league` / `can_review_grades` |
+| *(MCP)* | `legendary_presence_last_seen` | `last_seen_at` + heartbeat/list для legendary online |
 
-Все три отражены в `sql/*.sql`, чтобы файлы оставались источником правды при чистом развёртывании.
+Отражены в `sql/*.sql`, чтобы файлы оставались источником правды при чистом развёртывании.
 
 ---
 

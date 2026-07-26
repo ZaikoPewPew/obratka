@@ -1,15 +1,16 @@
 /**
- * SWR-кэш ленты home: feed / mine.
+ * SWR-кэш вкладок home: feed / mine / rating.
  * Memory + sessionStorage (`obratka.homeLists.<userId>`), чтобы SPA и F5
  * не мигали skeleton при наличии данных.
  */
 
-/** @typedef {'feed' | 'mine'} HomeListTabId */
+/** @typedef {'feed' | 'mine' | 'rating'} HomeListTabId */
 
 /**
  * @typedef {{
  *   feed: unknown[] | null;
  *   mine: unknown[] | null;
+ *   rating: unknown[] | null;
  * }} HomeListTabsCache
  */
 
@@ -22,7 +23,7 @@ const memoryByUser = new Map();
  * @returns {HomeListTabsCache}
  */
 function emptyTabs() {
-  return { feed: null, mine: null };
+  return { feed: null, mine: null, rating: null };
 }
 
 /**
@@ -49,9 +50,11 @@ function parseStored(raw) {
   if (!raw || typeof raw !== "object") return null;
   const feed = "feed" in raw && raw.feed === null ? null : raw.feed;
   const mine = "mine" in raw && raw.mine === null ? null : raw.mine;
+  const rating = "rating" in raw && raw.rating === null ? null : raw.rating;
   return {
     feed: feed == null ? null : isItemList(feed) ? feed : null,
     mine: mine == null ? null : isItemList(mine) ? mine : null,
+    rating: rating == null ? null : isItemList(rating) ? rating : null,
   };
 }
 

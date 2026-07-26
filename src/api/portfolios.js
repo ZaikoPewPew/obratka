@@ -137,6 +137,37 @@ export function portfolioPreviewUrl(url) {
 }
 
 /**
+ * Эксперимент: на карточках сначала OG/share-image (как в Telegram/iMessage),
+ * при ошибке — прежний thum.io. Выключить → `false`, поведение как раньше.
+ */
+export const HOME_CARD_PREFER_OG_PREVIEW = true;
+
+/**
+ * OG/twitter image через Microlink embed (проксирует meta image как `<img src>`).
+ * Free-tier лимит сервиса низкий — только для визуального теста.
+ * @param {string} url
+ * @returns {string}
+ */
+export function portfolioOgPreviewUrl(url) {
+  const endpoint = new URL("https://api.microlink.io/");
+  endpoint.searchParams.set("url", url);
+  endpoint.searchParams.set("embed", "image.url");
+  return endpoint.href;
+}
+
+/**
+ * Кандидаты превью карточки: OG (если эксперимент включён) → thum.io.
+ * @param {string} url
+ * @returns {string[]}
+ */
+export function buildPortfolioPreviewCandidates(url) {
+  const screenshot = portfolioPreviewUrl(url);
+  if (!HOME_CARD_PREFER_OG_PREVIEW) return [screenshot];
+  return [portfolioOgPreviewUrl(url), screenshot];
+}
+
+
+/**
  * @param {unknown} err
  * @returns {string}
  */

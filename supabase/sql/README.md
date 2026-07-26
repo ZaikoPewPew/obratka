@@ -5,6 +5,8 @@
 | Файл | Роль |
 |------|------|
 | `profiles.sql` | `public.profiles`, protect tier/ban/reputation/**balance**/grade, `is_profile_banned` (self-only), telegram_id из app_metadata |
+| `legendary_presence.sql` | `last_seen_at` + RPC heartbeat/list для `tier=legendary` (после profiles) |
+| `rating_leaderboard.sql` | снапшот топ-50 по `balance` + RPC `list_rating_top` (ленивая пересборка раз в 24 ч; после profiles) |
 | `wallet.sql` | `protect_profiles_balance` + RPC `spend_submit_cost` |
 | `referrals.sql` | персональный `referral_code` (max 2 uses), seed `YTHWKPDWAK`, RPC validate/redeem; без наград |
 | `portfolios.sql` | portfolios/reviews, лиги; INSERT WITH CHECK pending/0/target=3 |
@@ -16,7 +18,7 @@
 | `delete-account-templates.sql` | удаление тестового аккаунта |
 | `portfolio-role-backfill.sql` | одноразовый backfill `portfolios.role` (Lead/Head naming) |
 
-Применять в SQL Editor Dashboard или через CLI. Порядок: `profiles` → `wallet` → `portfolios` → `review_claims` → `review_complaints` / `referrals`; при legacy — `subscribers_rls`.  
+Применять в SQL Editor Dashboard или через CLI. Порядок: `profiles` → `legendary_presence` → `rating_leaderboard` → `wallet` → `portfolios` → `review_claims` → `review_complaints` / `referrals`; при legacy — `subscribers_rls`.  
 Обзор — [`../README.md`](../README.md).  
 **Как банить юзеров:** [`../BAN.md`](../BAN.md).  
 **Кто какие RPC может звать:** [`../SECURITY.md`](../SECURITY.md).

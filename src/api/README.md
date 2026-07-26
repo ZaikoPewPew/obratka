@@ -8,7 +8,9 @@
 |------|------|
 | `auth.js` | Email OTP (`requestEmailOtp` / `verifyEmailOtp`); Telegram Login → Edge Function; Google OAuth (`signInWithGoogle` / `completeOAuthFromUrl`); `mapSupabaseAuthErrorCode`; `signOut` |
 | `telegramWidget.js` | загрузка Login Widget / `Telegram.Login.auth` |
-| `profiles.js` | `fetchMyProfile` / `updateMyProfile` / `isProfileBanned` (`public.profiles`; `tier`, `banned_*`, `reputation` только чтение) |
+| `profiles.js` | `fetchMyProfile` / `updateMyProfile` / `isProfileBanned` (`public.profiles`; `tier`, `banned_*`, `reputation`, `last_seen_at` только чтение / RPC) |
+| `presence.js` | legendary online: `heartbeatLegendaryPresence` / `listOnlineLegendaries` (RPC; только `tier=legendary`) |
+| `rating.js` | `listRatingTop` — топ-50 по `balance` для вкладки «Рейтинг» (RPC `list_rating_top`; серверный снапшот раз в сутки) |
 | `onboarding.js` | `saveOnboardingAnswers` → колонки + `onboarding` jsonb в профиле |
 | `subscribers.js` | waitlist: POST email + RPC/HEAD count |
 

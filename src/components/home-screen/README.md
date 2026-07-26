@@ -2,7 +2,7 @@
 
 Path: **`/home`**. После onboarding: шапка (лого, репутация, баланс, аватар) + лента карточек портфолио + нижний док: переключатель **На ревью / Мои посты / Рейтинг** и кнопка **«Закинуть своё»** (квадрат с плюсом справа от таббара).
 
-Файл: [`HomeScreen.js`](./HomeScreen.js). Стили: [`styles/home-screen.css`](../../../styles/home-screen.css). Токены: `--home-screen-*` в [`styles/tokens.css`](../../../styles/tokens.css).
+Файл: [`HomeScreen.js`](./HomeScreen.js). Стили: [`styles/home-screen.css`](../../../styles/home-screen.css). Токены `--home-screen-*` в [`styles/tokens.css`](../../../styles/tokens.css). Слева на desktop (≥960px) — sticky aside [`legendary-online-panel`](../legendary-online-panel/) («Легенды онлайн», poll вместе с home).
 
 ## Поведение
 
@@ -12,7 +12,7 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 |---------|-----|------------|
 | **На ревью** (`feed`, default) | `listPortfoliosForReview()` | Чужие `pending` **в лиге** грейда ревьюера (RLS), без своих; карточка до `target_reviews` completed-отчётов; `reviewedByMe` = отправленный отчёт (`reviews`), не claim/abort — disabled + оверлей, без модалки |
 | **Мои посты** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …); сверху сегмент **Активные / Завершенные** ([`tabs-panel`](../tabs-panel/README.md)); точка на вкладке и на «Завершенные» при **непросмотренном** готовом отчёте (`listReadyOwnReportIds` + `mineReadySeen`) |
-| **Рейтинг** (`rating`) | — | Отдельный блок `.home-screen__rating` + empty `.home-screen__rating-empty` (`homeRatingSoon`); лента скрыта (`feed[hidden]`); без API / skeleton / кэша |
+| **Рейтинг** (`rating`) | `listRatingTop()` | Топ-50 по балансу (Figma `RaitingCard` 482:2123) в `.home-screen__rating-list`: аватар 52 + бейдж места (синий, 20), имя/роль (`formatPortfolioRole`), белая плашка баланса; skeleton `--skeleton`-модификаторы; empty `.home-screen__rating-empty` (`homeRatingEmpty`); кэш вкладки в `homeListCache` (`rating`); снапшот на сервере обновляется раз в сутки (`rating_leaderboard.sql`) |
 
 Переключатель: `home-screen__tabbar` внутри дока `home-screen__tabbar-dock` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`). Вкладки: **На ревью** / **Мои посты** / **Рейтинг**. Справа от таббара в доке (gap 8px, `--home-screen-tabbar-dock-gap`) — кнопка «Закинуть своё» (56×56, r16, Google blue, плюс 24; токены `--home-screen-tabbar-submit-*`).
 
@@ -200,7 +200,7 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 Токены intro-модалки: `--home-screen-review-intro-indent` / `--home-screen-review-intro-step-gap`.
 
-Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeEmptyMineActive`, `homeEmptyMineCompleted`, `homeTabFeed`, `homeTabMine`, `homeTabRating`, `homeRatingSoon`, `homeTabsAria`, `homeMineFilterActive`, `homeMineFilterCompleted`, `homeMineFilterAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeTabMineReadyAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`.
+Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeEmptyMineActive`, `homeEmptyMineCompleted`, `homeTabFeed`, `homeTabMine`, `homeTabRating`, `homeRatingEmpty`, `homeRatingListAria`, `homeRatingNameFallback`, `homeRatingPlaceAria`, `homeRatingBalanceAria`, `homeTabsAria`, `homeMineFilterActive`, `homeMineFilterCompleted`, `homeMineFilterAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeTabMineReadyAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `homePlatformWebLetter`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`.
 
 `homeCardOwnTitle` / `homeCardOwnAria` в locales — legacy (в UI не используются; own-копирайт = `homeCardReport*` / `Pending*`).
 
