@@ -22,8 +22,9 @@ import { createAppRouter } from "./app/router.js";
 import { getSession, setSession, clearSession } from "./app/session.js";
 import { completeOAuthFromUrl, signOut } from "./api/auth.js";
 import { getSupabase } from "./lib/supabaseClient.js";
-import { submitPortfolio, clearSubmittedPortfolios, submitPortfolioReview, claimPortfolioReview, heartbeatPortfolioClaim, releasePortfolioClaim, portfolioRpcErrorCode } from "./api/portfolios.js";
+import { submitPortfolio, clearSubmittedPortfolios, submitPortfolioReview, claimPortfolioReview, heartbeatPortfolioClaim, releasePortfolioClaim, portfolioRpcErrorCode, hasFreeMineSlot } from "./api/portfolios.js";
 import { clearHomeListCache } from "./utils/homeListCache.js";
+import { clearFeedSeen } from "./utils/feedSeen.js";
 import { clearMineReadySeen } from "./utils/mineReadySeen.js";
 import {
   buildHomeSearch,
@@ -38,9 +39,9 @@ import {
 } from "./api/referrals.js";
 import {
   awardReviewReward,
+  applySubmitBalance,
   canSubmitPortfolio,
   refreshSessionFromProfile,
-  spendSubmitCost,
 } from "./api/wallet.js";
 import { createDictationEngine, isWebSpeechSupported } from "./lib/dictation/createDictationEngine.js";
 import { createReviewPanel } from "./components/review-panel/ReviewPanel.js";
@@ -49,6 +50,7 @@ import { createAuthScreen } from "./components/auth-screen/AuthScreen.js";
 import { createAuthCodeScreen } from "./components/auth-code-screen/AuthCodeScreen.js";
 import { createHomeScreen } from "./components/home-screen/HomeScreen.js";
 import { createOnboardingScreen } from "./components/onboarding-screen/OnboardingScreen.js";
+import { DEFAULT_ONBOARDING_ROLE } from "./api/onboarding.js";
 import { createReferralScreen } from "./components/referral-screen/ReferralScreen.js";
 import { createSuccessScreen } from "./components/success-screen/SuccessScreen.js";
 import { createReportScreen } from "./components/report-screen/ReportScreen.js";
@@ -298,6 +300,7 @@ async function exitAuthenticatedSession() {
   }
   clearHomeListCache(sessionUserId);
   clearMineReadySeen(sessionUserId);
+  clearFeedSeen(sessionUserId);
   clearSession();
   clearSubmittedPortfolios();
   setPendingAuthEmail(null);
@@ -892,8 +895,13 @@ const urlScreen = createUrlScreen({
     /* URL сразу; persist в фоне — done-UI на url-screen не ждёт сеть. */
     syncRoute("success", { replace: true });
     try {
-      await spendSubmitCost();
-      await submitPortfolio(url);
+      const result = await submitPortfolio(url);
+      if (typeof result?.balance === "number") {
+        applySubmitBalance(result.balance);
+      } else {
+        await refreshSessionFromProfile();
+      }
+      clearHomeListCache(getSession()?.userId);
     } catch {
       go("home", { replace: true });
       throw new Error("url.submit_failed");
@@ -975,6 +983,22 @@ const homeScreen = createHomeScreen({
   },
   onAddPortfolio: async () => {
     if (!canSubmitPortfolio()) return;
+    try {
+      if (!(await hasFreeMineSlot())) {
+        const t = getStrings();
+        homeScreen.showNotice({
+          title: t.homePendingLimitTitle ?? "",
+          body: t.homePendingLimit ?? "",
+          closeLabel: t.homePendingLimitClose,
+          closeAria: t.homePendingLimitCloseAria,
+        });
+        return;
+      }
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.warn("[home] hasFreeMineSlot", err);
+      }
+    }
     go("url");
   },
   onOpenSettings: () => {
@@ -999,7 +1023,10 @@ const onboardingScreen = createOnboardingScreen({
     setSession({
       ...session,
       onboardingDone: true,
-      role: typeof answers?.role === "string" ? answers.role : session.role,
+      role:
+        typeof answers?.role === "string" && answers.role
+          ? answers.role
+          : session.role || DEFAULT_ONBOARDING_ROLE,
       grade: typeof answers?.grade === "string" ? answers.grade : session.grade,
     });
     go("home", { replace: true, handoff: true });
@@ -1228,8 +1255,18 @@ async function applyRoute(id, opts = {}) {
     banned: Boolean(session?.banned),
   });
 
-  if (accessible === "url" && !canSubmitPortfolio()) {
-    accessible = "home";
+  if (accessible === "url") {
+    if (!canSubmitPortfolio()) {
+      accessible = "home";
+    } else {
+      try {
+        if (!(await hasFreeMineSlot())) {
+          accessible = "home";
+        }
+      } catch {
+        accessible = "home";
+      }
+    }
   }
 
   if (accessible !== id) {

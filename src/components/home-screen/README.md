@@ -10,7 +10,7 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 
 | Вкладка | API | Содержимое |
 |---------|-----|------------|
-| **На ревью** (`feed`, default) | `listPortfoliosForReview()` | Чужие `pending` **в лиге** грейда ревьюера (RLS), без своих; карточка до `target_reviews` completed-отчётов; `reviewedByMe` = отправленный отчёт (`reviews`), не claim/abort — disabled + оверлей, без модалки |
+| **На ревью** (`feed`, default) | `listPortfoliosForReview()` | Чужие `pending` **в лиге** грейда ревьюера (RLS), без своих; карточка до `target_reviews` completed-отчётов; `reviewedByMe` = отправленный отчёт (`reviews`), не claim/abort — disabled + оверлей, без модалки; точка на вкладке при **новом** кейсе (`listFeedPortfolioIds` + `feedSeen`) |
 | **Мои посты** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …); сверху сегмент **Активные / Завершенные** ([`tabs-panel`](../tabs-panel/README.md)); точка на вкладке и на «Завершенные» при **непросмотренном** готовом отчёте (`listReadyOwnReportIds` + `mineReadySeen`) |
 | **Рейтинг** (`rating`) | `listRatingTop()` | Топ-50 по балансу (Figma `RaitingCard` 482:2123) в `.home-screen__rating-list`: аватар 52 + бейдж места (синий, 20), имя/роль (`formatPortfolioRole`), белая плашка баланса; skeleton `--skeleton`-модификаторы; empty `.home-screen__rating-empty` (`homeRatingEmpty`); кэш вкладки в `homeListCache` (`rating`); снапшот на сервере обновляется раз в сутки (`rating_leaderboard.sql`) |
 
@@ -30,7 +30,21 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 | **Активные** (`active`, default) | `reviewsCount < targetReviews` (ещё собираются ревью, 0…2) |
 | **Завершенные** (`completed`) | `reviewsCount >= targetReviews` (все слоты заполнены, 3/3) |
 
-Empty: `homeEmptyMineActive` / `homeEmptyMineCompleted`. Фильтр сбрасывается в `active` на `close()`; при следующем `open()` вид берётся из URL.
+Empty «Завершенные»: `homeEmptyMineCompleted`. На **Активных** текстового empty нет: всегда до `MAX_MINE_PENDING` (1) слотов — реальная карточка или dashed placeholder «Свободный слот» (`homeMineSlotFree*`, Figma Type=Queue). Клик по свободному слоту / CTA «Закинуть» → если слот занят `homePendingLimit*`, если нет монет `homeSubmitLocked*`. Фильтр сбрасывается в `active` на `close()`; при следующем `open()` вид берётся из URL.
+
+### Индикатор на «На ревью»
+
+Красная точка на вкладке (те же `--home-screen-tabbar-tab-dot-*`, 6×6): видна, когда в ленте есть portfolio id, которого ещё нет в `obratka.feedSeen.<userId>`, и пользователь **не** на `feed`.
+
+Поведение:
+
+- открытие вкладки `feed` → текущие id пишутся в seen (`markFeedSeen`), точка гаснет;
+- уже на `feed` при poll/visibility — новые id сразу acknowledge (карточка в списке + `revealNewOnly`);
+- холодный старт: первый снимок ленты → `seedFeedSeenIfNeeded` (точка не горит на всём списке);
+- снова загорается только для **нового** id (ещё не в seen);
+- logout → `clearFeedSeen`.
+
+Источник на `mine` / `rating`: лёгкий `listFeedPortfolioIds()` на каждом `refresh`. На `feed` — id из загруженного списка. Aria: `homeTabFeedNewAria`.
 
 ### Индикатор на «Мои посты» и «Завершенные»
 
@@ -178,7 +192,7 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 `createHomeScreen({ onOpenPortfolio, onOpenReport?, onAddPortfolio?, onOpenSettings?, onSignOut?, onViewChange? })` → `{ root, open(view?), close, setItems, setView, getView, refresh, showNotice }`.
 
-Внутреннее: `activeTab` `feed` \| `mine` \| `rating`; `mineFilter` `active` \| `completed`; `refresh` читает соответствующий list API (на `rating` — только wallet, без списка); кэш вкладок — [`homeListCache.js`](../../utils/homeListCache.js).
+Внутреннее: `activeTab` `feed` \| `mine` \| `rating`; `mineFilter` `active` \| `completed`; `refresh` читает соответствующий list API (`listPortfoliosForReview` / `listMyPortfolios` / `listRatingTop`; на чужих вкладках ещё `listFeedPortfolioIds` для точки); кэш вкладок — [`homeListCache.js`](../../utils/homeListCache.js) (`feed`/`mine`/`rating`).
 
 ## URL-состояние
 
@@ -187,7 +201,7 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 - `/home` — `feed` + `active` (дефолты в query не пишутся);
 - `/home?tab=mine` — «Мои посты» / «Сейчас на ревью»;
 - `/home?tab=mine&filter=completed` — «Мои посты» / «Завершенные»;
-- `/home?tab=rating` — placeholder рейтинга.
+- `/home?tab=rating` — топ-50 по балансу.
 
 [`homeRoute.js`](../../utils/homeRoute.js) парсит и канонизирует query. Клик по основной вкладке добавляет запись History, смена фильтра заменяет текущую; Back/Forward вызывает `setView()` без повторного монтажа экрана и без эха в URL.
 
@@ -201,7 +215,7 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 Токены intro-модалки: `--home-screen-review-intro-indent` / `--home-screen-review-intro-step-gap`.
 
-Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeEmptyMineActive`, `homeEmptyMineCompleted`, `homeTabFeed`, `homeTabMine`, `homeTabRating`, `homeRatingEmpty`, `homeRatingListAria`, `homeRatingNameFallback`, `homeRatingPlaceAria`, `homeRatingBalanceAria`, `homeTabsAria`, `homeMineFilterActive`, `homeMineFilterCompleted`, `homeMineFilterAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeTabMineReadyAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `homePlatformWebLetter`, `homePlatformSite`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`.
+Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeEmptyMineActive`, `homeEmptyMineCompleted`, `homeMineSlotFree`, `homeMineSlotFreeAria`, `homePendingLimit*`, `homeTabFeed`, `homeTabMine`, `homeTabRating`, `homeRatingEmpty`, `homeRatingListAria`, `homeRatingNameFallback`, `homeRatingPlaceAria`, `homeRatingBalanceAria`, `homeTabsAria`, `homeMineFilterActive`, `homeMineFilterCompleted`, `homeMineFilterAria`, `homeAddPortfolio`, `homeBalanceAria`, `homeTabMineReadyAria`, `homeTabFeedNewAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `homePlatformWebLetter`, `homePlatformSite`, `homeSubmitLocked`, `homeSubmitLockedTitle`, `homeSubmitLockedClose`, `homeSubmitLockedCloseAria`, `homeSubmitCost`.
 
 `homeCardOwnTitle` / `homeCardOwnAria` в locales — legacy (в UI не используются; own-копирайт = `homeCardReport*` / `Pending*`).
 

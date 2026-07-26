@@ -1,5 +1,8 @@
 import { updateMyProfile } from "./profiles.js";
 
+/** Пока шаг specialization скрыт — все катаем как product. */
+export const DEFAULT_ONBOARDING_ROLE = "product-designer";
+
 /**
  * @param {string | string[] | undefined} value
  * @returns {string[]}
@@ -13,23 +16,38 @@ function asStringArray(value) {
 }
 
 /**
+ * Нормализует ответы: без `role` подставляет DEFAULT_ONBOARDING_ROLE.
+ *
+ * @param {Record<string, unknown>} answers
+ * @returns {Record<string, unknown> & { role: string }}
+ */
+export function normalizeOnboardingAnswers(answers) {
+  const role =
+    typeof answers.role === "string" && answers.role
+      ? answers.role
+      : DEFAULT_ONBOARDING_ROLE;
+  return { ...answers, role };
+}
+
+/**
  * Пишет ответы онбординга в `public.profiles`.
  *
  * @param {Record<string, unknown>} answers
- * @returns {Promise<void>}
+ * @returns {Promise<Record<string, unknown> & { role: string }>}
  */
 export async function saveOnboardingAnswers(answers) {
-  const role = typeof answers.role === "string" ? answers.role : null;
-  const grade = typeof answers.grade === "string" ? answers.grade : null;
-  const domains = asStringArray(/** @type {string | string[]} */ (answers.domain));
-  const goals = asStringArray(/** @type {string | string[]} */ (answers.goal));
+  const payload = normalizeOnboardingAnswers(answers);
+  const grade = typeof payload.grade === "string" ? payload.grade : null;
+  const domains = asStringArray(/** @type {string | string[]} */ (payload.domain));
+  const goals = asStringArray(/** @type {string | string[]} */ (payload.goal));
 
   await updateMyProfile({
-    role,
+    role: payload.role,
     grade,
     domains,
     goals,
-    onboarding: answers,
+    onboarding: payload,
     onboarding_done: true,
   });
+  return payload;
 }

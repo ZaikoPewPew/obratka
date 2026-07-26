@@ -13,4 +13,4 @@
 
 Монтаж: [`HomeScreen.js`](../home-screen/HomeScreen.js) слева в `home-screen__cluster`. Poll вместе с home (~15 с). Heartbeat пишет только legendary-клиент (`main.js` + `heartbeat_legendary_presence`).
 
-Рейтинг валюты ([`rating/`](../rating/)) — отдельно, пока не монтируется.
+Рейтинг валюты на вкладке `?tab=rating` — внутри [`home-screen`](../home-screen/README.md) (`listRatingTop`). Папка [`rating/`](../rating/) — неиспользуемый aside, не путать.

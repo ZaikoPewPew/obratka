@@ -6,7 +6,7 @@ import { getSupabase } from "../lib/supabaseClient.js";
 /** Награда за завершённое ревью (начисляет сервер в handle_review_inserted). */
 export const REVIEW_REWARD = 1;
 
-/** Стоимость подачи своего портфолио (списывает RPC spend_submit_cost). */
+/** Стоимость подачи своего портфолио (списывает RPC submit_portfolio). */
 export const SUBMIT_COST = 1;
 
 /**
@@ -176,7 +176,21 @@ export async function creditBalance(amount) {
 }
 
 /**
- * Списать стоимость подачи портфолио через RPC.
+ * Записать баланс после atomic submit (RPC уже списал).
+ * @param {number} next
+ * @returns {number}
+ */
+export function applySubmitBalance(next) {
+  const value =
+    typeof next === "number" && Number.isFinite(next)
+      ? Math.max(0, Math.floor(next))
+      : getBalance();
+  walletMutationGen += 1;
+  return writeBalanceLocal(value);
+}
+
+/**
+ * Legacy: отдельное списание без insert. Новая подача — submit_portfolio.
  * @returns {Promise<number>} новый баланс
  * @throws {Error} если недостаточно средств / не авторизован
  */
@@ -203,7 +217,5 @@ export async function spendSubmitCost() {
     typeof data === "number" && Number.isFinite(data)
       ? Math.max(0, Math.floor(data))
       : getBalance() - SUBMIT_COST;
-  walletMutationGen += 1;
-  writeBalanceLocal(next);
-  return next;
+  return applySubmitBalance(next);
 }

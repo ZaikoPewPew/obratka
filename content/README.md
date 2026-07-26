@@ -14,7 +14,7 @@
 | `referral*` | `/referral` (validate errors: `referralExhausted`, …) |
 | `auth*` / `authEmail*` / `authCode*` / `authOtp*` / `authIdentityConflict` | `/registration`, `/registration/code` |
 | `onboarding*` | `/onboarding` |
-| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeReputation*` / `homeAccount*` | `/home` (feed/mine/rating, placeholder рейтинга, SWR, intro, mine gate, seen-dot, слоты, invite, репутация, меню профиля) |
+| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeAccount*` / `homeLegendaryOnline*` / `homeRating*` | `/home` (feed/mine/rating топ-50, SWR, intro, mine gate, feedSeen + 3/3, слоты, invite, репутация, легенды онлайн, меню профиля) |
 | `modalCloseAria` | общая модалка (`app-modal`) |
 | `url*` / `urlModal*` / `urlScreen*` / `urlScreenBack*` | `/portfolio` (в т.ч. чип «На главную») |
 | `success*` | `/done` |

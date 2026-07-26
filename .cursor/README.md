@@ -8,7 +8,7 @@
 |------|--------|
 | `design-tokens.mdc` | Только `var(--…)` из `tokens.css`, Montserrat, motion |
 | `i18n.mdc` | UI-строки только из `locales.json` (ru/en) |
-| `screens.mdc` | Экран = модуль, `go()`, paths, home Активные/Завершенные, handoff |
+| `screens.mdc` | Экран = модуль, `go()`, paths, home (feedSeen / 3/3 / rating / legendary), handoff |
 | `brand-ui.mdc` | Visual variants, field errors, marks — не копипастить mesh |
 | `review-claims.mdc` | Claim / heartbeat / release; награда только после submit |
 | `dictation.mdc` | Надиктовка: `/review` → `answers.dictation` + микрофон в поле совета (Web Speech MVP) |
@@ -32,6 +32,7 @@
 | Brand split-shell | `src/components/brand-screen-shell/` |
 | App modal | `src/components/app-modal/` (`createAppModal`, `--app-modal-*`) |
 | Tabs panel | `src/components/tabs-panel/` (`createTabsPanel`, `--tabs-panel-*`) |
+| Legendary online | `src/components/legendary-online-panel/` (aside home) |
 | Brand marks / morph | `src/assets/brand/brandMarks.js` |
 | Шрифт | `@fontsource/montserrat` → `src/main.js` |
 
@@ -45,7 +46,7 @@
 | `/registration` | Email → `/registration/code` / Telegram / Google |
 | `/registration/code` | 6 ячеек OTP |
 | `/onboarding` | Онбординг → `profiles` |
-| `/home` | Hub: SWR лента/мои + intro до claim + mine report gate + Активные/Завершенные + seen-dot 3/3 + tabbar-dock |
+| `/home` | Hub: SWR feed/mine/rating + intro до claim + mine report gate + Активные/Завершенные + feedSeen / 3/3 + legendary aside + tabbar-dock |
 | `/settings` | Заглушка настроек (из account-menu) |
 | `/portfolio` | Подача URL; back-chip «На главную»; done через `setVariant("done")` |
 | `/review` | iframe + таймер 45 s + **rec** (заметки; нужен claim); в квизе — микрофон в поле совета |
@@ -64,9 +65,9 @@
 | Надиктовка | `src/lib/dictation/` + `.iframe-shell__rec` + `.review-panel__rec` |
 | Онбординг-контент | `content/onboarding.json`, `content/onboarding.md` |
 
-Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `tabs-panel`, `account-menu`, `settings-screen`, `success-screen`, `ban-screen`, `report-screen`.
+Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `legendary-online-panel`, `tabs-panel`, `account-menu`, `settings-screen`, `success-screen`, `ban-screen`, `report-screen`.
 
-**Home (новое):** вкладки feed/mine/rating (rating — placeholder); query через `homeRoute` (`?tab=mine&filter=completed`, Back/Forward без remount); SWR `homeListCache` (memory + `obratka.homeLists.<userId>`); silent slot patch; feed sort `sortFeedForSlotClosure`; `reviewedByMe` только после submit → disabled + оверлей; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); фильтр Активные/Завершенные (`tabs-panel`; 3/3 → Завершенные); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`; гаснет при открытии «Завершенные»); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) 20%/blur + `--on-dark` через `backdropLuminance`. Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache` + `clearMineReadySeen`.
+**Home:** вкладки feed/mine/rating (топ-50 `listRatingTop`, кэш `homeListCache`); query через `homeRoute` (`?tab=mine&filter=completed`, Back/Forward без remount); SWR memory + `obratka.homeLists.<userId>`; silent slot patch; feed sort `sortFeedForSlotClosure`; `reviewedByMe` только после submit → disabled + оверлей; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); фильтр Активные/Завершенные (`tabs-panel`; 3/3 → Завершенные); точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`; гаснет при открытии feed); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`; гаснет при открытии «Завершенные»); aside «Легенды онлайн» (`legendary-online-panel`); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) + `--on-dark` через `backdropLuminance`. Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache` + `clearMineReadySeen` + `clearFeedSeen`.
 **Url-screen:** чип `.url-screen__back` (`urlScreenBack*`) → home; на done скрыт.  
 Подробно: [`home-screen/README.md`](../src/components/home-screen/README.md), [`url-screen/README.md`](../src/components/url-screen/README.md).
 
@@ -130,6 +131,8 @@ API: `src/api/auth.js`. Edge: `supabase/functions/telegram-auth/`.
 | Файл | Роль |
 |------|------|
 | `profiles.sql` | профиль, ban, reputation, tier, referral-колонки |
+| `legendary_presence.sql` | `last_seen_at` + heartbeat/list (legendary online) |
+| `rating_leaderboard.sql` | снапшот топ-50 + `list_rating_top` |
 | `referrals.sql` | validate / redeem / seed |
 | `portfolios.sql` | очередь + лиги |
 | `review_claims.sql` | claim-слоты (после portfolios) |

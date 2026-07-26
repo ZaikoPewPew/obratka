@@ -23,7 +23,8 @@
 | `referralCode.js` | нормализация referral-кода / URL |
 | `backdropLuminance.js` | яркость фона под элементом (home tabbar → `--on-dark`) |
 | `homeRoute.js` | parse/build/canonical query для `/home`: `feed` / `mine` / `rating` и фильтр mine |
-| `homeListCache.js` | SWR-кэш ленты home (`feed`/`mine`, memory + `sessionStorage` `obratka.homeLists.<userId>`); `clearHomeListCache` на logout |
+| `homeListCache.js` | SWR-кэш ленты home (`feed`/`mine`/`rating`, memory + `sessionStorage` `obratka.homeLists.<userId>`); `clearHomeListCache` на logout |
+| `feedSeen.js` | seen id кейсов ленты для точки на «На ревью» (`localStorage` `obratka.feedSeen.<userId>`); открытие feed гасит; seed baseline; `clearFeedSeen` на logout |
 | `mineReadySeen.js` | seen id готовых отчётов для точки на «Мои» / «Завершенные» (`localStorage` `obratka.mineReadySeen.<userId>`); открытие «Завершенные» гасит; `clearMineReadySeen` на logout |
 
 Тесты: `*.test.js` рядом (в т.ч. `homeRoute.test.js`, `reviewReport.dictation.test.js`) + `src/app/routes.test.js` (`npm test`).

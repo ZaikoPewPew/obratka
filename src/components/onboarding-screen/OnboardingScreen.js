@@ -1,7 +1,10 @@
 import { formatString, getStrings } from "../../i18n.js";
 import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import onboardingContent from "../../../content/onboarding.json";
-import { saveOnboardingAnswers } from "../../api/onboarding.js";
+import {
+  normalizeOnboardingAnswers,
+  saveOnboardingAnswers,
+} from "../../api/onboarding.js";
 import {
   getMotionAdvanceDelayMs,
   getMotionReveal,
@@ -145,9 +148,9 @@ const BRAND_MARK_SVG = brandMarkSvg("url-screen__brand-mark");
  */
 export function createOnboardingScreen({ onComplete }) {
   const t = getStrings();
-  const contentSteps = Array.isArray(onboardingContent?.steps)
-    ? onboardingContent.steps
-    : [];
+  const contentSteps = (
+    Array.isArray(onboardingContent?.steps) ? onboardingContent.steps : []
+  ).filter((stepDef) => stepDef?.hidden !== true);
 
   const panel = document.createElement("div");
   panel.className = "review-panel";
@@ -534,7 +537,7 @@ export function createOnboardingScreen({ onComplete }) {
   }
 
   async function finish() {
-    const answers = collectAnswers();
+    const answers = normalizeOnboardingAnswers(collectAnswers());
     try {
       await saveOnboardingAnswers(answers);
     } catch (err) {

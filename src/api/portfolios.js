@@ -35,6 +35,9 @@ import { getSupabase } from "../lib/supabaseClient.js";
 /** Целевое число ревьюеров для новой карточки. */
 export const DEFAULT_TARGET_REVIEWS = 3;
 
+/** Макс. одновременных pending у автора (сервер: max_mine_pending). */
+export const MAX_MINE_PENDING = 1;
+
 /**
  * Подписи роли на карточке всегда на английском (Title Case),
  * независимо от UI-локали онбординга.
@@ -149,7 +152,7 @@ export function portfolioRpcErrorCode(err) {
         ? err.message
         : String(err || "");
   const match = raw.match(
-    /\b(no_slots|claim_not_found|already_reviewed|review_claim_required|portfolio_not_pending|portfolio_not_found|cannot_review_own_portfolio|review_league_mismatch|profile_banned|not_authenticated)\b/,
+    /\b(no_slots|claim_not_found|already_reviewed|review_claim_required|portfolio_not_pending|portfolio_not_found|cannot_review_own_portfolio|review_league_mismatch|profile_banned|not_authenticated|too_many_pending|insufficient_balance|banned|url_required)\b/,
   );
   return match ? match[1] : raw || "unknown_error";
 }
@@ -547,6 +550,39 @@ export async function listMyPortfolios() {
 }
 
 /**
+ * Id чужих pending-портфолио в ленте (для точки «новый кейс» на «На ревью»).
+ * Лёгкий запрос: только id, без слотов / reviewedByMe / сорта. Лиги — через RLS.
+ *
+ * @returns {Promise<string[]>}
+ */
+export async function listFeedPortfolioIds() {
+  const supabase = getSupabase();
+  if (!supabase) return [];
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.id) return [];
+
+  const { data: rows, error } = await supabase
+    .from("portfolios")
+    .select("id")
+    .eq("status", "pending")
+    .neq("owner_id", user.id);
+
+  if (error) {
+    if (import.meta.env.DEV) {
+      console.warn("[portfolios] listFeedPortfolioIds", error.message);
+    }
+    return [];
+  }
+
+  return (rows || [])
+    .map((row) => (row?.id != null ? String(row.id) : ""))
+    .filter(Boolean);
+}
+
+/**
  * Id своих портфолио, собравших все ревью (для точки на вкладке «Мои»).
  * Лёгкий запрос: только счётчики, без слотов и маппинга карточек.
  *
@@ -627,10 +663,50 @@ export async function getPortfolio(id) {
 }
 
 /**
- * Подача своего портфолио в общую очередь.
+ * Сколько своих pending сейчас (для гейта слота до RPC).
+ * @returns {Promise<number>}
+ */
+export async function countMyPendingPortfolios() {
+  const supabase = getSupabase();
+  if (!supabase) {
+    throw new Error("supabase_not_configured");
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.id) {
+    throw new Error("not_authenticated");
+  }
+
+  const { count, error } = await supabase
+    .from("portfolios")
+    .select("id", { count: "exact", head: true })
+    .eq("owner_id", user.id)
+    .eq("status", "pending");
+
+  if (error) {
+    throw new Error(error.message || "portfolio_pending_count_failed");
+  }
+  return typeof count === "number" && Number.isFinite(count)
+    ? Math.max(0, Math.floor(count))
+    : 0;
+}
+
+/**
+ * Есть ли свободный слот (pending < MAX_MINE_PENDING).
+ * @returns {Promise<boolean>}
+ */
+export async function hasFreeMineSlot() {
+  const pending = await countMyPendingPortfolios();
+  return pending < MAX_MINE_PENDING;
+}
+
+/**
+ * Подача своего портфолио: RPC spend + insert + лимит pending.
  *
  * @param {string} rawUrl
- * @returns {Promise<PortfolioQueueItem>}
+ * @returns {Promise<PortfolioQueueItem & { balance?: number }>}
  */
 export async function submitPortfolio(rawUrl) {
   const url = String(rawUrl || "").trim();
@@ -652,32 +728,27 @@ export async function submitPortfolio(rawUrl) {
   const avatarUrl =
     typeof session?.avatarUrl === "string" ? session.avatarUrl.trim() : "";
 
+  const { data, error } = await supabase.rpc("submit_portfolio", {
+    p_url: url,
+    p_name: displayName || labelFromUrl(url),
+    p_role: formatPortfolioRole(session?.grade, session?.role),
+    p_avatar_url: avatarUrl || null,
+  });
+
+  if (error || !data || typeof data !== "object") {
+    throw new Error(
+      portfolioRpcErrorCode(error) || "portfolio_submit_failed",
+    );
+  }
+
   /** @type {Record<string, unknown>} */
-  const insert = {
-    owner_id: user.id,
-    url,
-    name: displayName || labelFromUrl(url),
-    role: formatPortfolioRole(session?.grade, session?.role),
-    target_reviews: DEFAULT_TARGET_REVIEWS,
-    reviews_count: 0,
-    status: "pending",
-  };
-  if (avatarUrl) {
-    insert.avatar_url = avatarUrl;
+  const row = /** @type {Record<string, unknown>} */ (data);
+  const item = mapPortfolioRow(row, user.id);
+  const bal = row.balance;
+  if (typeof bal === "number" && Number.isFinite(bal)) {
+    return { ...item, balance: Math.max(0, Math.floor(bal)) };
   }
-
-  const { data, error } = await supabase
-    .from("portfolios")
-    .insert(insert)
-    .select(
-      "id, owner_id, url, name, role, avatar_url, target_reviews, reviews_count, status",
-    )
-    .maybeSingle();
-
-  if (error || !data) {
-    throw new Error(error?.message || "portfolio_submit_failed");
-  }
-  return mapPortfolioRow(data, user.id);
+  return item;
 }
 
 /**

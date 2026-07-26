@@ -756,6 +756,16 @@
   --home-screen-card-bg: var(--color-surface-muted);
   --home-screen-card-bg-hover: var(--color-surface-muted-hover);
   --home-screen-card-bg-active: var(--color-surface-muted-active);
+  /* Свободный слот на «Мои → Активные» (Figma Type=Queue 487:3222) */
+  --home-screen-slot-empty-dash: 1.5px;
+  --home-screen-slot-empty-border-color: var(--palette-gray-200);
+  --home-screen-slot-empty-preview-bg: var(--color-surface);
+  --home-screen-slot-empty-label-size: var(--font-size-base);
+  --home-screen-slot-empty-label-weight: var(--font-weight-regular);
+  --home-screen-slot-empty-meta-height: var(--home-screen-progress-height);
+  --home-screen-slot-empty-meta-wide: 214px;
+  --home-screen-slot-empty-meta-narrow: 96px;
+  --home-screen-slot-empty-meta-radius: var(--radius-pill);
   --home-screen-preview-height: 250px;
   --home-screen-preview-radius: var(--radius-md);
   --home-screen-preview-bg: var(--palette-white);
@@ -775,7 +785,7 @@
   );
   --home-screen-preview-browser-viewport-radius: var(--radius-md);
   /* Reviewed-by-me overlay on feed preview */
-  --home-screen-reviewed-overlay-bg: var(--palette-white);
+  --home-screen-reviewed-overlay-bg: var(--color-surface-muted);
   --home-screen-reviewed-chip-gap: var(--space-2);
   --home-screen-reviewed-label-size: var(--font-size-base);
   --home-screen-reviewed-label-weight: var(--font-weight-regular);

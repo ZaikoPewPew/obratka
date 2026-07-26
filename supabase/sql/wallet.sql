@@ -2,7 +2,8 @@
 -- Apply after profiles.sql. Idempotent.
 --
 -- Clients cannot UPDATE profiles.balance directly.
--- spend_submit_cost() — списание за подачу портфолио.
+-- spend_submit_cost() — legacy списание (1 coin); новая подача — submit_portfolio
+--   в portfolio_submit.sql (atomic spend + insert + max 1 pending).
 -- Награда за ревью — в handle_review_inserted (review_claims.sql) через bypass GUC.
 
 -- ---------------------------------------------------------------------------

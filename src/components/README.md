@@ -20,7 +20,8 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `auth-screen/` | `/registration` | Email → auth-code / Telegram / Google (shell) |
 | `auth-code-screen/` | `/registration/code` | OTP verify + resend cooldown (shell) |
 | `onboarding-screen/` | `/onboarding` | UI → `profiles` (shell) |
-| `home-screen/` | `/home` | хаб + SWR feed/mine + intro + mine gate + seen-dot 3/3 + tabbar-dock + wallet + репутация + invite |
+| `home-screen/` | `/home` | хаб + SWR feed/mine/rating + intro + mine gate + feedSeen / 3/3 + tabbar-dock + wallet + репутация + invite + legendary aside |
+| `legendary-online-panel/` | — | sticky aside «Легенды онлайн» на home (desktop ≥960px) |
 | `account-menu/` | — | поповер профиля (settings / invite / contacts / sign out) |
 | `settings-screen/` | `/settings` | заглушка настроек |
 | `url-screen/` | `/portfolio` | back-chip → home; submit + done (`setVariant("done")`; shell) |
@@ -28,7 +29,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `success-screen/` | `/done` | пресеты успеха (deep link) |
 | `report-screen/` | `/report` | листы ревью + жалоба + PDF |
 | `ban-screen/` | `/banned` | блок аккаунта; статичный evil mark |
-| `rating/` | — | топ по валюте на home (пока не монтируется) |
+| `rating/` | — | неиспользуемый aside; вкладка рейтинга — в `home-screen` |
 | `locale-toggle/` | — | legacy waitlist/lang UI; **не в entry**, стили не подключены — [`README`](locale-toggle/README.md) |
 
 ## Ревью и квиз

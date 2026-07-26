@@ -23,7 +23,8 @@
 | `grade_league(text)` | нет | да | лиги |
 | `is_profile_banned(uuid)` | нет | да | self-only |
 | `redeem_referral(text)` | нет | да | один раз на аккаунт |
-| `spend_submit_cost()` | нет | да | списание за подачу |
+| `spend_submit_cost()` | нет | да | legacy списание; подача — `submit_portfolio` |
+| `submit_portfolio(text,text,text,text)` | нет | да | atomic spend + insert, max 1 pending |
 | `submit_review_complaint(uuid, text[])` | нет | да | жалоба на лист |
 | `heartbeat_legendary_presence()` | нет | да | ping `last_seen_at` только для `tier=legendary` |
 | `list_online_legendaries()` | нет | да | список онлайн VIP (id/name/avatar) |
@@ -61,7 +62,7 @@ order by 1;
 | Таблица | Клиент | Комментарий |
 |---|---|---|
 | `profiles` | select/update своих | `banned_at`, `ban_reason`, `tier`, `balance`, `reputation`, `last_seen_at` режут триггеры `protect_profiles_*`; grade — только до `onboarding_done` |
-| `portfolios` / `reviews` | по RLS (лиги, own) | `anon` отозван; INSERT review требует живой claim |
+| `portfolios` / `reviews` | по RLS (лиги, own); portfolios **без** client INSERT | insert портфолио только RPC `submit_portfolio`; INSERT review требует живой claim |
 | `review_claims` | только `select` | mutations — исключительно через RPC |
 | `review_complaints` | insert только RPC | `reporter_id` ревьюеру не виден |
 | `referral_seed_codes` | нет доступа | seed `YTHWKPDWAK` только через RPC |
@@ -73,7 +74,8 @@ order by 1;
 
 Клиент **не может** начислять монеты:
 
-- списание — `spend_submit_cost()`;
+- подача портфолио — `submit_portfolio()` (atomic: лимит 1 pending + spend 1 + INSERT);
+- legacy `spend_submit_cost()` без insert — не использовать с клиента;
 - награда за ревью (+1) — внутри `handle_review_inserted` через `set_config('app.bypass_profile_guards', ...)`;
 - RPC `temp_credit_balance` **удалён** 2026-07-26 (был временный, позволял любому залогиненному накрутить себе баланс);
 - клик по чипу баланса на home теперь DEV-only и пишет только в localStorage.

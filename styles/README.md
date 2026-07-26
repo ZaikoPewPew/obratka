@@ -6,16 +6,18 @@
 - `app-modal.css` — универсальная модалка (`createAppModal`, `--app-modal-*`).
 - `iframe-shell.css` — оболочка `/review` (таймер, **`.iframe-shell__rec`**), `.url-screen*` (в т.ч. **`.url-screen__back`**, `__error*`, `__input-wrap--invalid`), `.auth-screen*` / `.auth-code-screen*` (в т.ч. `__cells--invalid`), `.review-screen*` / `.review-panel*` (в т.ч. **`.review-panel__rec`**).
 - `brand-screen.css` — **заготовка** выноса общих split-стилей из iframe-shell.
-- `home-screen.css` — главная `/home` (topbar, лента, tabbar-dock: glass tabs + submit + tab-dot 3/3, `--on-dark`).
+- `home-screen.css` — главная `/home` (topbar, лента, вкладка рейтинга `.home-screen__rating-list`, tabbar-dock: glass tabs + submit + tab-dot, `--on-dark`).
+- `legendary-online-panel.css` — sticky aside «Легенды онлайн» на home (desktop).
 - `tabs-panel.css` — сегмент Активные / Завершенные на «Мои» (`createTabsPanel`, `--tabs-panel-*`).
 - `success-screen.css` — `/done` (пресеты успеха).
 - `ban-screen.css` — `/banned` (блок аккаунта, красный mesh).
 - `report-screen.css` — `/report` (листы + жалоба).
 - `account-menu.css` / `settings-screen.css` — меню профиля / settings.
+- `rating-panel.css` — **не в entry**; оболочка неиспользуемого aside `src/components/rating/`.
 
 ## Что подключено из `index.html`
 
-`tokens.css` → `base.css` → `entrance.css` → `app-modal.css` → `iframe-shell.css` → `success-screen.css` → `report-screen.css` → `ban-screen.css` → `home-screen.css` → `tabs-panel.css` → `account-menu.css` → `settings-screen.css`.
+`tokens.css` → `base.css` → `entrance.css` → `app-modal.css` → `iframe-shell.css` → `success-screen.css` → `report-screen.css` → `ban-screen.css` → `home-screen.css` → `legendary-online-panel.css` → `tabs-panel.css` → `account-menu.css` → `settings-screen.css`.
 
 Архив waitlist-CSS удалён (`desktop` / `mobile` / `apply` / `access-modal` / `notification` / `privacy-policy-panel`). Историческая спека: [`mobile.md`](../mobile.md).
 

@@ -5,6 +5,7 @@
       "id": "role",
       "type": "single",
       "required": true,
+      "hidden": true,
       "labelKey": "onboardingStepRoleLabel",
       "options": [
         {

@@ -26,7 +26,7 @@ Auth-gated deep link (`home` / `settings` / `onboarding` / `report` / `url` / `s
 | `auth` | `/registration` | Email → code screen / Telegram / Google |
 | `authCode` | `/registration/code` | 6-digit Email OTP + resend cooldown |
 | `onboarding` | `/onboarding` | Онбординг → profiles |
-| `home` | `/home` | Хаб: SWR лента/мои + seen-dot + tabbar-dock + меню профиля |
+| `home` | `/home` | Хаб: SWR feed/mine/rating + feedSeen/3/3 + legendary aside + tabbar-dock + меню профиля |
 | `settings` | `/settings` | Отдельный экран настроек (пока заглушка) |
 | `url` | `/portfolio` | Подача URL; back-chip → home; done на том же экране |
 | `review` | `/review` | Ревью: iframe + таймер 45 s + чип rec (заметки) |
@@ -55,7 +55,7 @@ referral → auth → (authCode) → onboarding → home
 
 Auth-защита и Dashboard: [`auth-screen/README.md`](../components/auth-screen/README.md).  
 Brand visual / field errors: [`brand-screen-visual`](../components/brand-screen-visual/README.md), [`FIELD_ERROR.md`](../utils/FIELD_ERROR.md).  
-Home: [`home-screen/README.md`](../components/home-screen/README.md) (`homeRoute` query, feed/mine/rating, SWR `homeListCache`, intro до claim, mine report gate, seen-dot, tabbar-dock + submit).
+Home: [`home-screen/README.md`](../components/home-screen/README.md) (`homeRoute` query, feed/mine/rating топ-50, SWR `homeListCache`, intro до claim, mine report gate, feedSeen/3/3, legendary aside, tabbar-dock + submit).
 Url: [`url-screen/README.md`](../components/url-screen/README.md) (back-chip + done).  
 Надиктовка (`/review` + поле совета): [`lib/dictation/README.md`](../lib/dictation/README.md).  
 См. корневой [`SCREENS.md`](../../SCREENS.md).

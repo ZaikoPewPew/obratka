@@ -6,8 +6,9 @@ Path: **`/onboarding`**. После регистрации; split через [`b
 
 Классы квиза 1:1: `review-panel__top` / `__back` / `__progress` / `__choice` / `__nav` / `__submit`, auto-advance по `single` (radio), кнопка «Далее» на `multi` (checkbox), motion шагов.
 
-Порядок шагов: специализация → грейд → домен (multi) → ожидания (multi).  
-Тексты — `onboarding*` в `locales.json`. Контент — [`content/onboarding.json`](../../../content/onboarding.json).
+Порядок шагов: грейд → домен (multi) → ожидания (multi).  
+Шаг specialization (`role`) временно `hidden: true` в [`content/onboarding.json`](../../../content/onboarding.json); в профиль пишется `product-designer` (`DEFAULT_ONBOARDING_ROLE`).  
+Тексты — `onboarding*` в `locales.json`.
 
 ## Shell / visual
 

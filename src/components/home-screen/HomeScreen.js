@@ -2,9 +2,11 @@ import { formatString, getLocale, getStrings } from "../../i18n.js";
 import {
   formatPortfolioGrade,
   formatPortfolioRole,
+  listFeedPortfolioIds,
   listMyPortfolios,
   listPortfoliosForReview,
   listReadyOwnReportIds,
+  MAX_MINE_PENDING,
   portfolioPreviewUrl,
 } from "../../api/portfolios.js";
 import { listRatingTop } from "../../api/rating.js";
@@ -30,6 +32,11 @@ import {
   resolveImageLumaProbes,
   sampleBackdropLuminance,
 } from "../../utils/backdropLuminance.js";
+import {
+  hasUnseenFeed,
+  markFeedSeen,
+  seedFeedSeenIfNeeded,
+} from "../../utils/feedSeen.js";
 import {
   hasUnseenMineReady,
   markMineReadySeen,
@@ -368,6 +375,18 @@ function readyOwnCardIds(list) {
 }
 
 /**
+ * Id карточек ленты (для точки «новый кейс»).
+ *
+ * @param {HomePortfolioItem[] | null | undefined} list
+ * @returns {string[]}
+ */
+function feedCardIds(list) {
+  return (Array.isArray(list) ? list : [])
+    .map((item) => (item?.id != null ? String(item.id) : ""))
+    .filter(Boolean);
+}
+
+/**
  * Завершённые: все ревью собраны (3/3).
  *
  * @param {HomePortfolioItem} item
@@ -647,6 +666,17 @@ export function createHomeScreen({
   feedTab.setAttribute("aria-selected", "true");
   feedTab.dataset.tab = "feed";
 
+  const feedTabLabel = document.createElement("span");
+  feedTabLabel.className = "home-screen__tab-label";
+
+  /* Точка «есть новый кейс в ленте»; текст остаётся в отдельном span. */
+  const feedTabDot = document.createElement("span");
+  feedTabDot.className = "home-screen__tab-dot";
+  feedTabDot.setAttribute("aria-hidden", "true");
+  feedTabDot.hidden = true;
+
+  feedTab.append(feedTabLabel, feedTabDot);
+
   const mineTab = document.createElement("button");
   mineTab.type = "button";
   mineTab.className = "home-screen__tab";
@@ -712,6 +742,7 @@ export function createHomeScreen({
   let lastScrollTop = 0;
   /** Непросмотренный готовый отчёт (3/3) → точки на «Мои» и «Завершённые». */
   let mineReady = false;
+  let feedUnseen = false;
   let tabbarHidden = false;
   let tabbarOnDark = false;
   let tabbarContrastRaf = 0;
@@ -798,15 +829,16 @@ export function createHomeScreen({
       empty.textContent =
         mineFilter === "completed"
           ? (t.homeEmptyMineCompleted ?? t.homeEmptyMine)
-          : (t.homeEmptyMineActive ?? t.homeEmptyMine);
+          : "";
     } else {
       empty.textContent = t.homeEmpty;
     }
-    feedTab.textContent = t.homeTabFeed;
+    feedTabLabel.textContent = t.homeTabFeed;
     mineTabLabel.textContent = t.homeTabMine;
     ratingTab.textContent = t.homeTabRating;
     ratingEmpty.textContent = t.homeRatingEmpty;
     ratingList.setAttribute("aria-label", t.homeRatingListAria);
+    syncFeedTabAria();
     syncMineTabAria();
     tabbar.setAttribute("aria-label", t.homeTabsAria);
     mineFilterPanel.setLabels({
@@ -854,6 +886,36 @@ export function createHomeScreen({
     noticeModal.setCloseAriaLabel(t.homeSubmitLockedCloseAria ?? "");
     noticeModal.setActionsVisible({ primary: true, secondary: false });
     noticeModal.open();
+  }
+
+  function openPendingLimitModal() {
+    const t = getStrings();
+    showNotice({
+      title: t.homePendingLimitTitle ?? "",
+      body: t.homePendingLimit ?? "",
+      closeLabel: t.homePendingLimitClose,
+      closeAria: t.homePendingLimitCloseAria,
+    });
+  }
+
+  /**
+   * CTA / empty-slot: монета + свободный pending-слот.
+   */
+  function tryAddPortfolio() {
+    const activePending = visibleFor(items).length;
+    if (
+      activeTab === "mine" &&
+      mineFilter === "active" &&
+      activePending >= MAX_MINE_PENDING
+    ) {
+      openPendingLimitModal();
+      return;
+    }
+    if (!canSubmitPortfolio()) {
+      openSubmitLockedModal();
+      return;
+    }
+    void onAddPortfolio?.();
   }
 
   /**
@@ -1124,6 +1186,15 @@ export function createHomeScreen({
     });
   }
 
+  function syncFeedTabAria() {
+    const t = getStrings();
+    if (feedUnseen) {
+      feedTab.setAttribute("aria-label", t.homeTabFeedNewAria ?? t.homeTabFeed);
+      return;
+    }
+    feedTab.removeAttribute("aria-label");
+  }
+
   function syncMineTabAria() {
     const t = getStrings();
     if (mineReady) {
@@ -1131,6 +1202,16 @@ export function createHomeScreen({
       return;
     }
     mineTab.removeAttribute("aria-label");
+  }
+
+  /**
+   * @param {boolean} next
+   */
+  function setFeedUnseen(next) {
+    if (feedUnseen === next) return;
+    feedUnseen = next;
+    feedTabDot.hidden = !next;
+    syncFeedTabAria();
   }
 
   /**
@@ -1570,6 +1651,54 @@ export function createHomeScreen({
   }
 
   /**
+   * Placeholder свободного слота (Figma Type=Queue) на «Мои → Активные».
+   * @returns {HTMLLIElement}
+   */
+  function createEmptySlotCard() {
+    const t = getStrings();
+    const li = document.createElement("li");
+    li.className = "home-screen__item home-screen__item--slot-empty";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "home-screen__card home-screen__card--slot-empty";
+    button.setAttribute(
+      "aria-label",
+      t.homeMineSlotFreeAria ?? t.homeMineSlotFree ?? "",
+    );
+
+    const preview = document.createElement("div");
+    preview.className = "home-screen__slot-empty-preview";
+    preview.setAttribute("aria-hidden", "true");
+
+    const label = document.createElement("p");
+    label.className = "home-screen__slot-empty-label";
+    label.setAttribute("data-i18n", "homeMineSlotFree");
+    label.textContent = t.homeMineSlotFree ?? "";
+    preview.append(label);
+
+    const meta = document.createElement("div");
+    meta.className = "home-screen__slot-empty-meta";
+    meta.setAttribute("aria-hidden", "true");
+
+    const metaWide = document.createElement("span");
+    metaWide.className =
+      "home-screen__slot-empty-pill home-screen__slot-empty-pill--wide";
+    const metaNarrow = document.createElement("span");
+    metaNarrow.className =
+      "home-screen__slot-empty-pill home-screen__slot-empty-pill--narrow";
+    meta.append(metaWide, metaNarrow);
+
+    button.append(preview, meta);
+    button.addEventListener("click", () => {
+      tryAddPortfolio();
+    });
+
+    li.append(button);
+    return li;
+  }
+
+  /**
    * @param {HomePortfolioItem} item
    * @returns {HTMLLIElement}
    */
@@ -1780,7 +1909,12 @@ export function createHomeScreen({
     const prevIds = opts.prevIds instanceof Set ? opts.prevIds : null;
     const visible = visibleFor(items);
     list.replaceChildren();
-    empty.hidden = visible.length > 0;
+    const showMineSlots =
+      activeTab === "mine" && mineFilter === "active" && !loading;
+    const emptySlots = showMineSlots
+      ? Math.max(0, MAX_MINE_PENDING - visible.length)
+      : 0;
+    empty.hidden = visible.length > 0 || emptySlots > 0;
     const t = getStrings();
     list.setAttribute(
       "aria-label",
@@ -1793,6 +1927,18 @@ export function createHomeScreen({
         revealNewOnly && prevIds != null && item.id && !prevIds.has(item.id);
       // Не стартуем с opacity:0 после скелетона — иначе гэп/скачок.
       if ((revealItems && !wasSkeletonLoading) || isNew) {
+        li.classList.add("motion-reveal");
+        li.style.setProperty(
+          "--reveal-delay",
+          `calc(var(--motion-stagger) * ${index})`,
+        );
+      }
+      list.append(li);
+    }
+    for (let i = 0; i < emptySlots; i += 1) {
+      const li = createEmptySlotCard();
+      const index = visible.length + i;
+      if (revealItems && !wasSkeletonLoading) {
         li.classList.add("motion-reveal");
         li.style.setProperty(
           "--reveal-delay",
@@ -1826,7 +1972,11 @@ export function createHomeScreen({
         syncOwnCardCopy(ownCard, item);
       }
     }
-    empty.hidden = visible.length > 0;
+    empty.hidden =
+      visible.length > 0 ||
+      (activeTab === "mine" &&
+        mineFilter === "active" &&
+        visible.length < MAX_MINE_PENDING);
     scheduleTabbarContrastSync();
   }
 
@@ -1858,9 +2008,56 @@ export function createHomeScreen({
     items = /** @type {HomePortfolioItem[]} */ (cached);
     if (tab === "mine") {
       syncMineReadyFromIds(readyOwnCardIds(items));
+    } else if (tab === "feed") {
+      syncFeedUnseenFromIds(feedCardIds(items));
     }
     renderList();
     return true;
+  }
+
+  /**
+   * Открыли «На ревью»: текущие id ленты считаются просмотренными,
+   * точка на вкладке гаснет.
+   *
+   * @param {string[]} ids
+   */
+  function acknowledgeFeedSeen(ids) {
+    const userId = getSession()?.userId;
+    seedFeedSeenIfNeeded(userId, ids);
+    markFeedSeen(userId, ids);
+    setFeedUnseen(false);
+  }
+
+  /**
+   * Точка по unseen кейсам; если уже на «На ревью» — сразу acknowledge.
+   *
+   * @param {string[]} ids
+   */
+  function syncFeedUnseenFromIds(ids) {
+    if (activeTab === "feed") {
+      acknowledgeFeedSeen(ids);
+      return;
+    }
+    const userId = getSession()?.userId;
+    if (seedFeedSeenIfNeeded(userId, ids)) {
+      setFeedUnseen(false);
+      return;
+    }
+    setFeedUnseen(hasUnseenFeed(userId, ids));
+  }
+
+  /** Точка на «На ревью»: непросмотренный новый кейс в ленте. */
+  async function refreshFeedUnseen(epoch, tab, feedItems) {
+    if (tab === "feed") {
+      if (epoch === refreshEpoch) {
+        syncFeedUnseenFromIds(feedCardIds(feedItems));
+      }
+      return;
+    }
+    const ids = await listFeedPortfolioIds();
+    if (epoch === refreshEpoch) {
+      syncFeedUnseenFromIds(ids);
+    }
   }
 
   /**
@@ -1956,6 +2153,8 @@ export function createHomeScreen({
           ratingList.hidden = true;
         }
       }
+      await refreshMineReady(epoch, tab, []);
+      await refreshFeedUnseen(epoch, tab, []);
       const online = await onlineLegendariesPromise;
       if (epoch === refreshEpoch) {
         legendaryOnlinePanel.setItems(online);
@@ -1974,6 +2173,7 @@ export function createHomeScreen({
     setCachedHomeList(getSession()?.userId, tab, next);
     setItems(next, { silent: !wasLoading });
     await refreshMineReady(epoch, tab, next);
+    await refreshFeedUnseen(epoch, tab, next);
 
     const online = await onlineLegendariesPromise;
     if (epoch === refreshEpoch) {
@@ -2024,6 +2224,16 @@ export function createHomeScreen({
         readyOwnCardIds(
           /** @type {HomePortfolioItem[] | null} */ (
             getCachedHomeList(getSession()?.userId, "mine")
+          ),
+        ),
+      ),
+    );
+    setFeedUnseen(
+      hasUnseenFeed(
+        getSession()?.userId,
+        feedCardIds(
+          /** @type {HomePortfolioItem[] | null} */ (
+            getCachedHomeList(getSession()?.userId, "feed")
           ),
         ),
       ),
@@ -2120,11 +2330,7 @@ export function createHomeScreen({
   });
 
   addBtn.addEventListener("click", () => {
-    if (!canSubmitPortfolio()) {
-      openSubmitLockedModal();
-      return;
-    }
-    void onAddPortfolio?.();
+    tryAddPortfolio();
   });
 
   balanceChip.addEventListener("click", () => {

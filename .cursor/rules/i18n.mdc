@@ -28,7 +28,7 @@ alwaysApply: true
 |---------|---------|
 | `referral*` | invite gate |
 | `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict` | регистрация / OTP |
-| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeCardReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeReputation*` / `homeAccount*` / `homeLegendaryOnline*` / `homeRating*` | home + notices / intro / mine gate / Активные·Завершенные / seen-dot / слоты ревьюеров / репутация / меню профиля / легенды онлайн / рейтинг топ-50 |
+| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeCardReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeMineSlotFree*` / `homePendingLimit*` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeAccount*` / `homeLegendaryOnline*` / `homeRating*` | home + notices / intro / mine gate / Активные·Завершенные / free-slot / pending-limit / seen-dot / слоты ревьюеров / репутация / меню профиля / легенды онлайн / рейтинг топ-50 |
 | `modalCloseAria` | общая модалка (`app-modal`) |
 | `url*` / `urlScreenBack*` | `/portfolio` (в т.ч. чип «На главную») |
 | `ban*` | `/banned` |

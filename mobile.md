@@ -18,7 +18,7 @@
 | `/registration` | email → `/registration/code` (OTP + cooldown resend / назад); Telegram; Google (редирект) |
 | `/registration/code` | 6 ячеек; cooldown «Повторно через N с»; ошибки identity / rate-limit |
 | `/onboarding` | шаги, валидация, запись в `profiles` |
-| `/home` | feed/mine/rating (rating — placeholder), query + Back/Forward, лента SWR без skeleton на hit, tabbar-dock (3 tabs + submit) `--on-dark`, intro до claim, отправленный отчёт disabled, фильтр Активные/Завершенные, mine gate / report, точка 3/3, баланс / репутация / invite |
+| `/home` | feed/mine/rating (топ-50 `listRatingTop`), query + Back/Forward, лента SWR без skeleton на hit, tabbar-dock (3 tabs + submit) `--on-dark`, intro до claim, отправленный отчёт disabled, фильтр Активные/Завершенные, mine gate / report, точки feedSeen + 3/3, баланс / репутация / invite; desktop — legendary aside |
 | `/settings` | заглушка из account-menu; «На главную» |
 | `/portfolio` | ввод URL, чип «На главную» (скрыт на done), нехватка баланса, done |
 | `/review` | iframe / external, таймер 45 s, чип rec (заметки), выход |
@@ -34,7 +34,7 @@
 
 ## Подключённые стили (entry)
 
-Из `index.html`: `tokens.css`, `base.css`, `entrance.css`, `app-modal.css`, `iframe-shell.css`, `success-screen.css`, `home-screen.css`, `tabs-panel.css`, `account-menu.css`, `settings-screen.css`, `ban-screen.css`, `report-screen.css`.
+Из `index.html`: `tokens.css`, `base.css`, `entrance.css`, `app-modal.css`, `iframe-shell.css`, `success-screen.css`, `home-screen.css`, `legendary-online-panel.css`, `tabs-panel.css`, `account-menu.css`, `settings-screen.css`, `ban-screen.css`, `report-screen.css`.
 
 ---
 

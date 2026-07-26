@@ -26,7 +26,7 @@ alwaysApply: true
 3. Mutations claims / referrals / ban / tier — RPC `security definer` + `set search_path = public`, не прямой INSERT/UPDATE с клиента.
 4. Не `grant` лишнего на `anon`/`authenticated`; seed-таблицы без прямого SELECT.
 5. Клиент не пишет: `banned_at`, `ban_reason`, `tier`, `balance`, `reputation`; grade/role — только до `onboarding_done`.
-6. Баланс: `spend_submit_cost` RPC; награда за ревью — в `handle_review_inserted`; не `updateMyProfile({ balance })`.
+6. Баланс: `submit_portfolio` RPC (atomic spend+insert, max 1 pending); legacy `spend_submit_cost`; награда за ревью — в `handle_review_inserted`; не `updateMyProfile({ balance })`.
 7. Не ослаблять лиги / claim-триггеры «для удобства UI».
 
 ## Клиент / сессия

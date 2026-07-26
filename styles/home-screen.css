@@ -614,6 +614,67 @@
   opacity: 1;
 }
 
+/* Свободный слот «Мои → Активные» (Figma Type=Queue) */
+.home-screen__card--slot-empty:hover {
+  --home-screen-card-surface: var(--home-screen-card-bg-hover);
+}
+
+.home-screen__card--slot-empty:active {
+  --home-screen-card-surface: var(--home-screen-card-bg-active);
+}
+
+.home-screen__slot-empty-preview {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: var(--home-screen-preview-height);
+  border-radius: var(--home-screen-preview-radius);
+  border: var(--home-screen-slot-empty-dash) dashed
+    var(--home-screen-slot-empty-border-color);
+  background: var(--home-screen-slot-empty-preview-bg);
+}
+
+.home-screen__slot-empty-label {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--home-screen-slot-empty-label-size);
+  font-weight: var(--home-screen-slot-empty-label-weight);
+  line-height: var(--line-height-snug);
+  color: var(--color-text);
+  text-align: center;
+}
+
+.home-screen__slot-empty-meta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--home-screen-card-gap);
+}
+
+.home-screen__slot-empty-pill {
+  box-sizing: border-box;
+  display: block;
+  flex-shrink: 0;
+  height: var(--home-screen-slot-empty-meta-height);
+  border-radius: var(--home-screen-slot-empty-meta-radius);
+  border: var(--home-screen-slot-empty-dash) dashed
+    var(--home-screen-slot-empty-border-color);
+  background: var(--home-screen-slot-empty-preview-bg);
+}
+
+.home-screen__slot-empty-pill--wide {
+  width: var(--home-screen-slot-empty-meta-wide);
+  max-width: 100%;
+  flex: 1 1 auto;
+}
+
+.home-screen__slot-empty-pill--narrow {
+  width: var(--home-screen-slot-empty-meta-narrow);
+}
+
 .home-screen__preview {
   box-sizing: border-box;
   position: relative;

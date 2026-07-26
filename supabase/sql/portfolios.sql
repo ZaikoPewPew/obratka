@@ -194,17 +194,8 @@ create policy "portfolios_select_feed"
     )
   );
 
+-- INSERT только через RPC submit_portfolio (portfolio_submit.sql) — не напрямую.
 drop policy if exists "portfolios_insert_own" on public.portfolios;
-create policy "portfolios_insert_own"
-  on public.portfolios for insert
-  to authenticated
-  with check (
-    owner_id = auth.uid()
-    and not public.is_profile_banned(auth.uid())
-    and status = 'pending'
-    and reviews_count = 0
-    and target_reviews = 3
-  );
 
 -- Счётчик/статус обновляет только security definer trigger.
 -- Актуальная SELECT-политика (reviewer + owner): review_claims.sql
@@ -231,7 +222,7 @@ create policy "reviews_insert_own"
     )
   );
 
-grant select, insert on public.portfolios to authenticated;
+grant select on public.portfolios to authenticated;
 grant select, insert on public.reviews to authenticated;
 
 revoke all on table public.portfolios from anon;

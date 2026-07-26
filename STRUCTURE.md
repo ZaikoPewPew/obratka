@@ -50,10 +50,10 @@
 | Папка | Роль |
 |-------|------|
 | `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `config/` ([README](src/config/README.md): review session + contacts), `lib/` ([README](src/lib/README.md): supabase + **dictation**), `assets/` |
-| `styles/` | Токены + UI. Entry: tokens/base/entrance/app-modal/iframe-shell/home/tabs-panel/success/ban/report |
+| `styles/` | Токены + UI. Entry: tokens/base/entrance/app-modal/iframe-shell/home/legendary-online-panel/tabs-panel/success/ban/report |
 | `content/` | `locales.json`, onboarding, embed-hosts, founder-avatars |
 | `public/` | Статика по URL (favicon и т.п.) |
-| `supabase/` | SQL (`profiles`, `referrals`, `portfolios`, `review_claims`, `review_complaints`, …) + Edge `telegram-auth`; доступы и адвайзоры — `SECURITY.md` |
+| `supabase/` | SQL (`profiles`, `legendary_presence`, `rating_leaderboard`, `referrals`, `portfolios`, `review_claims`, `review_complaints`, …) + Edge `telegram-auth`; доступы и адвайзоры — `SECURITY.md` |
 | `.cursor/` | Правила агента (`rules/*.mdc`) и карта (`.cursor/README.md`) |
 
 ### Brand UI (кратко)
@@ -78,14 +78,14 @@
 ```
 
 `/referral` — invite-only gate (`validate_referral`); после входа у юзера свой код (лимит 2), шаринг с home.  
-`/home` — feed/mine/rating; активный вид хранится в query через `homeRoute`; feed/mine используют SWR-кэш (`homeListCache`); rating пока placeholder. Intro до claim; отправленный отчёт → disabled-карточка; mine report gate; фильтр Активные/Завершенные (`tabs-panel`); точка на «Мои» и «Завершенные» (`mineReadySeen`); tabbar-dock (glass tabs + «Закинуть своё») с контрастом над превью.
+`/home` — feed/mine/rating; активный вид хранится в query через `homeRoute`; feed/mine/rating используют SWR-кэш (`homeListCache`); рейтинг — топ-50 (`listRatingTop`); aside «Легенды онлайн». Intro до claim; отправленный отчёт → disabled-карточка; mine report gate; фильтр Активные/Завершенные (`tabs-panel`); точка на «На ревью» (`feedSeen`); точка на «Мои» и «Завершенные» (`mineReadySeen`); tabbar-dock (glass tabs + «Закинуть своё») с контрастом над превью.
 `/portfolio` — подача URL; чип «На главную» (скрыт на done); done на том же экране.  
 `/review` = просмотр портфолио + таймер **45 s** (`REVIEW_SESSION_SECONDS` в `src/config/review.js`) + опциональная надиктовка (чип rec → `answers.dictation`).  
 `/quiz` = опрос; в поле «Главный совет» — микрофон (тот же `DictationEngine` → текст в `advice`). Не путать с login-`session.js` (`obratka.session`).  
 `/report` = листы ревью автора (+ секция надиктовки) + жалоба → `reputation` (вход только когда собраны все ревью).  
 `/banned` = бан (в т.ч. автобан по репутации).
 
-Клиентский кэш ленты: `sessionStorage` ключ `obratka.homeLists.<userId>`; seen готовых отчётов: `localStorage` `obratka.mineReadySeen.<userId>` (оба сбрасываются на logout).  
+Клиентский кэш ленты: `sessionStorage` ключ `obratka.homeLists.<userId>`; seen готовых отчётов: `localStorage` `obratka.mineReadySeen.<userId>`; seen кейсов ленты: `localStorage` `obratka.feedSeen.<userId>` (все сбрасываются на logout).  
 `localStorage`-сессия — UX-кэш: boot проверяет cached `userId` через Supabase Auth; auth-gated deep links без user не открываются.
 Таймер просмотра: `REVIEW_SESSION_SECONDS` в `src/config/review.js` (не путать с claim TTL 20 min).  
 Диктовка: [`src/lib/dictation/README.md`](src/lib/dictation/README.md).

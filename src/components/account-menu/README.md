@@ -11,7 +11,7 @@
 - «Настройки» → колбэк → `/settings` (заглушка).
 - «Пригласить» открывает `homeInvite*`-модалку (referral share).
 - «Контакты» → `COMMUNITY_CONTACT_URL` из `src/config/contacts.js`.
-- «Выйти» → `signOut` + `clearHomeListCache` + `clearMineReadySeen` → `/referral`.
+- «Выйти» → `signOut` + `clearHomeListCache` + `clearMineReadySeen` + `clearFeedSeen` → `/referral`.
 - Навигация, модалки и завершение сессии передаются колбэками наверх (без `go()` внутри меню).
 
 Стили: `styles/account-menu.css`. Все размеры, цвета и motion — токены
