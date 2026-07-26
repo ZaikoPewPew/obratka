@@ -701,6 +701,7 @@
   --home-screen-rating-role-size: var(--home-screen-meta-font-size);
   --home-screen-rating-role-weight: var(--home-screen-role-weight);
   --home-screen-rating-balance-height: 52px;
+  --home-screen-rating-balance-min-width: 52px;
   --home-screen-rating-balance-padding-x: var(--space-4);
   --home-screen-rating-balance-radius: var(--radius-md);
   --home-screen-rating-balance-bg: var(--color-surface);

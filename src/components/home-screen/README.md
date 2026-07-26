@@ -12,7 +12,7 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 |---------|-----|------------|
 | **На ревью** (`feed`, default) | `listPortfoliosForReview()` | Чужие `pending` **в лиге** грейда ревьюера (RLS), без своих; карточка до `target_reviews` completed-отчётов; `reviewedByMe` = отправленный отчёт (`reviews`), не claim/abort — disabled + оверлей, без модалки; точка на вкладке при **новом** кейсе (`listFeedPortfolioIds` + `feedSeen`) |
 | **Мои посты** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …); сверху сегмент **Мои на ревью / Мои завершенные** ([`tabs-panel`](../tabs-panel/README.md)); точка на вкладке и на «Мои завершенные» при **непросмотренном** готовом отчёте (`listReadyOwnReportIds` + `mineReadySeen`) |
-| **Рейтинг** (`rating`) | `listRatingTop()` | Топ-50 по балансу (Figma `RaitingCard` 482:2123) в `.home-screen__rating-list`: аватар 52 + бейдж места (синий, 20), имя/роль (`formatPortfolioRole`), белая плашка баланса; skeleton `--skeleton`-модификаторы; empty `.home-screen__rating-empty` (`homeRatingEmpty`); кэш вкладки в `homeListCache` (`rating`); снапшот на сервере обновляется раз в сутки (`rating_leaderboard.sql`) |
+| **Рейтинг** (`rating`) | `listRatingTop()` | Топ-50 по балансу (Figma `RaitingCard` 482:2123) в `.home-screen__rating-list`: аватар 52 + бейдж места (синий, 20), имя/роль (`formatPortfolioRole`), белая плашка баланса (`min-width`/`height` 52px, padding-x 16px — `--home-screen-rating-balance-*`); skeleton `--skeleton`-модификаторы; empty `.home-screen__rating-empty` (`homeRatingEmpty`); кэш вкладки в `homeListCache` (`rating`); снапшот на сервере обновляется раз в сутки (`rating_leaderboard.sql`) |
 
 Переключатель: `home-screen__tabbar` внутри дока `home-screen__tabbar-dock` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`). Вкладки: **На ревью** / **Мои посты** / **Рейтинг**. Справа от таббара в доке (gap 8px, `--home-screen-tabbar-dock-gap`) — кнопка «Закинуть своё» (56×56, r16, Google blue, плюс 24; токены `--home-screen-tabbar-submit-*`).
 
@@ -123,7 +123,7 @@ SWR: при `open` / смене таба / F5 — если есть кэш вк�
 Клик по чужой карточке → intro-модалка «Как проходит ревью» (`createAppModal`, шаги `homeReviewIntroStep1…4`, таймер из [`src/config/review.js`](../../config/review.js)) → CTA «Проревьюить» → `onOpenPortfolio` → `claimPortfolioReview` → `/review` (таймер + опц. надиктовка). «Не сейчас» / закрытие — без claim.  
 Своя (`isOwn`, вкладка «Мои») кликабельна всегда: собраны все ревью (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report` (листы + жалоба); иначе модалка `homeMineNotReady*` с прогрессом. Title / aria карточки — `homeCardReport*` либо `homeCardReportPending*`, пересинхронизируются при silent-патче слотов.  
 Уже отревьюенная карточка (`reviewedByMe` = строка в `reviews` после submit) — `disabled`, без intro и без notice; статус только оверлеем на превью.
-CTA «Закинуть своё» (кнопка в доке у таббара) — всегда активна. Баланс ≥ `SUBMIT_COST` → `onAddPortfolio` → `/portfolio`; иначе `createAppModal` «не хватает монет».
+CTA «Закинуть своё» (кнопка в доке у таббара) — всегда активна. Баланс ≥ `SUBMIT_COST` (30) → `onAddPortfolio` → `/portfolio`; иначе `createAppModal` «не хватает монет». Старт с 0 → нужно ~3 чужих ревью (`REVIEW_REWARD` 10).
 
 Лиги (тихий матчинг): junior → junior; middle → junior+middle; senior/lead/head → middle+senior+.  
 Клиент-зеркало: [`src/api/leagues.js`](../../api/leagues.js). Сервер: [`supabase/sql/portfolios.sql`](../../../supabase/sql/portfolios.sql) + [`review_claims.sql`](../../../supabase/sql/review_claims.sql) (`can_review_portfolio`, claim-слоты, RLS).
@@ -142,8 +142,8 @@ Topbar поверх контента (`position: absolute`), появление 
 - При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.
 - Репутация: `profiles.reputation` ↔ `session.reputation`; чип = иконка + дельта от 100 (`0` / `+10` / `-20`, `formatReputationDelta`); клик → explainer через `createAppModal` (без весов тегов).
 - Порядок чипов в шапке: репутация → баланс → аватар. «Закинуть своё» — не в шапке, а в доке у таббара; чип уведомлений убран (непросмотренный готовый отчёт — точка на «Мои посты»).
-- Баланс: `profiles.balance` ↔ `session.balance`.
-- Клик по чипу баланса (**DEV**): local-only через `creditBalance` (+10). Серверный spend — `spend_submit_cost`; награда за ревью — в `handle_review_inserted`.
+- Баланс: `profiles.balance` ↔ `session.balance`. Экономика: `REVIEW_REWARD = 10`, `SUBMIT_COST = 30` ([`wallet.js`](../../api/wallet.js) / `wallet.mdc`).
+- Клик по чипу баланса (**DEV**): local-only через `creditBalance` (+10). Подача — RPC `submit_portfolio` (spend 30); legacy `spend_submit_cost`; награда за ревью (+10) — в `handle_review_inserted`.
 - CTA «Закинуть своё» без монет → `createAppModal` «Монет маловато»; notices (no slots / already reviewed) — тот же `noticeModal`.
 - Клик по аватару профиля → `account-menu` из Figma `467:1320`, раскрывающийся влево от правого края аватара с отступом 16px вниз (без выхода за viewport).
 - В меню `displayName` (из `profiles.display_name`) и email не кликабельны; «Настройки» → `/settings`, «Пригласить» → `homeInvite*`-модалка, «Контакты» → `createAppModal`, «Выйти» → полный Supabase `signOut` + очистка локальной сессии.

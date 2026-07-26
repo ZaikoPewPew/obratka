@@ -464,6 +464,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  min-width: var(--home-screen-rating-balance-min-width);
   height: var(--home-screen-rating-balance-height);
   padding-inline: var(--home-screen-rating-balance-padding-x);
   border-radius: var(--home-screen-rating-balance-radius);

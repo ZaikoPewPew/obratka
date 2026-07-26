@@ -21,6 +21,6 @@
 | `components/` | UI-экраны; brand: `brand-screen-visual`, `brand-screen-shell` |
 | `config/` | review session + contacts |
 | `utils/` | field errors, motion, handoff, mesh, homeRoute/homeListCache, feedSeen, mineReadySeen, backdropLuminance, PDF — [`utils/README.md`](utils/README.md) |
-| `api/` | Auth, profiles, wallet, portfolios, referrals, reviewComplaints |
+| `api/` | Auth, profiles, wallet, portfolios, leagues, referrals, reviewComplaints, presence, rating |
 | `assets/` | brand marks / morph — [`assets/README.md`](assets/README.md) |
 | `lib/` | supabase client + **dictation** |

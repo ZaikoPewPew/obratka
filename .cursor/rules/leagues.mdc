@@ -41,4 +41,4 @@ Senior → Junior **нельзя** (ликвидность мидлов). Grade 
 - Порядок ленты после слотов — `sortFeedForSlotClosure` в `portfolios.js` (не SQL)
 - Home UI: [`src/components/home-screen/`](../../src/components/home-screen/) — SWR-кэш вкладок, silent patch слотов, glass-tabbar + tabbar-dock submit, intro до claim, mine report gate, фильтр Активные/Завершенные (`tabs-panel`), seen-dot ленты (`feedSeen`) + 3/3 (`mineReadySeen`), вкладка рейтинга (`listRatingTop`), fixed «Топы в сети» (`legendary-online-panel`); FAB «быстрая связь» (`contact-fab`).
 
-Награды v1 пока 1:1; дифференциал экономики — позже.
+Награды v1: 10 за ревью / 30 за подачу (3:1); дифференциал по лигам — позже.

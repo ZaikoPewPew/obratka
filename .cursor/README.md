@@ -18,6 +18,7 @@
 | `reputation.mdc` | Жалобы на листы → репутация → автобан |
 | `supabase-sql.mdc` | Порядок SQL, RPC, RLS (glob `supabase/**`) |
 | `security.mdc` | Секреты, RLS, клиент: anon ок; `service_role` никогда |
+| `wallet.mdc` | Баланс: `submit_portfolio` / award; клиент не пишет `balance` |
 | `git-remote.mdc` | Remote / Pages только `ZaikoPewPew/obratka` |
 
 ## Дизайн-система
@@ -65,9 +66,9 @@
 | Надиктовка | `src/lib/dictation/` + `.iframe-shell__rec` + `.review-panel__rec` |
 | Онбординг-контент | `content/onboarding.json`, `content/onboarding.md` |
 
-Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `legendary-online-panel`, `tabs-panel`, `account-menu`, `settings-screen`, `success-screen`, `ban-screen`, `report-screen`.
+Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `legendary-online-panel`, `contact-fab`, `tabs-panel`, `account-menu`, `settings-screen`, `success-screen`, `ban-screen`, `report-screen`.
 
-**Home:** вкладки feed/mine/rating (топ-50 `listRatingTop`, кэш `homeListCache`); query через `homeRoute` (`?tab=mine&filter=completed`, Back/Forward без remount); SWR memory + `obratka.homeLists.<userId>`; silent slot patch; feed sort `sortFeedForSlotClosure`; `reviewedByMe` только после submit → disabled + оверлей; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); фильтр Активные/Завершенные (`tabs-panel`; 3/3 → Завершенные); точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`; гаснет при открытии feed); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`; гаснет при открытии «Завершенные»); fixed-чип «Топы в сети» (`legendary-online-panel`); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) + `--on-dark` через `backdropLuminance`. Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache` + `clearMineReadySeen` + `clearFeedSeen`.
+**Home:** вкладки feed/mine/rating (топ-50 `listRatingTop`, кэш `homeListCache`); query через `homeRoute` (`?tab=mine&filter=completed`, Back/Forward без remount); SWR memory + `obratka.homeLists.<userId>`; silent slot patch; feed sort `sortFeedForSlotClosure`; `reviewedByMe` только после submit → disabled + оверлей; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); фильтр Активные/Завершенные (`tabs-panel`; 3/3 → Завершенные); на «Мои на ревью» — free-slot до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / `homePendingLimit*`); точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`; гаснет при открытии feed); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`; гаснет при открытии «Завершенные»); fixed-чип «Топы в сети» (`legendary-online-panel`); FAB «быстрая связь» (`contact-fab`); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) + `--on-dark` через `backdropLuminance`. Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache` + `clearMineReadySeen` + `clearFeedSeen`.
 **Url-screen:** чип `.url-screen__back` (`urlScreenBack*`) → home; на done скрыт.  
 Подробно: [`home-screen/README.md`](../src/components/home-screen/README.md), [`url-screen/README.md`](../src/components/url-screen/README.md).
 
@@ -123,8 +124,7 @@ API: `src/api/auth.js`. Edge: `supabase/functions/telegram-auth/`.
 - **Anon ок** в клиенте / `.env.production` / Pages; защита = **RLS**, не секретность ключа.
 - **`service_role` / `TELEGRAM_BOT_TOKEN` / Google Client Secret** — никогда в клиент, git или чат.
 - Клиент только через `src/lib/supabaseClient.js` (anon).
-- **Balance** — только RPC `spend_submit_cost` / award в review trigger; не client UPDATE.
-- Подробно — `security.mdc`.
+- **Balance** — primary `submit_portfolio` (atomic spend+insert); legacy `spend_submit_cost`; award в `handle_review_inserted`; не client UPDATE. Подробно — `wallet.mdc` / `security.mdc`.
 
 ## Supabase SQL map
 
@@ -133,9 +133,11 @@ API: `src/api/auth.js`. Edge: `supabase/functions/telegram-auth/`.
 | `profiles.sql` | профиль, ban, reputation, tier, referral-колонки |
 | `legendary_presence.sql` | `last_seen_at` + heartbeat/list (legendary online) |
 | `rating_leaderboard.sql` | снапшот топ-50 + `list_rating_top` |
+| `wallet.sql` | protect balance + legacy `spend_submit_cost` |
 | `referrals.sql` | validate / redeem / seed |
 | `portfolios.sql` | очередь + лиги |
-| `review_claims.sql` | claim-слоты (после portfolios) |
+| `portfolio_submit.sql` | RPC `submit_portfolio` (atomic spend+insert, max 1 pending) |
+| `review_claims.sql` | claim-слоты (после portfolios); award в trigger |
 | `review_complaints.sql` | жалобы на листы → reputation → автобан |
 | `ban-templates.sql` | операторский бан |
 
@@ -156,8 +158,11 @@ Variants: `default` / `invalid` (без resize) / `done`. Handoff: `go(id, { han
 
 ## Wallet (кратко)
 
-`REVIEW_REWARD` / `SUBMIT_COST` stub в `src/api/wallet.js`.  
-Баланс: `profiles.balance` ↔ `session.balance`. Награда ревью — только после submit (см. claims).
+`REVIEW_REWARD = 10` / `SUBMIT_COST = 30` в `src/api/wallet.js` (wired, не stub).  
+Старт `balance = 0` → 3 чужих ревью открывают подачу.  
+Подача: RPC `submit_portfolio` (atomic spend+insert, max 1 pending).  
+Награда: только после `submitPortfolioReview` → `handle_review_inserted` (`REVIEW_REWARD`).  
+Клиент не пишет `profiles.balance`. Правило: `wallet.mdc`.
 
 ## Исследования
 

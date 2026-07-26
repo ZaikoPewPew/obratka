@@ -4,10 +4,10 @@ import { fetchMyProfile, updateMyProfile } from "./profiles.js";
 import { getSupabase } from "../lib/supabaseClient.js";
 
 /** Награда за завершённое ревью (начисляет сервер в handle_review_inserted). */
-export const REVIEW_REWARD = 1;
+export const REVIEW_REWARD = 10;
 
 /** Стоимость подачи своего портфолио (списывает RPC submit_portfolio). */
-export const SUBMIT_COST = 1;
+export const SUBMIT_COST = 30;
 
 /**
  * Инкремент при локальной мутации баланса (credit/spend), чтобы in-flight

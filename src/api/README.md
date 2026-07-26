@@ -48,7 +48,7 @@ Env / Dashboard: `.env.example`, `src/components/auth-screen/README.md`, `supaba
 
 | Файл | Роль |
 |------|------|
-| `wallet.js` | `getBalance` / `applySubmitBalance` / `spendSubmitCost` (legacy RPC) / `awardReviewReward` (= refresh) / `creditBalance` (DEV local-only) / `REVIEW_REWARD` / `SUBMIT_COST`; `refreshSessionFromProfile` |
+| `wallet.js` | `getBalance` / `applySubmitBalance` / `spendSubmitCost` (legacy RPC) / `awardReviewReward` (= refresh) / `creditBalance` (DEV local-only) / `REVIEW_REWARD = 10` / `SUBMIT_COST = 30` (3 ревью → подача); `refreshSessionFromProfile` |
 | `leagues.js` | матчинг лиг по `grade` (зеркало SQL): `gradeToLeague` / `canReviewGrades`; null/unknown → лига 1 |
 | `portfolios.js` | `listPortfoliosForReview` (чужие pending в лиге + слоты; до 3/3 completed; порядок `sortFeedForSlotClosure`: open slot → closer to target → FIFO; `reviewedByMe` / full вниз) / `listMyPortfolios` (`created_at` DESC) / `listFeedPortfolioIds` для точки «новый кейс» на «На ревью» / `listReadyOwnReportIds` (+ `hasReadyOwnReport`) для точки на «Мои» / claim·heartbeat·release (**claim только после CTA intro на home**) / `submitPortfolio` (RPC `submit_portfolio`) / `countMyPendingPortfolios` / `hasFreeMineSlot` / `MAX_MINE_PENDING` (=1) / `submitPortfolioReview` (answers + опционально `dictation`) + `formatPortfolioRole` / `formatPortfolioGrade` (без известного grade → `gradeUndefined`); active-слоты на карточке **анонимны** (`homeCardReviewerAnonymous` — без PII до завершения ревью) |
 | `reviewComplaints.js` | жалобы на листы: `listPortfolioReviewSheets` (с `answers`) / `submitReviewComplaint` / `getReputation` / `formatReputationDelta`; теги v1 без весов на клиенте; RPC `submit_review_complaint` |

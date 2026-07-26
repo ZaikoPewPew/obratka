@@ -2,7 +2,7 @@
 -- Apply after profiles.sql. Idempotent.
 --
 -- Clients cannot UPDATE profiles.balance directly.
--- spend_submit_cost() — legacy списание (1 coin); новая подача — submit_portfolio
+-- spend_submit_cost() — legacy списание (30 coins); новая подача — submit_portfolio
 --   в portfolio_submit.sql (atomic spend + insert + max 1 pending).
 -- Награда за ревью — в handle_review_inserted (review_claims.sql) через bypass GUC.
 
@@ -38,7 +38,7 @@ revoke all on function public.protect_profiles_balance() from anon;
 revoke all on function public.protect_profiles_balance() from authenticated;
 
 -- ---------------------------------------------------------------------------
--- Spend submit cost (1 coin). Returns new balance.
+-- Spend submit cost (30 coins). Returns new balance.
 -- ---------------------------------------------------------------------------
 
 create or replace function public.spend_submit_cost()
@@ -50,7 +50,7 @@ as $$
 declare
   uid uuid := auth.uid();
   bal integer;
-  cost constant integer := 1;
+  cost constant integer := 30;
 begin
   if uid is null then
     raise exception 'not_authenticated';

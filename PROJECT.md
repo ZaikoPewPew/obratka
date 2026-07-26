@@ -17,6 +17,7 @@
 | Home: SWR-кэш вкладок + silent slot patch | wired (`homeListCache.js`: feed/mine/rating) |
 | Home: точка «новый кейс» на «На ревью» | wired (`feedSeen.js` + `listFeedPortfolioIds`) |
 | Home: «Топы в сети» (fixed-чип) | wired (`legendary-online-panel` + `legendary_presence`) |
+| Home: free-slot «Мои» + max 1 pending | wired (`MAX_MINE_PENDING`, `submit_portfolio`) |
 | Home tabbar dock: glass + «Закинуть своё» справа | wired (`tabbar-dock`, `--on-dark`) |
 | Review claim / heartbeat / release | wired (награда только после submit) |
 | Review iframe + таймер 45 s + **надиктовка** (rec на `/review` + микрофон в поле совета) + квиз | wired |
@@ -36,7 +37,9 @@
 - **Intro до claim:** клик по чужой карточке → `createAppModal` `homeReviewIntro*` (шаг 1 с `{seconds}` = `REVIEW_SESSION_SECONDS`) → CTA «Проревьюить» → claim → `/review`. «Не сейчас» / закрытие — без claim.
 - **Mine report gate:** `reviewsCount < targetReviews` → `homeMineNotReady*`; иначе `/report`. Own-карточки всегда `cursor: pointer` (не `not-allowed`).
 - **Фильтр «Мои»:** сегмент Активные / Завершенные (`tabs-panel`); завершённые = 3/3 (`reviewsCount >= targetReviews`).
-- **Вкладка «Рейтинг»:** третий tab `rating`; топ-50 по `balance` (`listRatingTop` / `rating_leaderboard.sql`, снапшот раз в сутки); карточки в `.home-screen__rating-list` (aside `rating/` **не** монтируется).
+- **Free-slot «Мои на ревью»:** до `MAX_MINE_PENDING` (=1) — реальная карточка или dashed «Свободный слот» (`homeMineSlotFree*`); занятый слот → `homePendingLimit*`; нет монет → `homeSubmitLocked*`. Подача — RPC `submit_portfolio` (atomic spend+insert).
+- **Экономика:** `REVIEW_REWARD = 10`, `SUBMIT_COST = 30` (старт `balance = 0` → 3 чужих ревью до своей подачи). Награда только после submit отчёта; abort/release claim — без монет. Правило: `.cursor/rules/wallet.mdc`.
+- **Вкладка «Рейтинг»:** третий tab `rating`; топ-50 по `balance` (`listRatingTop` / `rating_leaderboard.sql`, снапшот раз в сутки); карточки в `.home-screen__rating-list` (aside `rating/` **не** монтируется); плашка баланса `min-width`/`height` 52px, padding-x 16px.
 - **«Топы в сети»:** fixed-чип слева снизу (`legendary-online-panel` + heartbeat/list RPC); скрыт, если никого нет.
 - **Deep links home:** `/home`, `?tab=mine`, `?tab=mine&filter=completed`, `?tab=rating`; query канонизирует `homeRoute.js`, Back/Forward переключает вид без remount.
 - **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 45` (review shell + intro copy).
@@ -118,13 +121,21 @@ SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabas
 
 Тихий матчинг по `profiles.grade` (UI «лиг» нет). Клиент-зеркало: [`src/api/leagues.js`](src/api/leagues.js). Правило: `.cursor/rules/leagues.mdc`.
 
+| Лига | `profiles.grade` |
+|------|------------------|
+| 1 | `junior`, **null / unknown** |
+| 2 | `middle` |
+| 3 | `senior`, `lead`, `head` |
+
+Null/unknown **не** пишем в `junior` в БД: матчинг = лига 1; UI = `gradeUndefined` («Грейд не определён»). Оператор может поправить grade руками.
+
 | Портфолио | Ревьюеры |
 |-----------|----------|
-| Junior | Junior, Middle |
+| Junior (и null) | Junior (и null), Middle |
 | Middle | Middle, Senior+ |
 | Senior+ | Senior+ |
 
-Senior → Junior нельзя. Grade обязателен в онбординге. Claims / INSERT тоже проверяют лигу.
+Senior → Junior нельзя. Grade обязателен в онбординге UI; серверный fallback лиги 1 — safety net. Claims / INSERT тоже проверяют лигу.
 
 ## Репутация и жалобы на листы
 
@@ -145,7 +156,7 @@ Senior → Junior нельзя. Grade обязателен в онбординг
 
 | Слой | Где |
 |------|-----|
-| Brand split (referral / auth / auth-code / onboarding / url) | `.url-screen*` + [`brand-screen-visual`](src/components/brand-screen-visual/README.md); цель — `brand-screen-shell`; на `/portfolio` — back-chip top-left |
+| Brand split (referral / auth / auth-code / onboarding / url) | `.url-screen*` + [`brand-screen-visual`](src/components/brand-screen-visual/README.md) + [`brand-screen-shell`](src/components/brand-screen-shell/README.md); на `/portfolio` — back-chip top-left |
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
 | Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `contact-fab`; feed/mine/rating (`listRatingTop`); URL-query; лента SWR; Активные/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` |

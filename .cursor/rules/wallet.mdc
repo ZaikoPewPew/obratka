@@ -1,0 +1,23 @@
+---
+description: Экономика баланса — submit_portfolio, award за ревью, клиент не пишет balance
+alwaysApply: true
+---
+
+# Wallet / баланс
+
+Монеты: `profiles.balance` ↔ UX-кэш `session.balance`. Константы клиента: `REVIEW_REWARD = 10`, `SUBMIT_COST = 30` в `src/api/wallet.js` (**не** stub). Старт с 0 → 3 чужих ревью до своей подачи.
+
+## Жёсткие правила
+
+1. Клиент **не** пишет `balance` (`protect_profiles_balance`; не `updateMyProfile({ balance })`).
+2. Подача портфолио — RPC **`submit_portfolio`** (atomic spend + insert; max **1** pending = `MAX_MINE_PENDING`).
+3. Legacy `spend_submit_cost` — только отдельное списание без insert; новая подача не через него.
+4. Награда за ревью — только сервер в `handle_review_inserted` после успешного INSERT review; abort/release claim → **без** монет.
+5. UI «Мои на ревью»: free-slot placeholder до лимита (`homeMineSlotFree*`); занятый слот → `homePendingLimit*`; нет монет → `homeSubmitLocked*`.
+
+## Код
+
+- API: `src/api/wallet.js`, `submitPortfolio` в `portfolios.js`
+- SQL: `supabase/sql/wallet.sql`, `portfolio_submit.sql` (после `portfolios.sql`)
+- Award: `review_claims.sql` → `handle_review_inserted`
+- Секреты / RLS: `security.mdc`

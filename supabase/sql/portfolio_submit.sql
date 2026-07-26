@@ -1,4 +1,4 @@
--- Atomic portfolio submit: spend 1 coin + INSERT + max 1 pending per owner.
+-- Atomic portfolio submit: spend 30 coins + INSERT + max 1 pending per owner.
 -- Apply after portfolios.sql (+ wallet.sql for balance guards). Idempotent.
 --
 -- Clients must not INSERT portfolios directly — only this RPC.
@@ -41,7 +41,7 @@ as $$
 declare
   uid uuid := auth.uid();
   bal integer;
-  cost constant integer := 1;
+  cost constant integer := 30;
   max_pending constant integer := public.max_mine_pending();
   pending_count integer;
   clean_url text := trim(coalesce(p_url, ''));

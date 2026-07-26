@@ -74,9 +74,9 @@ order by 1;
 
 Клиент **не может** начислять монеты:
 
-- подача портфолио — `submit_portfolio()` (atomic: лимит 1 pending + spend 1 + INSERT);
-- legacy `spend_submit_cost()` без insert — не использовать с клиента;
-- награда за ревью (+1) — внутри `handle_review_inserted` через `set_config('app.bypass_profile_guards', ...)`;
+- подача портфолио — `submit_portfolio()` (atomic: лимит 1 pending + spend 30 + INSERT);
+- legacy `spend_submit_cost()` без insert — не использовать с клиента (тоже 30);
+- награда за ревью (+10) — внутри `handle_review_inserted` через `set_config('app.bypass_profile_guards', ...)`;
 - RPC `temp_credit_balance` **удалён** 2026-07-26 (был временный, позволял любому залогиненному накрутить себе баланс);
 - клик по чипу баланса на home теперь DEV-only и пишет только в localStorage.
 

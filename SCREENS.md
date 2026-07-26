@@ -84,7 +84,7 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 
 Handoff соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
-`home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки feed/mine/rating (топ-50 `listRatingTop`); SWR `homeListCache`; fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB «быстрая связь» (`contact-fab`, Telegram); intro до claim (`homeReviewIntro*`); `reviewedByMe` после submit → disabled + оверлей; mine report gate (`homeMineNotReady*`); фильтр Активные/Завершенные (`tabs-panel`); точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`).
+`home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки feed/mine/rating (топ-50 `listRatingTop`); SWR `homeListCache`; fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB «быстрая связь» (`contact-fab`, Telegram); intro до claim (`homeReviewIntro*`); `reviewedByMe` после submit → disabled + оверлей; mine report gate (`homeMineNotReady*`); фильтр Активные/Завершенные (`tabs-panel`); free-slot «Мои на ревью» до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / `homePendingLimit*`); точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`).
 `account-menu` — поповер под аватаром; identity read-only; settings / invite / contacts / sign out.  
 `settings-screen` — side-route `/settings` (заглушка).
 `url-screen` — split; чип «На главную» (`.url-screen__back` / `urlScreenBack*`, скрыт на done); при URL справа заглушка «Портфолио»; submit → done на том же экране (`setVariant("done")`).  
@@ -149,6 +149,7 @@ src/assets/brand/
 src/api/
   auth.js / profiles.js / onboarding.js / wallet.js
   portfolios.js / leagues.js / referrals.js / reviewComplaints.js
+  presence.js / rating.js
   telegramWidget.js / subscribers.js
 
 styles/
@@ -157,7 +158,11 @@ styles/
   app-modal.css
   iframe-shell.css
   home-screen.css
+  legendary-online-panel.css
+  contact-fab.css
   tabs-panel.css
+  account-menu.css
+  settings-screen.css
   success-screen.css
   report-screen.css
   ban-screen.css
@@ -186,7 +191,7 @@ Shared (не экраны флоу):
 | `createAuthScreen` | `/registration` | UI + Email → authCode / Telegram / Google (shell) |
 | `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` (shell) |
 | `createOnboardingScreen` | `/onboarding` | UI → profiles (shell) |
-| `createHomeScreen` | `/home` + query | UI (feed/mine/rating топ-50 + SWR + intro + mine gate + Активные/Завершенные + feedSeen/3/3 + «Топы в сети» + tabbar-dock) |
+| `createHomeScreen` | `/home` + query | UI (feed/mine/rating топ-50 + SWR + intro + mine gate + Активные/Завершенные + free-slot + feedSeen/3/3 + «Топы в сети» + contact-fab + tabbar-dock) |
 | `createSettingsScreen` | `/settings` | UI (заглушка настроек) |
 | `createUrlScreen` | `/portfolio` | UI (back-chip → home; submit + done via `setVariant`; shell) |
 | iframe-shell + timer + rec | `/review` | UI (заметки → `answers.dictation`) |

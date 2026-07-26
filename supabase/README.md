@@ -14,10 +14,11 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 | `sql/profiles.sql` | `public.profiles`, protect tier/ban/reputation/balance/grade, referral |
 | `sql/legendary_presence.sql` | `last_seen_at` + heartbeat/list для legendary online |
 | `sql/rating_leaderboard.sql` | снапшот топ-50 по `balance` + RPC `list_rating_top` |
-| `sql/wallet.sql` | protect balance + RPC `spend_submit_cost` |
+| `sql/wallet.sql` | protect balance + RPC `spend_submit_cost` (legacy, cost 30) |
 | `sql/referrals.sql` | referral-код на профиль (лимит 2), seed `YTHWKPDWAK`, RPC validate/redeem |
 | `sql/portfolios.sql` | portfolios/reviews, лиги; INSERT pending/0/target=3 |
-| `sql/review_claims.sql` | claims + award balance в review trigger |
+| `sql/portfolio_submit.sql` | RPC `submit_portfolio` (atomic spend 30 + insert, max 1 pending); revoke client INSERT |
+| `sql/review_claims.sql` | claims + award balance (+10) в review trigger |
 | `sql/review_complaints.sql` | жалобы на листы → `reputation` → автобан |
 | `sql/subscribers_rls.sql` | RLS на legacy `subscribers` (если таблица есть) |
 | `sql/ban-templates.sql` | Copy-paste SQL: бан / разбан / поиск |

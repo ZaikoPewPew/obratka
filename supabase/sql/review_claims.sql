@@ -390,10 +390,10 @@ begin
   where portfolio_id = new.portfolio_id
     and reviewer_id = new.reviewer_id;
 
-  -- Award REVIEW_REWARD (1) server-side; clients cannot write balance.
+  -- Award REVIEW_REWARD (10) server-side; clients cannot write balance.
   perform set_config('app.bypass_profile_guards', 'on', true);
   update public.profiles
-  set balance = balance + 1
+  set balance = balance + 10
   where id = new.reviewer_id;
 
   return new;
