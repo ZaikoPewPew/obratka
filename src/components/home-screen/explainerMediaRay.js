@@ -2,7 +2,7 @@ import lottie from "lottie-web";
 import rotatingRayAnimation from "../../assets/home/modal/rotating-ray.json";
 
 /**
- * Lottie «Rotating Ray» под PNG в explainer-медиа (между muted-фоном и фото).
+ * Lottie «Rotating Ray» под PNG в explainer-медиа (между тёмным фоном и фото).
  *
  * @returns {{ root: HTMLElement, destroy: () => void }}
  */
@@ -18,8 +18,8 @@ export function createExplainerMediaRay() {
     autoplay: true,
     animationData: rotatingRayAnimation,
   });
-  // 2/3 от дефолтной скорости Lottie (убрать 1/3).
-  anim.setSpeed(2 / 3);
+  // 1/3 от дефолтной скорости Lottie (ещё в 2 раза медленнее прежних 2/3).
+  anim.setSpeed(1 / 3);
 
   return {
     root,

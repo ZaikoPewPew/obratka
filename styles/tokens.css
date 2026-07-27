@@ -598,7 +598,7 @@
   --home-screen-reputation-explainer-media-width: 180px;
   --home-screen-reputation-explainer-media-height: 216px;
   --home-screen-reputation-explainer-media-radius: var(--radius-md);
-  --home-screen-reputation-explainer-media-bg: var(--color-surface-muted);
+  --home-screen-reputation-explainer-media-bg: var(--palette-gray-900);
   --home-screen-reputation-explainer-card-padding: var(--space-4);
   --home-screen-reputation-explainer-card-gap: var(--space-1);
   --home-screen-reputation-explainer-card-radius: var(--radius-md);
@@ -627,11 +627,11 @@
   --home-screen-balance-explainer-media-width: 182px;
   --home-screen-balance-explainer-media-height: 216px;
   --home-screen-balance-explainer-media-radius: var(--radius-md);
-  --home-screen-balance-explainer-media-bg: var(--color-surface-muted);
+  --home-screen-balance-explainer-media-bg: var(--palette-gray-900);
   --home-screen-p2p-explainer-media-width: 268px;
   --home-screen-p2p-explainer-media-height: 216px;
   --home-screen-p2p-explainer-media-radius: var(--radius-md);
-  --home-screen-p2p-explainer-media-bg: var(--color-surface-muted);
+  --home-screen-p2p-explainer-media-bg: var(--palette-gray-900);
   --home-screen-explainer-media-ray-size: 210%;
   --home-screen-explainer-media-ray-opacity: 0.9;
   --home-screen-balance-explainer-card-padding: var(--space-4);
