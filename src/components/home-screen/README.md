@@ -146,7 +146,7 @@ CTA «Закинуть своё» (кнопка в доке у таббара) �
 - Подача — RPC `submit_portfolio` (spend 30); legacy `spend_submit_cost`; награда за ревью (+10) — в `handle_review_inserted`.
 - CTA «Закинуть своё» без монет → `createAppModal` «Монет маловато»; notices (no slots / already reviewed) — тот же `noticeModal`.
 - Клик по аватару профиля → `account-menu` из Figma `467:1320`, раскрывающийся влево от правого края аватара с отступом 16px вниз (без выхода за viewport).
-- В меню `displayName` (из `profiles.display_name`) и email не кликабельны; «Настройки» → `/settings`, «Пригласить» → `homeInvite*`-модалка, «Контакты» → `createAppModal`, «Выйти» → полный Supabase `signOut` + очистка локальной сессии.
+- В меню `displayName` (из `profiles.display_name`) и email не кликабельны; «Настройки» → `/settings`, «Пригласить» → explainer `homeInvite*` (Figma `492:4030`): фото [`currency-referal.jpg`](../../assets/home/modal/currency-referal.jpg) + карточка с кодом и слотами, primary «Скопировать код» / secondary «Скопировать ссылку»; «Контакты» → `createAppModal`, «Выйти» → полный Supabase `signOut` + очистка локальной сессии.
 
 Логотип в шапке декоративный и не сбрасывает сессию.
 

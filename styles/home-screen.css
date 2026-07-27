@@ -1439,18 +1439,67 @@
   outline-offset: var(--focus-ring-offset);
 }
 
-.home-screen__invite-code {
+.home-screen__invite-explainer {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-screen-invite-explainer-gap);
+  min-width: 0;
+}
+
+.home-screen__invite-explainer-media {
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+  width: var(--home-screen-invite-explainer-media-width);
+  height: var(--home-screen-invite-explainer-media-height);
+  overflow: hidden;
+  border-radius: var(--home-screen-invite-explainer-media-radius);
+  background: var(--home-screen-invite-explainer-media-bg);
+}
+
+.home-screen__invite-explainer-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-screen-invite-explainer-card-gap);
+  min-width: 0;
+  padding: var(--home-screen-invite-explainer-card-padding);
+  border-radius: var(--home-screen-invite-explainer-card-radius);
+  background: var(--home-screen-invite-explainer-card-bg);
+}
+
+.home-screen__invite-explainer-card-code,
+.home-screen__invite-explainer-card-body {
   margin: 0;
-  font-size: var(--home-screen-invite-code-size);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--home-screen-invite-code-tracking);
-  line-height: 1.2;
+  font-family: var(--font-family);
+}
+
+.home-screen__invite-explainer-card-code {
   color: var(--color-text-strong);
+  font-size: var(--home-screen-invite-explainer-card-code-size);
+  font-weight: var(--home-screen-invite-explainer-card-code-weight);
+  letter-spacing: var(--home-screen-invite-explainer-card-code-tracking);
+  line-height: var(--home-screen-invite-explainer-card-code-line);
   word-break: break-all;
 }
 
-.home-screen__invite-code[hidden] {
+.home-screen__invite-explainer-card-body {
+  color: var(--home-screen-invite-explainer-card-body-color);
+  font-size: var(--home-screen-invite-explainer-card-body-size);
+  font-weight: var(--home-screen-invite-explainer-card-body-weight);
+  line-height: var(--home-screen-invite-explainer-card-body-line);
+}
+
+.home-screen__invite-explainer-card-body[hidden] {
   display: none;
+}
+
+@media (max-width: 560px) {
+  .home-screen__invite-explainer-media {
+    height: auto;
+    aspect-ratio: 552 / 256;
+  }
 }
 
 .home-screen__invite-actions {

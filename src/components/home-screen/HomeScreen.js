@@ -66,6 +66,7 @@ import balanceCardDucksUrl from "../../assets/home/modal/balance-card-ducks.svg"
 import currencyDuckUrl from "../../assets/home/modal/currency-duck.png";
 import currencyGhostUrl from "../../assets/home/modal/currency-ghost.png";
 import currencyP2pUrl from "../../assets/home/modal/currency-p2p.png";
+import currencyReferalUrl from "../../assets/home/modal/currency-referal.jpg";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
 import reviewedCheckIconSvg from "../../assets/home/reviewed-check.svg?raw";
 import reputationNeutralIconUrl from "../../assets/home/reputation-neutral.svg";
@@ -787,9 +788,36 @@ export function createHomeScreen({
   });
   reviewIntroModal.content.append(reviewIntroSteps);
 
+  const inviteExplainer = document.createElement("div");
+  inviteExplainer.className = "home-screen__invite-explainer";
+
+  const inviteMedia = document.createElement("div");
+  inviteMedia.className = "home-screen__invite-explainer-media";
+
+  const inviteRay = createExplainerMediaRay();
+
+  const invitePhoto = document.createElement("img");
+  invitePhoto.className = "home-screen__explainer-media-photo";
+  invitePhoto.src = currencyReferalUrl;
+  invitePhoto.alt = "";
+  invitePhoto.width = 552;
+  invitePhoto.height = 256;
+  invitePhoto.decoding = "async";
+
+  inviteMedia.append(inviteRay.root, invitePhoto);
+
+  const inviteCard = document.createElement("div");
+  inviteCard.className = "home-screen__invite-explainer-card";
+
   const inviteCode = document.createElement("p");
-  inviteCode.className = "home-screen__invite-code";
+  inviteCode.className = "home-screen__invite-explainer-card-code";
   inviteCode.setAttribute("aria-live", "polite");
+
+  const inviteCardBody = document.createElement("p");
+  inviteCardBody.className = "home-screen__invite-explainer-card-body";
+
+  inviteCard.append(inviteCode, inviteCardBody);
+  inviteExplainer.append(inviteMedia, inviteCard);
 
   const inviteModal = createAppModal({
     size: "md",
@@ -812,7 +840,7 @@ export function createHomeScreen({
       );
     },
   });
-  inviteModal.content.append(inviteCode);
+  inviteModal.content.append(inviteExplainer);
 
   const tabbar = document.createElement("div");
   tabbar.className = "home-screen__tabbar";
@@ -1233,17 +1261,26 @@ export function createHomeScreen({
   function openInviteModal(info) {
     const t = getStrings();
     inviteCodeValue = info.code;
-    inviteModal.setTitle(t.homeInviteTitle ?? "");
+    inviteModal.setTitle(
+      fixHangingPrepositions(t.homeInviteTitle ?? ""),
+    );
     inviteModal.setDescription(
+      fixHangingPrepositions(
+        info.code
+          ? (t.homeInviteBody ?? "")
+          : (t.homeInviteEmpty ?? ""),
+      ),
+    );
+    inviteCode.textContent = info.code || "—";
+    inviteCardBody.textContent = fixHangingPrepositions(
       info.code
-        ? formatString(t.homeInviteBody, {
+        ? formatString(t.homeInviteCardBody ?? "", {
             left: info.slotsLeft,
             max: info.maxUses,
           })
-        : (t.homeInviteEmpty ?? ""),
+        : "",
     );
-    inviteCode.textContent = info.code || "—";
-    inviteCode.hidden = !info.code;
+    inviteCardBody.hidden = !info.code;
     inviteModal.setPrimaryLabel(t.homeInviteCopyCode ?? "");
     inviteModal.setSecondaryLabel(t.homeInviteCopyLink ?? "");
     inviteModal.setCloseAriaLabel(t.homeInviteCloseAria ?? "");
