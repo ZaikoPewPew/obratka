@@ -22,16 +22,20 @@ function initialFromLabel(label) {
 }
 
 /**
- * Fixed-чип «Топы в сети» слева снизу на home (Figma 489:3318).
+ * Fixed-чип «p4p в сети» слева снизу на home (Figma 489:3318).
  * Скрыт, пока нет online legendary; при появлении — въезд снизу (`motion-reveal`).
+ * Клик / Enter / Space → explainer (Figma 492:4009).
  *
+ * @param {{ onOpen?: () => void }} [opts]
  * @returns {{
  *   root: HTMLElement;
  *   setItems: (items: LegendaryOnlineItem[]) => void;
  *   syncCopy: () => void;
  * }}
  */
-export function createLegendaryOnlinePanel() {
+export function createLegendaryOnlinePanel(opts = {}) {
+  const onOpen = typeof opts.onOpen === "function" ? opts.onOpen : null;
+
   const root = document.createElement("aside");
   root.className = "legendary-online-panel";
   root.hidden = true;
@@ -39,6 +43,7 @@ export function createLegendaryOnlinePanel() {
 
   const avatars = document.createElement("ul");
   avatars.className = "legendary-online-panel__avatars";
+  avatars.setAttribute("aria-hidden", "true");
 
   const label = document.createElement("span");
   label.className = "legendary-online-panel__label";
@@ -53,7 +58,6 @@ export function createLegendaryOnlinePanel() {
     const t = getStrings();
     label.textContent = t.homeLegendaryOnlineTitle ?? "";
     root.setAttribute("aria-label", t.homeLegendaryOnlineAria ?? "");
-    avatars.setAttribute("aria-label", t.homeLegendaryOnlineAria ?? "");
     render();
   }
 
@@ -71,10 +75,9 @@ export function createLegendaryOnlinePanel() {
         ? item.displayName.trim()
         : fallback;
     if (name) {
-      li.setAttribute("aria-label", name);
       const tip = document.createElement("span");
       tip.className = "legendary-online-panel__tip";
-      tip.setAttribute("role", "tooltip");
+      tip.setAttribute("aria-hidden", "true");
       tip.textContent = name;
       li.append(tip);
     }
@@ -131,6 +134,10 @@ export function createLegendaryOnlinePanel() {
     const visible = items.length > 0;
     root.hidden = !visible;
     root.setAttribute("aria-hidden", visible ? "false" : "true");
+    if (onOpen) {
+      root.tabIndex = visible ? 0 : -1;
+      root.setAttribute("role", "button");
+    }
 
     if (visible && !wasVisible) {
       root.classList.remove("legendary-online-panel--enter");
@@ -150,6 +157,19 @@ export function createLegendaryOnlinePanel() {
   function setItems(next) {
     items = Array.isArray(next) ? next.filter((item) => item?.id) : [];
     render();
+  }
+
+  if (onOpen) {
+    root.addEventListener("click", () => {
+      if (root.hidden) return;
+      onOpen();
+    });
+    root.addEventListener("keydown", (event) => {
+      if (root.hidden) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      onOpen();
+    });
   }
 
   syncCopy();

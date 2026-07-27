@@ -14,7 +14,8 @@
 |------|------|
 | `currency-duck.jpg` | фото в explainer «Игровая валюта» |
 | `balance-card-ducks.svg` | декор карточки «Уточки» |
-| `currency-ghost.jpg` | фото в explainer «Репутация в сообществе» |
+| `currency-ghost.jpg` | фото в explainer «Репутация в нашей обратке» |
+| `currency-p2p.jpg` | фото в explainer «p4p в сети» |
 
 ## `brand/`
 

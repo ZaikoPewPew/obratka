@@ -121,7 +121,7 @@ await modal.close();
 |----|---------------------|
 | Новый кейс с title + слот + 1–2 CTA | Inline notice без оверлея |
 | Общий каркас под разные тела | Ban / brand split-экраны |
-| Home: review intro (`homeReviewIntro*`), mine not-ready (`homeMineNotReady*` via notice), invite, submit-locked, reputation explainer (`homeReputation*`), balance explainer (`homeBalance*`), contacts | Complaint-модалка на `report-screen` (свой DOM, не app-modal) |
+| Home: review intro (`homeReviewIntro*`), mine not-ready (`homeMineNotReady*` via notice), invite, submit-locked, reputation explainer (`homeReputation*`), balance explainer (`homeBalance*`), p4p online explainer (`homeLegendaryOnline*`), contacts | Complaint-модалка на `report-screen` (свой DOM, не app-modal) |
 
 Слот intro на home: `<ol class="home-screen__review-intro-steps">` + токены `--home-screen-review-intro-*`.
 

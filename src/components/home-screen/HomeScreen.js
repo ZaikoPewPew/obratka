@@ -22,7 +22,6 @@ import {
 } from "../../api/wallet.js";
 import {
   formatReputationDelta,
-  getReputation,
   getReputationDelta,
 } from "../../api/reviewComplaints.js";
 import { listOnlineLegendaries } from "../../api/presence.js";
@@ -64,6 +63,7 @@ import boneIconUrl from "../../assets/home/bone.svg";
 import balanceCardDucksUrl from "../../assets/home/modal/balance-card-ducks.svg";
 import currencyDuckUrl from "../../assets/home/modal/currency-duck.jpg";
 import currencyGhostUrl from "../../assets/home/modal/currency-ghost.jpg";
+import currencyP2pUrl from "../../assets/home/modal/currency-p2p.jpg";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
 import reviewedCheckIconSvg from "../../assets/home/reviewed-check.svg?raw";
 import reputationNeutralIconUrl from "../../assets/home/reputation-neutral.svg";
@@ -614,7 +614,11 @@ export function createHomeScreen({
 
   ratingView.append(ratingList, ratingEmpty);
 
-  const legendaryOnlinePanel = createLegendaryOnlinePanel();
+  const legendaryOnlinePanel = createLegendaryOnlinePanel({
+    onOpen: () => {
+      openLegendaryOnlineModal();
+    },
+  });
   cluster.append(feed, ratingView);
   body.append(cluster);
 
@@ -709,6 +713,38 @@ export function createHomeScreen({
     },
   });
   balanceModal.content.append(balanceExplainer);
+
+  const p2pExplainer = document.createElement("div");
+  p2pExplainer.className = "home-screen__reputation-explainer-row";
+
+  const p2pMedia = document.createElement("img");
+  p2pMedia.className = "home-screen__reputation-explainer-media";
+  p2pMedia.src = currencyP2pUrl;
+  p2pMedia.alt = "";
+  p2pMedia.width = 268;
+  p2pMedia.height = 216;
+  p2pMedia.decoding = "async";
+
+  const p2pCard = document.createElement("div");
+  p2pCard.className = "home-screen__reputation-explainer-card";
+
+  const p2pCardTitle = document.createElement("p");
+  p2pCardTitle.className = "home-screen__reputation-explainer-card-value";
+
+  const p2pCardBody = document.createElement("p");
+  p2pCardBody.className = "home-screen__reputation-explainer-card-label";
+
+  p2pCard.append(p2pCardTitle, p2pCardBody);
+  p2pExplainer.append(p2pMedia, p2pCard);
+
+  const legendaryOnlineModal = createAppModal({
+    size: "md",
+    showPrimary: false,
+    onSecondary: () => {
+      void legendaryOnlineModal.close();
+    },
+  });
+  legendaryOnlineModal.content.append(p2pExplainer);
 
   const reviewIntroSteps = document.createElement("ol");
   reviewIntroSteps.className = "home-screen__review-intro-steps";
@@ -827,6 +863,7 @@ export function createHomeScreen({
     noticeModal.root,
     reputationModal.root,
     balanceModal.root,
+    legendaryOnlineModal.root,
     reviewIntroModal.root,
     inviteModal.root,
     contactsModal.root,
@@ -2485,11 +2522,25 @@ export function createHomeScreen({
     balanceModal.open();
   }
 
+  function openLegendaryOnlineModal() {
+    const t = getStrings();
+    p2pCardTitle.textContent = t.homeLegendaryOnlineCardTitle ?? "";
+    p2pCardBody.textContent = t.homeLegendaryOnlineCardBody ?? "";
+    legendaryOnlineModal.setTitle(t.homeLegendaryOnlineTitle ?? "");
+    legendaryOnlineModal.setDescription(t.homeLegendaryOnlineDesc ?? "");
+    legendaryOnlineModal.setSecondaryLabel(t.homeLegendaryOnlineClose ?? "");
+    legendaryOnlineModal.setCloseAriaLabel(
+      t.homeLegendaryOnlineCloseAria ?? t.homeLegendaryOnlineClose ?? "",
+    );
+    legendaryOnlineModal.setActionsVisible({ primary: false, secondary: true });
+    legendaryOnlineModal.open();
+  }
+
   function openReputationModal() {
     const t = getStrings();
     reputationCardValue.textContent = formatString(
       t.homeReputationCardTitle ?? "",
-      { reputation: getReputation() },
+      { reputation: formatReputationDelta() },
     );
     reputationCardLabel.textContent = t.homeReputationCardLabel ?? "";
     reputationBody.textContent = t.homeReputationBody ?? "";

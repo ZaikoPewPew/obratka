@@ -2,7 +2,7 @@
 
 Path: **`/home`**. После onboarding: шапка (лого, репутация, баланс, аватар) + лента карточек портфолио + нижний док: переключатель **На ревью / Мои посты / Рейтинг** и кнопка **«Закинуть своё»** (квадрат с плюсом справа от таббара).
 
-Файл: [`HomeScreen.js`](./HomeScreen.js). Стили: [`styles/home-screen.css`](../../../styles/home-screen.css). Токены `--home-screen-*` в [`styles/tokens.css`](../../../styles/tokens.css). Слева снизу — fixed [`legendary-online-panel`](../legendary-online-panel/) («Топы в сети», poll вместе с home; скрыт если никого нет). Справа снизу — fixed [`contact-fab`](../contact-fab/) (Telegram, Figma `478:1814`).
+Файл: [`HomeScreen.js`](./HomeScreen.js). Стили: [`styles/home-screen.css`](../../../styles/home-screen.css). Токены `--home-screen-*` в [`styles/tokens.css`](../../../styles/tokens.css). Слева снизу — fixed [`legendary-online-panel`](../legendary-online-panel/) («p4p в сети», poll вместе с home; клик → explainer Figma `492:4009`; скрыт если никого нет). Справа снизу — fixed [`contact-fab`](../contact-fab/) (Telegram, Figma `478:1814`).
 
 ## Поведение
 
@@ -140,7 +140,7 @@ CTA «Закинуть своё» (кнопка в доке у таббара) �
 - Empty state ленты — карточка `--home-screen-empty-*` (радиус 24, высота 326, muted-фон, текст по центру).
 - Если в `profiles.avatar_url` пусто — при refresh подтягиваем picture из Auth и пишем в профиль.
 - При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.
-- Репутация: `profiles.reputation` ↔ `session.reputation`; чип = иконка + дельта от 100 (`0` / `+10` / `-20`, `formatReputationDelta`); клик → explainer «Репутация в сообществе» (`homeReputation*`, Figma `492:3988`): фото + карточка «Сейчас N репутация» из [`assets/home/modal/`](../../assets/home/modal/) (`currency-ghost.jpg`), secondary CTA «Ясн» → закрыть (без весов тегов).
+- Репутация: `profiles.reputation` ↔ `session.reputation`; чип = иконка + дельта от 100 (`0` / `+10` / `-20`, `formatReputationDelta`); клик → explainer «Репутация в нашей обратке» (`homeReputation*`, Figma `492:3988`): фото + карточка «Сейчас N репутация» (та же дельта, что на чипе) из [`assets/home/modal/`](../../assets/home/modal/) (`currency-ghost.jpg`), secondary CTA «Ясн» → закрыть (без весов тегов).
 - Порядок чипов в шапке: репутация → баланс → аватар. «Закинуть своё» — не в шапке, а в доке у таббара; чип уведомлений убран (непросмотренный готовый отчёт — точка на «Мои посты»).
 - Баланс: `profiles.balance` ↔ `session.balance`. Экономика: `REVIEW_REWARD = 10`, `SUBMIT_COST = 30` ([`wallet.js`](../../api/wallet.js) / `wallet.mdc`). Клик по чипу → explainer «Игровая валюта» (`homeBalance*`, Figma `496:4403`): фото + карточка «Сейчас N уточек» из [`assets/home/modal/`](../../assets/home/modal/) (`currency-duck.jpg`, `balance-card-ducks.svg`), secondary CTA «Ясн» → закрыть.
 - Подача — RPC `submit_portfolio` (spend 30); legacy `spend_submit_cost`; награда за ревью (+10) — в `handle_review_inserted`.

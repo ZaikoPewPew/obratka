@@ -18,7 +18,8 @@
   background: var(--legendary-online-bg);
   font-family: var(--font-family);
   color: var(--color-text);
-  pointer-events: none;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .legendary-online-panel[hidden] {
@@ -57,7 +58,7 @@
   box-shadow: 0 0 0 var(--legendary-online-avatar-ring-width)
     var(--legendary-online-avatar-ring-color);
   pointer-events: auto;
-  cursor: default;
+  cursor: inherit;
 }
 
 .legendary-online-panel__avatar:last-child {
