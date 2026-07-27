@@ -1702,6 +1702,15 @@ div.home-screen__review-intro-rec {
   background: var(--home-screen-invite-explainer-media-bg);
 }
 
+.home-screen__invite-explainer-media .home-screen__explainer-media-ray {
+  width: var(--home-screen-invite-explainer-media-ray-size);
+  height: var(--home-screen-invite-explainer-media-ray-size);
+}
+
+.home-screen__invite-explainer-media .home-screen__explainer-media-photo {
+  object-fit: var(--home-screen-invite-explainer-media-photo-fit);
+}
+
 .home-screen__invite-bar {
   box-sizing: border-box;
   display: flex;

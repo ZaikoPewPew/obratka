@@ -13,6 +13,7 @@
 | Файл | Роль |
 |------|------|
 | `currency-duck.png` | фото в explainer «Валюта сообщества» |
+| `currency-referal.png` | фото в invite-explainer (поверх Lottie на `#F3F4F7`) |
 | `balance-card-ducks.svg` | декор карточки «Уточки» |
 | `currency-ghost.png` | фото в explainer «Репутация в нашей обратке» |
 | `currency-p2p.png` | фото в explainer «p4p в сети» |

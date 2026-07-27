@@ -888,7 +888,10 @@
   --home-screen-invite-explainer-media-width: 100%;
   --home-screen-invite-explainer-media-height: 256px;
   --home-screen-invite-explainer-media-radius: var(--radius-md);
-  --home-screen-invite-explainer-media-bg: var(--color-surface-muted);
+  --home-screen-invite-explainer-media-bg: var(--palette-gray-100);
+  /* Lottie чуть шире фото, квадратные пропорции лучей. */
+  --home-screen-invite-explainer-media-ray-size: 118%;
+  --home-screen-invite-explainer-media-photo-fit: contain;
   --home-screen-invite-bar-height: 72px;
   --home-screen-invite-bar-gap: var(--space-4);
   --home-screen-invite-bar-cluster-gap: var(--radius-sm);

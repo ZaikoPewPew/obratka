@@ -69,7 +69,7 @@ import balanceCardDucksUrl from "../../assets/home/modal/balance-card-ducks.svg"
 import currencyDuckUrl from "../../assets/home/modal/currency-duck.png";
 import currencyGhostUrl from "../../assets/home/modal/currency-ghost.png";
 import currencyP2pUrl from "../../assets/home/modal/currency-p2p.png";
-import currencyReferalUrl from "../../assets/home/modal/currency-referal.jpg";
+import currencyReferalUrl from "../../assets/home/modal/currency-referal.png";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
 import reviewedCheckIconSvg from "../../assets/home/reviewed-check.svg?raw";
 import reputationNeutralIconUrl from "../../assets/home/reputation-neutral.svg";
