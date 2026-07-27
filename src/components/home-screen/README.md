@@ -120,7 +120,7 @@ SWR: при `open` / смене таба / F5 — если есть кэш вк�
 
 После skeleton данные с `motion-reveal` stagger; после тихого refetch при тех же id — только патч reviewer-слотов (без пересборки DOM / thum.io); новые карточки — full rebuild + reveal только для новых id.
 
-Клик по чужой карточке → intro-модалка (Figma `492:3611`): тайтл + «Автор карточки — {name}», две карточки («1-ая / 2-ая минута», на первой декоративный rec) → CTA «Сюдаа его!» → `onOpenPortfolio` → `claimPortfolioReview` → `/review`. «Не сейчас» / закрытие — без claim.  
+Клик по чужой карточке → intro-модалка (Figma `492:3611`): тайтл + «Автор карточки — {name}», две карточки («1-ая минута» с интерактивным preview-rec на mic-meter без STT; «2-ая минута» со взрывом уточек) → CTA «Сюдаа его!» → `onOpenPortfolio` → `claimPortfolioReview` → `/review`. «Не сейчас» / закрытие — без claim; mic-meter стопается.  
 Своя (`isOwn`, вкладка «Мои») кликабельна всегда: собраны все ревью (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report` (листы + жалоба); иначе модалка `homeMineNotReady*` с прогрессом. Title / aria карточки — `homeCardReport*` либо `homeCardReportPending*`, пересинхронизируются при silent-патче слотов.  
 Уже отревьюенная карточка (`reviewedByMe` = строка в `reviews` после submit) — `disabled`, без intro и без notice; статус только оверлеем на превью.
 CTA «Закинуть своё» (кнопка в доке у таббара) — всегда активна. Баланс ≥ `SUBMIT_COST` (30) → `onAddPortfolio` → `/portfolio`; иначе `createAppModal` «не хватает монет». Старт с 0 → нужно ~3 чужих ревью (`REVIEW_REWARD` 10).
@@ -129,7 +129,7 @@ CTA «Закинуть своё» (кнопка в доке у таббара) �
 Клиент-зеркало: [`src/api/leagues.js`](../../api/leagues.js). Сервер: [`supabase/sql/portfolios.sql`](../../../supabase/sql/portfolios.sql) + [`review_claims.sql`](../../../supabase/sql/review_claims.sql) (`can_review_portfolio`, claim-слоты, RLS).
 
 Лента по центру экрана (`--home-screen-body-padding-top` = 16px сверху); снизу запас под таббар (`--home-screen-body-padding-bottom`).  
-При `open` / reload cascade сверху вниз (`--home-screen-reveal-delay-*`): topbar (`motion-reveal-topbar`, без `filter`) → body (`motion-reveal`) → tabbar-dock (`motion-reveal-dock`: только `translateY`, **без** `opacity` — иначе у glass tabbar пропадает `backdrop-filter`) → contact-fab. Track / blur / `--on-dark` на самом `.home-screen__tabbar`. Hide/show дока по скроллу не трогает entrance.
+При `open` / reload cascade сверху вниз (`--home-screen-reveal-delay-*`): topbar (`motion-reveal-topbar`, без `filter`) → body (`motion-reveal`) → contact-fab. Tabbar-dock **без** своего slide (`motion-reveal-dock` не вешаем) — проявляется через opacity родителя (свой delayed slide давал рывок после fade; opacity на dock запрещён — ломает glass `backdrop-filter`). Track / blur / `--on-dark` на самом `.home-screen__tabbar`. Hide/show дока по скроллу не трогает entrance.
 
 Рейтинг слева (топ по валюте) — компонент [`rating/`](../rating/), пока **не монтируется**.
 
@@ -215,7 +215,7 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 Glass track: `background` + `backdrop-filter: blur(var(--home-screen-tabbar-blur))` на **`.home-screen__tabbar`** (не на dock). Свап темы: `backdropLuminance` → `home-screen__tabbar--on-dark` (track / label). Не анимировать `opacity` на предке dock — иначе blur пропадает.
 
-Entrance на `--open`: `--home-screen-reveal-delay-topbar` / `-body` / `-tabbar` / `-fab` → `motion-reveal-topbar` / `motion-reveal` / `motion-reveal-dock` / `motion-reveal-topbar`. `motion-reveal-dock` = только `translateX(-50%) translateY(…)`.
+Entrance на `--open`: `--home-screen-reveal-delay-topbar` / `-body` / `-fab` → `motion-reveal-topbar` / `motion-reveal` / `motion-reveal-topbar`. Dock без delayed animation — только parent fade + базовый `translateX(-50%)`.
 
 Токены intro-модалки: `--home-screen-review-intro-card-*` / `--home-screen-review-intro-rec-*` / `--home-screen-review-intro-cards-gap`.
 
@@ -223,6 +223,6 @@ Entrance на `--open`: `--home-screen-reveal-delay-topbar` / `-body` / `-tabbar
 
 `homeCardOwnTitle` / `homeCardOwnAria` в locales — legacy (в UI не используются; own-копирайт = `homeCardReport*` / `Pending*`).
 
-`prefers-reduced-motion: reduce` — hide/thumb/label transitions ≈ мгновенные; entrance-анимации topbar/body/dock/fab отключены (dock остаётся `translateX(-50%)`).
+`prefers-reduced-motion: reduce` — hide/thumb/label transitions ≈ мгновенные; entrance-анимации topbar/body/fab отключены (dock и так без entrance-slide, остаётся `translateX(-50%)`).
 
 См. [`SCREENS.md`](../../../SCREENS.md), [`src/api/README.md`](../../api/README.md).

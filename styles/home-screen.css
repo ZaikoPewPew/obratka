@@ -36,7 +36,6 @@
 
 .home-screen--open .home-screen__topbar,
 .home-screen--open .home-screen__body,
-.home-screen--open .home-screen__tabbar-dock,
 .home-screen--open .contact-fab {
   animation-duration: var(--motion-reveal-duration);
   animation-timing-function: var(--motion-reveal-ease);
@@ -55,13 +54,11 @@
 }
 
 /*
- * Док: только translateY (opacity ломает backdrop-filter у glass tabbar).
+ * Док без своего entrance-slide: иначе dual-phase (parent fade → delayed
+ * motion-reveal-dock) даёт рывок. Проявляется через opacity родителя.
+ * Opacity на dock / предке glass запрещён — ломает backdrop-filter.
  * Track bg / blur / --on-dark остаются на .home-screen__tabbar.
  */
-.home-screen--open .home-screen__tabbar-dock {
-  animation-name: motion-reveal-dock;
-  animation-delay: var(--home-screen-reveal-delay-tabbar);
-}
 
 .home-screen--open .contact-fab {
   animation-name: motion-reveal-topbar;
@@ -81,21 +78,11 @@
 
   .home-screen--open .home-screen__topbar,
   .home-screen--open .home-screen__body,
-  .home-screen--open .home-screen__tabbar-dock,
   .home-screen--open .contact-fab {
     animation: none;
     opacity: 1;
     filter: none;
-  }
-
-  .home-screen--open .home-screen__topbar,
-  .home-screen--open .home-screen__body,
-  .home-screen--open .contact-fab {
     transform: none;
-  }
-
-  .home-screen--open .home-screen__tabbar-dock {
-    transform: translateX(-50%);
   }
 }
 
@@ -470,14 +457,44 @@
   align-items: center;
   gap: var(--home-screen-review-intro-rec-gap);
   height: var(--home-screen-review-intro-rec-height);
+  margin: 0;
   padding: 0 var(--home-screen-review-intro-rec-padding-right) 0
     var(--home-screen-review-intro-rec-padding-x);
+  border: none;
   border-radius: var(--home-screen-review-intro-rec-radius);
   background: var(--home-screen-review-intro-rec-bg);
   box-shadow: var(--home-screen-review-intro-rec-shadow);
   color: var(--color-text);
-  pointer-events: none;
+  font: inherit;
+  cursor: pointer;
+  appearance: none;
   transform: translateX(-50%);
+}
+
+div.home-screen__review-intro-rec {
+  cursor: default;
+  pointer-events: none;
+}
+
+.home-screen__review-intro-rec:hover {
+  background: var(--color-surface-muted-hover);
+}
+
+div.home-screen__review-intro-rec:hover {
+  background: var(--home-screen-review-intro-rec-bg);
+}
+
+.home-screen__review-intro-rec:active {
+  background: var(--color-surface-muted-active);
+}
+
+div.home-screen__review-intro-rec:active {
+  background: var(--home-screen-review-intro-rec-bg);
+}
+
+.home-screen__review-intro-rec:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .home-screen__review-intro-rec-mic {
@@ -505,6 +522,9 @@
   );
   border-radius: var(--home-screen-review-intro-rec-bar-radius);
   background: var(--home-screen-review-intro-rec-wave-color);
+  transform-origin: center;
+  transition: transform var(--home-screen-review-intro-rec-bar-transition-duration)
+    var(--home-screen-review-intro-rec-bar-transition-easing);
 }
 
 .home-screen__review-intro-rec-bar:nth-child(1) {
@@ -551,6 +571,84 @@
   height: var(--home-screen-review-intro-rec-dot-size);
   border-radius: 50%;
   background: var(--color-recording);
+  opacity: 0;
+  transition: opacity var(--duration-fast) ease;
+}
+
+.home-screen__review-intro-rec--listening .home-screen__review-intro-rec-dot {
+  opacity: 1;
+  animation: motion-recording-blink var(--motion-recording-blink-duration)
+    var(--motion-recording-blink-ease) infinite;
+}
+
+.home-screen__review-intro-rec--listening .home-screen__review-intro-rec-bar {
+  height: var(--home-screen-review-intro-rec-wave-height);
+  transform: scaleY(
+    calc(
+      var(--home-screen-review-intro-rec-bar-min-scale) +
+        var(--control-rec-bar-level, 0) *
+        var(--home-screen-review-intro-rec-bar-level-scale)
+    )
+  );
+}
+
+.home-screen__review-intro-ducks {
+  box-sizing: border-box;
+  position: absolute;
+  right: var(--home-screen-review-intro-ducks-right);
+  bottom: var(--home-screen-review-intro-ducks-bottom);
+  width: var(--home-screen-review-intro-ducks-width);
+  height: var(--home-screen-review-intro-ducks-height);
+  pointer-events: none;
+  user-select: none;
+}
+
+.home-screen__review-intro-duck {
+  box-sizing: border-box;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: var(--home-screen-review-intro-duck-size);
+  height: auto;
+  margin-left: calc(var(--home-screen-review-intro-duck-size) / -2);
+  opacity: 0;
+  transform-origin: center bottom;
+  animation: motion-review-intro-duck-burst
+    var(--home-screen-review-intro-duck-burst-duration)
+    var(--home-screen-review-intro-duck-burst-ease) both;
+  animation-delay: calc(
+    var(--duck-index, 0) * var(--home-screen-review-intro-duck-stagger)
+  );
+}
+
+.home-screen__review-intro-duck:nth-child(1) {
+  --duck-burst-x: var(--home-screen-review-intro-duck-1-x);
+  --duck-burst-y: var(--home-screen-review-intro-duck-1-y);
+  --duck-burst-rot-from: var(--home-screen-review-intro-duck-1-rot-from);
+  --duck-burst-rot-to: var(--home-screen-review-intro-duck-1-rot-to);
+  width: calc(
+    var(--home-screen-review-intro-duck-size) *
+      var(--home-screen-review-intro-duck-1-scale)
+  );
+}
+
+.home-screen__review-intro-duck:nth-child(2) {
+  --duck-burst-x: var(--home-screen-review-intro-duck-2-x);
+  --duck-burst-y: var(--home-screen-review-intro-duck-2-y);
+  --duck-burst-rot-from: var(--home-screen-review-intro-duck-2-rot-from);
+  --duck-burst-rot-to: var(--home-screen-review-intro-duck-2-rot-to);
+  z-index: 1;
+}
+
+.home-screen__review-intro-duck:nth-child(3) {
+  --duck-burst-x: var(--home-screen-review-intro-duck-3-x);
+  --duck-burst-y: var(--home-screen-review-intro-duck-3-y);
+  --duck-burst-rot-from: var(--home-screen-review-intro-duck-3-rot-from);
+  --duck-burst-rot-to: var(--home-screen-review-intro-duck-3-rot-to);
+  width: calc(
+    var(--home-screen-review-intro-duck-size) *
+      var(--home-screen-review-intro-duck-3-scale)
+  );
 }
 
 @media (max-width: 560px) {
@@ -563,6 +661,13 @@
     padding-bottom: calc(
       var(--home-screen-review-intro-card-padding) +
         var(--home-screen-review-intro-rec-height) + var(--space-4)
+    );
+  }
+
+  .home-screen__review-intro-card--with-ducks {
+    padding-bottom: calc(
+      var(--home-screen-review-intro-card-padding) +
+        var(--home-screen-review-intro-ducks-height) * 0.45
     );
   }
 

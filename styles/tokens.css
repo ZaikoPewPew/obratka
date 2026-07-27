@@ -856,6 +856,39 @@
     transparent
   );
   --home-screen-review-intro-rec-dot-size: 7px;
+  --home-screen-review-intro-rec-bar-min-scale: var(--control-rec-bar-min-scale);
+  --home-screen-review-intro-rec-bar-level-scale: var(
+    --control-rec-bar-level-scale
+  );
+  --home-screen-review-intro-rec-bar-transition-duration: var(
+    --control-rec-bar-transition-duration
+  );
+  --home-screen-review-intro-rec-bar-transition-easing: var(
+    --control-rec-bar-transition-easing
+  );
+  --home-screen-review-intro-ducks-width: 120px;
+  --home-screen-review-intro-ducks-height: 132px;
+  --home-screen-review-intro-ducks-bottom: -8px;
+  --home-screen-review-intro-ducks-right: 8px;
+  --home-screen-review-intro-duck-size: 66px;
+  --home-screen-review-intro-duck-burst-duration: 720ms;
+  --home-screen-review-intro-duck-burst-ease: var(--ease-reveal);
+  --home-screen-review-intro-duck-stagger: 70ms;
+  --home-screen-review-intro-duck-burst-rise: var(--space-12);
+  --home-screen-review-intro-duck-1-x: calc(var(--space-8) * -1);
+  --home-screen-review-intro-duck-1-y: calc(var(--space-2) * -1);
+  --home-screen-review-intro-duck-1-rot-from: -18deg;
+  --home-screen-review-intro-duck-1-rot-to: -8deg;
+  --home-screen-review-intro-duck-1-scale: 0.92;
+  --home-screen-review-intro-duck-2-x: var(--space-1);
+  --home-screen-review-intro-duck-2-y: calc(var(--space-6) * -1);
+  --home-screen-review-intro-duck-2-rot-from: 10deg;
+  --home-screen-review-intro-duck-2-rot-to: 4deg;
+  --home-screen-review-intro-duck-3-x: var(--space-8);
+  --home-screen-review-intro-duck-3-y: calc(var(--space-1) * -0.5);
+  --home-screen-review-intro-duck-3-rot-from: 16deg;
+  --home-screen-review-intro-duck-3-rot-to: 12deg;
+  --home-screen-review-intro-duck-3-scale: 0.86;
   --home-screen-invite-explainer-gap: var(--space-4);
   --home-screen-invite-explainer-media-width: 100%;
   --home-screen-invite-explainer-media-height: 256px;

@@ -89,6 +89,30 @@
   }
 }
 
+/** Взрыв уточек снизу карточки intro-модалки. */
+@keyframes motion-review-intro-duck-burst {
+  0% {
+    opacity: 0;
+    transform: translate(
+        var(--duck-burst-x, 0),
+        calc(var(--duck-burst-y, 0px) + var(--home-screen-review-intro-duck-burst-rise))
+      )
+      scale(0.35) rotate(var(--duck-burst-rot-from, -12deg));
+  }
+
+  62% {
+    opacity: 1;
+    transform: translate(var(--duck-burst-x, 0), var(--duck-burst-y, 0px))
+      scale(1.08) rotate(var(--duck-burst-rot-to, 8deg));
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(var(--duck-burst-x, 0), var(--duck-burst-y, 0px))
+      scale(1) rotate(var(--duck-burst-rot-to, 8deg));
+  }
+}
+
 /**
  * Shimmer-sweep: блик уезжает за край и появляется с другой стороны.
  * Старт/финиш вне видимой области → infinite без рывка на стыке цикла.
