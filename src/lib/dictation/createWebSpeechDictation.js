@@ -26,7 +26,9 @@ const WAVEFORM_NOISE_FLOOR = 0.006;
 const WAVEFORM_SENSITIVITY = 12;
 /** < 1: тихий голос поднимается сильнее, громкий мягко упирается в 1. */
 const WAVEFORM_CURVE = 0.62;
-const WAVEFORM_LOCAL_MIX = 0.7;
+const WAVEFORM_LOCAL_MIX = 0.55;
+/** Смешение с соседями: волна читается как цельный силуэт, не набор пик. */
+const WAVEFORM_NEIGHBOR_MIX = 0.28;
 /** EMA: быстрее вверх, медленнее вниз — меньше дёрганья. */
 const WAVEFORM_SMOOTH_ATTACK = 0.48;
 const WAVEFORM_SMOOTH_RELEASE = 0.16;
@@ -198,7 +200,7 @@ export function buildWaveformLevels(
 
   const globalLevel = amplifyRms(overallRms);
   /** @type {number[]} */
-  const levels = new Array(count);
+  const rawLevels = new Array(count);
   for (let barIndex = 0; barIndex < count; barIndex += 1) {
     const start = Math.floor((barIndex * samples.length) / count);
     const end = Math.max(
@@ -206,10 +208,23 @@ export function buildWaveformLevels(
       Math.floor(((barIndex + 1) * samples.length) / count),
     );
     const localLevel = amplifyRms(timeDomainRms(samples, start, end));
-    levels[barIndex] = Math.min(
+    rawLevels[barIndex] = Math.min(
       1,
       localLevel * WAVEFORM_LOCAL_MIX +
         globalLevel * (1 - WAVEFORM_LOCAL_MIX),
+    );
+  }
+
+  /** @type {number[]} */
+  const levels = new Array(count);
+  for (let barIndex = 0; barIndex < count; barIndex += 1) {
+    const prev = rawLevels[Math.max(0, barIndex - 1)];
+    const next = rawLevels[Math.min(count - 1, barIndex + 1)];
+    const self = rawLevels[barIndex];
+    levels[barIndex] = Math.min(
+      1,
+      self * (1 - WAVEFORM_NEIGHBOR_MIX) +
+        ((prev + next) / 2) * WAVEFORM_NEIGHBOR_MIX,
     );
   }
   return levels;

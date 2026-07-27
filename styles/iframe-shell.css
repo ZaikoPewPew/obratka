@@ -214,46 +214,47 @@ body {
   height: calc(var(--control-rec-wave-height) * var(--bar-base, 0.33));
   border-radius: var(--control-rec-bar-radius);
   background: var(--control-rec-wave-color);
-  transform-origin: center;
-  transition: transform var(--control-rec-bar-transition-duration)
+  transform-origin: center bottom;
+  transition: height var(--control-rec-bar-transition-duration)
     var(--control-rec-bar-transition-easing);
 }
 
+/* Покой: мягкая «живая» силуэт-волна, не пилообразный паттерн. */
 .iframe-shell__rec-bar:nth-child(1) {
-  --bar-base: 0.33;
+  --bar-base: 0.2;
 }
 .iframe-shell__rec-bar:nth-child(2) {
-  --bar-base: 0.67;
+  --bar-base: 0.38;
 }
 .iframe-shell__rec-bar:nth-child(3) {
-  --bar-base: 1;
+  --bar-base: 0.62;
 }
 .iframe-shell__rec-bar:nth-child(4) {
-  --bar-base: 0.67;
+  --bar-base: 0.9;
 }
 .iframe-shell__rec-bar:nth-child(5) {
-  --bar-base: 0.78;
+  --bar-base: 0.72;
 }
 .iframe-shell__rec-bar:nth-child(6) {
-  --bar-base: 0.33;
+  --bar-base: 0.42;
 }
 .iframe-shell__rec-bar:nth-child(7) {
-  --bar-base: 1;
+  --bar-base: 0.55;
 }
 .iframe-shell__rec-bar:nth-child(8) {
-  --bar-base: 0.78;
+  --bar-base: 0.84;
 }
 .iframe-shell__rec-bar:nth-child(9) {
-  --bar-base: 0.33;
+  --bar-base: 0.66;
 }
 .iframe-shell__rec-bar:nth-child(10) {
-  --bar-base: 1;
+  --bar-base: 0.4;
 }
 .iframe-shell__rec-bar:nth-child(11) {
-  --bar-base: 0.78;
+  --bar-base: 0.28;
 }
 .iframe-shell__rec-bar:nth-child(12) {
-  --bar-base: 0.33;
+  --bar-base: 0.18;
 }
 
 .iframe-shell__rec-dot {
@@ -261,23 +262,27 @@ body {
   width: var(--control-rec-dot-size);
   height: var(--control-rec-dot-size);
   border-radius: 50%;
-  background: var(--color-recording);
-  opacity: 0;
-  transition: opacity var(--duration-fast) ease;
+  background: var(--control-rec-dot-idle-color);
+  opacity: 1;
+  animation: none;
+  transition:
+    background-color var(--duration-fast) ease,
+    opacity var(--duration-fast) ease;
 }
 
 .iframe-shell__rec--recording .iframe-shell__rec-dot {
-  opacity: 1;
+  background: var(--control-rec-dot-active-color);
+  animation: motion-recording-blink var(--motion-recording-blink-duration)
+    var(--motion-recording-blink-ease) infinite;
 }
 
 .iframe-shell__rec--recording .iframe-shell__rec-bar {
-  height: var(--control-rec-wave-height);
-  transform: scaleY(
-    calc(
-      var(--control-rec-bar-min-scale) +
-        var(--control-rec-bar-level, 0) *
-        var(--control-rec-bar-level-scale)
-    )
+  height: calc(
+    var(--control-rec-wave-height) *
+      (
+        var(--control-rec-bar-min-scale) + var(--control-rec-bar-level, 0) *
+          var(--control-rec-bar-level-scale)
+      )
   );
 }
 

@@ -476,22 +476,6 @@ div.home-screen__review-intro-rec {
   pointer-events: none;
 }
 
-.home-screen__review-intro-rec:hover {
-  background: var(--color-surface-muted-hover);
-}
-
-div.home-screen__review-intro-rec:hover {
-  background: var(--home-screen-review-intro-rec-bg);
-}
-
-.home-screen__review-intro-rec:active {
-  background: var(--color-surface-muted-active);
-}
-
-div.home-screen__review-intro-rec:active {
-  background: var(--home-screen-review-intro-rec-bg);
-}
-
 .home-screen__review-intro-rec:focus-visible {
   outline: var(--focus-ring-width) solid var(--color-focus-ring);
   outline-offset: var(--focus-ring-offset);
@@ -522,46 +506,46 @@ div.home-screen__review-intro-rec:active {
   );
   border-radius: var(--home-screen-review-intro-rec-bar-radius);
   background: var(--home-screen-review-intro-rec-wave-color);
-  transform-origin: center;
-  transition: transform var(--home-screen-review-intro-rec-bar-transition-duration)
+  transform-origin: center bottom;
+  transition: height var(--home-screen-review-intro-rec-bar-transition-duration)
     var(--home-screen-review-intro-rec-bar-transition-easing);
 }
 
 .home-screen__review-intro-rec-bar:nth-child(1) {
-  --bar-base: 0.333;
+  --bar-base: 0.2;
 }
 .home-screen__review-intro-rec-bar:nth-child(2) {
-  --bar-base: 0.667;
+  --bar-base: 0.38;
 }
 .home-screen__review-intro-rec-bar:nth-child(3) {
-  --bar-base: 1;
+  --bar-base: 0.62;
 }
 .home-screen__review-intro-rec-bar:nth-child(4) {
-  --bar-base: 0.667;
+  --bar-base: 0.9;
 }
 .home-screen__review-intro-rec-bar:nth-child(5) {
-  --bar-base: 0.778;
+  --bar-base: 0.72;
 }
 .home-screen__review-intro-rec-bar:nth-child(6) {
-  --bar-base: 0.333;
+  --bar-base: 0.42;
 }
 .home-screen__review-intro-rec-bar:nth-child(7) {
-  --bar-base: 1;
+  --bar-base: 0.55;
 }
 .home-screen__review-intro-rec-bar:nth-child(8) {
-  --bar-base: 0.778;
+  --bar-base: 0.84;
 }
 .home-screen__review-intro-rec-bar:nth-child(9) {
-  --bar-base: 0.333;
+  --bar-base: 0.66;
 }
 .home-screen__review-intro-rec-bar:nth-child(10) {
-  --bar-base: 1;
+  --bar-base: 0.4;
 }
 .home-screen__review-intro-rec-bar:nth-child(11) {
-  --bar-base: 0.778;
+  --bar-base: 0.28;
 }
 .home-screen__review-intro-rec-bar:nth-child(12) {
-  --bar-base: 0.333;
+  --bar-base: 0.18;
 }
 
 .home-screen__review-intro-rec-dot {
@@ -570,35 +554,83 @@ div.home-screen__review-intro-rec:active {
   width: var(--home-screen-review-intro-rec-dot-size);
   height: var(--home-screen-review-intro-rec-dot-size);
   border-radius: 50%;
-  background: var(--color-recording);
-  opacity: 0;
-  transition: opacity var(--duration-fast) ease;
+  background: var(--home-screen-review-intro-rec-dot-idle-color);
+  opacity: 1;
+  animation: none;
+  transition:
+    background-color var(--duration-fast) ease,
+    opacity var(--duration-fast) ease;
 }
 
 .home-screen__review-intro-rec--listening .home-screen__review-intro-rec-dot {
-  opacity: 1;
+  background: var(--home-screen-review-intro-rec-dot-active-color);
   animation: motion-recording-blink var(--motion-recording-blink-duration)
     var(--motion-recording-blink-ease) infinite;
 }
 
 .home-screen__review-intro-rec--listening .home-screen__review-intro-rec-bar {
-  height: var(--home-screen-review-intro-rec-wave-height);
-  transform: scaleY(
-    calc(
-      var(--home-screen-review-intro-rec-bar-min-scale) +
-        var(--control-rec-bar-level, 0) *
-        var(--home-screen-review-intro-rec-bar-level-scale)
-    )
+  height: calc(
+    var(--home-screen-review-intro-rec-wave-height) *
+      (
+        var(--home-screen-review-intro-rec-bar-min-scale) +
+          var(--control-rec-bar-level, 0) *
+          var(--home-screen-review-intro-rec-bar-level-scale)
+      )
   );
+}
+
+.home-screen__review-intro-card--with-ducks {
+  cursor: pointer;
+}
+
+.home-screen__review-intro-ducks-hit {
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--home-screen-review-intro-ducks-hit-height);
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+}
+
+.home-screen__review-intro-ducks-hit:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+  border-radius: var(--home-screen-review-intro-card-radius);
+}
+
+.home-screen__review-intro-ducks-hint {
+  box-sizing: border-box;
+  position: absolute;
+  right: var(--home-screen-review-intro-ducks-hint-right);
+  bottom: var(--home-screen-review-intro-ducks-hint-bottom);
+  width: var(--home-screen-review-intro-duck-size);
+  height: auto;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity var(--duration-fast) ease;
+}
+
+.home-screen__review-intro-card--with-ducks:hover
+  .home-screen__review-intro-ducks-hint,
+.home-screen__review-intro-ducks-hit:focus-visible
+  .home-screen__review-intro-ducks-hint {
+  opacity: var(--home-screen-review-intro-ducks-hint-opacity);
 }
 
 .home-screen__review-intro-ducks {
   box-sizing: border-box;
   position: absolute;
-  right: var(--home-screen-review-intro-ducks-right);
-  bottom: var(--home-screen-review-intro-ducks-bottom);
+  inset: 0;
   width: var(--home-screen-review-intro-ducks-width);
   height: var(--home-screen-review-intro-ducks-height);
+  overflow: hidden;
   pointer-events: none;
   user-select: none;
 }
@@ -606,49 +638,19 @@ div.home-screen__review-intro-rec:active {
 .home-screen__review-intro-duck {
   box-sizing: border-box;
   position: absolute;
-  left: 50%;
-  bottom: 0;
   width: var(--home-screen-review-intro-duck-size);
   height: auto;
-  margin-left: calc(var(--home-screen-review-intro-duck-size) / -2);
+  margin: 0;
   opacity: 0;
-  transform-origin: center bottom;
-  animation: motion-review-intro-duck-burst
+  transform: translate(-50%, -50%) scale(0.35) rotate(0deg);
+  transform-origin: center center;
+  animation: motion-review-intro-duck-scatter
     var(--home-screen-review-intro-duck-burst-duration)
     var(--home-screen-review-intro-duck-burst-ease) both;
   animation-delay: calc(
     var(--duck-index, 0) * var(--home-screen-review-intro-duck-stagger)
   );
-}
-
-.home-screen__review-intro-duck:nth-child(1) {
-  --duck-burst-x: var(--home-screen-review-intro-duck-1-x);
-  --duck-burst-y: var(--home-screen-review-intro-duck-1-y);
-  --duck-burst-rot-from: var(--home-screen-review-intro-duck-1-rot-from);
-  --duck-burst-rot-to: var(--home-screen-review-intro-duck-1-rot-to);
-  width: calc(
-    var(--home-screen-review-intro-duck-size) *
-      var(--home-screen-review-intro-duck-1-scale)
-  );
-}
-
-.home-screen__review-intro-duck:nth-child(2) {
-  --duck-burst-x: var(--home-screen-review-intro-duck-2-x);
-  --duck-burst-y: var(--home-screen-review-intro-duck-2-y);
-  --duck-burst-rot-from: var(--home-screen-review-intro-duck-2-rot-from);
-  --duck-burst-rot-to: var(--home-screen-review-intro-duck-2-rot-to);
-  z-index: 1;
-}
-
-.home-screen__review-intro-duck:nth-child(3) {
-  --duck-burst-x: var(--home-screen-review-intro-duck-3-x);
-  --duck-burst-y: var(--home-screen-review-intro-duck-3-y);
-  --duck-burst-rot-from: var(--home-screen-review-intro-duck-3-rot-from);
-  --duck-burst-rot-to: var(--home-screen-review-intro-duck-3-rot-to);
-  width: calc(
-    var(--home-screen-review-intro-duck-size) *
-      var(--home-screen-review-intro-duck-3-scale)
-  );
+  will-change: transform, opacity;
 }
 
 @media (max-width: 560px) {
@@ -665,9 +667,8 @@ div.home-screen__review-intro-rec:active {
   }
 
   .home-screen__review-intro-card--with-ducks {
-    padding-bottom: calc(
-      var(--home-screen-review-intro-card-padding) +
-        var(--home-screen-review-intro-ducks-height) * 0.45
+    min-height: calc(
+      var(--home-screen-review-intro-card-size) * 0.72
     );
   }
 

@@ -21,6 +21,7 @@
   --palette-black: #000000;
   --palette-gray-50: #fafafa;
   --palette-gray-100: #f3f4f7;
+  --palette-gray-125: #eeeeee;
   --palette-gray-150: #eceef3;
   --palette-gray-175: #e9eaed;
   --palette-gray-200: #e8eaef;
@@ -273,14 +274,17 @@
   --control-rec-wave-height: 18px;
   --control-rec-wave-gap: 2px;
   --control-rec-bar-width: 2px;
-  --control-rec-bar-radius: 5px;
+  /* Полностью скруглённые торцы полос (и в покое, и при анимации высоты). */
+  --control-rec-bar-radius: 999px;
   /* 2px / 18px: минимальная видимая высота полосы в тишине */
   --control-rec-bar-min-scale: 0.111111;
   --control-rec-bar-level-scale: 0.888889;
-  --control-rec-bar-transition-duration: 120ms;
-  --control-rec-bar-transition-easing: ease-out;
+  --control-rec-bar-transition-duration: 140ms;
+  --control-rec-bar-transition-easing: cubic-bezier(0.22, 1, 0.36, 1);
   --control-rec-wave-color: color-mix(in srgb, var(--color-text) 25%, transparent);
   --control-rec-dot-size: 4px;
+  --control-rec-dot-idle-color: var(--color-text);
+  --control-rec-dot-active-color: var(--color-recording);
   --control-mobile-name-max-width: 160px;
   --frame-border-color: var(--color-border);
   --frame-bg: var(--color-surface-muted);
@@ -842,20 +846,23 @@
   --home-screen-review-intro-rec-gap: 7px;
   --home-screen-review-intro-rec-radius: 14px;
   --home-screen-review-intro-rec-bg: var(--color-surface);
-  --home-screen-review-intro-rec-shadow: -1px 4px 2px
-    color-mix(in srgb, var(--palette-gray-900) 8%, transparent);
+  --home-screen-review-intro-rec-shadow: -1px 4px 4px 0 var(--palette-gray-125);
   --home-screen-review-intro-rec-bottom: 51px;
   --home-screen-review-intro-rec-mic-size: 32px;
   --home-screen-review-intro-rec-wave-height: 32px;
   --home-screen-review-intro-rec-wave-gap: 4px;
   --home-screen-review-intro-rec-bar-width: 4px;
-  --home-screen-review-intro-rec-bar-radius: 5px;
+  --home-screen-review-intro-rec-bar-radius: 999px;
   --home-screen-review-intro-rec-wave-color: color-mix(
     in srgb,
     var(--color-text) 25%,
     transparent
   );
   --home-screen-review-intro-rec-dot-size: 7px;
+  --home-screen-review-intro-rec-dot-idle-color: var(--control-rec-dot-idle-color);
+  --home-screen-review-intro-rec-dot-active-color: var(
+    --control-rec-dot-active-color
+  );
   --home-screen-review-intro-rec-bar-min-scale: var(--control-rec-bar-min-scale);
   --home-screen-review-intro-rec-bar-level-scale: var(
     --control-rec-bar-level-scale
@@ -866,29 +873,17 @@
   --home-screen-review-intro-rec-bar-transition-easing: var(
     --control-rec-bar-transition-easing
   );
-  --home-screen-review-intro-ducks-width: 120px;
-  --home-screen-review-intro-ducks-height: 132px;
-  --home-screen-review-intro-ducks-bottom: -8px;
-  --home-screen-review-intro-ducks-right: 8px;
+  --home-screen-review-intro-ducks-width: 100%;
+  --home-screen-review-intro-ducks-height: 100%;
+  --home-screen-review-intro-ducks-hit-height: 58%;
+  --home-screen-review-intro-ducks-hint-opacity: 0.5;
+  --home-screen-review-intro-ducks-hint-bottom: var(--space-3);
+  --home-screen-review-intro-ducks-hint-right: var(--space-3);
   --home-screen-review-intro-duck-size: 66px;
-  --home-screen-review-intro-duck-burst-duration: 720ms;
+  --home-screen-review-intro-duck-burst-duration: 780ms;
   --home-screen-review-intro-duck-burst-ease: var(--ease-reveal);
-  --home-screen-review-intro-duck-stagger: 70ms;
-  --home-screen-review-intro-duck-burst-rise: var(--space-12);
-  --home-screen-review-intro-duck-1-x: calc(var(--space-8) * -1);
-  --home-screen-review-intro-duck-1-y: calc(var(--space-2) * -1);
-  --home-screen-review-intro-duck-1-rot-from: -18deg;
-  --home-screen-review-intro-duck-1-rot-to: -8deg;
-  --home-screen-review-intro-duck-1-scale: 0.92;
-  --home-screen-review-intro-duck-2-x: var(--space-1);
-  --home-screen-review-intro-duck-2-y: calc(var(--space-6) * -1);
-  --home-screen-review-intro-duck-2-rot-from: 10deg;
-  --home-screen-review-intro-duck-2-rot-to: 4deg;
-  --home-screen-review-intro-duck-3-x: var(--space-8);
-  --home-screen-review-intro-duck-3-y: calc(var(--space-1) * -0.5);
-  --home-screen-review-intro-duck-3-rot-from: 16deg;
-  --home-screen-review-intro-duck-3-rot-to: 12deg;
-  --home-screen-review-intro-duck-3-scale: 0.86;
+  --home-screen-review-intro-duck-stagger: 28ms;
+  --home-screen-review-intro-duck-burst-count: 6;
   --home-screen-invite-explainer-gap: var(--space-4);
   --home-screen-invite-explainer-media-width: 100%;
   --home-screen-invite-explainer-media-height: 256px;

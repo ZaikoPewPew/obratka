@@ -177,23 +177,80 @@ function createReviewIntroRecPreview() {
 }
 
 /**
- * Взрыв уточек из низа карточки «2-ая минута».
- * @returns {HTMLDivElement}
+ * Слой уточек для карточки «2-ая минута»: хинт по hover + разлёт от клика.
+ * @returns {{
+ *   root: DocumentFragment;
+ *   hit: HTMLButtonElement;
+ *   layer: HTMLDivElement;
+ *   burstAt: (clientX: number, clientY: number, card: HTMLElement) => void;
+ * }}
  */
 function createReviewIntroDucksBurst() {
-  const wrap = document.createElement("div");
-  wrap.className = "home-screen__review-intro-ducks";
-  wrap.setAttribute("aria-hidden", "true");
-  for (let i = 0; i < 3; i += 1) {
-    const duck = document.createElement("img");
-    duck.className = "home-screen__review-intro-duck";
-    duck.src = balanceCardDucksUrl;
-    duck.alt = "";
-    duck.draggable = false;
-    duck.style.setProperty("--duck-index", String(i));
-    wrap.append(duck);
+  const fragment = document.createDocumentFragment();
+
+  const layer = document.createElement("div");
+  layer.className = "home-screen__review-intro-ducks";
+  layer.setAttribute("aria-hidden", "true");
+
+  const hit = document.createElement("button");
+  hit.type = "button";
+  hit.className = "home-screen__review-intro-ducks-hit";
+
+  const hint = document.createElement("img");
+  hint.className = "home-screen__review-intro-ducks-hint";
+  hint.src = balanceCardDucksUrl;
+  hint.alt = "";
+  hint.draggable = false;
+  hit.append(hint);
+
+  /**
+   * @param {number} clientX
+   * @param {number} clientY
+   * @param {HTMLElement} card
+   */
+  function burstAt(clientX, clientY, card) {
+    const rect = card.getBoundingClientRect();
+    const originX = Math.min(Math.max(clientX - rect.left, 8), rect.width - 8);
+    const originY = Math.min(Math.max(clientY - rect.top, 8), rect.height - 8);
+    const count = 6;
+    const fragmentDucks = document.createDocumentFragment();
+
+    for (let i = 0; i < count; i += 1) {
+      const duck = document.createElement("img");
+      duck.className = "home-screen__review-intro-duck";
+      duck.src = balanceCardDucksUrl;
+      duck.alt = "";
+      duck.draggable = false;
+      duck.style.left = `${originX}px`;
+      duck.style.top = `${originY}px`;
+
+      const t = count === 1 ? 0.5 : i / (count - 1);
+      const angleDeg = -110 + t * 140 + (i % 2 === 0 ? -6 : 6);
+      const angle = (angleDeg * Math.PI) / 180;
+      const dist = 72 + (i % 3) * 28 + t * 36;
+      const scale = 0.72 + (i % 3) * 0.14;
+      const rot = -28 + t * 56 + (i % 2 === 0 ? -10 : 12);
+
+      duck.style.setProperty("--duck-index", String(i));
+      duck.style.setProperty("--duck-dx", `${Math.cos(angle) * dist}px`);
+      duck.style.setProperty("--duck-dy", `${Math.sin(angle) * dist}px`);
+      duck.style.setProperty("--duck-rot", `${rot}deg`);
+      duck.style.setProperty("--duck-scale", String(scale));
+      duck.addEventListener(
+        "animationend",
+        () => {
+          duck.remove();
+        },
+        { once: true },
+      );
+      fragmentDucks.append(duck);
+    }
+
+    layer.append(fragmentDucks);
   }
-  return wrap;
+
+  fragment.append(layer, hit);
+  return { root: fragment, hit, layer, burstAt };
 }
 
 /**
@@ -207,6 +264,7 @@ function createReviewIntroDucksBurst() {
  * @returns {{
  *   root: HTMLLIElement;
  *   rec: ReturnType<typeof createReviewIntroRecPreview> | null;
+ *   ducks: ReturnType<typeof createReviewIntroDucksBurst> | null;
  * }}
  */
 function createReviewIntroCard(opts) {
@@ -231,14 +289,26 @@ function createReviewIntroCard(opts) {
 
   /** @type {ReturnType<typeof createReviewIntroRecPreview> | null} */
   let rec = null;
+  /** @type {ReturnType<typeof createReviewIntroDucksBurst> | null} */
+  let ducks = null;
   if (opts.withRec) {
     rec = createReviewIntroRecPreview();
     card.append(rec.root);
   }
   if (opts.withDucks) {
-    card.append(createReviewIntroDucksBurst());
+    ducks = createReviewIntroDucksBurst();
+    const t = getStrings();
+    ducks.hit.setAttribute(
+      "aria-label",
+      t.homeReviewIntroDucksAria ?? "",
+    );
+    ducks.hit.title = t.homeReviewIntroDucksTitle ?? "";
+    ducks.hit.addEventListener("click", (event) => {
+      ducks?.burstAt(event.clientX, event.clientY, card);
+    });
+    card.append(ducks.root);
   }
-  return { root: card, rec };
+  return { root: card, rec, ducks };
 }
 
 /**

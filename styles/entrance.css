@@ -89,27 +89,24 @@
   }
 }
 
-/** Взрыв уточек снизу карточки intro-модалки. */
-@keyframes motion-review-intro-duck-burst {
+/** Взрыв уточек от точки клика в intro-модалке. */
+@keyframes motion-review-intro-duck-scatter {
   0% {
-    opacity: 0;
-    transform: translate(
-        var(--duck-burst-x, 0),
-        calc(var(--duck-burst-y, 0px) + var(--home-screen-review-intro-duck-burst-rise))
-      )
-      scale(0.35) rotate(var(--duck-burst-rot-from, -12deg));
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.4) rotate(0deg);
   }
 
-  62% {
+  70% {
     opacity: 1;
-    transform: translate(var(--duck-burst-x, 0), var(--duck-burst-y, 0px))
-      scale(1.08) rotate(var(--duck-burst-rot-to, 8deg));
   }
 
   100% {
-    opacity: 1;
-    transform: translate(var(--duck-burst-x, 0), var(--duck-burst-y, 0px))
-      scale(1) rotate(var(--duck-burst-rot-to, 8deg));
+    opacity: 0;
+    transform: translate(
+        calc(-50% + var(--duck-dx, 0px)),
+        calc(-50% + var(--duck-dy, 0px))
+      )
+      scale(var(--duck-scale, 1)) rotate(var(--duck-rot, 0deg));
   }
 }
 

@@ -120,7 +120,7 @@ SWR: при `open` / смене таба / F5 — если есть кэш вк�
 
 После skeleton данные с `motion-reveal` stagger; после тихого refetch при тех же id — только патч reviewer-слотов (без пересборки DOM / thum.io); новые карточки — full rebuild + reveal только для новых id.
 
-Клик по чужой карточке → intro-модалка (Figma `492:3611`): тайтл + «Автор карточки — {name}», две карточки («1-ая минута» с интерактивным preview-rec на mic-meter без STT; «2-ая минута» со взрывом уточек) → CTA «Сюдаа его!» → `onOpenPortfolio` → `claimPortfolioReview` → `/review`. «Не сейчас» / закрытие — без claim; mic-meter стопается.  
+Клик по чужой карточке → intro-модалка (Figma `492:3611`): тайтл + «Автор карточки — {name}», две карточки («1-ая минута» с интерактивным preview-rec на mic-meter без STT; «2-ая минута» — hover-хинт уточек + клик → разлёт от курсора) → CTA «Сюдаа его!» → `onOpenPortfolio` → `claimPortfolioReview` → `/review`. «Не сейчас» / закрытие — без claim; mic-meter стопается.  
 Своя (`isOwn`, вкладка «Мои») кликабельна всегда: собраны все ревью (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report` (листы + жалоба); иначе модалка `homeMineNotReady*` с прогрессом. Title / aria карточки — `homeCardReport*` либо `homeCardReportPending*`, пересинхронизируются при silent-патче слотов.  
 Уже отревьюенная карточка (`reviewedByMe` = строка в `reviews` после submit) — `disabled`, без intro и без notice; статус только оверлеем на превью.
 CTA «Закинуть своё» (кнопка в доке у таббара) — всегда активна. Баланс ≥ `SUBMIT_COST` (30) → `onAddPortfolio` → `/portfolio`; иначе `createAppModal` «не хватает монет». Старт с 0 → нужно ~3 чужих ревью (`REVIEW_REWARD` 10).
