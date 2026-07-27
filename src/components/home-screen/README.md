@@ -30,7 +30,7 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 | **Мои на ревью** (`active`, default) | `reviewsCount < targetReviews` (ещё собираются ревью, 0…2) |
 | **Мои завершенные** (`completed`) | `reviewsCount >= targetReviews` (все слоты заполнены, 3/3) |
 
-Empty «Мои завершенные»: `homeEmptyMineCompleted`. На **Мои на ревью** текстового empty нет: всегда до `MAX_MINE_PENDING` (1) слотов — реальная карточка или dashed placeholder «Свободный слот» (`homeMineSlotFree*`, Figma Type=Queue). Клик по свободному слоту / CTA «Закинуть» → если слот занят `homePendingLimit*`, если нет монет `homeSubmitLocked*`. Фильтр сбрасывается в `active` на `close()`; при следующем `open()` вид берётся из URL.
+Empty «Мои завершенные»: `homeEmptyMineCompleted`. На **Мои на ревью** текстового empty нет: всегда до `MAX_MINE_PENDING` (1) слотов — реальная карточка или dashed placeholder «Свободный слот» (`homeMineSlotFree*`, Figma Type=Queue). Cold-miss skeleton там тоже **1** карточка (`MINE_ACTIVE_SKELETON_CARD_COUNT` = `MAX_MINE_PENDING`), не лента из 5. Клик по свободному слоту / CTA «Закинуть» → если слот занят `homePendingLimit*`, если нет монет `homeSubmitLocked*`. Фильтр сбрасывается в `active` на `close()`; при следующем `open()` вид берётся из URL.
 
 ### Индикатор на «На ревью»
 
@@ -140,9 +140,9 @@ CTA «Закинуть своё» (кнопка в доке у таббара) �
 - Empty state ленты — карточка `--home-screen-empty-*` (радиус 24, высота 326, muted-фон, текст по центру).
 - Если в `profiles.avatar_url` пусто — при refresh подтягиваем picture из Auth и пишем в профиль.
 - При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.
-- Репутация: `profiles.reputation` ↔ `session.reputation`; чип = иконка + дельта от 100 (`0` / `+10` / `-20`, `formatReputationDelta`); клик → explainer через `createAppModal` (без весов тегов).
+- Репутация: `profiles.reputation` ↔ `session.reputation`; чип = иконка + дельта от 100 (`0` / `+10` / `-20`, `formatReputationDelta`); клик → explainer «Репутация в сообществе» (`homeReputation*`, Figma `492:3988`): фото + карточка «Сейчас N репутация» из [`assets/home/modal/`](../../assets/home/modal/) (`currency-ghost.jpg`), secondary CTA «Ясн» → закрыть (без весов тегов).
 - Порядок чипов в шапке: репутация → баланс → аватар. «Закинуть своё» — не в шапке, а в доке у таббара; чип уведомлений убран (непросмотренный готовый отчёт — точка на «Мои посты»).
-- Баланс: `profiles.balance` ↔ `session.balance`. Экономика: `REVIEW_REWARD = 10`, `SUBMIT_COST = 30` ([`wallet.js`](../../api/wallet.js) / `wallet.mdc`). Клик по чипу → explainer «Игровая валюта» (`homeBalance*`, Figma `496:4403`): фото + карточка «Уточки» из [`assets/home/modal/`](../../assets/home/modal/) (`currency-duck.jpg`, `balance-card-ducks.svg`), secondary CTA «Ясн» → закрыть.
+- Баланс: `profiles.balance` ↔ `session.balance`. Экономика: `REVIEW_REWARD = 10`, `SUBMIT_COST = 30` ([`wallet.js`](../../api/wallet.js) / `wallet.mdc`). Клик по чипу → explainer «Игровая валюта» (`homeBalance*`, Figma `496:4403`): фото + карточка «Сейчас N уточек» из [`assets/home/modal/`](../../assets/home/modal/) (`currency-duck.jpg`, `balance-card-ducks.svg`), secondary CTA «Ясн» → закрыть.
 - Подача — RPC `submit_portfolio` (spend 30); legacy `spend_submit_cost`; награда за ревью (+10) — в `handle_review_inserted`.
 - CTA «Закинуть своё» без монет → `createAppModal` «Монет маловато»; notices (no slots / already reviewed) — тот же `noticeModal`.
 - Клик по аватару профиля → `account-menu` из Figma `467:1320`, раскрывающийся влево от правого края аватара с отступом 16px вниз (без выхода за viewport).

@@ -189,14 +189,87 @@
   padding-inline: var(--home-screen-chip-padding-x) var(--space-5);
 }
 
-.home-screen__reputation-body {
+.home-screen__reputation-explainer {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-screen-reputation-explainer-gap);
+  min-width: 0;
+}
+
+.home-screen__reputation-explainer-row {
+  box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+  gap: var(--home-screen-reputation-explainer-gap);
+  min-width: 0;
+}
+
+.home-screen__reputation-explainer-media {
+  box-sizing: border-box;
+  display: block;
+  flex: 0 0 auto;
+  width: var(--home-screen-reputation-explainer-media-width);
+  height: var(--home-screen-reputation-explainer-media-height);
+  object-fit: cover;
+  border-radius: var(--home-screen-reputation-explainer-media-radius);
+}
+
+.home-screen__reputation-explainer-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-screen-reputation-explainer-card-gap);
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--home-screen-reputation-explainer-media-height);
+  padding: var(--home-screen-reputation-explainer-card-padding);
+  border-radius: var(--home-screen-reputation-explainer-card-radius);
+  background: var(--home-screen-reputation-explainer-card-bg);
+}
+
+.home-screen__reputation-explainer-card-value,
+.home-screen__reputation-explainer-card-label,
+.home-screen__reputation-explainer-body {
   margin: 0;
-  color: var(--color-text-muted);
   font-family: var(--font-family);
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-loose);
-  white-space: var(--home-screen-reputation-body-pre);
+}
+
+.home-screen__reputation-explainer-card-value {
+  color: var(--color-text);
+  font-size: var(--home-screen-reputation-explainer-card-value-size);
+  font-weight: var(--home-screen-reputation-explainer-card-value-weight);
+  line-height: var(--home-screen-reputation-explainer-card-value-line);
+}
+
+.home-screen__reputation-explainer-card-label {
+  color: var(--home-screen-reputation-explainer-card-label-color);
+  font-size: var(--home-screen-reputation-explainer-card-label-size);
+  font-weight: var(--home-screen-reputation-explainer-card-label-weight);
+  line-height: var(--home-screen-reputation-explainer-card-label-line);
+}
+
+.home-screen__reputation-explainer-body {
+  color: var(--color-text);
+  font-size: var(--home-screen-reputation-explainer-body-size);
+  font-weight: var(--home-screen-reputation-explainer-body-weight);
+  line-height: var(--home-screen-reputation-explainer-body-line);
+}
+
+@media (max-width: 560px) {
+  .home-screen__reputation-explainer-row {
+    flex-direction: column;
+  }
+
+  .home-screen__reputation-explainer-media {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 268 / 216;
+  }
+
+  .home-screen__reputation-explainer-card {
+    min-height: 0;
+  }
 }
 
 .home-screen__balance-explainer {

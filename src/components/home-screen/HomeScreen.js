@@ -22,6 +22,7 @@ import {
 } from "../../api/wallet.js";
 import {
   formatReputationDelta,
+  getReputation,
   getReputationDelta,
 } from "../../api/reviewComplaints.js";
 import { listOnlineLegendaries } from "../../api/presence.js";
@@ -62,6 +63,7 @@ import { REVIEW_SESSION_SECONDS } from "../../config/review.js";
 import boneIconUrl from "../../assets/home/bone.svg";
 import balanceCardDucksUrl from "../../assets/home/modal/balance-card-ducks.svg";
 import currencyDuckUrl from "../../assets/home/modal/currency-duck.jpg";
+import currencyGhostUrl from "../../assets/home/modal/currency-ghost.jpg";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
 import reviewedCheckIconSvg from "../../assets/home/reviewed-check.svg?raw";
 import reputationNeutralIconUrl from "../../assets/home/reputation-neutral.svg";
@@ -121,8 +123,14 @@ function createReviewedCheckIcon() {
   return svg;
 }
 
-/** Сколько skeleton-карточек показывать, пока грузится лента. */
+/** Сколько skeleton-карточек показывать, пока грузится лента / «Мои завершенные». */
 const SKELETON_CARD_COUNT = 5;
+
+/**
+ * Skeleton на «Мои → Мои на ревью»: всегда ≤ `MAX_MINE_PENDING` слотов
+ * (карточка или free-slot), не имитировать длинную ленту.
+ */
+const MINE_ACTIVE_SKELETON_CARD_COUNT = MAX_MINE_PENDING;
 
 /** Сколько skeleton-карточек показывать, пока грузится рейтинг. */
 const RATING_SKELETON_CARD_COUNT = 8;
@@ -610,9 +618,6 @@ export function createHomeScreen({
   cluster.append(feed, ratingView);
   body.append(cluster);
 
-  const reputationBody = document.createElement("p");
-  reputationBody.className = "home-screen__reputation-body";
-
   const noticeModal = createAppModal({
     size: "md",
     showSecondary: false,
@@ -620,6 +625,49 @@ export function createHomeScreen({
       void noticeModal.close();
     },
   });
+
+  const reputationExplainer = document.createElement("div");
+  reputationExplainer.className = "home-screen__reputation-explainer";
+
+  const reputationRow = document.createElement("div");
+  reputationRow.className = "home-screen__reputation-explainer-row";
+
+  const reputationMedia = document.createElement("img");
+  reputationMedia.className = "home-screen__reputation-explainer-media";
+  reputationMedia.src = currencyGhostUrl;
+  reputationMedia.alt = "";
+  reputationMedia.width = 268;
+  reputationMedia.height = 216;
+  reputationMedia.decoding = "async";
+
+  const reputationCard = document.createElement("div");
+  reputationCard.className = "home-screen__reputation-explainer-card";
+
+  const reputationCardValue = document.createElement("p");
+  reputationCardValue.className = "home-screen__reputation-explainer-card-value";
+
+  const reputationCardLabel = document.createElement("p");
+  reputationCardLabel.className = "home-screen__reputation-explainer-card-label";
+
+  reputationCard.append(reputationCardValue, reputationCardLabel);
+  reputationRow.append(reputationMedia, reputationCard);
+
+  const reputationBody = document.createElement("p");
+  reputationBody.className = "home-screen__reputation-explainer-body";
+
+  const reputationBodyNote = document.createElement("p");
+  reputationBodyNote.className = "home-screen__reputation-explainer-body";
+
+  reputationExplainer.append(reputationRow, reputationBody, reputationBodyNote);
+
+  const reputationModal = createAppModal({
+    size: "md",
+    showPrimary: false,
+    onSecondary: () => {
+      void reputationModal.close();
+    },
+  });
+  reputationModal.content.append(reputationExplainer);
 
   const balanceExplainer = document.createElement("div");
   balanceExplainer.className = "home-screen__balance-explainer";
@@ -777,6 +825,7 @@ export function createHomeScreen({
     tabbarDock,
     legendaryOnlinePanel.root,
     noticeModal.root,
+    reputationModal.root,
     balanceModal.root,
     reviewIntroModal.root,
     inviteModal.root,
@@ -1539,7 +1588,11 @@ export function createHomeScreen({
   function renderSkeleton() {
     list.replaceChildren();
     empty.hidden = true;
-    for (let i = 0; i < SKELETON_CARD_COUNT; i += 1) {
+    const count =
+      activeTab === "mine" && mineFilter === "active"
+        ? MINE_ACTIVE_SKELETON_CARD_COUNT
+        : SKELETON_CARD_COUNT;
+    for (let i = 0; i < count; i += 1) {
       list.append(createSkeletonCard());
     }
   }
@@ -2418,7 +2471,9 @@ export function createHomeScreen({
 
   function openBalanceModal() {
     const t = getStrings();
-    balanceCardTitle.textContent = t.homeBalanceCardTitle ?? "";
+    balanceCardTitle.textContent = formatString(t.homeBalanceCardTitle ?? "", {
+      balance: getBalance(),
+    });
     balanceCardBody.textContent = t.homeBalanceCardBody ?? "";
     balanceModal.setTitle(t.homeBalanceTitle ?? "");
     balanceModal.setDescription(t.homeBalanceDesc ?? "");
@@ -2432,19 +2487,21 @@ export function createHomeScreen({
 
   function openReputationModal() {
     const t = getStrings();
-    const reputationDelta = formatReputationDelta();
-    reputationBody.textContent = t.homeReputationBody ?? "";
-    noticeModal.content.replaceChildren(reputationBody);
-    noticeModal.setTitle(
-      formatString(t.homeReputationTitle, { reputation: reputationDelta }),
+    reputationCardValue.textContent = formatString(
+      t.homeReputationCardTitle ?? "",
+      { reputation: getReputation() },
     );
-    noticeModal.setDescription("");
-    noticeModal.setPrimaryLabel(t.homeReputationClose ?? "");
-    noticeModal.setCloseAriaLabel(
+    reputationCardLabel.textContent = t.homeReputationCardLabel ?? "";
+    reputationBody.textContent = t.homeReputationBody ?? "";
+    reputationBodyNote.textContent = t.homeReputationBodyNote ?? "";
+    reputationModal.setTitle(t.homeReputationTitle ?? "");
+    reputationModal.setDescription(t.homeReputationDesc ?? "");
+    reputationModal.setSecondaryLabel(t.homeReputationClose ?? "");
+    reputationModal.setCloseAriaLabel(
       t.homeReputationCloseAria ?? t.homeReputationClose ?? "",
     );
-    noticeModal.setActionsVisible({ primary: true, secondary: false });
-    noticeModal.open();
+    reputationModal.setActionsVisible({ primary: false, secondary: true });
+    reputationModal.open();
   }
 
   reputationChip.addEventListener("click", () => {
