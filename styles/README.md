@@ -2,7 +2,7 @@
 
 - `tokens.css` — **источник дизайн-токенов** (примитивы → семантика → темы). Правило: `.cursor/rules/design-tokens.mdc`.
 - `base.css` — сброс / база.
-- `entrance.css` — `@keyframes motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock` / `motion-recording-blink` / `motion-reputation-eyes-look` (пульс индикатора записи + взгляд глазок репутации).
+- `entrance.css` — `@keyframes motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock` / `motion-recording-blink` / `motion-reputation-eyes-look` / `motion-balance-duck-float` / `motion-control-error-buzz` (пульс индикатора записи + взгляд глазок репутации + покачивание уточки баланса + error-buzz).
 - `app-modal.css` — универсальная модалка (`createAppModal`, `--app-modal-*`).
 - `side-panel.css` — боковая панель (`createSidePanel`, `--side-panel-*`).
 - `iframe-shell.css` — оболочка `/review` (таймер, **`.iframe-shell__rec`**), `.url-screen*` (в т.ч. **`.url-screen__back`**, `__error*`, `__input-wrap--invalid`), `.auth-screen*` / `.auth-code-screen*` (в т.ч. `__cells--invalid`), `.review-screen*` / `.review-panel*` (в т.ч. **`.review-panel__rec`**).
@@ -37,6 +37,8 @@
 | `--motion-feature-*` / `--motion-report-launch-*` | PDF-лист |
 | `--motion-recording-blink-*` | пульс красного индикатора записи |
 | `--motion-reputation-eyes-*` | периодический взгляд глазок чипа репутации |
+| `--motion-balance-duck-*` | периодическое покачивание уточки на чипе баланса |
+| `--motion-control-error-buzz-*` | короткий горизонтальный buzz (хаптик ошибки) |
 | `--motion-delay-*` / `--motion-stagger` | stagger |
 | `--url-screen-reveal-*` / `--url-screen-error-*` | split + field error aliases |
 | `--url-screen-error-mesh-*` | палитра invalid (= ban) |
@@ -54,7 +56,7 @@
 
 Handoff без анимации visual: класс `.url-screen--handoff` + `brandScreenTransition.js`.
 
-CSS: `animation-name: motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock`.  
+CSS: `animation-name: motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock`; idle `motion-balance-duck-float` / `motion-reputation-eyes-look`; отказ — класс `.motion-control-error-buzz`.  
 `motion-reveal-dock` — slide-up с `translateX(-50%)`, без opacity (иначе у `.home-screen__tabbar` пропадает blur).  
 JS: `src/utils/motionTokens.js`.  
 Field errors: [`src/utils/FIELD_ERROR.md`](../src/utils/FIELD_ERROR.md).  

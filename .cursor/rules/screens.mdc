@@ -51,8 +51,9 @@ alwaysApply: true
 
 ## Motion / docs
 
-Open/close — `--motion-*` / `entrance.css` (`motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock`) / `motionTokens.js`.  
-Home dock: только translate (без `opacity` на предке glass) — иначе ломается `backdrop-filter`.  
+Open/close — `--motion-*` / `entrance.css` (`motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock` / `motion-control-error-buzz` / idle `motion-balance-duck-float` / `motion-reputation-eyes-look`) / `motionTokens.js`. 
+Home dock: только translate (без `opacity` на предке glass) — иначе ломается `backdrop-filter`. 
+Home без монет: CTA «Закинуть своё» → buzz submit + чип баланса + `homeSubmitLocked*`.
 Новый экран: README в папке + таблица path в `SCREENS.md` и `src/app/README.md`.  
 Shared UI (`app-modal`, `side-panel`, brand-shell, `tabs-panel`, `legendary-online-panel`, `contact-fab`): README в папке + упоминание в `SCREENS.md` / `PROJECT.md` § Слои UI.
 

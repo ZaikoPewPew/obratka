@@ -6,7 +6,7 @@
 
 | Файл | О чём |
 |------|--------|
-| `design-tokens.mdc` | Только `var(--…)` из `tokens.css`, Montserrat, motion (`motion-reveal-dock` / home glass) |
+| `design-tokens.mdc` | Только `var(--…)` из `tokens.css`, Montserrat, motion (`motion-reveal-dock` / duck / error-buzz / home glass) |
 | `i18n.mdc` | UI-строки только из `locales.json` (ru/en) |
 | `typography.mdc` | Висячие предлоги 1–3 буквы → NBSP (`fixHangingPrepositions`) |
 | `screens.mdc` | Экран = модуль, `go()`, paths, home (feedSeen / 3/3 / rating / legendary), handoff |
@@ -28,7 +28,7 @@
 |-----|-----|
 | Токены | `styles/tokens.css` |
 | Локали | `content/locales.json`, `src/i18n.js` |
-| Motion | `--motion-*`, `entrance.css` (`motion-reveal` / `-scale` / `-topbar` / `-dock`), `motionTokens.js`, `brandScreenTransition.js` |
+| Motion | `--motion-*`, `entrance.css` (`motion-reveal` / `-scale` / `-topbar` / `-dock` / `-balance-duck-float` / `-control-error-buzz` / idle eyes), `motionTokens.js`, `brandScreenTransition.js` |
 | Field errors | `src/utils/FIELD_ERROR.md`, `fieldError.js`, `urlScreenField.js` |
 | Brand visual / variants | `src/components/brand-screen-visual/` |
 | Brand split-shell | `src/components/brand-screen-shell/` |
@@ -94,7 +94,7 @@ Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-scre
 
 ## Referrals (шпаргалка)
 
-Validate **до** auth → redeem **после** login; 1 код / 2 слота; seed `YTHWKPDWAK`; **без наград**; шаринг с home (аватар).  
+Validate **до** auth → redeem **после** login; 1 код / 2 слота; seed `YTHWKPDWAK`; **без наград**; шаринг с home (аватар → «Пригласить»): copy/share = полный `homeInviteMessage`.  
 SQL / API: `supabase/sql/referrals.sql`, `src/api/referrals.js`.
 
 ## Ban (шпаргалка)
@@ -163,6 +163,7 @@ Variants: `default` / `invalid` (без resize) / `done`. Handoff: `go(id, { han
 Старт `balance = 0` → 3 чужих ревью открывают подачу.  
 Подача: RPC `submit_portfolio` (atomic spend+insert, max 1 pending).  
 Награда: только после `submitPortfolioReview` → `handle_review_inserted` (`REVIEW_REWARD`).  
+Нет монет → buzz submit + чип баланса (`motion-control-error-buzz`) + `homeSubmitLocked*`.  
 Клиент не пишет `profiles.balance`. Правило: `wallet.mdc`.
 
 ## Исследования

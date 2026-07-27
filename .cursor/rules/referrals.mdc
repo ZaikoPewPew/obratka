@@ -19,7 +19,7 @@ alwaysApply: true
 ## Жёсткие правила
 
 - Seed-таблицу клиенту не открывать — только RPC.
-- Шаринг: home → аватар → меню профиля → «Пригласить» → модалка (`homeInvite*`); копировать код / ссылку.
+- Шаринг: home → аватар → меню профиля → «Пригласить» → модалка (`homeInvite*`); copy и share кладут полный текст `homeInviteMessage` (`{url}`, `{code}`) — не только код или голую ссылку.
 - Ошибки поля на referral-screen: `setUrlScreenFieldInvalid` + `visual.setVariant("invalid")`.
 
 ## Код

@@ -231,6 +231,16 @@
   --motion-reputation-eyes-shift: 2px;
   --motion-reputation-eyes-duration: 9000ms;
   --motion-reputation-eyes-ease: cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  /* Покачивание уточки на чипе баланса (покой → волны → покой) */
+  --motion-balance-duck-rotate: 5deg;
+  --motion-balance-duck-bob: 1.5px;
+  --motion-balance-duck-sway: 0.5px;
+  --motion-balance-duck-duration: 8500ms;
+  --motion-balance-duck-ease: cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  /* Короткий error-buzz (как UI-хаптик при отказе) */
+  --motion-control-error-buzz-x: 3px;
+  --motion-control-error-buzz-duration: 420ms;
+  --motion-control-error-buzz-ease: cubic-bezier(0.36, 0.07, 0.19, 0.97);
 
   /* Слои */
   --z-base: 1;
@@ -857,7 +867,7 @@
   --legendary-online-avatar-letter-size: var(--font-size-xs);
   --legendary-online-dot-size: var(--space-2);
   --legendary-online-dot-offset: 0px;
-  --legendary-online-dot-border-width: 1px;
+  --legendary-online-dot-border-width: 2px;
   --legendary-online-dot-border-color: var(--legendary-online-bg);
   --legendary-online-dot-bg: var(--color-online);
   --legendary-online-tooltip-padding-x: var(--space-2);

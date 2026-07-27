@@ -122,7 +122,8 @@
   position: absolute;
   top: var(--legendary-online-dot-offset);
   right: var(--legendary-online-dot-offset);
-  box-sizing: border-box;
+  /* content-box: size = fill 8×8, border 2px outside (как stroke Outside в Figma) */
+  box-sizing: content-box;
   width: var(--legendary-online-dot-size);
   height: var(--legendary-online-dot-size);
   border-radius: var(--radius-pill);

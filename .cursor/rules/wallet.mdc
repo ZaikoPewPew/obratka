@@ -13,7 +13,7 @@ alwaysApply: true
 2. Подача портфолио — RPC **`submit_portfolio`** (atomic spend + insert; max **1** pending = `MAX_MINE_PENDING`).
 3. Legacy `spend_submit_cost` — только отдельное списание без insert; новая подача не через него.
 4. Награда за ревью — только сервер в `handle_review_inserted` после успешного INSERT review; abort/release claim → **без** монет.
-5. UI «Мои на ревью»: free-slot placeholder до лимита (`homeMineSlotFree*`); занятый слот → `homePendingLimit*`; нет монет → `homeSubmitLocked*`.
+5. UI «Мои на ревью»: free-slot placeholder до лимита (`homeMineSlotFree*`); занятый слот → `homePendingLimit*`; нет монет → короткий error-buzz на submit **и** чипе баланса (`motion-control-error-buzz`) + модалка `homeSubmitLocked*`.
 
 ## Код
 

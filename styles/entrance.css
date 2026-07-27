@@ -118,6 +118,93 @@
   }
 }
 
+/**
+ * Периодическое покачивание уточки на чипе баланса:
+ * покой → лёгкие волны (rotate + bob) → покой.
+ * 0% и 100% идентичны → infinite без рывка.
+ */
+@keyframes motion-balance-duck-float {
+  0%,
+  40% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  46% {
+    transform: translate(
+        var(--motion-balance-duck-sway),
+        calc(-1 * var(--motion-balance-duck-bob))
+      )
+      rotate(var(--motion-balance-duck-rotate));
+  }
+
+  53% {
+    transform: translate(
+        calc(-1 * var(--motion-balance-duck-sway)),
+        var(--motion-balance-duck-bob)
+      )
+      rotate(calc(-1 * var(--motion-balance-duck-rotate)));
+  }
+
+  60% {
+    transform: translate(
+        calc(0.6 * var(--motion-balance-duck-sway)),
+        calc(-0.6 * var(--motion-balance-duck-bob))
+      )
+      rotate(calc(0.55 * var(--motion-balance-duck-rotate)));
+  }
+
+  67% {
+    transform: translate(
+        calc(-0.35 * var(--motion-balance-duck-sway)),
+        calc(0.35 * var(--motion-balance-duck-bob))
+      )
+      rotate(calc(-0.3 * var(--motion-balance-duck-rotate)));
+  }
+
+  74%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+/**
+ * Короткий горизонтальный buzz — визуальный «хаптик» ошибки
+ * (отказ CTA / нехватка баланса и т.п.).
+ */
+@keyframes motion-control-error-buzz {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  16% {
+    transform: translateX(calc(-1 * var(--motion-control-error-buzz-x)));
+  }
+
+  32% {
+    transform: translateX(var(--motion-control-error-buzz-x));
+  }
+
+  48% {
+    transform: translateX(calc(-0.7 * var(--motion-control-error-buzz-x)));
+  }
+
+  64% {
+    transform: translateX(calc(0.45 * var(--motion-control-error-buzz-x)));
+  }
+
+  80% {
+    transform: translateX(calc(-0.2 * var(--motion-control-error-buzz-x)));
+  }
+}
+
+.motion-control-error-buzz {
+  animation-name: motion-control-error-buzz;
+  animation-duration: var(--motion-control-error-buzz-duration);
+  animation-timing-function: var(--motion-control-error-buzz-ease);
+  animation-fill-mode: both;
+}
+
 /** Взрыв уточек от точки клика в intro-модалке. */
 @keyframes motion-review-intro-duck-scatter {
   0% {
@@ -196,6 +283,14 @@
   }
 
   .home-screen__reputation-eyes {
+    animation: none;
+  }
+
+  .home-screen__balance-duck {
+    animation: none;
+  }
+
+  .motion-control-error-buzz {
     animation: none;
   }
 }

@@ -38,7 +38,7 @@
 - **Mine report gate:** `reviewsCount < targetReviews` → `homeMineNotReady*`; иначе `/report`. Own-карточки всегда `cursor: pointer` (не `not-allowed`).
 - **Фильтр «Мои»:** сегмент Активные / Завершенные (`tabs-panel`); завершённые = 3/3 (`reviewsCount >= targetReviews`).
 - **Free-slot «Мои на ревью»:** до `MAX_MINE_PENDING` (=1) — реальная карточка или dashed «Свободный слот» (`homeMineSlotFree*`); занятый слот → `homePendingLimit*`; нет монет → `homeSubmitLocked*`. Подача — RPC `submit_portfolio` (atomic spend+insert).
-- **Экономика:** `REVIEW_REWARD = 10`, `SUBMIT_COST = 30` (старт `balance = 0` → 3 чужих ревью до своей подачи). Награда только после submit отчёта; abort/release claim — без монет. Правило: `.cursor/rules/wallet.mdc`.
+- **Экономика:** `REVIEW_REWARD = 10`, `SUBMIT_COST = 30` (старт `balance = 0` → 3 чужих ревью до своей подачи). Награда только после submit отчёта; abort/release claim — без монет. Нет монет на «Закинуть своё» → error-buzz на submit + чипе баланса + `homeSubmitLocked*`. Правило: `.cursor/rules/wallet.mdc`.
 - **Вкладка «Рейтинг»:** третий tab `rating`; топ-50 по `balance` (`listRatingTop` / `rating_leaderboard.sql`, снапшот раз в сутки); карточки в `.home-screen__rating-list` (aside `rating/` **не** монтируется); плашка баланса `min-width`/`height` 52px, padding-x 16px.
 - **«Топы в сети»:** fixed-чип слева снизу (`legendary-online-panel` + heartbeat/list RPC); скрыт, если никого нет.
 - **Deep links home:** `/home`, `?tab=mine`, `?tab=mine&filter=completed`, `?tab=rating`; query канонизирует `homeRoute.js`, Back/Forward переключает вид без remount.
@@ -98,7 +98,7 @@
 | Redeem | после логина `redeem_referral` (один раз на аккаунт) |
 | Код юзера | `profiles.referral_code`, max **2** активации |
 | Seed | `YTHWKPDWAK` в `referral_seed_codes` (холодный старт) |
-| Шаринг | home → аватар → account-menu → «Пригласить» (`homeInvite*`) |
+| Шаринг | home → аватар → account-menu → «Пригласить» (`homeInvite*`); copy/share = полный `homeInviteMessage` (`{url}`, `{code}`) |
 | SQL / API | [`supabase/sql/referrals.sql`](supabase/sql/referrals.sql), [`src/api/referrals.js`](src/api/referrals.js) |
 
 ## Данные (Supabase)

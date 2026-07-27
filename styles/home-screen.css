@@ -152,6 +152,7 @@
 
 .home-screen__chip {
   box-sizing: border-box;
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -705,6 +706,14 @@ div.home-screen__review-intro-rec {
   transform-origin: center;
   animation: motion-reputation-eyes-look
     var(--motion-reputation-eyes-duration) var(--motion-reputation-eyes-ease)
+    infinite;
+}
+
+/* Уточка на чипе баланса: покой → волны → покой. */
+.home-screen__balance-duck {
+  transform-origin: 50% 70%;
+  animation: motion-balance-duck-float
+    var(--motion-balance-duck-duration) var(--motion-balance-duck-ease)
     infinite;
 }
 
@@ -1506,8 +1515,16 @@ div.home-screen__review-intro-rec {
 .home-screen__reviewer-slot:hover .home-screen__tip,
 .home-screen__reviewer-slot:focus-visible .home-screen__tip,
 .home-screen__badge:hover .home-screen__tip,
-.home-screen__badge:focus-visible .home-screen__tip {
+.home-screen__badge:focus-visible .home-screen__tip,
+.home-screen__chip:hover .home-screen__tip,
+.home-screen__chip:focus-visible .home-screen__tip {
   display: block;
+}
+
+/* Чипы в шапке — tip снизу, иначе уезжает за верх экрана */
+.home-screen__chip .home-screen__tip {
+  top: calc(100% + var(--home-screen-reviewer-slot-tooltip-offset));
+  bottom: auto;
 }
 
 .home-screen__reviewer-slot:nth-child(1) {
@@ -1799,14 +1816,6 @@ div.home-screen__review-intro-rec {
   background: transparent;
   color: var(--home-screen-invite-bar-color);
   cursor: pointer;
-}
-
-.home-screen__invite-copy:hover:not(:disabled) {
-  background: var(--color-surface-muted-hover);
-}
-
-.home-screen__invite-copy:active:not(:disabled) {
-  background: var(--color-surface-muted-active);
 }
 
 .home-screen__invite-copy:focus-visible {

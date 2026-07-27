@@ -39,8 +39,9 @@
 
 ## Motion helpers (`motionTokens.js`)
 
-CSS keyframes (SoT): `styles/entrance.css` — `motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock` / `motion-recording-blink`.  
+CSS keyframes (SoT): `styles/entrance.css` — `motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock` / `motion-recording-blink` / `motion-reputation-eyes-look` / `motion-balance-duck-float` / `motion-control-error-buzz`.
 Home dock entrance: только transform (`motion-reveal-dock`); delays — `--home-screen-reveal-delay-*`.
+Home idle / haptic: уточка баланса (`motion-balance-duck-float`), глазки репутации, отказ CTA — класс `.motion-control-error-buzz`.
 
 | Функция | Токены |
 |---------|--------|

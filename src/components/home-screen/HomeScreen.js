@@ -741,7 +741,7 @@ export function createHomeScreen({
   balanceChip.className = "home-screen__chip home-screen__chip--balance";
 
   const boneImg = document.createElement("img");
-  boneImg.className = "home-screen__chip-icon";
+  boneImg.className = "home-screen__chip-icon home-screen__balance-duck";
   boneImg.src = boneIconUrl;
   boneImg.alt = "";
   boneImg.width = 24;
@@ -751,7 +751,11 @@ export function createHomeScreen({
   const balanceValue = document.createElement("span");
   balanceValue.className = "home-screen__chip-value";
 
-  balanceChip.append(boneImg, balanceValue);
+  const balanceTip = document.createElement("span");
+  balanceTip.className = "home-screen__tip";
+  balanceTip.setAttribute("aria-hidden", "true");
+
+  balanceChip.append(boneImg, balanceValue, balanceTip);
 
   const reputationChip = document.createElement("button");
   reputationChip.type = "button";
@@ -764,7 +768,11 @@ export function createHomeScreen({
   const reputationValue = document.createElement("span");
   reputationValue.className = "home-screen__chip-value";
 
-  reputationChip.append(reputationIcon, reputationValue);
+  const reputationTip = document.createElement("span");
+  reputationTip.className = "home-screen__tip";
+  reputationTip.setAttribute("aria-hidden", "true");
+
+  reputationChip.append(reputationIcon, reputationValue, reputationTip);
 
   const profileBtn = document.createElement("button");
   profileBtn.type = "button";
@@ -1418,7 +1426,9 @@ export function createHomeScreen({
       "aria-label",
       formatString(t.homeBalanceAria, { balance }),
     );
-    balanceChip.title = formatString(t.homeBalance, { balance });
+    const balanceTooltip = t.homeBalanceTooltip ?? "";
+    balanceChip.title = balanceTooltip;
+    balanceTip.textContent = balanceTooltip;
 
     const reputationDelta = formatReputationDelta();
     reputationValue.textContent = reputationDelta;
@@ -1433,9 +1443,9 @@ export function createHomeScreen({
       "aria-label",
       formatString(t.homeReputationAria, { reputation: reputationDelta }),
     );
-    reputationChip.title = formatString(t.homeReputation, {
-      reputation: reputationDelta,
-    });
+    const reputationTooltip = t.homeReputationTooltip ?? "";
+    reputationChip.title = reputationTooltip;
+    reputationTip.textContent = reputationTooltip;
 
     profileBtn.setAttribute("aria-label", t.homeProfileAria);
     profileBtn.setAttribute("aria-haspopup", "menu");
@@ -1447,7 +1457,28 @@ export function createHomeScreen({
     scheduleTabThumbSync();
   }
 
+  /**
+   * Визуальный «хаптик» ошибки: короткий buzz на контроле.
+   * @param {HTMLElement} el
+   */
+  function playControlErrorBuzz(el) {
+    if (!el) return;
+    el.classList.remove("motion-control-error-buzz");
+    // Force reflow so a second locked-tap restarts the animation.
+    void el.offsetWidth;
+    el.classList.add("motion-control-error-buzz");
+  }
+
+  /** Submit + чип баланса — связать отказ с нехваткой монет. */
+  function buzzSubmitLocked() {
+    // Док мог уехать при скролле — вернуть, иначе buzz submit не виден.
+    tabbarDock.classList.remove("home-screen__tabbar-dock--hidden");
+    playControlErrorBuzz(addBtn);
+    playControlErrorBuzz(balanceChip);
+  }
+
   function openSubmitLockedModal() {
+    buzzSubmitLocked();
     const t = getStrings();
     noticeModal.content.replaceChildren();
     noticeModal.setTitle(t.homeSubmitLockedTitle ?? "");
@@ -1703,10 +1734,20 @@ export function createHomeScreen({
     inviteModal.open();
   }
 
+  /** Текст приглашения для буфера / Web Share (`homeInviteMessage`: `{url}`, `{code}`). */
+  function buildInviteMessage() {
+    const t = getStrings();
+    const url = buildReferralShareUrl(inviteCodeValue);
+    return formatString(t.homeInviteMessage ?? "", {
+      url,
+      code: inviteCodeValue,
+    });
+  }
+
   async function copyInviteCode() {
     if (!inviteCodeValue) return;
     try {
-      await navigator.clipboard.writeText(inviteCodeValue);
+      await navigator.clipboard.writeText(buildInviteMessage());
       setInviteCopyDone();
       if (inviteCopyResetId != null) window.clearTimeout(inviteCopyResetId);
       inviteCopyResetId = window.setTimeout(() => {
@@ -1721,12 +1762,11 @@ export function createHomeScreen({
   async function shareInviteLink() {
     if (!inviteCodeValue) return;
     const t = getStrings();
-    const url = buildReferralShareUrl(inviteCodeValue);
     const title = t.homeInviteTitle ?? "";
-    const text = t.homeInviteBody ?? "";
+    const text = buildInviteMessage();
     try {
       if (typeof navigator.share === "function") {
-        await navigator.share({ title, text, url });
+        await navigator.share({ title, text });
         return;
       }
     } catch (err) {
@@ -1735,7 +1775,7 @@ export function createHomeScreen({
       }
     }
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(text);
     } catch {
       /* ignore */
     }

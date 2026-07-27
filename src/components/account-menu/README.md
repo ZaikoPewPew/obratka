@@ -9,7 +9,7 @@
 - Интерактивны «Настройки», «Пригласить», «Контакты», «Правила» и «Выйти».
 - Ключи UI: `homeAccount*` (плюс `homeInvite*` для шаринга, `homeContacts*` / `homeRules*` для оверлеев).
 - «Настройки» → колбэк → `/settings` (заглушка).
-- «Пригласить» открывает `homeInvite*`-модалку (referral share).
+- «Пригласить» открывает `homeInvite*`-модалку; copy и share кладут полный текст `homeInviteMessage` (`{url}`, `{code}`), не только код или ссылку.
 - «Контакты» → `COMMUNITY_CONTACT_URL` из `src/config/contacts.js`.
 - «Правила» → `createSidePanel` с текстом из `content/rules.json` (`getCommunityRules`).
 - «Выйти» → `signOut` + `clearHomeListCache` + `clearMineReadySeen` + `clearFeedSeen` → `/referral`.
