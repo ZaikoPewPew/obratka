@@ -16,6 +16,7 @@
 | `balance-card-ducks.svg` | декор карточки «Уточки» |
 | `currency-ghost.png` | фото в explainer «Репутация в нашей обратке» |
 | `currency-p2p.png` | фото в explainer «p4p в сети» |
+| `rotating-ray.json` | Lottie-лучи под PNG в explainer-медиа |
 
 ## `brand/`
 

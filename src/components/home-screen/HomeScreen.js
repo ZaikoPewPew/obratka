@@ -58,6 +58,7 @@ import { createAccountMenu } from "../account-menu/AccountMenu.js";
 import { createTabsPanel } from "../tabs-panel/TabsPanel.js";
 import { createLegendaryOnlinePanel } from "../legendary-online-panel/LegendaryOnlinePanel.js";
 import { createContactFab } from "../contact-fab/ContactFab.js";
+import { createExplainerMediaRay } from "./explainerMediaRay.js";
 import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
 import { REVIEW_SESSION_SECONDS } from "../../config/review.js";
 import boneIconUrl from "../../assets/home/bone.svg";
@@ -637,13 +638,20 @@ export function createHomeScreen({
   const reputationRow = document.createElement("div");
   reputationRow.className = "home-screen__reputation-explainer-row";
 
-  const reputationMedia = document.createElement("img");
+  const reputationMedia = document.createElement("div");
   reputationMedia.className = "home-screen__reputation-explainer-media";
-  reputationMedia.src = currencyGhostUrl;
-  reputationMedia.alt = "";
-  reputationMedia.width = 180;
-  reputationMedia.height = 216;
-  reputationMedia.decoding = "async";
+
+  const reputationRay = createExplainerMediaRay();
+
+  const reputationPhoto = document.createElement("img");
+  reputationPhoto.className = "home-screen__explainer-media-photo";
+  reputationPhoto.src = currencyGhostUrl;
+  reputationPhoto.alt = "";
+  reputationPhoto.width = 180;
+  reputationPhoto.height = 216;
+  reputationPhoto.decoding = "async";
+
+  reputationMedia.append(reputationRay.root, reputationPhoto);
 
   const reputationCard = document.createElement("div");
   reputationCard.className = "home-screen__reputation-explainer-card";
@@ -674,13 +682,20 @@ export function createHomeScreen({
   const balanceExplainer = document.createElement("div");
   balanceExplainer.className = "home-screen__balance-explainer";
 
-  const balanceMedia = document.createElement("img");
+  const balanceMedia = document.createElement("div");
   balanceMedia.className = "home-screen__balance-explainer-media";
-  balanceMedia.src = currencyDuckUrl;
-  balanceMedia.alt = "";
-  balanceMedia.width = 182;
-  balanceMedia.height = 216;
-  balanceMedia.decoding = "async";
+
+  const balanceRay = createExplainerMediaRay();
+
+  const balancePhoto = document.createElement("img");
+  balancePhoto.className = "home-screen__explainer-media-photo";
+  balancePhoto.src = currencyDuckUrl;
+  balancePhoto.alt = "";
+  balancePhoto.width = 182;
+  balancePhoto.height = 216;
+  balancePhoto.decoding = "async";
+
+  balanceMedia.append(balanceRay.root, balancePhoto);
 
   const balanceCard = document.createElement("div");
   balanceCard.className = "home-screen__balance-explainer-card";
@@ -715,13 +730,20 @@ export function createHomeScreen({
   const p2pExplainer = document.createElement("div");
   p2pExplainer.className = "home-screen__reputation-explainer-row";
 
-  const p2pMedia = document.createElement("img");
+  const p2pMedia = document.createElement("div");
   p2pMedia.className = "home-screen__p2p-explainer-media";
-  p2pMedia.src = currencyP2pUrl;
-  p2pMedia.alt = "";
-  p2pMedia.width = 268;
-  p2pMedia.height = 216;
-  p2pMedia.decoding = "async";
+
+  const p2pRay = createExplainerMediaRay();
+
+  const p2pPhoto = document.createElement("img");
+  p2pPhoto.className = "home-screen__explainer-media-photo";
+  p2pPhoto.src = currencyP2pUrl;
+  p2pPhoto.alt = "";
+  p2pPhoto.width = 268;
+  p2pPhoto.height = 216;
+  p2pPhoto.decoding = "async";
+
+  p2pMedia.append(p2pRay.root, p2pPhoto);
 
   const p2pCard = document.createElement("div");
   p2pCard.className = "home-screen__reputation-explainer-card";
