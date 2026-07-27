@@ -78,6 +78,14 @@ const PREVIEW_BROWSER_CONTROLS_URL = `${
   import.meta.env.BASE_URL || "/"
 }assets/svg/home-preview-browser-controls.svg`;
 
+const INVITE_COPY_SVG = `<svg class="home-screen__invite-copy-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M4 7V19C4 20.1046 4.89543 21 6 21H15M10 17H17C18.1046 17 19 16.1046 19 15V5C19 3.89543 18.1046 3 17 3H10C8.89543 3 8 3.89543 8 5V15C8 16.1046 8.89543 17 10 17Z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`;
+
+const INVITE_COPIED_SVG = `<svg class="home-screen__invite-copy-icon home-screen__invite-copy-icon--done" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M22 7L11.5 17.5L7.5 13.5M6 17.5L2 13.5M16.5 7L11.5 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`;
+
 /**
  * Иконка чипа репутации: нейтральная (0) / позитивная (>0) / негативная (<0).
  * @param {number} delta
@@ -806,41 +814,53 @@ export function createHomeScreen({
 
   inviteMedia.append(inviteRay.root, invitePhoto);
 
-  const inviteCard = document.createElement("div");
-  inviteCard.className = "home-screen__invite-explainer-card";
+  const inviteBar = document.createElement("div");
+  inviteBar.className = "home-screen__invite-bar";
+
+  const inviteCluster = document.createElement("div");
+  inviteCluster.className = "home-screen__invite-bar-cluster";
+
+  const inviteUses = document.createElement("p");
+  inviteUses.className = "home-screen__invite-bar-uses";
+
+  const inviteCodeCell = document.createElement("div");
+  inviteCodeCell.className = "home-screen__invite-bar-code";
 
   const inviteCode = document.createElement("p");
-  inviteCode.className = "home-screen__invite-explainer-card-code";
+  inviteCode.className = "home-screen__invite-bar-code-text";
   inviteCode.setAttribute("aria-live", "polite");
 
-  const inviteCardBody = document.createElement("p");
-  inviteCardBody.className = "home-screen__invite-explainer-card-body";
+  const inviteCopyBtn = document.createElement("button");
+  inviteCopyBtn.type = "button";
+  inviteCopyBtn.className = "home-screen__invite-copy";
+  inviteCopyBtn.innerHTML = INVITE_COPY_SVG;
 
-  inviteCard.append(inviteCode, inviteCardBody);
-  inviteExplainer.append(inviteMedia, inviteCard);
+  inviteCodeCell.append(inviteCode, inviteCopyBtn);
+  inviteCluster.append(inviteUses, inviteCodeCell);
+
+  const inviteShareBtn = document.createElement("button");
+  inviteShareBtn.type = "button";
+  inviteShareBtn.className = "home-screen__invite-share";
+
+  inviteBar.append(inviteCluster, inviteShareBtn);
+  inviteExplainer.append(inviteMedia, inviteBar);
 
   const inviteModal = createAppModal({
     size: "md",
-    onPrimary: () => {
-      if (!inviteCodeValue) return;
-      const t = getStrings();
-      void copyInviteText(
-        inviteCodeValue,
-        "primary",
-        t.homeInviteCopyCode,
-      );
-    },
-    onSecondary: () => {
-      if (!inviteCodeValue) return;
-      const t = getStrings();
-      void copyInviteText(
-        buildReferralShareUrl(inviteCodeValue),
-        "secondary",
-        t.homeInviteCopyLink,
-      );
-    },
+    showPrimary: false,
+    showSecondary: false,
   });
   inviteModal.content.append(inviteExplainer);
+
+  inviteCopyBtn.addEventListener("click", () => {
+    if (!inviteCodeValue) return;
+    void copyInviteCode();
+  });
+
+  inviteShareBtn.addEventListener("click", () => {
+    if (!inviteCodeValue) return;
+    void shareInviteLink();
+  });
 
   const tabbar = document.createElement("div");
   tabbar.className = "home-screen__tabbar";
@@ -1243,6 +1263,7 @@ export function createHomeScreen({
       window.clearTimeout(inviteCopyResetId);
       inviteCopyResetId = null;
     }
+    setInviteCopyIdle();
     void inviteModal.close();
   }
 
@@ -1251,16 +1272,35 @@ export function createHomeScreen({
     return accountMenu.close();
   }
 
+  function setInviteCopyIdle() {
+    const t = getStrings();
+    inviteCopyBtn.classList.remove("home-screen__invite-copy--done");
+    inviteCopyBtn.innerHTML = INVITE_COPY_SVG;
+    inviteCopyBtn.setAttribute("aria-label", t.homeInviteCopyAria ?? "");
+  }
+
+  function setInviteCopyDone() {
+    const t = getStrings();
+    inviteCopyBtn.classList.add("home-screen__invite-copy--done");
+    inviteCopyBtn.innerHTML = INVITE_COPIED_SVG;
+    inviteCopyBtn.setAttribute("aria-label", t.homeInviteCopiedAria ?? "");
+  }
+
   /**
    * @param {{
    *   code: string | null;
-   *   slotsLeft: number;
+   *   uses: number;
    *   maxUses: number;
    * }} info
    */
   function openInviteModal(info) {
     const t = getStrings();
     inviteCodeValue = info.code;
+    if (inviteCopyResetId != null) {
+      window.clearTimeout(inviteCopyResetId);
+      inviteCopyResetId = null;
+    }
+    setInviteCopyIdle();
     inviteModal.setTitle(
       fixHangingPrepositions(t.homeInviteTitle ?? ""),
     );
@@ -1271,47 +1311,60 @@ export function createHomeScreen({
           : (t.homeInviteEmpty ?? ""),
       ),
     );
-    inviteCode.textContent = info.code || "—";
-    inviteCardBody.textContent = fixHangingPrepositions(
-      info.code
-        ? formatString(t.homeInviteCardBody ?? "", {
-            left: info.slotsLeft,
-            max: info.maxUses,
-          })
-        : "",
+    inviteUses.textContent = fixHangingPrepositions(
+      formatString(t.homeInviteUses ?? "", {
+        used: info.uses,
+        max: info.maxUses,
+      }),
     );
-    inviteCardBody.hidden = !info.code;
-    inviteModal.setPrimaryLabel(t.homeInviteCopyCode ?? "");
-    inviteModal.setSecondaryLabel(t.homeInviteCopyLink ?? "");
+    inviteCode.textContent = info.code || "—";
+    inviteCopyBtn.disabled = !info.code;
+    inviteShareBtn.disabled = !info.code;
+    inviteShareBtn.textContent = t.homeInviteShare ?? "";
+    inviteShareBtn.setAttribute(
+      "aria-label",
+      t.homeInviteShareAria ?? t.homeInviteShare ?? "",
+    );
     inviteModal.setCloseAriaLabel(t.homeInviteCloseAria ?? "");
-    inviteModal.setActionsVisible({
-      primary: Boolean(info.code),
-      secondary: Boolean(info.code),
-    });
+    inviteModal.setActionsVisible({ primary: false, secondary: false });
     inviteModal.open();
   }
 
-  /**
-   * @param {string} text
-   * @param {"primary" | "secondary"} which
-   * @param {string} idleLabel
-   */
-  async function copyInviteText(text, which, idleLabel) {
-    const t = getStrings();
-    const setLabel =
-      which === "primary"
-        ? inviteModal.setPrimaryLabel
-        : inviteModal.setSecondaryLabel;
+  async function copyInviteCode() {
+    if (!inviteCodeValue) return;
     try {
-      await navigator.clipboard.writeText(text);
-      setLabel(t.homeInviteCopied ?? "");
+      await navigator.clipboard.writeText(inviteCodeValue);
+      setInviteCopyDone();
       if (inviteCopyResetId != null) window.clearTimeout(inviteCopyResetId);
       inviteCopyResetId = window.setTimeout(() => {
-        setLabel(idleLabel);
+        setInviteCopyIdle();
         inviteCopyResetId = null;
       }, 1600);
     } catch {
-      setLabel(idleLabel);
+      setInviteCopyIdle();
+    }
+  }
+
+  async function shareInviteLink() {
+    if (!inviteCodeValue) return;
+    const t = getStrings();
+    const url = buildReferralShareUrl(inviteCodeValue);
+    const title = t.homeInviteTitle ?? "";
+    const text = t.homeInviteBody ?? "";
+    try {
+      if (typeof navigator.share === "function") {
+        await navigator.share({ title, text, url });
+        return;
+      }
+    } catch (err) {
+      if (err && typeof err === "object" && "name" in err && err.name === "AbortError") {
+        return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      /* ignore */
     }
   }
 
@@ -1335,7 +1388,7 @@ export function createHomeScreen({
 
     openInviteModal({
       code,
-      slotsLeft: Math.max(0, REFERRAL_MAX_USES - uses),
+      uses: Math.max(0, uses),
       maxUses: REFERRAL_MAX_USES,
     });
   }

@@ -1458,47 +1458,172 @@
   background: var(--home-screen-invite-explainer-media-bg);
 }
 
-.home-screen__invite-explainer-card {
+.home-screen__invite-bar {
   box-sizing: border-box;
   display: flex;
-  flex-direction: column;
-  gap: var(--home-screen-invite-explainer-card-gap);
+  align-items: stretch;
+  gap: var(--home-screen-invite-bar-gap);
+  width: 100%;
   min-width: 0;
-  padding: var(--home-screen-invite-explainer-card-padding);
-  border-radius: var(--home-screen-invite-explainer-card-radius);
-  background: var(--home-screen-invite-explainer-card-bg);
+  height: var(--home-screen-invite-bar-height);
 }
 
-.home-screen__invite-explainer-card-code,
-.home-screen__invite-explainer-card-body {
+.home-screen__invite-bar-cluster {
+  box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+  gap: var(--home-screen-invite-bar-cluster-gap);
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+}
+
+.home-screen__invite-bar-uses,
+.home-screen__invite-bar-code {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: 100%;
   margin: 0;
+  padding: 0 var(--home-screen-invite-bar-padding-x);
+  background: var(--home-screen-invite-bar-bg);
+  color: var(--home-screen-invite-bar-color);
   font-family: var(--font-family);
+  font-size: var(--home-screen-invite-bar-font-size);
+  font-weight: var(--home-screen-invite-bar-font-weight);
+  line-height: 1.2;
 }
 
-.home-screen__invite-explainer-card-code {
-  color: var(--color-text-strong);
-  font-size: var(--home-screen-invite-explainer-card-code-size);
-  font-weight: var(--home-screen-invite-explainer-card-code-weight);
-  letter-spacing: var(--home-screen-invite-explainer-card-code-tracking);
-  line-height: var(--home-screen-invite-explainer-card-code-line);
-  word-break: break-all;
+.home-screen__invite-bar-uses {
+  flex: 0 0 var(--home-screen-invite-bar-uses-width);
+  width: var(--home-screen-invite-bar-uses-width);
+  border-radius: var(--home-screen-invite-bar-uses-radius);
+  white-space: nowrap;
 }
 
-.home-screen__invite-explainer-card-body {
-  color: var(--home-screen-invite-explainer-card-body-color);
-  font-size: var(--home-screen-invite-explainer-card-body-size);
-  font-weight: var(--home-screen-invite-explainer-card-body-weight);
-  line-height: var(--home-screen-invite-explainer-card-body-line);
+.home-screen__invite-bar-code {
+  gap: var(--space-2);
+  flex: 1 1 var(--home-screen-invite-bar-code-width);
+  min-width: 0;
+  border-radius: var(--home-screen-invite-bar-code-radius);
 }
 
-.home-screen__invite-explainer-card-body[hidden] {
-  display: none;
+.home-screen__invite-bar-code-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font: inherit;
+  color: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-screen__invite-copy {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: var(--home-screen-invite-copy-size);
+  height: var(--home-screen-invite-copy-size);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--home-screen-invite-bar-color);
+  cursor: pointer;
+}
+
+.home-screen__invite-copy:hover:not(:disabled) {
+  background: var(--color-surface-muted-hover);
+}
+
+.home-screen__invite-copy:active:not(:disabled) {
+  background: var(--color-surface-muted-active);
+}
+
+.home-screen__invite-copy:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.home-screen__invite-copy:disabled {
+  cursor: default;
+  opacity: var(--opacity-disabled);
+}
+
+.home-screen__invite-copy--done {
+  color: var(--home-screen-invite-copy-done-color);
+}
+
+.home-screen__invite-copy-icon {
+  display: block;
+  width: var(--home-screen-invite-copy-size);
+  height: var(--home-screen-invite-copy-size);
+}
+
+.home-screen__invite-share {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: 0 0 var(--home-screen-invite-bar-share-width);
+  align-items: center;
+  justify-content: center;
+  width: var(--home-screen-invite-bar-share-width);
+  height: 100%;
+  margin: 0;
+  padding: 0 var(--home-screen-invite-bar-padding-x);
+  border: none;
+  border-radius: var(--home-screen-invite-bar-share-radius);
+  background: var(--home-screen-invite-bar-share-bg);
+  color: var(--home-screen-invite-bar-share-color);
+  font-family: var(--font-family);
+  font-size: var(--home-screen-invite-bar-font-size);
+  font-weight: var(--home-screen-invite-bar-share-weight);
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.home-screen__invite-share:hover:not(:disabled) {
+  background: var(--home-screen-invite-bar-share-bg-hover);
+}
+
+.home-screen__invite-share:active:not(:disabled) {
+  background: var(--home-screen-invite-bar-share-bg-active);
+}
+
+.home-screen__invite-share:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring-on-accent);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.home-screen__invite-share:disabled {
+  cursor: default;
+  opacity: var(--opacity-disabled);
 }
 
 @media (max-width: 560px) {
   .home-screen__invite-explainer-media {
     height: auto;
     aspect-ratio: 552 / 256;
+  }
+
+  .home-screen__invite-bar {
+    flex-wrap: wrap;
+    height: auto;
+  }
+
+  .home-screen__invite-bar-cluster {
+    flex: 1 1 100%;
+    min-height: var(--home-screen-invite-bar-height);
+  }
+
+  .home-screen__invite-share {
+    flex: 1 1 100%;
+    width: 100%;
+    min-height: var(--home-screen-invite-bar-height);
   }
 }
 

@@ -33,6 +33,7 @@
   --palette-red: #c43c3c;
   --palette-red-soft: #fff8f8;
   --palette-green: #00c023;
+  --palette-copied-green: #62c554;
   /* Online presence (Figma legendary chip) */
   --palette-online: #62c554;
   --palette-brand-hot: #f9392a;
@@ -826,18 +827,28 @@
   --home-screen-invite-explainer-media-height: 256px;
   --home-screen-invite-explainer-media-radius: var(--radius-md);
   --home-screen-invite-explainer-media-bg: var(--color-surface-muted);
-  --home-screen-invite-explainer-card-padding: var(--space-4);
-  --home-screen-invite-explainer-card-gap: var(--space-1);
-  --home-screen-invite-explainer-card-radius: var(--radius-md);
-  --home-screen-invite-explainer-card-bg: var(--color-surface-muted);
-  --home-screen-invite-explainer-card-code-size: var(--font-size-xl);
-  --home-screen-invite-explainer-card-code-weight: var(--font-weight-semibold);
-  --home-screen-invite-explainer-card-code-line: var(--line-height-snug);
-  --home-screen-invite-explainer-card-code-tracking: 0.08em;
-  --home-screen-invite-explainer-card-body-size: var(--font-size-base);
-  --home-screen-invite-explainer-card-body-weight: var(--font-weight-regular);
-  --home-screen-invite-explainer-card-body-line: var(--line-height-snug);
-  --home-screen-invite-explainer-card-body-color: var(--color-text-muted);
+  --home-screen-invite-bar-height: 72px;
+  --home-screen-invite-bar-gap: var(--space-4);
+  --home-screen-invite-bar-cluster-gap: var(--radius-sm);
+  --home-screen-invite-bar-uses-width: 96px;
+  --home-screen-invite-bar-code-width: 289px;
+  --home-screen-invite-bar-share-width: 149px;
+  --home-screen-invite-bar-padding-x: var(--space-6);
+  --home-screen-invite-bar-bg: var(--color-surface-muted);
+  --home-screen-invite-bar-color: var(--color-text);
+  --home-screen-invite-bar-font-size: var(--font-size-base);
+  --home-screen-invite-bar-font-weight: var(--font-weight-regular);
+  --home-screen-invite-bar-uses-radius: var(--radius-md) 0 0 var(--radius-md);
+  --home-screen-invite-bar-code-radius: var(--radius-sm) var(--radius-md)
+    var(--radius-md) var(--radius-sm);
+  --home-screen-invite-bar-share-radius: var(--radius-md);
+  --home-screen-invite-bar-share-bg: var(--color-accent);
+  --home-screen-invite-bar-share-bg-hover: var(--color-accent-hover);
+  --home-screen-invite-bar-share-bg-active: var(--color-accent-active);
+  --home-screen-invite-bar-share-color: var(--color-on-accent);
+  --home-screen-invite-bar-share-weight: var(--font-weight-medium);
+  --home-screen-invite-copy-size: var(--space-6);
+  --home-screen-invite-copy-done-color: var(--palette-copied-green);
   --home-screen-invite-actions-gap: var(--space-2);
   --home-screen-card-padding: var(--space-2);
   --home-screen-card-gap: var(--space-2);
