@@ -1025,6 +1025,10 @@ body {
   color: var(--shell-review-hint-color);
 }
 
+.review-panel__meta-hint--error {
+  color: var(--color-error);
+}
+
 .review-panel__count {
   font-family: var(--font-family);
   font-size: var(--font-size-xs);

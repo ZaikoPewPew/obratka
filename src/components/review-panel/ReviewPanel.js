@@ -749,7 +749,6 @@ export function createReviewPanel(options = {}) {
       hint: null,
       validate: () => adviceInput.value.trim().length >= ADVICE_MIN_LEN,
       autoAdvance: false,
-      errorMessage: t.reviewAdviceTooShort,
     },
   ];
 
@@ -833,6 +832,16 @@ export function createReviewPanel(options = {}) {
   }
 
   function showStepError(visible) {
+    const isAdvice = currentStep === totalSteps - 1;
+    // На шаге совета ошибка — цвет «Минимум 100…», без отдельной строки.
+    adviceHint.classList.toggle(
+      "review-panel__meta-hint--error",
+      Boolean(visible && isAdvice),
+    );
+    if (isAdvice) {
+      stepError.hidden = true;
+      return;
+    }
     if (visible) {
       stepError.textContent =
         steps[currentStep]?.errorMessage ?? t.reviewStepRequired;
@@ -889,7 +898,12 @@ export function createReviewPanel(options = {}) {
 
   function syncAdviceMeta() {
     adviceCount.textContent = `${adviceInput.value.length} / ${ADVICE_MAX_LEN}`;
-    if (!stepError.hidden) showStepError(false);
+    if (
+      !stepError.hidden ||
+      adviceHint.classList.contains("review-panel__meta-hint--error")
+    ) {
+      showStepError(false);
+    }
     if (currentStep === totalSteps - 1) {
       syncReportReveal();
     }

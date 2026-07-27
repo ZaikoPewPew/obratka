@@ -230,12 +230,14 @@
   /* Взгляд глазок на чипе репутации (центр → +shift → −shift → центр) */
   --motion-reputation-eyes-shift: 2px;
   --motion-reputation-eyes-duration: 9000ms;
+  --motion-reputation-eyes-hover-duration: 1100ms;
   --motion-reputation-eyes-ease: cubic-bezier(0.45, 0.05, 0.55, 0.95);
   /* Покачивание уточки на чипе баланса (покой → волны → покой) */
   --motion-balance-duck-rotate: 5deg;
   --motion-balance-duck-bob: 1.5px;
   --motion-balance-duck-sway: 0.5px;
   --motion-balance-duck-duration: 8500ms;
+  --motion-balance-duck-hover-duration: 1200ms;
   --motion-balance-duck-ease: cubic-bezier(0.45, 0.05, 0.55, 0.95);
   /* Короткий error-buzz (как UI-хаптик при отказе) */
   --motion-control-error-buzz-x: 3px;

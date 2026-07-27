@@ -16,7 +16,7 @@
 `resolveAccessibleRoute`: `/registration` без `referralCode` и без `userId` → обратно на `/referral`.  
 Auth-gated deep link (`home` / `settings` / `onboarding` / `report` / `url` / `success` / `review` / `quiz` / `done`) без `userId` → `resolveEntryScreen` (referral или auth по state); с `userId` и без онбординга → `onboarding`.
 После логина `main.js` вызывает `redeemReferral` (идемпотентно).
-На boot: localStorage `userId` без живой Supabase Auth → очистка UX-кэша (referral-код сохраняется).
+На boot / route / visibility: localStorage `userId` без живой Supabase Auth → `exitAuthenticatedSession` → `/referral` (`reconcileSessionAccess` в `main.js`).
 
 ## URL
 
@@ -38,7 +38,7 @@ Auth-gated deep link (`home` / `settings` / `onboarding` / `report` / `url` / `s
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query вроде `?ref=` / `?lang=` сохраняются.  
 Google OAuth return обрабатывается в `main.js` до роутинга (`completeOAuthFromUrl`); ошибка → `obratka.authProviderError` → показ на `auth`.  
-`session.banned` синкается из `profiles.banned_at` (`applyProviderUser` / `refreshSessionFromProfile`); при `true` любой маршрут → `banned`.
+`session.banned` синкается из `profiles.banned_at` (`applyProviderUser` / `refreshSessionFromProfile` / `reconcileSessionAccess`); при `true` любой маршрут → `banned` (JWT жив, пока сам не «Выйти»).
 
 На GitHub Pages SPA-fallback: `dist/404.html` (= копия `index.html`) из `npm run build`.
 

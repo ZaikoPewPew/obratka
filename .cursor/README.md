@@ -163,7 +163,7 @@ Variants: `default` / `invalid` (без resize) / `done`. Handoff: `go(id, { han
 Старт `balance = 0` → 3 чужих ревью открывают подачу.  
 Подача: RPC `submit_portfolio` (atomic spend+insert, max 1 pending).  
 Награда: только после `submitPortfolioReview` → `handle_review_inserted` (`REVIEW_REWARD`).  
-Нет монет → buzz submit + чип баланса (`motion-control-error-buzz`) + `homeSubmitLocked*`.  
+CTA «Закинуть»: слот занят → `homePendingLimit*`; иначе нет монет → buzz submit + чип баланса (`motion-control-error-buzz`).  
 Клиент не пишет `profiles.balance`. Правило: `wallet.mdc`.
 
 ## Исследования

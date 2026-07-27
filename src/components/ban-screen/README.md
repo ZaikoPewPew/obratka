@@ -2,7 +2,11 @@
 
 Path: **`/banned`** (`banned`).
 
-Показывается когда у `profiles.banned_at` есть значение. Из экрана нельзя уйти навигацией / deep link / history — `go` / `resolveAccessibleRoute` / `resolveEntryScreen` всегда схлопывают на `banned`. Действия: **«Выйти»** (sign-out → `/referral`) и **«Связаться»** → Telegram админа.
+Показывается когда у `profiles.banned_at` есть значение — и сразу после логина, и mid-session (после refresh профиля на route / visibility / boot). Из экрана нельзя уйти навигацией / deep link / history — `go` / `resolveAccessibleRoute` / `resolveEntryScreen` всегда схлопывают на `banned`.
+
+**Не путать с удалением аккаунта:** нет живой Auth → полный logout на `/referral`, не этот экран.
+
+Действия: **«Выйти»** (sign-out → `/referral`) и **«Связаться»** → Telegram админа.
 
 ## Layout
 

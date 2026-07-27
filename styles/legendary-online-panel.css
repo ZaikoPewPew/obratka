@@ -120,9 +120,13 @@
 
 .legendary-online-panel__dot {
   position: absolute;
-  top: var(--legendary-online-dot-offset);
-  right: var(--legendary-online-dot-offset);
-  /* content-box: size = fill 8×8, border 2px outside (как stroke Outside в Figma) */
+  /* inset по fill 8×8; border outside не участвует в выравнивании к углу аватара */
+  top: calc(
+    var(--legendary-online-dot-offset) - var(--legendary-online-dot-border-width)
+  );
+  right: calc(
+    var(--legendary-online-dot-offset) - var(--legendary-online-dot-border-width)
+  );
   box-sizing: content-box;
   width: var(--legendary-online-dot-size);
   height: var(--legendary-online-dot-size);

@@ -332,6 +332,50 @@ async function exitAuthenticatedSession() {
   go("referral", { replace: true });
 }
 
+/**
+ * UX-кэш с userId: подтвердить живую Auth, подтянуть ban.
+ * Мёртвый Auth (удалённый аккаунт) → полный выход на /referral.
+ * Бан не разлогинивает — caller / resolveAccessibleRoute ведут на /banned.
+ *
+ * @returns {Promise<"ok" | "banned" | "gone">}
+ */
+async function reconcileSessionAccess() {
+  const cached = getSession();
+  if (!cached?.userId) return "ok";
+
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+      if (error && import.meta.env.DEV) {
+        console.warn("[session] getUser", error.message);
+      }
+      if (!user?.id) {
+        await exitAuthenticatedSession();
+        return "gone";
+      }
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.warn("[session] getUser", err);
+      }
+      /* Сеть/исключение — не разлогинивать; ban проверим через refresh. */
+    }
+  }
+
+  try {
+    const session = (await refreshSessionFromProfile()) ?? getSession();
+    if (session?.banned) return "banned";
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.warn("[session] refresh", err);
+    }
+  }
+  return getSession()?.banned ? "banned" : "ok";
+}
+
 const banScreen = createBanScreen({
   onExit: exitAuthenticatedSession,
 });
@@ -1064,7 +1108,7 @@ const homeScreen = createHomeScreen({
     go("report", { search: { id: item.id } });
   },
   onAddPortfolio: async () => {
-    if (!canSubmitPortfolio()) return;
+    // Иерархия: слот → монеты (как tryAddPortfolio на home).
     try {
       if (!(await hasFreeMineSlot())) {
         const t = getStrings();
@@ -1081,6 +1125,7 @@ const homeScreen = createHomeScreen({
         console.warn("[home] hasFreeMineSlot", err);
       }
     }
+    if (!canSubmitPortfolio()) return;
     go("url");
   },
   onOpenSettings: () => {
@@ -1323,13 +1368,9 @@ async function applyRoute(id, opts = {}) {
   let session = getSession();
 
   if (session?.userId) {
-    try {
-      session = (await refreshSessionFromProfile()) ?? session;
-    } catch (err) {
-      if (import.meta.env.DEV) {
-        console.warn("[session] refresh before route", err);
-      }
-    }
+    const access = await reconcileSessionAccess();
+    if (access === "gone") return;
+    session = getSession();
   }
 
   let accessible = resolveAccessibleRoute(id, {
@@ -1341,16 +1382,15 @@ async function applyRoute(id, opts = {}) {
   });
 
   if (accessible === "url") {
-    if (!canSubmitPortfolio()) {
-      accessible = "home";
-    } else {
-      try {
-        if (!(await hasFreeMineSlot())) {
-          accessible = "home";
-        }
-      } catch {
+    // Иерархия: слот → монеты (как tryAddPortfolio / onAddPortfolio).
+    try {
+      if (!(await hasFreeMineSlot())) {
+        accessible = "home";
+      } else if (!canSubmitPortfolio()) {
         accessible = "home";
       }
+    } catch {
+      accessible = "home";
     }
   }
 
@@ -1601,9 +1641,9 @@ document.addEventListener("visibilitychange", () => {
   }
   if (!getSession()?.userId) return;
   syncLegendaryPresenceHeartbeat();
-  void refreshSessionFromProfile().then((session) => {
+  void reconcileSessionAccess().then((access) => {
     syncLegendaryPresenceHeartbeat();
-    if (session?.banned && activeRouteId !== "banned") {
+    if (access === "banned" && activeRouteId !== "banned") {
       go("banned", { replace: true });
     }
   });
@@ -1615,25 +1655,9 @@ void (async () => {
     if (oauthSession) {
       await applyProviderUser(oauthSession.user, "google");
     } else if (getSession()?.userId) {
-      // UX-кэш `obratka.session` без живой Supabase Auth → не пускать на home.
-      const supabase = getSupabase();
-      if (supabase) {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user?.id) {
-          const referralCode = getSession()?.referralCode ?? null;
-          clearSession();
-          if (referralCode) {
-            setSession({ referralCode });
-          }
-        } else {
-          // Re-validate ban from server — do not trust stale localStorage alone.
-          await refreshSessionFromProfile();
-        }
-      } else {
-        await refreshSessionFromProfile();
-      }
+      // Re-validate Auth + ban — не доверять одному UX-кэшу localStorage.
+      // gone → exit на /referral; banned → start/applyRoute схлопнет на /banned.
+      await reconcileSessionAccess();
     }
   } catch (err) {
     if (import.meta.env.DEV) {
@@ -1649,5 +1673,6 @@ void (async () => {
     }
   }
   syncLegendaryPresenceHeartbeat();
+  // Бан после boot-refresh: start → applyRoute схлопнет любой deep link на /banned.
   appRouter.start();
 })();

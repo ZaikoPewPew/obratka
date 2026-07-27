@@ -2,6 +2,7 @@ import { formatString, getLocale, getStrings } from "../../i18n.js";
 import {
   formatPortfolioGrade,
   formatPortfolioRole,
+  hasFreeMineSlot,
   listFeedPortfolioIds,
   listMyPortfolios,
   listPortfoliosForReview,
@@ -1477,18 +1478,6 @@ export function createHomeScreen({
     playControlErrorBuzz(balanceChip);
   }
 
-  function openSubmitLockedModal() {
-    buzzSubmitLocked();
-    const t = getStrings();
-    noticeModal.content.replaceChildren();
-    noticeModal.setTitle(t.homeSubmitLockedTitle ?? "");
-    noticeModal.setDescription(t.homeSubmitLocked ?? "");
-    noticeModal.setPrimaryLabel(t.homeSubmitLockedClose ?? "");
-    noticeModal.setCloseAriaLabel(t.homeSubmitLockedCloseAria ?? "");
-    noticeModal.setActionsVisible({ primary: true, secondary: false });
-    noticeModal.open();
-  }
-
   function openPendingLimitModal() {
     const t = getStrings();
     showNotice({
@@ -1500,27 +1489,52 @@ export function createHomeScreen({
   }
 
   /**
-   * CTA / empty-slot: монета + свободный pending-слот.
+   * Pending «Мои на ревью»: текущий mine-список или кэш вкладки.
+   * `null` — нет локальных данных (нужен сервер).
+   * @returns {number | null}
    */
-  function tryAddPortfolio() {
-    const activePending = visibleFor(items).length;
-    if (
-      activeTab === "mine" &&
-      mineFilter === "active" &&
-      activePending >= MAX_MINE_PENDING
-    ) {
+  function localActiveMinePendingCount() {
+    if (activeTab === "mine") {
+      return items.filter((item) => !isCompletedOwnItem(item)).length;
+    }
+    const userId = getSession()?.userId;
+    const cached = getCachedHomeList(userId, "mine");
+    if (!Array.isArray(cached)) return null;
+    return /** @type {HomePortfolioItem[]} */ (cached).filter(
+      (item) => !isCompletedOwnItem(item),
+    ).length;
+  }
+
+  /**
+   * CTA / empty-slot: сначала свободный pending-слот, потом монеты.
+   */
+  async function tryAddPortfolio() {
+    let pending = localActiveMinePendingCount();
+    if (pending == null) {
+      try {
+        if (!(await hasFreeMineSlot())) {
+          openPendingLimitModal();
+          return;
+        }
+      } catch (err) {
+        if (import.meta.env.DEV) {
+          console.warn("[home] hasFreeMineSlot", err);
+        }
+      }
+    } else if (pending >= MAX_MINE_PENDING) {
       openPendingLimitModal();
       return;
     }
+
     if (!canSubmitPortfolio()) {
-      openSubmitLockedModal();
+      buzzSubmitLocked();
       return;
     }
     void onAddPortfolio?.();
   }
 
   /**
-   * Универсальный диалог (нет слотов / locked submit и т.п.).
+   * Универсальный диалог (нет слотов / pending limit и т.п.).
    * @param {{
    *   title: string;
    *   body: string;
@@ -1533,15 +1547,15 @@ export function createHomeScreen({
     noticeModal.content.replaceChildren();
     noticeModal.setTitle(opts.title);
     noticeModal.setDescription(opts.body);
-    noticeModal.setPrimaryLabel(opts.closeLabel || t.homeSubmitLockedClose);
+    noticeModal.setPrimaryLabel(opts.closeLabel || t.homeNoSlotsClose || "");
     noticeModal.setCloseAriaLabel(
-      opts.closeAria || opts.closeLabel || t.homeSubmitLockedCloseAria || "",
+      opts.closeAria || opts.closeLabel || t.modalCloseAria || "",
     );
     noticeModal.setActionsVisible({ primary: true, secondary: false });
     noticeModal.open();
   }
 
-  function closeSubmitLockedModal() {
+  function closeNoticeModal() {
     void noticeModal.close();
   }
 
@@ -2383,7 +2397,7 @@ export function createHomeScreen({
 
     button.append(preview, meta);
     button.addEventListener("click", () => {
-      tryAddPortfolio();
+      void tryAddPortfolio();
     });
 
     li.append(button);
@@ -2962,7 +2976,7 @@ export function createHomeScreen({
     mineFilterPanel.setActive("active", { instant: true });
     syncMineFilterPanel();
     showTabbar();
-    closeSubmitLockedModal();
+    closeNoticeModal();
     closeReviewIntroModal();
     closeInviteModal();
     void closeAccountMenu();
@@ -3025,7 +3039,7 @@ export function createHomeScreen({
   });
 
   addBtn.addEventListener("click", () => {
-    tryAddPortfolio();
+    void tryAddPortfolio();
   });
 
   balanceChip.addEventListener("click", () => {
