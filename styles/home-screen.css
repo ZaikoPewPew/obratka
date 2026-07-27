@@ -699,8 +699,9 @@ div.home-screen__review-intro-rec {
   overflow: visible;
 }
 
+/* view-box: одинаковый origin для neutral/positive/negative (fill-box плясал от bbox глаз). */
 .home-screen__reputation-eyes {
-  transform-box: fill-box;
+  transform-box: view-box;
   transform-origin: center;
   animation: motion-reputation-eyes-look
     var(--motion-reputation-eyes-duration) var(--motion-reputation-eyes-ease)
