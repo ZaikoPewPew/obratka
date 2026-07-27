@@ -272,7 +272,7 @@
   .home-screen__reputation-explainer-media {
     width: 100%;
     height: auto;
-    aspect-ratio: 268 / 216;
+    aspect-ratio: 180 / 216;
   }
 
   .home-screen__reputation-explainer-card {
@@ -355,11 +355,30 @@
   .home-screen__balance-explainer-media {
     width: 100%;
     height: auto;
-    aspect-ratio: 260 / 216;
+    aspect-ratio: 182 / 216;
   }
 
   .home-screen__balance-explainer-card {
     min-height: 0;
+  }
+}
+
+.home-screen__p2p-explainer-media {
+  box-sizing: border-box;
+  display: block;
+  flex: 0 0 auto;
+  width: var(--home-screen-p2p-explainer-media-width);
+  height: var(--home-screen-p2p-explainer-media-height);
+  object-fit: cover;
+  border-radius: var(--home-screen-p2p-explainer-media-radius);
+  background: var(--home-screen-p2p-explainer-media-bg);
+}
+
+@media (max-width: 560px) {
+  .home-screen__p2p-explainer-media {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 268 / 216;
   }
 }
 

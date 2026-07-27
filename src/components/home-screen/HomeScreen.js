@@ -641,7 +641,7 @@ export function createHomeScreen({
   reputationMedia.className = "home-screen__reputation-explainer-media";
   reputationMedia.src = currencyGhostUrl;
   reputationMedia.alt = "";
-  reputationMedia.width = 268;
+  reputationMedia.width = 180;
   reputationMedia.height = 216;
   reputationMedia.decoding = "async";
 
@@ -678,7 +678,7 @@ export function createHomeScreen({
   balanceMedia.className = "home-screen__balance-explainer-media";
   balanceMedia.src = currencyDuckUrl;
   balanceMedia.alt = "";
-  balanceMedia.width = 260;
+  balanceMedia.width = 182;
   balanceMedia.height = 216;
   balanceMedia.decoding = "async";
 
@@ -716,7 +716,7 @@ export function createHomeScreen({
   p2pExplainer.className = "home-screen__reputation-explainer-row";
 
   const p2pMedia = document.createElement("img");
-  p2pMedia.className = "home-screen__reputation-explainer-media";
+  p2pMedia.className = "home-screen__p2p-explainer-media";
   p2pMedia.src = currencyP2pUrl;
   p2pMedia.alt = "";
   p2pMedia.width = 268;
