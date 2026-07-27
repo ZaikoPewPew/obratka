@@ -472,11 +472,6 @@
   transform: translateX(-50%);
 }
 
-div.home-screen__review-intro-rec {
-  cursor: default;
-  pointer-events: none;
-}
-
 .home-screen__review-intro-rec:focus-visible {
   outline: var(--focus-ring-width) solid var(--color-focus-ring);
   outline-offset: var(--focus-ring-offset);
@@ -514,39 +509,51 @@ div.home-screen__review-intro-rec {
 
 .home-screen__review-intro-rec-bar:nth-child(1) {
   --bar-base: 0.2;
+  --bar-wave-index: 0;
 }
 .home-screen__review-intro-rec-bar:nth-child(2) {
   --bar-base: 0.38;
+  --bar-wave-index: 1;
 }
 .home-screen__review-intro-rec-bar:nth-child(3) {
   --bar-base: 0.62;
+  --bar-wave-index: 2;
 }
 .home-screen__review-intro-rec-bar:nth-child(4) {
   --bar-base: 0.9;
+  --bar-wave-index: 3;
 }
 .home-screen__review-intro-rec-bar:nth-child(5) {
   --bar-base: 0.72;
+  --bar-wave-index: 4;
 }
 .home-screen__review-intro-rec-bar:nth-child(6) {
   --bar-base: 0.42;
+  --bar-wave-index: 5;
 }
 .home-screen__review-intro-rec-bar:nth-child(7) {
   --bar-base: 0.55;
+  --bar-wave-index: 6;
 }
 .home-screen__review-intro-rec-bar:nth-child(8) {
   --bar-base: 0.84;
+  --bar-wave-index: 7;
 }
 .home-screen__review-intro-rec-bar:nth-child(9) {
   --bar-base: 0.66;
+  --bar-wave-index: 8;
 }
 .home-screen__review-intro-rec-bar:nth-child(10) {
   --bar-base: 0.4;
+  --bar-wave-index: 9;
 }
 .home-screen__review-intro-rec-bar:nth-child(11) {
   --bar-base: 0.28;
+  --bar-wave-index: 10;
 }
 .home-screen__review-intro-rec-bar:nth-child(12) {
   --bar-base: 0.18;
+  --bar-wave-index: 11;
 }
 
 .home-screen__review-intro-rec-dot {
@@ -570,39 +577,12 @@ div.home-screen__review-intro-rec {
 }
 
 .home-screen__review-intro-rec--listening .home-screen__review-intro-rec-bar {
-  height: calc(
-    var(--home-screen-review-intro-rec-wave-height) *
-      (
-        var(--home-screen-review-intro-rec-bar-min-scale) +
-          var(--control-rec-bar-level, 0) *
-          var(--home-screen-review-intro-rec-bar-level-scale)
-      )
+  animation: motion-review-intro-rec-wave
+    var(--home-screen-review-intro-rec-wave-duration)
+    var(--home-screen-review-intro-rec-wave-ease) infinite;
+  animation-delay: calc(
+    var(--bar-wave-index, 0) * var(--home-screen-review-intro-rec-wave-stagger)
   );
-}
-
-.home-screen__review-intro-card--with-ducks {
-  cursor: pointer;
-}
-
-.home-screen__review-intro-ducks-hit {
-  box-sizing: border-box;
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: var(--home-screen-review-intro-ducks-hit-height);
-  margin: 0;
-  padding: 0;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  appearance: none;
-}
-
-.home-screen__review-intro-ducks-hit:focus-visible {
-  outline: var(--focus-ring-width) solid var(--color-focus-ring);
-  outline-offset: calc(var(--focus-ring-offset) * -1);
-  border-radius: var(--home-screen-review-intro-card-radius);
 }
 
 .home-screen__review-intro-ducks-hint {
@@ -612,46 +592,9 @@ div.home-screen__review-intro-rec {
   bottom: var(--home-screen-review-intro-ducks-hint-bottom);
   width: var(--home-screen-review-intro-duck-size);
   height: auto;
-  opacity: 0;
+  opacity: 1;
   pointer-events: none;
   user-select: none;
-  transition: opacity var(--duration-fast) ease;
-}
-
-.home-screen__review-intro-card--with-ducks:hover
-  .home-screen__review-intro-ducks-hint,
-.home-screen__review-intro-ducks-hit:focus-visible
-  .home-screen__review-intro-ducks-hint {
-  opacity: var(--home-screen-review-intro-ducks-hint-opacity);
-}
-
-.home-screen__review-intro-ducks {
-  box-sizing: border-box;
-  position: absolute;
-  inset: 0;
-  width: var(--home-screen-review-intro-ducks-width);
-  height: var(--home-screen-review-intro-ducks-height);
-  overflow: hidden;
-  pointer-events: none;
-  user-select: none;
-}
-
-.home-screen__review-intro-duck {
-  box-sizing: border-box;
-  position: absolute;
-  width: var(--home-screen-review-intro-duck-size);
-  height: auto;
-  margin: 0;
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.35) rotate(0deg);
-  transform-origin: center center;
-  animation: motion-review-intro-duck-scatter
-    var(--home-screen-review-intro-duck-burst-duration)
-    var(--home-screen-review-intro-duck-burst-ease) both;
-  animation-delay: calc(
-    var(--duck-index, 0) * var(--home-screen-review-intro-duck-stagger)
-  );
-  will-change: transform, opacity;
 }
 
 @media (max-width: 560px) {

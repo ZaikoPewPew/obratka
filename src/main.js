@@ -74,6 +74,7 @@ import {
 } from "./utils/portfolioEmbed.js";
 import { getMotionFocusDelayMs } from "./utils/motionTokens.js";
 import brandLogoUrl from "./assets/brand/logo.svg";
+import timerEndUrl from "./assets/audio/Timer-end.wav";
 
 const SESSION_TOTAL_MS = REVIEW_SESSION_SECONDS * 1000;
 const TIMER_TICK_MS = 10;
@@ -383,9 +384,18 @@ document.body.append(banScreen.root);
 
 let remainingMs = SESSION_TOTAL_MS;
 let timerId = null;
+/** Точный дедлайн конца сессии (wall-clock) — для external, пока вкладка в фоне. */
+let sessionDeadlineMs = null;
+/** setTimeout на дедлайн — надёжнее throttled setInterval в фоне. */
+let sessionEndTimeoutId = null;
+/** iframe: таймер на паузе, пока вкладка скрыта. */
+let timerPaused = false;
 let sessionEnded = false;
 /** Таймер уже запущен в текущей сессии (для external — после кнопки). */
 let sessionStarted = false;
+
+/** @type {HTMLAudioElement | null} */
+let timerEndAudio = null;
 
 function stopClaimHeartbeat() {
   if (claimHeartbeatId != null) {
@@ -532,12 +542,16 @@ async function claimAndStartReview(item, opts = {}) {
   claimHeld = true;
   reviewSubmitted = false;
   reviewSubmitPromise = null;
-  resetDictationSession();
   stopTimer();
   sessionEnded = false;
   sessionStarted = false;
+  timerPaused = false;
+  sessionDeadlineMs = null;
   remainingMs = SESSION_TOTAL_MS;
   renderTimer();
+  // Сначала live-флаги, потом reset/sync — иначе Rec остаётся hidden
+  // до конца async applyRoute (reconcileSessionAccess).
+  resetDictationSession();
   enterSessionShell();
   await closeReview();
   applyPortfolio(item.url, {
@@ -606,10 +620,11 @@ async function openNextReviewCase() {
  * Claim к этому моменту уже released или снят триггером после submit.
  */
 function clearReviewSessionState() {
-  resetDictationSession();
   stopTimer();
   sessionEnded = false;
   sessionStarted = false;
+  timerPaused = false;
+  sessionDeadlineMs = null;
   remainingMs = SESSION_TOTAL_MS;
   renderTimer();
   portfolioUrl = null;
@@ -619,6 +634,8 @@ function clearReviewSessionState() {
   claimHeld = false;
   embedPlan = null;
   portfolioName = getStrings().brandName;
+  // После снятия claimHeld — иначе sync снова покажет Rec.
+  resetDictationSession();
 }
 
 /**
@@ -652,8 +669,9 @@ function setDictationWaveform(levels = []) {
 function syncDictationButtonChrome() {
   if (!dictationBtn) return;
   const t = getStrings();
-  const onLiveReview =
-    activeRouteId === "review" && !sessionEnded && Boolean(claimHeld);
+  // Не завязывать на activeRouteId === "review": shell входит до applyRoute,
+  // а route выставляется только после await reconcileSessionAccess.
+  const onLiveReview = Boolean(claimHeld) && !sessionEnded;
   if (!isWebSpeechSupported() || !onLiveReview) {
     dictationBtn.hidden = true;
     if (!isWebSpeechSupported()) {
@@ -687,9 +705,13 @@ function syncDictationChrome() {
  * @returns {NonNullable<ReturnType<typeof createDictationEngine>> | null}
  */
 function ensureDictationEngine() {
-  if (dictationEngine) return dictationEngine;
+  if (dictationEngine) {
+    syncDictationBackgroundPolicy();
+    return dictationEngine;
+  }
   dictationEngine = createDictationEngine({ lang: speechLangForLocale() });
   if (!dictationEngine) return null;
+  syncDictationBackgroundPolicy();
   dictationEngine.onTranscript((finalText, interim) => {
     const combined = [finalText, interim].filter(Boolean).join(" ").trim();
     if (dictationTarget === "advice") {
@@ -711,6 +733,11 @@ function ensureDictationEngine() {
     }
   });
   return dictationEngine;
+}
+
+/** External: держать STT при уходе на вкладку портфолио; iframe — обычный pause. */
+function syncDictationBackgroundPolicy() {
+  dictationEngine?.setKeepAliveInBackground?.(embedPlan?.mode === "external");
 }
 
 async function stopDictation() {
@@ -811,6 +838,7 @@ function openPortfolioExternally() {
  */
 function applyEmbedPlan(plan) {
   embedPlan = plan;
+  syncDictationBackgroundPolicy();
 
   if (!frame || !frameWrap || !externalViewer) return;
 
@@ -974,18 +1002,79 @@ function lockFrameAndShowReview() {
   if (activeRouteId !== "review" || !claimHeld || reviewSubmitted) return;
   sessionEnded = true;
   syncDictationChrome();
+  playTimerEndSound();
   openReview();
 }
 
+function isExternalEmbedSession() {
+  return embedPlan?.mode === "external";
+}
+
+function clearSessionEndTimeout() {
+  if (sessionEndTimeoutId != null) {
+    window.clearTimeout(sessionEndTimeoutId);
+    sessionEndTimeoutId = null;
+  }
+}
+
+function scheduleSessionEndTimeout() {
+  clearSessionEndTimeout();
+  if (sessionDeadlineMs == null) return;
+  const delay = Math.max(0, sessionDeadlineMs - Date.now());
+  sessionEndTimeoutId = window.setTimeout(() => {
+    sessionEndTimeoutId = null;
+    finishSessionFromTimer();
+  }, delay);
+}
+
+function playTimerEndSound() {
+  try {
+    if (!timerEndAudio) {
+      timerEndAudio = new Audio(timerEndUrl);
+      timerEndAudio.preload = "auto";
+    }
+    timerEndAudio.currentTime = 0;
+    void timerEndAudio.play().catch(() => {
+      /* autoplay / background tab — молча */
+    });
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Прогреть Audio после user gesture (кнопка external / старт сессии). */
+function warmTimerEndSound() {
+  try {
+    if (!timerEndAudio) {
+      timerEndAudio = new Audio(timerEndUrl);
+      timerEndAudio.preload = "auto";
+    }
+    timerEndAudio.load();
+  } catch {
+    /* ignore */
+  }
+}
+
+function finishSessionFromTimer() {
+  if (sessionEnded) return;
+  stopTimer();
+  remainingMs = 0;
+  sessionDeadlineMs = null;
+  timerPaused = false;
+  renderTimer();
+  lockFrameAndShowReview();
+}
+
 function tick() {
-  remainingMs -= TIMER_TICK_MS;
+  if (sessionDeadlineMs != null) {
+    remainingMs = Math.max(0, sessionDeadlineMs - Date.now());
+  } else {
+    remainingMs -= TIMER_TICK_MS;
+  }
   renderTimer();
 
   if (remainingMs <= 0) {
-    stopTimer();
-    remainingMs = 0;
-    renderTimer();
-    lockFrameAndShowReview();
+    finishSessionFromTimer();
   }
 }
 
@@ -994,12 +1083,15 @@ function stopTimer() {
     window.clearInterval(timerId);
     timerId = null;
   }
+  clearSessionEndTimeout();
 }
 
 /** Сбросить таймер на полный срок без запуска (ждём кнопку во external). */
 function armSession() {
   stopTimer();
   remainingMs = SESSION_TOTAL_MS;
+  sessionDeadlineMs = null;
+  timerPaused = false;
   sessionEnded = false;
   sessionStarted = false;
   renderTimer();
@@ -1010,8 +1102,53 @@ function startTimer() {
   remainingMs = SESSION_TOTAL_MS;
   sessionEnded = false;
   sessionStarted = true;
+  timerPaused = false;
+  warmTimerEndSound();
+  if (isExternalEmbedSession()) {
+    // Wall-clock: не замирает, пока смотрят портфолио на другой вкладке.
+    sessionDeadlineMs = Date.now() + remainingMs;
+    scheduleSessionEndTimeout();
+  } else {
+    sessionDeadlineMs = null;
+  }
   renderTimer();
   timerId = window.setInterval(tick, TIMER_TICK_MS);
+}
+
+/**
+ * iframe: пауза при уходе со вкладки (setInterval и так throttlit — делаем явно).
+ * external: не трогаем — дедлайн wall-clock продолжает тикать.
+ */
+function pauseTimerForHiddenTab() {
+  if (!sessionStarted || sessionEnded || timerPaused) return;
+  if (isExternalEmbedSession()) return;
+  if (timerId !== null) {
+    window.clearInterval(timerId);
+    timerId = null;
+  }
+  clearSessionEndTimeout();
+  timerPaused = true;
+}
+
+function resumeTimerAfterVisible() {
+  if (!sessionStarted || sessionEnded || !timerPaused) return;
+  timerPaused = false;
+  if (remainingMs <= 0) {
+    finishSessionFromTimer();
+    return;
+  }
+  timerId = window.setInterval(tick, TIMER_TICK_MS);
+}
+
+/** Подтянуть remaining из дедлайна после возврата на вкладку (external). */
+function syncExternalTimerFromDeadline() {
+  if (!sessionStarted || sessionEnded || !isExternalEmbedSession()) return;
+  if (sessionDeadlineMs == null) return;
+  remainingMs = Math.max(0, sessionDeadlineMs - Date.now());
+  renderTimer();
+  if (remainingMs <= 0) {
+    finishSessionFromTimer();
+  }
 }
 
 /**
@@ -1046,6 +1183,7 @@ const shell = document.querySelector(".iframe-shell");
  */
 function enterSessionShell() {
   if (!shell) return;
+  syncDictationChrome();
   shell.hidden = false;
   shell.classList.remove("iframe-shell--entered");
   requestAnimationFrame(() => {
@@ -1606,7 +1744,7 @@ frameForwardBtn?.addEventListener("click", () => {
 });
 
 dictationBtn?.addEventListener("click", () => {
-  if (activeRouteId !== "review" || sessionEnded) return;
+  if (!claimHeld || sessionEnded) return;
   void toggleDictation("notes");
 });
 
@@ -1636,9 +1774,17 @@ window.addEventListener("pagehide", () => {
 
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState !== "visible") {
+    pauseTimerForHiddenTab();
     stopLegendaryPresenceHeartbeat();
     return;
   }
+
+  syncExternalTimerFromDeadline();
+  resumeTimerAfterVisible();
+  if (dictationRecording && isExternalEmbedSession()) {
+    dictationEngine?.resumeIfNeeded?.();
+  }
+
   if (!getSession()?.userId) return;
   syncLegendaryPresenceHeartbeat();
   void reconcileSessionAccess().then((access) => {

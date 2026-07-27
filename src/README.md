@@ -5,8 +5,8 @@
 
 ## Верхний уровень
 
-- `main.js` — точка входа: OAuth/boot-проверка Auth, роутер (`go` / `applyRoute`), home query, монтаж экранов, iframe-таймер, **надиктовка** (чип rec + микрофон в поле совета), квиз; email/Telegram завершаются через `AuthScreen` → `applyProviderUser`.
-- `i18n.js` — локали из `content/locales.json` (+ founder-avatars).
+- `main.js` — точка входа: OAuth/boot-проверка Auth, роутер (`go` / `applyRoute`), home query, монтаж экранов, iframe-таймер (iframe pause / external wall-clock + `Timer-end.wav`), **надиктовка** (чип rec + микрофон в поле совета), квиз; email/Telegram завершаются через `AuthScreen` → `applyProviderUser`.
+- `i18n.js` — локали из `content/locales.json` (+ founder-avatars); реэкспорт `formatPlural`.
 - `config.js` — legacy waitlist count (не продуктовый флоу).
 - `config/review.js` — `REVIEW_SESSION_SECONDS` (таймер `/review` + intro copy на home) — [`config/README.md`](config/README.md).
 - `config/contacts.js` — community Telegram URL.
@@ -20,7 +20,7 @@
 | `app/` | routes, router, flow, login-session (`obratka.session`) |
 | `components/` | UI-экраны; brand: `brand-screen-visual`, `brand-screen-shell` |
 | `config/` | review session + contacts |
-| `utils/` | field errors, motion, handoff, mesh, homeRoute/homeListCache, feedSeen, mineReadySeen, backdropLuminance, PDF — [`utils/README.md`](utils/README.md) |
+| `utils/` | field errors, motion, handoff, mesh, plural, hangingPrepositions, homeRoute/homeListCache, feedSeen, mineReadySeen, backdropLuminance, PDF — [`utils/README.md`](utils/README.md) |
 | `api/` | Auth, profiles, wallet, portfolios, leagues, referrals, reviewComplaints, presence, rating |
-| `assets/` | brand marks / morph — [`assets/README.md`](assets/README.md) |
+| `assets/` | brand marks / morph + `audio/Timer-end.wav` — [`assets/README.md`](assets/README.md) |
 | `lib/` | supabase client + **dictation** |

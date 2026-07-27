@@ -19,6 +19,8 @@ MVP: **Web Speech API** (браузер) → текст в памяти сесс
 | `start()` → `Promise<boolean>` | mic + STT; `false` при deny / fail |
 | `stop()` | остановить STT и треки |
 | `resetTranscript()` | обнулить накопленный final-буфер |
+| `setKeepAliveInBackground(bool)` | external-портфолио: не рвать сессию STT, пока вкладка скрыта |
+| `resumeIfNeeded()` | добить restart после visibility / throttle |
 | `onTranscript(cb)` | `(finalText, interim) => void` |
 | `onLevel(cb)` | общий уровень `0..1` (AnalyserNode) |
 | `onWaveform(cb)` | отдельный уровень `0..1` для каждой полосы волны |
@@ -40,6 +42,15 @@ MVP: **Web Speech API** (браузер) → текст в памяти сесс
 6. Новая сессия → `resetDictationSession()`.
 
 Таймер просмотра: `REVIEW_SESSION_SECONDS = 45` в [`src/config/review.js`](../../config/review.js) — отдельно от claim TTL 20 min; ту же величину показывает intro-модалка home.
+
+Поведение при смене вкладки:
+
+| Режим embed | Таймер | Надиктовка |
+|-------------|--------|------------|
+| iframe | пауза, пока вкладка скрыта | STT ждёт возврата (сессию не рвём) |
+| external | wall-clock + `setTimeout` дедлайна — **не** паузится | `setKeepAliveInBackground(true)` — best-effort restart в фоне |
+
+Конец таймера → звук [`Timer-end.wav`](../../assets/audio/Timer-end.wav) + стоп записи + quiz.
 
 ## Отчёт
 
@@ -65,6 +76,7 @@ MVP: **Web Speech API** (браузер) → текст в памяти сесс
 - Chrome / Edge — ок; Safari частично; Firefox обычно нет.
 - В Chrome речь уходит в облако движка браузера (не наш сервер).
 - Клиент просит до трёх гипотез, выбирает наиболее уверенную, отбрасывает низкоуверенные final-фрагменты и убирает повтор хвоста после авто-restart. На `stop` interim коммитится в final, чтобы текст не пропадал из поля. Это уменьшает явный мусор, но не меняет саму модель распознавания браузера.
+- Фоновая вкладка: браузер может всё равно резать `SpeechRecognition`; для external делаем best-effort keep-alive, таймер при этом идёт по wall-clock.
 - Надиктовка не обязательна: и заметки, и `advice` можно просто напечатать.
 
 ## Дальше (план B)

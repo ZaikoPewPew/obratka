@@ -103,6 +103,8 @@ export function formatString(template, vars = {}) {
   );
 }
 
+export { formatPlural, pluralCategory } from "./utils/plural.js";
+
 /**
  * Применяет строки ко всему UI: data-i18n, data-i18n-aria, data-i18n-title, document.title/lang.
  * @param {string} [locale]

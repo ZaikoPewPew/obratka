@@ -27,7 +27,7 @@ npm run dev
 | `/home` | Очередь / мои / рейтинг (топ-50); SWR, report gate, точки feedSeen + 3/3, intro до claim, tabbar-dock + submit (glass / `--on-dark` / entrance cascade); вид синхронизирован с query |
 | `/settings` | Заглушка настроек (из account-menu) |
 | `/portfolio` | Подача URL; чип «На главную»; done на том же экране |
-| `/review` | Просмотр портфолио + таймер 45 s + надиктовка заметок (rec) |
+| `/review` | Просмотр портфолио + таймер 45 s (iframe pause / external wall-clock) + звук конца + надиктовка (rec) |
 | `/quiz` → `/quiz/done` | Квиз (микрофон в поле «Главный совет») и финал |
 | `/done` | Успех подачи (deep link / sync) |
 | `/report` | Листы автору (+ заметки с просмотра) + жалоба |

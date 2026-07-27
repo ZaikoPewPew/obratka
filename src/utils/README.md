@@ -6,6 +6,8 @@
 
 | Файл | Роль |
 |------|------|
+| `plural.js` | склонение по числу (`one`/`few`/`many`/`other`) для i18n-шаблонов; реэкспорт из `src/i18n.js` |
+| `hangingPrepositions.js` | висячие предлоги → `\u00A0` перед `textContent` (см. `typography.mdc`) |
 | `countTemplate.js` | вставка отформатированного числа в шаблон (`{count}`) |
 | `emailValidation.js` | валидация и нормализация email |
 | `foundersCountDisplay.js` | число подписчиков/основателей |
@@ -27,7 +29,7 @@
 | `feedSeen.js` | seen id кейсов ленты для точки на «На ревью» (`localStorage` `obratka.feedSeen.<userId>`); открытие feed гасит; seed baseline; `clearFeedSeen` на logout |
 | `mineReadySeen.js` | seen id готовых отчётов для точки на «Мои» / «Завершенные» (`localStorage` `obratka.mineReadySeen.<userId>`); открытие «Завершенные» гасит; `clearMineReadySeen` на logout |
 
-Тесты: `*.test.js` рядом (в т.ч. `homeRoute.test.js`, `reviewReport.dictation.test.js`) + `src/app/routes.test.js` (`npm test`).
+Тесты: `*.test.js` рядом (в т.ч. `homeRoute.test.js`, `plural.test.js`, `hangingPrepositions.test.js`, `reviewReport.dictation.test.js`) + `src/app/routes.test.js` (`npm test`).
 
 Движок надиктовки (не utils): [`src/lib/dictation/README.md`](../lib/dictation/README.md).
 

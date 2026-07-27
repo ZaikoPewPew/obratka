@@ -31,6 +31,12 @@
 | `logoDonePaths.js` | path-строки для in-place morph → done |
 | `brandMarks.js` | фабрики SVG + morph API |
 
+## `audio/`
+
+| Файл | Роль |
+|------|------|
+| `Timer-end.wav` | звук окончания таймера просмотра на `/review` (`main.js`) |
+
 ### `brandMarks.js` — API
 
 | Функция | Когда |

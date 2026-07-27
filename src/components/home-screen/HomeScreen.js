@@ -1,4 +1,5 @@
 import { formatString, getLocale, getStrings } from "../../i18n.js";
+import { formatPlural } from "../../utils/plural.js";
 import {
   formatPortfolioGrade,
   formatPortfolioRole,
@@ -63,10 +64,6 @@ import { createLegendaryOnlinePanel } from "../legendary-online-panel/LegendaryO
 import { createContactFab } from "../contact-fab/ContactFab.js";
 import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
 import { createExplainerMediaRay } from "./explainerMediaRay.js";
-import {
-  createMicMeter,
-  isMicMeterSupported,
-} from "../../lib/mic-meter/createMicMeter.js";
 import boneIconUrl from "../../assets/home/bone.svg";
 import balanceCardDucksUrl from "../../assets/home/modal/balance-card-ducks.svg";
 import currencyDuckUrl from "../../assets/home/modal/currency-duck.png";
@@ -133,27 +130,17 @@ function createReputationIcon(kind) {
 }
 
 /**
- * Превью-чип rec для intro-модалки: тот же UX, что shell-rec, но только mic-meter
- * (без STT / записи). Если mic недоступен — декоративный блок.
+ * Превью-чип rec для intro-модалки: toggle декоративной волны (без mic / STT).
  *
  * @returns {{
- *   root: HTMLElement;
- *   bars: HTMLElement[];
- *   interactive: boolean;
+ *   root: HTMLButtonElement;
  *   setListening: (listening: boolean) => void;
- *   syncChrome: (listening: boolean) => void;
  * }}
  */
 function createReviewIntroRecPreview() {
-  const interactive = isMicMeterSupported();
-  /** @type {HTMLButtonElement | HTMLDivElement} */
-  const chip = document.createElement(interactive ? "button" : "div");
+  const chip = document.createElement("button");
+  chip.type = "button";
   chip.className = "home-screen__review-intro-rec";
-  if (interactive) {
-    /** @type {HTMLButtonElement} */ (chip).type = "button";
-  } else {
-    chip.setAttribute("aria-hidden", "true");
-  }
 
   const micWrap = document.createElement("span");
   micWrap.innerHTML = `<svg class="home-screen__review-intro-rec-mic" width="32" height="32" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
@@ -165,13 +152,10 @@ function createReviewIntroRecPreview() {
   const wave = document.createElement("span");
   wave.className = "home-screen__review-intro-rec-wave";
   wave.setAttribute("aria-hidden", "true");
-  /** @type {HTMLElement[]} */
-  const bars = [];
   for (let i = 0; i < 12; i += 1) {
     const bar = document.createElement("span");
     bar.className = "home-screen__review-intro-rec-bar";
     wave.append(bar);
-    bars.push(bar);
   }
 
   const dot = document.createElement("span");
@@ -181,9 +165,11 @@ function createReviewIntroRecPreview() {
   if (mic) chip.append(mic);
   chip.append(wave, dot);
 
-  function syncChrome(listening) {
+  let listening = false;
+
+  function setListening(next) {
+    listening = Boolean(next);
     chip.classList.toggle("home-screen__review-intro-rec--listening", listening);
-    if (!interactive) return;
     const t = getStrings();
     chip.setAttribute("aria-pressed", listening ? "true" : "false");
     chip.setAttribute(
@@ -197,92 +183,26 @@ function createReviewIntroRecPreview() {
       : (t.homeReviewIntroRecStartTitle ?? "");
   }
 
-  syncChrome(false);
+  setListening(false);
+  chip.addEventListener("click", () => {
+    setListening(!listening);
+  });
 
-  return {
-    root: chip,
-    bars,
-    interactive,
-    setListening: syncChrome,
-    syncChrome,
-  };
+  return { root: chip, setListening };
 }
 
 /**
- * Слой уточек для карточки «2-ая минута»: хинт по hover + разлёт от клика.
- * @returns {{
- *   root: DocumentFragment;
- *   hit: HTMLButtonElement;
- *   layer: HTMLDivElement;
- *   burstAt: (clientX: number, clientY: number, card: HTMLElement) => void;
- * }}
+ * Декор уточек для карточки «2-ая минута» (статичная картинка).
+ * @returns {{ root: HTMLImageElement }}
  */
-function createReviewIntroDucksBurst() {
-  const fragment = document.createDocumentFragment();
-
-  const layer = document.createElement("div");
-  layer.className = "home-screen__review-intro-ducks";
-  layer.setAttribute("aria-hidden", "true");
-
-  const hit = document.createElement("button");
-  hit.type = "button";
-  hit.className = "home-screen__review-intro-ducks-hit";
-
-  const hint = document.createElement("img");
-  hint.className = "home-screen__review-intro-ducks-hint";
-  hint.src = balanceCardDucksUrl;
-  hint.alt = "";
-  hint.draggable = false;
-  hit.append(hint);
-
-  /**
-   * @param {number} clientX
-   * @param {number} clientY
-   * @param {HTMLElement} card
-   */
-  function burstAt(clientX, clientY, card) {
-    const rect = card.getBoundingClientRect();
-    const originX = Math.min(Math.max(clientX - rect.left, 8), rect.width - 8);
-    const originY = Math.min(Math.max(clientY - rect.top, 8), rect.height - 8);
-    const count = 6;
-    const fragmentDucks = document.createDocumentFragment();
-
-    for (let i = 0; i < count; i += 1) {
-      const duck = document.createElement("img");
-      duck.className = "home-screen__review-intro-duck";
-      duck.src = balanceCardDucksUrl;
-      duck.alt = "";
-      duck.draggable = false;
-      duck.style.left = `${originX}px`;
-      duck.style.top = `${originY}px`;
-
-      const t = count === 1 ? 0.5 : i / (count - 1);
-      const angleDeg = -110 + t * 140 + (i % 2 === 0 ? -6 : 6);
-      const angle = (angleDeg * Math.PI) / 180;
-      const dist = 72 + (i % 3) * 28 + t * 36;
-      const scale = 0.72 + (i % 3) * 0.14;
-      const rot = -28 + t * 56 + (i % 2 === 0 ? -10 : 12);
-
-      duck.style.setProperty("--duck-index", String(i));
-      duck.style.setProperty("--duck-dx", `${Math.cos(angle) * dist}px`);
-      duck.style.setProperty("--duck-dy", `${Math.sin(angle) * dist}px`);
-      duck.style.setProperty("--duck-rot", `${rot}deg`);
-      duck.style.setProperty("--duck-scale", String(scale));
-      duck.addEventListener(
-        "animationend",
-        () => {
-          duck.remove();
-        },
-        { once: true },
-      );
-      fragmentDucks.append(duck);
-    }
-
-    layer.append(fragmentDucks);
-  }
-
-  fragment.append(layer, hit);
-  return { root: fragment, hit, layer, burstAt };
+function createReviewIntroDucksDecor() {
+  const ducks = document.createElement("img");
+  ducks.className = "home-screen__review-intro-ducks-hint";
+  ducks.src = balanceCardDucksUrl;
+  ducks.alt = "";
+  ducks.draggable = false;
+  ducks.setAttribute("aria-hidden", "true");
+  return { root: ducks };
 }
 
 /**
@@ -296,7 +216,6 @@ function createReviewIntroDucksBurst() {
  * @returns {{
  *   root: HTMLLIElement;
  *   rec: ReturnType<typeof createReviewIntroRecPreview> | null;
- *   ducks: ReturnType<typeof createReviewIntroDucksBurst> | null;
  * }}
  */
 function createReviewIntroCard(opts) {
@@ -321,26 +240,14 @@ function createReviewIntroCard(opts) {
 
   /** @type {ReturnType<typeof createReviewIntroRecPreview> | null} */
   let rec = null;
-  /** @type {ReturnType<typeof createReviewIntroDucksBurst> | null} */
-  let ducks = null;
   if (opts.withRec) {
     rec = createReviewIntroRecPreview();
     card.append(rec.root);
   }
   if (opts.withDucks) {
-    ducks = createReviewIntroDucksBurst();
-    const t = getStrings();
-    ducks.hit.setAttribute(
-      "aria-label",
-      t.homeReviewIntroDucksAria ?? "",
-    );
-    ducks.hit.title = t.homeReviewIntroDucksTitle ?? "";
-    ducks.hit.addEventListener("click", (event) => {
-      ducks?.burstAt(event.clientX, event.clientY, card);
-    });
-    card.append(ducks.root);
+    card.append(createReviewIntroDucksDecor().root);
   }
-  return { root: card, rec, ducks };
+  return { root: card, rec };
 }
 
 /**
@@ -1074,74 +981,29 @@ export function createHomeScreen({
   const reviewIntroSteps = document.createElement("ol");
   reviewIntroSteps.className = "home-screen__review-intro-steps";
 
-  /** @type {ReturnType<typeof createMicMeter> | null} */
-  let introMicMeter = null;
   /** @type {ReturnType<typeof createReviewIntroRecPreview> | null} */
   let introRec = null;
-  /** @type {number[]} */
-  const introRecLastLevels = Array(12).fill(-1);
 
-  function setIntroRecWaveform(levels = []) {
-    if (!introRec) return;
-    const listening = Boolean(introMicMeter?.isRunning());
-    for (let index = 0; index < introRec.bars.length; index += 1) {
-      const next = listening ? Number(levels[index]) || 0 : 0;
-      if (Math.abs(introRecLastLevels[index] - next) < 0.01) continue;
-      introRecLastLevels[index] = next;
-      introRec.bars[index].style.setProperty(
-        "--control-rec-bar-level",
-        String(next),
-      );
-    }
-  }
-
-  function ensureIntroMicMeter() {
-    if (introMicMeter) return introMicMeter;
-    introMicMeter = createMicMeter();
-    introMicMeter.onWaveform(setIntroRecWaveform);
-    introMicMeter.onError(() => {
-      introRec?.setListening(false);
-      setIntroRecWaveform();
-    });
-    return introMicMeter;
-  }
-
-  async function stopIntroMicMeter() {
-    if (introMicMeter?.isRunning()) {
-      await introMicMeter.stop();
-    }
+  function stopIntroRecPreview() {
     introRec?.setListening(false);
-    setIntroRecWaveform();
-  }
-
-  async function toggleIntroMicMeter() {
-    const meter = ensureIntroMicMeter();
-    if (!meter.supported || !introRec?.interactive) return;
-    if (meter.isRunning()) {
-      await stopIntroMicMeter();
-      return;
-    }
-    const ok = await meter.start();
-    introRec.setListening(ok);
-    if (!ok) setIntroRecWaveform();
   }
 
   const reviewIntroModal = createAppModal({
     size: "md",
     onPrimary: () => {
       const item = reviewIntroItem;
-      void stopIntroMicMeter();
+      stopIntroRecPreview();
       void reviewIntroModal.close();
       if (item) {
         void onOpenPortfolio(item);
       }
     },
     onSecondary: () => {
-      void stopIntroMicMeter();
+      stopIntroRecPreview();
       void reviewIntroModal.close();
     },
     onClose: () => {
-      void stopIntroMicMeter();
+      stopIntroRecPreview();
       reviewIntroItem = null;
       introRec = null;
     },
@@ -1578,7 +1440,7 @@ export function createHomeScreen({
    */
   function openReviewIntro(item) {
     const t = getStrings();
-    void stopIntroMicMeter();
+    stopIntroRecPreview();
     reviewIntroItem = item;
     const authorName =
       (typeof item.name === "string" && item.name.trim()) ||
@@ -1597,16 +1459,7 @@ export function createHomeScreen({
       withDucks: true,
     });
     introRec = minute1.rec;
-    if (introRec?.interactive) {
-      introRec.root.addEventListener("click", () => {
-        void toggleIntroMicMeter();
-      });
-      introRec.syncChrome(false);
-    }
-    for (let i = 0; i < introRecLastLevels.length; i += 1) {
-      introRecLastLevels[i] = -1;
-    }
-    setIntroRecWaveform();
+    introRec?.setListening(false);
     reviewIntroSteps.append(minute1.root, minute2.root);
     reviewIntroModal.setTitle(
       fixHangingPrepositions(t.homeReviewIntroTitle ?? ""),
@@ -1624,7 +1477,7 @@ export function createHomeScreen({
   }
 
   function closeReviewIntroModal() {
-    void stopIntroMicMeter();
+    stopIntroRecPreview();
     reviewIntroItem = null;
     introRec = null;
     void reviewIntroModal.close();
@@ -3048,10 +2901,20 @@ export function createHomeScreen({
 
   function openBalanceModal() {
     const t = getStrings();
+    const balance = getBalance();
+    const balanceFormatted = Number(balance).toLocaleString(getLocale());
     balanceCardTitle.textContent = fixHangingPrepositions(
-      formatString(t.homeBalanceCardTitle ?? "", {
-        balance: getBalance(),
-      }),
+      formatPlural(
+        {
+          one: t.homeBalanceCardTitleOne,
+          few: t.homeBalanceCardTitleFew,
+          many: t.homeBalanceCardTitleMany,
+          other: t.homeBalanceCardTitleOther ?? t.homeBalanceCardTitleMany,
+        },
+        balance,
+        { balance: balanceFormatted },
+        getLocale(),
+      ),
     );
     balanceCardBody.textContent = fixHangingPrepositions(
       t.homeBalanceCardBody ?? "",

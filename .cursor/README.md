@@ -90,7 +90,8 @@ Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-scre
 2. В квизе кнопка микрофона в поле «Главный совет» → текст прямо в `advice`.
 3. Submit мержит `answers.dictation` (опционально) → секция листа.
 4. Аудио не upload; Whisper — план B за тем же `DictationEngine`.
-5. Код: `src/lib/dictation/`; правило `dictation.mdc`.
+5. Таймер: iframe — пауза при скрытой вкладке; external — wall-clock + keep-alive STT; конец → `Timer-end.wav` + стоп → quiz.
+6. Код: `src/lib/dictation/`; правило `dictation.mdc`.
 
 ## Referrals (шпаргалка)
 

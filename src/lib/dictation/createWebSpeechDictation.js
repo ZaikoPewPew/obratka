@@ -10,6 +10,8 @@
  *   start: () => Promise<boolean>;
  *   stop: () => Promise<void>;
  *   resetTranscript: () => void;
+ *   setKeepAliveInBackground: (enabled: boolean) => void;
+ *   resumeIfNeeded: () => void;
  *   onTranscript: (cb: (finalText: string, interim: string) => void) => () => void;
  *   onLevel: (cb: (level: number) => void) => () => void;
  *   onWaveform: (cb: (levels: number[]) => void) => () => void;
@@ -239,7 +241,7 @@ export function isWebSpeechSupported() {
 }
 
 /**
- * @param {{ lang?: string }} [options]
+ * @param {{ lang?: string; keepAliveInBackground?: boolean }} [options]
  * @returns {DictationEngine}
  */
 export function createWebSpeechDictation(options = {}) {
@@ -269,14 +271,71 @@ export function createWebSpeechDictation(options = {}) {
   let levelBuffer = null;
   /** @type {ReturnType<typeof window.setInterval> | null} */
   let levelTimer = null;
+  /** @type {ReturnType<typeof window.setInterval> | null} */
+  let backgroundRetryId = null;
   /** @type {number[]} */
   let smoothedWaveform = Array(WAVEFORM_BAR_COUNT).fill(0);
 
   let running = false;
   let wantRunning = false;
+  /** External portfolio: не сдаваться, пока вкладка скрыта (смотреть кейс в другой вкладке). */
+  let keepAliveInBackground = Boolean(options.keepAliveInBackground);
   let finalText = "";
   /** Последний interim — на stop коммитим в final, иначе текст «пропадает». */
   let lastInterim = "";
+
+  function stopBackgroundRetry() {
+    if (backgroundRetryId != null) {
+      window.clearInterval(backgroundRetryId);
+      backgroundRetryId = null;
+    }
+  }
+
+  function startBackgroundRetry() {
+    if (!keepAliveInBackground || backgroundRetryId != null) return;
+    backgroundRetryId = window.setInterval(() => {
+      if (!wantRunning || !keepAliveInBackground) {
+        stopBackgroundRetry();
+        return;
+      }
+      if (running) return;
+      tryResumeRecognition();
+    }, 1000);
+  }
+
+  function resumeAudioContext() {
+    if (audioContext?.state === "suspended") {
+      void audioContext.resume().catch(() => {});
+    }
+  }
+
+  /**
+   * Перезапуск STT после onend / возврата на вкладку.
+   * @returns {boolean}
+   */
+  function tryResumeRecognition() {
+    if (!wantRunning || running || !recognition) return false;
+    resumeAudioContext();
+    try {
+      recognition.start();
+      running = true;
+      stopBackgroundRetry();
+      return true;
+    } catch {
+      if (keepAliveInBackground) {
+        startBackgroundRetry();
+        return false;
+      }
+      if (document.visibilityState === "hidden") {
+        // iframe / без keep-alive: ждём visibility, сессию не рвём.
+        return false;
+      }
+      wantRunning = false;
+      tearDownAudio();
+      emitError("speech_ended");
+      return false;
+    }
+  }
 
   function emitTranscript(interim = "") {
     lastInterim = normalizeTranscript(interim);
@@ -397,19 +456,25 @@ export function createWebSpeechDictation(options = {}) {
 
     rec.onend = () => {
       running = false;
-      if (wantRunning) {
-        try {
-          rec.start();
-          running = true;
-        } catch {
-          wantRunning = false;
-          tearDownAudio();
-          emitError("speech_ended");
-        }
+      if (!wantRunning) return;
+      if (document.visibilityState === "hidden" && !keepAliveInBackground) {
+        return;
       }
+      tryResumeRecognition();
     };
 
     return rec;
+  }
+
+  function onVisibilityChange() {
+    if (document.visibilityState !== "visible") return;
+    if (!wantRunning) return;
+    resumeAudioContext();
+    if (!running) tryResumeRecognition();
+  }
+
+  if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", onVisibilityChange);
   }
 
   return {
@@ -457,6 +522,7 @@ export function createWebSpeechDictation(options = {}) {
 
     async stop() {
       wantRunning = false;
+      stopBackgroundRetry();
       const rec = recognition;
       recognition = null;
       if (rec) {
@@ -485,6 +551,27 @@ export function createWebSpeechDictation(options = {}) {
       emitTranscript("");
     },
 
+    /**
+     * External-режим: пытаться держать STT живым, пока смотрят портфолио
+     * на другой вкладке (браузер может всё равно резать фоновое распознавание).
+     * @param {boolean} enabled
+     */
+    setKeepAliveInBackground(enabled) {
+      keepAliveInBackground = Boolean(enabled);
+      if (!keepAliveInBackground) {
+        stopBackgroundRetry();
+        return;
+      }
+      if (wantRunning && !running) startBackgroundRetry();
+    },
+
+    /** Вернуть STT после visibility / throttle (без смены wantRunning). */
+    resumeIfNeeded() {
+      if (!wantRunning) return;
+      resumeAudioContext();
+      if (!running) tryResumeRecognition();
+    },
+
     onTranscript(cb) {
       transcriptListeners.add(cb);
       return () => transcriptListeners.delete(cb);
@@ -507,6 +594,10 @@ export function createWebSpeechDictation(options = {}) {
 
     destroy() {
       wantRunning = false;
+      stopBackgroundRetry();
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+      }
       void this.stop();
       transcriptListeners.clear();
       levelListeners.clear();

@@ -38,7 +38,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 
 | Модуль | Path | Роль |
 |--------|------|------|
-| iframe-shell (`index.html` + `main.js`) | `/review` | Просмотр + таймер 45 s + чип **rec** (заметки) |
+| iframe-shell (`index.html` + `main.js`) | `/review` | Просмотр + таймер 45 s (iframe pause / external wall-clock + `Timer-end.wav`) + чип **rec** |
 | `review-screen/` | `/quiz` | Оболочка квиза + PDF reveal |
 | `review-panel/` | `/quiz` → `/quiz/done` | Шаги опроса + микрофон в advice + локальный done |
 

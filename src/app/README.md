@@ -29,7 +29,7 @@ Auth-gated deep link (`home` / `settings` / `onboarding` / `report` / `url` / `s
 | `home` | `/home` | Хаб: SWR feed/mine/rating + feedSeen/3/3 + «Топы в сети» + tabbar-dock (entrance / glass / `--on-dark`) + меню профиля |
 | `settings` | `/settings` | Отдельный экран настроек (пока заглушка) |
 | `url` | `/portfolio` | Подача URL; back-chip → home; done на том же экране |
-| `review` | `/review` | Ревью: iframe + таймер 45 s + чип rec (заметки) |
+| `review` | `/review` | Ревью: iframe + таймер 45 s (pause / external wall-clock + `Timer-end.wav`) + чип rec |
 | `quiz` | `/quiz` | Квиз / опрос после таймера; микрофон в поле «Главный совет» |
 | `done` | `/quiz/done` | Финал квиза (review-panel done + улет отчёта) |
 | `success` | `/done` | Успех подачи портфолио (success-screen) |

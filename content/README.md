@@ -15,7 +15,7 @@
 | `referral*` | `/referral` (validate errors: `referralExhausted`, …) |
 | `auth*` / `authEmail*` / `authCode*` / `authOtp*` / `authIdentityConflict` | `/registration`, `/registration/code` |
 | `onboarding*` | `/onboarding` |
-| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeMineSlotFree*` / `homePendingLimit*` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeBalance*` / `homeAccount*` / `homeContacts*` / `homeRulesCloseAria` / `homeContactFab*` / `homeLegendaryOnline*` / `homeRating*` | `/home` (feed/mine/rating топ-50, SWR, intro, mine gate, free-slot / pending-limit, feedSeen + 3/3, слоты, invite `homeInviteMessage`, репутация / баланс + tip, контакты / правила / FAB, «Топы в сети», меню профиля) |
+| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeMineSlotFree*` / `homePendingLimit*` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeBalance*` / `homeBalanceCardTitleOne`·`Few`·`Many`·`Other` / `homeAccount*` / `homeContacts*` / `homeRulesCloseAria` / `homeContactFab*` / `homeLegendaryOnline*` / `homeRating*` | `/home` (feed/mine/rating топ-50, SWR, intro, mine gate, free-slot / pending-limit, feedSeen + 3/3, слоты, invite `homeInviteMessage`, репутация / баланс + tip + plural-карточка, контакты / правила / FAB, «Топы в сети», меню профиля) |
 | `gradeUndefined` | подпись без известного `profiles.grade` (карточки / рейтинг / report) |
 | `modalCloseAria` | общая модалка (`app-modal`) |
 | `url*` / `urlModal*` / `urlScreen*` / `urlScreenBack*` | `/portfolio` (в т.ч. чип «На главную») |
@@ -24,7 +24,7 @@
 | `ban*` | `/banned` |
 | `reportScreen*` / `reportComplaint*` / `complaintTag*` | `/report` (листы + жалоба; теги v1: `low_effort` · `spam` · `harassment` · `offensive` · `irrelevant`) |
 | `review*` / `reviewRec*` / `reviewAdviceRec*` / `report*` / `reportDictationTitle` | `/quiz` (в т.ч. микрофон в поле совета), PDF; rec на `/review` |
-| `frame*` / `controls*` | iframe-shell `/review` |
+| `frame*` / `controls*` / `embedBlocked*` | iframe-shell `/review` (в т.ч. external viewer) |
 
 ### Auth-защита (ключи)
 

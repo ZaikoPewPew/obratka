@@ -24,7 +24,7 @@ referral → auth → authCode → onboarding → home
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |
 | 4 | `home-screen` | `/home` + query | Хаб: feed/mine/rating; SWR + intro до claim + mine report gate + tabbar-dock (entrance / glass / `--on-dark`); query хранит активный вид |
 | 4a | `settings-screen` | `/settings` | Настройки аккаунта (пока заглушка) |
-| 5a | iframe-shell | `/review` | Ревью: iframe + таймер **45 s** + чип **rec** (надиктовка → `answers.dictation`) |
+| 5a | iframe-shell | `/review` | Ревью: iframe + таймер **45 s** (pause / external wall-clock + `Timer-end.wav`) + чип **rec** |
 | 5b | `url-screen` | `/portfolio` | Подача URL (баланс); чип «На главную»; done на том же экране |
 | 6 | `review-screen` + `review-panel` | `/quiz` → `/quiz/done` | Квиз (микрофон в поле «Главный совет»); финал слева + улет отчёта |
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
@@ -92,7 +92,8 @@ Handoff соседних brand-экранов: `handoff: true` (`brandScreenTran
 `success-screen` — запасной `/done` (deep link); основной submit больше не прыгает сюда (`pendingSuccessPreset` = `generic`).  
 `review-screen` — split для квиза (слева panel, справа visual + PDF-лист).  
 `ban-screen` — статичный красный mesh + `banBrandMarkSvg` (не `setVariant`).  
-На `/review` в шапке — опциональная надиктовка (`.iframe-shell__rec`), в квизе — микрофон в поле «Главный совет» (`.review-panel__rec`); таймер `REVIEW_SESSION_SECONDS` из [`src/config/review.js`](src/config/review.js); см. [`src/lib/dictation/README.md`](src/lib/dictation/README.md).
+На `/review` в шапке — опциональная надиктовка (`.iframe-shell__rec`), в квизе — микрофон в поле «Главный совет» (`.review-panel__rec`); таймер `REVIEW_SESSION_SECONDS` из [`src/config/review.js`](src/config/review.js).  
+iframe: пауза при скрытой вкладке; external (портфолио в другой вкладке): wall-clock без паузы + best-effort keep-alive STT; конец → `Timer-end.wav` + стоп записи → quiz. См. [`src/lib/dictation/README.md`](src/lib/dictation/README.md).
 
 ## Дерево файлов
 
@@ -226,7 +227,8 @@ Home entrance: `--home-screen-reveal-delay-*` + `motion-reveal-dock` (тольк
 Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeCardReport*` / `homeCardReportPending*` / `homeTabMineReadyAria` / `homeReputation*` / `homeBalance*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*`, `modalCloseAria`, `url*` / `urlScreenBack*`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `reviewRec*` / `reviewAdviceRec*` / `report*` / `reportDictationTitle`, `frame*` / `controls*`).
 Правило: `.cursor/rules/i18n.mdc`.
 
-Таймер `/review` и intro copy: `REVIEW_SESSION_SECONDS` в [`src/config/review.js`](src/config/review.js).
+Таймер `/review` и intro copy: `REVIEW_SESSION_SECONDS` в [`src/config/review.js`](src/config/review.js).  
+iframe — пауза при `visibility hidden`; external — wall-clock + дедлайн; конец → [`Timer-end.wav`](src/assets/audio/Timer-end.wav).
 
 ## App-слой
 
@@ -264,7 +266,7 @@ Home entrance: `--home-screen-reveal-delay-*` + `motion-reveal-dock` (тольк
 - [`src/utils/homeRoute.js`](src/utils/homeRoute.js) — parse/build/canonical home query
 - [`src/utils/feedSeen.js`](src/utils/feedSeen.js) — seen кейсов ленты → точка на «На ревью»
 - [`src/utils/mineReadySeen.js`](src/utils/mineReadySeen.js) — seen 3/3 → точка на «Мои» / «Завершенные»
-- [`src/lib/dictation/README.md`](src/lib/dictation/README.md) — надиктовка: `/review` + поле совета в квизе
+- [`src/lib/dictation/README.md`](src/lib/dictation/README.md) — надиктовка: `/review` + поле совета в квизе; iframe pause / external keep-alive; конец → [`Timer-end.wav`](src/assets/audio/Timer-end.wav)
 - [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) — правый visual + variants
 - [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) — split-каркас
 - [`src/components/app-modal/README.md`](src/components/app-modal/README.md) — универсальная модалка

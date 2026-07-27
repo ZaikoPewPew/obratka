@@ -42,7 +42,7 @@
 - **Вкладка «Рейтинг»:** третий tab `rating`; топ-50 по `balance` (`listRatingTop` / `rating_leaderboard.sql`, снапшот раз в сутки); карточки в `.home-screen__rating-list` (aside `rating/` **не** монтируется); плашка баланса `min-width`/`height` 52px, padding-x 16px.
 - **«Топы в сети»:** fixed-чип слева снизу (`legendary-online-panel` + heartbeat/list RPC); скрыт, если никого нет.
 - **Deep links home:** `/home`, `?tab=mine`, `?tab=mine&filter=completed`, `?tab=rating`; query канонизирует `homeRoute.js`, Back/Forward переключает вид без remount.
-- **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 45` (review shell + intro copy).
+- **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 45` (review shell + intro copy). iframe — пауза при скрытой вкладке; external — wall-clock без паузы; конец → `src/assets/audio/Timer-end.wav` + стоп надиктовки → quiz.
 - **Tabbar dock:** glass-таббар + кнопка «Закинуть своё» справа (56×56, Google blue, gap 8px); hide при скролле уезжает весь док. Светлый трек — gray-900 10% + blur 20; тёмный превью → `--on-dark` — white 20%.
 - **Чипы шапки:** репутация → баланс → аватар. Submit и уведомления из topbar убраны.
 - **Точка на «На ревью»:** красная 6px в углу вкладки при **новом** кейсе в ленте; открытие «На ревью» гасит (`feedSeen`), новый id снова зажигает.
@@ -192,8 +192,8 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 - Экраны: referral, auth, auth-code, onboarding, home, settings, url, review-shell (+ rec), quiz, success, report, ban
 - Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `side-panel`, `account-menu`, `tabs-panel`, `legendary-online-panel`, `contact-fab`
 - Home state: `src/utils/homeRoute.js` (query) + `homeListCache.js` + `feedSeen.js` + `mineReadySeen.js` (кэши сбрасываются в `exitAuthenticatedSession`)
-- Review timer: `src/config/review.js` (`REVIEW_SESSION_SECONDS`)
-- Dictation: `src/lib/dictation/` (Web Speech MVP)
+- Review timer: `src/config/review.js` (`REVIEW_SESSION_SECONDS`); iframe pause / external wall-clock; end sound `src/assets/audio/Timer-end.wav`
+- Dictation: `src/lib/dictation/` (Web Speech MVP; external `setKeepAliveInBackground`)
 - Url-screen: чип «На главную» (`.url-screen__back`, скрыт на done) → `onExit` → home
 
 Waitlist dual-layout удалён; историческая спека — [`mobile.md`](mobile.md) § Архив.

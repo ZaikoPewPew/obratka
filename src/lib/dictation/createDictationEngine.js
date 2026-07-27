@@ -6,9 +6,9 @@ import {
 /**
  * Фабрика движка диктовки. Сейчас — Web Speech; позже можно вернуть Whisper
  * с тем же контрактом
- * (start/stop/onTranscript/onLevel/onWaveform/onError/destroy).
+ * (start/stop/onTranscript/onLevel/onWaveform/onError/setKeepAliveInBackground/resumeIfNeeded/destroy).
  *
- * @param {{ lang?: string }} [options]
+ * @param {{ lang?: string; keepAliveInBackground?: boolean }} [options]
  * @returns {import("./createWebSpeechDictation.js").DictationEngine | null}
  */
 export function createDictationEngine(options = {}) {

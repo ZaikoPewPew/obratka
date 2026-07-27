@@ -272,24 +272,15 @@
   animation-fill-mode: both;
 }
 
-/** Взрыв уточек от точки клика в intro-модалке. */
-@keyframes motion-review-intro-duck-scatter {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(0.4) rotate(0deg);
-  }
-
-  70% {
-    opacity: 1;
-  }
-
+/** Декоративная волна preview-rec в intro-модалке (без mic). */
+@keyframes motion-review-intro-rec-wave {
+  0%,
   100% {
-    opacity: 0;
-    transform: translate(
-        calc(-50% + var(--duck-dx, 0px)),
-        calc(-50% + var(--duck-dy, 0px))
-      )
-      scale(var(--duck-scale, 1)) rotate(var(--duck-rot, 0deg));
+    transform: scaleY(var(--home-screen-review-intro-rec-wave-scale-min));
+  }
+
+  50% {
+    transform: scaleY(var(--home-screen-review-intro-rec-wave-scale-max));
   }
 }
 
@@ -346,6 +337,11 @@
   }
 
   .review-panel__rec-dot {
+    animation: none;
+  }
+
+  .home-screen__review-intro-rec--listening .home-screen__review-intro-rec-dot,
+  .home-screen__review-intro-rec--listening .home-screen__review-intro-rec-bar {
     animation: none;
   }
 
