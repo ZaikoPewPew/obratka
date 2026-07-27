@@ -1,6 +1,7 @@
 # `content/` — контент и данные
 
 - `locales.json` — **UI-строки** (`ru` / `en`, `supportedLocales`). Правило: `.cursor/rules/i18n.mdc`.
+- `rules.json` — текст правил сообщества (`title` / `updated` / `intro` / `sections` по локалям). Загрузка: `getCommunityRules()` → home side-panel.
 - `onboarding.json` / `onboarding.md` — шаги онбординга (`/onboarding`).
 - `embed-hosts.md` — площадки портфолио (iframe vs external). Код: `src/utils/embedHosts.js`.
 - `founder-avatars.json` — пул GitHub-источников для стека аватаров (`pickCount` + `sources`). Shuffle: `getFounderAvatarSourcesForPage()` в `src/i18n.js` → unavatar.io. Сейчас: `/referral` ([`referral-screen`](../src/components/referral-screen/README.md)).
@@ -14,7 +15,7 @@
 | `referral*` | `/referral` (validate errors: `referralExhausted`, …) |
 | `auth*` / `authEmail*` / `authCode*` / `authOtp*` / `authIdentityConflict` | `/registration`, `/registration/code` |
 | `onboarding*` | `/onboarding` |
-| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeMineSlotFree*` / `homePendingLimit*` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeAccount*` / `homeContacts*` / `homeRules*` / `homeContactFab*` / `homeLegendaryOnline*` / `homeRating*` | `/home` (feed/mine/rating топ-50, SWR, intro, mine gate, free-slot / pending-limit, feedSeen + 3/3, слоты, invite, репутация, контакты / правила / FAB, «Топы в сети», меню профиля) |
+| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeMineSlotFree*` / `homePendingLimit*` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeAccount*` / `homeContacts*` / `homeRulesCloseAria` / `homeContactFab*` / `homeLegendaryOnline*` / `homeRating*` | `/home` (feed/mine/rating топ-50, SWR, intro, mine gate, free-slot / pending-limit, feedSeen + 3/3, слоты, invite, репутация, контакты / правила / FAB, «Топы в сети», меню профиля) |
 | `gradeUndefined` | подпись без известного `profiles.grade` (карточки / рейтинг / report) |
 | `modalCloseAria` | общая модалка (`app-modal`) |
 | `url*` / `urlModal*` / `urlScreen*` / `urlScreenBack*` | `/portfolio` (в т.ч. чип «На главную») |

@@ -227,10 +227,10 @@
   --motion-recording-blink-duration: 1100ms;
   --motion-recording-blink-ease: ease-in-out;
   --motion-recording-blink-opacity-min: 0.25;
-  /* Взгляд глазок на чипе репутации (центр → −shift → +shift → центр) */
+  /* Взгляд глазок на чипе репутации (центр → +shift → −shift → центр) */
   --motion-reputation-eyes-shift: 2px;
-  --motion-reputation-eyes-duration: 4500ms;
-  --motion-reputation-eyes-ease: ease-in-out;
+  --motion-reputation-eyes-duration: 9000ms;
+  --motion-reputation-eyes-ease: cubic-bezier(0.45, 0.05, 0.55, 0.95);
 
   /* Слои */
   --z-base: 1;
@@ -572,7 +572,8 @@
   --side-panel-backdrop-ease: var(--motion-screen-ease);
   --side-panel-panel-duration: var(--motion-reveal-duration);
   --side-panel-panel-ease: var(--motion-reveal-ease);
-  --side-panel-panel-shift: 24px;
+  /* % от ширины панели → полный выезд за правый край + inset */
+  --side-panel-panel-shift: calc(100% + var(--side-panel-inset));
 
   /* Слоты ревьюеров на карточке (чип 108×52, аватары 32) */
   --home-screen-progress-width: 108px;

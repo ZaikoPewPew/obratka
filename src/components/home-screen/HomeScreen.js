@@ -52,6 +52,7 @@ import {
   parseHomeView,
 } from "../../utils/homeRoute.js";
 import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
+import { getCommunityRules } from "../../utils/communityRules.js";
 import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import { createAppModal } from "../app-modal/AppModal.js";
 import { createSidePanel } from "../side-panel/SidePanel.js";
@@ -814,32 +815,30 @@ export function createHomeScreen({
 
   function syncRulesPanelContent() {
     const t = getStrings();
-    rulesPanel.setTitle(t.homeRulesTitle ?? "");
-    rulesPanel.setDescription(
-      fixHangingPrepositions(t.homeRulesUpdated ?? ""),
-    );
+    const rules = getCommunityRules();
+    rulesPanel.setTitle(rules.title);
+    rulesPanel.setDescription(fixHangingPrepositions(rules.updated));
     rulesPanel.setCloseAriaLabel(t.homeRulesCloseAria ?? "");
-    rulesPanel.content.replaceChildren(
-      createRulesText(t.homeRulesIntro ?? "", "side-panel__intro"),
-      (() => {
-        const section = document.createElement("section");
-        section.className = "side-panel__section";
-        section.append(
-          createRulesText(t.homeRules1Title ?? "", "side-panel__section-title", "h3"),
-          createRulesText(t.homeRules1Body ?? "", "side-panel__section-body"),
+
+    /** @type {HTMLElement[]} */
+    const nodes = [];
+    if (rules.intro) {
+      nodes.push(createRulesText(rules.intro, "side-panel__intro"));
+    }
+    for (const section of rules.sections) {
+      const wrap = document.createElement("section");
+      wrap.className = "side-panel__section";
+      if (section.title) {
+        wrap.append(
+          createRulesText(section.title, "side-panel__section-title", "h3"),
         );
-        return section;
-      })(),
-      (() => {
-        const section = document.createElement("section");
-        section.className = "side-panel__section";
-        section.append(
-          createRulesText(t.homeRules2Title ?? "", "side-panel__section-title", "h3"),
-          createRulesText(t.homeRules2Body ?? "", "side-panel__section-body"),
-        );
-        return section;
-      })(),
-    );
+      }
+      if (section.body) {
+        wrap.append(createRulesText(section.body, "side-panel__section-body"));
+      }
+      nodes.push(wrap);
+    }
+    rulesPanel.content.replaceChildren(...nodes);
   }
 
   const accountMenu = createAccountMenu({

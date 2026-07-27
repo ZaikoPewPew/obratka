@@ -61,20 +61,32 @@ await panel.close();
 | `setTitle` / `setDescription` | копирайт шапки |
 | `setCloseAriaLabel` | aria у крестика |
 
+## Стили и motion
+
+Токены `--side-panel-*` (алиасы на семантику / `--motion-reveal-*` / `--motion-screen-*`).
+
+| Слой | Поведение |
+|------|-----------|
+| Backdrop | `opacity` → `--side-panel-backdrop-*` |
+| Panel | только `translateX` (`--side-panel-panel-shift` = `100% + inset`); **без** fade opacity |
+| Open | `hidden=false` → rAF → класс `side-panel--open` |
+| Close | снять `--open` → `transitionend` на `transform` панели / fallback |
+| Reduced motion | без сдвига, почти мгновенный transition |
+
 ## Поведение
 
 - `role="dialog"` + `aria-modal="true"` + `aria-labelledby`
 - Focus: open → close; close → предыдущий `activeElement`
 - Escape / клик по backdrop → `close()`
-- Slide-in справа + fade backdrop; reduced motion — без сдвига
 - **Не** писать `history` / `go()` внутри
 
 ## Кейс на home
 
-Account-menu → «Правила» → `homeRules*` в слоте (intro + секции).
+Account-menu → «Правила» → текст из [`content/rules.json`](../../../content/rules.json) через `getCommunityRules()` (`homeRulesCloseAria` — только aria крестика в locales).
 
 ## Связанные доки
 
 - [`../account-menu/README.md`](../account-menu/README.md)
 - [`../app-modal/README.md`](../app-modal/README.md)
+- [`../../../content/README.md`](../../../content/README.md)
 - [`../../../styles/README.md`](../../../styles/README.md)

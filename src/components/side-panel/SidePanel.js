@@ -6,8 +6,24 @@ const CLOSE_SVG = `<svg class="side-panel__close-icon" width="24" height="24" vi
 </svg>`;
 
 /**
+ * Fallback закрытия ≈ CSS panel-duration + запас.
+ * @returns {number}
+ */
+function getSidePanelCloseFallbackMs() {
+  if (typeof document === "undefined") return getScreenCloseFallbackMs();
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue("--side-panel-panel-duration")
+    .trim();
+  const value = Number.parseFloat(raw);
+  if (!Number.isFinite(value)) return getScreenCloseFallbackMs();
+  const ms = raw.endsWith("s") && !raw.endsWith("ms") ? value * 1000 : value;
+  return Math.max(180, Math.round(ms + 80));
+}
+
+/**
  * Боковая панель справа (Figma SidePanel).
  * Каркас: title / description / слот / close. Не экран флоу.
+ * Панель всегда opaque — только slide; backdrop отдельно fade.
  *
  * @param {{
  *   title?: string;
@@ -47,6 +63,10 @@ export function createSidePanel(opts = {}) {
   root.hidden = true;
   root.setAttribute("aria-hidden", "true");
 
+  const backdrop = document.createElement("div");
+  backdrop.className = "side-panel__backdrop";
+  backdrop.setAttribute("aria-hidden", "true");
+
   const panel = document.createElement("div");
   panel.className = "side-panel__panel";
   panel.setAttribute("role", "dialog");
@@ -80,7 +100,7 @@ export function createSidePanel(opts = {}) {
   content.className = "side-panel__content";
 
   panel.append(header, content);
-  root.append(panel);
+  root.append(backdrop, panel);
 
   /**
    * @param {string} title
@@ -167,7 +187,7 @@ export function createSidePanel(opts = {}) {
     root.classList.remove("side-panel--open");
     root.setAttribute("aria-hidden", "true");
 
-    const fallbackMs = getScreenCloseFallbackMs();
+    const fallbackMs = getSidePanelCloseFallbackMs();
 
     return new Promise((resolve) => {
       let settled = false;
@@ -175,7 +195,7 @@ export function createSidePanel(opts = {}) {
       const finish = () => {
         if (settled) return;
         settled = true;
-        root.removeEventListener("transitionend", onEnd);
+        panel.removeEventListener("transitionend", onEnd);
         window.clearTimeout(timerId);
         root.hidden = true;
         closing = false;
@@ -194,11 +214,11 @@ export function createSidePanel(opts = {}) {
        * @param {TransitionEvent} event
        */
       const onEnd = (event) => {
-        if (event.target !== root || event.propertyName !== "opacity") return;
+        if (event.target !== panel || event.propertyName !== "transform") return;
         finish();
       };
 
-      root.addEventListener("transitionend", onEnd);
+      panel.addEventListener("transitionend", onEnd);
       const timerId = window.setTimeout(finish, fallbackMs);
     });
   }
@@ -207,8 +227,8 @@ export function createSidePanel(opts = {}) {
     void close();
   });
 
-  root.addEventListener("click", (event) => {
-    if (!closeOnBackdrop || event.target !== root) return;
+  backdrop.addEventListener("click", () => {
+    if (!closeOnBackdrop) return;
     void close();
   });
 

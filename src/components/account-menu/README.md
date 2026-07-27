@@ -11,7 +11,7 @@
 - «Настройки» → колбэк → `/settings` (заглушка).
 - «Пригласить» открывает `homeInvite*`-модалку (referral share).
 - «Контакты» → `COMMUNITY_CONTACT_URL` из `src/config/contacts.js`.
-- «Правила» → `createSidePanel` с `homeRules*` (Figma `517:4740`).
+- «Правила» → `createSidePanel` с текстом из `content/rules.json` (`getCommunityRules`).
 - «Выйти» → `signOut` + `clearHomeListCache` + `clearMineReadySeen` + `clearFeedSeen` → `/referral`.
 - Навигация, модалки / side-panel и завершение сессии передаются колбэками наверх (без `go()` внутри меню).
 

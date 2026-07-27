@@ -91,25 +91,28 @@
 
 /**
  * Периодический взгляд глазок чипа репутации:
- * дефолт → −2px → +2px → дефолт (пауза большую часть цикла).
+ * прямо → направо (пауза) → налево (пауза) → прямо.
+ * Переходы медленные; плато на ключевых кадрах держат паузу.
  */
 @keyframes motion-reputation-eyes-look {
   0%,
-  72% {
+  48% {
     transform: translateX(0);
   }
 
-  78% {
+  56%,
+  64% {
+    transform: translateX(var(--motion-reputation-eyes-shift));
+  }
+
+  72%,
+  80% {
     transform: translateX(
       calc(-1 * var(--motion-reputation-eyes-shift))
     );
   }
 
-  86% {
-    transform: translateX(var(--motion-reputation-eyes-shift));
-  }
-
-  92%,
+  88%,
   100% {
     transform: translateX(0);
   }

@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "defaultLocale": "ru",
+  "updatedAt": "2026-07-27",
+  "locales": {
+    "ru": {
+      "title": "Правила сообщества",
+      "updated": "Последнее обновление 27 июля 2026",
+      "intro": "Обратка — про честную и уважительную обратную связь по портфолио. Эти правила держат сообщество полезным для всех.",
+      "sections": [
+        {
+          "title": "1. Уважайте друг друга",
+          "body": "Общайтесь вежливо и без оскорблений.\nКритикуйте работу, а не человека.\nТоксичность, дискриминация, травля и переходы на личности запрещены."
+        },
+        {
+          "title": "2. Давайте конструктивную обратную связь",
+          "body": "Объясняйте, что именно можно улучшить и почему.\nПо возможности предлагайте варианты.\nИзбегайте комментариев в духе «плохо» или «не нравится» без объяснений."
+        },
+        {
+          "title": "3. Смотрите работу внимательно",
+          "body": "Перед отчётом реально изучите портфолио — на просмотр есть таймер.\nНизкоусилие, спам и нерелевантные листы вредят автору.\nНадиктовка и текстовые ответы — по желанию, но смысл в отчёте должен быть."
+        },
+        {
+          "title": "4. Завершайте ревью честно",
+          "body": "Пока кейс у вас — доведите до отчёта или отпустите его.\nНаграда начисляется только после отправки отчёта.\nУход без submit — без монет."
+        },
+        {
+          "title": "5. Подавайте своё портфолио",
+          "body": "В очередь — свой URL и реальная работа.\nОдновременно в ожидании может быть один кейс.\nПодача стоит монет, которые зарабатываются ревью."
+        },
+        {
+          "title": "6. Монеты и баланс",
+          "body": "Монеты нужны, чтобы закинуть своё портфолио.\nИх дают за полезные ревью, а не за клики и аборт.\nНе пытайтесь накручивать систему."
+        },
+        {
+          "title": "7. Жалобы и репутация",
+          "body": "Автор может пожаловаться на конкретный лист: низкоусилие, спам, травля, оскорбления, нерелевантность.\nНесогласие с грейдом — не повод для жалобы.\nПовторные нарушения снижают репутацию и могут привести к бану."
+        },
+        {
+          "title": "8. Invite-only",
+          "body": "Вход по приглашению.\nДелитесь кодом с теми, кому доверяете — слотов немного.\nНе продавайте и не спамьте инвайтами."
+        },
+        {
+          "title": "9. Конфиденциальность и помощь",
+          "body": "Не публикуйте чужие личные данные и не шлите вредоносные ссылки.\nЕсли аккаунт заблокирован или нужна помощь — напишите через «Контакты»."
+        }
+      ]
+    },
+    "en": {
+      "title": "Community rules",
+      "updated": "Last updated July 27, 2026",
+      "intro": "Obratka is about honest, respectful portfolio feedback. These rules keep the community useful for everyone.",
+      "sections": [
+        {
+          "title": "1. Respect each other",
+          "body": "Be polite and avoid insults.\nCritique the work, not the person.\nToxicity, discrimination, harassment, and personal attacks are not allowed."
+        },
+        {
+          "title": "2. Give constructive feedback",
+          "body": "Explain what can be improved and why.\nSuggest options when you can.\nAvoid comments like “bad” or “I don’t like it” without explanation."
+        },
+        {
+          "title": "3. Review the work carefully",
+          "body": "Study the portfolio before submitting a report — there is a viewing timer.\nLow-effort, spam, and irrelevant sheets hurt the author.\nDictation and typed answers are optional, but the report should still have substance."
+        },
+        {
+          "title": "4. Finish reviews honestly",
+          "body": "While a case is yours, finish the report or release it.\nRewards are granted only after you submit the report.\nLeaving without submit means no coins."
+        },
+        {
+          "title": "5. Submit your own portfolio",
+          "body": "Queue only your URL and real work.\nYou can have one pending case at a time.\nSubmitting costs coins earned by reviewing."
+        },
+        {
+          "title": "6. Coins and balance",
+          "body": "Coins are needed to submit your portfolio.\nYou earn them for useful reviews, not for clicks or aborts.\nDo not try to game the system."
+        },
+        {
+          "title": "7. Complaints and reputation",
+          "body": "Authors can report a specific sheet for low effort, spam, harassment, offensive content, or irrelevance.\nDisagreeing with a grade is not a reason to complain.\nRepeated violations lower reputation and can lead to a ban."
+        },
+        {
+          "title": "8. Invite-only",
+          "body": "Access is by invitation.\nShare your code with people you trust — slots are limited.\nDo not sell or spam invites."
+        },
+        {
+          "title": "9. Privacy and help",
+          "body": "Do not publish other people’s personal data or send harmful links.\nIf your account is banned or you need help, write via Contacts."
+        }
+      ]
+    }
+  }
+}

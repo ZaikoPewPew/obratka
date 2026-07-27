@@ -1,6 +1,7 @@
 /**
  * Боковая панель (Figma SidePanel).
  * Токены: --side-panel-* в tokens.css.
+ * Панель всегда opaque — только slide справа; backdrop fade отдельно.
  */
 
 .side-panel {
@@ -11,22 +12,31 @@
   display: block;
   margin: 0;
   padding: 0;
-  background: var(--side-panel-backdrop-bg);
-  -webkit-backdrop-filter: blur(var(--side-panel-backdrop-blur));
-  backdrop-filter: blur(var(--side-panel-backdrop-blur));
-  opacity: 0;
   pointer-events: none;
-  transition: opacity var(--side-panel-backdrop-duration)
-    var(--side-panel-backdrop-ease);
 }
 
 .side-panel--open {
-  opacity: 1;
   pointer-events: auto;
 }
 
 .side-panel[hidden] {
   display: none !important;
+}
+
+.side-panel__backdrop {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  background: var(--side-panel-backdrop-bg);
+  -webkit-backdrop-filter: blur(var(--side-panel-backdrop-blur));
+  backdrop-filter: blur(var(--side-panel-backdrop-blur));
+  opacity: 0;
+  transition: opacity var(--side-panel-backdrop-duration)
+    var(--side-panel-backdrop-ease);
+}
+
+.side-panel--open .side-panel__backdrop {
+  opacity: 1;
 }
 
 .side-panel__panel {
@@ -52,9 +62,11 @@
   box-shadow: var(--side-panel-shadow);
   color: var(--color-text);
   font-family: var(--font-family);
+  opacity: 1;
   transform: translateX(var(--side-panel-panel-shift));
   transition: transform var(--side-panel-panel-duration)
     var(--side-panel-panel-ease);
+  will-change: transform;
 }
 
 .side-panel--open .side-panel__panel {
@@ -191,7 +203,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .side-panel,
+  .side-panel__backdrop,
   .side-panel__panel {
     transition-duration: 0.01ms;
   }
