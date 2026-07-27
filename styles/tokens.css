@@ -360,29 +360,45 @@
     var(--shell-review-rec-size) + var(--shell-review-rec-offset) * 2
   );
   --shell-review-slider-width: 500px;
-  --shell-review-slider-height: 106px;
-  --shell-review-slider-track-height: 63px;
-  --shell-review-slider-tick-width: 4px;
-  --shell-review-slider-tick-height-end: 63px;
-  --shell-review-slider-tick-height-mid: 41px;
-  --shell-review-slider-tick-offset-mid: 11px;
-  --shell-review-slider-tick-color: var(--color-text);
-  --shell-review-slider-thumb-size: 20px;
+  --shell-review-slider-height: 148px;
+  --shell-review-slider-track-height: 36px;
+  --shell-review-slider-track-radius: var(--radius-xs);
+  --shell-review-slider-cell: 6px;
+  --shell-review-slider-thumb-width: 24px;
+  --shell-review-slider-thumb-height: 40px;
+  --shell-review-slider-thumb-radius: var(--radius-xs);
   --shell-review-slider-thumb-color: var(--color-text);
-  --shell-review-slider-thumb-ring: var(--space-1);
+  --shell-review-slider-thumb-shadow: 0 var(--space-1) var(--space-2)
+    color-mix(in srgb, var(--color-black) 18%, transparent);
+  --shell-review-slider-thumb-ring: 2px;
+  --shell-review-slider-thumb-ring-color: color-mix(
+    in srgb,
+    var(--color-text) 30%,
+    transparent
+  );
   --shell-review-slider-hit-size: 48px;
-  --shell-review-slider-track-color: var(--color-border);
-  --shell-review-slider-fill-color: var(--color-text);
-  --shell-review-slider-fill-height: var(--shell-review-slider-tick-width);
+  --shell-review-slider-track-color: var(--color-surface-muted);
+  --shell-review-slider-fill-color: var(--color-accent);
+  --shell-review-slider-stop-size: 4px;
+  --shell-review-slider-stop-color: var(--color-text);
+  --shell-review-slider-stop-muted: color-mix(
+    in srgb,
+    var(--color-text) 30%,
+    transparent
+  );
   --shell-review-slider-motion-duration: 560ms;
   --shell-review-slider-motion-ease: var(--ease-out);
   --shell-review-slider-lerp: 0.16;
   --shell-review-slider-lerp-drag: 0.42;
   --shell-review-slider-label-gap: var(--space-3);
-  --shell-review-slider-label-height: 31px;
-  --shell-review-slider-label-size: var(--font-size-lg);
+  --shell-review-slider-label-height: 28px;
+  --shell-review-slider-label-size: var(--font-size-md);
   --shell-review-slider-label-weight: var(--font-weight-regular);
   --shell-review-slider-label-color: var(--color-text-muted);
+  --shell-review-slider-readout-size: var(--font-size-3xl);
+  --shell-review-slider-readout-weight: var(--font-weight-semibold);
+  --shell-review-slider-readout-color: var(--color-text);
+  --shell-review-slider-readout-gap: var(--space-4);
   --shell-review-check-size: 24px;
   --shell-review-submit-bg: var(--color-accent);
   --shell-review-submit-text: var(--color-on-accent);

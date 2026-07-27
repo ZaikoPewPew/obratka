@@ -41,6 +41,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | iframe-shell (`index.html` + `main.js`) | `/review` | Просмотр + таймер 45 s (iframe pause / external wall-clock + `Timer-end.wav`) + чип **rec** |
 | `review-screen/` | `/quiz` | Оболочка квиза + PDF reveal |
 | `review-panel/` | `/quiz` → `/quiz/done` | Шаги опроса + микрофон в advice + локальный done |
+| `scale-slider/` | — | Шкала оценки (canvas-сетка) для шагов context / visual |
 
 Движок диктовки: [`../lib/dictation/README.md`](../lib/dictation/README.md).  
 См. [`PROJECT.md`](../../PROJECT.md) — Entrypoint.

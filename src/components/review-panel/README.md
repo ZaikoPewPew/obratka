@@ -32,8 +32,9 @@
 
 ## Стили / i18n
 
-Классы `.review-panel__*` в `iframe-shell.css`; токены `--shell-review-*` / `--shell-review-rec-*`.  
-Ключи: `review*`, `reviewDone*`, `reviewContinue`, `reviewAdviceRec*`, шкалы и варианты.  
+Классы `.review-panel__*` в `iframe-shell.css`; токены `--shell-review-*` / `--shell-review-rec-*` / `--shell-review-slider-*`.  
+Шкалы context/visual: [`scale-slider`](../scale-slider/README.md) (readout одним словом + canvas-сетка + min/max).  
+Ключи: `review*`, `reviewDone*`, `reviewContinue`, `reviewAdviceRec*`, `reviewContextShort` / `reviewVisualShort`, шкалы и варианты.  
 Мигание индикатора записи: `motion-recording-blink` в `styles/entrance.css`.
 
 См. [`review-screen/README.md`](../review-screen/README.md), [`lib/dictation/README.md`](../../lib/dictation/README.md), [`SCREENS.md`](../../../SCREENS.md).

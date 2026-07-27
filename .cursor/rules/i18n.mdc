@@ -36,6 +36,7 @@ alwaysApply: true
 | `ban*` | `/banned` |
 | `reportScreen*` / `reportComplaint*` / `complaintTag*` | `/report` + жалоба на лист |
 | `reviewRec*` / `reviewAdviceRec*` / `reportDictationTitle` | чип rec на `/review`, микрофон в поле совета, секция надиктовки в листе |
+| `reviewContextShort` / `reviewVisualShort` | однословный readout шкал в квизе |
 | `settings*` | `/settings` (заглушка) |
 
 ## Добавление ключа

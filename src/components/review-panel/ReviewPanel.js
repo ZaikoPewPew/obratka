@@ -4,6 +4,7 @@ import {
   getMotionAdvanceDelayMs,
   getMotionReveal,
 } from "../../utils/motionTokens.js";
+import { createScaleSlider } from "../scale-slider/ScaleSlider.js";
 
 const ADVICE_MIN_LEN = 100;
 const ADVICE_MAX_LEN = 1000;
@@ -105,43 +106,6 @@ function hasSliderValue(form, name) {
   );
 }
 
-/** Ширина/высота viewBox делений слайдера (совпадает с токенами). */
-const SLIDER_VIEW_W = 500;
-const SLIDER_VIEW_H = 63;
-const SLIDER_TICK_W = 4;
-const SLIDER_TICK_MID_Y = 11;
-const SLIDER_TICK_MID_H = 41;
-
-/**
- * @param {number} count
- * @returns {SVGSVGElement}
- */
-function createSliderTicks(count) {
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("class", "review-panel__slider-ticks");
-  svg.setAttribute("viewBox", `0 0 ${SLIDER_VIEW_W} ${SLIDER_VIEW_H}`);
-  svg.setAttribute("fill", "none");
-  svg.setAttribute("aria-hidden", "true");
-  svg.setAttribute("focusable", "false");
-
-  const span = (SLIDER_VIEW_W - SLIDER_TICK_W) / Math.max(count - 1, 1);
-  for (let i = 0; i < count; i += 1) {
-    const isEnd = i === 0 || i === count - 1;
-    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect.setAttribute("x", String(i * span));
-    rect.setAttribute("y", isEnd ? "0" : String(SLIDER_TICK_MID_Y));
-    rect.setAttribute("width", String(SLIDER_TICK_W));
-    rect.setAttribute(
-      "height",
-      isEnd ? String(SLIDER_VIEW_H) : String(SLIDER_TICK_MID_H),
-    );
-    rect.setAttribute("fill", "currentColor");
-    svg.append(rect);
-  }
-
-  return svg;
-}
-
 /**
  * @param {string} name
  * @param {string} value
@@ -193,223 +157,6 @@ function createChoice(name, value, title, subtitle = null, type = "radio") {
   }
 
   return { label, input };
-}
-
-/**
- * @param {string} name
- * @param {number} from
- * @param {number} to
- * @param {string} [ariaLabel]
- * @param {{ low: string; high: string }} ends
- */
-function createScale(name, from, to, ariaLabel, ends) {
-  const count = to - from + 1;
-
-  const block = document.createElement("div");
-  block.className = "review-panel__scale-block";
-
-  const slider = document.createElement("div");
-  slider.className = "review-panel__slider";
-
-  const ticks = createSliderTicks(count);
-
-  const track = document.createElement("span");
-  track.className = "review-panel__slider-track";
-  track.setAttribute("aria-hidden", "true");
-
-  const fill = document.createElement("span");
-  fill.className = "review-panel__slider-fill";
-  fill.setAttribute("aria-hidden", "true");
-
-  const thumb = document.createElement("span");
-  thumb.className = "review-panel__slider-thumb";
-  thumb.setAttribute("aria-hidden", "true");
-
-  const input = document.createElement("input");
-  input.className = "review-panel__slider-input";
-  input.type = "range";
-  input.name = name;
-  input.min = String(from);
-  input.max = String(to);
-  input.step = "1";
-  input.value = String(from);
-  input.dataset.touched = "0";
-  input.autocomplete = "off";
-  if (ariaLabel) {
-    input.setAttribute("aria-label", ariaLabel);
-  }
-
-  let visualProgress = 0;
-  let targetProgress = 0;
-  let rafId = 0;
-  let dragging = false;
-
-  function readLerp(token) {
-    const raw = getComputedStyle(slider).getPropertyValue(token).trim();
-    const n = Number(raw);
-    return Number.isFinite(n) && n > 0 ? n : 0.2;
-  }
-
-  function clampProgress(value) {
-    return Math.min(1, Math.max(0, value));
-  }
-
-  function progressFromValue(value) {
-    const min = Number(input.min);
-    const max = Number(input.max);
-    return max === min ? 0 : (value - min) / (max - min);
-  }
-
-  function valueFromProgress(progress) {
-    const min = Number(input.min);
-    const max = Number(input.max);
-    return Math.round(min + clampProgress(progress) * (max - min));
-  }
-
-  function progressFromClientX(clientX) {
-    const rect = slider.getBoundingClientRect();
-    if (rect.width <= 0) return targetProgress;
-    const tick = Number.parseFloat(
-      getComputedStyle(slider).getPropertyValue("--shell-review-slider-tick-width"),
-    );
-    const tickW = Number.isFinite(tick) ? tick : 4;
-    const start = tickW / 2;
-    const travel = Math.max(rect.width - tickW, 1);
-    return clampProgress((clientX - rect.left - start) / travel);
-  }
-
-  function applyVisual(progress) {
-    slider.style.setProperty(
-      "--shell-review-slider-progress",
-      String(clampProgress(progress)),
-    );
-  }
-
-  function tickFrame() {
-    const lerp = readLerp(
-      dragging
-        ? "--shell-review-slider-lerp-drag"
-        : "--shell-review-slider-lerp",
-    );
-    const diff = targetProgress - visualProgress;
-    if (Math.abs(diff) < 0.0004) {
-      visualProgress = targetProgress;
-      applyVisual(visualProgress);
-      rafId = 0;
-      return;
-    }
-    visualProgress += diff * lerp;
-    applyVisual(visualProgress);
-    rafId = requestAnimationFrame(tickFrame);
-  }
-
-  function setTargetProgress(progress, { immediate = false } = {}) {
-    targetProgress = clampProgress(progress);
-    if (immediate) {
-      visualProgress = targetProgress;
-      applyVisual(visualProgress);
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-        rafId = 0;
-      }
-      return;
-    }
-    if (!rafId) {
-      rafId = requestAnimationFrame(tickFrame);
-    }
-  }
-
-  function syncFromInputValue({ immediate = false } = {}) {
-    setTargetProgress(progressFromValue(Number(input.value)), { immediate });
-    slider.classList.toggle(
-      "review-panel__slider--touched",
-      input.dataset.touched === "1",
-    );
-  }
-
-  function setFromClientX(clientX) {
-    const progress = progressFromClientX(clientX);
-    input.dataset.touched = "1";
-    input.value = String(valueFromProgress(progress));
-    setTargetProgress(progress);
-    slider.classList.add("review-panel__slider--touched");
-  }
-
-  function snapToValue() {
-    const snapped = valueFromProgress(targetProgress);
-    input.value = String(snapped);
-    setTargetProgress(progressFromValue(snapped));
-  }
-
-  input.addEventListener("pointerdown", (event) => {
-    dragging = true;
-    slider.classList.add("review-panel__slider--dragging");
-    try {
-      input.setPointerCapture(event.pointerId);
-    } catch {
-      /* ignore */
-    }
-    setFromClientX(event.clientX);
-  });
-
-  input.addEventListener("pointermove", (event) => {
-    if (!dragging) return;
-    setFromClientX(event.clientX);
-  });
-
-  const endPointer = () => {
-    if (!dragging) return;
-    dragging = false;
-    slider.classList.remove("review-panel__slider--dragging");
-    snapToValue();
-  };
-
-  input.addEventListener("pointerup", endPointer);
-  input.addEventListener("pointercancel", endPointer);
-  input.addEventListener("lostpointercapture", endPointer);
-
-  input.addEventListener("input", () => {
-    if (dragging) return;
-    input.dataset.touched = "1";
-    syncFromInputValue();
-  });
-
-  input.addEventListener("keydown", () => {
-    // Стрелки: дождаться обновления value, затем плавно дотянуть.
-    queueMicrotask(() => {
-      if (dragging) return;
-      input.dataset.touched = "1";
-      syncFromInputValue();
-    });
-  });
-
-  // Экспорт сброса визуала для clearAllSelections через dataset hook
-  input.addEventListener("reset-visual", () => {
-    dragging = false;
-    slider.classList.remove("review-panel__slider--dragging");
-    input.dataset.touched = "0";
-    input.value = input.min;
-    setTargetProgress(0, { immediate: true });
-    slider.classList.remove("review-panel__slider--touched");
-  });
-
-  syncFromInputValue({ immediate: true });
-  slider.append(track, fill, ticks, thumb, input);
-
-  const endsRow = document.createElement("div");
-  endsRow.className = "review-panel__scale-ends";
-
-  const low = document.createElement("span");
-  low.className = "review-panel__scale-end";
-  low.textContent = ends.low;
-
-  const high = document.createElement("span");
-  high.className = "review-panel__scale-end review-panel__scale-end--high";
-  high.textContent = ends.high;
-
-  endsRow.append(low, high);
-  block.append(slider, endsRow);
-  return block;
 }
 
 /**
@@ -690,13 +437,20 @@ export function createReviewPanel(options = {}) {
     {
       step: createStep(
         createOptions(
-          createScale("context", 1, 5, t.reviewContextLabel, {
-            low: t.reviewContextScaleLow,
-            high: t.reviewContextScaleHigh,
+          createScaleSlider({
+            name: "context",
+            from: 1,
+            to: 5,
+            title: t.reviewContextShort,
+            ariaLabel: t.reviewContextLabel,
+            ends: {
+              low: t.reviewContextScaleLow,
+              high: t.reviewContextScaleHigh,
+            },
           }),
         ),
       ),
-      title: t.reviewContextLabel,
+      title: "",
       hint: null,
       validate: () => hasSliderValue(form, "context"),
       autoAdvance: true,
@@ -718,13 +472,20 @@ export function createReviewPanel(options = {}) {
     {
       step: createStep(
         createOptions(
-          createScale("visual", 1, 10, t.reviewVisualLabel, {
-            low: t.reviewVisualScaleLow,
-            high: t.reviewVisualScaleHigh,
+          createScaleSlider({
+            name: "visual",
+            from: 1,
+            to: 10,
+            title: t.reviewVisualShort,
+            ariaLabel: t.reviewVisualLabel,
+            ends: {
+              low: t.reviewVisualScaleLow,
+              high: t.reviewVisualScaleHigh,
+            },
           }),
         ),
       ),
-      title: t.reviewVisualLabel,
+      title: "",
       hint: null,
       validate: () => hasSliderValue(form, "visual"),
       autoAdvance: true,
@@ -851,8 +612,10 @@ export function createReviewPanel(options = {}) {
 
   function syncQuestion() {
     const item = steps[currentStep];
-    questionTitle.textContent = item?.title ?? "";
+    const title = item?.title ?? "";
     const hint = item?.hint ?? null;
+    questionTitle.textContent = title;
+    question.hidden = !title && !hint;
     if (hint) {
       questionHint.textContent = hint;
       questionHint.hidden = false;

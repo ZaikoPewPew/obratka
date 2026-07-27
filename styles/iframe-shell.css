@@ -592,6 +592,10 @@ body {
   flex-shrink: 0;
 }
 
+.review-panel__question[hidden] {
+  display: none;
+}
+
 .review-panel__label {
   margin: 0;
   font-family: var(--font-family);
@@ -755,73 +759,107 @@ body {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--shell-review-slider-label-gap);
+  gap: var(--shell-review-slider-readout-gap);
   width: min(var(--shell-review-slider-width), 100%);
   min-height: var(--shell-review-slider-height);
   margin-inline: auto;
+}
+
+.review-panel__scale-readout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+}
+
+.review-panel__scale-readout-word {
+  font-family: var(--font-family);
+  font-weight: var(--shell-review-slider-readout-weight);
+  font-size: var(--shell-review-slider-readout-size);
+  line-height: var(--line-height-snug);
+  color: var(--shell-review-slider-readout-color);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.review-panel__scale-control {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--shell-review-slider-label-gap);
+  width: 100%;
 }
 
 .review-panel__slider {
   position: relative;
   box-sizing: border-box;
   width: 100%;
-  height: var(--shell-review-slider-track-height);
-  color: var(--shell-review-slider-tick-color);
+  height: var(--shell-review-slider-thumb-height);
+  color: var(--shell-review-slider-fill-color);
+  touch-action: none;
   --shell-review-slider-progress: 0;
 }
 
-.review-panel__slider-track,
-.review-panel__slider-fill {
+.review-panel__slider-track {
   position: absolute;
   top: 50%;
   left: 0;
+  right: 0;
   z-index: 0;
-  height: var(--shell-review-slider-fill-height);
-  border-radius: var(--radius-pill);
+  height: var(--shell-review-slider-track-height);
+  overflow: hidden;
+  border-radius: var(--shell-review-slider-track-radius);
+  background: var(--shell-review-slider-track-color);
+  color: var(--shell-review-slider-fill-color);
+  transform: translateY(-50%);
   pointer-events: none;
 }
 
-.review-panel__slider-track {
-  width: 100%;
-  background: var(--shell-review-slider-track-color);
-  transform: translateY(-50%);
-}
-
-.review-panel__slider-fill {
-  width: calc(
-    (var(--shell-review-slider-tick-width) / 2) +
-      (100% - var(--shell-review-slider-tick-width))
-  );
-  background: var(--shell-review-slider-fill-color);
-  transform: translateY(-50%) scaleX(var(--shell-review-slider-progress));
-  transform-origin: left center;
-  will-change: transform;
-}
-
-.review-panel__slider-ticks {
-  position: relative;
-  z-index: 1;
+.review-panel__slider-canvas {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
   pointer-events: none;
 }
 
+.review-panel__slider-stops {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.review-panel__slider-stop {
+  position: absolute;
+  top: 50%;
+  width: var(--shell-review-slider-stop-size);
+  height: var(--shell-review-slider-stop-size);
+  border-radius: var(--radius-pill);
+  background: var(--shell-review-slider-stop-muted);
+  transform: translate(-50%, -50%);
+}
+
+.review-panel__slider-stop--passed {
+  background: var(--shell-review-slider-stop-color);
+}
+
 .review-panel__slider-thumb {
   position: absolute;
   top: 50%;
   left: calc(
-    (var(--shell-review-slider-tick-width) / 2) +
-      (100% - var(--shell-review-slider-tick-width)) *
+    (var(--shell-review-slider-thumb-width) / 2) +
+      (100% - var(--shell-review-slider-thumb-width)) *
         var(--shell-review-slider-progress)
   );
   z-index: 2;
   box-sizing: border-box;
-  width: var(--shell-review-slider-thumb-size);
-  height: var(--shell-review-slider-thumb-size);
-  border-radius: var(--radius-pill);
+  width: var(--shell-review-slider-thumb-width);
+  height: var(--shell-review-slider-thumb-height);
+  border-radius: var(--shell-review-slider-thumb-radius);
   background: var(--shell-review-slider-thumb-color);
-  box-shadow: 0 0 0 var(--shell-review-slider-thumb-ring) var(--color-bg);
+  box-shadow: var(--shell-review-slider-thumb-shadow);
   transform: translate(-50%, -50%);
   pointer-events: none;
   will-change: left;
@@ -830,7 +868,15 @@ body {
 }
 
 .review-panel__slider--dragging .review-panel__slider-thumb {
-  transform: translate(-50%, -50%) scale(1.1);
+  transform: translate(-50%, -50%) scale(1.04);
+}
+
+.review-panel__slider:has(.review-panel__slider-input:focus-visible)
+  .review-panel__slider-thumb {
+  box-shadow:
+    var(--shell-review-slider-thumb-shadow),
+    0 0 0 var(--shell-review-slider-thumb-ring)
+      var(--shell-review-slider-thumb-ring-color);
 }
 
 .review-panel__slider-input {
@@ -845,7 +891,8 @@ body {
   margin: 0;
   transform: translateY(-50%);
   background: transparent;
-  cursor: pointer;
+  cursor: grab;
+  touch-action: none;
 }
 
 .review-panel__slider-input:focus {
@@ -853,9 +900,7 @@ body {
 }
 
 .review-panel__slider-input:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
-  border-radius: var(--radius-xs);
+  outline: none;
 }
 
 .review-panel__slider-input::-webkit-slider-runnable-track {
@@ -875,7 +920,7 @@ body {
   height: var(--shell-review-slider-hit-size);
   margin-top: 0;
   border: 0;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-xs);
   background: transparent;
   cursor: grab;
 }
@@ -884,13 +929,20 @@ body {
   width: var(--shell-review-slider-hit-size);
   height: var(--shell-review-slider-hit-size);
   border: 0;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-xs);
   background: transparent;
   cursor: grab;
 }
 
+.review-panel__slider-input:active,
+.review-panel__slider--dragging .review-panel__slider-input {
+  cursor: grabbing;
+}
+
 .review-panel__slider-input:active::-webkit-slider-thumb,
-.review-panel__slider-input:active::-moz-range-thumb {
+.review-panel__slider-input:active::-moz-range-thumb,
+.review-panel__slider--dragging .review-panel__slider-input::-webkit-slider-thumb,
+.review-panel__slider--dragging .review-panel__slider-input::-moz-range-thumb {
   cursor: grabbing;
 }
 
