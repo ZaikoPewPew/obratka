@@ -10,7 +10,7 @@ alwaysApply: true
 ## Жёсткие правила
 
 1. Вход в ревью только через `claimPortfolioReview` → `claimHeld = true` → `go("review")`:
-   - с home: карточка → intro → CTA «Проревьюить» → `claimAndStartReview`;
+   - с home: карточка → intro → CTA «Сюдаа его!» → `claimAndStartReview`;
    - с `/quiz/done`: «Следующий кейс» → свежая лента + тот же `claimAndStartReview` (без intro); нет кандидатов → home.
    Не открывать `/review` и не ставить `claimHeld` до успешного RPC.
 2. Пока review/quiz открыт: `heartbeatPortfolioClaim` (TTL **20 min**).

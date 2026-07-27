@@ -44,7 +44,7 @@
 | `--control-rec-*` / `--color-recording` | чип надиктовки в шапке `/review` |
 | `--shell-review-rec-*` | кнопка надиктовки в поле «Главный совет» |
 | `--home-screen-*` | topbar / feed / avatar / locked-modal |
-| `--home-screen-review-intro-*` | шаги intro-модалки (`indent` / `step-gap`) |
+| `--home-screen-review-intro-*` | карточки intro-модалки (две минуты + декоративный rec) |
 | `--home-screen-tabbar-*` | glass track (gray-900 10% / white on-dark 20% / blur 20), hide/thumb/label/contrast; dock-gap + submit (56×56 Google blue) + tab-dot (6px Google red) |
 | `--home-screen-reveal-delay-*` | entrance stagger на `/home` (topbar → body → dock → fab); dock = `motion-reveal-dock` **без** opacity (glass `backdrop-filter`) |
 | `--tabs-panel-*` | сегмент Активные/Завершенные (track / tab / thumb / tab-dot) |

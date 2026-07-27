@@ -58,9 +58,8 @@ import { createAccountMenu } from "../account-menu/AccountMenu.js";
 import { createTabsPanel } from "../tabs-panel/TabsPanel.js";
 import { createLegendaryOnlinePanel } from "../legendary-online-panel/LegendaryOnlinePanel.js";
 import { createContactFab } from "../contact-fab/ContactFab.js";
-import { createExplainerMediaRay } from "./explainerMediaRay.js";
 import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
-import { REVIEW_SESSION_SECONDS } from "../../config/review.js";
+import { createExplainerMediaRay } from "./explainerMediaRay.js";
 import boneIconUrl from "../../assets/home/bone.svg";
 import balanceCardDucksUrl from "../../assets/home/modal/balance-card-ducks.svg";
 import currencyDuckUrl from "../../assets/home/modal/currency-duck.png";
@@ -95,6 +94,65 @@ function reputationIconUrlFor(delta) {
   if (delta > 0) return reputationPositiveIconUrl;
   if (delta < 0) return reputationNegativeIconUrl;
   return reputationNeutralIconUrl;
+}
+
+/**
+ * Декоративный чип rec для intro-модалки (Figma `492:3611`) — не интерактивный.
+ * @returns {HTMLDivElement}
+ */
+function createReviewIntroRecPreview() {
+  const chip = document.createElement("div");
+  chip.className = "home-screen__review-intro-rec";
+  chip.setAttribute("aria-hidden", "true");
+
+  const micWrap = document.createElement("span");
+  micWrap.innerHTML = `<svg class="home-screen__review-intro-rec-mic" width="32" height="32" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <path d="M9 11.25C10.2426 11.25 11.25 10.2426 11.25 9V4.5C11.25 3.25736 10.2426 2.25 9 2.25C7.75736 2.25 6.75 3.25736 6.75 4.5V9C6.75 10.2426 7.75736 11.25 9 11.25Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M13.5 8.25V9C13.5 11.4853 11.4853 13.5 9 13.5C6.51472 13.5 4.5 11.4853 4.5 9V8.25M9 13.5V15.75M7.125 15.75H10.875" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+  const mic = micWrap.firstElementChild;
+
+  const wave = document.createElement("span");
+  wave.className = "home-screen__review-intro-rec-wave";
+  for (let i = 0; i < 12; i += 1) {
+    const bar = document.createElement("span");
+    bar.className = "home-screen__review-intro-rec-bar";
+    wave.append(bar);
+  }
+
+  const dot = document.createElement("span");
+  dot.className = "home-screen__review-intro-rec-dot";
+
+  if (mic) chip.append(mic);
+  chip.append(wave, dot);
+  return chip;
+}
+
+/**
+ * Карточка шага intro-модалки (минута 1 / 2).
+ * @param {{ title: string; body: string; withRec?: boolean }} opts
+ * @returns {HTMLLIElement}
+ */
+function createReviewIntroCard(opts) {
+  const card = document.createElement("li");
+  card.className = "home-screen__review-intro-card";
+  if (opts.withRec) {
+    card.classList.add("home-screen__review-intro-card--with-rec");
+  }
+
+  const title = document.createElement("p");
+  title.className = "home-screen__review-intro-card-title";
+  title.textContent = fixHangingPrepositions(opts.title ?? "");
+
+  const body = document.createElement("p");
+  body.className = "home-screen__review-intro-card-body";
+  body.textContent = fixHangingPrepositions(opts.body ?? "");
+
+  card.append(title, body);
+  if (opts.withRec) {
+    card.append(createReviewIntroRecPreview());
+  }
+  return card;
 }
 
 /**
@@ -1177,29 +1235,38 @@ export function createHomeScreen({
   }
 
   /**
-   * Промежуточный шаг перед claim: что будет на `/review` + CTA «Проревьюить».
+   * Промежуточный шаг перед claim: две минуты + CTA «Сюдаа его!».
    *
    * @param {HomePortfolioItem} item
    */
   function openReviewIntro(item) {
     const t = getStrings();
     reviewIntroItem = item;
-    const steps = [
-      formatString(t.homeReviewIntroStep1, { seconds: REVIEW_SESSION_SECONDS }),
-      t.homeReviewIntroStep2,
-      t.homeReviewIntroStep3,
-      t.homeReviewIntroStep4,
-    ];
+    const authorName =
+      (typeof item.name === "string" && item.name.trim()) ||
+      (typeof item.url === "string" && item.url.trim()) ||
+      "";
     reviewIntroSteps.replaceChildren();
     reviewIntroSteps.setAttribute("aria-label", t.homeReviewIntroStepsAria ?? "");
-    for (const text of steps) {
-      const step = document.createElement("li");
-      step.className = "home-screen__review-intro-step";
-      step.textContent = text ?? "";
-      reviewIntroSteps.append(step);
-    }
-    reviewIntroModal.setTitle(t.homeReviewIntroTitle ?? "");
-    reviewIntroModal.setDescription(t.homeReviewIntroBody ?? "");
+    reviewIntroSteps.append(
+      createReviewIntroCard({
+        title: t.homeReviewIntroStep1Title ?? "",
+        body: t.homeReviewIntroStep1Body ?? "",
+        withRec: true,
+      }),
+      createReviewIntroCard({
+        title: t.homeReviewIntroStep2Title ?? "",
+        body: t.homeReviewIntroStep2Body ?? "",
+      }),
+    );
+    reviewIntroModal.setTitle(
+      fixHangingPrepositions(t.homeReviewIntroTitle ?? ""),
+    );
+    reviewIntroModal.setDescription(
+      fixHangingPrepositions(
+        formatString(t.homeReviewIntroBody ?? "", { name: authorName }),
+      ),
+    );
     reviewIntroModal.setPrimaryLabel(t.homeReviewIntroStart ?? "");
     reviewIntroModal.setSecondaryLabel(t.homeReviewIntroCancel ?? "");
     reviewIntroModal.setCloseAriaLabel(t.homeReviewIntroCloseAria ?? "");

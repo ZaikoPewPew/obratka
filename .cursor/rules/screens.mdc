@@ -31,7 +31,7 @@ alwaysApply: true
 
 ## Ключевые флоу
 
-- Home pick → intro-модалка «Как проходит ревью» → CTA → **claim** → `/review` (опц. надиктовка заметок) → quiz (опц. микрофон в поле совета); abort → home **без** награды (см. `review-claims.mdc`, `dictation.mdc`).
+- Home pick → intro-модалка (две минуты + автор) → CTA → **claim** → `/review` (опц. надиктовка заметок) → quiz (опц. микрофон в поле совета); abort → home **без** награды (см. `review-claims.mdc`, `dictation.mdc`).
 - Submit URL → `setVariant("done")` на url-screen + `syncRoute("success")`; не прыгать на success-screen. Back-chip `.url-screen__back` (`urlScreenBack*`) → home; на done скрыт.
 - Mine / `isOwn` → `onOpenReport` → `/report` (листы + жалоба) только когда собраны все ревью; иначе модалка `homeMineNotReady*`.
 - Ban: любой route → `banned` (`flow.js`); см. `ban.mdc`.

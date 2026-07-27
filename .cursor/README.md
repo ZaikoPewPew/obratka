@@ -77,7 +77,7 @@ Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-scre
 
 ## Review claims (шпаргалка)
 
-1. Home pick → intro-модалка (`homeReviewIntro*`) → CTA «Проревьюить» → `claimPortfolioReview` → `/review` (закрытие / «Не сейчас» — без claim).
+1. Home pick → intro-модалка (`homeReviewIntro*`) → CTA «Сюдаа его!» → `claimPortfolioReview` → `/review` (закрытие / «Не сейчас» — без claim).
 2. Mine (`isOwn`): `reviewsCount >= targetReviews` → `onOpenReport` → `/report`; иначе `homeMineNotReady*`.
 3. Heartbeat пока на review/quiz (TTL 20 min).
 4. Abort / back / pagehide → `release` **без** монет.

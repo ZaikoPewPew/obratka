@@ -34,7 +34,7 @@
 - **Silent refresh:** при тех же id карточек — патч только reviewer-слотов (без thum.io); новые id — rebuild + reveal только для них.
 - **Порядок feed:** `sortFeedForSlotClosure` — open slot → ближе к 3/3 → FIFO; `reviewedByMe` / full вниз (не newest-first). См. home-screen README.
 - **Отправленный отчёт:** `reviewedByMe` появляется только после INSERT в `reviews`; карточка disabled с оверлеем «Отчёт отправлен», без intro/notice и повторного claim.
-- **Intro до claim:** клик по чужой карточке → `createAppModal` `homeReviewIntro*` (шаг 1 с `{seconds}` = `REVIEW_SESSION_SECONDS`) → CTA «Проревьюить» → claim → `/review`. «Не сейчас» / закрытие — без claim.
+- **Intro до claim:** клик по чужой карточке → `createAppModal` `homeReviewIntro*` (тайтл + автор `{name}`, две карточки минут, CTA «Сюдаа его!») → claim → `/review`. «Не сейчас» / закрытие — без claim.
 - **Mine report gate:** `reviewsCount < targetReviews` → `homeMineNotReady*`; иначе `/report`. Own-карточки всегда `cursor: pointer` (не `not-allowed`).
 - **Фильтр «Мои»:** сегмент Активные / Завершенные (`tabs-panel`); завершённые = 3/3 (`reviewsCount >= targetReviews`).
 - **Free-slot «Мои на ревью»:** до `MAX_MINE_PENDING` (=1) — реальная карточка или dashed «Свободный слот» (`homeMineSlotFree*`); занятый слот → `homePendingLimit*`; нет монет → `homeSubmitLocked*`. Подача — RPC `submit_portfolio` (atomic spend+insert).
