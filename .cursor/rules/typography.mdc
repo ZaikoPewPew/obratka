@@ -1,0 +1,24 @@
+---
+description: Типографика UI — висячие предлоги/союзы (1–3 буквы → NBSP)
+alwaysApply: true
+---
+
+# Типографика (висячие предлоги)
+
+Короткие слова **1–3 буквы** (`и`, `в`, `к`, `на`, `от`, `по`, `при`, `или`, `как`, `a`, `of`, `to`, …) не должны висеть в конце строки: пробел после них → неразрывный (`\u00A0`), чтобы слово уехало на следующую строку вместе со следующим.
+
+## Жёсткое правило
+
+1. Многострочный / переносимый UI-copy (модалки, карточки explainer, body) — пропускать через [`fixHangingPrepositions`](../../src/utils/hangingPrepositions.js) **перед** `textContent` / `setTitle` / `setDescription`.
+2. Не хардкодить `\u00A0` вручную в `locales.json`, если можно прогнать util (исключение — уже готовые строки в разметке без JS).
+3. Кнопки из одного-двух слов (`Ясн`, `Понятно`) и aria без переноса — можно не трогать.
+4. Не ломать `formatString` плейсхолдеры: сначала `formatString`, потом `fixHangingPrepositions`.
+
+```js
+import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
+
+el.textContent = fixHangingPrepositions(
+  formatString(t.homeBalanceCardTitle, { balance }),
+);
+modal.setDescription(fixHangingPrepositions(t.homeBalanceDesc ?? ""));
+```

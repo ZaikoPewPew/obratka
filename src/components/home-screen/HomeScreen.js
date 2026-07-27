@@ -51,6 +51,7 @@ import {
   MINE_FILTER_IDS,
   parseHomeView,
 } from "../../utils/homeRoute.js";
+import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
 import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import { createAppModal } from "../app-modal/AppModal.js";
 import { createAccountMenu } from "../account-menu/AccountMenu.js";
@@ -657,12 +658,9 @@ export function createHomeScreen({
   reputationRow.append(reputationMedia, reputationCard);
 
   const reputationBody = document.createElement("p");
-  reputationBody.className = "home-screen__reputation-explainer-body";
+  reputationBody.className = "home-screen__reputation-explainer-callout";
 
-  const reputationBodyNote = document.createElement("p");
-  reputationBodyNote.className = "home-screen__reputation-explainer-body";
-
-  reputationExplainer.append(reputationRow, reputationBody, reputationBodyNote);
+  reputationExplainer.append(reputationRow, reputationBody);
 
   const reputationModal = createAppModal({
     size: "md",
@@ -2508,12 +2506,20 @@ export function createHomeScreen({
 
   function openBalanceModal() {
     const t = getStrings();
-    balanceCardTitle.textContent = formatString(t.homeBalanceCardTitle ?? "", {
-      balance: getBalance(),
-    });
-    balanceCardBody.textContent = t.homeBalanceCardBody ?? "";
-    balanceModal.setTitle(t.homeBalanceTitle ?? "");
-    balanceModal.setDescription(t.homeBalanceDesc ?? "");
+    balanceCardTitle.textContent = fixHangingPrepositions(
+      formatString(t.homeBalanceCardTitle ?? "", {
+        balance: getBalance(),
+      }),
+    );
+    balanceCardBody.textContent = fixHangingPrepositions(
+      t.homeBalanceCardBody ?? "",
+    );
+    balanceModal.setTitle(
+      fixHangingPrepositions(t.homeBalanceTitle ?? ""),
+    );
+    balanceModal.setDescription(
+      fixHangingPrepositions(t.homeBalanceDesc ?? ""),
+    );
     balanceModal.setSecondaryLabel(t.homeBalanceClose ?? "");
     balanceModal.setCloseAriaLabel(
       t.homeBalanceCloseAria ?? t.homeBalanceClose ?? "",
@@ -2524,10 +2530,18 @@ export function createHomeScreen({
 
   function openLegendaryOnlineModal() {
     const t = getStrings();
-    p2pCardTitle.textContent = t.homeLegendaryOnlineCardTitle ?? "";
-    p2pCardBody.textContent = t.homeLegendaryOnlineCardBody ?? "";
-    legendaryOnlineModal.setTitle(t.homeLegendaryOnlineTitle ?? "");
-    legendaryOnlineModal.setDescription(t.homeLegendaryOnlineDesc ?? "");
+    p2pCardTitle.textContent = fixHangingPrepositions(
+      t.homeLegendaryOnlineCardTitle ?? "",
+    );
+    p2pCardBody.textContent = fixHangingPrepositions(
+      t.homeLegendaryOnlineCardBody ?? "",
+    );
+    legendaryOnlineModal.setTitle(
+      fixHangingPrepositions(t.homeLegendaryOnlineTitle ?? ""),
+    );
+    legendaryOnlineModal.setDescription(
+      fixHangingPrepositions(t.homeLegendaryOnlineDesc ?? ""),
+    );
     legendaryOnlineModal.setSecondaryLabel(t.homeLegendaryOnlineClose ?? "");
     legendaryOnlineModal.setCloseAriaLabel(
       t.homeLegendaryOnlineCloseAria ?? t.homeLegendaryOnlineClose ?? "",
@@ -2538,15 +2552,23 @@ export function createHomeScreen({
 
   function openReputationModal() {
     const t = getStrings();
-    reputationCardValue.textContent = formatString(
-      t.homeReputationCardTitle ?? "",
-      { reputation: formatReputationDelta() },
+    reputationCardValue.textContent = fixHangingPrepositions(
+      formatString(t.homeReputationCardTitle ?? "", {
+        reputation: formatReputationDelta(),
+      }),
     );
-    reputationCardLabel.textContent = t.homeReputationCardLabel ?? "";
-    reputationBody.textContent = t.homeReputationBody ?? "";
-    reputationBodyNote.textContent = t.homeReputationBodyNote ?? "";
-    reputationModal.setTitle(t.homeReputationTitle ?? "");
-    reputationModal.setDescription(t.homeReputationDesc ?? "");
+    reputationCardLabel.textContent = fixHangingPrepositions(
+      t.homeReputationCardLabel ?? "",
+    );
+    reputationBody.textContent = fixHangingPrepositions(
+      t.homeReputationBody ?? "",
+    );
+    reputationModal.setTitle(
+      fixHangingPrepositions(t.homeReputationTitle ?? ""),
+    );
+    reputationModal.setDescription(
+      fixHangingPrepositions(t.homeReputationDesc ?? ""),
+    );
     reputationModal.setSecondaryLabel(t.homeReputationClose ?? "");
     reputationModal.setCloseAriaLabel(
       t.homeReputationCloseAria ?? t.homeReputationClose ?? "",

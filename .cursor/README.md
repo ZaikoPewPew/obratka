@@ -8,6 +8,7 @@
 |------|--------|
 | `design-tokens.mdc` | Только `var(--…)` из `tokens.css`, Montserrat, motion (`motion-reveal-dock` / home glass) |
 | `i18n.mdc` | UI-строки только из `locales.json` (ru/en) |
+| `typography.mdc` | Висячие предлоги 1–3 буквы → NBSP (`fixHangingPrepositions`) |
 | `screens.mdc` | Экран = модуль, `go()`, paths, home (feedSeen / 3/3 / rating / legendary), handoff |
 | `brand-ui.mdc` | Visual variants, field errors, marks — не копипастить mesh |
 | `review-claims.mdc` | Claim / heartbeat / release; награда только после submit |
