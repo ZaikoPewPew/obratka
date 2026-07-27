@@ -6,8 +6,9 @@
 
 `createScaleSlider({ name, from, to, title, ariaLabel?, ends: { low, high } })` → `HTMLElement` (`.review-panel__scale-block`).
 
-- `title` — одно слово вида оценки (readout над треком).
-- `ends.low` / `ends.high` — подписи минималки / максималки.
+- `title` — idle-заголовок до первого касания (одно слово критерия).
+- `valueTitles` — подписи по стопам (2 слова, склонения); после touch заголовок анимированно меняется.
+- `ends.low` / `ends.high` — подписи минималки / максималки (согласованы с родом критерия).
 - Значения — целые стопы от `from` до `to` (step 1); drag и клавиатура магнитятся к ним.
 
 ## Поведение canvas

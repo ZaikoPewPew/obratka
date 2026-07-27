@@ -395,10 +395,14 @@
   --shell-review-slider-label-size: var(--font-size-md);
   --shell-review-slider-label-weight: var(--font-weight-regular);
   --shell-review-slider-label-color: var(--color-text-muted);
-  --shell-review-slider-readout-size: var(--font-size-3xl);
-  --shell-review-slider-readout-weight: var(--font-weight-semibold);
+  --shell-review-slider-readout-size: var(--shell-review-question-size);
+  --shell-review-slider-readout-weight: var(--shell-review-question-weight);
   --shell-review-slider-readout-color: var(--color-text);
-  --shell-review-slider-readout-gap: var(--space-4);
+  --shell-review-slider-readout-gap: var(--space-6);
+  --shell-review-slider-title-duration: var(--duration-normal);
+  --shell-review-slider-title-shift: var(--motion-reveal-shift);
+  --shell-review-slider-title-blur: var(--motion-reveal-blur);
+  --shell-review-slider-title-ease: var(--ease-reveal);
   --shell-review-check-size: 24px;
   --shell-review-submit-bg: var(--color-accent);
   --shell-review-submit-text: var(--color-on-accent);

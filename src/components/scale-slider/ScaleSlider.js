@@ -1,7 +1,11 @@
 /**
  * Шкала оценки с анимированной сеткой на треке.
  * Нативный range (без Radix): drag / keyboard / form value.
- *
+ */
+
+import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
+
+/**
  * @param {{
  *   name: string;
  *   from: number;
@@ -9,10 +13,19 @@
  *   title: string;
  *   ariaLabel?: string;
  *   ends: { low: string; high: string };
+ *   valueTitles?: Record<number, string> | Record<string, string>;
  * }} opts
  * @returns {HTMLElement}
  */
-export function createScaleSlider({ name, from, to, title, ariaLabel, ends }) {
+export function createScaleSlider({
+  name,
+  from,
+  to,
+  title,
+  ariaLabel,
+  ends,
+  valueTitles = {},
+}) {
   const min = Math.min(from, to);
   const max = Math.max(from, to);
   const stops = [];
@@ -26,10 +39,14 @@ export function createScaleSlider({ name, from, to, title, ariaLabel, ends }) {
   readout.setAttribute("role", "status");
   readout.setAttribute("aria-live", "polite");
 
+  const viewport = document.createElement("span");
+  viewport.className = "review-panel__scale-readout-viewport";
+
   const readoutWord = document.createElement("span");
   readoutWord.className = "review-panel__scale-readout-word";
-  readoutWord.textContent = title;
-  readout.append(readoutWord);
+  readoutWord.textContent = fixHangingPrepositions(title);
+  viewport.append(readoutWord);
+  readout.append(viewport);
 
   const slider = document.createElement("div");
   slider.className = "review-panel__slider";
@@ -82,11 +99,11 @@ export function createScaleSlider({ name, from, to, title, ariaLabel, ends }) {
 
   const low = document.createElement("span");
   low.className = "review-panel__scale-end";
-  low.textContent = ends.low;
+  low.textContent = fixHangingPrepositions(ends.low);
 
   const high = document.createElement("span");
   high.className = "review-panel__scale-end review-panel__scale-end--high";
-  high.textContent = ends.high;
+  high.textContent = fixHangingPrepositions(ends.high);
 
   endsRow.append(low, high);
 
@@ -109,11 +126,148 @@ export function createScaleSlider({ name, from, to, title, ariaLabel, ends }) {
   let dpr = 1;
   /** @type {ReturnType<typeof createNoise> | null} */
   let noise = null;
+  let displayedTitle = title;
+  let lastValue = min;
+  let titleGen = 0;
+  /** @type {Animation | null} */
+  let titleAnim = null;
 
   const reducedMotionMq = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   function prefersReducedMotion() {
     return reducedMotionMq.matches;
+  }
+
+  /**
+   * @param {number} value
+   * @returns {string}
+   */
+  function titleForValue(value) {
+    if (input.dataset.touched !== "1") return title;
+    const mapped = valueTitles[value] ?? valueTitles[String(value)];
+    return typeof mapped === "string" && mapped ? mapped : title;
+  }
+
+  function readTitleMotion() {
+    const root = getComputedStyle(document.documentElement);
+    const durationRaw = root
+      .getPropertyValue("--shell-review-slider-title-duration")
+      .trim();
+    const shiftRaw = root
+      .getPropertyValue("--shell-review-slider-title-shift")
+      .trim();
+    const blurRaw = root
+      .getPropertyValue("--shell-review-slider-title-blur")
+      .trim();
+    const easing =
+      root.getPropertyValue("--shell-review-slider-title-ease").trim() ||
+      "cubic-bezier(0.22, 1, 0.36, 1)";
+    const durationMs =
+      durationRaw.endsWith("s") && !durationRaw.endsWith("ms")
+        ? Number.parseFloat(durationRaw) * 1000
+        : Number.parseFloat(durationRaw) || 320;
+    const shiftPx = Number.parseFloat(shiftRaw) || 12;
+    const blurPx = Number.parseFloat(blurRaw) || 5;
+    return { durationMs, shiftPx, blurPx, easing };
+  }
+
+  /**
+   * @param {string} next
+   * @param {{ immediate?: boolean; direction?: number }} [opts]
+   */
+  function setReadoutTitle(next, { immediate = false, direction = 1 } = {}) {
+    const nextText = fixHangingPrepositions(next);
+    if (nextText === displayedTitle && !titleAnim) return;
+    const fromText = readoutWord.textContent || displayedTitle;
+    displayedTitle = nextText;
+    const gen = ++titleGen;
+    syncReadoutAria(Number(input.value));
+
+    if (immediate || prefersReducedMotion() || !fromText) {
+      if (titleAnim) {
+        titleAnim.cancel();
+        titleAnim = null;
+      }
+      readoutWord.textContent = nextText;
+      readoutWord.style.opacity = "";
+      readoutWord.style.transform = "";
+      readoutWord.style.filter = "";
+      return;
+    }
+
+    const { durationMs, shiftPx, blurPx, easing } = readTitleMotion();
+    const dir = direction >= 0 ? 1 : -1;
+    const blur = `blur(${blurPx}px)`;
+
+    if (titleAnim) {
+      titleAnim.cancel();
+      titleAnim = null;
+    }
+    readoutWord.textContent = fromText;
+    readoutWord.style.opacity = "1";
+    readoutWord.style.transform = "translateY(0)";
+    readoutWord.style.filter = "blur(0px)";
+
+    const outgoing = readoutWord.animate(
+      [
+        {
+          opacity: 1,
+          transform: "translateY(0)",
+          filter: "blur(0px)",
+        },
+        {
+          opacity: 0,
+          transform: `translateY(${-dir * shiftPx}px)`,
+          filter: blur,
+        },
+      ],
+      { duration: durationMs * 0.45, easing, fill: "forwards" },
+    );
+
+    titleAnim = outgoing;
+    outgoing.finished
+      .then(() => {
+        if (gen !== titleGen) return;
+        readoutWord.textContent = nextText;
+        const incoming = readoutWord.animate(
+          [
+            {
+              opacity: 0,
+              transform: `translateY(${dir * shiftPx}px)`,
+              filter: blur,
+            },
+            {
+              opacity: 1,
+              transform: "translateY(0)",
+              filter: "blur(0px)",
+            },
+          ],
+          { duration: durationMs * 0.55, easing, fill: "forwards" },
+        );
+        titleAnim = incoming;
+        return incoming.finished;
+      })
+      .then(() => {
+        if (gen !== titleGen) return;
+        titleAnim = null;
+        readoutWord.style.opacity = "";
+        readoutWord.style.transform = "";
+        readoutWord.style.filter = "";
+      })
+      .catch(() => {
+        /* cancelled */
+      });
+  }
+
+  /**
+   * @param {number} value
+   * @param {{ immediate?: boolean }} [opts]
+   */
+  function syncReadoutTitle(value, { immediate = false } = {}) {
+    const next = titleForValue(value);
+    const direction = value >= lastValue ? 1 : -1;
+    lastValue = value;
+    setReadoutTitle(next, { immediate, direction });
   }
 
   function readTokenPx(token, fallback) {
@@ -172,10 +326,12 @@ export function createScaleSlider({ name, from, to, title, ariaLabel, ends }) {
   }
 
   function syncReadoutAria(value) {
+    const label = titleForValue(value);
     readout.setAttribute(
       "aria-label",
-      `${title}: ${value} (${ends.low} — ${ends.high})`,
+      `${label}, ${value} (${ends.low} — ${ends.high})`,
     );
+    input.setAttribute("aria-valuetext", label);
   }
 
   function syncStops(value) {
@@ -391,6 +547,7 @@ export function createScaleSlider({ name, from, to, title, ariaLabel, ends }) {
     const value = Number(input.value);
     setTargetProgress(progressFromValue(value), { immediate });
     syncStops(value);
+    syncReadoutTitle(value, { immediate });
     syncReadoutAria(value);
     slider.classList.toggle(
       "review-panel__slider--touched",
@@ -401,10 +558,14 @@ export function createScaleSlider({ name, from, to, title, ariaLabel, ends }) {
   function setFromClientX(clientX) {
     const progress = progressFromClientX(clientX);
     const value = valueFromProgress(progress);
+    const prev = Number(input.value);
     input.dataset.touched = "1";
     input.value = String(value);
     setTargetProgress(progress);
     syncStops(value);
+    if (value !== prev || displayedTitle === title) {
+      syncReadoutTitle(value);
+    }
     syncReadoutAria(value);
     slider.classList.add("review-panel__slider--touched");
   }
@@ -414,6 +575,7 @@ export function createScaleSlider({ name, from, to, title, ariaLabel, ends }) {
     input.value = String(snapped);
     setTargetProgress(progressFromValue(snapped));
     syncStops(snapped);
+    syncReadoutTitle(snapped);
     syncReadoutAria(snapped);
   }
 
@@ -491,8 +653,10 @@ export function createScaleSlider({ name, from, to, title, ariaLabel, ends }) {
     slider.classList.remove("review-panel__slider--dragging");
     input.dataset.touched = "0";
     input.value = String(min);
+    lastValue = min;
     setTargetProgress(0, { immediate: true });
     syncStops(min);
+    setReadoutTitle(title, { immediate: true });
     syncReadoutAria(min);
     slider.classList.remove("review-panel__slider--touched");
     paintOnce();

@@ -770,16 +770,32 @@ body {
   align-items: flex-start;
   justify-content: center;
   width: 100%;
+  min-height: calc(
+    var(--shell-review-slider-readout-size) * var(--line-height-snug)
+  );
+}
+
+.review-panel__scale-readout-viewport {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  min-height: calc(
+    var(--shell-review-slider-readout-size) * var(--line-height-snug)
+  );
 }
 
 .review-panel__scale-readout-word {
+  display: block;
+  width: 100%;
+  margin: 0;
   font-family: var(--font-family);
   font-weight: var(--shell-review-slider-readout-weight);
   font-size: var(--shell-review-slider-readout-size);
   line-height: var(--line-height-snug);
   color: var(--shell-review-slider-readout-color);
   text-align: center;
-  font-variant-numeric: tabular-nums;
+  will-change: transform, opacity, filter;
 }
 
 .review-panel__scale-control {
