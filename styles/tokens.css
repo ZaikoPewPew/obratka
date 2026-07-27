@@ -598,6 +598,7 @@
   --home-screen-reputation-explainer-media-width: 268px;
   --home-screen-reputation-explainer-media-height: 216px;
   --home-screen-reputation-explainer-media-radius: var(--radius-md);
+  --home-screen-reputation-explainer-media-bg: var(--color-surface-muted);
   --home-screen-reputation-explainer-card-padding: var(--space-4);
   --home-screen-reputation-explainer-card-gap: var(--space-1);
   --home-screen-reputation-explainer-card-radius: var(--radius-md);
@@ -626,6 +627,7 @@
   --home-screen-balance-explainer-media-width: 260px;
   --home-screen-balance-explainer-media-height: 216px;
   --home-screen-balance-explainer-media-radius: var(--radius-md);
+  --home-screen-balance-explainer-media-bg: var(--color-surface-muted);
   --home-screen-balance-explainer-card-padding: var(--space-4);
   --home-screen-balance-explainer-card-gap: var(--space-1);
   --home-screen-balance-explainer-card-radius: var(--radius-md);

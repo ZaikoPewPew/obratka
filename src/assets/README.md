@@ -12,10 +12,10 @@
 
 | Файл | Роль |
 |------|------|
-| `currency-duck.jpg` | фото в explainer «Валюта сообщества» |
+| `currency-duck.png` | фото в explainer «Валюта сообщества» |
 | `balance-card-ducks.svg` | декор карточки «Уточки» |
-| `currency-ghost.jpg` | фото в explainer «Репутация в нашей обратке» |
-| `currency-p2p.jpg` | фото в explainer «p4p в сети» |
+| `currency-ghost.png` | фото в explainer «Репутация в нашей обратке» |
+| `currency-p2p.png` | фото в explainer «p4p в сети» |
 
 ## `brand/`
 

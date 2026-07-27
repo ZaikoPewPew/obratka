@@ -213,6 +213,7 @@
   height: var(--home-screen-reputation-explainer-media-height);
   object-fit: cover;
   border-radius: var(--home-screen-reputation-explainer-media-radius);
+  background: var(--home-screen-reputation-explainer-media-bg);
 }
 
 .home-screen__reputation-explainer-card {
@@ -295,6 +296,7 @@
   height: var(--home-screen-balance-explainer-media-height);
   object-fit: cover;
   border-radius: var(--home-screen-balance-explainer-media-radius);
+  background: var(--home-screen-balance-explainer-media-bg);
 }
 
 .home-screen__balance-explainer-card {
