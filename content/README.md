@@ -14,7 +14,7 @@
 | `referral*` | `/referral` (validate errors: `referralExhausted`, …) |
 | `auth*` / `authEmail*` / `authCode*` / `authOtp*` / `authIdentityConflict` | `/registration`, `/registration/code` |
 | `onboarding*` | `/onboarding` |
-| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeMineSlotFree*` / `homePendingLimit*` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeAccount*` / `homeContacts*` / `homeContactFab*` / `homeLegendaryOnline*` / `homeRating*` | `/home` (feed/mine/rating топ-50, SWR, intro, mine gate, free-slot / pending-limit, feedSeen + 3/3, слоты, invite, репутация, контакты / FAB, «Топы в сети», меню профиля) |
+| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeMineSlotFree*` / `homePendingLimit*` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeAccount*` / `homeContacts*` / `homeRules*` / `homeContactFab*` / `homeLegendaryOnline*` / `homeRating*` | `/home` (feed/mine/rating топ-50, SWR, intro, mine gate, free-slot / pending-limit, feedSeen + 3/3, слоты, invite, репутация, контакты / правила / FAB, «Топы в сети», меню профиля) |
 | `gradeUndefined` | подпись без известного `profiles.grade` (карточки / рейтинг / report) |
 | `modalCloseAria` | общая модалка (`app-modal`) |
 | `url*` / `urlModal*` / `urlScreen*` / `urlScreenBack*` | `/portfolio` (в т.ч. чип «На главную») |

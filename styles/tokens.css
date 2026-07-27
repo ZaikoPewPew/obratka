@@ -227,6 +227,10 @@
   --motion-recording-blink-duration: 1100ms;
   --motion-recording-blink-ease: ease-in-out;
   --motion-recording-blink-opacity-min: 0.25;
+  /* Взгляд глазок на чипе репутации (центр → −shift → +shift → центр) */
+  --motion-reputation-eyes-shift: 2px;
+  --motion-reputation-eyes-duration: 4500ms;
+  --motion-reputation-eyes-ease: ease-in-out;
 
   /* Слои */
   --z-base: 1;
@@ -521,6 +525,54 @@
   --app-modal-dialog-shift: var(--motion-reveal-shift);
   --app-modal-dialog-blur: var(--motion-reveal-blur);
   --app-modal-dialog-scale-from: var(--motion-reveal-scale-from);
+
+  /*
+   * Side panel (Figma SidePanel 517:4740).
+   * Справа, inset 16; ширина 500; высота = экран − insets.
+   */
+  --side-panel-z: var(--z-modal);
+  --side-panel-inset: var(--space-4);
+  --side-panel-width: 500px;
+  --side-panel-padding: var(--space-6);
+  --side-panel-gap: var(--space-4);
+  --side-panel-radius: var(--radius-xl);
+  --side-panel-bg: var(--color-surface);
+  --side-panel-shadow: var(--shadow-modal);
+  --side-panel-header-gap: var(--space-2);
+  --side-panel-title-desc-gap: var(--space-1);
+  --side-panel-title-size: 24px;
+  --side-panel-title-weight: var(--font-weight-regular);
+  --side-panel-title-line-height: var(--line-height-snug);
+  --side-panel-title-color: var(--color-text);
+  --side-panel-desc-size: var(--font-size-md);
+  --side-panel-desc-weight: var(--font-weight-regular);
+  --side-panel-desc-line-height: var(--line-height-loose);
+  --side-panel-desc-color: var(--color-text-muted);
+  --side-panel-close-size: 56px;
+  --side-panel-close-radius: var(--radius-md);
+  --side-panel-close-bg: var(--color-surface-muted);
+  --side-panel-close-bg-hover: var(--color-surface-muted-hover);
+  --side-panel-close-bg-active: var(--color-surface-muted-active);
+  --side-panel-close-icon-size: var(--space-6);
+  --side-panel-close-color: var(--color-text);
+  --side-panel-body-gap: var(--space-4);
+  --side-panel-intro-size: var(--font-size-md);
+  --side-panel-intro-line-height: var(--line-height-normal);
+  --side-panel-intro-color: var(--color-text);
+  --side-panel-section-title-size: var(--font-size-lg);
+  --side-panel-section-title-line-height: var(--line-height-snug);
+  --side-panel-section-title-color: var(--color-text);
+  --side-panel-section-body-size: var(--font-size-md);
+  --side-panel-section-body-line-height: var(--line-height-normal);
+  --side-panel-section-body-color: var(--color-text);
+  --side-panel-section-gap: var(--space-4);
+  --side-panel-backdrop-bg: var(--color-overlay);
+  --side-panel-backdrop-blur: var(--overlay-blur);
+  --side-panel-backdrop-duration: var(--motion-screen-duration);
+  --side-panel-backdrop-ease: var(--motion-screen-ease);
+  --side-panel-panel-duration: var(--motion-reveal-duration);
+  --side-panel-panel-ease: var(--motion-reveal-ease);
+  --side-panel-panel-shift: 24px;
 
   /* Слоты ревьюеров на карточке (чип 108×52, аватары 32) */
   --home-screen-progress-width: 108px;

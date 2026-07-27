@@ -89,6 +89,32 @@
   }
 }
 
+/**
+ * Периодический взгляд глазок чипа репутации:
+ * дефолт → −2px → +2px → дефолт (пауза большую часть цикла).
+ */
+@keyframes motion-reputation-eyes-look {
+  0%,
+  72% {
+    transform: translateX(0);
+  }
+
+  78% {
+    transform: translateX(
+      calc(-1 * var(--motion-reputation-eyes-shift))
+    );
+  }
+
+  86% {
+    transform: translateX(var(--motion-reputation-eyes-shift));
+  }
+
+  92%,
+  100% {
+    transform: translateX(0);
+  }
+}
+
 /** Взрыв уточек от точки клика в intro-модалке. */
 @keyframes motion-review-intro-duck-scatter {
   0% {
@@ -163,6 +189,10 @@
   }
 
   .review-panel__rec-dot {
+    animation: none;
+  }
+
+  .home-screen__reputation-eyes {
     animation: none;
   }
 }

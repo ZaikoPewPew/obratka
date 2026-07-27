@@ -85,7 +85,8 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 Handoff соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
 `home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки feed/mine/rating (топ-50 `listRatingTop`); SWR `homeListCache`; fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB «быстрая связь» (`contact-fab`, Telegram); intro до claim (`homeReviewIntro*`); `reviewedByMe` после submit → disabled + оверлей; mine report gate (`homeMineNotReady*`); фильтр Активные/Завершенные (`tabs-panel`); free-slot «Мои на ревью» до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / `homePendingLimit*`); точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`); entrance cascade на `--open` (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
-`account-menu` — поповер под аватаром; identity read-only; settings / invite / contacts / sign out.  
+`account-menu` — поповер под аватаром; identity read-only; settings / invite / contacts / rules / sign out.
+`side-panel` — боковая панель справа (home → «Правила», Figma `517:4740`); слот контента; без `history` / `go()`.  
 `settings-screen` — side-route `/settings` (заглушка).
 `url-screen` — split; чип «На главную» (`.url-screen__back` / `urlScreenBack*`, скрыт на done); при URL справа заглушка «Портфолио»; submit → done на том же экране (`setVariant("done")`).  
 `success-screen` — запасной `/done` (deep link); основной submit больше не прыгает сюда (`pendingSuccessPreset` = `generic`).  
@@ -106,6 +107,7 @@ src/components/
   brand-screen-shell/     ← каркас split + visual
   brand-screen-visual/    ← mesh + марка, variants
   app-modal/              ← универсальная модалка (слот + CTA)
+  side-panel/             ← боковая панель справа (слот; «Правила»)
   tabs-panel/             ← сегмент Активные/Завершенные (Figma tabspanel)
   referral-screen/
   auth-screen/
@@ -156,6 +158,7 @@ styles/
   tokens.css
   entrance.css
   app-modal.css
+  side-panel.css
   iframe-shell.css
   home-screen.css
   legendary-online-panel.css
@@ -212,6 +215,7 @@ go("auth", { handoff: true }); // referral → auth: visual статичен
 Field error: `--motion-field-error-*`, `--motion-field-error-visual-*`.  
 Auth: `--auth-screen-*`, `--auth-code-*` (в т.ч. `--auth-code-resend-cooldown`).  
 App modal: `--app-modal-*` + `styles/app-modal.css` ([`app-modal/README.md`](src/components/app-modal/README.md)).  
+Side panel: `--side-panel-*` + `styles/side-panel.css` ([`side-panel/README.md`](src/components/side-panel/README.md)).  
 Tabs panel: `--tabs-panel-*` + `styles/tabs-panel.css` ([`tabs-panel/README.md`](src/components/tabs-panel/README.md)).  
 Home tabbar-dock: `--home-screen-tabbar-*` + `--home-screen-tabbar-dock-gap` / `--home-screen-tabbar-submit-*` (translucent track / on-dark / blur / contrast; кнопка «Закинуть своё» 56×56 Google blue).  
 Home entrance: `--home-screen-reveal-delay-*` + `motion-reveal-dock` (только translate; **без** opacity на dock — иначе ломается glass `backdrop-filter` у `.home-screen__tabbar`).  
@@ -264,6 +268,7 @@ Home entrance: `--home-screen-reveal-delay-*` + `motion-reveal-dock` (тольк
 - [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) — правый visual + variants
 - [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) — split-каркас
 - [`src/components/app-modal/README.md`](src/components/app-modal/README.md) — универсальная модалка
+- [`src/components/side-panel/README.md`](src/components/side-panel/README.md) — боковая панель
 - [`src/components/tabs-panel/README.md`](src/components/tabs-panel/README.md) — сегмент табов
 - [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — ошибки полей
 - [`src/assets/README.md`](src/assets/README.md) — марки / morph

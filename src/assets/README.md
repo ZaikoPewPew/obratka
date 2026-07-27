@@ -5,6 +5,7 @@
 ## `home/`
 
 Чипы / иконки шапки и карточек ленты (`bone.svg`, `reputation-*.svg`, …).
+`reputation-*.svg` — inline через `?raw` (группа `.home-screen__reputation-eyes` для анимации взгляда).
 
 ### `home/modal/`
 

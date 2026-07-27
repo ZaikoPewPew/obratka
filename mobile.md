@@ -34,7 +34,7 @@
 
 ## Подключённые стили (entry)
 
-Из `index.html`: `tokens.css`, `base.css`, `entrance.css`, `app-modal.css`, `iframe-shell.css`, `success-screen.css`, `home-screen.css`, `legendary-online-panel.css`, `contact-fab.css`, `tabs-panel.css`, `account-menu.css`, `settings-screen.css`, `ban-screen.css`, `report-screen.css`.
+Из `index.html`: `tokens.css`, `base.css`, `entrance.css`, `app-modal.css`, `side-panel.css`, `iframe-shell.css`, `success-screen.css`, `home-screen.css`, `legendary-online-panel.css`, `contact-fab.css`, `tabs-panel.css`, `account-menu.css`, `settings-screen.css`, `ban-screen.css`, `report-screen.css`.
 
 ---
 

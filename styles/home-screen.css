@@ -696,6 +696,15 @@ div.home-screen__review-intro-rec {
   height: var(--home-screen-chip-icon);
   flex-shrink: 0;
   color: inherit;
+  overflow: visible;
+}
+
+.home-screen__reputation-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: motion-reputation-eyes-look
+    var(--motion-reputation-eyes-duration) var(--motion-reputation-eyes-ease)
+    infinite;
 }
 
 .home-screen__chip-value {

@@ -54,6 +54,7 @@ import {
 import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
 import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import { createAppModal } from "../app-modal/AppModal.js";
+import { createSidePanel } from "../side-panel/SidePanel.js";
 import { createAccountMenu } from "../account-menu/AccountMenu.js";
 import { createTabsPanel } from "../tabs-panel/TabsPanel.js";
 import { createLegendaryOnlinePanel } from "../legendary-online-panel/LegendaryOnlinePanel.js";
@@ -72,9 +73,9 @@ import currencyP2pUrl from "../../assets/home/modal/currency-p2p.png";
 import currencyReferalUrl from "../../assets/home/modal/currency-referal.png";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
 import reviewedCheckIconSvg from "../../assets/home/reviewed-check.svg?raw";
-import reputationNeutralIconUrl from "../../assets/home/reputation-neutral.svg";
-import reputationPositiveIconUrl from "../../assets/home/reputation-positive.svg";
-import reputationNegativeIconUrl from "../../assets/home/reputation-negative.svg";
+import reputationNeutralIconSvg from "../../assets/home/reputation-neutral.svg?raw";
+import reputationPositiveIconSvg from "../../assets/home/reputation-positive.svg?raw";
+import reputationNegativeIconSvg from "../../assets/home/reputation-negative.svg?raw";
 import slotPlusIconUrl from "../../assets/home/slot-plus.svg";
 
 const PREVIEW_BROWSER_CONTROLS_URL = `${
@@ -89,15 +90,44 @@ const INVITE_COPIED_SVG = `<svg class="home-screen__invite-copy-icon home-screen
   <path d="M22 7L11.5 17.5L7.5 13.5M6 17.5L2 13.5M16.5 7L11.5 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`;
 
+/** @typedef {'neutral' | 'positive' | 'negative'} ReputationIconKind */
+
+/** @type {Record<ReputationIconKind, string>} */
+const REPUTATION_ICON_SVG = {
+  neutral: reputationNeutralIconSvg,
+  positive: reputationPositiveIconSvg,
+  negative: reputationNegativeIconSvg,
+};
+
 /**
- * Иконка чипа репутации: нейтральная (0) / позитивная (>0) / негативная (<0).
+ * Вариант иконки чипа репутации по дельте от 100.
  * @param {number} delta
- * @returns {string}
+ * @returns {ReputationIconKind}
  */
-function reputationIconUrlFor(delta) {
-  if (delta > 0) return reputationPositiveIconUrl;
-  if (delta < 0) return reputationNegativeIconUrl;
-  return reputationNeutralIconUrl;
+function reputationIconKindFor(delta) {
+  if (delta > 0) return "positive";
+  if (delta < 0) return "negative";
+  return "neutral";
+}
+
+/**
+ * Inline SVG чипа репутации (глазки анимируются через CSS).
+ * @param {ReputationIconKind} kind
+ * @returns {SVGElement}
+ */
+function createReputationIcon(kind) {
+  const wrap = document.createElement("span");
+  wrap.innerHTML = REPUTATION_ICON_SVG[kind].trim();
+  const svg = wrap.firstElementChild;
+  if (!(svg instanceof SVGElement)) {
+    throw new Error(`reputation-${kind}.svg must be a root <svg>`);
+  }
+  svg.classList.add("home-screen__chip-icon", "home-screen__reputation-icon");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("width", "24");
+  svg.setAttribute("height", "24");
+  svg.setAttribute("focusable", "false");
+  return svg;
 }
 
 /**
@@ -726,18 +756,14 @@ export function createHomeScreen({
   reputationChip.type = "button";
   reputationChip.className = "home-screen__chip home-screen__chip--reputation";
 
-  const reputationImg = document.createElement("img");
-  reputationImg.className = "home-screen__chip-icon";
-  reputationImg.src = reputationNeutralIconUrl;
-  reputationImg.alt = "";
-  reputationImg.width = 24;
-  reputationImg.height = 24;
-  reputationImg.decoding = "async";
+  /** @type {ReputationIconKind} */
+  let reputationIconKind = "neutral";
+  let reputationIcon = createReputationIcon(reputationIconKind);
 
   const reputationValue = document.createElement("span");
   reputationValue.className = "home-screen__chip-value";
 
-  reputationChip.append(reputationImg, reputationValue);
+  reputationChip.append(reputationIcon, reputationValue);
 
   const profileBtn = document.createElement("button");
   profileBtn.type = "button";
@@ -772,6 +798,50 @@ export function createHomeScreen({
     },
   });
 
+  const rulesPanel = createSidePanel();
+
+  /**
+   * @param {string} text
+   * @param {string} className
+   * @param {string} [tagName="p"]
+   */
+  function createRulesText(text, className, tagName = "p") {
+    const el = document.createElement(tagName);
+    el.className = className;
+    el.textContent = fixHangingPrepositions(text ?? "");
+    return el;
+  }
+
+  function syncRulesPanelContent() {
+    const t = getStrings();
+    rulesPanel.setTitle(t.homeRulesTitle ?? "");
+    rulesPanel.setDescription(
+      fixHangingPrepositions(t.homeRulesUpdated ?? ""),
+    );
+    rulesPanel.setCloseAriaLabel(t.homeRulesCloseAria ?? "");
+    rulesPanel.content.replaceChildren(
+      createRulesText(t.homeRulesIntro ?? "", "side-panel__intro"),
+      (() => {
+        const section = document.createElement("section");
+        section.className = "side-panel__section";
+        section.append(
+          createRulesText(t.homeRules1Title ?? "", "side-panel__section-title", "h3"),
+          createRulesText(t.homeRules1Body ?? "", "side-panel__section-body"),
+        );
+        return section;
+      })(),
+      (() => {
+        const section = document.createElement("section");
+        section.className = "side-panel__section";
+        section.append(
+          createRulesText(t.homeRules2Title ?? "", "side-panel__section-title", "h3"),
+          createRulesText(t.homeRules2Body ?? "", "side-panel__section-body"),
+        );
+        return section;
+      })(),
+    );
+  }
+
   const accountMenu = createAccountMenu({
     onClose: () => {
       profileBtn.setAttribute("aria-expanded", "false");
@@ -788,6 +858,10 @@ export function createHomeScreen({
       contactsModal.setCloseAriaLabel(t.homeContactsCloseAria ?? "");
       contactsModal.setActionsVisible({ primary: true, secondary: false });
       contactsModal.open();
+    },
+    onRules: () => {
+      syncRulesPanelContent();
+      rulesPanel.open();
     },
     onSignOut: () => onSignOut?.(),
   });
@@ -1205,6 +1279,7 @@ export function createHomeScreen({
     reviewIntroModal.root,
     inviteModal.root,
     contactsModal.root,
+    rulesPanel.root,
   );
 
   /** @type {HomePortfolioItem[]} */
@@ -1348,7 +1423,13 @@ export function createHomeScreen({
 
     const reputationDelta = formatReputationDelta();
     reputationValue.textContent = reputationDelta;
-    reputationImg.src = reputationIconUrlFor(getReputationDelta());
+    const nextReputationKind = reputationIconKindFor(getReputationDelta());
+    if (nextReputationKind !== reputationIconKind) {
+      reputationIconKind = nextReputationKind;
+      const nextIcon = createReputationIcon(reputationIconKind);
+      reputationIcon.replaceWith(nextIcon);
+      reputationIcon = nextIcon;
+    }
     reputationChip.setAttribute(
       "aria-label",
       formatString(t.homeReputationAria, { reputation: reputationDelta }),
@@ -2847,6 +2928,7 @@ export function createHomeScreen({
     closeInviteModal();
     void closeAccountMenu();
     void contactsModal.close();
+    void rulesPanel.close();
     root.setAttribute("aria-busy", "false");
     root.hidden = true;
     return Promise.resolve();

@@ -2,8 +2,9 @@
 
 - `tokens.css` — **источник дизайн-токенов** (примитивы → семантика → темы). Правило: `.cursor/rules/design-tokens.mdc`.
 - `base.css` — сброс / база.
-- `entrance.css` — `@keyframes motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock` / `motion-recording-blink` (пульс индикатора записи).
+- `entrance.css` — `@keyframes motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock` / `motion-recording-blink` / `motion-reputation-eyes-look` (пульс индикатора записи + взгляд глазок репутации).
 - `app-modal.css` — универсальная модалка (`createAppModal`, `--app-modal-*`).
+- `side-panel.css` — боковая панель (`createSidePanel`, `--side-panel-*`).
 - `iframe-shell.css` — оболочка `/review` (таймер, **`.iframe-shell__rec`**), `.url-screen*` (в т.ч. **`.url-screen__back`**, `__error*`, `__input-wrap--invalid`), `.auth-screen*` / `.auth-code-screen*` (в т.ч. `__cells--invalid`), `.review-screen*` / `.review-panel*` (в т.ч. **`.review-panel__rec`**).
 - `brand-screen.css` — **заготовка** выноса общих split-стилей из iframe-shell.
 - `home-screen.css` — главная `/home` (topbar, лента, вкладка рейтинга `.home-screen__rating-list`, tabbar-dock: glass tabs + submit + tab-dot, `--on-dark`).
@@ -18,7 +19,7 @@
 
 ## Что подключено из `index.html`
 
-`tokens.css` → `base.css` → `entrance.css` → `app-modal.css` → `iframe-shell.css` → `success-screen.css` → `report-screen.css` → `ban-screen.css` → `home-screen.css` → `legendary-online-panel.css` → `contact-fab.css` → `tabs-panel.css` → `account-menu.css` → `settings-screen.css`.
+`tokens.css` → `base.css` → `entrance.css` → `app-modal.css` → `side-panel.css` → `iframe-shell.css` → `success-screen.css` → `report-screen.css` → `ban-screen.css` → `home-screen.css` → `legendary-online-panel.css` → `contact-fab.css` → `tabs-panel.css` → `account-menu.css` → `settings-screen.css`.
 
 Архив waitlist-CSS удалён (`desktop` / `mobile` / `apply` / `access-modal` / `notification` / `privacy-policy-panel`). Историческая спека: [`mobile.md`](../mobile.md).
 
@@ -35,6 +36,7 @@
 | `--motion-advance-delay` / `--motion-focus-delay` | квиз |
 | `--motion-feature-*` / `--motion-report-launch-*` | PDF-лист |
 | `--motion-recording-blink-*` | пульс красного индикатора записи |
+| `--motion-reputation-eyes-*` | периодический взгляд глазок чипа репутации |
 | `--motion-delay-*` / `--motion-stagger` | stagger |
 | `--url-screen-reveal-*` / `--url-screen-error-*` | split + field error aliases |
 | `--url-screen-error-mesh-*` | палитра invalid (= ban) |

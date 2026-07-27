@@ -159,6 +159,7 @@ Senior → Junior нельзя. Grade обязателен в онбординг
 | Brand split (referral / auth / auth-code / onboarding / url) | `.url-screen*` + [`brand-screen-visual`](src/components/brand-screen-visual/README.md) + [`brand-screen-shell`](src/components/brand-screen-shell/README.md); на `/portfolio` — back-chip top-left |
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
+| Side panel | [`side-panel`](src/components/side-panel/README.md) — панель справа (слот); home → «Правила» |
 | Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `contact-fab`; feed/mine/rating (`listRatingTop`); URL-query; лента SWR; Активные/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` / entrance cascade |
 | Review | `index.html` `.iframe-shell` + таймер + чип **rec** (заметки → `answers.dictation`) в `main.js` |
 | Quiz | `review-screen` + `review-panel` (микрофон в поле «Главный совет» → `advice`) |
@@ -179,6 +180,7 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 - Field errors: [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md).
 - Brand visual: [`brand-screen-visual`](src/components/brand-screen-visual/README.md).
 - App modal: [`app-modal`](src/components/app-modal/README.md).
+- Side panel: [`side-panel`](src/components/side-panel/README.md).
 - Строки: `content/locales.json` + `src/i18n.js` (правило `.cursor/rules/i18n.mdc`); close aria модалки — `modalCloseAria`.
 - Тема: `<html data-theme="dark">` (семантика в токенах).
 
@@ -186,9 +188,9 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 
 **Подключено** (`index.html` + `main.js`):
 
-- CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `success-screen`, `home-screen`, `legendary-online-panel`, `contact-fab`, `tabs-panel`, `account-menu`, `settings-screen`, `ban-screen`, `report-screen`
+- CSS: `tokens`, `base`, `entrance`, `app-modal`, `side-panel`, `iframe-shell`, `success-screen`, `home-screen`, `legendary-online-panel`, `contact-fab`, `tabs-panel`, `account-menu`, `settings-screen`, `ban-screen`, `report-screen`
 - Экраны: referral, auth, auth-code, onboarding, home, settings, url, review-shell (+ rec), quiz, success, report, ban
-- Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `account-menu`, `tabs-panel`, `legendary-online-panel`, `contact-fab`
+- Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `side-panel`, `account-menu`, `tabs-panel`, `legendary-online-panel`, `contact-fab`
 - Home state: `src/utils/homeRoute.js` (query) + `homeListCache.js` + `feedSeen.js` + `mineReadySeen.js` (кэши сбрасываются в `exitAuthenticatedSession`)
 - Review timer: `src/config/review.js` (`REVIEW_SESSION_SECONDS`)
 - Dictation: `src/lib/dictation/` (Web Speech MVP)

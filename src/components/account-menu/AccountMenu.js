@@ -23,6 +23,7 @@ function getAccountMenuCloseFallbackMs() {
  *   onSettings?: () => void | Promise<void>;
  *   onInvite?: () => void | Promise<void>;
  *   onContacts?: () => void | Promise<void>;
+ *   onRules?: () => void | Promise<void>;
  *   onSignOut?: () => void | Promise<void>;
  *   onClose?: () => void;
  * }} [opts]
@@ -70,7 +71,12 @@ export function createAccountMenu(opts = {}) {
   contactsBtn.className = "account-menu__action";
   contactsBtn.setAttribute("role", "menuitem");
 
-  actions.append(settingsBtn, inviteBtn, contactsBtn);
+  const rulesBtn = document.createElement("button");
+  rulesBtn.type = "button";
+  rulesBtn.className = "account-menu__action";
+  rulesBtn.setAttribute("role", "menuitem");
+
+  actions.append(settingsBtn, inviteBtn, contactsBtn, rulesBtn);
 
   const secondDivider = document.createElement("div");
   secondDivider.className = "account-menu__divider";
@@ -98,6 +104,7 @@ export function createAccountMenu(opts = {}) {
     settingsBtn.textContent = t.homeAccountSettings ?? "";
     inviteBtn.textContent = t.homeAccountInvite ?? "";
     contactsBtn.textContent = t.homeAccountContacts ?? "";
+    rulesBtn.textContent = t.homeAccountRules ?? "";
     signOutBtn.textContent = t.homeAccountSignOut ?? "";
     signOutBtn.disabled = false;
     root.setAttribute("aria-label", t.homeAccountMenuAria ?? "");
@@ -171,6 +178,10 @@ export function createAccountMenu(opts = {}) {
 
   contactsBtn.addEventListener("click", () => {
     void close().then(() => opts.onContacts?.());
+  });
+
+  rulesBtn.addEventListener("click", () => {
+    void close().then(() => opts.onRules?.());
   });
 
   signOutBtn.addEventListener("click", () => {
