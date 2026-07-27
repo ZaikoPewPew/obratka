@@ -18,6 +18,8 @@ export function createExplainerMediaRay() {
     autoplay: true,
     animationData: rotatingRayAnimation,
   });
+  // 2/3 от дефолтной скорости Lottie (убрать 1/3).
+  anim.setSpeed(2 / 3);
 
   return {
     root,
