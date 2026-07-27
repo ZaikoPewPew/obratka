@@ -1078,8 +1078,8 @@ export function createHomeScreen({
   invitePhoto.className = "home-screen__explainer-media-photo";
   invitePhoto.src = currencyReferalUrl;
   invitePhoto.alt = "";
-  invitePhoto.width = 552;
-  invitePhoto.height = 256;
+  invitePhoto.width = 1104;
+  invitePhoto.height = 512;
   invitePhoto.decoding = "async";
 
   inviteMedia.append(inviteRay.root, invitePhoto);

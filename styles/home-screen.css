@@ -1704,7 +1704,9 @@ div.home-screen__review-intro-rec {
 
 .home-screen__invite-explainer-media .home-screen__explainer-media-ray {
   width: var(--home-screen-invite-explainer-media-ray-size);
-  height: var(--home-screen-invite-explainer-media-ray-size);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  opacity: var(--home-screen-invite-explainer-media-ray-opacity);
 }
 
 .home-screen__invite-explainer-media .home-screen__explainer-media-photo {

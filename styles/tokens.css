@@ -889,8 +889,9 @@
   --home-screen-invite-explainer-media-height: 256px;
   --home-screen-invite-explainer-media-radius: var(--radius-md);
   --home-screen-invite-explainer-media-bg: var(--palette-gray-100);
-  /* Lottie чуть шире фото, квадратные пропорции лучей. */
-  --home-screen-invite-explainer-media-ray-size: 118%;
+  /* Квадрат от ширины медиа (не от высоты — иначе лучи сплющиваются). */
+  --home-screen-invite-explainer-media-ray-size: 155%;
+  --home-screen-invite-explainer-media-ray-opacity: 1;
   --home-screen-invite-explainer-media-photo-fit: contain;
   --home-screen-invite-bar-height: 72px;
   --home-screen-invite-bar-gap: var(--space-4);
