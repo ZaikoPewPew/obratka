@@ -125,7 +125,7 @@
 
 .app-modal__description-link:hover,
 .app-modal__description-link:focus-visible {
-  color: var(--app-modal-desc-link-color);
+  color: var(--app-modal-desc-link-color-hover);
 }
 
 .app-modal__description[hidden] {

@@ -23,7 +23,7 @@ alwaysApply: true
 ## Клиент
 
 - API: `src/api/reviewComplaints.js`
-- UI: `report-screen` (жалоба, skeleton листов, PDF через `shareReviewPdf` — не ломать / не redesign без задачи), home чип репутации (hover-tip `homeReputationTooltip` + explainer по клику)
+- UI: `report-screen` (жалоба, skeleton листов, PDF через `shareReviewPdf` — не ломать / не redesign без задачи), home чип репутации (explainer по клику)
 - Апелляция: ban-screen «Связаться» (вручную)
 
 ## Вне v1

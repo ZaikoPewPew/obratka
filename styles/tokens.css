@@ -540,7 +540,8 @@
   --app-modal-desc-weight: var(--font-weight-regular);
   --app-modal-desc-line-height: var(--line-height-loose);
   --app-modal-desc-color: var(--color-text-muted);
-  --app-modal-desc-link-color: var(--palette-google-blue);
+  --app-modal-desc-link-color: var(--app-modal-desc-color);
+  --app-modal-desc-link-color-hover: var(--palette-google-blue);
   --app-modal-close-size: 56px;
   --app-modal-close-radius: var(--radius-md);
   --app-modal-close-bg: var(--color-surface-muted);

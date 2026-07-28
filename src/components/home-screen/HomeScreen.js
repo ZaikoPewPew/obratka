@@ -3,7 +3,6 @@ import { formatPlural } from "../../utils/plural.js";
 import {
   formatPortfolioGrade,
   formatPortfolioRole,
-  hasFreeMineSlot,
   isPortfolioOpenForReview,
   listFeedPortfolioIds,
   listMyPortfolios,
@@ -673,11 +672,7 @@ export function createHomeScreen({
   const balanceValue = document.createElement("span");
   balanceValue.className = "home-screen__chip-value";
 
-  const balanceTip = document.createElement("span");
-  balanceTip.className = "home-screen__tip";
-  balanceTip.setAttribute("aria-hidden", "true");
-
-  balanceChip.append(boneImg, balanceValue, balanceTip);
+  balanceChip.append(boneImg, balanceValue);
 
   const reputationChip = document.createElement("button");
   reputationChip.type = "button";
@@ -690,11 +685,7 @@ export function createHomeScreen({
   const reputationValue = document.createElement("span");
   reputationValue.className = "home-screen__chip-value";
 
-  const reputationTip = document.createElement("span");
-  reputationTip.className = "home-screen__tip";
-  reputationTip.setAttribute("aria-hidden", "true");
-
-  reputationChip.append(reputationIcon, reputationValue, reputationTip);
+  reputationChip.append(reputationIcon, reputationValue);
 
   const profileBtn = document.createElement("button");
   profileBtn.type = "button";
@@ -1365,9 +1356,6 @@ export function createHomeScreen({
       "aria-label",
       formatString(t.homeBalanceAria, { balance }),
     );
-    const balanceTooltip = t.homeBalanceTooltip ?? "";
-    balanceChip.title = balanceTooltip;
-    balanceTip.textContent = balanceTooltip;
 
     const reputationDelta = formatReputationDelta();
     reputationValue.textContent = reputationDelta;
@@ -1382,9 +1370,6 @@ export function createHomeScreen({
       "aria-label",
       formatString(t.homeReputationAria, { reputation: reputationDelta }),
     );
-    const reputationTooltip = t.homeReputationTooltip ?? "";
-    reputationChip.title = reputationTooltip;
-    reputationTip.textContent = reputationTooltip;
 
     profileBtn.setAttribute("aria-label", t.homeProfileAria);
     profileBtn.setAttribute("aria-haspopup", "menu");
@@ -1470,26 +1455,12 @@ export function createHomeScreen({
   }
 
   /**
-   * CTA / empty-slot: сначала свободный pending-слот, потом монеты.
+   * CTA / empty-slot: сначала свободный pending-слот (локально), потом монеты.
+   * Нет mine-кэша — не ждём сеть: gate слота в applyRoute.
    */
-  async function tryAddPortfolio() {
-    let pending = localActiveMinePendingCount();
-    if (pending == null) {
-      try {
-        if (!(await hasFreeMineSlot())) {
-          submitSlotBlocked = true;
-          flashSubmitError();
-          syncSubmitButton();
-          return;
-        }
-        submitSlotBlocked = false;
-        syncSubmitButton();
-      } catch (err) {
-        if (import.meta.env.DEV) {
-          console.warn("[home] hasFreeMineSlot", err);
-        }
-      }
-    } else if (pending >= MAX_MINE_PENDING) {
+  function tryAddPortfolio() {
+    const pending = localActiveMinePendingCount();
+    if (pending != null && pending >= MAX_MINE_PENDING) {
       flashSubmitError();
       return;
     }

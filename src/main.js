@@ -1351,24 +1351,8 @@ const homeScreen = createHomeScreen({
         : "";
     go("report", { search: { id: item.id } });
   },
-  onAddPortfolio: async () => {
-    // Иерархия: слот → монеты (как tryAddPortfolio на home).
-    try {
-      if (!(await hasFreeMineSlot())) {
-        const t = getStrings();
-        homeScreen.showNotice({
-          title: t.homePendingLimitTitle ?? "",
-          body: t.homePendingLimit ?? "",
-          closeLabel: t.homePendingLimitClose,
-          closeAria: t.homePendingLimitCloseAria,
-        });
-        return;
-      }
-    } catch (err) {
-      if (import.meta.env.DEV) {
-        console.warn("[home] hasFreeMineSlot", err);
-      }
-    }
+  onAddPortfolio: () => {
+    // Слот локально на home; авторитетный gate — applyRoute (без лишнего await).
     if (!canSubmitPortfolio()) return;
     go("url");
   },
@@ -1612,10 +1596,32 @@ async function applyRoute(id, opts = {}) {
   const prevRouteId = activeRouteId;
   let session = getSession();
 
+  /** Параллельный результат слота при запросе `/portfolio` (null — не запрашивали). */
+  /** @type {boolean | null} */
+  let urlSlotFree = null;
+
   if (session?.userId) {
-    const access = await reconcileSessionAccess();
-    if (access === "gone") return;
-    session = getSession();
+    if (id === "url") {
+      // Session + pending-слот параллельно — меньше лаг CTA «Закинуть».
+      const [access, slotResult] = await Promise.all([
+        reconcileSessionAccess(),
+        hasFreeMineSlot()
+          .then((free) => /** @type {const} */ ({ ok: true, free }))
+          .catch((err) => {
+            if (import.meta.env.DEV) {
+              console.warn("[route] hasFreeMineSlot", err);
+            }
+            return /** @type {const} */ ({ ok: false, free: false });
+          }),
+      ]);
+      if (access === "gone") return;
+      session = getSession();
+      urlSlotFree = slotResult.ok ? slotResult.free : false;
+    } else {
+      const access = await reconcileSessionAccess();
+      if (access === "gone") return;
+      session = getSession();
+    }
   }
 
   let accessible = resolveAccessibleRoute(id, {
@@ -1626,16 +1632,23 @@ async function applyRoute(id, opts = {}) {
     banned: Boolean(session?.banned),
   });
 
+  /** Слот занят → home + notice (deep link / гонка без локального buzz). */
+  let pendingLimitBlocked = false;
+
   if (accessible === "url") {
     // Иерархия: слот → монеты (как tryAddPortfolio / onAddPortfolio).
     try {
-      if (!(await hasFreeMineSlot())) {
+      const slotFree =
+        urlSlotFree != null ? urlSlotFree : await hasFreeMineSlot();
+      if (!slotFree) {
         accessible = "home";
+        pendingLimitBlocked = true;
       } else if (!canSubmitPortfolio()) {
         accessible = "home";
       }
     } catch {
       accessible = "home";
+      pendingLimitBlocked = true;
     }
   }
 
@@ -1647,11 +1660,23 @@ async function applyRoute(id, opts = {}) {
   activeRouteId = id;
   syncDictationChrome();
 
+  const showPendingLimitIfNeeded = () => {
+    if (!pendingLimitBlocked) return;
+    const t = getStrings();
+    homeScreen.showNotice({
+      title: t.homePendingLimitTitle ?? "",
+      body: t.homePendingLimit ?? "",
+      closeLabel: t.homePendingLimitClose,
+      closeAria: t.homePendingLimitCloseAria,
+    });
+  };
+
   // Back/Forward между вкладками home: экран уже смонтирован, меняем только вид.
   if (id === "home" && prevRouteId === "home" && !handoff) {
     const view = currentHomeView();
     canonicalizeHomeSearch(view);
     await homeScreen.setView(view);
+    showPendingLimitIfNeeded();
     return;
   }
 
@@ -1806,6 +1831,7 @@ async function applyRoute(id, opts = {}) {
 
   await closeOthers();
   openTarget(id);
+  showPendingLimitIfNeeded();
 }
 
 appRouter = createAppRouter({
