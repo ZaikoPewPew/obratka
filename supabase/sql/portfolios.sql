@@ -16,10 +16,11 @@ create table if not exists public.portfolios (
   status text not null default 'pending'
     check (status in ('pending', 'done', 'skipped')),
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  constraint portfolios_reviews_within_target
-    check (reviews_count <= target_reviews)
+  updated_at timestamptz not null default now()
 );
+-- reviews_count может превысить target_reviews (in-flight overshoot после
+-- закрытия ленты). Старый CHECK portfolios_reviews_within_target снят в
+-- review_claims.sql при повторном apply.
 
 create index if not exists portfolios_status_created_idx
   on public.portfolios (status, created_at desc);
@@ -149,7 +150,9 @@ begin
     raise exception 'cannot_review_own_portfolio';
   end if;
 
-  if p.status <> 'pending' then
+  -- pending или done (late in-flight после target) — ок; skipped — нет.
+  -- Полная проверка claim + award: см. review_claims.sql (заменяет этот триггер).
+  if p.status not in ('pending', 'done') then
     raise exception 'portfolio_not_pending';
   end if;
 
@@ -217,7 +220,9 @@ create policy "reviews_insert_own"
       select 1
       from public.portfolios p
       where p.id = portfolio_id
-        and p.status = 'pending'
+        -- pending: обычный вход; done: late overshoot (in-flight с claim).
+        -- Claim и лиги жёстко проверяет handle_review_inserted (BEFORE INSERT).
+        and p.status in ('pending', 'done')
         and p.owner_id <> (select auth.uid())
         and public.can_review_portfolio(p.owner_id, (select auth.uid()))
     )

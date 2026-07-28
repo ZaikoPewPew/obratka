@@ -9,23 +9,25 @@ alwaysApply: true
 
 ## Флоу
 
-1. `/referral` → RPC `validate_referral` (**anon**, до auth) → `session.referralCode`.
+1. `/referral` → RPC `validate_referral` (**anon**, до auth) → `session.referralCode` + `obratka.inviteGatePassed` (device flag).
 2. После логина → `redeem_referral` (**один раз** на аккаунт).
 3. Код юзера: `profiles.referral_code`, max **2** (`REFERRAL_MAX_USES`).
 4. Seed холодного старта: `YTHWKPDWAK` в `referral_seed_codes` (только через RPC).
 5. Prefill / share: `?ref=` + `normalizeReferralCode` / `buildReferralShareUrl`.
-6. Deep link `/registration` без кода и без сессии → обратно на `/referral` (`flow.js`).
+6. Deep link `/registration` без кода, без сессии и без device gate → обратно на `/referral` (`flow.js`).
+7. Logout / мёртвый Auth: при `inviteGatePassed` → `/registration`, иначе → `/referral`. Gate один раз на устройство; `/referral` и `?ref=` остаются доступны.
 
 ## Жёсткие правила
 
 - Seed-таблицу клиенту не открывать — только RPC.
 - Шаринг: home → аватар → меню профиля → «Пригласить» → модалка (`homeInvite*`); copy и share кладут полный текст `homeInviteMessage` (`{url}`, `{code}`) — не только код или голую ссылку.
 - Ошибки поля на referral-screen: `setUrlScreenFieldInvalid` + `visual.setVariant("invalid")`.
+- `obratka.inviteGatePassed` не чистить в `clearSession` — переживает logout.
 
 ## Код
 
 - SQL: `supabase/sql/referrals.sql`
 - API: `src/api/referrals.js`
-- Utils: `src/utils/referralCode.js`
+- Utils: `src/utils/referralCode.js`, `src/utils/inviteGate.js`
 - UI: `src/components/referral-screen/`
 - Продукт: `PROJECT.md` § Рефералы

@@ -85,7 +85,7 @@ Empty «Мои завершенные»: `homeEmptyMineCompleted`. На **Мои
 
 Цель: ревьюер чаще открывает то, что **быстрее даёт completed и закрывает слот автора** (дойти до `target_reviews`, default 3). Не newest-first.
 
-Сорт — **клиентский**, в [`src/api/portfolios.js`](../../api/portfolios.js) (`sortFeedForSlotClosure`), **после** `attachReviewerSlots` (нужны live claims). Home / кэш порядок не меняют — сохраняют то, что вернул API. Вкладка **Мои** — без этого сорта: `created_at` DESC.
+Сорт — **клиентский**, в [`src/api/portfolios.js`](../../api/portfolios.js) (`sortFeedForSlotClosure`), **после** `attachReviewerSlots` (слоты для UI; на порядок live не влияют). Home / кэш порядок не меняют — сохраняют то, что вернул API. Вкладка **Мои** — без этого сорта: `created_at` DESC.
 
 Конвейер:
 
@@ -98,21 +98,20 @@ list pending (RLS лига) → reviewedByMe → attachReviewerSlots → sortFee
 | # | Ключ | Выше | Ниже |
 |---|------|------|------|
 | 1 | `reviewedByMe` | ещё не отправил отчёт | уже отправил отчёт (disabled, не claim) |
-| 2 | свободный слот | `openSlots > 0` | `openSlots ≤ 0` (claim даст `no_slots`) |
-| 3 | remaining | меньше осталось (`2/3` → `1/3` → `0/3`) | свежие без прогресса |
-| 4 | `createdAt` | старше (FIFO) | новее |
+| 2 | remaining | меньше осталось (`2/3` → `1/3` → `0/3`) | свежие без прогресса |
+| 3 | `createdAt` | старше (FIFO) | новее |
 
-Формулы (как claim-квота: completed + live claims):
+Формулы:
 
-- `activeCount` = число `reviewerSlots` с `kind === "active"`
-- `openSlots = targetReviews − reviewsCount − activeCount`
 - `remaining = max(0, targetReviews − reviewsCount)`
+- Дверь claim / `isPortfolioOpenForReview` = `reviewsCount < targetReviews` (live claims **не** закрывают вход)
+- Слоты UI = первые `targetReviews` лиц; report — все листы (overshoot ок)
 
 `createdAt` мапится из `portfolios.created_at` в `PortfolioQueueItem` (нужен только tie-break; в UI не показывается).
 
-**Почему не SQL `ORDER BY`:** live claims приходят вторым RPC (`portfolio_reviewer_slots`); сервер без join не знает «занято claim’ом». PostgREST `.order("created_at")` — только грубый pre-order; финальный порядок после `sortFeedForSlotClosure`.
+**Почему не SQL `ORDER BY`:** слоты приходят вторым RPC (`portfolio_reviewer_slots`); финальный порядок после `sortFeedForSlotClosure` (remaining + FIFO). Live не двигает карточку вниз.
 
-**Что не меняем этим сортом:** видимость карточек (full / `reviewedByMe` остаются в ленте), claim TTL, лиги, `target_reviews`. Весов / explainer порядка в UI нет.
+**Что не меняем этим сортом:** видимость карточек (`reviewedByMe` остаются в ленте), claim TTL, лиги, `target_reviews`. Весов / explainer порядка в UI нет.
 
 ### Лента и карточки
 
@@ -120,9 +119,10 @@ SWR: при `open` / смене таба / F5 — если есть кэш вк�
 
 После skeleton данные с `motion-reveal` stagger; после тихого refetch при тех же id — только патч reviewer-слотов (без пересборки DOM / thum.io); новые карточки — full rebuild + reveal только для новых id.
 
-Клик по чужой карточке → если нет свободного слота (`isPortfolioOpenForReview`) → `homeNoSlots*` + refresh; иначе intro-модалка (Figma `492:3611`): тайтл + «Автор карточки — {name}», две карточки («1-ая минута» с toggle preview-rec — декоративная волна без mic/STT; «2-ая минута» — статичные уточки) → CTA «Сюдаа его!» → `onOpenPortfolio` → `claimPortfolioReview` → `/review`. «Не сейчас» / закрытие — без claim; preview-rec сбрасывается.  
+Клик по чужой карточке → если уже `reviewsCount >= target` (`isPortfolioOpenForReview`) → `homeNoSlots*` + refresh; иначе intro-модалка (Figma `492:3611`): тайтл + «Автор карточки — {name}», две карточки («1-ая минута» с toggle preview-rec — декоративная волна без mic/STT; «2-ая минута» — статичные уточки) → CTA «Сюдаа его!» → `onOpenPortfolio` → `claimPortfolioReview` → `/review`. «Не сейчас» / закрытие — без claim; preview-rec сбрасывается.  
+Active claims не закрывают дверь; late submit после `done` принимает сервер (+10). На карточке — первые `target` аватарок.  
 Abort / hard navigation: release через SPA `releaseHeldClaim` или `pagehide` keepalive + per-tab `sessionStorage` reconcile (см. `review-claims.mdc`) — active «Аноним» не должен залипать после ухода.  
-Своя (`isOwn`, вкладка «Мои») кликабельна всегда: собраны все ревью (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report` (листы + жалоба); иначе модалка `homeMineNotReady*` с прогрессом. Title / aria карточки — `homeCardReport*` либо `homeCardReportPending*`, пересинхронизируются при silent-патче слотов.  
+Своя (`isOwn`, вкладка «Мои») кликабельна всегда: собраны все ревью (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report` (листы + жалоба; при overshoot листов может быть > target); иначе модалка `homeMineNotReady*` с прогрессом. Title / aria карточки — `homeCardReport*` либо `homeCardReportPending*`, пересинхронизируются при silent-патче слотов.  
 Уже отревьюенная карточка (`reviewedByMe` = строка в `reviews` после submit) — `disabled`, без intro и без notice; статус только оверлеем на превью.
 CTA «Закинуть своё» (кнопка в доке у таббара) — всегда активна. Иерархия: занятый pending-слот → `homePendingLimit*`; иначе баланс ≥ `SUBMIT_COST` (30) → `onAddPortfolio` → `/portfolio`; иначе короткий error-buzz (`motion-control-error-buzz`) на кнопке submit **и** чипе баланса (без модалки). Старт с 0 → нужно ~3 чужих ревью (`REVIEW_REWARD` 10).
 

@@ -11,6 +11,7 @@ import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
  *   from: number;
  *   to: number;
  *   title: string;
+ *   description?: string;
  *   ariaLabel?: string;
  *   ends: { low: string; high: string };
  *   valueTitles?: Record<number, string> | Record<string, string>;
@@ -23,6 +24,7 @@ export function createScaleSlider({
   from,
   to,
   title,
+  description = "",
   ariaLabel,
   ends,
   valueTitles = {},
@@ -33,6 +35,7 @@ export function createScaleSlider({
   const stops = [];
   for (let v = min; v <= max; v += 1) stops.push(v);
   const idleTitle = fixHangingPrepositions(title);
+  const idleDescription = fixHangingPrepositions(String(description || "").trim());
 
   const block = document.createElement("div");
   block.className = "review-panel__scale-block";
@@ -52,7 +55,12 @@ export function createScaleSlider({
 
   const readoutHint = document.createElement("p");
   readoutHint.className = "review-panel__scale-readout-hint";
-  readoutHint.hidden = true;
+  if (idleDescription) {
+    readoutHint.textContent = idleDescription;
+    readoutHint.hidden = false;
+  } else {
+    readoutHint.hidden = true;
+  }
 
   readout.append(viewport, readoutHint);
 
@@ -161,22 +169,26 @@ export function createScaleSlider({
    * @returns {string}
    */
   function hintForValue(value) {
-    if (input.dataset.touched !== "1") return "";
     const mapped = valueHints[value] ?? valueHints[String(value)];
-    return typeof mapped === "string" ? mapped : "";
+    return typeof mapped === "string" ? mapped.trim() : "";
   }
 
   /**
+   * Приписка всегда на месте (без появления при первом drag):
+   * до касания — статичное дополнение к вопросу (`description`);
+   * после — ступень `valueHints` (меняется вместе с ползунком).
    * @param {number} value
    */
   function syncReadoutHint(value) {
-    const hint = hintForValue(value).trim();
-    if (!hint) {
+    const touched = input.dataset.touched === "1";
+    const stepHint = hintForValue(value);
+    const text = touched && stepHint ? stepHint : idleDescription;
+    if (!text) {
       readoutHint.textContent = "";
       readoutHint.hidden = true;
       return;
     }
-    readoutHint.textContent = fixHangingPrepositions(hint);
+    readoutHint.textContent = fixHangingPrepositions(text);
     readoutHint.hidden = false;
   }
 
@@ -364,7 +376,8 @@ export function createScaleSlider({
 
   function syncReadoutAria(value) {
     const label = titleForValue(value);
-    const hint = hintForValue(value);
+    const hint =
+      input.dataset.touched === "1" ? hintForValue(value) : idleDescription;
     const full = hint ? `${label}. ${hint}` : label;
     readout.setAttribute(
       "aria-label",

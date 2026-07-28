@@ -13,16 +13,16 @@
 
 Баланс и профиль дополнительно синкаются с `public.profiles` через `src/api/wallet.js` (`refreshSessionFromProfile`).
 
-`resolveAccessibleRoute`: `/registration` без `referralCode` и без `userId` → обратно на `/referral`.  
+`resolveAccessibleRoute`: `/registration` без `referralDone` (нет `referralCode` и нет device `inviteGatePassed`) и без `userId` → обратно на `/referral`.  
 Auth-gated deep link (`home` / `settings` / `onboarding` / `report` / `url` / `success` / `review` / `quiz` / `done`) без `userId` → `resolveEntryScreen` (referral или auth по state); с `userId` и без онбординга → `onboarding`.
 После логина `main.js` вызывает `redeemReferral` (идемпотентно).
-На boot / route / visibility: localStorage `userId` без живой Supabase Auth → `exitAuthenticatedSession` → `/referral` (`reconcileSessionAccess` в `main.js`).
+На boot / route / visibility: localStorage `userId` без живой Supabase Auth → `exitAuthenticatedSession` → `/registration` при `inviteGatePassed`, иначе `/referral` (`reconcileSessionAccess` в `main.js`).
 
 ## URL
 
 | Id | Path | Смысл |
 |----|------|--------|
-| `referral` | `/referral` | Invite gate: `validate_referral` → session.referralCode |
+| `referral` | `/referral` | Invite gate: `validate_referral` → session.referralCode + `obratka.inviteGatePassed` |
 | `auth` | `/registration` | Email → code screen / Telegram / Google |
 | `authCode` | `/registration/code` | 6-digit Email OTP + resend cooldown |
 | `onboarding` | `/onboarding` | Онбординг → profiles |

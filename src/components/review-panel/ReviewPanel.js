@@ -483,6 +483,7 @@ export function createReviewPanel(options = {}) {
             from: 1,
             to: 5,
             title: t.reviewContextShort,
+            description: t.reviewContextLabel,
             ariaLabel: t.reviewContextLabel,
             ends: {
               low: t.reviewContextScaleLow,
@@ -535,6 +536,7 @@ export function createReviewPanel(options = {}) {
             from: 1,
             to: 5,
             title: t.reviewVisualShort,
+            description: t.reviewVisualLabel,
             ariaLabel: t.reviewVisualLabel,
             ends: {
               low: t.reviewVisualScaleLow,

@@ -17,21 +17,24 @@ alwaysApply: true
 3. Уход без submit (back / home / pagehide / abort): `releasePortfolioClaim` — **без** монет.
    - SPA: `await releaseHeldClaim()`.
    - Unload (`pagehide`): `releasePortfolioClaimKeepalive` (`fetch` + `keepalive`); per-tab `sessionStorage` (`obratka.reviewClaim`) + boot/`releaseHeldClaim` reconcile, если keepalive не успел.
-4. Награда только после успешного `submitPortfolioReview` → `awardReviewReward()` (`REVIEW_REWARD`).
+4. Награда только после успешного `submitPortfolioReview` → `awardReviewReward()` (`REVIEW_REWARD`); late overshoot (после `done`) — **та же** +10.
 5. Не открывать quiz без `claimHeld` (анти ghost-quiz).
 6. Mutations claims — только security definer RPC, не прямой INSERT/UPDATE с клиента.
 7. Опциональная надиктовка (чип rec на `/review` + микрофон в поле совета) не меняет claim-правила; стоп STT при abort/pagehide/submit — см. `dictation.mdc`.
-8. Home: перед intro / claim — клиентский `isPortfolioOpenForReview` (иначе `homeNoSlots*`); сервер всё равно проверяет `no_slots`.
+8. Home: перед intro / claim — клиентский `isPortfolioOpenForReview` (`reviewsCount < target`; иначе `homeNoSlots*`); сервер: `no_slots` при `reviews_count >= target`.
 
-## Слоты на карточке
+## Дверь и overshoot
 
-- `completed` = reviews; `active` = чужие live claims.
-- Карточка в ленте до `target_reviews` completed (default **3**).
-- Active **не** прячут карточку; при открытии без места → `no_slots`.
+- **Дверь в ленту / новый claim:** `reviews_count < target_reviews` (default **3**) и `status = pending`. Live claims **не** лимит.
+- Active claims **не** прячут карточку; пока gathering — можно зайти больше, чем target.
+- Когда `reviews_count` достигает target → `status = done`, лента закрыта; новые claim → `no_slots` / `portfolio_not_pending`.
+- **In-flight без кика:** клиент **не** abort’ит `/review`/`quiz` при закрытии карточки. Heartbeat не делает `go("home")` на ошибке. Late INSERT с живым claim после `done` — ок (`reviews_count` сверх target; **та же** +10). RLS `reviews_insert_own` допускает `status in ('pending','done')`; claim жёстко в триггере.
+- UI слотов на карточке: первые **target** лиц (completed + active); report / PDF / жалобы — **все** листы.
 - RPC-ошибки → `portfolioRpcErrorCode` → home notices (`homeNoSlots*`); `already_reviewed` → silent refresh (карточка disabled + оверлей, без модалки).
 - `reviewedByMe` = строка в `reviews` после submit отчёта, не claim/abort/уход с квиза.
 - `portfolio_reviewer_slots` должна быть **VOLATILE** (STABLE → PostgREST 405); в начале RPC — `purge_expired_review_claims` (expired не светятся в UI до следующего claim).
 - Apply SQL: [`supabase/sql/README.md`](../../supabase/sql/README.md) § «Как применять» / «Повторный apply».
+- Продукт: [`PROJECT.md`](../../PROJECT.md) § Claims, слоты и overshoot.
 
 ## Код
 

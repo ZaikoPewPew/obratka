@@ -23,6 +23,7 @@
 | `reviewReport.js` | сводка квиза → тексты PDF (+ опц. `dictation`); зоны `contextZone` / `visualZone` (visual 1–5); вердикт `tier × gradeZone`. Спека: [`QUIZ.md`](../../QUIZ.md) |
 | `shareReviewPdf.js` | печать PDF-отчёта (1 ревьюер = 1 страница; `onComplete`) |
 | `referralCode.js` | нормализация referral-кода / URL |
+| `inviteGate.js` | device flag `obratka.inviteGatePassed` после validate; переживает logout / `clearSession` |
 | `backdropLuminance.js` | яркость фона под элементом (home tabbar → `--on-dark`; не ломать glass blur / entrance dock) |
 | `homeRoute.js` | parse/build/canonical query для `/home`: `feed` / `mine` / `rating` и фильтр mine |
 | `homeListCache.js` | SWR-кэш ленты home (`feed`/`mine`/`rating`, memory + `sessionStorage` `obratka.homeLists.<userId>`); `clearHomeListCache` на logout |

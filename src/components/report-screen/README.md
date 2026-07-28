@@ -2,7 +2,7 @@
 
 Path: **`/report`** (`report`). Только для **автора** из вкладки «Мои».
 
-Вход с home «Мои» только после `reviewsCount >= targetReviews` (`onOpenReport`); иначе home показывает `homeMineNotReady*` и сюда не ведёт.
+Вход с home «Мои» только после `reviewsCount >= targetReviews` (`onOpenReport`); иначе home показывает `homeMineNotReady*` и сюда не ведёт. Листов может быть **больше target** (in-flight overshoot): список, жалобы и PDF показывают **все** rows, без cap на 3. На карточке home по-прежнему первые `target` аватарок — см. [`PROJECT.md`](../../../PROJECT.md) § Claims.
 
 ## Сейчас
 

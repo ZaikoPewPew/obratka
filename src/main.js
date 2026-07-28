@@ -43,6 +43,10 @@ import {
   isCanonicalHomeSearch,
   parseHomeView,
 } from "./utils/homeRoute.js";
+import {
+  getInviteGatePassed,
+  setInviteGatePassed,
+} from "./utils/inviteGate.js";
 import { fetchMyProfile, isProfileBanned, updateMyProfile } from "./api/profiles.js";
 import { heartbeatLegendaryPresence } from "./api/presence.js";
 import {
@@ -376,12 +380,20 @@ async function exitAuthenticatedSession() {
   pendingReportPortfolioName = "";
   leaveSessionShell();
   await closeReview();
-  go("referral", { replace: true });
+  go(getInviteGatePassed() ? "auth" : "referral", { replace: true });
+}
+
+/**
+ * Invite gate: код в UX-сессии или уже пройденный validate на этом устройстве.
+ * @returns {boolean}
+ */
+function isReferralDone() {
+  return Boolean(getSession()?.referralCode) || getInviteGatePassed();
 }
 
 /**
  * UX-кэш с userId: подтвердить живую Auth, подтянуть ban.
- * Мёртвый Auth (удалённый аккаунт) → полный выход на /referral.
+ * Мёртвый Auth (удалённый аккаунт) → полный выход на auth (или referral, если gate ещё не пройден).
  * Бан не разлогинивает — caller / resolveAccessibleRoute ведут на /banned.
  *
  * @returns {Promise<"ok" | "banned" | "gone">}
@@ -1576,6 +1588,7 @@ const referralScreen = createReferralScreen({
     }
     const session = getSession() ?? {};
     setSession({ ...session, referralCode: result.code });
+    setInviteGatePassed(true);
     go("auth", { handoff: true });
   },
 });
@@ -1609,7 +1622,7 @@ async function applyRoute(id, opts = {}) {
     hasPortfolio: Boolean(portfolioUrl),
     hasSession: Boolean(session?.userId),
     onboardingDone: Boolean(session?.onboardingDone),
-    referralDone: Boolean(session?.referralCode),
+    referralDone: isReferralDone(),
     banned: Boolean(session?.banned),
   });
 
@@ -1805,7 +1818,7 @@ appRouter = createAppRouter({
       const entry = resolveEntryScreen({
         hasSession: Boolean(session?.userId),
         onboardingDone: Boolean(session?.onboardingDone),
-        referralDone: Boolean(session?.referralCode),
+        referralDone: isReferralDone(),
         banned: Boolean(session?.banned),
       });
       const search = Object.fromEntries(location.search.entries());

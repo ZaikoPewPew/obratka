@@ -34,7 +34,7 @@
 
 | Что меняли | Что прогнать |
 |------------|--------------|
-| Весь claims-слой | весь [`review_claims.sql`](review_claims.sql) |
+| Весь claims-слой / overshoot (дверь без live, late insert, RLS insert на `done`) | весь [`review_claims.sql`](review_claims.sql) (drop CHECK + claim/trigger + `reviews_insert_own`) |
 | Только слоты + purge expired | с `drop function … portfolio_reviewer_slots` до конца функции **и** `revoke`/`grant` на неё (в конце файла) |
 
 Клиентский фикс залипающих «Аноним»-слотов (keepalive `pagehide` + `sessionStorage` `obratka.reviewClaim`) **не** требует SQL — достаточно деплоя фронта. SQL-purge в `portfolio_reviewer_slots` — доп. hardening, чтобы expired не светились до следующего claim/heartbeat.

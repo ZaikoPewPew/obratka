@@ -19,7 +19,7 @@
 | Home: «Топы в сети» (fixed-чип) | wired (`legendary-online-panel` + `legendary_presence`) |
 | Home: free-slot «Мои» + max 1 pending | wired (`MAX_MINE_PENDING`, `submit_portfolio`) |
 | Home tabbar dock: glass + «Закинуть своё» справа | wired (`tabbar-dock`, `--on-dark`, entrance `motion-reveal-dock`) |
-| Review claim / heartbeat / release | wired (награда только после submit; unload = keepalive + `sessionStorage` reconcile) |
+| Review claim / heartbeat / release | wired (награда только после submit; unload = keepalive + `sessionStorage` reconcile; **overshoot** — см. § Claims) |
 | Review iframe + таймер 45 s + **надиктовка** (rec на `/review` + микрофон в поле совета) + квиз | wired |
 | Подача URL + back-chip + done на url-screen | wired |
 | Report: листы (+ `dictation`) + жалоба + PDF | wired |
@@ -32,9 +32,9 @@
 
 - **SWR ленты:** `feed` / `mine` / `rating` в memory + `sessionStorage` (`obratka.homeLists.<userId>`); open / смена таба / F5 без skeleton при hit; тихий `refresh`; logout → `clearHomeListCache`.
 - **Silent refresh:** при тех же id карточек — патч только reviewer-слотов (без thum.io); новые id — rebuild + reveal только для них.
-- **Порядок feed:** `sortFeedForSlotClosure` — open slot → ближе к 3/3 → FIFO; `reviewedByMe` / full вниз (не newest-first). См. home-screen README.
+- **Порядок feed:** `sortFeedForSlotClosure` — ближе к 3/3 → FIFO; `reviewedByMe` вниз (не newest-first). Дверь claim = `reviews_count < target` (live не лимит; late overshoot ок). См. home-screen README.
 - **Отправленный отчёт:** `reviewedByMe` появляется только после INSERT в `reviews`; карточка disabled с оверлеем «Отчёт отправлен», без intro/notice и повторного claim.
-- **Intro до claim:** клик по чужой карточке → если нет слота (`isPortfolioOpenForReview`) → `homeNoSlots*`; иначе `createAppModal` `homeReviewIntro*` (тайтл + автор `{name}`, две карточки минут, CTA «Сюдаа его!») → claim → `/review`. «Не сейчас» / закрытие — без claim.
+- **Intro до claim:** клик по чужой карточке → если уже набрали target (`isPortfolioOpenForReview`) → `homeNoSlots*`; иначе `createAppModal` `homeReviewIntro*` (тайтл + автор `{name}`, две карточки минут, CTA «Сюдаа его!») → claim → `/review`. «Не сейчас» / закрытие — без claim.
 - **Abort / hard nav:** SPA `releaseHeldClaim`; `pagehide` → `releasePortfolioClaimKeepalive`; per-tab `obratka.reviewClaim` + boot reconcile — active «Аноним» не залипает после ухода (см. `review-claims.mdc`). SQL: `portfolio_reviewer_slots` чистит expired перед list.
 - **Mine report gate:** `reviewsCount < targetReviews` → `homeMineNotReady*`; иначе `/report`. Own-карточки всегда `cursor: pointer` (не `not-allowed`).
 - **Фильтр «Мои»:** сегмент Активные / Завершенные (`tabs-panel`); завершённые = 3/3 (`reviewsCount >= targetReviews`).
@@ -59,7 +59,7 @@
                               └─ submit → /portfolio → done (URL sync /done)
 ```
 
-Корень `/` → `resolveEntryScreen(getSession())` в `src/app/flow.js`. Auth-gated deep links без живой сессии идут в referral/auth; пользователь без завершённого онбординга — в `/onboarding`. На boot cached `userId` проверяется через Supabase Auth, stale UX-кэш очищается с сохранением referral-кода.
+Корень `/` → `resolveEntryScreen(getSession())` в `src/app/flow.js`. Auth-gated deep links без живой сессии идут в referral/auth; пользователь без завершённого онбординга — в `/onboarding`. На boot cached `userId` проверяется через Supabase Auth; stale UX-кэш чистится (`clearSession`), device invite gate (`obratka.inviteGatePassed`) переживает logout.
 Оркестрация: `src/main.js` (`go` / `applyRoute` / `syncRoute`).
 
 Подробная таблица path ↔ экран — [`SCREENS.md`](SCREENS.md).
@@ -95,12 +95,13 @@
 
 | Что | Детали |
 |-----|--------|
-| Gate | `/referral` → RPC `validate_referral` (anon) до auth |
+| Gate | `/referral` → RPC `validate_referral` (anon) до auth; после успеха — `obratka.inviteGatePassed` (раз на устройство) |
 | Redeem | после логина `redeem_referral` (один раз на аккаунт) |
 | Код юзера | `profiles.referral_code`, max **2** активации |
 | Seed | `YTHWKPDWAK` в `referral_seed_codes` (холодный старт) |
+| Logout | при gate → `/registration`; иначе → `/referral`. Deep link `/referral` / `?ref=` не ломаем |
 | Шаринг | home → аватар → account-menu → «Пригласить» (`homeInvite*`); copy/share = полный `homeInviteMessage` (`{url}`, `{code}`) |
-| SQL / API | [`supabase/sql/referrals.sql`](supabase/sql/referrals.sql), [`src/api/referrals.js`](src/api/referrals.js) |
+| SQL / API | [`supabase/sql/referrals.sql`](supabase/sql/referrals.sql), [`src/api/referrals.js`](src/api/referrals.js), [`src/utils/inviteGate.js`](src/utils/inviteGate.js) |
 
 ## Данные (Supabase)
 
@@ -137,6 +138,45 @@ Null/unknown **не** пишем в `junior` в БД: матчинг = лига 
 | Senior+ | Senior+ |
 
 Senior → Junior нельзя. Grade обязателен в онбординге UI; серверный fallback лиги 1 — safety net. Claims / INSERT тоже проверяют лигу.
+
+## Claims, слоты и overshoot
+
+Цель: автору **достаточно** `target_reviews` (default **3**) completed-отчётов — карточка уходит из ленты в «Завершенные». Не ловим realtime «ровно трое в комнате» и **не кикаем** тех, кто уже внутри, если листов стало больше трёх.
+
+Правило агента: [`.cursor/rules/review-claims.mdc`](.cursor/rules/review-claims.mdc). SQL: [`review_claims.sql`](supabase/sql/review_claims.sql) (+ RLS insert в [`portfolios.sql`](supabase/sql/portfolios.sql)).
+
+### Дверь
+
+| Событие | Правило |
+|---------|---------|
+| Карточка в ленте | `status = pending` и `reviews_count < target` |
+| Новый claim | пока `reviews_count < target` (и лига / не своё / не `already_reviewed`). **Live claims не лимит** |
+| `no_slots` / `homeNoSlots*` | уже набрали target completed (не «трое сидят внутри») |
+| UI слотов на карточке | первые **target** лиц (completed + active «Аноним»); лишние в кружках не рисуем |
+| `/report` + PDF + жалобы | **все** листы по portfolio, без cap на 3 |
+
+### In-flight (4-й / N-й ревьюер)
+
+Пока карточка ещё pending, несколько человек могут взять claim. Когда третьи сдают отчёт → `status = done`, лента закрыта. Остальные с **живым claim**:
+
+1. **Сессию не рвём** — клиент не смотрит `status`/`reviews_count` mid-review/quiz и не делает `go("home")` из‑за закрытия карточки. Heartbeat при ошибке только логирует (DEV), не abort.
+2. **Heartbeat / release** — security definer RPC, не зависят от SELECT портфолио (после `done` чужой SELECT по RLS ленты уже закрыт — это ок).
+3. **Submit** — INSERT с валидным claim принимается при `status in ('pending','done')`; `reviews_count` растёт сверх target; **та же +10**; claim снимается. RLS `reviews_insert_own` и триггер `handle_review_inserted` оба допускают `done`.
+4. Без claim / после abort — как раньше, без монет.
+
+```text
+A,B,C,D взяли claim (карточка ещё < 3 completed)
+A,B,C сдали → done, лента закрыта, автору «Завершенные»
+D спокойно дописывает квиз → INSERT +10 → 4-й лист в report/PDF
+```
+
+Не путать с abort: уход с `/review` / pagehide без submit → `release` → слот «Аноним» исчезает, награды нет.
+
+### Клиентское зеркало
+
+- `isPortfolioOpenForReview` — `reviewsCount < target` (без вычета live).
+- `sortFeedForSlotClosure` — remaining до target → FIFO; live не двигает карточку вниз.
+- Оркестрация claim: `main.js` (`claimHeld`, heartbeat, `releaseHeldClaim`, keepalive).
 
 ## Репутация и жалобы на листы
 

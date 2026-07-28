@@ -14,10 +14,11 @@ createScaleSlider({
   from,           // min (целое)
   to,             // max (целое)
   title,          // idle-заголовок до первого касания («Понятность» / «Визуал»)
+  description?,   // статичная приписка под заголовком (полный вопрос) — видна сразу
   ariaLabel?,     // полный вопрос для a11y
   ends: { low, high },
   valueTitles?,   // { [value]: string } — заголовок после touch
-  valueHints?,    // { [value]: string } — приписка под заголовком
+  valueHints?,    // { [value]: string } — приписка после touch (+ aria)
 }) → HTMLElement  // .review-panel__scale-block
 ```
 
@@ -25,10 +26,12 @@ createScaleSlider({
 
 | Состояние | Заголовок | Приписка |
 |-----------|-----------|----------|
-| До touch | `title` (idle) | скрыта |
-| Drag / pointer | `valueTitles[value]` **сразу** (без очереди анимаций) | `valueHints[value]` сразу |
-| Клавиатура | короткий кроссфейд заголовка | сразу |
-| `reset-visual` | снова idle `title` | скрыта |
+| До touch | `title` (idle, напр. «Понятность») | сразу `description` (полный вопрос) — **без** `hidden` |
+| Drag / pointer | `valueTitles[value]` сразу | `valueHints[value]` (меняется со ступенью) |
+| Клавиатура | короткий кроссфейд заголовка | `valueHints[value]` |
+| `reset-visual` | снова idle `title` | снова `description` |
+
+Приписка видна с первого кадра, чтобы не появлялась при дёрге ползунка. До касания — дополнение к вопросу; после — контекст ступени.
 
 Стопы — все целые от `from` до `to` (step 1). Drag и стрелки магнитятся к стопам; клавиши Home/End/PageUp/PageDown тоже по индексу стопов.
 

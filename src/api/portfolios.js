@@ -443,19 +443,8 @@ async function attachReviewerSlots(items) {
 }
 
 /**
- * Число занятых live-claim слотов (kind === 'active') на карточке.
- *
- * @param {PortfolioQueueItem} item
- * @returns {number}
- */
-function activeSlotCount(item) {
-  const slots = Array.isArray(item.reviewerSlots) ? item.reviewerSlots : [];
-  return slots.reduce((n, slot) => (slot && slot.kind === "active" ? n + 1 : n), 0);
-}
-
-/**
  * Клиентский фильтр кандидата на claim (сервер всё равно проверит).
- * Совпадает с тем, что на home кликабельно: не своё, не reviewedByMe, есть слот.
+ * Дверь = ещё не набрали target completed. Live claims не закрывают вход.
  *
  * @param {PortfolioQueueItem | null | undefined} item
  * @returns {boolean}
@@ -466,15 +455,15 @@ export function isPortfolioOpenForReview(item) {
   if (!id) return false;
   const target = item.targetReviews ?? DEFAULT_TARGET_REVIEWS;
   const completed = item.reviewsCount ?? 0;
-  return target - completed - activeSlotCount(item) > 0;
+  return completed < target;
 }
 
 /**
- * Порядок ленты «На ревью» под быстрое закрытие 3 слотов автора:
+ * Порядок ленты «На ревью» под быстрое закрытие target слотов автора:
  * 1) уже отправил отчёт (`reviews`) — вниз (на home disabled);
- * 2) без свободного слота — вниз (`openSlots = target - completed - active`);
- * 3) меньше остаётся до target — выше (сначала 2/3, потом 1/3, потом 0/3);
- * 4) tie-break: старше выше (`createdAt` ASC, FIFO).
+ * 2) меньше остаётся до target — выше (сначала 2/3, потом 1/3, потом 0/3);
+ * 3) tie-break: старше выше (`createdAt` ASC, FIFO).
+ * Live claims не двигают карточку вниз — дверь открыта, пока completed < target.
  * Стабильный сорт: не мутирует вход.
  *
  * @param {PortfolioQueueItem[]} items
@@ -485,19 +474,16 @@ function sortFeedForSlotClosure(items) {
     .map((item, index) => {
       const target = item.targetReviews ?? DEFAULT_TARGET_REVIEWS;
       const completed = item.reviewsCount ?? 0;
-      const openSlots = target - completed - activeSlotCount(item);
       return {
         item,
         index,
         reviewedByMe: item.reviewedByMe ? 1 : 0,
-        hasOpenSlot: openSlots > 0 ? 0 : 1,
         remaining: Math.max(0, target - completed),
         createdAt: typeof item.createdAt === "string" ? item.createdAt : "",
       };
     })
     .sort((a, b) => {
       if (a.reviewedByMe !== b.reviewedByMe) return a.reviewedByMe - b.reviewedByMe;
-      if (a.hasOpenSlot !== b.hasOpenSlot) return a.hasOpenSlot - b.hasOpenSlot;
       if (a.remaining !== b.remaining) return a.remaining - b.remaining;
       if (a.createdAt !== b.createdAt) return a.createdAt < b.createdAt ? -1 : 1;
       return a.index - b.index;
@@ -517,11 +503,11 @@ export function clearSubmittedPortfolios() {
  * Карточка остаётся до 3/3 completed-отчётов (`status=pending`);
  * `reviewedByMe` — только после INSERT в `reviews` (submit отчёта), не claim /
  * abort / уход с квиза. На home такие карточки disabled + оверлей, без модалки.
- * Active claims не прячут карточку — только `no_slots` при открытии.
+ * Active claims не прячут карточку и не закрывают claim: дверь =
+ * `reviews_count < target`. Late in-flight после done сдаёт лист и получает +10.
  *
- * Порядок (после слотов) — `sortFeedForSlotClosure`: свободный слот →
- * ближе к target (больше completed) → старше (FIFO), а `reviewedByMe`
- * и заполненные карточки уходят вниз. Не newest-first.
+ * Порядок (после слотов) — `sortFeedForSlotClosure`: ближе к target
+ * (больше completed) → старше (FIFO); `reviewedByMe` вниз. Не newest-first.
  *
  * @returns {Promise<PortfolioQueueItem[]>}
  */

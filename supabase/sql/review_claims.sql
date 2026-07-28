@@ -11,6 +11,14 @@
 --     (см. sql/README.md § «Повторный apply»).
 -- Клиентский unload: keepalive release + sessionStorage reconcile — не SQL;
 --   см. .cursor/rules/review-claims.mdc.
+--
+-- Overshoot: дверь в ленту = reviews_count >= target (live claims не лимит).
+-- In-flight с валидным claim может INSERT после status=done; +10 как у всех.
+-- UI слотов / лента показывают target кружков (первые лица); report — все листы.
+
+-- Снять потолок reviews_count <= target (иначе late insert упрётся в CHECK).
+alter table public.portfolios
+  drop constraint if exists portfolios_reviews_within_target;
 
 -- Ответы квиза + денормализованный аватар ревьюера (для слотов / отчёта).
 alter table public.reviews
@@ -75,8 +83,6 @@ as $$
 declare
   uid uuid := auth.uid();
   p public.portfolios;
-  live_others integer;
-  own_live boolean;
   ttl interval := public.review_claim_ttl();
   avatar text;
   display text;
@@ -121,21 +127,9 @@ begin
     raise exception 'already_reviewed';
   end if;
 
-  select exists (
-    select 1
-    from public.review_claims c
-    where c.portfolio_id = p.id
-      and c.reviewer_id = uid
-      and c.expires_at > now()
-  ) into own_live;
-
-  select count(*)::integer into live_others
-  from public.review_claims c
-  where c.portfolio_id = p.id
-    and c.reviewer_id <> uid
-    and c.expires_at > now();
-
-  if not own_live and (p.reviews_count + live_others) >= p.target_reviews then
+  -- Дверь = набрали target completed. Live claims не считаем: пока карточка
+  -- в ленте, можно зайти впятером; опоздавшие in-flight сдадут после done.
+  if p.reviews_count >= p.target_reviews then
     raise exception 'no_slots';
   end if;
 
@@ -348,7 +342,8 @@ begin
     raise exception 'cannot_review_own_portfolio';
   end if;
 
-  if p.status <> 'pending' then
+  -- Late overshoot: status уже done, но у ревьюера ещё живой claim — принимаем.
+  if p.status not in ('pending', 'done') then
     raise exception 'portfolio_not_pending';
   end if;
 
@@ -459,6 +454,24 @@ create policy "reviews_select_reviewer_or_owner"
       from public.portfolios p
       where p.id = portfolio_id
         and p.owner_id = (select auth.uid())
+    )
+  );
+
+-- Late overshoot: INSERT после status=done, если триггер пропустит (живой claim).
+drop policy if exists "reviews_insert_own" on public.reviews;
+create policy "reviews_insert_own"
+  on public.reviews for insert
+  to authenticated
+  with check (
+    reviewer_id = (select auth.uid())
+    and not public.is_profile_banned((select auth.uid()))
+    and exists (
+      select 1
+      from public.portfolios p
+      where p.id = portfolio_id
+        and p.status in ('pending', 'done')
+        and p.owner_id <> (select auth.uid())
+        and public.can_review_portfolio(p.owner_id, (select auth.uid()))
     )
   );
 

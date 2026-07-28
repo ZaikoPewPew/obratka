@@ -11,12 +11,12 @@ alwaysApply: true
 
 1. `session.banned` из профиля (`applyProviderUser` / `refreshSessionFromProfile` / `reconcileSessionAccess`).
 2. Бан → всегда `/banned` (login, mid-session, deep link, history Back/Forward). `resolveEntryScreen` / `resolveAccessibleRoute` / `go` escape-proof; JWT при бане **не** рвём.
-3. Удалённый / мёртвый Auth (`getUser()` пустой при UX-кэше с `userId`) → `exitAuthenticatedSession` → `/referral` (способ входа). Не оставлять stale `userId` — иначе history снова откроет gated-экраны.
+3. Удалённый / мёртвый Auth (`getUser()` пустой при UX-кэше с `userId`) → `exitAuthenticatedSession` → `/registration` при device invite gate, иначе `/referral`. Не оставлять stale `userId` — иначе history снова откроет gated-экраны.
 4. Ревалидация: boot, каждый `applyRoute`, `visibilitychange` — через `reconcileSessionAccess` в `main.js` (не realtime).
 5. Клиент **не** пишет `banned_at` / `ban_reason` / `tier` / `reputation` (триггеры `protect_profiles_*`; RPC жалоб ставит bypass).
 6. UI: `ban-screen` — статичный красный mesh + `banBrandMarkSvg` **44×52**.
 7. **Не** использовать `createBrandScreenVisual` / `setVariant("invalid")` на ban-screen.
-8. «Выйти» на ban-screen → signOut → `/referral`; повторный логин того же аккаунта снова → `/banned`.
+8. «Выйти» на ban-screen → signOut → `/registration` (или `/referral`, если gate ещё не пройден); повторный логин того же аккаунта снова → `/banned`.
 9. RLS: banned не INSERT portfolios/reviews (`is_profile_banned`).
 10. Автобан: жалобы на листы → `reputation` → порог → те же `banned_at` (см. `reputation.mdc`).
 

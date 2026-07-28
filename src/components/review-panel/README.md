@@ -33,7 +33,7 @@
 
 Progress считает только **видимые** шаги (6 или 7 в зависимости от visual).
 
-Шкалы: idle-заголовок одним словом (`reviewContextShort` / `reviewVisualShort`); после касания — ступень + приписка; min/max слева/справа. Вопросный `.review-panel__question` на scale-шагах скрыт (заголовок живёт в слайдере).
+Шкалы: idle-заголовок (`reviewContextShort` / `reviewVisualShort`) + **сразу** приписка полного вопроса (`description`); после касания заголовок → `Value*`, приписка → `Hint*` ступени (без появления с нуля). Вопросный `.review-panel__question` на scale-шагах скрыт.
 
 Авто-advance на single/scale после выбора (кроме pain и advice).
 

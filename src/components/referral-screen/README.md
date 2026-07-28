@@ -35,9 +35,10 @@ Handoff на auth: `go("auth", { handoff: true })` — visual не переиг�
 
 1. Prefill: `?ref=` (через `open(prefill)` из `main.js`); код/URL нормализуется (`normalizeReferralCode`).
 2. Submit → `onSubmit(code)` (async). Ошибки (`invalid` / `exhausted` / …) → `setError`.
-3. В `main.js`: `validateReferral` → session → `go("auth", { handoff: true })`.
+3. В `main.js`: `validateReferral` → session + `setInviteGatePassed(true)` → `go("auth", { handoff: true })`.
 4. После логина: `redeemReferral` (один раз на аккаунт).
-5. Deep link `/registration` без кода и без сессии → обратно на `/referral`.
+5. Deep link `/registration` без кода, без сессии и без device gate → обратно на `/referral`.
+6. Logout при `inviteGatePassed` → `/registration` (не снова на gate). `/referral` и `?ref=` остаются доступны.
 
 ## i18n
 

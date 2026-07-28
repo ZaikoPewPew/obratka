@@ -30,7 +30,7 @@ Senior → Junior **нельзя** (ликвидность мидлов). Grade 
 ## Claims и слоты
 
 - `claim_portfolio_review` / INSERT review тоже проверяют `can_review_portfolio` (+ `review_league_mismatch`).
-- Active claims **не** снимают карточку с ленты; лимит = `reviews_count + live_others >= target_reviews`.
+- Active claims **не** снимают карточку с ленты; дверь нового claim = `reviews_count >= target_reviews` (`no_slots`). Live не лимит; late insert после `done` ок (+10). См. `review-claims.mdc`.
 - Детали claim/heartbeat/release — `review-claims.mdc`.
 
 ## Код

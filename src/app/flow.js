@@ -136,7 +136,7 @@ export function resolveAccessibleRoute(id, state = {}) {
     }
   }
 
-  // Invite-only: auth без кода / без сессии → обратно на referral.
+  // Invite-only: auth без кода / без device gate / без сессии → обратно на referral.
   if (
     (id === "auth" || id === "authCode") &&
     !hasSession &&
