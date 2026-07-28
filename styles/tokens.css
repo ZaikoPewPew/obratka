@@ -740,7 +740,7 @@
   --home-screen-p2p-explainer-media-radius: var(--radius-md);
   --home-screen-p2p-explainer-media-bg: var(--color-surface-muted);
   --home-screen-explainer-media-ray-size: 210%;
-  --home-screen-explainer-media-ray-opacity: 0.9;
+  --home-screen-explainer-media-ray-opacity: 1;
   --home-screen-balance-explainer-card-padding: var(--space-4);
   --home-screen-balance-explainer-card-gap: var(--space-1);
   --home-screen-balance-explainer-card-radius: var(--radius-md);
