@@ -1452,16 +1452,6 @@ export function createHomeScreen({
     addBtn.replaceChildren(createSubmitIcon(nextKind));
   }
 
-  function openPendingLimitModal() {
-    const t = getStrings();
-    showNotice({
-      title: t.homePendingLimitTitle ?? "",
-      body: t.homePendingLimit ?? "",
-      closeLabel: t.homePendingLimitClose,
-      closeAria: t.homePendingLimitCloseAria,
-    });
-  }
-
   /**
    * Pending «Мои на ревью»: текущий mine-список или кэш вкладки.
    * `null` — нет локальных данных (нужен сервер).
@@ -1489,7 +1479,6 @@ export function createHomeScreen({
         if (!(await hasFreeMineSlot())) {
           submitSlotBlocked = true;
           flashSubmitError();
-          openPendingLimitModal();
           syncSubmitButton();
           return;
         }
@@ -1502,7 +1491,6 @@ export function createHomeScreen({
       }
     } else if (pending >= MAX_MINE_PENDING) {
       flashSubmitError();
-      openPendingLimitModal();
       return;
     }
 

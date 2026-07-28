@@ -118,7 +118,7 @@
   }
 }
 
-/** Тот же взгляд без длинного idle — один раз на hover/focus чипа. */
+/** Тот же взгляд без idle-паузы — один раз на hover/focus чипа (скорость = активная фаза). */
 @keyframes motion-reputation-eyes-look-once {
   0% {
     transform: translateX(0);
@@ -191,7 +191,7 @@
   }
 }
 
-/** Волны уточки без длинного idle — один раз на hover/focus чипа. */
+/** Волны уточки без idle-паузы — один раз на hover/focus чипа (скорость = активная фаза). */
 @keyframes motion-balance-duck-float-once {
   0% {
     transform: translate(0, 0) rotate(0deg);

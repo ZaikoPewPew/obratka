@@ -660,7 +660,7 @@
     infinite;
 }
 
-/* Hover/focus: сразу один цикл без длинной idle-паузы. */
+/* Hover/focus: сразу один цикл без idle-паузы, скорость как у активной фазы. */
 .home-screen__chip--reputation:focus-visible .home-screen__reputation-eyes {
   animation: motion-reputation-eyes-look-once
     var(--motion-reputation-eyes-hover-duration)
