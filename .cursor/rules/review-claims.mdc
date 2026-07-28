@@ -15,10 +15,13 @@ alwaysApply: true
    Не открывать `/review` и не ставить `claimHeld` до успешного RPC.
 2. Пока review/quiz открыт: `heartbeatPortfolioClaim` (TTL **20 min**).
 3. Уход без submit (back / home / pagehide / abort): `releasePortfolioClaim` — **без** монет.
+   - SPA: `await releaseHeldClaim()`.
+   - Unload (`pagehide`): `releasePortfolioClaimKeepalive` (`fetch` + `keepalive`); per-tab `sessionStorage` (`obratka.reviewClaim`) + boot/`releaseHeldClaim` reconcile, если keepalive не успел.
 4. Награда только после успешного `submitPortfolioReview` → `awardReviewReward()` (`REVIEW_REWARD`).
 5. Не открывать quiz без `claimHeld` (анти ghost-quiz).
 6. Mutations claims — только security definer RPC, не прямой INSERT/UPDATE с клиента.
 7. Опциональная надиктовка (чип rec на `/review` + микрофон в поле совета) не меняет claim-правила; стоп STT при abort/pagehide/submit — см. `dictation.mdc`.
+8. Home: перед intro / claim — клиентский `isPortfolioOpenForReview` (иначе `homeNoSlots*`); сервер всё равно проверяет `no_slots`.
 
 ## Слоты на карточке
 
@@ -27,12 +30,13 @@ alwaysApply: true
 - Active **не** прячут карточку; при открытии без места → `no_slots`.
 - RPC-ошибки → `portfolioRpcErrorCode` → home notices (`homeNoSlots*`); `already_reviewed` → silent refresh (карточка disabled + оверлей, без модалки).
 - `reviewedByMe` = строка в `reviews` после submit отчёта, не claim/abort/уход с квиза.
-- `portfolio_reviewer_slots` должна быть **VOLATILE** (STABLE → PostgREST 405).
+- `portfolio_reviewer_slots` должна быть **VOLATILE** (STABLE → PostgREST 405); в начале RPC — `purge_expired_review_claims` (expired не светятся в UI до следующего claim).
+- Apply SQL: [`supabase/sql/README.md`](../../supabase/sql/README.md) § «Как применять» / «Повторный apply».
 
 ## Код
 
 - SQL: `supabase/sql/review_claims.sql` (после `portfolios.sql`)
-- API: `src/api/portfolios.js` (`claim` / `heartbeat` / `release`)
-- Оркестрация: `src/main.js` (`claimHeld`, heartbeat, `releaseHeldClaim`, `claimAndStartReview`, `openNextReviewCase`)
+- API: `src/api/portfolios.js` (`claim` / `heartbeat` / `release` / `releasePortfolioClaimKeepalive`)
+- Оркестрация: `src/main.js` (`claimHeld`, `obratka.reviewClaim` sessionStorage, heartbeat, `releaseHeldClaim`, `claimAndStartReview`, `openNextReviewCase`)
 - API-фильтр кандидата: `isPortfolioOpenForReview` в `portfolios.js`
 - UI слотов: `src/components/home-screen/README.md` (silent patch при poll / visibility без skeleton)

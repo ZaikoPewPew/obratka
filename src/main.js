@@ -21,7 +21,7 @@ import {
 import { createAppRouter } from "./app/router.js";
 import { getSession, setSession, clearSession } from "./app/session.js";
 import { completeOAuthFromUrl, signOut } from "./api/auth.js";
-import { getSupabase } from "./lib/supabaseClient.js";
+import { getSupabase, refreshCachedAccessToken } from "./lib/supabaseClient.js";
 import {
   submitPortfolio,
   clearSubmittedPortfolios,
@@ -29,6 +29,7 @@ import {
   claimPortfolioReview,
   heartbeatPortfolioClaim,
   releasePortfolioClaim,
+  releasePortfolioClaimKeepalive,
   portfolioRpcErrorCode,
   hasFreeMineSlot,
   listPortfoliosForReview,
@@ -72,6 +73,7 @@ import { REVIEW_SESSION_SECONDS } from "./config/review.js";
 import {
   resolvePortfolioEmbed,
 } from "./utils/portfolioEmbed.js";
+import { normalizePortfolioUrl } from "./utils/portfolioMeta.js";
 import { getMotionFocusDelayMs } from "./utils/motionTokens.js";
 import brandLogoUrl from "./assets/brand/logo.svg";
 import timerEndUrl from "./assets/audio/Timer-end.wav";
@@ -80,10 +82,18 @@ const SESSION_TOTAL_MS = REVIEW_SESSION_SECONDS * 1000;
 const TIMER_TICK_MS = 10;
 /** Продление claim TTL, пока пользователь на review/quiz. */
 const CLAIM_HEARTBEAT_MS = 2 * 60 * 1000;
+/** Per-tab: orphan claim после failed unload → boot reconcile. */
+const REVIEW_CLAIM_STORAGE_KEY = "obratka.reviewClaim";
 /** Ping last_seen для legendary (серверный online TTL = 2 min). */
 const LEGENDARY_PRESENCE_HEARTBEAT_MS = 60 * 1000;
 /** Потолок длины надиктовки в answers.dictation. */
 const DICTATION_MAX_LEN = 4000;
+/**
+ * Sandbox портфолио-iframe: скрипты/формы/попапы ок, без top-navigation
+ * (вредоносный сайт автора не уводит окно приложения).
+ */
+const PORTFOLIO_FRAME_SANDBOX =
+  "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox";
 
 const frameWrap = document.querySelector("[data-frame]");
 const frame = document.querySelector("#portfolio-frame");
@@ -107,6 +117,40 @@ let portfolioUrl = null;
 let portfolioId = null;
 /** Активный claim на portfolioId (нужно release при уходе без submit). */
 let claimHeld = false;
+
+/**
+ * @param {string} id
+ */
+function persistReviewClaim(id) {
+  const portfolio = String(id || "").trim();
+  if (!portfolio) return;
+  try {
+    window.sessionStorage.setItem(REVIEW_CLAIM_STORAGE_KEY, portfolio);
+  } catch {
+    /* private mode / quota */
+  }
+}
+
+function clearPersistedReviewClaim() {
+  try {
+    window.sessionStorage.removeItem(REVIEW_CLAIM_STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * @returns {string}
+ */
+function readPersistedReviewClaim() {
+  try {
+    const raw = window.sessionStorage.getItem(REVIEW_CLAIM_STORAGE_KEY);
+    return typeof raw === "string" ? raw.trim() : "";
+  } catch {
+    return "";
+  }
+}
+
 /** Ревью уже отправлено — claim не освобождаем (триггер снял его). */
 let reviewSubmitted = false;
 /** @type {Promise<void> | null} */
@@ -236,6 +280,7 @@ const reviewPanel = createReviewPanel({
           await submitPortfolioReview(portfolioId, payload ?? null);
           reviewSubmitted = true;
           claimHeld = false;
+          clearPersistedReviewClaim();
           stopClaimHeartbeat();
           await awardReviewReward();
         }
@@ -316,6 +361,7 @@ async function exitAuthenticatedSession() {
   }
   stopTimer();
   await releaseHeldClaim();
+  clearPersistedReviewClaim();
   resetDictationSession();
   stopLegendaryPresenceHeartbeat();
   portfolioUrl = null;
@@ -477,11 +523,26 @@ async function releaseHeldClaim() {
   stopClaimHeartbeat();
   if (!claimHeld || reviewSubmitted || !portfolioId) {
     claimHeld = false;
+    await releaseOrphanedReviewClaim();
     return;
   }
   const id = portfolioId;
   claimHeld = false;
   await releasePortfolioClaim(id);
+  clearPersistedReviewClaim();
+}
+
+/**
+ * Same-tab orphan после failed pagehide keepalive: storage есть, claimHeld нет.
+ * Не трогает чужую вкладку (sessionStorage per-tab).
+ * @returns {Promise<void>}
+ */
+async function releaseOrphanedReviewClaim() {
+  if (claimHeld) return;
+  const id = readPersistedReviewClaim();
+  if (!id) return;
+  await releasePortfolioClaim(id);
+  clearPersistedReviewClaim();
 }
 
 /** Защита от двойного клика «Следующий кейс». */
@@ -506,6 +567,20 @@ async function claimAndStartReview(item, opts = {}) {
   if (item?.isOwn || item?.reviewedByMe) return false;
   const id = typeof item?.id === "string" ? item.id : "";
   if (!id) return false;
+
+  if (!isPortfolioOpenForReview(item)) {
+    if (showNoSlotsNotice) {
+      const t = getStrings();
+      homeScreen.showNotice({
+        title: t.homeNoSlotsTitle,
+        body: t.homeNoSlotsBody,
+        closeLabel: t.homeNoSlotsClose,
+        closeAria: t.homeNoSlotsCloseAria,
+      });
+      void homeScreen.refresh();
+    }
+    return false;
+  }
 
   try {
     await claimPortfolioReview(id);
@@ -540,6 +615,8 @@ async function claimAndStartReview(item, opts = {}) {
   }
 
   claimHeld = true;
+  persistReviewClaim(id);
+  void refreshCachedAccessToken();
   reviewSubmitted = false;
   reviewSubmitPromise = null;
   stopTimer();
@@ -842,6 +919,9 @@ function applyEmbedPlan(plan) {
 
   if (!frame || !frameWrap || !externalViewer) return;
 
+  frame.setAttribute("sandbox", PORTFOLIO_FRAME_SANDBOX);
+  frame.setAttribute("referrerpolicy", "no-referrer");
+
   const isExternal = plan.mode === "external";
   frameWrap.classList.toggle("iframe-shell__frame--external", isExternal);
   externalViewer.hidden = !isExternal;
@@ -934,7 +1014,7 @@ function setPortfolioAvatar(primary) {
  * }} [options]
  */
 function applyPortfolio(url, options = {}) {
-  portfolioUrl = url;
+  const safeUrl = normalizePortfolioUrl(url);
   portfolioId =
     typeof options.portfolioId === "string" && options.portfolioId.trim()
       ? options.portfolioId.trim()
@@ -942,17 +1022,31 @@ function applyPortfolio(url, options = {}) {
   const applicantName =
     typeof options.applicantName === "string" && options.applicantName.trim()
       ? options.applicantName.trim()
-      : url;
+      : safeUrl || String(url || "").trim() || getStrings().brandName;
   const applicantAvatar =
     typeof options.applicantAvatar === "string"
       ? options.applicantAvatar.trim()
       : "";
-  const plan = resolvePortfolioEmbed(url);
 
   syncPortfolioChrome({
     label: applicantName,
     avatar: applicantAvatar,
   });
+
+  if (!safeUrl) {
+    portfolioUrl = "";
+    applyEmbedPlan({
+      mode: "iframe",
+      openUrl: "",
+      frameSrc: null,
+      allowFullscreen: false,
+      hostLabel: "",
+    });
+    return;
+  }
+
+  portfolioUrl = safeUrl;
+  const plan = resolvePortfolioEmbed(safeUrl);
   applyEmbedPlan(plan);
 
   if (options.openExternal && plan.mode === "external") {
@@ -1766,7 +1860,9 @@ window.addEventListener("pagehide", () => {
     return;
   }
   if (claimHeld && !reviewSubmitted && portfolioId) {
-    void releasePortfolioClaim(portfolioId);
+    // keepalive: обычный rpc часто убивается при unload. Storage не чистим —
+    // boot reconcile добьёт orphan, если fetch не успел.
+    releasePortfolioClaimKeepalive(portfolioId);
     claimHeld = false;
   }
   stopClaimHeartbeat();

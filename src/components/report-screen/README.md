@@ -12,7 +12,7 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 - Одна жалоба на лист (`review_complaints`, RPC `submit_review_complaint`) → штраф репутации ревьюера на сервере
 - Справа: дефолт mesh + мокап листа; **Скачать PDF** можно много раз (лист снова выезжает → улетает → done)
 - В строке листа — EN Title Case должность ревьюера (`formatPortfolioRole`: Senior Product Designer / Product Design Lead / Head Of Design)
-- Секции листа из `answers` (шкалы + `advice` + опционально **`dictation`** / «Заметки с просмотра»)
+- Секции листа из `answers` через `buildReportSections` (`mode: "full"`): L2 кросс-сигналы, L1, pain, итог `tier × gradeZone` + `reportSummaryLead`, `advice`, опц. **`dictation`**. Схема полей — [`QUIZ.md`](../../../QUIZ.md). Старые листы с `hire` / visual 1–10 **не** распарсятся.
 - PDF: все ревьюеры, **1 дизайнер = 1 страница** (`shareReviewPdf`)
 - CTA: серая «На главную» + тёмная «Скачать PDF» (пока нет листов — та же тёмная, только `cursor: not-allowed`)
 
@@ -45,6 +45,7 @@ reportScreen.open({ portfolioId: item.id, portfolioName: item.name });
 
 Клиент: [`src/api/reviewComplaints.js`](../../api/reviewComplaints.js) — `listPortfolioReviewSheets` (с `answers`) / `submitReviewComplaint`.  
 PDF / секции: [`src/utils/reviewReport.js`](../../utils/reviewReport.js), [`src/utils/shareReviewPdf.js`](../../utils/shareReviewPdf.js).  
+Спека квиза и трактовок: [`QUIZ.md`](../../../QUIZ.md).  
 Надиктовка: [`src/lib/dictation/README.md`](../../lib/dictation/README.md).
 
 ## Стили

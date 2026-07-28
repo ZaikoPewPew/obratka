@@ -1,11 +1,19 @@
 import { getSession } from "../app/session.js";
 import { getStrings } from "../i18n.js";
-import { getSupabase, getSupabaseUrl } from "../lib/supabaseClient.js";
+import {
+  getCachedAccessToken,
+  getSupabase,
+  getSupabaseAnonKey,
+  getSupabaseUrl,
+} from "../lib/supabaseClient.js";
+import { normalizePortfolioUrl } from "../utils/portfolioMeta.js";
 
 /**
  * Очередь портфолио на ревью (Supabase) + свои карточки.
  * Матчинг лиг — RLS / `can_review_portfolio` (см. `leagues.js`).
- * Claim-слоты: `claimPortfolioReview` / heartbeat / release.
+ * Claim-слоты: `claimPortfolioReview` / heartbeat / `releasePortfolioClaim` /
+ * `releasePortfolioClaimKeepalive` (pagehide). Orphan после failed unload —
+ * `sessionStorage` `obratka.reviewClaim` + boot reconcile в `main.js`.
  *
  * @typedef {{
  *   kind: 'completed' | 'active';
@@ -186,7 +194,7 @@ export function portfolioRpcErrorCode(err) {
         ? err.message
         : String(err || "");
   const match = raw.match(
-    /\b(no_slots|claim_not_found|already_reviewed|review_claim_required|portfolio_not_pending|portfolio_not_found|cannot_review_own_portfolio|review_league_mismatch|profile_banned|not_authenticated|too_many_pending|insufficient_balance|banned|url_required)\b/,
+    /\b(no_slots|claim_not_found|already_reviewed|review_claim_required|portfolio_not_pending|portfolio_not_found|cannot_review_own_portfolio|review_league_mismatch|profile_banned|not_authenticated|too_many_pending|insufficient_balance|banned|url_required|invalid_url)\b/,
   );
   return match ? match[1] : raw || "unknown_error";
 }
@@ -762,7 +770,10 @@ export async function hasFreeMineSlot() {
  * @returns {Promise<PortfolioQueueItem & { balance?: number }>}
  */
 export async function submitPortfolio(rawUrl) {
-  const url = String(rawUrl || "").trim();
+  const url = normalizePortfolioUrl(rawUrl);
+  if (!url) {
+    throw new Error("invalid_url");
+  }
   const supabase = getSupabase();
   if (!supabase) {
     throw new Error("supabase_not_configured");
@@ -871,6 +882,44 @@ export async function releasePortfolioClaim(portfolioId) {
 
   if (error && import.meta.env.DEV) {
     console.warn("[portfolios] releasePortfolioClaim", error.message);
+  }
+}
+
+/**
+ * Fire-and-forget release на unload (`pagehide`): `keepalive` fetch к RPC,
+ * без await. Токен — из кэша auth (sync); storage claim не чистим здесь —
+ * boot reconcile добьёт, если запрос не успел.
+ *
+ * @param {string} portfolioId
+ * @returns {boolean} true если fetch ушёл
+ */
+export function releasePortfolioClaimKeepalive(portfolioId) {
+  const id = String(portfolioId || "").trim();
+  if (!id) return false;
+
+  const base = getSupabaseUrl();
+  const anon = getSupabaseAnonKey();
+  const token = getCachedAccessToken();
+  if (!base || !anon || !token) return false;
+
+  try {
+    void fetch(`${base}/rest/v1/rpc/release_portfolio_claim`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        apikey: anon,
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ p_portfolio_id: id }),
+      keepalive: true,
+    });
+    return true;
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.warn("[portfolios] releasePortfolioClaimKeepalive", err);
+    }
+    return false;
   }
 }
 

@@ -2,18 +2,19 @@
  * Сводка ответов ревью → тексты трактовок для отчёта.
  *
  * Детерминированно, без LLM:
- *  - L1 per-field: зоны шкал (context / visual) + грейд / структура / метрики.
+ *  - L1 per-field: зоны шкал (context / visual) + грейд / структура / метрики / tier.
  *  - L2 cross-signal: комбинации 2-3 полей → приоритетная трактовка,
  *    перекрывает дублирующий L1 (`covers` / `coversPain`).
- *  - L3 summary: итоговый вердикт `hire × gradeZone` (только `mode: "full"`).
+ *  - L3 summary: итоговый вердикт `tier × gradeZone` (только `mode: "full"`).
  *
- * `mode: "preview"` (живой лист в квизе) — только L1 + hire + pain, без L2/L3,
+ * `mode: "preview"` (живой лист в квизе) — только L1 + tier + pain, без L2/L3,
  * чтобы ревьюер не видел, как ответы складываются в «комбо-вердикт».
  *
  * Вариативность формулировок — детерминированный hash по `seed` (review_id),
  * не `Math.random()`: одинаковые answers + seed → одинаковый текст.
  *
  * `grade` = оценка уровня АВТОРА портфолио (её ставит ревьюер), не грейд ревьюера.
+ * `tier` = рыночный уровень кейсов (не `profiles.tier` лиг).
  * Опционально `answers.dictation` — надиктовка с `/review` (см. src/lib/dictation/).
  */
 
@@ -21,7 +22,7 @@
  * @typedef {'junior' | 'mid' | 'senior' | 'staff' | 'lead' | 'head'} Grade
  * @typedef {'mess' | 'dump' | 'outline' | 'clear'} Structure
  * @typedef {'none' | 'vanity' | 'nominal' | 'solid' | 'strong'} Metrics
- * @typedef {'yes' | 'maybe' | 'no'} Hire
+ * @typedef {'early' | 'mid' | 'strong' | 'top'} MarketTier
  *
  * @typedef {{
  *   grade: Grade;
@@ -29,7 +30,7 @@
  *   structure: Structure;
  *   metrics: Metrics;
  *   visual: number;
- *   hire: Hire;
+ *   tier: MarketTier;
  *   advice: string;
  *   dictation?: string;
  *   pain?: string[];
@@ -46,7 +47,7 @@ export function answersFromFormData(formData) {
   const grade = String(formData.get("grade") || "");
   const structure = String(formData.get("structure") || "");
   const metrics = String(formData.get("metrics") || "");
-  const hire = String(formData.get("hire") || "");
+  const tier = String(formData.get("tier") || "");
   const context = Number(formData.get("context"));
   const visual = Number(formData.get("visual"));
   const advice = String(formData.get("advice") || "").trim();
@@ -59,14 +60,14 @@ export function answersFromFormData(formData) {
     !isGrade(grade) ||
     !isStructure(structure) ||
     !isMetrics(metrics) ||
-    !isHire(hire) ||
+    !isTier(tier) ||
     !Number.isFinite(context) ||
     !Number.isFinite(visual)
   ) {
     return null;
   }
 
-  return { grade, context, structure, metrics, visual, hire, advice, pain };
+  return { grade, context, structure, metrics, visual, tier, advice, pain };
 }
 
 /**
@@ -80,7 +81,7 @@ export function parseReviewAnswers(raw) {
   const grade = String(row.grade || "");
   const structure = String(row.structure || "");
   const metrics = String(row.metrics || "");
-  const hire = String(row.hire || "");
+  const tier = String(row.tier || "");
   const context = Number(row.context);
   const visual = Number(row.visual);
   const advice = typeof row.advice === "string" ? row.advice.trim() : "";
@@ -94,7 +95,7 @@ export function parseReviewAnswers(raw) {
     !isGrade(grade) ||
     !isStructure(structure) ||
     !isMetrics(metrics) ||
-    !isHire(hire) ||
+    !isTier(tier) ||
     !Number.isFinite(context) ||
     !Number.isFinite(visual)
   ) {
@@ -102,17 +103,17 @@ export function parseReviewAnswers(raw) {
   }
 
   /** @type {ReviewAnswers} */
-  const answers = { grade, context, structure, metrics, visual, hire, advice, pain };
+  const answers = { grade, context, structure, metrics, visual, tier, advice, pain };
   if (dictation) answers.dictation = dictation;
   return answers;
 }
 
 /**
  * Приоритет проблем интерфейса (`pain`): чем раньше — тем важнее.
- * Значение `ok` (взаимоисключающее) обрабатывается отдельно.
+ * Показывается только при низкой оценке visual (см. review-panel).
  * @type {string[]}
  */
-const PAIN_PRIORITY = ["overloaded", "contrast", "hierarchy", "grid", "components"];
+const PAIN_PRIORITY = ["overloaded", "contrast", "composition", "components"];
 
 /**
  * L2 cross-signals: порядок в массиве = приоритет. Берём максимум 2.
@@ -128,6 +129,18 @@ const PAIN_PRIORITY = ["overloaded", "contrast", "hierarchy", "grid", "component
  */
 const CROSS_SIGNALS = [
   {
+    id: "gradeAboveTier",
+    key: "reportCrossGradeAboveTier",
+    covers: ["grade", "tier"],
+    test: (a) => isSeniorPlus(a.grade) && isLowTier(a.tier),
+  },
+  {
+    id: "tierAboveGrade",
+    key: "reportCrossTierAboveGrade",
+    covers: ["grade", "tier"],
+    test: (a) => isJuniorOrMid(a.grade) && isHighTier(a.tier),
+  },
+  {
     id: "seniorMess",
     key: "reportCrossSeniorMess",
     covers: ["grade", "structure"],
@@ -137,19 +150,19 @@ const CROSS_SIGNALS = [
     id: "juniorStrongVisual",
     key: "reportCrossJuniorStrongVisual",
     covers: ["visual"],
-    test: (a) => (a.grade === "junior" || a.grade === "mid") && a.visual >= 8,
+    test: (a) => (a.grade === "junior" || a.grade === "mid") && a.visual >= 4,
   },
   {
-    id: "noMetricsButHire",
-    key: "reportCrossNoMetricsButHire",
+    id: "noMetricsButHighTier",
+    key: "reportCrossNoMetricsButHighTier",
     covers: ["metrics"],
-    test: (a) => a.metrics === "none" && a.hire === "yes",
+    test: (a) => a.metrics === "none" && isHighTier(a.tier),
   },
   {
-    id: "strongMetricsNoHire",
-    key: "reportCrossStrongMetricsNoHire",
+    id: "strongMetricsButEarly",
+    key: "reportCrossStrongMetricsButEarly",
     covers: ["metrics"],
-    test: (a) => a.metrics === "strong" && a.hire === "no",
+    test: (a) => a.metrics === "strong" && a.tier === "early",
   },
   {
     id: "contextOverloaded",
@@ -162,35 +175,39 @@ const CROSS_SIGNALS = [
     id: "seniorWeakVisual",
     key: "reportCrossSeniorWeakVisual",
     covers: ["visual"],
-    test: (a) => isSeniorPlus(a.grade) && a.visual <= 4,
+    test: (a) => isSeniorPlus(a.grade) && a.visual <= 2,
   },
   {
-    id: "clearNoMetricsMaybe",
-    key: "reportCrossClearNoMetricsMaybe",
+    id: "clearNoMetricsMid",
+    key: "reportCrossClearNoMetricsMid",
     covers: ["structure", "metrics"],
     test: (a) =>
-      a.structure === "clear" && a.metrics === "none" && a.hire === "maybe",
+      a.structure === "clear" && a.metrics === "none" && a.tier === "mid",
   },
   {
     id: "goodVisualBadContrast",
     key: "reportCrossGoodVisualBadContrast",
     covers: [],
     coversPain: ["contrast"],
-    test: (a) => a.visual >= 7 && hasPain(a, "contrast"),
+    test: (a) => a.visual >= 3 && hasPain(a, "contrast"),
   },
   {
-    id: "juniorNoHireGrid",
-    key: "reportCrossJuniorNoHireGrid",
+    id: "juniorEarlyComposition",
+    key: "reportCrossJuniorEarlyComposition",
     covers: [],
-    coversPain: ["grid"],
-    test: (a) => a.grade === "junior" && a.hire === "no" && hasPain(a, "grid"),
+    coversPain: ["composition"],
+    test: (a) =>
+      a.grade === "junior" && a.tier === "early" && hasPain(a, "composition"),
   },
   {
     id: "goldProfile",
     key: "reportCrossGoldProfile",
     covers: ["context", "metrics", "visual"],
     test: (a) =>
-      a.context >= 4 && a.metrics === "strong" && a.visual >= 8 && a.hire === "yes",
+      a.context >= 4 &&
+      a.metrics === "strong" &&
+      a.visual >= 4 &&
+      isHighTier(a.tier),
   },
   {
     id: "dumpComponents",
@@ -200,10 +217,10 @@ const CROSS_SIGNALS = [
     test: (a) => a.structure === "dump" && hasPain(a, "components"),
   },
   {
-    id: "maybeNoPain",
-    key: "reportCrossMaybeNoPain",
+    id: "midNoPain",
+    key: "reportCrossMidNoPain",
     covers: [],
-    test: (a) => a.hire === "maybe" && !hasAnyRealPain(a),
+    test: (a) => a.tier === "mid" && !hasAnyRealPain(a),
   },
 ];
 
@@ -273,19 +290,28 @@ export function buildReportSections(answers, t, opts = {}) {
   if (painSection) sections.push(painSection);
 
   if (mode === "preview") {
-    sections.push({
-      title: t.reportHireTitle,
-      body: variant(t, `reportHire${cap(answers.hire)}`, 2, seed),
-    });
+    if (!covered.has("tier")) {
+      sections.push({
+        title: t.reportTierTitle,
+        body: variant(t, `reportTier${cap(answers.tier)}`, 2, seed),
+      });
+    }
   } else {
-    sections.push({
-      title: t.reportSummaryTitle,
-      body: variant(
+    const summaryBody = [
+      t.reportSummaryLead ?? "",
+      variant(
         t,
-        `reportSummary${cap(answers.hire)}${gradeZone(answers.grade)}`,
+        `reportSummary${cap(answers.tier)}${gradeZone(answers.grade)}`,
         2,
         seed,
       ),
+    ]
+      .map((part) => String(part || "").trim())
+      .filter(Boolean)
+      .join(" ");
+    sections.push({
+      title: t.reportSummaryTitle,
+      body: summaryBody,
     });
   }
 
@@ -300,7 +326,8 @@ export function buildReportSections(answers, t, opts = {}) {
 }
 
 /**
- * Блок «проблемы интерфейса» (`pain`) — одной секцией.
+ * Блок «проблемы интерфейса» (`pain`) — только если ревьюер отметил пункты
+ * (обычно при visual ≤ 2 в квизе).
  * @param {ReviewAnswers} answers
  * @param {Record<string, string>} t
  * @param {string} seed
@@ -310,9 +337,6 @@ export function buildReportSections(answers, t, opts = {}) {
 function buildPainSection(answers, t, seed, suppressed) {
   const pain = Array.isArray(answers.pain) ? answers.pain : [];
   if (pain.length === 0) return null;
-  if (pain.includes("ok")) {
-    return { title: t.reportPainTitle, body: variant(t, "reportPainOk", 2, seed) };
-  }
 
   const known = PAIN_PRIORITY.filter(
     (item) => pain.includes(item) && !suppressed.has(item),
@@ -377,7 +401,7 @@ function variant(t, base, bank, seed) {
  * @returns {string}
  */
 function seedFromAnswers(a) {
-  return `${a.grade}:${a.structure}:${a.metrics}:${a.hire}:${a.context}:${a.visual}`;
+  return `${a.grade}:${a.structure}:${a.metrics}:${a.tier}:${a.context}:${a.visual}`;
 }
 
 /**
@@ -400,14 +424,14 @@ function contextZone(score) {
 }
 
 /**
- * Зона визуального качества (1-10).
+ * Зона визуального качества (1-5).
  * @param {number} score
  * @returns {"Weak" | "Ok" | "Good" | "Strong"}
  */
 function visualZone(score) {
-  if (score <= 4) return "Weak";
-  if (score <= 6) return "Ok";
-  if (score <= 8) return "Good";
+  if (score <= 1) return "Weak";
+  if (score === 2) return "Ok";
+  if (score === 3) return "Good";
   return "Strong";
 }
 
@@ -436,6 +460,30 @@ function isSeniorPlus(grade) {
 }
 
 /**
+ * @param {Grade} grade
+ * @returns {boolean}
+ */
+function isJuniorOrMid(grade) {
+  return grade === "junior" || grade === "mid";
+}
+
+/**
+ * @param {MarketTier} tier
+ * @returns {boolean}
+ */
+function isHighTier(tier) {
+  return tier === "strong" || tier === "top";
+}
+
+/**
+ * @param {MarketTier} tier
+ * @returns {boolean}
+ */
+function isLowTier(tier) {
+  return tier === "early" || tier === "mid";
+}
+
+/**
  * @param {ReviewAnswers} a
  * @param {string} item
  * @returns {boolean}
@@ -445,13 +493,13 @@ function hasPain(a, item) {
 }
 
 /**
- * Есть ли хотя бы одна реальная проблема (не пусто и не только `ok`).
+ * Есть ли хотя бы одна реальная проблема.
  * @param {ReviewAnswers} a
  * @returns {boolean}
  */
 function hasAnyRealPain(a) {
   if (!Array.isArray(a.pain) || a.pain.length === 0) return false;
-  return a.pain.some((item) => item !== "ok");
+  return a.pain.some((item) => PAIN_PRIORITY.includes(item));
 }
 
 /**
@@ -498,8 +546,13 @@ function isMetrics(value) {
 
 /**
  * @param {string} value
- * @returns {value is Hire}
+ * @returns {value is MarketTier}
  */
-function isHire(value) {
-  return value === "yes" || value === "maybe" || value === "no";
+function isTier(value) {
+  return (
+    value === "early" ||
+    value === "mid" ||
+    value === "strong" ||
+    value === "top"
+  );
 }

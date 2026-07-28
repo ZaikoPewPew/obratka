@@ -4,6 +4,7 @@ import {
   formatPortfolioGrade,
   formatPortfolioRole,
   hasFreeMineSlot,
+  isPortfolioOpenForReview,
   listFeedPortfolioIds,
   listMyPortfolios,
   listPortfoliosForReview,
@@ -757,6 +758,41 @@ export function createHomeScreen({
     rulesPanel.content.replaceChildren(...nodes);
   }
 
+  function openRulesPanel() {
+    syncRulesPanelContent();
+    rulesPanel.open();
+  }
+
+  /**
+   * @returns {DocumentFragment}
+   */
+  function buildReputationDescription() {
+    const t = getStrings();
+    const template = t.homeReputationDesc ?? "";
+    const linkLabel = fixHangingPrepositions(t.homeReputationDescLink ?? "");
+    const parts = String(template).split("{link}");
+
+    const frag = document.createDocumentFragment();
+    if (parts[0]) {
+      frag.append(document.createTextNode(fixHangingPrepositions(parts[0])));
+    }
+
+    const link = document.createElement("button");
+    link.type = "button";
+    link.className = "app-modal__description-link";
+    link.textContent = linkLabel;
+    link.addEventListener("click", () => {
+      openRulesPanel();
+    });
+    frag.append(link);
+
+    if (parts[1]) {
+      frag.append(document.createTextNode(fixHangingPrepositions(parts[1])));
+    }
+
+    return frag;
+  }
+
   const accountMenu = createAccountMenu({
     onClose: () => {
       profileBtn.setAttribute("aria-expanded", "false");
@@ -775,8 +811,7 @@ export function createHomeScreen({
       contactsModal.open();
     },
     onRules: () => {
-      syncRulesPanelContent();
-      rulesPanel.open();
+      openRulesPanel();
     },
     onSignOut: () => onSignOut?.(),
   });
@@ -1439,6 +1474,17 @@ export function createHomeScreen({
    * @param {HomePortfolioItem} item
    */
   function openReviewIntro(item) {
+    if (!isPortfolioOpenForReview(item)) {
+      const t = getStrings();
+      showNotice({
+        title: t.homeNoSlotsTitle,
+        body: t.homeNoSlotsBody,
+        closeLabel: t.homeNoSlotsClose,
+        closeAria: t.homeNoSlotsCloseAria,
+      });
+      void refresh();
+      return;
+    }
     const t = getStrings();
     stopIntroRecPreview();
     reviewIntroItem = item;
@@ -2971,9 +3017,7 @@ export function createHomeScreen({
     reputationModal.setTitle(
       fixHangingPrepositions(t.homeReputationTitle ?? ""),
     );
-    reputationModal.setDescription(
-      fixHangingPrepositions(t.homeReputationDesc ?? ""),
-    );
+    reputationModal.setDescription(buildReputationDescription());
     reputationModal.setSecondaryLabel(t.homeReputationClose ?? "");
     reputationModal.setCloseAriaLabel(
       t.homeReputationCloseAria ?? t.homeReputationClose ?? "",

@@ -10,8 +10,8 @@ const base = {
   context: 4,
   structure: "clear",
   metrics: "solid",
-  visual: 8,
-  hire: "yes",
+  visual: 4,
+  tier: "strong",
   advice: "Tighten the metrics story.",
 };
 
@@ -28,6 +28,15 @@ describe("parseReviewAnswers dictation", () => {
     const parsed = parseReviewAnswers({ ...base, dictation: "   " });
     assert.equal(parsed?.dictation, undefined);
   });
+
+  it("rejects legacy hire payload", () => {
+    const parsed = parseReviewAnswers({
+      ...base,
+      tier: undefined,
+      hire: "yes",
+    });
+    assert.equal(parsed, null);
+  });
 });
 
 describe("buildReportSections dictation", () => {
@@ -43,12 +52,17 @@ describe("buildReportSections dictation", () => {
       reportMetricsTitle: "m",
       reportMetricsSolid: "ms",
       reportVisualTitle: "v",
-      reportVisualHigh: "vh",
-      reportVisualLow: "vl",
-      reportHireTitle: "h",
-      reportHireYes: "hy",
+      reportVisualStrong: "vs",
+      reportVisualGood: "vg",
+      reportTierTitle: "tier",
+      reportTierStrong: "ts",
+      reportSummaryTitle: "Summary",
+      reportSummaryLead: "Lead.",
+      reportSummaryStrongMid0: "Strong mid verdict.",
       reportAdviceTitle: "Advice",
       reportDictationTitle: "Notes",
+      reportCrossTitle: "Cross",
+      reportCrossTitle2: "Cross2",
     };
     const sections = buildReportSections(
       { ...base, dictation: "Raw voice notes here." },

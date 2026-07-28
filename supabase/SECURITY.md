@@ -17,14 +17,14 @@
 | `claim_portfolio_review(uuid)` | нет | да | claim слота |
 | `heartbeat_portfolio_claim(uuid)` | нет | да | TTL 20 min |
 | `release_portfolio_claim(uuid)` | нет | да | уход без submit |
-| `portfolio_reviewer_slots(uuid[])` | нет | да | слоты на карточках home |
+| `portfolio_reviewer_slots(uuid[])` | нет | да | слоты home; VOLATILE; в начале `purge_expired_review_claims` |
 | `can_review_portfolio(uuid, uuid)` | нет | да | лиги |
 | `can_review_grades(text, text)` | нет | да | лиги |
 | `grade_league(text)` | нет | да | лиги |
 | `is_profile_banned(uuid)` | нет | да | self-only |
 | `redeem_referral(text)` | нет | да | один раз на аккаунт |
 | `spend_submit_cost()` | нет | да | legacy списание; подача — `submit_portfolio` |
-| `submit_portfolio(text,text,text,text)` | нет | да | atomic spend + insert, max 1 pending |
+| `submit_portfolio(text,text,text,text)` | нет | да | atomic spend + insert, max 1 pending; reject non-http(s) URL (`invalid_url`) |
 | `submit_review_complaint(uuid, text[])` | нет | да | жалоба на лист |
 | `heartbeat_legendary_presence()` | нет | да | ping `last_seen_at` только для `tier=legendary` |
 | `list_online_legendaries()` | нет | да | список онлайн VIP (id/name/avatar) |
@@ -35,7 +35,7 @@
 | `protect_profiles_last_seen()` | нет | нет | trigger-only |
 | `handle_new_user()` | нет | **нет** | trigger-only, не через PostgREST |
 | `profile_grade(uuid)` | нет | нет | оракул грейдов, только internal |
-| `purge_expired_review_claims()` | нет | нет | internal |
+| `purge_expired_review_claims()` | нет | нет | internal (claim / heartbeat / `portfolio_reviewer_slots`) |
 | `handle_review_inserted()` | нет | нет | trigger-only |
 | `review_complaint_tag_weight(text)` / `review_complaint_ban_threshold()` | нет | нет | веса жалоб не наружу |
 
@@ -107,8 +107,24 @@ UI-часть: [`src/components/home-screen/README.md`](../src/components/home-s
 | *(MCP)* | `legendary_presence_last_seen` | `last_seen_at` + heartbeat/list для legendary online |
 | *(MCP)* | `grade_league_null_as_league_1` | null/unknown grade → лига 1 (как junior) |
 | *(MCP)* | `wrap_auth_uid_rls_initplan` | `auth.uid()` → `(select auth.uid())` в 6 RLS-политиках (`profiles_select_own`, `profiles_update_own`, `portfolios_select_feed`, `reviews_insert_own`, `review_claims_select_visible`, `reviews_select_reviewer_or_owner`, `review_complaints_select_own`) — снят `auth_rls_initplan` WARN, доступ не менялся |
+| *(MCP)* | `portfolio_reviewer_slots_purge_expired` | `purge_expired_review_claims` в начале `portfolio_reviewer_slots` (expired anonymous не светятся до следующего claim) |
 
 Отражены в `sql/*.sql`, чтобы файлы оставались источником правды при чистом развёртывании.
+
+---
+
+## Инцидент 2026-07-28: залипающие anonymous-слоты
+
+**Симптом.** Уход с `/review` по новой ссылке / reload оставлял active-слот «Аноним»; несколько аккаунтов забивали 3/3; автор orphan снова входил через `own_live`.
+
+**Причина.** `pagehide` слал обычный `supabase.rpc` без `keepalive` → браузер убивал запрос; `claimHeld` только in-memory → boot не релизил.
+
+**Решение (клиент + SQL):**
+- `releasePortfolioClaimKeepalive` + per-tab `sessionStorage` `obratka.reviewClaim` + reconcile в `releaseHeldClaim`;
+- home gate `isPortfolioOpenForReview` до intro;
+- SQL: purge expired в `portfolio_reviewer_slots` (миграция выше).
+
+Apply SQL: [`sql/README.md`](sql/README.md) § «Как применять». Правила: [`.cursor/rules/review-claims.mdc`](../.cursor/rules/review-claims.mdc).
 
 ---
 

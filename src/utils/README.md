@@ -20,7 +20,7 @@
 | `embedHosts.js` | каталог хостов (см. `content/embed-hosts.md`) |
 | `portfolioEmbed.js` | Figma/YouTube embed / iframe / внешняя вкладка |
 | `meshGradientWash.js` | WebGL mesh (Paper Shaders); `transitionToCssColors` |
-| `reviewReport.js` | сводка квиза → тексты PDF (+ опционально `dictation`) |
+| `reviewReport.js` | сводка квиза → тексты PDF (+ опц. `dictation`); зоны `contextZone` / `visualZone` (visual 1–5); вердикт `tier × gradeZone`. Спека: [`QUIZ.md`](../../QUIZ.md) |
 | `shareReviewPdf.js` | печать PDF-отчёта (1 ревьюер = 1 страница; `onComplete`) |
 | `referralCode.js` | нормализация referral-кода / URL |
 | `backdropLuminance.js` | яркость фона под элементом (home tabbar → `--on-dark`; не ломать glass blur / entrance dock) |

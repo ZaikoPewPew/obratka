@@ -18,7 +18,7 @@
 | Папка | Роль |
 |-------|------|
 | `app/` | routes, router, flow, login-session (`obratka.session`) |
-| `components/` | UI-экраны; brand: `brand-screen-visual`, `brand-screen-shell` |
+| `components/` | UI-экраны; brand: `brand-screen-visual`, `brand-screen-shell`; квиз-шкалы: `scale-slider` |
 | `config/` | review session + contacts |
 | `utils/` | field errors, motion, handoff, mesh, plural, hangingPrepositions, homeRoute/homeListCache, feedSeen, mineReadySeen, backdropLuminance, PDF — [`utils/README.md`](utils/README.md) |
 | `api/` | Auth, profiles, wallet, portfolios, leagues, referrals, reviewComplaints, presence, rating |

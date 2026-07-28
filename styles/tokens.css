@@ -360,7 +360,7 @@
     var(--shell-review-rec-size) + var(--shell-review-rec-offset) * 2
   );
   --shell-review-slider-width: 500px;
-  --shell-review-slider-height: 148px;
+  --shell-review-slider-height: 176px;
   --shell-review-slider-track-height: 36px;
   --shell-review-slider-track-radius: var(--radius-xs);
   --shell-review-slider-cell: 6px;
@@ -399,7 +399,15 @@
   --shell-review-slider-readout-weight: var(--shell-review-question-weight);
   --shell-review-slider-readout-color: var(--color-text);
   --shell-review-slider-readout-gap: var(--space-6);
-  --shell-review-slider-title-duration: var(--duration-normal);
+  --shell-review-slider-hint-gap: var(--space-2);
+  --shell-review-slider-hint-size: var(--shell-review-hint-size);
+  --shell-review-slider-hint-weight: var(--shell-review-hint-weight);
+  --shell-review-slider-hint-line-height: var(--shell-review-hint-line-height);
+  --shell-review-slider-hint-line: calc(
+    var(--shell-review-slider-hint-size) * var(--shell-review-slider-hint-line-height)
+  );
+  --shell-review-slider-hint-color: var(--shell-review-hint-color);
+  --shell-review-slider-title-duration: var(--duration-fast);
   --shell-review-slider-title-shift: var(--motion-reveal-shift);
   --shell-review-slider-title-blur: var(--motion-reveal-blur);
   --shell-review-slider-title-ease: var(--ease-reveal);
@@ -526,6 +534,7 @@
   --app-modal-desc-weight: var(--font-weight-regular);
   --app-modal-desc-line-height: var(--line-height-loose);
   --app-modal-desc-color: var(--color-text-muted);
+  --app-modal-desc-link-color: var(--palette-google-blue);
   --app-modal-close-size: 56px;
   --app-modal-close-radius: var(--radius-md);
   --app-modal-close-bg: var(--color-surface-muted);

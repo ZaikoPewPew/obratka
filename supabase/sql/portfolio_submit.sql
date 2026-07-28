@@ -59,11 +59,28 @@ begin
     raise exception 'url_required';
   end if;
 
+  -- Mirror client normalizePortfolioUrl: only http(s); host must contain '.'.
+  if clean_url ~* '^[a-z][a-z0-9+.-]*:' and clean_url !~* '^https?://' then
+    raise exception 'invalid_url';
+  end if;
+
+  if clean_url !~* '^https?://' then
+    clean_url := 'https://' || clean_url;
+  end if;
+
+  if nullif(
+       substring(clean_url from '^https?://(?:[^/?#]*@)?([^/?#:]+)'),
+       ''
+     ) is null
+     or substring(clean_url from '^https?://(?:[^/?#]*@)?([^/?#:]+)') !~ '\.'
+  then
+    raise exception 'invalid_url';
+  end if;
+
   select count(*)::integer into pending_count
   from public.portfolios
   where owner_id = uid
     and status = 'pending';
-
   if pending_count >= max_pending then
     raise exception 'too_many_pending';
   end if;

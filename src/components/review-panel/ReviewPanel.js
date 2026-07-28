@@ -366,18 +366,35 @@ export function createReviewPanel(options = {}) {
   ].map((c) => c.label);
 
   const painItems = [
-    createChoice("pain", "hierarchy", t.reviewPainHierarchy, null, "checkbox"),
-    createChoice("pain", "grid", t.reviewPainGrid, null, "checkbox"),
-    createChoice("pain", "overloaded", t.reviewPainOverloaded, null, "checkbox"),
+    createChoice(
+      "pain",
+      "composition",
+      t.reviewPainComposition,
+      null,
+      "checkbox",
+    ),
     createChoice("pain", "contrast", t.reviewPainContrast, null, "checkbox"),
-    createChoice("pain", "components", t.reviewPainComponents, null, "checkbox"),
-    createChoice("pain", "ok", t.reviewPainOk, null, "checkbox"),
+    createChoice(
+      "pain",
+      "components",
+      t.reviewPainComponents,
+      null,
+      "checkbox",
+    ),
+    createChoice(
+      "pain",
+      "overloaded",
+      t.reviewPainOverloaded,
+      null,
+      "checkbox",
+    ),
   ];
 
-  const hireChoices = [
-    createChoice("hire", "yes", t.reviewHireYes, t.reviewHireYesHint),
-    createChoice("hire", "maybe", t.reviewHireMaybe, t.reviewHireMaybeHint),
-    createChoice("hire", "no", t.reviewHireNo, t.reviewHireNoHint),
+  const tierChoices = [
+    createChoice("tier", "early", t.reviewTierEarly, t.reviewTierEarlyHint),
+    createChoice("tier", "mid", t.reviewTierMid, t.reviewTierMidHint),
+    createChoice("tier", "strong", t.reviewTierStrong, t.reviewTierStrongHint),
+    createChoice("tier", "top", t.reviewTierTop, t.reviewTierTopHint),
   ].map((c) => c.label);
 
   const adviceStack = document.createElement("div");
@@ -418,16 +435,39 @@ export function createReviewPanel(options = {}) {
   adviceField.append(adviceInput, adviceRecBtn);
   adviceStack.append(adviceField, adviceMeta);
 
+  /**
+   * @returns {number}
+   */
+  function readVisualScore() {
+    const input = form.querySelector(
+      'input.review-panel__slider-input[name="visual"]',
+    );
+    if (!(input instanceof HTMLInputElement)) return NaN;
+    return Number(input.value);
+  }
+
+  /**
+   * Pain только при низкой оценке visual (≤ 2).
+   * @returns {boolean}
+   */
+  function isPainStepVisible() {
+    const score = readVisualScore();
+    return Number.isFinite(score) && score <= 2;
+  }
+
   /** @type {{
+   *   id: string;
    *   step: HTMLElement;
    *   title: string;
    *   hint: string | null;
    *   validate: () => boolean;
    *   autoAdvance: boolean;
+   *   isVisible?: () => boolean;
    *   errorMessage?: string;
    * }[]} */
   const steps = [
     {
+      id: "grade",
       step: createStep(createOptions(...gradeChoices)),
       title: t.reviewGradeLabel,
       hint: null,
@@ -435,6 +475,7 @@ export function createReviewPanel(options = {}) {
       autoAdvance: true,
     },
     {
+      id: "context",
       step: createStep(
         createOptions(
           createScaleSlider({
@@ -454,6 +495,13 @@ export function createReviewPanel(options = {}) {
               4: t.reviewContextValue4,
               5: t.reviewContextValue5,
             },
+            valueHints: {
+              1: t.reviewContextHint1,
+              2: t.reviewContextHint2,
+              3: t.reviewContextHint3,
+              4: t.reviewContextHint4,
+              5: t.reviewContextHint5,
+            },
           }),
         ),
       ),
@@ -463,6 +511,7 @@ export function createReviewPanel(options = {}) {
       autoAdvance: true,
     },
     {
+      id: "structure",
       step: createStep(createOptions(...structureChoices)),
       title: t.reviewStructureLabel,
       hint: null,
@@ -470,6 +519,7 @@ export function createReviewPanel(options = {}) {
       autoAdvance: true,
     },
     {
+      id: "metrics",
       step: createStep(createOptions(...metricsChoices)),
       title: t.reviewMetricsLabel,
       hint: null,
@@ -477,12 +527,13 @@ export function createReviewPanel(options = {}) {
       autoAdvance: true,
     },
     {
+      id: "visual",
       step: createStep(
         createOptions(
           createScaleSlider({
             name: "visual",
             from: 1,
-            to: 10,
+            to: 5,
             title: t.reviewVisualShort,
             ariaLabel: t.reviewVisualLabel,
             ends: {
@@ -495,11 +546,13 @@ export function createReviewPanel(options = {}) {
               3: t.reviewVisualValue3,
               4: t.reviewVisualValue4,
               5: t.reviewVisualValue5,
-              6: t.reviewVisualValue6,
-              7: t.reviewVisualValue7,
-              8: t.reviewVisualValue8,
-              9: t.reviewVisualValue9,
-              10: t.reviewVisualValue10,
+            },
+            valueHints: {
+              1: t.reviewVisualHint1,
+              2: t.reviewVisualHint2,
+              3: t.reviewVisualHint3,
+              4: t.reviewVisualHint4,
+              5: t.reviewVisualHint5,
             },
           }),
         ),
@@ -510,20 +563,24 @@ export function createReviewPanel(options = {}) {
       autoAdvance: true,
     },
     {
+      id: "pain",
       step: createStep(createOptions(...painItems.map((c) => c.label))),
       title: t.reviewPainLabel,
       hint: null,
       validate: () => true,
       autoAdvance: false,
+      isVisible: isPainStepVisible,
     },
     {
-      step: createStep(createOptions(...hireChoices)),
-      title: t.reviewHireLabel,
+      id: "tier",
+      step: createStep(createOptions(...tierChoices)),
+      title: t.reviewTierLabel,
       hint: null,
-      validate: () => hasRadioValue(form, "hire"),
+      validate: () => hasRadioValue(form, "tier"),
       autoAdvance: true,
     },
     {
+      id: "advice",
       step: createStep(adviceStack),
       title: t.reviewAdviceLabel,
       hint: null,
@@ -600,9 +657,56 @@ export function createReviewPanel(options = {}) {
   let advanceTimer = null;
   /** @type {Record<string, FormDataEntryValue> | null} */
   let completedAnswers = null;
-  const totalSteps = steps.length;
   const prefersReducedMotion = () =>
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /**
+   * @param {number} index
+   * @returns {boolean}
+   */
+  function isStepIndexVisible(index) {
+    const item = steps[index];
+    if (!item) return false;
+    return typeof item.isVisible === "function" ? item.isVisible() : true;
+  }
+
+  /**
+   * @returns {number[]}
+   */
+  function visibleStepIndices() {
+    return steps
+      .map((_, index) => index)
+      .filter((index) => isStepIndexVisible(index));
+  }
+
+  /**
+   * @param {number} fromIndex
+   * @param {1 | -1} direction
+   * @returns {number}
+   */
+  function findAdjacentVisibleStep(fromIndex, direction) {
+    let index = fromIndex + direction;
+    while (index >= 0 && index < steps.length) {
+      if (isStepIndexVisible(index)) return index;
+      index += direction;
+    }
+    return fromIndex;
+  }
+
+  function clearPainSelections() {
+    for (const item of painItems) {
+      item.input.checked = false;
+      item.input.disabled = false;
+      item.label.classList.remove("review-panel__choice--disabled");
+    }
+  }
+
+  /**
+   * Если visual вырос выше порога — сбросить pain (шаг скрыт).
+   */
+  function syncPainForVisual() {
+    if (!isPainStepVisible()) clearPainSelections();
+  }
 
   function clearAdvanceTimer() {
     if (advanceTimer !== null) {
@@ -612,7 +716,7 @@ export function createReviewPanel(options = {}) {
   }
 
   function showStepError(visible) {
-    const isAdvice = currentStep === totalSteps - 1;
+    const isAdvice = steps[currentStep]?.id === "advice";
     // На шаге совета ошибка — цвет «Минимум 100…», без отдельной строки.
     adviceHint.classList.toggle(
       "review-panel__meta-hint--error",
@@ -645,22 +749,25 @@ export function createReviewPanel(options = {}) {
   }
 
   function syncProgress() {
-    const current = currentStep + 1;
+    const visible = visibleStepIndices();
+    const position = Math.max(0, visible.indexOf(currentStep));
+    const current = position + 1;
+    const total = visible.length;
     progressLabel.textContent = formatString(t.reviewProgress, {
       current,
-      total: totalSteps,
+      total,
     });
     progress.setAttribute("aria-valuenow", String(current));
-    progress.setAttribute("aria-valuemax", String(totalSteps));
+    progress.setAttribute("aria-valuemax", String(total));
     progress.setAttribute(
       "aria-valuetext",
-      formatString(t.reviewProgress, { current, total: totalSteps }),
+      formatString(t.reviewProgress, { current, total }),
     );
   }
 
   function syncChrome() {
     const isFirst = currentStep === 0;
-    const isLast = currentStep === totalSteps - 1;
+    const isLast = steps[currentStep]?.id === "advice";
     const auto = Boolean(steps[currentStep]?.autoAdvance);
 
     // Шаг с полем ушёл — микрофон не должен остаться включённым.
@@ -686,7 +793,7 @@ export function createReviewPanel(options = {}) {
     ) {
       showStepError(false);
     }
-    if (currentStep === totalSteps - 1) {
+    if (steps[currentStep]?.id === "advice") {
       syncReportReveal();
     }
   }
@@ -718,7 +825,7 @@ export function createReviewPanel(options = {}) {
 
   function syncReportReveal() {
     const onAdvice =
-      done.hidden && !form.hidden && currentStep === totalSteps - 1;
+      done.hidden && !form.hidden && steps[currentStep]?.id === "advice";
 
     if (!onAdvice) {
       onReportReveal?.(false);
@@ -1019,8 +1126,10 @@ export function createReviewPanel(options = {}) {
       focusActiveStep();
       return;
     }
-    if (currentStep < totalSteps - 1) {
-      await goToStep(currentStep + 1, { direction: 1 });
+    if (current?.id === "visual") syncPainForVisual();
+    const nextIndex = findAdjacentVisibleStep(currentStep, 1);
+    if (nextIndex !== currentStep) {
+      await goToStep(nextIndex, { direction: 1 });
       focusActiveStep();
     }
   }
@@ -1036,46 +1145,11 @@ export function createReviewPanel(options = {}) {
   async function goBack() {
     if (transitioning) return;
     clearAdvanceTimer();
-    if (currentStep > 0) {
-      await goToStep(currentStep - 1, { direction: -1 });
+    const prevIndex = findAdjacentVisibleStep(currentStep, -1);
+    if (prevIndex !== currentStep) {
+      await goToStep(prevIndex, { direction: -1 });
       focusActiveStep();
     }
-  }
-
-  function syncPainExclusive() {
-    const okItem = painItems.find((item) => item.input.value === "ok");
-    const otherItems = painItems.filter((item) => item.input.value !== "ok");
-    const okChecked = Boolean(okItem?.input.checked);
-
-    for (const item of otherItems) {
-      if (okChecked) {
-        item.input.checked = false;
-        item.input.disabled = true;
-        item.label.classList.add("review-panel__choice--disabled");
-      } else {
-        item.input.disabled = false;
-        item.label.classList.remove("review-panel__choice--disabled");
-      }
-    }
-
-    if (okItem) {
-      okItem.input.disabled = false;
-      okItem.label.classList.remove("review-panel__choice--disabled");
-    }
-  }
-
-  function onPainChange(changed) {
-    if (changed.input.value === "ok" && changed.input.checked) {
-      for (const item of painItems) {
-        if (item.input.value !== "ok") {
-          item.input.checked = false;
-        }
-      }
-    } else if (changed.input.value !== "ok" && changed.input.checked) {
-      const okItem = painItems.find((item) => item.input.value === "ok");
-      if (okItem) okItem.input.checked = false;
-    }
-    syncPainExclusive();
   }
 
   function clearAllSelections() {
@@ -1096,11 +1170,6 @@ export function createReviewPanel(options = {}) {
     for (const item of painItems) {
       item.label.classList.remove("review-panel__choice--disabled");
     }
-    syncPainExclusive();
-  }
-
-  for (const item of painItems) {
-    item.input.addEventListener("change", () => onPainChange(item));
   }
 
   adviceInput.addEventListener("focus", () => {

@@ -9,6 +9,7 @@
 | `README.md` | Быстрый старт, env, auth, ссылки |
 | `PROJECT.md` | Продукт, архитектура, бэкенд, roadmap |
 | `SCREENS.md` | Экраны + path-роутинг + контракты фабрик |
+| `QUIZ.md` | Пул вопросов квиза, схема `answers`, L1/L2/L3 PDF-отчёта |
 | `STRUCTURE.md` | Этот документ |
 | `mobile.md` | Мобильный UX продукта + архив waitlist-спеки |
 | `index.html` | Каркас `.iframe-shell` (`/review`) + CSS entry |
@@ -64,6 +65,8 @@
 | Split-каркас | [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) |
 | App modal | [`src/components/app-modal/README.md`](src/components/app-modal/README.md) |
 | Tabs panel | [`src/components/tabs-panel/README.md`](src/components/tabs-panel/README.md) |
+| Scale slider (квиз 1–5) | [`src/components/scale-slider/README.md`](src/components/scale-slider/README.md) |
+| Квиз / отчёт (SoT) | [`QUIZ.md`](QUIZ.md) |
 | Ошибки полей | [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) |
 | Марки / morph | [`src/assets/README.md`](src/assets/README.md) |
 
@@ -82,7 +85,7 @@
 `/portfolio` — подача URL; чип «На главную» (скрыт на done); done на том же экране.  
 `/review` = просмотр портфолио + таймер **45 s** (`REVIEW_SESSION_SECONDS` в `src/config/review.js`) + опциональная надиктовка (чип rec → `answers.dictation`).  
 iframe: таймер паузится при уходе со вкладки; external: wall-clock без паузы, конец → `Timer-end.wav` + quiz.  
-`/quiz` = опрос; в поле «Главный совет» — микрофон (тот же `DictationEngine` → текст в `advice`). Не путать с login-`session.js` (`obratka.session`).  
+`/quiz` = опрос (`review-panel` + [`scale-slider`](src/components/scale-slider/README.md) на шагах понятность/визуал **1–5**; условный pain; рыночный `tier`); в поле «Главный совет» — микрофон. Спека: [`QUIZ.md`](QUIZ.md). Не путать с login-`session.js` (`obratka.session`).  
 `/report` = листы ревью автора (+ секция надиктовки) + жалоба → `reputation` (вход только когда собраны все ревью).  
 `/banned` = бан (в т.ч. автобан по репутации).
 

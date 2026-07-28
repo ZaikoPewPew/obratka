@@ -24,7 +24,7 @@ alwaysApply: true
 
 ## Оболочка и экраны
 
-- `--control-*` (в т.ч. `--control-rec-*` для чипа надиктовки на `/review`, `--shell-review-rec-*` для микрофона в поле совета), `--shell-*`, `--frame-*`, `--recall-*`. Аватар / «Заметки»: `--radius-xs`.
+- `--control-*` (в т.ч. `--control-rec-*` для чипа надиктовки на `/review`, `--shell-review-rec-*` для микрофона в поле совета, `--shell-review-slider-*` для шкал квиза), `--shell-*`, `--frame-*`, `--recall-*`. Аватар / «Заметки»: `--radius-xs`.
 - Recording indicator: `--color-recording` (алиас на `--palette-google-red`); пульс — `--motion-recording-blink-*` + `motion-recording-blink` в `entrance.css`.
 - Ban: `--shell-ban-mesh-*`, `--ban-screen-*`.
 - Home tabbar: `--home-screen-tabbar-*` (hide / thumb / contrast / glass track).

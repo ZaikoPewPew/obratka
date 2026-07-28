@@ -10,6 +10,8 @@
 2. **Нельзя** — сразу внешняя вкладка + UI в оболочке.
 3. **Можно / неизвестно** — пробуем iframe as-is (личные сайты, Dprofile и т.д.).
 
+Безопасность iframe (`#portfolio-frame`): `sandbox` без `allow-top-navigation` (скрипты/формы/попапы разрешены; увод top-окна — нет), `referrerpolicy="no-referrer"`. URL при submit и при открытии `/review` — только `http(s)` (клиент `normalizePortfolioUrl` + RPC `submit_portfolio`).
+
 ## Спец-embed
 
 | Площадка | Поведение |

@@ -50,7 +50,7 @@ function normalizeSize(value) {
  *   isOpen: () => boolean;
  *   setSize: (size: AppModalSize) => void;
  *   setTitle: (title: string) => void;
- *   setDescription: (description: string) => void;
+ *   setDescription: (description: string | Node) => void;
  *   setPrimaryLabel: (label: string) => void;
  *   setSecondaryLabel: (label: string) => void;
  *   setActionsVisible: (flags: { primary?: boolean; secondary?: boolean }) => void;
@@ -134,9 +134,20 @@ export function createAppModal(opts = {}) {
   }
 
   /**
-   * @param {string} description
+   * @param {string | Node} description
    */
   function setDescription(description) {
+    if (description instanceof Node) {
+      descriptionEl.replaceChildren(description);
+      const hasContent = descriptionEl.childNodes.length > 0;
+      descriptionEl.hidden = !hasContent;
+      if (hasContent) {
+        dialog.setAttribute("aria-describedby", descId);
+      } else {
+        dialog.removeAttribute("aria-describedby");
+      }
+      return;
+    }
     const text = typeof description === "string" ? description.trim() : "";
     descriptionEl.textContent = text;
     descriptionEl.hidden = !text;

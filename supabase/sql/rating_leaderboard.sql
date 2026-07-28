@@ -42,7 +42,8 @@ security definer
 set search_path = public
 as $$
 begin
-  delete from public.rating_leaderboard;
+  -- WHERE true: PostgREST / safe-update запрещает DELETE без WHERE.
+  delete from public.rating_leaderboard where true;
 
   insert into public.rating_leaderboard
     (place, profile_id, display_name, avatar_url, grade, role, balance, refreshed_at)
@@ -98,10 +99,16 @@ begin
 
   select max(l.refreshed_at) into last_refresh from public.rating_leaderboard l;
 
-  if (last_refresh is null or last_refresh <= now() - ttl)
-     and pg_try_advisory_xact_lock(hashtext('rating_leaderboard_refresh')) then
-    perform public.refresh_rating_leaderboard();
-  end if;
+  -- Сбой refresh не должен ронять RPC: отдаём прежний снапшот.
+  begin
+    if (last_refresh is null or last_refresh <= now() - ttl)
+       and pg_try_advisory_xact_lock(hashtext('rating_leaderboard_refresh')) then
+      perform public.refresh_rating_leaderboard();
+    end if;
+  exception
+    when others then
+      null;
+  end;
 
   return query
   select

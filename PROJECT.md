@@ -19,7 +19,7 @@
 | Home: «Топы в сети» (fixed-чип) | wired (`legendary-online-panel` + `legendary_presence`) |
 | Home: free-slot «Мои» + max 1 pending | wired (`MAX_MINE_PENDING`, `submit_portfolio`) |
 | Home tabbar dock: glass + «Закинуть своё» справа | wired (`tabbar-dock`, `--on-dark`, entrance `motion-reveal-dock`) |
-| Review claim / heartbeat / release | wired (награда только после submit) |
+| Review claim / heartbeat / release | wired (награда только после submit; unload = keepalive + `sessionStorage` reconcile) |
 | Review iframe + таймер 45 s + **надиктовка** (rec на `/review` + микрофон в поле совета) + квиз | wired |
 | Подача URL + back-chip + done на url-screen | wired |
 | Report: листы (+ `dictation`) + жалоба + PDF | wired |
@@ -34,7 +34,8 @@
 - **Silent refresh:** при тех же id карточек — патч только reviewer-слотов (без thum.io); новые id — rebuild + reveal только для них.
 - **Порядок feed:** `sortFeedForSlotClosure` — open slot → ближе к 3/3 → FIFO; `reviewedByMe` / full вниз (не newest-first). См. home-screen README.
 - **Отправленный отчёт:** `reviewedByMe` появляется только после INSERT в `reviews`; карточка disabled с оверлеем «Отчёт отправлен», без intro/notice и повторного claim.
-- **Intro до claim:** клик по чужой карточке → `createAppModal` `homeReviewIntro*` (тайтл + автор `{name}`, две карточки минут, CTA «Сюдаа его!») → claim → `/review`. «Не сейчас» / закрытие — без claim.
+- **Intro до claim:** клик по чужой карточке → если нет слота (`isPortfolioOpenForReview`) → `homeNoSlots*`; иначе `createAppModal` `homeReviewIntro*` (тайтл + автор `{name}`, две карточки минут, CTA «Сюдаа его!») → claim → `/review`. «Не сейчас» / закрытие — без claim.
+- **Abort / hard nav:** SPA `releaseHeldClaim`; `pagehide` → `releasePortfolioClaimKeepalive`; per-tab `obratka.reviewClaim` + boot reconcile — active «Аноним» не залипает после ухода (см. `review-claims.mdc`). SQL: `portfolio_reviewer_slots` чистит expired перед list.
 - **Mine report gate:** `reviewsCount < targetReviews` → `homeMineNotReady*`; иначе `/report`. Own-карточки всегда `cursor: pointer` (не `not-allowed`).
 - **Фильтр «Мои»:** сегмент Активные / Завершенные (`tabs-panel`); завершённые = 3/3 (`reviewsCount >= targetReviews`).
 - **Free-slot «Мои на ревью»:** до `MAX_MINE_PENDING` (=1) — реальная карточка или dashed «Свободный слот» (`homeMineSlotFree*`). CTA «Закинуть»: сначала занятый слот → `homePendingLimit*`, потом нет монет → buzz на submit + чипе баланса. Подача — RPC `submit_portfolio` (atomic spend+insert).
@@ -162,7 +163,7 @@ Senior → Junior нельзя. Grade обязателен в онбординг
 | Side panel | [`side-panel`](src/components/side-panel/README.md) — панель справа (слот); home → «Правила» |
 | Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `contact-fab`; feed/mine/rating (`listRatingTop`); URL-query; лента SWR; Активные/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` / entrance cascade |
 | Review | `index.html` `.iframe-shell` + таймер + чип **rec** (заметки → `answers.dictation`) в `main.js` |
-| Quiz | `review-screen` + `review-panel` (микрофон в поле «Главный совет» → `advice`) |
+| Quiz | `review-screen` + `review-panel` + [`scale-slider`](src/components/scale-slider/README.md) (context/visual **1–5**; условный `pain`; рыночный `tier`) + mic → `advice`. SoT: [`QUIZ.md`](QUIZ.md) |
 | Success | `success-screen` (`/done`) |
 | Ban | `ban-screen` — статичный красный mesh + `banBrandMarkSvg` |
 | Report | `report-screen` — листы (+ надиктовка) + жалоба + PDF |
@@ -171,6 +172,18 @@ Senior → Junior нельзя. Grade обязателен в онбординг
 Handoff соседних brand-экранов: `go(id, { handoff: true })` — правый visual без повторной анимации.
 
 Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo-done). Подробно — README `brand-screen-visual`.
+
+## Квиз и отчёт
+
+Пул вопросов после `/review` → `/quiz`, схема `reviews.answers`, зоны шкал, L1/L2/L3 PDF и условный `pain` — **[`QUIZ.md`](QUIZ.md)**.
+
+Кратко:
+
+- Шкалы **context** и **visual** обе **1–5** ([`scale-slider`](src/components/scale-slider/README.md)).
+- `pain[]` показывается только при `visual ≤ 2` (composition / contrast / components / overloaded).
+- Вердикт рынка — поле **`tier`** (`early` · `mid` · `strong` · `top`), не `hire`.
+- Отчёт: `buildReportSections` в [`reviewReport.js`](src/utils/reviewReport.js); preview без кросс-сигналов; full — L2 + матрица `tier × gradeZone` + `reportSummaryLead`.
+- Старые answers с `hire` / visual 1–10 не парсятся.
 
 ## Дизайн и i18n
 
@@ -190,7 +203,7 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 
 - CSS: `tokens`, `base`, `entrance`, `app-modal`, `side-panel`, `iframe-shell`, `success-screen`, `home-screen`, `legendary-online-panel`, `contact-fab`, `tabs-panel`, `account-menu`, `settings-screen`, `ban-screen`, `report-screen`
 - Экраны: referral, auth, auth-code, onboarding, home, settings, url, review-shell (+ rec), quiz, success, report, ban
-- Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `side-panel`, `account-menu`, `tabs-panel`, `legendary-online-panel`, `contact-fab`
+- Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `side-panel`, `account-menu`, `tabs-panel`, `legendary-online-panel`, `contact-fab`, `scale-slider`
 - Home state: `src/utils/homeRoute.js` (query) + `homeListCache.js` + `feedSeen.js` + `mineReadySeen.js` (кэши сбрасываются в `exitAuthenticatedSession`)
 - Review timer: `src/config/review.js` (`REVIEW_SESSION_SECONDS`); iframe pause / external wall-clock; end sound `src/assets/audio/Timer-end.wav`
 - Dictation: `src/lib/dictation/` (Web Speech MVP; external `setKeepAliveInBackground`)

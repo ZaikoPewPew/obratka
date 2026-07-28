@@ -40,8 +40,8 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 |--------|------|------|
 | iframe-shell (`index.html` + `main.js`) | `/review` | Просмотр + таймер 45 s (iframe pause / external wall-clock + `Timer-end.wav`) + чип **rec** |
 | `review-screen/` | `/quiz` | Оболочка квиза + PDF reveal |
-| `review-panel/` | `/quiz` → `/quiz/done` | Шаги опроса + микрофон в advice + локальный done |
-| `scale-slider/` | — | Шкала оценки (canvas-сетка) для шагов context / visual |
+| `review-panel/` | `/quiz` → `/quiz/done` | Шаги опроса + шкалы 1–5 + условный pain + `tier` + mic в advice + локальный done. SoT: [`QUIZ.md`](../../QUIZ.md) |
+| `scale-slider/` | — | Шкалы оценки context/visual: canvas-сетка, ступени + приписки, min/max — [`README`](scale-slider/README.md) |
 
 Движок диктовки: [`../lib/dictation/README.md`](../lib/dictation/README.md).  
 См. [`PROJECT.md`](../../PROJECT.md) — Entrypoint.

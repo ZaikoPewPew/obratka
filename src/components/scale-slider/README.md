@@ -1,25 +1,101 @@
 # `scale-slider` — шкала оценки с сеткой
 
-Слайдер для шагов квиза «понятность» / «визуал»: крупное однословное название критерия, трек с анимированной сеткой квадратов, прямоугольный thumb, подписи min/max слева/справа.
+Слайдер для шагов квиза **понятность** (`context`, 1–5) и **визуал** (`visual`, 1–5).
+
+Над треком — заголовок в стиле вопросов квиза + приписка ступени; трек с анимированной сеткой квадратов; прямоугольный thumb; слева минималка, справа максималка.
+
+Фабрика: [`ScaleSlider.js`](ScaleSlider.js). Подключается из [`review-panel`](../review-panel/README.md). Пул вопросов / зоны отчёта: [`QUIZ.md`](../../../QUIZ.md).
 
 ## API
 
-`createScaleSlider({ name, from, to, title, ariaLabel?, ends: { low, high } })` → `HTMLElement` (`.review-panel__scale-block`).
+```js
+createScaleSlider({
+  name,           // имя input (form → answers.context / answers.visual)
+  from,           // min (целое)
+  to,             // max (целое)
+  title,          // idle-заголовок до первого касания («Понятность» / «Визуал»)
+  ariaLabel?,     // полный вопрос для a11y
+  ends: { low, high },
+  valueTitles?,   // { [value]: string } — заголовок после touch
+  valueHints?,    // { [value]: string } — приписка под заголовком
+}) → HTMLElement  // .review-panel__scale-block
+```
 
-- `title` — idle-заголовок до первого касания (одно слово критерия).
-- `valueTitles` — подписи по стопам (2 слова, склонения); после touch заголовок анимированно меняется.
-- `ends.low` / `ends.high` — подписи минималки / максималки (согласованы с родом критерия).
-- Значения — целые стопы от `from` до `to` (step 1); drag и клавиатура магнитятся к ним.
+### Поведение текста
 
-## Поведение canvas
+| Состояние | Заголовок | Приписка |
+|-----------|-----------|----------|
+| До touch | `title` (idle) | скрыта |
+| Drag / pointer | `valueTitles[value]` **сразу** (без очереди анимаций) | `valueHints[value]` сразу |
+| Клавиатура | короткий кроссфейд заголовка | сразу |
+| `reset-visual` | снова idle `title` | скрыта |
 
-- Сетка ~6×6px, цвет из `color` трека (`--shell-review-slider-fill-color` / `currentColor`).
-- «Хвост» до центра thumb + слабая «подсказка» справа при малых значениях.
-- Пауза: `prefers-reduced-motion`, вне вьюпорта (`IntersectionObserver`), скрытая вкладка; `ResizeObserver` + `devicePixelRatio` ≤ 2.
+Стопы — все целые от `from` до `to` (step 1). Drag и стрелки магнитятся к стопам; клавиши Home/End/PageUp/PageDown тоже по индексу стопов.
 
-Форма: скрытый `input[type=range].review-panel__slider-input` (как раньше) — `hasSliderValue` / FormData без изменений.
+### Разметка
+
+```text
+.review-panel__scale-block
+  ├─ .review-panel__scale-readout
+  │    ├─ .review-panel__scale-readout-viewport
+  │    │    └─ .review-panel__scale-readout-word
+  │    └─ .review-panel__scale-readout-hint
+  └─ .review-panel__scale-control
+       ├─ .review-panel__slider
+       │    ├─ .review-panel__slider-track
+       │    │    ├─ canvas.review-panel__slider-canvas
+       │    │    └─ .review-panel__slider-stops → .review-panel__slider-stop
+       │    ├─ .review-panel__slider-thumb
+       │    └─ input.review-panel__slider-input[type=range]
+       └─ .review-panel__scale-ends → .review-panel__scale-end(+--high)
+```
+
+Форма: `input.review-panel__slider-input` — `hasSliderValue` / FormData без изменений. Сброс: `dispatchEvent(new Event("reset-visual"))`.
+
+## Canvas-заливка
+
+- Сетка ~6×6px (`--shell-review-slider-cell`), цвет из `color` трека (`--shell-review-slider-fill-color` → `currentColor`).
+- «Хвост» мерцающих квадратов до центра thumb; слабая «подсказка» справа при малых значениях.
+- Пауза анимации (CPU): `prefers-reduced-motion` (статичный кадр), вне вьюпорта (`IntersectionObserver`), скрытая вкладка (`visibilitychange`).
+- Ресайз: `ResizeObserver` + `devicePixelRatio` ≤ 2; смена темы (`MutationObserver` на `<html>` class/style/`data-theme`) → перерисовка.
+
+База — нативный `range` (не Radix): доступность, drag, keyboard уже в input.
 
 ## Стили / токены
 
-Классы `.review-panel__scale-*` / `.review-panel__slider-*` в `styles/iframe-shell.css`.  
-Токены `--shell-review-slider-*` в `styles/tokens.css`.
+Классы в `styles/iframe-shell.css`. Токены `--shell-review-slider-*` в `styles/tokens.css`:
+
+| Токен | Назначение |
+|-------|------------|
+| `--shell-review-slider-readout-*` | заголовок (= вопрос квиза: 32px / regular / `--color-text`) |
+| `--shell-review-slider-readout-gap` | отступ заголовок → слайдер (**24px** / `--space-6`) |
+| `--shell-review-slider-hint-*` | приписка под заголовком |
+| `--shell-review-slider-track-*` / `cell` / `fill-color` | трек и сетка |
+| `--shell-review-slider-thumb-*` | прямоугольный ползунок |
+| `--shell-review-slider-stop-*` | точки-стопы |
+| `--shell-review-slider-title-*` | duration/shift/blur/ease кроссфейда (клавиатура) |
+| `--shell-review-slider-lerp*` | сглаживание позиции thumb |
+
+Типографика заголовка: `fixHangingPrepositions` перед `textContent`.
+
+## i18n
+
+| Ключи | Роль |
+|-------|------|
+| `reviewContextShort` / `reviewVisualShort` | idle-заголовок |
+| `reviewContextLabel` / `reviewVisualLabel` | aria полного вопроса |
+| `reviewContextScaleLow/High` / `reviewVisualScaleLow/High` | min/max (род согласован: «Слабый»–«Сильный») |
+| `reviewContextValue1…5` / `reviewVisualValue1…5` | заголовок ступени |
+| `reviewContextHint1…5` / `reviewVisualHint1…5` | приписка ступени |
+
+Правило: `.cursor/rules/i18n.mdc`. Локали: `content/locales.json`.
+
+## Связь с отчётом
+
+Числа `context` / `visual` из FormData уходят в `answers` → зоны в [`reviewReport.js`](../../utils/reviewReport.js) (`contextZone` / `visualZone`) → тексты PDF.
+
+Зоны **visual 1–5:** `1 → Weak`, `2 → Ok`, `3 → Good`, `4–5 → Strong` (см. [`QUIZ.md`](../../../QUIZ.md)).
+
+Подписи слайдера — UX квиза; формулировки отчёта (`reportVisual*`) отдельные.
+
+См. [`review-panel/README.md`](../review-panel/README.md), [`SCREENS.md`](../../../SCREENS.md).

@@ -36,7 +36,9 @@ alwaysApply: true
 | `ban*` | `/banned` |
 | `reportScreen*` / `reportComplaint*` / `complaintTag*` | `/report` + жалоба на лист |
 | `reviewRec*` / `reviewAdviceRec*` / `reportDictationTitle` | чип rec на `/review`, микрофон в поле совета, секция надиктовки в листе |
-| `reviewContextShort` / `reviewVisualShort` / `reviewContextValue*` / `reviewVisualValue*` | idle-заголовок шкал + подписи по стопам |
+| `reviewTier*` / `reviewPain*` / `reviewGrade*` / `reviewStructure*` / `reviewMetrics*` | шаги квиза (tier = рыночный уровень, не `profiles.tier`) |
+| `reportTier*` / `reportSummary*` / `reportCross*` / `reportPain*` / `reportGrade*` / `reportContext*` / `reportStructure*` / `reportMetrics*` / `reportVisual*` / `reportAdviceTitle` | тексты PDF-листа |
+| `reviewContextShort` / `reviewVisualShort` / `reviewContextValue*` / `reviewVisualValue*` / `reviewContextHint*` / `reviewVisualHint*` | idle-заголовок шкал + ступени + приписки 1–5 ([`scale-slider`](../../src/components/scale-slider/README.md)) |
 | `settings*` | `/settings` (заглушка) |
 
 ## Добавление ключа

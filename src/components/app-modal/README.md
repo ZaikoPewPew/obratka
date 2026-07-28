@@ -71,7 +71,7 @@ await modal.close();
 | `open()` / `close()` | `close` → `Promise` после fade |
 | `isOpen()` | backdrop открыт + класс `--open` |
 | `setSize(size)` | `md` / `lg` / `xl` |
-| `setTitle` / `setDescription` | копирайт |
+| `setTitle` / `setDescription` | копирайт (`setDescription` принимает `string` или `Node`) |
 | `setPrimaryLabel` / `setSecondaryLabel` | кнопки |
 | `setActionsVisible({ primary, secondary })` | скрыть ряд / кнопки |
 | `setCloseAriaLabel` | aria у крестика |

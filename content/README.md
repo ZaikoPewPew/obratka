@@ -23,7 +23,7 @@
 | `settings*` | `/settings` (заглушка) |
 | `ban*` | `/banned` |
 | `reportScreen*` / `reportComplaint*` / `complaintTag*` | `/report` (листы + жалоба; теги v1: `low_effort` · `spam` · `harassment` · `offensive` · `irrelevant`) |
-| `review*` / `reviewRec*` / `reviewAdviceRec*` / `report*` / `reportDictationTitle` | `/quiz` (в т.ч. микрофон в поле совета), PDF; rec на `/review` |
+| `review*` / `reviewRec*` / `reviewAdviceRec*` / `reviewTier*` / `reviewPain*` / `reviewContextShort`·`Value*`·`Hint*` / `reviewVisualShort`·`Value*`·`Hint*` (1–5) / `report*` / `reportDictationTitle` | `/quiz` (шкалы + условный pain + tier + микрофон в совете), PDF; rec на `/review` |
 | `frame*` / `controls*` / `embedBlocked*` | iframe-shell `/review` (в т.ч. external viewer) |
 
 ### Auth-защита (ключи)

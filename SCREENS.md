@@ -26,7 +26,7 @@ referral → auth → authCode → onboarding → home
 | 4a | `settings-screen` | `/settings` | Настройки аккаунта (пока заглушка) |
 | 5a | iframe-shell | `/review` | Ревью: iframe + таймер **45 s** (pause / external wall-clock + `Timer-end.wav`) + чип **rec** |
 | 5b | `url-screen` | `/portfolio` | Подача URL (баланс); чип «На главную»; done на том же экране |
-| 6 | `review-screen` + `review-panel` | `/quiz` → `/quiz/done` | Квиз (микрофон в поле «Главный совет»); финал слева + улет отчёта |
+| 6 | `review-screen` + `review-panel` + `scale-slider` | `/quiz` → `/quiz/done` | Квиз: grade → context/structure/metrics → visual 1–5 (+ pain если ≤2) → **tier** → advice; финал + улет отчёта. SoT: [`QUIZ.md`](QUIZ.md) |
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
 | 8 | `report-screen` | `/report` | Отчёт автору: листы + жалоба + PDF (мокап листа → done после скачивания) |
 | — | `ban-screen` | `/banned` | Аккаунт заблокирован; «Выйти» + «Связаться» (242px); красный mesh; deep link escape-proof |
@@ -91,6 +91,7 @@ Handoff соседних brand-экранов: `handoff: true` (`brandScreenTran
 `url-screen` — split; чип «На главную» (`.url-screen__back` / `urlScreenBack*`, скрыт на done); при URL справа заглушка «Портфолио»; submit → done на том же экране (`setVariant("done")`).  
 `success-screen` — запасной `/done` (deep link); основной submit больше не прыгает сюда (`pendingSuccessPreset` = `generic`).  
 `review-screen` — split для квиза (слева panel, справа visual + PDF-лист).  
+Шкалы context/visual **1–5** — [`scale-slider`](src/components/scale-slider/README.md). Пул / `tier` / отчёт — [`QUIZ.md`](QUIZ.md).  
 `ban-screen` — статичный красный mesh + `banBrandMarkSvg` (не `setVariant`).  
 На `/review` в шапке — опциональная надиктовка (`.iframe-shell__rec`), в квизе — микрофон в поле «Главный совет» (`.review-panel__rec`); таймер `REVIEW_SESSION_SECONDS` из [`src/config/review.js`](src/config/review.js).  
 iframe: пауза при скрытой вкладке; external (портфолио в другой вкладке): wall-clock без паузы + best-effort keep-alive STT; конец → `Timer-end.wav` + стоп записи → quiz. См. [`src/lib/dictation/README.md`](src/lib/dictation/README.md).
@@ -121,7 +122,8 @@ src/components/
   settings-screen/       ← /settings (пока заглушка)
   url-screen/
   review-screen/
-  review-panel/           ← только шаги квиза
+  review-panel/           ← шаги квиза
+  scale-slider/           ← шкалы context (1–5) / visual (1–5)
   success-screen/         ← /done (подача портфолио)
   report-screen/          ← /report (листы ревью + жалоба)
   ban-screen/             ← /banned (аккаунт заблокирован)
@@ -136,7 +138,7 @@ src/utils/
   homeListCache.js        ← SWR feed/mine/rating (memory + sessionStorage)
   feedSeen.js             ← seen id кейсов ленты → точка на «На ревью»
   mineReadySeen.js        ← seen id готовых отчётов → точка на «Мои» / «Завершенные»
-  reviewReport.js         ← answers → секции PDF (+ dictation)
+  reviewReport.js         ← answers → секции PDF (tier × gradeZone, L1/L2/L3; см. QUIZ.md)
 
 src/config/
   review.js               ← REVIEW_SESSION_SECONDS (таймер /review + intro)
@@ -199,7 +201,7 @@ Shared (не экраны флоу):
 | `createSettingsScreen` | `/settings` | UI (заглушка настроек) |
 | `createUrlScreen` | `/portfolio` | UI (back-chip → home; submit + done via `setVariant`; shell) |
 | iframe-shell + timer + rec | `/review` | UI (заметки → `answers.dictation`) |
-| `createReviewScreen` + `createReviewPanel` | `/quiz` | UI (микрофон в поле совета → `advice`) |
+| `createReviewScreen` + `createReviewPanel` (+ `createScaleSlider`) | `/quiz` | UI: visual 1–5, условный pain, `tier`; mic → `advice`. См. [`QUIZ.md`](QUIZ.md) |
 | `createSuccessScreen` | `/done` | UI (deep link / generic; submit остаётся на url-screen) |
 | `createReportScreen` | `/report` | UI (листы + жалоба на лист) |
 | `createBanScreen` | `/banned` | UI (блок аккаунта; static evil mark) |
@@ -224,7 +226,7 @@ Home entrance: `--home-screen-reveal-delay-*` + `motion-reveal-dock` (тольк
 
 ## i18n
 
-Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeCardReport*` / `homeCardReportPending*` / `homeTabMineReadyAria` / `homeReputation*` / `homeBalance*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*`, `modalCloseAria`, `url*` / `urlScreenBack*`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `reviewRec*` / `reviewAdviceRec*` / `report*` / `reportDictationTitle`, `frame*` / `controls*`).
+Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeCardReport*` / `homeCardReportPending*` / `homeTabMineReadyAria` / `homeReputation*` / `homeBalance*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*`, `modalCloseAria`, `url*` / `urlScreenBack*`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `reviewRec*` / `reviewAdviceRec*` / `reviewContextShort`·`Value*`·`Hint*` / `reviewVisualShort`·`Value*`·`Hint*` / `report*` / `reportDictationTitle`, `frame*` / `controls*`).
 Правило: `.cursor/rules/i18n.mdc`.
 
 Таймер `/review` и intro copy: `REVIEW_SESSION_SECONDS` в [`src/config/review.js`](src/config/review.js).  
@@ -266,6 +268,8 @@ iframe — пауза при `visibility hidden`; external — wall-clock + де
 - [`src/utils/homeRoute.js`](src/utils/homeRoute.js) — parse/build/canonical home query
 - [`src/utils/feedSeen.js`](src/utils/feedSeen.js) — seen кейсов ленты → точка на «На ревью»
 - [`src/utils/mineReadySeen.js`](src/utils/mineReadySeen.js) — seen 3/3 → точка на «Мои» / «Завершенные»
+- [`QUIZ.md`](QUIZ.md) — пул вопросов, схема `answers`, L1/L2/L3 PDF
+- [`src/components/scale-slider/README.md`](src/components/scale-slider/README.md) — шкалы квиза 1–5 (canvas, ступени, приписки)
 - [`src/lib/dictation/README.md`](src/lib/dictation/README.md) — надиктовка: `/review` + поле совета в квизе; iframe pause / external keep-alive; конец → [`Timer-end.wav`](src/assets/audio/Timer-end.wav)
 - [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) — правый visual + variants
 - [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) — split-каркас

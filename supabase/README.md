@@ -18,7 +18,7 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 | `sql/referrals.sql` | referral-код на профиль (лимит 2), seed `YTHWKPDWAK`, RPC validate/redeem |
 | `sql/portfolios.sql` | portfolios/reviews, лиги; INSERT pending/0/target=3 |
 | `sql/portfolio_submit.sql` | RPC `submit_portfolio` (atomic spend 30 + insert, max 1 pending); revoke client INSERT |
-| `sql/review_claims.sql` | claims + award balance (+10) в review trigger |
+| `sql/review_claims.sql` | claims + award (+10); `portfolio_reviewer_slots` + purge expired; apply — [`sql/README.md`](sql/README.md) § «Как применять» |
 | `sql/review_complaints.sql` | жалобы на листы → `reputation` → автобан |
 | `sql/subscribers_rls.sql` | RLS на legacy `subscribers` (если таблица есть) |
 | `sql/ban-templates.sql` | Copy-paste SQL: бан / разбан / поиск |

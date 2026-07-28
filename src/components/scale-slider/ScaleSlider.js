@@ -14,6 +14,7 @@ import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
  *   ariaLabel?: string;
  *   ends: { low: string; high: string };
  *   valueTitles?: Record<number, string> | Record<string, string>;
+ *   valueHints?: Record<number, string> | Record<string, string>;
  * }} opts
  * @returns {HTMLElement}
  */
@@ -25,11 +26,13 @@ export function createScaleSlider({
   ariaLabel,
   ends,
   valueTitles = {},
+  valueHints = {},
 }) {
   const min = Math.min(from, to);
   const max = Math.max(from, to);
   const stops = [];
   for (let v = min; v <= max; v += 1) stops.push(v);
+  const idleTitle = fixHangingPrepositions(title);
 
   const block = document.createElement("div");
   block.className = "review-panel__scale-block";
@@ -44,9 +47,14 @@ export function createScaleSlider({
 
   const readoutWord = document.createElement("span");
   readoutWord.className = "review-panel__scale-readout-word";
-  readoutWord.textContent = fixHangingPrepositions(title);
+  readoutWord.textContent = idleTitle;
   viewport.append(readoutWord);
-  readout.append(viewport);
+
+  const readoutHint = document.createElement("p");
+  readoutHint.className = "review-panel__scale-readout-hint";
+  readoutHint.hidden = true;
+
+  readout.append(viewport, readoutHint);
 
   const slider = document.createElement("div");
   slider.className = "review-panel__slider";
@@ -126,7 +134,7 @@ export function createScaleSlider({
   let dpr = 1;
   /** @type {ReturnType<typeof createNoise> | null} */
   let noise = null;
-  let displayedTitle = title;
+  let displayedTitle = idleTitle;
   let lastValue = min;
   let titleGen = 0;
   /** @type {Animation | null} */
@@ -146,6 +154,30 @@ export function createScaleSlider({
     if (input.dataset.touched !== "1") return title;
     const mapped = valueTitles[value] ?? valueTitles[String(value)];
     return typeof mapped === "string" && mapped ? mapped : title;
+  }
+
+  /**
+   * @param {number} value
+   * @returns {string}
+   */
+  function hintForValue(value) {
+    if (input.dataset.touched !== "1") return "";
+    const mapped = valueHints[value] ?? valueHints[String(value)];
+    return typeof mapped === "string" ? mapped : "";
+  }
+
+  /**
+   * @param {number} value
+   */
+  function syncReadoutHint(value) {
+    const hint = hintForValue(value).trim();
+    if (!hint) {
+      readoutHint.textContent = "";
+      readoutHint.hidden = true;
+      return;
+    }
+    readoutHint.textContent = fixHangingPrepositions(hint);
+    readoutHint.hidden = false;
   }
 
   function readTitleMotion() {
@@ -177,17 +209,19 @@ export function createScaleSlider({
    */
   function setReadoutTitle(next, { immediate = false, direction = 1 } = {}) {
     const nextText = fixHangingPrepositions(next);
+    const snap = immediate || dragging || prefersReducedMotion();
     if (nextText === displayedTitle && !titleAnim) return;
-    const fromText = readoutWord.textContent || displayedTitle;
+
     displayedTitle = nextText;
     const gen = ++titleGen;
     syncReadoutAria(Number(input.value));
 
-    if (immediate || prefersReducedMotion() || !fromText) {
-      if (titleAnim) {
-        titleAnim.cancel();
-        titleAnim = null;
-      }
+    if (titleAnim) {
+      titleAnim.cancel();
+      titleAnim = null;
+    }
+
+    if (snap) {
       readoutWord.textContent = nextText;
       readoutWord.style.opacity = "";
       readoutWord.style.transform = "";
@@ -195,67 +229,66 @@ export function createScaleSlider({
       return;
     }
 
+    const fromText = readoutWord.textContent || idleTitle;
     const { durationMs, shiftPx, blurPx, easing } = readTitleMotion();
     const dir = direction >= 0 ? 1 : -1;
     const blur = `blur(${blurPx}px)`;
 
-    if (titleAnim) {
-      titleAnim.cancel();
-      titleAnim = null;
-    }
     readoutWord.textContent = fromText;
     readoutWord.style.opacity = "1";
     readoutWord.style.transform = "translateY(0)";
     readoutWord.style.filter = "blur(0px)";
 
-    const outgoing = readoutWord.animate(
+    // Один короткий кроссфейд — без двухфазной очереди, чтобы не отставать от стопа.
+    const anim = readoutWord.animate(
       [
         {
           opacity: 1,
           transform: "translateY(0)",
           filter: "blur(0px)",
+          offset: 0,
         },
         {
           opacity: 0,
-          transform: `translateY(${-dir * shiftPx}px)`,
+          transform: `translateY(${-dir * shiftPx * 0.5}px)`,
           filter: blur,
+          offset: 0.45,
+        },
+        {
+          opacity: 0,
+          transform: `translateY(${dir * shiftPx * 0.5}px)`,
+          filter: blur,
+          offset: 0.46,
+        },
+        {
+          opacity: 1,
+          transform: "translateY(0)",
+          filter: "blur(0px)",
+          offset: 1,
         },
       ],
-      { duration: durationMs * 0.45, easing, fill: "forwards" },
+      { duration: durationMs, easing, fill: "forwards" },
     );
 
-    titleAnim = outgoing;
-    outgoing.finished
+    // Смена текста в середине кроссфейда.
+    const swapAt = window.setTimeout(() => {
+      if (gen !== titleGen) return;
+      readoutWord.textContent = nextText;
+    }, durationMs * 0.45);
+
+    titleAnim = anim;
+    anim.finished
       .then(() => {
-        if (gen !== titleGen) return;
-        readoutWord.textContent = nextText;
-        const incoming = readoutWord.animate(
-          [
-            {
-              opacity: 0,
-              transform: `translateY(${dir * shiftPx}px)`,
-              filter: blur,
-            },
-            {
-              opacity: 1,
-              transform: "translateY(0)",
-              filter: "blur(0px)",
-            },
-          ],
-          { duration: durationMs * 0.55, easing, fill: "forwards" },
-        );
-        titleAnim = incoming;
-        return incoming.finished;
-      })
-      .then(() => {
+        window.clearTimeout(swapAt);
         if (gen !== titleGen) return;
         titleAnim = null;
+        readoutWord.textContent = nextText;
         readoutWord.style.opacity = "";
         readoutWord.style.transform = "";
         readoutWord.style.filter = "";
       })
       .catch(() => {
-        /* cancelled */
+        window.clearTimeout(swapAt);
       });
   }
 
@@ -267,7 +300,11 @@ export function createScaleSlider({
     const next = titleForValue(value);
     const direction = value >= lastValue ? 1 : -1;
     lastValue = value;
-    setReadoutTitle(next, { immediate, direction });
+    setReadoutTitle(next, {
+      immediate: immediate || dragging,
+      direction,
+    });
+    syncReadoutHint(value);
   }
 
   function readTokenPx(token, fallback) {
@@ -327,11 +364,13 @@ export function createScaleSlider({
 
   function syncReadoutAria(value) {
     const label = titleForValue(value);
+    const hint = hintForValue(value);
+    const full = hint ? `${label}. ${hint}` : label;
     readout.setAttribute(
       "aria-label",
-      `${label}, ${value} (${ends.low} — ${ends.high})`,
+      `${full}, ${value} (${ends.low} — ${ends.high})`,
     );
-    input.setAttribute("aria-valuetext", label);
+    input.setAttribute("aria-valuetext", full);
   }
 
   function syncStops(value) {
@@ -559,12 +598,14 @@ export function createScaleSlider({
     const progress = progressFromClientX(clientX);
     const value = valueFromProgress(progress);
     const prev = Number(input.value);
+    const wasIdle = input.dataset.touched !== "1";
     input.dataset.touched = "1";
     input.value = String(value);
     setTargetProgress(progress);
     syncStops(value);
-    if (value !== prev || displayedTitle === title) {
-      syncReadoutTitle(value);
+    // Drag: текст всегда = текущий стоп, без очереди анимаций.
+    if (value !== prev || wasIdle || displayedTitle === idleTitle) {
+      syncReadoutTitle(value, { immediate: true });
     }
     syncReadoutAria(value);
     slider.classList.add("review-panel__slider--touched");
@@ -575,7 +616,7 @@ export function createScaleSlider({
     input.value = String(snapped);
     setTargetProgress(progressFromValue(snapped));
     syncStops(snapped);
-    syncReadoutTitle(snapped);
+    syncReadoutTitle(snapped, { immediate: true });
     syncReadoutAria(snapped);
   }
 
@@ -657,6 +698,7 @@ export function createScaleSlider({
     setTargetProgress(0, { immediate: true });
     syncStops(min);
     setReadoutTitle(title, { immediate: true });
+    syncReadoutHint(min);
     syncReadoutAria(min);
     slider.classList.remove("review-panel__slider--touched");
     paintOnce();

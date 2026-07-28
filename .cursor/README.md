@@ -52,7 +52,7 @@
 | `/settings` | Заглушка настроек (из account-menu) |
 | `/portfolio` | Подача URL; back-chip «На главную»; done через `setVariant("done")` |
 | `/review` | iframe + таймер 45 s + **rec** (заметки; нужен claim); в квизе — микрофон в поле совета |
-| `/quiz` | Квиз |
+| `/quiz` | Квиз: visual 1–5, условный pain, `tier` (не hire); advice + mic — [`QUIZ.md`](../QUIZ.md) |
 | `/quiz/done` | Финал квиза |
 | `/done` | Запасной success (deep link) |
 | `/report` | Листы ревью автора + жалоба → репутация |
@@ -63,7 +63,7 @@
 | Routes / router / flow | `src/app/` |
 | Оркестрация | `main.js` → `go()` / `applyRoute()` / `syncRoute()` |
 | Screens | `src/components/*-screen/` |
-| Квиз | `review-screen/` + `review-panel/` |
+| Квиз | `review-screen/` + `review-panel/` + [`scale-slider/`](../src/components/scale-slider/README.md) |
 | Надиктовка | `src/lib/dictation/` + `.iframe-shell__rec` + `.review-panel__rec` |
 | Онбординг-контент | `content/onboarding.json`, `content/onboarding.md` |
 

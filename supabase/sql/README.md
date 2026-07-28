@@ -11,7 +11,7 @@
 | `portfolio_submit.sql` | RPC `submit_portfolio` (atomic spend 30 + insert, max 1 pending); revoke client INSERT |
 | `referrals.sql` | персональный `referral_code` (max 2 uses), seed `YTHWKPDWAK`, RPC validate/redeem; без наград |
 | `portfolios.sql` | portfolios/reviews, лиги; SELECT only (INSERT через `submit_portfolio`) |
-| `review_claims.sql` | claims + award balance (+10) в `handle_review_inserted` |
+| `review_claims.sql` | claims + award balance (+10) в `handle_review_inserted`; `portfolio_reviewer_slots` вызывает `purge_expired_review_claims` перед list |
 | `review_complaints.sql` | reputation + RPC complaint |
 | `subscribers_count.sql` | RPC count (legacy) |
 | `subscribers_rls.sql` | RLS + revoke на live `subscribers`, если таблица есть |
@@ -20,7 +20,25 @@
 | `portfolio-role-backfill.sql` | одноразовый backfill `portfolios.role` (Lead/Head naming) |
 | `portfolio_preview_cache.sql` | Storage-бакет `portfolio-previews` (публичный read, без client write) для Edge `portfolio-preview` |
 
-Применять в SQL Editor Dashboard или через CLI. Порядок: `profiles` → `legendary_presence` → `rating_leaderboard` → `wallet` → `portfolios` → `portfolio_submit` → `review_claims` → `review_complaints` / `referrals`; при legacy — `subscribers_rls`.  
+## Как применять
+
+1. Dashboard проекта **obratka** → **SQL Editor** (вторая иконка слева) → New query.
+2. Вставь содержимое нужного `.sql` (или точечный блок) → **Run**.
+3. Альтернатива: MCP `apply_migration` / CLI `supabase db` — тот же SQL.
+
+Порядок первого деплоя: `profiles` → `legendary_presence` → `rating_leaderboard` → `wallet` → `portfolios` → `portfolio_submit` → `review_claims` → `review_complaints` / `referrals`; при legacy — `subscribers_rls`.
+
+### Повторный apply (уже живая БД)
+
+Файлы в основном идемпотентны (`create or replace`, `if not exists`). Для claims:
+
+| Что меняли | Что прогнать |
+|------------|--------------|
+| Весь claims-слой | весь [`review_claims.sql`](review_claims.sql) |
+| Только слоты + purge expired | с `drop function … portfolio_reviewer_slots` до конца функции **и** `revoke`/`grant` на неё (в конце файла) |
+
+Клиентский фикс залипающих «Аноним»-слотов (keepalive `pagehide` + `sessionStorage` `obratka.reviewClaim`) **не** требует SQL — достаточно деплоя фронта. SQL-purge в `portfolio_reviewer_slots` — доп. hardening, чтобы expired не светились до следующего claim/heartbeat.
+
 Обзор — [`../README.md`](../README.md).  
 **Как банить юзеров:** [`../BAN.md`](../BAN.md).  
 **Кто какие RPC может звать:** [`../SECURITY.md`](../SECURITY.md).

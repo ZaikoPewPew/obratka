@@ -2,6 +2,15 @@
 -- + answers на reviews; слоты-аватарки; RPC claim/heartbeat/release
 -- Depends on public.portfolios / public.reviews / public.profiles
 --   (apply portfolios.sql + profiles.sql first).
+--
+-- Как применять (Dashboard SQL Editor или MCP apply_migration):
+--   • Первый раз / полный reset: весь файл целиком (идемпотентен: IF NOT EXISTS,
+--     CREATE OR REPLACE, DROP POLICY IF EXISTS).
+--   • Точечный апдейт слотов (purge expired перед list): блок
+--     `portfolio_reviewer_slots` + revoke/grant в конце файла
+--     (см. sql/README.md § «Повторный apply»).
+-- Клиентский unload: keepalive release + sessionStorage reconcile — не SQL;
+--   см. .cursor/rules/review-claims.mdc.
 
 -- Ответы квиза + денормализованный аватар ревьюера (для слотов / отчёта).
 alter table public.reviews
@@ -244,6 +253,8 @@ begin
   if uid is null or p_ids is null or cardinality(p_ids) = 0 then
     return;
   end if;
+
+  perform public.purge_expired_review_claims();
 
   return query
   select

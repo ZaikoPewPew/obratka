@@ -109,6 +109,26 @@
   line-height: var(--app-modal-desc-line-height);
 }
 
+.app-modal__description-link {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--app-modal-desc-link-color);
+  font: inherit;
+  line-height: inherit;
+  text-align: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+  cursor: pointer;
+}
+
+.app-modal__description-link:hover,
+.app-modal__description-link:focus-visible {
+  color: var(--app-modal-desc-link-color);
+}
+
 .app-modal__description[hidden] {
   display: none !important;
 }
