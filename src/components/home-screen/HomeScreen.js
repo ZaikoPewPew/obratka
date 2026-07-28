@@ -1123,9 +1123,6 @@ export function createHomeScreen({
     size: "md",
     showPrimary: false,
     showSecondary: false,
-    onSecondary: () => {
-      closeInviteModal();
-    },
   });
   inviteModal.content.append(inviteExplainer);
 
@@ -1704,13 +1701,8 @@ export function createHomeScreen({
       t.homeInviteShareAria ?? t.homeInviteShare ?? "",
     );
     inviteModal.setCloseAriaLabel(t.homeInviteCloseAria ?? "");
-    if (inviteSlotsExhausted) {
-      inviteModal.setSecondaryLabel(t.homeInviteClose ?? "");
-      inviteModal.setActionsVisible({ primary: false, secondary: true });
-    } else {
-      inviteModal.setSecondaryLabel("");
-      inviteModal.setActionsVisible({ primary: false, secondary: false });
-    }
+    inviteModal.setSecondaryLabel("");
+    inviteModal.setActionsVisible({ primary: false, secondary: false });
     inviteModal.open();
   }
 

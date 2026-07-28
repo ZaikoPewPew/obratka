@@ -573,7 +573,7 @@
    */
   --side-panel-z: var(--z-modal);
   --side-panel-inset: var(--space-4);
-  --side-panel-width: 500px;
+  --side-panel-width: 650px;
   --side-panel-padding: var(--space-6);
   --side-panel-gap: var(--space-4);
   --side-panel-radius: var(--radius-xl);

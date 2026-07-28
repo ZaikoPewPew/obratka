@@ -10,7 +10,7 @@
 
 | Figma | Код |
 |-------|-----|
-| Панель 500×высота экрана | `--side-panel-width` + `top/right/bottom: inset` |
+| Панель 650×высота экрана | `--side-panel-width` + `top/right/bottom: inset` |
 | Inset 16 сверху / справа / снизу | `--side-panel-inset` |
 | Radius 24, padding 24, gap 16 | `--side-panel-*` |
 | Title 24 + muted subtitle 14 | `.side-panel__title` / `__description` |
