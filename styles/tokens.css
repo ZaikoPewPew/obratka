@@ -890,9 +890,9 @@
   --legendary-online-label-weight: var(--font-weight-regular);
   --legendary-online-avatar-size: var(--space-8);
   --legendary-online-avatar-radius: var(--radius-pill);
-  --legendary-online-avatars-gap: -4px;
-  --legendary-online-avatar-ring-width: 1px;
-  --legendary-online-avatar-ring-color: var(--legendary-online-bg);
+  --legendary-online-avatars-gap: 0px;
+  --legendary-online-avatar-ring-width: 3px;
+  --legendary-online-avatar-ring-color: var(--color-surface-muted);
   --legendary-online-avatar-letter-bg: var(--home-screen-avatar-letter-bg);
   --legendary-online-avatar-letter-color: var(--home-screen-avatar-letter-color);
   --legendary-online-avatar-letter-size: var(--font-size-xs);
