@@ -119,8 +119,7 @@
   font: inherit;
   line-height: inherit;
   text-align: inherit;
-  text-decoration: underline;
-  text-underline-offset: 0.12em;
+  text-decoration: none;
   cursor: pointer;
 }
 
