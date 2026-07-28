@@ -91,6 +91,22 @@ export function getMotionFieldErrorVisual() {
 }
 
 /**
+ * Короткий горизонтальный buzz отказа CTA / нехватки баланса.
+ * @returns {{ durationMs: number; easing: string }}
+ */
+export function getMotionControlErrorBuzz() {
+  return {
+    durationMs: parseCssTimeMs(
+      readCssVar("--motion-control-error-buzz-duration"),
+      420,
+    ),
+    easing:
+      readCssVar("--motion-control-error-buzz-ease") ||
+      "cubic-bezier(0.36, 0.07, 0.19, 0.97)",
+  };
+}
+
+/**
  * Cooldown кнопки «Отправить ещё раз» на экране email OTP.
  * @returns {number}
  */

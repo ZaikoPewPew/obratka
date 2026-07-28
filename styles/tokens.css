@@ -1142,7 +1142,7 @@
   --home-screen-tabbar-label-ease: var(--motion-screen-ease);
   --home-screen-tabbar-contrast-duration: var(--motion-screen-duration);
   --home-screen-tabbar-contrast-ease: var(--motion-screen-ease);
-  /* Кнопка «Закинуть своё» справа от таббара (Google blue, плюс 24) */
+  /* Кнопка «Закинуть своё» справа от таббара (Google blue / lock → red flash) */
   --home-screen-tabbar-dock-gap: var(--space-2);
   --home-screen-tabbar-submit-size: var(--home-screen-tabbar-height);
   --home-screen-tabbar-submit-radius: var(--radius-md);
@@ -1160,6 +1160,20 @@
     var(--palette-google-blue) 78%,
     var(--palette-black)
   );
+  /* Flash отказа (нет уток / слот занят) — Google red #EA4335 */
+  --home-screen-tabbar-submit-bg-error: var(--palette-google-red);
+  --home-screen-tabbar-submit-bg-error-hover: color-mix(
+    in srgb,
+    var(--palette-google-red) 88%,
+    var(--palette-black)
+  );
+  --home-screen-tabbar-submit-bg-error-active: color-mix(
+    in srgb,
+    var(--palette-google-red) 78%,
+    var(--palette-black)
+  );
+  --home-screen-tabbar-submit-bg-duration: 220ms;
+  --home-screen-tabbar-submit-bg-ease: var(--ease-reveal);
   --home-screen-body-padding-bottom: calc(
     var(--home-screen-tabbar-offset) + var(--home-screen-tabbar-height) +
       var(--space-4)

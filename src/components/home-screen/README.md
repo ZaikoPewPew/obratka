@@ -1,6 +1,6 @@
 # `home-screen` — главная (лента + мои + рейтинг)
 
-Path: **`/home`**. После onboarding: шапка (лого, репутация, баланс, аватар) + лента карточек портфолио + нижний док: переключатель **На ревью / Мои посты / Рейтинг** и кнопка **«Закинуть своё»** (квадрат с плюсом справа от таббара).
+Path: **`/home`**. После onboarding: шапка (лого, репутация, баланс, аватар) + лента карточек портфолио + нижний док: переключатель **На ревью / Мои посты / Рейтинг** и кнопка **«Закинуть своё»** (квадрат с плюсом/замком справа от таббара).
 
 Файл: [`HomeScreen.js`](./HomeScreen.js). Стили: [`styles/home-screen.css`](../../../styles/home-screen.css). Токены `--home-screen-*` в [`styles/tokens.css`](../../../styles/tokens.css). Слева снизу — fixed [`legendary-online-panel`](../legendary-online-panel/) («p4p в сети», poll вместе с home; клик → explainer Figma `492:4009`; скрыт если никого нет). Справа снизу — fixed [`contact-fab`](../contact-fab/) (Telegram, Figma `478:1814`).
 
@@ -14,7 +14,7 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 | **Мои посты** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …); сверху сегмент **Мои на ревью / Мои завершенные** ([`tabs-panel`](../tabs-panel/README.md)); точка на вкладке и на «Мои завершенные» при **непросмотренном** готовом отчёте (`listReadyOwnReportIds` + `mineReadySeen`) |
 | **Рейтинг** (`rating`) | `listRatingTop()` | Топ-50 по балансу (Figma `RaitingCard` 482:2123) в `.home-screen__rating-list`: аватар 52 + бейдж места (синий, 20), имя/роль (`formatPortfolioRole`), белая плашка баланса (`min-width`/`height` 52px, padding-x 16px — `--home-screen-rating-balance-*`); skeleton `--skeleton`-модификаторы; empty `.home-screen__rating-empty` (`homeRatingEmpty`); кэш вкладки в `homeListCache` (`rating`); снапшот на сервере обновляется раз в сутки (`rating_leaderboard.sql`) |
 
-Переключатель: `home-screen__tabbar` внутри дока `home-screen__tabbar-dock` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`). Вкладки: **На ревью** / **Мои посты** / **Рейтинг**. Справа от таббара в доке (gap 8px, `--home-screen-tabbar-dock-gap`) — кнопка «Закинуть своё» (56×56, r16, Google blue, плюс 24; токены `--home-screen-tabbar-submit-*`).
+Переключатель: `home-screen__tabbar` внутри дока `home-screen__tabbar-dock` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`). Вкладки: **На ревью** / **Мои посты** / **Рейтинг**. Справа от таббара в доке (gap 8px, `--home-screen-tabbar-dock-gap`) — кнопка «Закинуть своё» (56×56, r16, Google blue, плюс/замок 24; токены `--home-screen-tabbar-submit-*`).
 
 - Скролл **вниз** по `home-screen__body` → док (таббар + кнопка) уезжает за нижний край (`home-screen__tabbar-dock--hidden`).
 - Скролл **вверх** (любой delta &lt; 0) / у верхнего края / **у низа ленты** → снова виден сразу.
@@ -124,7 +124,7 @@ Active claims не закрывают дверь; late submit после `done` 
 Abort / hard navigation: release через SPA `releaseHeldClaim` или `pagehide` keepalive + per-tab `sessionStorage` reconcile (см. `review-claims.mdc`) — active «Аноним» не должен залипать после ухода.  
 Своя (`isOwn`, вкладка «Мои») кликабельна всегда: собраны все ревью (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report` (листы + жалоба; при overshoot листов может быть > target); иначе модалка `homeMineNotReady*` с прогрессом. Title / aria карточки — `homeCardReport*` либо `homeCardReportPending*`, пересинхронизируются при silent-патче слотов.  
 Уже отревьюенная карточка (`reviewedByMe` = строка в `reviews` после submit) — `disabled`, без intro и без notice; статус только оверлеем на превью.
-CTA «Закинуть своё» (кнопка в доке у таббара) — всегда активна. Иерархия: занятый pending-слот → `homePendingLimit*`; иначе баланс ≥ `SUBMIT_COST` (30) → `onAddPortfolio` → `/portfolio`; иначе короткий error-buzz (`motion-control-error-buzz`) на кнопке submit **и** чипе баланса (без модалки). Старт с 0 → нужно ~3 чужих ревью (`REVIEW_REWARD` 10).
+CTA «Закинуть своё» (кнопка в доке у таббара) — всегда активна. Иконка: плюс, если можно подать; **замок** (`lock.svg`), если нет уток (`balance < SUBMIT_COST`) или pending-слот занят (`MAX_MINE_PENDING`). Иерархия клика: занятый pending-слот → красный flash + buzz на submit + `homePendingLimit*`; иначе баланс ≥ `SUBMIT_COST` (30) → `onAddPortfolio` → `/portfolio`; иначе короткий error-buzz (`motion-control-error-buzz`) на кнопке submit **и** чипе баланса + flash фона submit в `--palette-google-red` на время buzz (без модалки). Переход синий ↔ красный — `transition` по `--home-screen-tabbar-submit-bg-*`. Старт с 0 → нужно ~3 чужих ревью (`REVIEW_REWARD` 10).
 
 Лиги (тихий матчинг): junior → junior; middle → junior+middle; senior/lead/head → middle+senior+.  
 Клиент-зеркало: [`src/api/leagues.js`](../../api/leagues.js). Сервер: [`supabase/sql/portfolios.sql`](../../../supabase/sql/portfolios.sql) + [`review_claims.sql`](../../../supabase/sql/review_claims.sql) (`can_review_portfolio`, claim-слоты, RLS).
@@ -145,7 +145,7 @@ CTA «Закинуть своё» (кнопка в доке у таббара) �
 - Порядок чипов в шапке: репутация → баланс → аватар. «Закинуть своё» — не в шапке, а в доке у таббара; чип уведомлений убран (непросмотренный готовый отчёт — точка на «Мои посты»).
 - Баланс: `profiles.balance` ↔ `session.balance`. Экономика: `REVIEW_REWARD = 10`, `SUBMIT_COST = 30` ([`wallet.js`](../../api/wallet.js) / `wallet.mdc`). Иконка уточки на чипе легонько покачивается на месте (`motion-balance-duck-float`, `--motion-balance-duck-*`: покой → волны → покой); hover/focus → сразу один короткий цикл (`motion-balance-duck-float-once`) + tip снизу (`homeBalanceTooltip`); клик → explainer «Валюта сообщества» (`homeBalance*`, Figma `496:4403`): фото + карточка «У тебя N уточка/уточки/уточек» (`formatPlural`) из [`assets/home/modal/`](../../assets/home/modal/) (`currency-duck.png`, `balance-card-ducks.svg`), secondary CTA «Ясн» → закрыть.
 - Подача — RPC `submit_portfolio` (spend 30); legacy `spend_submit_cost`; награда за ревью (+10) — в `handle_review_inserted`.
-- CTA «Закинуть своё»: слот занят → `homePendingLimit*`; иначе без монет → buzz submit + чип баланса (`motion-control-error-buzz`, `--motion-control-error-buzz-*`); notices (no slots / already reviewed) — `noticeModal`.
+- CTA «Закинуть своё»: плюс ↔ замок по доступности; слот занят → flash+buzz submit + `homePendingLimit*`; иначе без монет → buzz submit + чип баланса + flash фона (`motion-control-error-buzz`, `--home-screen-tabbar-submit-bg-error` / `--motion-control-error-buzz-*`); notices (no slots / already reviewed) — `noticeModal`.
 - Клик по аватару профиля → `account-menu` из Figma `467:1320`, раскрывающийся влево от правого края аватара с отступом 16px вниз (без выхода за viewport).
 - В меню `displayName` (из `profiles.display_name`) и email не кликабельны; «Настройки» → `/settings`, «Пригласить» → explainer `homeInvite*` (Figma `492:4030`): фото [`currency-referal.png`](../../assets/home/modal/currency-referal.png) на фоне `--palette-gray-100` + Lottie `rotating-ray` между фоном и PNG + бар `uses из max` / код + copy / «Поделиться»; copy и share кладут полный текст `homeInviteMessage` (`{url}`, `{code}`); при `uses >= max` — текст `homeInviteCodeExhausted`, статичные галочки, без share (бар на всю ширину); модалка без CTA (закрытие крестиком / backdrop); «Контакты» → `createAppModal`; «Правила» → `createSidePanel` + [`content/rules.json`](../../../content/rules.json) (Figma `517:4740`); «Выйти» → полный Supabase `signOut` + очистка локальной сессии.
 
@@ -182,7 +182,7 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
     button.home-screen__tab           role=tab  data-tab=feed|mine|rating
       .home-screen__tab-label         подпись (только у mine)
       .home-screen__tab-dot           aria-hidden, hidden пока нет непросмотренного 3/3
-  button.home-screen__tabbar-submit   «Закинуть своё» (плюс)
+  button.home-screen__tabbar-submit   «Закинуть своё» (плюс / замок)
 ```
 
 Классы состояния: `--active` на табе; `home-screen__tabbar-dock--hidden` на доке при скролле вниз; `--on-dark` на tabbar при тёмном фоне под баром.
@@ -212,7 +212,7 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 ## Стили / i18n / a11y
 
-Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, translucent track / on-dark track+label, motion hide/thumb/label/contrast) + `--home-screen-tabbar-dock-gap` / `--home-screen-tabbar-submit-*` (кнопка 56×56, r16, Google blue, hover/active через color-mix) + `--home-screen-tabbar-tab-dot-*` (точка 6px, offset 8px, Google red). Точка на сегменте «Мои завершенные»: `--tabs-panel-tab-dot-*` (7px, right 22px).
+Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, translucent track / on-dark track+label, motion hide/thumb/label/contrast) + `--home-screen-tabbar-dock-gap` / `--home-screen-tabbar-submit-*` (кнопка 56×56, r16, Google blue, hover/active через color-mix; error-flash Google red + `bg-duration`/`bg-ease` для transition синий↔красный; плюс/замок 24) + `--home-screen-tabbar-tab-dot-*` (точка 6px, offset 8px, Google red). Точка на сегменте «Мои завершенные»: `--tabs-panel-tab-dot-*` (7px, right 22px).
 
 Glass track: `background` + `backdrop-filter: blur(var(--home-screen-tabbar-blur))` на **`.home-screen__tabbar`** (не на dock). Свап темы: `backdropLuminance` → `home-screen__tabbar--on-dark` (track / label). Не анимировать `opacity` на предке dock — иначе blur пропадает.
 

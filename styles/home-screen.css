@@ -2130,6 +2130,8 @@
   background: var(--home-screen-tabbar-submit-bg);
   color: var(--home-screen-tabbar-submit-color);
   cursor: pointer;
+  transition: background-color var(--home-screen-tabbar-submit-bg-duration)
+    var(--home-screen-tabbar-submit-bg-ease);
 }
 
 .home-screen__tabbar-submit:hover {
@@ -2138,6 +2140,18 @@
 
 .home-screen__tabbar-submit:active {
   background: var(--home-screen-tabbar-submit-bg-active);
+}
+
+.home-screen__tabbar-submit--error {
+  background: var(--home-screen-tabbar-submit-bg-error);
+}
+
+.home-screen__tabbar-submit--error:hover {
+  background: var(--home-screen-tabbar-submit-bg-error-hover);
+}
+
+.home-screen__tabbar-submit--error:active {
+  background: var(--home-screen-tabbar-submit-bg-error-active);
 }
 
 .home-screen__tabbar-submit:focus-visible {
@@ -2238,7 +2252,8 @@
   .home-screen__tabbar-dock,
   .home-screen__tabbar,
   .home-screen__tabbar-thumb,
-  .home-screen__tab {
+  .home-screen__tab,
+  .home-screen__tabbar-submit {
     transition-duration: 0.01ms;
   }
 
