@@ -50,6 +50,7 @@ PDF / секции: [`src/utils/reviewReport.js`](../../utils/reviewReport.js), 
 
 ## Стили
 
-`styles/report-screen.css` + токены `--report-screen-*` / `--shell-review-report-*`.
+`styles/report-screen.css` + токены `--report-screen-*` / `--shell-review-report-*`.  
+На короткой visual лист clamp’ится ≥ `--shell-review-report-gap-below-brand` под лого (`--shell-review-report-shift-shown-effective`).
 
 См. [`SCREENS.md`](../../../SCREENS.md), [`supabase/sql/review_complaints.sql`](../../../supabase/sql/review_complaints.sql), [`PROJECT.md`](../../../PROJECT.md) § Репутация.

@@ -510,6 +510,8 @@
   min-width: 0;
   min-height: 0;
   border-radius: var(--url-screen-visual-radius);
+  container-type: size;
+  container-name: brand-visual;
   background-color: var(--url-screen-visual-wash);
   transition: background-color var(--shell-review-mesh-done-duration)
     var(--shell-review-brand-motion-ease);
@@ -552,6 +554,14 @@
   z-index: var(--shell-review-z-report);
   width: min(var(--shell-review-report-width), 120%);
   height: var(--shell-review-report-height);
+  /* На короткой visual: не ближе gap к низу поднятого лого. */
+  --shell-review-report-shift-shown-effective: max(
+    var(--shell-review-report-shift-shown),
+    calc(
+      100% - 100cqh + var(--shell-review-brand-top) +
+        var(--url-screen-brand-height) + var(--shell-review-report-gap-below-brand)
+    )
+  );
   transform: translate(-50%, var(--shell-review-report-shift-hidden));
   opacity: 0;
   pointer-events: none;
@@ -561,7 +571,7 @@
 }
 
 .report-screen--report .report-screen__report {
-  transform: translate(-50%, var(--shell-review-report-shift-shown));
+  transform: translate(-50%, var(--shell-review-report-shift-shown-effective));
   opacity: 1;
 }
 

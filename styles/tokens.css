@@ -607,6 +607,8 @@
   --side-panel-section-body-line-height: var(--line-height-normal);
   --side-panel-section-body-color: var(--color-text);
   --side-panel-section-gap: var(--space-4);
+  --side-panel-section-list-gap: var(--space-2);
+  --side-panel-section-bullet-gap: var(--space-2);
   --side-panel-backdrop-bg: var(--color-overlay);
   --side-panel-backdrop-blur: var(--overlay-blur);
   --side-panel-backdrop-duration: var(--motion-screen-duration);
@@ -1066,7 +1068,8 @@
   --home-screen-badge-web-font-size: calc(var(--home-screen-badge-size) / 6);
   --home-screen-badge-platform-bg: var(--palette-gray-900);
   --home-screen-badge-platform-icon-color: var(--palette-white);
-  --home-screen-badge-platform-icon-size: var(--space-4);
+  /* Силуэт бренда = 1/3 диаметра круглешки бейджа. */
+  --home-screen-badge-platform-icon-size: calc(var(--home-screen-badge-size) / 3);
   /* Перекрашивает любой логотип (SVG / favicon) в сплошной белый силуэт. */
   --home-screen-badge-platform-icon-filter: brightness(0) invert(1);
   --home-screen-meta-gap: var(--space-2);
@@ -1311,6 +1314,8 @@
   --shell-review-report-section-line-height: var(--line-height-loose);
   --shell-review-report-shift-hidden: calc(100% + var(--space-6));
   --shell-review-report-shift-shown: 22%;
+  /* Мин. зазор верх листа ↔ низ поднятого лого на короткой visual. */
+  --shell-review-report-gap-below-brand: 40px;
   --shell-review-report-duration: var(--motion-feature-duration);
   --shell-review-report-fade-duration: var(--motion-feature-fade-duration);
   --shell-review-report-ease: var(--motion-feature-ease);

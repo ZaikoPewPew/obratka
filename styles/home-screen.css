@@ -1802,6 +1802,16 @@
   color: var(--home-screen-invite-copy-done-color);
 }
 
+.home-screen__invite-copy--static {
+  cursor: default;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.home-screen__invite-copy--static:disabled {
+  opacity: 1;
+}
+
 .home-screen__invite-copy-icon {
   display: block;
   width: var(--home-screen-invite-copy-size);
@@ -1828,6 +1838,18 @@
   line-height: 1.2;
   white-space: nowrap;
   cursor: pointer;
+}
+
+.home-screen__invite-share[hidden] {
+  display: none;
+}
+
+.home-screen__invite-bar--exhausted .home-screen__invite-bar-cluster {
+  flex: 1 1 100%;
+}
+
+.home-screen__invite-bar--exhausted .home-screen__invite-bar-code {
+  flex: 1 1 auto;
 }
 
 .home-screen__invite-share:hover:not(:disabled) {

@@ -41,6 +41,11 @@ export const EXTERNAL_EMBED_HOSTS = Object.freeze([
     suffix: "portfolio.adobe.com",
     label: "Adobe Portfolio",
   },
+  {
+    id: "adobe-myportfolio",
+    suffix: "myportfolio.com",
+    label: "Adobe Portfolio",
+  },
   { id: "adobe", suffix: "adobe.com", label: "Adobe" },
   { id: "uxfolio", suffix: "uxfol.io", label: "UXfol.io" },
   { id: "readymag", suffix: "readymag.com", label: "Readymag" },

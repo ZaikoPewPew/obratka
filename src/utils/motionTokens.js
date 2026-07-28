@@ -149,6 +149,22 @@ export function getReportLaunchMotion() {
 }
 
 /**
+ * Вычисленный translateY листа (после CSS-clamp на короткой visual).
+ * Не читать сырой `--shell-review-report-shift-shown` — там идеальные 22%.
+ * @param {Element} sheet
+ * @returns {string} например `"158.84px"`
+ */
+export function readSheetTranslateY(sheet) {
+  const raw = getComputedStyle(sheet).transform;
+  if (!raw || raw === "none") return "0px";
+  try {
+    return `${new DOMMatrix(raw).m42}px`;
+  } catch {
+    return "0px";
+  }
+}
+
+/**
  * Смена mesh-палитры после submit: к середине спуска лого.
  * @returns {{ durationMs: number; easing: string }}
  */

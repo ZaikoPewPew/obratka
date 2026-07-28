@@ -10,6 +10,7 @@ import {
   getReportLaunchMotion,
   getReviewMeshDoneMotion,
   getScreenCloseFallbackMs,
+  readSheetTranslateY,
 } from "../../utils/motionTokens.js";
 import { buildReportSections } from "../../utils/reviewReport.js";
 import { shareReviewPdf } from "../../utils/shareReviewPdf.js";
@@ -379,9 +380,7 @@ export function createReportScreen(opts = {}) {
     const { durationMs, liftPx, peak, easeLift, easeDive } =
       getReportLaunchMotion();
     const styles = getComputedStyle(root);
-    const shown =
-      styles.getPropertyValue("--shell-review-report-shift-shown").trim() ||
-      "22%";
+    const shown = readSheetTranslateY(report);
     const hidden =
       styles.getPropertyValue("--shell-review-report-shift-hidden").trim() ||
       "100%";

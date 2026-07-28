@@ -87,6 +87,12 @@ describe("resolvePortfolioEmbed", () => {
     assert.equal(plan.mode, "external");
     assert.equal(plan.hostLabel, "Webflow");
   });
+
+  it("routes Adobe Portfolio myportfolio hosts to external", () => {
+    const plan = resolvePortfolioEmbed("https://name.myportfolio.com/");
+    assert.equal(plan.mode, "external");
+    assert.equal(plan.hostLabel, "Adobe Portfolio");
+  });
 });
 
 describe("toFigmaEmbedUrl", () => {

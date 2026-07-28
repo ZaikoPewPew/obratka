@@ -16,8 +16,8 @@
 | `fieldError.js` | плавный выезд `.url-screen__error` (opacity/blur/высота) |
 | `urlScreenField.js` | invalid поля: текст + aria + обводка (`--invalid` / OTP cells) |
 | `portfolioMeta.js` | нормализация URL; favicon и имя сайта |
-| `platformBrandIcon.js` | иконка площадки (Simple Icons / «W») |
-| `embedHosts.js` | каталог хостов (см. `content/embed-hosts.md`) |
+| `platformBrandIcon.js` | иконка площадки на карточке (Simple Icons / favicon / «www»); размер = 1/3 бейджа (`--home-screen-badge-platform-icon-size`); ≠≠** embed-стратегия |
+| `embedHosts.js` | каталог хостов iframe vs новое окно (см. `content/embed-hosts.md`) |
 | `portfolioEmbed.js` | Figma/YouTube embed / iframe / внешняя вкладка |
 | `meshGradientWash.js` | WebGL mesh (Paper Shaders); `transitionToCssColors` |
 | `reviewReport.js` | сводка квиза → тексты PDF (+ опц. `dictation`); зоны `contextZone` / `visualZone` (visual 1–5); вердикт `tier × gradeZone`. Спека: [`QUIZ.md`](../../QUIZ.md) |
@@ -55,6 +55,7 @@ Home idle / haptic: уточка баланса (`motion-balance-duck-float`), �
 | `getAuthCodeResendCooldownMs` | `--auth-code-resend-cooldown` |
 | `getMotionAdvanceDelayMs` / `getMotionFocusDelayMs` | квиз |
 | `getReportLaunchMotion` | уход PDF/preview-листа |
+| `readSheetTranslateY` | вычисленный translateY листа (после CSS-clamp на короткой visual) |
 | `getReviewMeshDoneMotion` / `getBrandMarkMorphMotion` | зелёный done + logo-done |
 
 ## Brand visual

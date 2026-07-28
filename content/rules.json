@@ -1,11 +1,11 @@
 {
   "version": 1,
   "defaultLocale": "ru",
-  "updatedAt": "2026-07-27",
+  "updatedAt": "2026-07-28",
   "locales": {
     "ru": {
       "title": "Правила сообщества",
-      "updated": "Последнее обновление 27 июля 2026",
+      "updated": "Последнее обновление 28 июля 2026",
       "intro": "Обратка — про честную и уважительную обратную связь по портфолио. Эти правила держат сообщество полезным для всех.",
       "sections": [
         {
@@ -18,23 +18,23 @@
         },
         {
           "title": "3. Смотрите работу внимательно",
-          "body": "Перед отчётом реально изучите портфолио — на просмотр есть таймер.\nНизкоусилие, спам и нерелевантные листы вредят автору.\nНадиктовка и текстовые ответы — по желанию, но смысл в отчёте должен быть."
+          "body": "Перед отчётом реально изучите портфолио — на просмотр есть таймер.\nНизкоусилие, спам и нерелевантные листы вредят автору.\nНекачественное ревью «лишь бы поскорее подать своё» может привести к блокировке.\nНадиктовка и текстовые комменты очень желательны: это улучшает качество обратной связи и вашу репутацию."
         },
         {
           "title": "4. Завершайте ревью честно",
-          "body": "Пока кейс у вас — доведите до отчёта или отпустите его.\nНаграда начисляется только после отправки отчёта.\nУход без submit — без монет."
+          "body": "Пока кейс у вас — доведите до отчёта или отпустите его.\nНаграда начисляется только после отправки отчёта.\nУход без submit — без уток."
         },
         {
           "title": "5. Подавайте своё портфолио",
-          "body": "В очередь — свой URL и реальная работа.\nОдновременно в ожидании может быть один кейс.\nПодача стоит монет, которые зарабатываются ревью."
+          "body": "В очередь — свой URL и реальная работа.\nОдновременно в ожидании может быть один кейс.\nПодача стоит уток, которые зарабатываются ревью."
         },
         {
-          "title": "6. Монеты и баланс",
-          "body": "Монеты нужны, чтобы закинуть своё портфолио.\nИх дают за полезные ревью, а не за клики и аборт.\nНе пытайтесь накручивать систему."
+          "title": "6. Уточки и баланс",
+          "body": "Уточки нужны, чтобы закинуть своё портфолио.\nИх дают за полезные ревью, а не за клики и аборт.\nНе пытайтесь накручивать систему — это приведёт к блокировке."
         },
         {
           "title": "7. Жалобы и репутация",
-          "body": "Автор может пожаловаться на конкретный лист: низкоусилие, спам, травля, оскорбления, нерелевантность.\nНесогласие с грейдом — не повод для жалобы.\nПовторные нарушения снижают репутацию и могут привести к бану."
+          "body": "Автор может пожаловаться на конкретный лист: низкоусилие, спам, травля, оскорбления, нерелевантность.\nНесогласие с грейдом — не повод для жалобы.\nПовторные нарушения снижают репутацию и могут привести к бану.\nПри ошибочных кейсах есть шанс разблокировки — напишите через «Контакты»."
         },
         {
           "title": "8. Invite-only",
@@ -48,7 +48,7 @@
     },
     "en": {
       "title": "Community rules",
-      "updated": "Last updated July 27, 2026",
+      "updated": "Last updated July 28, 2026",
       "intro": "Obratka is about honest, respectful portfolio feedback. These rules keep the community useful for everyone.",
       "sections": [
         {
@@ -61,23 +61,23 @@
         },
         {
           "title": "3. Review the work carefully",
-          "body": "Study the portfolio before submitting a report — there is a viewing timer.\nLow-effort, spam, and irrelevant sheets hurt the author.\nDictation and typed answers are optional, but the report should still have substance."
+          "body": "Study the portfolio before submitting a report — there is a viewing timer.\nLow-effort, spam, and irrelevant sheets hurt the author.\nLow-quality reviews just to submit your own portfolio faster may lead to a ban.\nDictation and written comments are highly encouraged: they improve feedback quality and your reputation."
         },
         {
           "title": "4. Finish reviews honestly",
-          "body": "While a case is yours, finish the report or release it.\nRewards are granted only after you submit the report.\nLeaving without submit means no coins."
+          "body": "While a case is yours, finish the report or release it.\nRewards are granted only after you submit the report.\nLeaving without submit means no ducks."
         },
         {
           "title": "5. Submit your own portfolio",
-          "body": "Queue only your URL and real work.\nYou can have one pending case at a time.\nSubmitting costs coins earned by reviewing."
+          "body": "Queue only your URL and real work.\nYou can have one pending case at a time.\nSubmitting costs ducks earned by reviewing."
         },
         {
-          "title": "6. Coins and balance",
-          "body": "Coins are needed to submit your portfolio.\nYou earn them for useful reviews, not for clicks or aborts.\nDo not try to game the system."
+          "title": "6. Ducks and balance",
+          "body": "Ducks are needed to submit your portfolio.\nYou earn them for useful reviews, not for clicks or aborts.\nDo not try to game the system — it will lead to a ban."
         },
         {
           "title": "7. Complaints and reputation",
-          "body": "Authors can report a specific sheet for low effort, spam, harassment, offensive content, or irrelevance.\nDisagreeing with a grade is not a reason to complain.\nRepeated violations lower reputation and can lead to a ban."
+          "body": "Authors can report a specific sheet for low effort, spam, harassment, offensive content, or irrelevance.\nDisagreeing with a grade is not a reason to complain.\nRepeated violations lower reputation and can lead to a ban.\nIn mistaken cases there is a chance of unblocking — write via Contacts."
         },
         {
           "title": "8. Invite-only",

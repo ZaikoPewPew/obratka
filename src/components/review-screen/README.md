@@ -23,9 +23,10 @@ Path: **`/quiz`**, финал **`/quiz/done`**. Split: слева слот по�
 
 Снизу вверх (`--shell-review-z-*`): glow → noise → report → brand.
 
-На шаге advice лист выезжает (`getReportLaunchMotion`); после submit — уезд + `.review-screen--done` (`getReviewMeshDoneMotion`). Марка: in-place morph `morphBrandMarkToDone` (нимб + fade короны), без `innerHTML`-swap. Слева одновременно входит `review-panel__done`.
+На шаге advice лист выезжает (`getReportLaunchMotion`); на короткой visual — clamp ≥ `--shell-review-report-gap-below-brand` под лого (`--shell-review-report-shift-shown-effective`); после submit — уезд + `.review-screen--done` (`getReviewMeshDoneMotion`). Марка: in-place morph `morphBrandMarkToDone` (нимб + fade короны), без `innerHTML`-swap. Слева одновременно входит `review-panel__done`.
 
 Токены `--shell-review-*`, `--motion-report-launch-*`. Классы в `iframe-shell.css`.  
+Launch стартует с `readSheetTranslateY` (вычисленный Y после clamp), не с сырых `22%`.  
 PDF-тексты: `src/utils/reviewReport.js` (`buildReportSections` — preview без L2/L3; full на report/PDF; `dictation` → `reportDictationTitle`).  
 Шкалы в panel: [`scale-slider`](../scale-slider/README.md) (context/visual **1–5**).  
 Пул и трактовки: [`QUIZ.md`](../../../QUIZ.md).

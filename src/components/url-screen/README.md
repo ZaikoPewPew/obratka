@@ -28,7 +28,7 @@ Referral / auth / auth-code / onboarding — тот же shell и классы `
 ## Поведение
 
 1. Слева сверху формы — чип «На главную» (`review-panel__back` + `urlScreenBack`) → `onExit` → home; на done-состоянии скрыт.
-2. Валидный URL (debounce) → справа белый лист: заголовок «Портфолио» + серые скелетоны строк (без скриншотов).
+2. Валидный URL (debounce) → справа белый лист: заголовок «Портфолио» + серые скелетоны строк (без скриншотов). На короткой visual лист clamp’ится ≥ `--shell-review-report-gap-below-brand` под поднятым лого (`--shell-review-report-shift-shown-effective`).
 3. Очистка поля → лист улетает вниз.
 4. Submit → сразу done-UI («Портфолио отправлено»); `onSubmit(url)` и persist идут в фоне. URL → `/done` через `syncRoute` (без скачка на success-screen). При ошибке сети → home.
 5. Done CTA «На главную» → `onExit` → home.

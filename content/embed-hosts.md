@@ -37,7 +37,7 @@
 | `docs.google.com`, `drive.google.com`, `sheets.google.com`, `slides.google.com` | Google Docs |
 | `miro.com` | Miro |
 | `whimsical.com` | Whimsical |
-| `adobe.com`, `portfolio.adobe.com` | Adobe |
+| `adobe.com`, `portfolio.adobe.com`, `myportfolio.com` | Adobe / Adobe Portfolio |
 | `uxfol.io` | UXfol.io |
 | `readymag.com`, `readymag.website` | Readymag |
 | `artstation.com` | ArtStation |
@@ -51,7 +51,8 @@
 
 - `webflow.com` / `tilda.cc` — редактор и маркетинг. `tilda.ws` — опубликованные проекты на поддомене Tilda (`X-Frame-Options: SAMEORIGIN`, проверено). Сайты на **своём домене** или `*.webflow.io` в этот список **не** входят.
 - `*.framer.website` и `framer.com` режутся. **`*.framer.ai` — не режем** (iframe ок, проверено на `dsgn-thinking.framer.ai`). Кастомный домен Framer — тоже iframe OK.
-- Широкий суффикс `adobe.com` намеренно ловит Adobe Portfolio / Express и соседние страницы Adobe.
+- Широкий суффикс `adobe.com` намеренно ловит Adobe Portfolio / Express и соседние страницы Adobe. Опубликованные сайты на `*.myportfolio.com` — отдельная запись (не суффикс `adobe.com`).
+- Иконка площадки на карточке (`platformBrandIcon.js`) **не** равна embed-стратегии: бренд можно показать и при optimistic iframe (пример: `*.webflow.io`, `*.framer.ai`, Cargo / Format / Squarespace / Wix / Canva).
 - **PDF** — не отдельный хост: прямой `.pdf` пробуем как iframe (браузерный просмотрщик). Drive/Dropbox уже в «Нельзя» или optimistic. Отдельный режим не нужен, пока нет массовых ссылок.
 
 ## Можно пробовать iframe
@@ -60,7 +61,8 @@
 
 - **Dprofile** (`dprofile.ru`)
 - **Framer на `*.framer.ai`**
-- Cargo, Format, Are.na, Semplice, Super, Dropfile и аналоги
+- Cargo (`cargo.site`, `cargocollective.com`), Format, Pixpa, Carbonmade, Journo Portfolio, Read.cv, Are.na, Semplice, Super, Dropfile и аналоги
+- Squarespace, Wix (`*.wixsite.com`), Elementor Cloud, Canva Sites (`*.my.canva.site`) — без ручной проверки framing не режем
 - Личные / кастомные домены
 - Опубликованный Webflow: `*.webflow.io`
 - Лендинги на Tilda/Framer **на кастомном домене**

@@ -730,6 +730,30 @@ export function createHomeScreen({
     return el;
   }
 
+  /**
+   * Строки `body` (через `\n`) → маркированный список.
+   * @param {string} body
+   */
+  function createRulesList(body) {
+    const items = String(body ?? "")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    if (items.length === 0) return null;
+    if (items.length === 1) {
+      return createRulesText(items[0], "side-panel__section-body");
+    }
+    const list = document.createElement("ul");
+    list.className = "side-panel__section-list";
+    for (const item of items) {
+      const li = document.createElement("li");
+      li.className = "side-panel__section-item";
+      li.textContent = fixHangingPrepositions(item);
+      list.append(li);
+    }
+    return list;
+  }
+
   function syncRulesPanelContent() {
     const t = getStrings();
     const rules = getCommunityRules();
@@ -751,7 +775,8 @@ export function createHomeScreen({
         );
       }
       if (section.body) {
-        wrap.append(createRulesText(section.body, "side-panel__section-body"));
+        const bodyNode = createRulesList(section.body);
+        if (bodyNode) wrap.append(bodyNode);
       }
       nodes.push(wrap);
     }
@@ -1098,16 +1123,19 @@ export function createHomeScreen({
     size: "md",
     showPrimary: false,
     showSecondary: false,
+    onSecondary: () => {
+      closeInviteModal();
+    },
   });
   inviteModal.content.append(inviteExplainer);
 
   inviteCopyBtn.addEventListener("click", () => {
-    if (!inviteCodeValue) return;
+    if (!inviteCodeValue || inviteSlotsExhausted) return;
     void copyInviteCode();
   });
 
   inviteShareBtn.addEventListener("click", () => {
-    if (!inviteCodeValue) return;
+    if (!inviteCodeValue || inviteSlotsExhausted) return;
     void shareInviteLink();
   });
 
@@ -1223,6 +1251,8 @@ export function createHomeScreen({
   let reviewIntroItem = null;
   /** @type {string | null} */
   let inviteCodeValue = null;
+  /** Слоты рефералки исчерпаны (uses >= max) — бар без share, код → статус. */
+  let inviteSlotsExhausted = false;
   /** @type {ReturnType<typeof window.setTimeout> | null} */
   let inviteCopyResetId = null;
   /** Нет фото → фон + буква; картинку прячем. */
@@ -1580,6 +1610,9 @@ export function createHomeScreen({
       window.clearTimeout(inviteCopyResetId);
       inviteCopyResetId = null;
     }
+    inviteSlotsExhausted = false;
+    inviteBar.classList.remove("home-screen__invite-bar--exhausted");
+    inviteShareBtn.hidden = false;
     setInviteCopyIdle();
     void inviteModal.close();
   }
@@ -1591,7 +1624,11 @@ export function createHomeScreen({
 
   function setInviteCopyIdle() {
     const t = getStrings();
-    inviteCopyBtn.classList.remove("home-screen__invite-copy--done");
+    inviteCopyBtn.classList.remove(
+      "home-screen__invite-copy--done",
+      "home-screen__invite-copy--static",
+    );
+    inviteCopyBtn.disabled = false;
     inviteCopyBtn.innerHTML = INVITE_COPY_SVG;
     inviteCopyBtn.setAttribute("aria-label", t.homeInviteCopyAria ?? "");
   }
@@ -1601,6 +1638,17 @@ export function createHomeScreen({
     inviteCopyBtn.classList.add("home-screen__invite-copy--done");
     inviteCopyBtn.innerHTML = INVITE_COPIED_SVG;
     inviteCopyBtn.setAttribute("aria-label", t.homeInviteCopiedAria ?? "");
+  }
+
+  /** Галлочки без клика: слоты исчерпаны. */
+  function setInviteCopyStaticDone() {
+    setInviteCopyDone();
+    inviteCopyBtn.classList.add("home-screen__invite-copy--static");
+    inviteCopyBtn.disabled = true;
+    inviteCopyBtn.setAttribute(
+      "aria-label",
+      getStrings().homeInviteCodeExhausted ?? "",
+    );
   }
 
   /**
@@ -1613,11 +1661,23 @@ export function createHomeScreen({
   function openInviteModal(info) {
     const t = getStrings();
     inviteCodeValue = info.code;
+    inviteSlotsExhausted =
+      Boolean(info.code) && info.uses >= info.maxUses && info.maxUses > 0;
     if (inviteCopyResetId != null) {
       window.clearTimeout(inviteCopyResetId);
       inviteCopyResetId = null;
     }
-    setInviteCopyIdle();
+    inviteBar.classList.toggle(
+      "home-screen__invite-bar--exhausted",
+      inviteSlotsExhausted,
+    );
+    inviteShareBtn.hidden = inviteSlotsExhausted;
+    if (inviteSlotsExhausted) {
+      setInviteCopyStaticDone();
+    } else {
+      setInviteCopyIdle();
+      inviteCopyBtn.disabled = !info.code;
+    }
     inviteModal.setTitle(
       fixHangingPrepositions(t.homeInviteTitle ?? ""),
     );
@@ -1634,16 +1694,23 @@ export function createHomeScreen({
         max: info.maxUses,
       }),
     );
-    inviteCode.textContent = info.code || "—";
-    inviteCopyBtn.disabled = !info.code;
-    inviteShareBtn.disabled = !info.code;
+    inviteCode.textContent = inviteSlotsExhausted
+      ? fixHangingPrepositions(t.homeInviteCodeExhausted ?? "")
+      : info.code || "—";
+    inviteShareBtn.disabled = !info.code || inviteSlotsExhausted;
     inviteShareBtn.textContent = t.homeInviteShare ?? "";
     inviteShareBtn.setAttribute(
       "aria-label",
       t.homeInviteShareAria ?? t.homeInviteShare ?? "",
     );
     inviteModal.setCloseAriaLabel(t.homeInviteCloseAria ?? "");
-    inviteModal.setActionsVisible({ primary: false, secondary: false });
+    if (inviteSlotsExhausted) {
+      inviteModal.setSecondaryLabel(t.homeInviteClose ?? "");
+      inviteModal.setActionsVisible({ primary: false, secondary: true });
+    } else {
+      inviteModal.setSecondaryLabel("");
+      inviteModal.setActionsVisible({ primary: false, secondary: false });
+    }
     inviteModal.open();
   }
 
@@ -1658,7 +1725,7 @@ export function createHomeScreen({
   }
 
   async function copyInviteCode() {
-    if (!inviteCodeValue) return;
+    if (!inviteCodeValue || inviteSlotsExhausted) return;
     try {
       await navigator.clipboard.writeText(buildInviteMessage());
       setInviteCopyDone();
@@ -1673,7 +1740,7 @@ export function createHomeScreen({
   }
 
   async function shareInviteLink() {
-    if (!inviteCodeValue) return;
+    if (!inviteCodeValue || inviteSlotsExhausted) return;
     const t = getStrings();
     const title = t.homeInviteTitle ?? "";
     const text = buildInviteMessage();

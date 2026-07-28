@@ -82,7 +82,7 @@ await panel.close();
 
 ## Кейс на home
 
-Account-menu → «Правила» → текст из [`content/rules.json`](../../../content/rules.json) через `getCommunityRules()` (`homeRulesCloseAria` — только aria крестика в locales).
+Account-menu → «Правила» → текст из [`content/rules.json`](../../../content/rules.json) через `getCommunityRules()` (`homeRulesCloseAria` — только aria крестика в locales). Строки `body` (через `\n`) рендерятся как маркированный список (`.side-panel__section-list`).
 
 ## Связанные доки
 

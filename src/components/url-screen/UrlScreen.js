@@ -13,6 +13,7 @@ import {
 import {
   getMotionReveal,
   getReportLaunchMotion,
+  readSheetTranslateY,
 } from "../../utils/motionTokens.js";
 
 /** Платформы в стеке иконок под полем URL (Framer → Designfolio → Behance → Notion). */
@@ -342,9 +343,7 @@ export function createUrlScreen({ onSubmit, onExit }) {
     const { durationMs, liftPx, peak, easeLift, easeDive } =
       getReportLaunchMotion();
     const styles = getComputedStyle(root);
-    const shown =
-      styles.getPropertyValue("--shell-review-report-shift-shown").trim() ||
-      "22%";
+    const shown = readSheetTranslateY(preview);
     const hidden =
       styles.getPropertyValue("--shell-review-report-shift-hidden").trim() ||
       "100%";
