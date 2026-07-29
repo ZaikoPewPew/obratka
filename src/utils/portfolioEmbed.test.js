@@ -3,6 +3,8 @@ import { describe, it } from "node:test";
 
 import {
   findExternalEmbedHost,
+  isLikelyFrameBlocked,
+  looksLikeReadymagHtml,
   resolvePortfolioEmbed,
   toFigmaEmbedUrl,
 } from "./portfolioEmbed.js";
@@ -93,6 +95,71 @@ describe("resolvePortfolioEmbed", () => {
     assert.equal(plan.mode, "external");
     assert.equal(plan.hostLabel, "Adobe Portfolio");
   });
+  it("routes Pixpa hosts to external", () => {
+    const plan = resolvePortfolioEmbed("https://studio.pixpa.com/portfolio");
+    assert.equal(plan.mode, "external");
+    assert.equal(plan.hostLabel, "Pixpa");
+  });
+
+  it("routes Journo Portfolio hosts to external", () => {
+    const plan = resolvePortfolioEmbed("https://name.journoportfolio.com/");
+    assert.equal(plan.mode, "external");
+    assert.equal(plan.hostLabel, "Journo Portfolio");
+  });
+
+  it("routes Wix site hosts to external", () => {
+    const plan = resolvePortfolioEmbed("https://user.wixsite.com/portfolio");
+    assert.equal(plan.mode, "external");
+    assert.equal(plan.hostLabel, "Wix");
+  });
+
+  it("routes report2 blocked hosts to external", () => {
+    assert.equal(
+      resolvePortfolioEmbed("https://name.weebly.com/").mode,
+      "external",
+    );
+    assert.equal(
+      resolvePortfolioEmbed("https://name.strikingly.com/").hostLabel,
+      "Strikingly",
+    );
+    assert.equal(
+      resolvePortfolioEmbed("https://bento.me/designer").hostLabel,
+      "Bento",
+    );
+    assert.equal(
+      resolvePortfolioEmbed("https://name.onuniverse.com/").hostLabel,
+      "Universe",
+    );
+    assert.equal(
+      resolvePortfolioEmbed("https://name.smugmug.com/").hostLabel,
+      "SmugMug",
+    );
+    assert.equal(
+      resolvePortfolioEmbed("https://sites.google.com/view/portfolio").hostLabel,
+      "Google Sites",
+    );
+    assert.equal(
+      resolvePortfolioEmbed("https://folio.vercel.app/").hostLabel,
+      "Vercel",
+    );
+  });
+
+  it("keeps carrd / github.io optimistic", () => {
+    assert.equal(
+      resolvePortfolioEmbed("https://designer.carrd.co/").mode,
+      "iframe",
+    );
+    assert.equal(
+      resolvePortfolioEmbed("https://user.github.io/folio/").mode,
+      "iframe",
+    );
+  });
+
+  it("keeps custom domains optimistic without hostname match", () => {
+    const plan = resolvePortfolioEmbed("https://oliviagrace.work/");
+    assert.equal(plan.mode, "iframe");
+    assert.equal(plan.hostLabel, "oliviagrace.work");
+  });
 });
 
 describe("toFigmaEmbedUrl", () => {
@@ -102,5 +169,49 @@ describe("toFigmaEmbedUrl", () => {
       embed,
       "https://embed.figma.com/design/KEY123/Old?embed-host=obratka",
     );
+  });
+});
+
+describe("looksLikeReadymagHtml", () => {
+  it("detects generator meta and Designed-with comment", () => {
+    assert.equal(
+      looksLikeReadymagHtml(
+        `<!doctype html><!-- Designed with Readymag --><meta name="generator" content="Readymag"/>`,
+      ),
+      true,
+    );
+  });
+
+  it("detects rmcdn assets", () => {
+    assert.equal(
+      looksLikeReadymagHtml(
+        `<link rel="icon" href="https://c-p.rmcdn.net/abc/Favicon.png"/>`,
+      ),
+      true,
+    );
+  });
+
+  it("ignores unrelated HTML", () => {
+    assert.equal(looksLikeReadymagHtml("<html><title>Hi</title></html>"), false);
+  });
+});
+
+describe("isLikelyFrameBlocked", () => {
+  it("treats about:blank as blocked", () => {
+    const iframe = {
+      contentWindow: { location: { href: "about:blank" } },
+    };
+    assert.equal(isLikelyFrameBlocked(iframe), true);
+  });
+
+  it("treats cross-origin SecurityError as embedded", () => {
+    const iframe = {
+      contentWindow: {
+        get location() {
+          throw new DOMException("Blocked", "SecurityError");
+        },
+      },
+    };
+    assert.equal(isLikelyFrameBlocked(iframe), false);
   });
 });

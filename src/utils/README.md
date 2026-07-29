@@ -18,7 +18,7 @@
 | `portfolioMeta.js` | нормализация URL; favicon и имя сайта |
 | `platformBrandIcon.js` | иконка площадки на карточке (Simple Icons / favicon / «www»); размер = 1/3 бейджа (`--home-screen-badge-platform-icon-size`); ≠≠** embed-стратегия |
 | `embedHosts.js` | каталог хостов iframe vs новое окно (см. `content/embed-hosts.md`) |
-| `portfolioEmbed.js` | Figma/YouTube embed / iframe / внешняя вкладка |
+| `portfolioEmbed.js` | Figma/YouTube embed / iframe / внешняя вкладка; Readymag HTML-probe; детект blocked iframe |
 | `meshGradientWash.js` | WebGL mesh (Paper Shaders); `transitionToCssColors` |
 | `reviewReport.js` | сводка квиза → тексты PDF (+ опц. `dictation`); зоны `contextZone` / `visualZone` (visual 1–5); вердикт `tier × gradeZone`. Спека: [`QUIZ.md`](../../QUIZ.md) |
 | `shareReviewPdf.js` | печать PDF-отчёта (1 ревьюер = 1 страница; `onComplete`) |

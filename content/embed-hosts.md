@@ -4,11 +4,13 @@
 
 Сайты с `X-Frame-Options` / CSP `frame-ancestors` нельзя показать во iframe чужого домена. С GitHub Pages заголовки чужого ответа не прочитать (CORS) — опираемся на этот лист.
 
-Стратегия:
+## Стратегия:
 
 1. **Спец-embed** — переписать URL (Figma, YouTube) и грузить iframe.
-2. **Нельзя** — сразу внешняя вкладка + UI в оболочке.
-3. **Можно / неизвестно** — пробуем iframe as-is (личные сайты, Dprofile и т.д.).
+2. **Нельзя** — сразу внешняя вкладка + UI в оболочке (суффиксы в `EXTERNAL_EMBED_HOSTS`).
+3. **Можно / неизвестно** — пробуем iframe as-is; дополнительно:
+   - HTML-probe маркеров Readymag (best-effort, CORS часто режет);
+   - если iframe остаётся `about:blank` / error (XFO/CSP/сеть) → эскалация в external UI и сброс таймера до кнопки «Открыть и начать».
 
 Безопасность iframe (`#portfolio-frame`): `sandbox` без `allow-top-navigation` (скрипты/формы/попапы разрешены; увод top-окна — нет), `referrerpolicy="no-referrer"`. URL при submit и при открытии `/review` — только `http(s)` (клиент `normalizePortfolioUrl` + RPC `submit_portfolio`).
 
@@ -34,7 +36,7 @@
 | `pinterest.com` | Pinterest |
 | `medium.com` | Medium |
 | `notion.so`, `notion.site` | Notion |
-| `docs.google.com`, `drive.google.com`, `sheets.google.com`, `slides.google.com` | Google Docs |
+| `docs.google.com`, `drive.google.com`, `sheets.google.com`, `slides.google.com`, `sites.google.com` | Google Docs / Sites |
 | `miro.com` | Miro |
 | `whimsical.com` | Whimsical |
 | `adobe.com`, `portfolio.adobe.com`, `myportfolio.com` | Adobe / Adobe Portfolio |
@@ -45,6 +47,15 @@
 | `framer.com`, `framer.website` | Framer |
 | `webflow.com` | Webflow |
 | `tilda.cc`, `tilda.ws` | Tilda |
+| `pixpa.com` | Pixpa |
+| `journoportfolio.com` | Journo Portfolio |
+| `wixsite.com` | Wix |
+| `weebly.com` | Weebly |
+| `strikingly.com` | Strikingly |
+| `bento.me` | Bento |
+| `onuniverse.com` | Universe |
+| `smugmug.com` | SmugMug |
+| `vercel.app` | Vercel |
 | `awwwards.com` | Awwwards |
 
 Замечания:
@@ -52,7 +63,12 @@
 - `webflow.com` / `tilda.cc` — редактор и маркетинг. `tilda.ws` — опубликованные проекты на поддомене Tilda (`X-Frame-Options: SAMEORIGIN`, проверено). Сайты на **своём домене** или `*.webflow.io` в этот список **не** входят.
 - `*.framer.website` и `framer.com` режутся. **`*.framer.ai` — не режем** (iframe ок, проверено на `dsgn-thinking.framer.ai`). Кастомный домен Framer — тоже iframe OK.
 - Широкий суффикс `adobe.com` намеренно ловит Adobe Portfolio / Express и соседние страницы Adobe. Опубликованные сайты на `*.myportfolio.com` — отдельная запись (не суффикс `adobe.com`).
-- Иконка площадки на карточке (`platformBrandIcon.js`) **не** равна embed-стратегии: бренд можно показать и при optimistic iframe (пример: `*.webflow.io`, `*.framer.ai`, Cargo / Format / Squarespace / Wix / Canva).
+- **Readymag на своём домене** (`oliviagrace.work` и т.п.) суффиксом не ловится: HTML-probe (если CORS пустит) + **iframe fallback** → UI «Открыть и начать». На `readymag.com` / `readymag.website` — сразу external.
+- `*.wixsite.com` / `*.pixpa.com` / `*.journoportfolio.com` — в external (заголовки / отчёт 2026-07).
+- `*.vercel.app` — дефолтный CSP Vercel режет чужой iframe (report2); кастомный домен на Vercel — optimistic + fallback.
+- Weebly / Strikingly / Bento / Universe / SmugMug / Google Sites — external (report2).
+- **Не** режем по апексу: `wix.com`, `editorx.com`, `github.io`, `netlify.app`, `carrd.co` (optimistic; у хостингов заголовки может переопределить проект).
+- Иконка площадки на карточке (`platformBrandIcon.js`) **не** равна embed-стратегии: бренд можно показать и при optimistic iframe (пример: `*.webflow.io`, `*.framer.ai`, Cargo / Format / Squarespace / Canva).
 - **PDF** — не отдельный хост: прямой `.pdf` пробуем как iframe (браузерный просмотрщик). Drive/Dropbox уже в «Нельзя» или optimistic. Отдельный режим не нужен, пока нет массовых ссылок.
 
 ## Можно пробовать iframe
@@ -61,13 +77,13 @@
 
 - **Dprofile** (`dprofile.ru`)
 - **Framer на `*.framer.ai`**
-- Cargo (`cargo.site`, `cargocollective.com`), Format, Pixpa, Carbonmade, Journo Portfolio, Read.cv, Are.na, Semplice, Super, Dropfile и аналоги
-- Squarespace, Wix (`*.wixsite.com`), Elementor Cloud, Canva Sites (`*.my.canva.site`) — без ручной проверки framing не режем
-- Личные / кастомные домены
+- Cargo (`cargo.site`, `cargocollective.com`), Format, Carbonmade, Read.cv, Are.na, Semplice, Super, Dropfile и аналоги
+- Squarespace, Carrd, Pixieset, Indexhibit, Elementor Cloud, Canva Sites (`*.my.canva.site`)
+- GitHub Pages (`*.github.io`), Netlify (`*.netlify.app`) — заголовки задаёт проект; при блоке сработает iframe fallback
+- Личные / кастомные домены (в т.ч. Tilda/Framer на своём домене; **Readymag на своём** уйдёт в external через probe/fallback)
 - Опубликованный Webflow: `*.webflow.io`
-- Лендинги на Tilda/Framer **на кастомном домене**
 
-Неизвестный хост → iframe. Если площадка всё же режет framing, пользователь увидит ошибку браузера; такие хосты стоит добавить в «Нельзя».
+Неизвестный хост → iframe. Если площадка режет framing (или сеть/антибот ломает фрейм), оболочка эскалирует в external UI.
 
 ## Проверено вручную (2026-07)
 
@@ -76,7 +92,9 @@
 | Свой / кастомный домен | iframe ок | optimistic |
 | `*.framer.ai` | iframe ок | optimistic |
 | `tilda.ws` | `SAMEORIGIN` | external |
-| Readymag | не открывается | external (уже было) |
+| Readymag (`*.website` / `*.com`) | не открывается | external |
+| Readymag custom (`oliviagrace.work`) | `XFO: DENY` | optimistic → probe/fallback → external |
+| Pixpa / Journo / Wixsite | framing cut | external |
 | Behance | не открывается | external |
 | Dribbble | `SAMEORIGIN` (заголовки) | external |
 | Notion | беда | external |

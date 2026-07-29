@@ -119,6 +119,16 @@ export const PLATFORM_BRAND_ICONS = Object.freeze([
     faviconHost: "myportfolio.com",
     label: "Adobe Portfolio",
   },
+  {
+    suffix: "readymag.com",
+    faviconHost: "readymag.com",
+    label: "Readymag",
+  },
+  {
+    suffix: "readymag.website",
+    faviconHost: "readymag.com",
+    label: "Readymag",
+  },
   { suffix: "squarespace.com", slug: "squarespace", label: "Squarespace" },
   {
     suffix: "wixsite.com",

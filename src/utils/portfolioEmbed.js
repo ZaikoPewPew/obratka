@@ -115,6 +115,100 @@ export function toYouTubeEmbedUrl(href) {
  * }} PortfolioEmbedPlan
  */
 
+/** Max HTML sample for Readymag fingerprint (props blob can be large). */
+const READYMAG_HTML_PROBE_CHARS = 120_000;
+
+/** @type {readonly RegExp[]} */
+const READYMAG_HTML_MARKERS = Object.freeze([
+  /name\s*=\s*["']generator["'][^>]*content\s*=\s*["']Readymag["']/i,
+  /content\s*=\s*["']Readymag["'][^>]*name\s*=\s*["']generator["']/i,
+  /Designed with Readymag/i,
+  /__RM_PROPS__/i,
+  /\.rmcdn\.net\b/i,
+  /\.rmcdn1\.net\b/i,
+]);
+
+/**
+ * @param {string} html
+ * @returns {boolean}
+ */
+export function looksLikeReadymagHtml(html) {
+  const sample = String(html || "").slice(0, READYMAG_HTML_PROBE_CHARS);
+  if (!sample) return false;
+  return READYMAG_HTML_MARKERS.some((re) => re.test(sample));
+}
+
+/**
+ * Best-effort CORS fetch. Often fails on custom domains — then iframe fallback.
+ * @param {string} portfolioUrl
+ * @param {{ timeoutMs?: number }} [opts]
+ * @returns {Promise<boolean>}
+ */
+export async function probeReadymagPortfolio(portfolioUrl, opts = {}) {
+  const timeoutMs =
+    typeof opts.timeoutMs === "number" && opts.timeoutMs > 0
+      ? opts.timeoutMs
+      : 4000;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(portfolioUrl, {
+      method: "GET",
+      mode: "cors",
+      credentials: "omit",
+      signal: controller.signal,
+    });
+    if (!response.ok) return false;
+    const html = await response.text();
+    return looksLikeReadymagHtml(html);
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Если iframe-URL кросс-ориджин, а document/location читаются —
+ * браузер подставил blank/error (XFO/CSP/сеть) → framing blocked.
+ * SecurityError на location → чужой документ реально загрузился.
+ *
+ * @param {HTMLIFrameElement | null | undefined} iframe
+ * @returns {boolean}
+ */
+export function isLikelyFrameBlocked(iframe) {
+  if (!iframe) return true;
+  try {
+    const win = iframe.contentWindow;
+    if (!win) return true;
+    const href = String(win.location?.href || "");
+    if (!href || href === "about:blank" || href.startsWith("about:")) {
+      return true;
+    }
+    // Same-origin accessible document for a remote portfolio URL = blocked shim.
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * @param {string} openUrl
+ * @param {string} hostLabel
+ * @returns {PortfolioEmbedPlan}
+ */
+export function toExternalEmbedPlan(openUrl, hostLabel) {
+  return {
+    mode: "external",
+    openUrl,
+    frameSrc: null,
+    allowFullscreen: false,
+    hostLabel: hostLabel || "site",
+  };
+}
+
 /**
  * @param {string} portfolioUrl
  * @returns {PortfolioEmbedPlan}
@@ -147,13 +241,7 @@ export function resolvePortfolioEmbed(portfolioUrl) {
 
   const external = findExternalEmbedHost(url.hostname);
   if (external) {
-    return {
-      mode: "external",
-      openUrl: portfolioUrl,
-      frameSrc: null,
-      allowFullscreen: false,
-      hostLabel: external.label,
-    };
+    return toExternalEmbedPlan(portfolioUrl, external.label);
   }
 
   return {

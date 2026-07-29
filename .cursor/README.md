@@ -93,6 +93,14 @@ Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-scre
 5. Таймер: iframe — пауза при скрытой вкладке; external — wall-clock + keep-alive STT; конец → `Timer-end.wav` + стоп → quiz.
 6. Код: `src/lib/dictation/`; правило `dictation.mdc`.
 
+## Portfolio embed (шпаргалка)
+
+1. SoT список: `content/embed-hosts.md` ← `EXTERNAL_EMBED_HOSTS` / `resolvePortfolioEmbed`.
+2. Спец-embed: Figma / YouTube rewrite → iframe.
+3. Blocklist суффикс → сразу external UI (`embedBlocked*`), таймер ждёт кнопку.
+4. Иначе optimistic iframe; Readymag HTML-probe + blank/error фрейма → escalate external + `armSession`.
+5. Не путать с иконками карточек: `platformBrandIcon.js` ≠ стратегия.
+
 ## Referrals (шпаргалка)
 
 Validate **до** auth → redeem **после** login; 1 код / 2 слота; seed `YTHWKPDWAK`; **без наград**; шаринг с home (аватар → «Пригласить»): copy/share = полный `homeInviteMessage`.  
@@ -173,4 +181,4 @@ CTA «Закинуть»: слот занят → `homePendingLimit*`; инач�
 |-----|-----|
 | Опрос: дизайнеры и портфолио (2026) | `.cursor/research/designers-portfolio-2026.md` |
 | Опросы: дизайн овчарка | `.cursor/research/design-ovcharka-polls.md` |
-| Каталог встраивания площадок | `content/embed-hosts.md` |
+| Каталог встраивания площадок | `content/embed-hosts.md` ← `embedHosts.js` / `portfolioEmbed.js`; blocklist → external; optimistic + Readymag probe + blank/error → `embedBlocked*` |

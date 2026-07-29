@@ -66,7 +66,10 @@ import { createUrlScreen } from "./components/url-screen/UrlScreen.js";
 import { createSettingsScreen } from "./components/settings-screen/SettingsScreen.js";
 import { REVIEW_SESSION_SECONDS } from "./config/review.js";
 import {
+  isLikelyFrameBlocked,
+  probeReadymagPortfolio,
   resolvePortfolioEmbed,
+  toExternalEmbedPlan,
 } from "./utils/portfolioEmbed.js";
 import { normalizePortfolioUrl } from "./utils/portfolioMeta.js";
 import { getMotionFocusDelayMs } from "./utils/motionTokens.js";
@@ -89,6 +92,10 @@ const DICTATION_MAX_LEN = 4000;
  */
 const PORTFOLIO_FRAME_SANDBOX =
   "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox";
+/** Ждём load; если нет — эскалация в external (XFO/CSP/сеть). */
+const FRAME_BLOCK_WATCH_MS = 8000;
+/** Пауза после load, чтобы браузер успел подставить blank/error. */
+const FRAME_BLOCK_SETTLE_MS = 50;
 
 const frameWrap = document.querySelector("[data-frame]");
 const frame = document.querySelector("#portfolio-frame");
@@ -112,6 +119,10 @@ let portfolioUrl = null;
 let portfolioId = null;
 /** Активный claim на portfolioId (нужно release при уходе без submit). */
 let claimHeld = false;
+/** Поколение applyEmbedPlan — сбрасывает устаревшие probe/iframe watchers. */
+let embedWatchGeneration = 0;
+/** @type {(() => void) | null} */
+let detachFrameBlockWatch = null;
 
 /**
  * @param {string} id
@@ -913,10 +924,100 @@ function openPortfolioExternally() {
   window.open(embedPlan.openUrl, "_blank", "noopener,noreferrer");
 }
 
+function clearFrameBlockWatch() {
+  if (detachFrameBlockWatch) {
+    detachFrameBlockWatch();
+    detachFrameBlockWatch = null;
+  }
+}
+
+/**
+ * Optimistic iframe → external UI (Readymag на своём домене / XFO / сеть).
+ * Если таймер уже тикал как у iframe — сбрасываем и ждём кнопку «Открыть».
+ * @param {string} hostLabel
+ */
+function escalateOptimisticEmbedToExternal(hostLabel) {
+  if (!embedPlan || embedPlan.mode !== "iframe") return;
+  const openUrl = embedPlan.openUrl || portfolioUrl || "";
+  if (!openUrl) return;
+
+  const wasRunning = sessionStarted && !sessionEnded;
+  applyEmbedPlan(
+    toExternalEmbedPlan(openUrl, hostLabel || embedPlan.hostLabel || "site"),
+  );
+  if (wasRunning || sessionStarted) {
+    armSession();
+  }
+}
+
+/**
+ * Следим за load/error optimistic iframe: blank/about:neterror → external.
+ * @param {import("./utils/portfolioEmbed.js").PortfolioEmbedPlan} plan
+ * @param {number} generation
+ */
+function watchOptimisticFrame(plan, generation) {
+  clearFrameBlockWatch();
+  // Спец-embed (Figma/YouTube) и пустой src не мониторим.
+  if (!frame || plan.mode !== "iframe" || !plan.frameSrc || plan.allowFullscreen) {
+    return;
+  }
+
+  let loadFired = false;
+  let settled = false;
+
+  const finish = () => {
+    if (settled || generation !== embedWatchGeneration) return;
+    settled = true;
+    clearFrameBlockWatch();
+    if (embedPlan?.mode !== "iframe") return;
+    if (!isLikelyFrameBlocked(frame)) return;
+    escalateOptimisticEmbedToExternal(plan.hostLabel);
+  };
+
+  const onLoad = () => {
+    loadFired = true;
+    window.setTimeout(finish, FRAME_BLOCK_SETTLE_MS);
+  };
+
+  const onError = () => {
+    finish();
+  };
+
+  const timeoutId = window.setTimeout(() => {
+    if (!loadFired) finish();
+  }, FRAME_BLOCK_WATCH_MS);
+
+  frame.addEventListener("load", onLoad);
+  frame.addEventListener("error", onError);
+
+  detachFrameBlockWatch = () => {
+    window.clearTimeout(timeoutId);
+    frame.removeEventListener("load", onLoad);
+    frame.removeEventListener("error", onError);
+  };
+}
+
+/**
+ * CORS-probe: маркеры Readymag в HTML (часто fail без ACAO → iframe watch).
+ * @param {string} url
+ * @param {number} generation
+ */
+function probeOptimisticReadymag(url, generation) {
+  void probeReadymagPortfolio(url).then((isReadymag) => {
+    if (!isReadymag || generation !== embedWatchGeneration) return;
+    if (embedPlan?.mode !== "iframe") return;
+    escalateOptimisticEmbedToExternal("Readymag");
+  });
+}
+
 /**
  * @param {import("./utils/portfolioEmbed.js").PortfolioEmbedPlan} plan
  */
 function applyEmbedPlan(plan) {
+  embedWatchGeneration += 1;
+  const generation = embedWatchGeneration;
+  clearFrameBlockWatch();
+
   embedPlan = plan;
   syncDictationBackgroundPolicy();
 
@@ -947,6 +1048,11 @@ function applyEmbedPlan(plan) {
   }
 
   frame.src = plan.frameSrc || "about:blank";
+  watchOptimisticFrame(plan, generation);
+  // Спец-embed (Figma/YouTube) не трогаем probe'ом; кастомные домены — да.
+  if (plan.frameSrc && plan.openUrl && !plan.allowFullscreen) {
+    probeOptimisticReadymag(plan.openUrl, generation);
+  }
 }
 
 function showBrandChrome() {

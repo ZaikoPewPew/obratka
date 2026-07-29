@@ -94,6 +94,7 @@ Handoff соседних brand-экранов: `handoff: true` (`brandScreenTran
 Шкалы context/visual **1–5** — [`scale-slider`](src/components/scale-slider/README.md). Пул / `tier` / отчёт — [`QUIZ.md`](QUIZ.md).  
 `ban-screen` — статичный красный mesh + `banBrandMarkSvg` (не `setVariant`).  
 На `/review` в шапке — опциональная надиктовка (`.iframe-shell__rec`), в квизе — микрофон в поле «Главный совет» (`.review-panel__rec`); таймер `REVIEW_SESSION_SECONDS` из [`src/config/review.js`](src/config/review.js).  
+Embed: [`content/embed-hosts.md`](content/embed-hosts.md) — спец-embed / blocklist / optimistic + Readymag probe + iframe→external fallback (`embedBlocked*`).  
 iframe: пауза при скрытой вкладке; external (портфолио в другой вкладке): wall-clock без паузы + best-effort keep-alive STT; конец → `Timer-end.wav` + стоп записи → quiz. См. [`src/lib/dictation/README.md`](src/lib/dictation/README.md).
 
 ## Дерево файлов
@@ -230,6 +231,7 @@ Home entrance: `--home-screen-reveal-delay-*` + `motion-reveal-dock` (тольк
 Правило: `.cursor/rules/i18n.mdc`.
 
 Таймер `/review` и intro copy: `REVIEW_SESSION_SECONDS` в [`src/config/review.js`](src/config/review.js).  
+Embed-стратегия: [`content/embed-hosts.md`](content/embed-hosts.md).  
 iframe — пауза при `visibility hidden`; external — wall-clock + дедлайн; конец → [`Timer-end.wav`](src/assets/audio/Timer-end.wav).
 
 ## App-слой

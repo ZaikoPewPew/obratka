@@ -20,7 +20,7 @@
 | Home: free-slot «Мои» + max 1 pending | wired (`MAX_MINE_PENDING`, `submit_portfolio`) |
 | Home tabbar dock: glass + «Закинуть своё» справа | wired (`tabbar-dock`, `--on-dark`, entrance `motion-reveal-dock`) |
 | Review claim / heartbeat / release | wired (награда только после submit; unload = keepalive + `sessionStorage` reconcile; **overshoot** — см. § Claims) |
-| Review iframe + таймер 45 s + **надиктовка** (rec на `/review` + микрофон в поле совета) + квиз | wired |
+| Review: iframe/external + таймер 45 s + **надиктовка** | wired (embed-hosts + probe/fallback; rec + mic в совете; SoT [`embed-hosts.md`](content/embed-hosts.md)) |
 | Подача URL + back-chip + done на url-screen | wired |
 | Report: листы (+ `dictation`) + жалоба + PDF | wired |
 | Referrals validate/redeem / share | wired (1 код / 2 слота, seed `YTHWKPDWAK`, без наград) |
@@ -178,6 +178,20 @@ D спокойно дописывает квиз → INSERT +10 → 4-й лис�
 - `sortFeedForSlotClosure` — remaining до target → FIFO; live не двигает карточку вниз.
 - Оркестрация claim: `main.js` (`claimHeld`, heartbeat, `releaseHeldClaim`, keepalive).
 
+## Встраивание портфолио (iframe / external)
+
+На `/review` URL — iframe или UI «Открыть и начать» (`embedBlocked*`).
+
+| Стратегия | Когда |
+|-----------|--------|
+| Спец-embed | Figma → `embed.figma.com?embed-host=obratka`; YouTube → `/embed/{id}` |
+| External | суффикс в `EXTERNAL_EMBED_HOSTS` (Behance, Notion, Readymag, Tilda.ws, Wixsite, `vercel.app`, …) |
+| Optimistic iframe | остальное (Dprofile, `*.framer.ai`, `*.webflow.io`, кастомные домены, Carrd, GitHub Pages…) |
+
+Optimistic доп.: HTML-probe Readymag (CORS best-effort) + blank/error фрейма (XFO/CSP/сеть) → external + сброс таймера до кнопки.  
+SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `portfolioEmbed.js` / `main.js`.  
+Иконка площадки (`platformBrandIcon.js`) **≠** embed-стратегия.
+
 ## Репутация и жалобы на листы
 
 Цель: ловить халяву / спам / травлю / нецелевое, не превращая обиду на жёсткую критику в бан.
@@ -202,7 +216,7 @@ D спокойно дописывает квиз → INSERT +10 → 4-й лис�
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
 | Side panel | [`side-panel`](src/components/side-panel/README.md) — панель справа (слот); home → «Правила» |
 | Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `feedback`; feed/mine/rating (`listRatingTop`); URL-query; лента SWR; Активные/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` / entrance cascade |
-| Review | `index.html` `.iframe-shell` + таймер + чип **rec** (заметки → `answers.dictation`) в `main.js` |
+| Review | `index.html` `.iframe-shell` + таймер + чип **rec** (заметки → `answers.dictation`) в `main.js`; embed: `resolvePortfolioEmbed` / external UI |
 | Quiz | `review-screen` + `review-panel` + [`scale-slider`](src/components/scale-slider/README.md) (context/visual **1–5**; условный `pain`; рыночный `tier`) + mic → `advice`. SoT: [`QUIZ.md`](QUIZ.md) |
 | Success | `success-screen` (`/done`) |
 | Ban | `ban-screen` — статичный красный mesh + `banBrandMarkSvg` |
@@ -246,6 +260,7 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 - Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `side-panel`, `account-menu`, `tabs-panel`, `legendary-online-panel`, `feedback`, `scale-slider`
 - Home state: `src/utils/homeRoute.js` (query) + `homeListCache.js` + `feedSeen.js` + `mineReadySeen.js` (кэши сбрасываются в `exitAuthenticatedSession`)
 - Review timer: `src/config/review.js` (`REVIEW_SESSION_SECONDS`); iframe pause / external wall-clock; end sound `src/assets/audio/Timer-end.wav`
+- Portfolio embed: `src/utils/embedHosts.js` + `portfolioEmbed.js` (Figma/YouTube rewrite; blocklist → external; optimistic iframe + Readymag probe + frame-block fallback). Каталог: [`content/embed-hosts.md`](content/embed-hosts.md)
 - Dictation: `src/lib/dictation/` (Web Speech MVP; external `setKeepAliveInBackground`)
 - Url-screen: чип «На главную» (`.url-screen__back`, скрыт на done) → `onExit` → home
 

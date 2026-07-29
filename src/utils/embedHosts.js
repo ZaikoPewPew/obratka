@@ -34,6 +34,7 @@ export const EXTERNAL_EMBED_HOSTS = Object.freeze([
   { id: "google-drive", suffix: "drive.google.com", label: "Google Drive" },
   { id: "google-sheets", suffix: "sheets.google.com", label: "Google Sheets" },
   { id: "google-slides", suffix: "slides.google.com", label: "Google Slides" },
+  { id: "google-sites", suffix: "sites.google.com", label: "Google Sites" },
   { id: "miro", suffix: "miro.com", label: "Miro" },
   { id: "whimsical", suffix: "whimsical.com", label: "Whimsical" },
   {
@@ -61,6 +62,19 @@ export const EXTERNAL_EMBED_HOSTS = Object.freeze([
   { id: "webflow", suffix: "webflow.com", label: "Webflow" },
   { id: "tilda-cc", suffix: "tilda.cc", label: "Tilda" },
   { id: "tilda-ws", suffix: "tilda.ws", label: "Tilda" },
+  { id: "pixpa", suffix: "pixpa.com", label: "Pixpa" },
+  {
+    id: "journo",
+    suffix: "journoportfolio.com",
+    label: "Journo Portfolio",
+  },
+  { id: "wixsite", suffix: "wixsite.com", label: "Wix" },
+  { id: "weebly", suffix: "weebly.com", label: "Weebly" },
+  { id: "strikingly", suffix: "strikingly.com", label: "Strikingly" },
+  { id: "bento", suffix: "bento.me", label: "Bento" },
+  { id: "universe", suffix: "onuniverse.com", label: "Universe" },
+  { id: "smugmug", suffix: "smugmug.com", label: "SmugMug" },
+  { id: "vercel-app", suffix: "vercel.app", label: "Vercel" },
   { id: "awwwards", suffix: "awwwards.com", label: "Awwwards" },
 ]);
 

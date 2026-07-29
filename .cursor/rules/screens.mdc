@@ -20,7 +20,7 @@ alwaysApply: true
 | `home` | `/home` (+ `?tab=mine\|rating`, `?tab=mine&filter=completed`) |
 | `settings` | `/settings` (stub из account-menu) |
 | `url` | `/portfolio` |
-| `review` | `/review` (iframe + таймер 45 s + rec; iframe pause / external wall-clock + `Timer-end.wav`; нужен claim) |
+| `review` | `/review` (iframe/external по `embed-hosts.md` + таймер 45 s + rec; iframe pause / external wall-clock + `Timer-end.wav`; нужен claim) |
 | `quiz` | `/quiz` (шкалы context/visual 1–5 через `scale-slider`; условный pain; `tier`; микрофон в поле «Главный совет») |
 | `done` | `/quiz/done` |
 | `success` | `/done` (deep link / запасной; submit URL остаётся на url-screen) |
