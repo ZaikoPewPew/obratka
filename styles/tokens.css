@@ -927,59 +927,12 @@
   --home-screen-locked-modal-title-weight: var(--font-weight-semibold);
   --home-screen-locked-modal-body-size: var(--font-size-base);
   --home-screen-locked-modal-z: calc(var(--home-screen-z) + 1);
-  --home-screen-review-intro-cards-gap: var(--space-4);
-  --home-screen-review-intro-card-size: 268px;
-  --home-screen-review-intro-card-padding: var(--space-4);
-  --home-screen-review-intro-card-radius: var(--radius-md);
-  --home-screen-review-intro-card-bg: var(--color-surface-muted);
-  --home-screen-review-intro-card-title-size: var(--font-size-lg);
-  --home-screen-review-intro-card-title-weight: var(--font-weight-semibold);
-  --home-screen-review-intro-card-title-color: var(--color-text);
-  --home-screen-review-intro-card-body-size: var(--font-size-base);
-  --home-screen-review-intro-card-body-weight: var(--font-weight-regular);
-  --home-screen-review-intro-card-body-color: color-mix(
-    in srgb,
-    var(--color-text) 50%,
-    transparent
-  );
-  --home-screen-review-intro-card-text-gap: var(--space-1);
-  --home-screen-review-intro-rec-height: 57px;
-  --home-screen-review-intro-rec-padding-x: 12px;
-  --home-screen-review-intro-rec-padding-right: 18px;
-  --home-screen-review-intro-rec-gap: 7px;
-  --home-screen-review-intro-rec-radius: 14px;
-  --home-screen-review-intro-rec-bg: var(--color-surface);
-  --home-screen-review-intro-rec-shadow: -1px 4px 4px 0 var(--palette-gray-125);
-  --home-screen-review-intro-rec-bottom: 51px;
-  --home-screen-review-intro-rec-mic-size: 32px;
-  --home-screen-review-intro-rec-wave-height: 32px;
-  --home-screen-review-intro-rec-wave-gap: 4px;
-  --home-screen-review-intro-rec-bar-width: 4px;
-  --home-screen-review-intro-rec-bar-radius: 999px;
-  --home-screen-review-intro-rec-wave-color: color-mix(
-    in srgb,
-    var(--color-text) 25%,
-    transparent
-  );
-  --home-screen-review-intro-rec-dot-size: 7px;
-  --home-screen-review-intro-rec-dot-idle-color: var(--control-rec-dot-idle-color);
-  --home-screen-review-intro-rec-dot-active-color: var(
-    --control-rec-dot-active-color
-  );
-  --home-screen-review-intro-rec-bar-transition-duration: var(
-    --control-rec-bar-transition-duration
-  );
-  --home-screen-review-intro-rec-bar-transition-easing: var(
-    --control-rec-bar-transition-easing
-  );
-  --home-screen-review-intro-rec-wave-duration: 900ms;
-  --home-screen-review-intro-rec-wave-ease: ease-in-out;
-  --home-screen-review-intro-rec-wave-stagger: 70ms;
-  --home-screen-review-intro-rec-wave-scale-min: 0.45;
-  --home-screen-review-intro-rec-wave-scale-max: 1.15;
-  --home-screen-review-intro-ducks-hint-bottom: var(--space-3);
-  --home-screen-review-intro-ducks-hint-right: var(--space-3);
-  --home-screen-review-intro-duck-size: 66px;
+  --home-screen-review-intro-media-width: 552px;
+  --home-screen-review-intro-media-height: 268px;
+  --home-screen-review-intro-media-radius: var(--radius-md);
+  --home-screen-review-intro-media-bg: var(--color-surface-muted);
+  --home-screen-review-intro-media-border-width: var(--border-width);
+  --home-screen-review-intro-media-border-color: var(--color-border);
   --home-screen-invite-explainer-gap: var(--space-4);
   --home-screen-invite-explainer-media-width: 100%;
   --home-screen-invite-explainer-media-height: 256px;

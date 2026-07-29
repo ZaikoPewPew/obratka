@@ -38,6 +38,12 @@
 |------|------|
 | `Timer-end.wav` | звук окончания таймера просмотра на `/review` (`main.js`) |
 
+## `video/`
+
+| Файл | Роль |
+|------|------|
+| `primer.mp4` | пример ревью в intro-модалке home (`homeReviewIntro*`, autoplay/loop/muted) |
+
 ### `brandMarks.js` — API
 
 | Функция | Когда |

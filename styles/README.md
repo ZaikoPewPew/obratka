@@ -2,7 +2,7 @@
 
 - `tokens.css` — **источник дизайн-токенов** (примитивы → семантика → темы). Правило: `.cursor/rules/design-tokens.mdc`.
 - `base.css` — сброс / база.
-- `entrance.css` — `@keyframes motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock` / `motion-recording-blink` / `motion-review-intro-rec-wave` / `motion-reputation-eyes-look` (+ `-once`) / `motion-balance-duck-float` (+ `-once`) / `motion-control-error-buzz` (пульс индикатора записи + декоративная волна intro-rec + взгляд глазок репутации + покачивание уточки баланса + error-buzz).
+- `entrance.css` — `@keyframes motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock` / `motion-recording-blink` / `motion-reputation-eyes-look` (+ `-once`) / `motion-balance-duck-float` (+ `-once`) / `motion-control-error-buzz` (пульс индикатора записи + взгляд глазок репутации + покачивание уточки баланса + error-buzz).
 - `app-modal.css` — универсальная модалка (`createAppModal`, `--app-modal-*`).
 - `side-panel.css` — боковая панель (`createSidePanel`, `--side-panel-*`).
 - `iframe-shell.css` — оболочка `/review` (таймер, **`.iframe-shell__rec`**, external viewer), `.url-screen*` (в т.ч. **`.url-screen__back`**, `__error*`, `__input-wrap--invalid`), `.auth-screen*` / `.auth-code-screen*` (в т.ч. `__cells--invalid`), `.review-screen*` / `.review-panel*` (в т.ч. **`.review-panel__rec`**, **`.review-panel__scale-*` / `__slider-*`** — шкалы [`scale-slider`](../src/components/scale-slider/README.md)). Таймер: iframe pause / external wall-clock; звук конца — `src/assets/audio/Timer-end.wav`.
@@ -49,7 +49,7 @@
 | `--control-rec-*` / `--color-recording` | чип надиктовки в шапке `/review` |
 | `--shell-review-rec-*` | кнопка надиктовки в поле «Главный совет» |
 | `--home-screen-*` | topbar / feed / avatar / locked-modal |
-| `--home-screen-review-intro-*` | карточки intro-модалки (две минуты, preview-rec, декор уточек) |
+| `--home-screen-review-intro-*` | видео-слот intro-модалки (552×268) |
 | `--home-screen-tabbar-*` | glass track (gray-900 10% / white on-dark 20% / blur 20), hide/thumb/label/contrast; dock-gap + submit (56×56 Google blue) + tab-dot (6px Google red) |
 | `--home-screen-reveal-delay-*` | entrance stagger на `/home` (topbar → body → dock → fab); dock = `motion-reveal-dock` **без** opacity (glass `backdrop-filter`) |
 | `--tabs-panel-*` | сегмент Активные/Завершенные (track / tab / thumb / tab-dot) |

@@ -34,7 +34,7 @@
 - **Silent refresh:** при тех же id карточек — патч только reviewer-слотов (без thum.io); новые id — rebuild + reveal только для них.
 - **Порядок feed:** `sortFeedForSlotClosure` — ближе к 3/3 → FIFO; `reviewedByMe` вниз (не newest-first). Дверь claim = `reviews_count < target` (live не лимит; late overshoot ок). См. home-screen README.
 - **Отправленный отчёт:** `reviewedByMe` появляется только после INSERT в `reviews`; карточка disabled с оверлеем «Отчёт отправлен», без intro/notice и повторного claim.
-- **Intro до claim:** клик по чужой карточке → если уже набрали target (`isPortfolioOpenForReview`) → `homeNoSlots*`; иначе `createAppModal` `homeReviewIntro*` (тайтл + автор `{name}`, две карточки минут, CTA «Сюдаа его!») → claim → `/review`. «Не сейчас» / закрытие — без claim.
+- **Intro до claim:** клик по чужой карточке → если уже набрали target (`isPortfolioOpenForReview`) → `homeNoSlots*`; иначе `createAppModal` `homeReviewIntro*` (тайтл + описание + видео-пример, CTA «Сюдаа его!») → claim → `/review`. «Не сейчас» / закрытие — без claim.
 - **Abort / hard nav:** SPA `releaseHeldClaim`; `pagehide` → `releasePortfolioClaimKeepalive`; per-tab `obratka.reviewClaim` + boot reconcile — active «Аноним» не залипает после ухода (см. `review-claims.mdc`). SQL: `portfolio_reviewer_slots` чистит expired перед list.
 - **Mine report gate:** `reviewsCount < targetReviews` → `homeMineNotReady*`; иначе `/report`. Own-карточки всегда `cursor: pointer` (не `not-allowed`).
 - **Фильтр «Мои»:** сегмент Активные / Завершенные (`tabs-panel`); завершённые = 3/3 (`reviewsCount >= targetReviews`).

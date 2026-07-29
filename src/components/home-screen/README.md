@@ -119,7 +119,7 @@ SWR: при `open` / смене таба / F5 — если есть кэш вк�
 
 После skeleton данные с `motion-reveal` stagger; после тихого refetch при тех же id — только патч reviewer-слотов (без пересборки DOM / thum.io); новые карточки — full rebuild + reveal только для новых id.
 
-Клик по чужой карточке → если уже `reviewsCount >= target` (`isPortfolioOpenForReview`) → `homeNoSlots*` + refresh; иначе intro-модалка (Figma `492:3611`): тайтл + «Автор карточки — {name}», две карточки («1-ая минута» с toggle preview-rec — декоративная волна без mic/STT; «2-ая минута» — статичные уточки) → CTA «Сюдаа его!» → `onOpenPortfolio` → `claimPortfolioReview` → `/review`. «Не сейчас» / закрытие — без claim; preview-rec сбрасывается.  
+Клик по чужой карточке → если уже `reviewsCount >= target` (`isPortfolioOpenForReview`) → `homeNoSlots*` + refresh; иначе intro-модалка: тайтл + описание + видео-слот 552×268 (`primer.mp4`, autoplay/loop/muted) → CTA «Сюдаа его!» → `onOpenPortfolio` → `claimPortfolioReview` → `/review`. «Не сейчас» / закрытие — без claim; видео стопается.  
 Active claims не закрывают дверь; late submit после `done` принимает сервер (+10). На карточке — первые `target` аватарок.  
 Abort / hard navigation: release через SPA `releaseHeldClaim` или `pagehide` keepalive + per-tab `sessionStorage` reconcile (см. `review-claims.mdc`) — active «Аноним» не должен залипать после ухода.  
 Своя (`isOwn`, вкладка «Мои») кликабельна всегда: собраны все ревью (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report` (листы + жалоба; при overshoot листов может быть > target); иначе модалка `homeMineNotReady*` с прогрессом. Title / aria карточки — `homeCardReport*` либо `homeCardReportPending*`, пересинхронизируются при silent-патче слотов.  
@@ -218,7 +218,7 @@ Glass track: `background` + `backdrop-filter: blur(var(--home-screen-tabbar-blur
 
 Entrance на `--open`: `--home-screen-reveal-delay-topbar` / `-body` / `-fab` → `motion-reveal-topbar` / `motion-reveal` / `motion-reveal-topbar`. Dock без delayed animation — только parent fade + базовый `translateX(-50%)`.
 
-Токены intro-модалки: `--home-screen-review-intro-card-*` / `--home-screen-review-intro-rec-*` / `--home-screen-review-intro-cards-gap`.
+Токены intro-модалки: `--home-screen-review-intro-media-*` (552×268).
 
 Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeEmptyMineActive`, `homeEmptyMineCompleted`, `homeMineSlotFree`, `homeMineSlotFreeAria`, `homePendingLimit*`, `homeTabFeed`, `homeTabMine`, `homeTabRating`, `homeRatingEmpty`, `homeRatingListAria`, `homeRatingNameFallback`, `homeRatingPlaceAria`, `homeRatingBalanceAria`, `homeTabsAria`, `homeMineFilterActive`, `homeMineFilterCompleted`, `homeMineFilterAria`, `homeAddPortfolio`, `homeBalance*`, `homeReputation*`, `homeInvite*` (в т.ч. `homeInviteMessage`), `homeTabMineReadyAria`, `homeTabFeedNewAria`, `homeProfileAria`, `homeAccount*`, `homeContacts*`, `homeRulesCloseAria`, `homeContactFab*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `gradeUndefined`, `homePlatformWebLetter`, `homePlatformSite`, `homeSubmitCost`. Правила сообщества: [`content/rules.json`](../../../content/rules.json).
 
