@@ -1,13 +1,3 @@
-import "@fontsource/montserrat/400.css";
-import "@fontsource/montserrat/500.css";
-import "@fontsource/montserrat/600.css";
-import "@fontsource/montserrat/cyrillic-400.css";
-import "@fontsource/montserrat/cyrillic-500.css";
-import "@fontsource/montserrat/cyrillic-600.css";
-import "@fontsource/montserrat/cyrillic-ext-400.css";
-import "@fontsource/montserrat/cyrillic-ext-500.css";
-import "@fontsource/montserrat/cyrillic-ext-600.css";
-
 import {
   applyDocumentI18n,
   formatString,
@@ -1618,6 +1608,15 @@ async function applyRoute(id, opts = {}) {
       if (access === "gone") return;
       session = getSession();
       urlSlotFree = slotResult.ok ? slotResult.free : false;
+    } else if (id === "report") {
+      // Open по кэшу — settle+profile не блокируют первый paint /report.
+      // Ban/gone догоняют фоном (exit уже внутри reconcile).
+      void reconcileSessionAccess().then((access) => {
+        if (access === "gone") return;
+        if (access === "banned" && activeRouteId !== "banned") {
+          go("banned", { replace: true });
+        }
+      });
     } else {
       const access = await reconcileSessionAccess();
       if (access === "gone") return;

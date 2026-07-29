@@ -36,7 +36,7 @@
 | Tabs panel | `src/components/tabs-panel/` (`createTabsPanel`, `--tabs-panel-*`) |
 | Legendary online | `src/components/legendary-online-panel/` (fixed-чип «Топы в сети») |
 | Brand marks / morph | `src/assets/brand/brandMarks.js` |
-| Шрифт | `@fontsource/montserrat` → `src/main.js` |
+| Шрифт | `@fontsource/montserrat` → `src/fonts.css` (link в `<head>` до tokens) |
 
 ## Экраны и URL
 
