@@ -3,7 +3,7 @@ import { getSession, setSession } from "../app/session.js";
 import { formatPortfolioRole } from "./portfolios.js";
 import { parseReviewAnswers } from "../utils/reviewReport.js";
 
-/** @typedef {'low_effort' | 'spam' | 'harassment' | 'offensive' | 'irrelevant'} ReviewComplaintTag */
+/** @typedef {'low_effort' | 'spam' | 'harassment' | 'offensive' | 'ai_slop'} ReviewComplaintTag */
 
 /** Теги жалобы v1 (веса только на сервере). */
 export const REVIEW_COMPLAINT_TAGS = /** @type {const} */ ([
@@ -11,7 +11,7 @@ export const REVIEW_COMPLAINT_TAGS = /** @type {const} */ ([
   "spam",
   "harassment",
   "offensive",
-  "irrelevant",
+  "ai_slop",
 ]);
 
 /** Стартовое значение, если в сессии/профиле ещё нет поля. */

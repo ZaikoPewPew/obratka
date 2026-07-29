@@ -73,6 +73,7 @@ await modal.close();
 | `setSize(size)` | `md` / `lg` / `xl` |
 | `setTitle` / `setDescription` | копирайт (`setDescription` принимает `string` или `Node`) |
 | `setPrimaryLabel` / `setSecondaryLabel` | кнопки |
+| `setPrimaryDisabled(disabled)` | disable primary (нет выбора / submit) |
 | `setActionsVisible({ primary, secondary })` | скрыть ряд / кнопки |
 | `setCloseAriaLabel` | aria у крестика |
 
@@ -121,7 +122,7 @@ await modal.close();
 |----|---------------------|
 | Новый кейс с title + слот + 1–2 CTA | Inline notice без оверлея |
 | Общий каркас под разные тела | Ban / brand split-экраны |
-| Home: review intro (`homeReviewIntro*`, видео `primer.mp4`), mine not-ready (`homeMineNotReady*` via notice), invite explainer (`homeInvite*`, Figma `492:4030`; copy/share = `homeInviteMessage`), submit-locked (+ error-buzz), reputation explainer (`homeReputation*`), balance explainer (`homeBalance*`), p4p online explainer (`homeLegendaryOnline*`), contacts | Complaint-модалка на `report-screen` (свой DOM, не app-modal) |
+| Home: review intro (`homeReviewIntro*`, видео `primer.mp4`), mine not-ready (`homeMineNotReady*`, `currency-empty-duck.png` + Lottie), invite explainer (`homeInvite*`, Figma `492:4030`; copy/share = `homeInviteMessage`), submit-locked (+ error-buzz), reputation explainer (`homeReputation*`), balance explainer (`homeBalance*`), p4p online explainer (`homeLegendaryOnline*`), contacts | Complaint-модалка на `report-screen` (свой DOM, не app-modal) |
 
 Слот intro на home: `.home-screen__review-intro-media` + `--home-screen-review-intro-media-*`.
 

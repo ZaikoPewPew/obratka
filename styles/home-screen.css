@@ -1492,15 +1492,26 @@
   min-width: 0;
 }
 
-.home-screen__invite-explainer-media {
+.home-screen__invite-explainer-media,
+.home-screen__mine-not-ready-explainer-media {
   box-sizing: border-box;
   position: relative;
   display: block;
+  overflow: hidden;
+}
+
+.home-screen__invite-explainer-media {
   width: var(--home-screen-invite-explainer-media-width);
   height: var(--home-screen-invite-explainer-media-height);
-  overflow: hidden;
   border-radius: var(--home-screen-invite-explainer-media-radius);
   background: var(--home-screen-invite-explainer-media-bg);
+}
+
+.home-screen__mine-not-ready-explainer-media {
+  width: var(--home-screen-mine-not-ready-explainer-media-width);
+  height: var(--home-screen-mine-not-ready-explainer-media-height);
+  border-radius: var(--home-screen-mine-not-ready-explainer-media-radius);
+  background: var(--home-screen-mine-not-ready-explainer-media-bg);
 }
 
 .home-screen__invite-explainer-media .home-screen__explainer-media-ray {
@@ -1510,8 +1521,19 @@
   opacity: var(--home-screen-invite-explainer-media-ray-opacity);
 }
 
+.home-screen__mine-not-ready-explainer-media .home-screen__explainer-media-ray {
+  width: var(--home-screen-mine-not-ready-explainer-media-ray-size);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  opacity: var(--home-screen-mine-not-ready-explainer-media-ray-opacity);
+}
+
 .home-screen__invite-explainer-media .home-screen__explainer-media-photo {
   object-fit: var(--home-screen-invite-explainer-media-photo-fit);
+}
+
+.home-screen__mine-not-ready-explainer-media .home-screen__explainer-media-photo {
+  object-fit: var(--home-screen-mine-not-ready-explainer-media-photo-fit);
 }
 
 .home-screen__invite-bar {

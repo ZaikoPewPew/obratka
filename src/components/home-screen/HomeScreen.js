@@ -63,13 +63,13 @@ import { createAccountMenu } from "../account-menu/AccountMenu.js";
 import { createTabsPanel } from "../tabs-panel/TabsPanel.js";
 import { createLegendaryOnlinePanel } from "../legendary-online-panel/LegendaryOnlinePanel.js";
 import { createContactFab } from "../contact-fab/ContactFab.js";
-import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
 import { createExplainerMediaRay } from "./explainerMediaRay.js";
 import boneIconUrl from "../../assets/home/bone.svg";
 import balanceCardDucksUrl from "../../assets/home/modal/balance-card-ducks.svg";
 import currencyDuckUrl from "../../assets/home/modal/currency-duck.png";
 import currencyGhostUrl from "../../assets/home/modal/currency-ghost.png";
 import currencyP2pUrl from "../../assets/home/modal/currency-p2p.png";
+import currencyEmptyDuckUrl from "../../assets/home/modal/currency-empty-duck.png";
 import currencyReferalUrl from "../../assets/home/modal/currency-referal.png";
 import reviewIntroVideoUrl from "../../assets/video/primer.mp4";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
@@ -654,15 +654,6 @@ export function createHomeScreen({
   const profileMenuAnchor = document.createElement("div");
   profileMenuAnchor.className = "home-screen__profile-menu-anchor";
 
-  const contactsModal = createAppModal({
-    size: "md",
-    showSecondary: false,
-    onPrimary: () => {
-      window.open(COMMUNITY_CONTACT_URL, "_blank", "noopener,noreferrer");
-      void contactsModal.close();
-    },
-  });
-
   const rulesPanel = createSidePanel();
 
   /**
@@ -772,15 +763,6 @@ export function createHomeScreen({
     onSettings: () => onOpenSettings?.(),
     onInvite: () => {
       void openMyReferralInvite();
-    },
-    onContacts: () => {
-      const t = getStrings();
-      contactsModal.setTitle(t.homeContactsTitle ?? "");
-      contactsModal.setDescription(t.homeContactsBody ?? "");
-      contactsModal.setPrimaryLabel(t.homeContactsOpen ?? "");
-      contactsModal.setCloseAriaLabel(t.homeContactsCloseAria ?? "");
-      contactsModal.setActionsVisible({ primary: true, secondary: false });
-      contactsModal.open();
     },
     onRules: () => {
       openRulesPanel();
@@ -1008,6 +990,30 @@ export function createHomeScreen({
   });
   reviewIntroModal.content.append(reviewIntroVideo.root);
 
+  const mineNotReadyMedia = document.createElement("div");
+  mineNotReadyMedia.className = "home-screen__mine-not-ready-explainer-media";
+
+  const mineNotReadyRay = createExplainerMediaRay();
+
+  const mineNotReadyPhoto = document.createElement("img");
+  mineNotReadyPhoto.className = "home-screen__explainer-media-photo";
+  mineNotReadyPhoto.src = currencyEmptyDuckUrl;
+  mineNotReadyPhoto.alt = "";
+  mineNotReadyPhoto.width = 1104;
+  mineNotReadyPhoto.height = 536;
+  mineNotReadyPhoto.decoding = "async";
+
+  mineNotReadyMedia.append(mineNotReadyRay.root, mineNotReadyPhoto);
+
+  const mineNotReadyModal = createAppModal({
+    size: "md",
+    showPrimary: false,
+    onSecondary: () => {
+      void mineNotReadyModal.close();
+    },
+  });
+  mineNotReadyModal.content.append(mineNotReadyMedia);
+
   const inviteExplainer = document.createElement("div");
   inviteExplainer.className = "home-screen__invite-explainer";
 
@@ -1145,8 +1151,8 @@ export function createHomeScreen({
     balanceModal.root,
     legendaryOnlineModal.root,
     reviewIntroModal.root,
+    mineNotReadyModal.root,
     inviteModal.root,
-    contactsModal.root,
     rulesPanel.root,
   );
 
@@ -1498,23 +1504,31 @@ export function createHomeScreen({
   }
 
   /**
-   * Своя карточка: отчёт — только когда собраны все ревью, иначе модалка.
+   * Своя карточка: отчёт — только когда собраны все ревью, иначе explainer.
    *
    * @param {HomePortfolioItem} item
    */
   function openOwnCard(item) {
-    const { completed, total, ready } = reportProgress(item);
+    const { ready } = reportProgress(item);
     if (ready) {
       void onOpenReport?.(item);
       return;
     }
+    openMineNotReadyModal();
+  }
+
+  function openMineNotReadyModal() {
     const t = getStrings();
-    showNotice({
-      title: t.homeMineNotReadyTitle,
-      body: formatString(t.homeMineNotReadyBody, { completed, total }),
-      closeLabel: t.homeMineNotReadyClose,
-      closeAria: t.homeMineNotReadyCloseAria,
-    });
+    mineNotReadyModal.setTitle(
+      fixHangingPrepositions(t.homeMineNotReadyTitle ?? ""),
+    );
+    mineNotReadyModal.setDescription(
+      fixHangingPrepositions(t.homeMineNotReadyBody ?? ""),
+    );
+    mineNotReadyModal.setSecondaryLabel(t.homeMineNotReadyClose ?? "");
+    mineNotReadyModal.setCloseAriaLabel(t.homeMineNotReadyCloseAria ?? "");
+    mineNotReadyModal.setActionsVisible({ primary: false, secondary: true });
+    mineNotReadyModal.open();
   }
 
   /**
@@ -2869,7 +2883,6 @@ export function createHomeScreen({
     closeReviewIntroModal();
     closeInviteModal();
     void closeAccountMenu();
-    void contactsModal.close();
     void rulesPanel.close();
     root.setAttribute("aria-busy", "false");
     root.hidden = true;

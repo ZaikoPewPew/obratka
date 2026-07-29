@@ -55,7 +55,7 @@
 ```text
 /referral → /registration → /onboarding → /home
                               ├─ pick → intro-модалка → /review → /quiz → /quiz/done
-                              ├─ mine → /report (все ревью собраны) / модалка «ещё собирается»
+                              ├─ mine → /report (все ревью собраны) / модалка «ещё не готов»
                               └─ submit → /portfolio → done (URL sync /done)
 ```
 
@@ -185,7 +185,7 @@ D спокойно дописывает квиз → INSERT +10 → 4-й лис�
 | Что | Детали |
 |-----|--------|
 | Где UI | `/report` — список листов; «Пожаловаться» → модалка тегов (мультивыбор). Без жалобы = ок |
-| Теги v1 | `low_effort`, `spam`, `harassment`, `offensive`, `irrelevant` (веса только в SQL) |
+| Теги v1 | `low_effort`, `spam`, `harassment`, `offensive`, `ai_slop` (веса только в SQL) |
 | Штраф | одна жалоба = `max(weight(tag))`; старт `reputation = 100`; бан при `<= 0` |
 | Ревьюер | чип репутации на home + explainer **без** таблицы весов |
 | Апелляция | вручную («Связаться» на `/banned`) |

@@ -12,6 +12,7 @@ import {
   getScreenCloseFallbackMs,
   readSheetTranslateY,
 } from "../../utils/motionTokens.js";
+import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
 import { buildReportSections } from "../../utils/reviewReport.js";
 import { shareReviewPdf } from "../../utils/shareReviewPdf.js";
 import { DEFAULT_TARGET_REVIEWS } from "../../api/portfolios.js";
@@ -21,6 +22,7 @@ import {
   listPortfolioReviewSheets,
   submitReviewComplaint,
 } from "../../api/reviewComplaints.js";
+import { createAppModal } from "../app-modal/AppModal.js";
 
 const BRAND_MARK_CLASS = "report-screen__brand-mark";
 const BRAND_MARK_SVG = brandMarkSvg(BRAND_MARK_CLASS);
@@ -47,9 +49,9 @@ const TAG_I18N_KEYS = {
     label: "complaintTagOffensive",
     hint: "complaintTagOffensiveHint",
   },
-  irrelevant: {
-    label: "complaintTagIrrelevant",
-    hint: "complaintTagIrrelevantHint",
+  ai_slop: {
+    label: "complaintTagAiSlop",
+    hint: "complaintTagAiSlopHint",
   },
 };
 
@@ -179,23 +181,11 @@ export function createReportScreen(opts = {}) {
   layout.append(panel, visual);
   root.append(layout);
 
-  const modalBackdrop = document.createElement("div");
-  modalBackdrop.className = "report-screen__modal-backdrop";
-  modalBackdrop.hidden = true;
-  modalBackdrop.setAttribute("aria-hidden", "true");
+  const complaintBody = document.createElement("div");
+  complaintBody.className = "report-screen__complaint";
 
-  const modal = document.createElement("div");
-  modal.className = "report-screen__modal";
-  modal.setAttribute("role", "dialog");
-  modal.setAttribute("aria-modal", "true");
-  modal.setAttribute("aria-labelledby", "report-complaint-title");
-
-  const modalTitle = document.createElement("h2");
-  modalTitle.className = "report-screen__modal-title";
-  modalTitle.id = "report-complaint-title";
-
-  const modalBody = document.createElement("p");
-  modalBody.className = "report-screen__modal-body";
+  const tipEl = document.createElement("p");
+  tipEl.className = "report-screen__complaint-tip";
 
   const tagsList = document.createElement("div");
   tagsList.className = "report-screen__tags";
@@ -233,27 +223,34 @@ export function createReportScreen(opts = {}) {
   }
 
   const modalError = document.createElement("p");
-  modalError.className = "report-screen__modal-error";
+  modalError.className = "report-screen__complaint-error";
   modalError.hidden = true;
   modalError.setAttribute("role", "alert");
 
-  const modalActions = document.createElement("div");
-  modalActions.className = "report-screen__modal-actions";
+  complaintBody.append(tipEl, tagsList, modalError);
 
-  const modalSubmit = document.createElement("button");
-  modalSubmit.type = "button";
-  modalSubmit.className =
-    "report-screen__modal-btn report-screen__modal-btn--primary";
-
-  const modalCancel = document.createElement("button");
-  modalCancel.type = "button";
-  modalCancel.className =
-    "report-screen__modal-btn report-screen__modal-btn--ghost";
-
-  modalActions.append(modalSubmit, modalCancel);
-  modal.append(modalTitle, modalBody, tagsList, modalError, modalActions);
-  modalBackdrop.append(modal);
-  root.append(modalBackdrop);
+  const complaintModal = createAppModal({
+    size: "md",
+    closeOnBackdrop: true,
+    closeOnEscape: true,
+    onPrimary: () => {
+      void submitComplaint();
+    },
+    onSecondary: () => {
+      if (submitting) return;
+      void complaintModal.close();
+    },
+    onClose: () => {
+      complaintReviewId = null;
+      selectedTags = new Set();
+      submitting = false;
+      syncTagSelection();
+      syncModalActions();
+      setModalError("");
+    },
+  });
+  complaintModal.content.append(complaintBody);
+  root.append(complaintModal.root);
 
   function brandMarkEl() {
     return /** @type {SVGElement | null} */ (brandSlot.querySelector("svg"));
@@ -505,10 +502,11 @@ export function createReportScreen(opts = {}) {
       "aria-label",
       t.reportScreenDownloadPdfAria ?? t.reportScreenDownloadPdf ?? "",
     );
-    modalTitle.textContent = t.reportComplaintModalTitle ?? "";
-    modalBody.textContent = t.reportComplaintModalBody ?? "";
-    modalSubmit.textContent = t.reportComplaintSubmit ?? "";
-    modalCancel.textContent = t.reportComplaintCancel ?? "";
+    complaintModal.setTitle(t.reportComplaintModalTitle ?? "");
+    complaintModal.setPrimaryLabel(t.reportComplaintSubmit ?? "");
+    complaintModal.setSecondaryLabel(t.reportComplaintCancel ?? "");
+    complaintModal.setActionsVisible({ primary: true, secondary: true });
+    tipEl.textContent = fixHangingPrepositions(t.reportComplaintTip ?? "");
     tagsList.setAttribute(
       "aria-label",
       t.reportComplaintTagsAria ?? t.reportComplaintModalTitle ?? "",
@@ -521,7 +519,9 @@ export function createReportScreen(opts = {}) {
       const labelEl = btn.querySelector(".report-screen__tag-label");
       const hintEl = btn.querySelector(".report-screen__tag-hint");
       if (labelEl) labelEl.textContent = t[keys.label] ?? tag;
-      if (hintEl) hintEl.textContent = t[keys.hint] ?? "";
+      if (hintEl) {
+        hintEl.textContent = fixHangingPrepositions(t[keys.hint] ?? "");
+      }
     }
   }
 
@@ -536,7 +536,7 @@ export function createReportScreen(opts = {}) {
   }
 
   function syncModalActions() {
-    modalSubmit.disabled = submitting || selectedTags.size === 0;
+    complaintModal.setPrimaryDisabled(submitting || selectedTags.size === 0);
   }
 
   function setModalError(message) {
@@ -550,21 +550,23 @@ export function createReportScreen(opts = {}) {
   }
 
   function closeComplaintModal() {
-    complaintReviewId = null;
-    selectedTags = new Set();
-    submitting = false;
-    syncTagSelection();
-    syncModalActions();
-    setModalError("");
-    modalBackdrop.classList.remove("report-screen__modal-backdrop--open");
-    modalBackdrop.hidden = true;
-    modalBackdrop.setAttribute("aria-hidden", "true");
+    if (!complaintModal.isOpen()) {
+      complaintReviewId = null;
+      selectedTags = new Set();
+      submitting = false;
+      syncTagSelection();
+      syncModalActions();
+      setModalError("");
+      return;
+    }
+    void complaintModal.close();
   }
 
   /**
    * @param {string} reviewId
+   * @param {string} reviewerName
    */
-  function openComplaintModal(reviewId) {
+  function openComplaintModal(reviewId, reviewerName) {
     const t = getStrings();
     complaintReviewId = reviewId;
     selectedTags = new Set();
@@ -572,13 +574,52 @@ export function createReportScreen(opts = {}) {
     syncTagSelection();
     syncModalActions();
     setModalError("");
-    modalTitle.textContent = t.reportComplaintModalTitle ?? "";
-    modalBody.textContent = t.reportComplaintModalBody ?? "";
-    modalBackdrop.hidden = false;
-    modalBackdrop.setAttribute("aria-hidden", "false");
-    requestAnimationFrame(() => {
-      modalBackdrop.classList.add("report-screen__modal-backdrop--open");
-    });
+    applyCopy();
+    const name =
+      (typeof reviewerName === "string" && reviewerName.trim()) ||
+      t.reportSheetReviewerFallback ||
+      "";
+    complaintModal.setDescription(
+      fixHangingPrepositions(
+        formatString(t.reportComplaintFrom ?? "", { name }),
+      ),
+    );
+    complaintModal.open();
+  }
+
+  /**
+   * @returns {void}
+   */
+  function submitComplaint() {
+    if (submitting || !complaintReviewId || selectedTags.size === 0) return;
+    const t = getStrings();
+    submitting = true;
+    syncModalActions();
+    setModalError("");
+
+    void submitReviewComplaint(complaintReviewId, [...selectedTags])
+      .then(() => {
+        const id = complaintReviewId;
+        sheets = sheets.map((sheet) =>
+          sheet.id === id ? { ...sheet, complained: true } : sheet,
+        );
+        void complaintModal.close().then(() => {
+          renderSheets();
+        });
+      })
+      .catch((err) => {
+        submitting = false;
+        syncModalActions();
+        const code = err instanceof Error ? err.message : "complaint_failed";
+        const keyMap = {
+          complaint_already_exists: "reportComplaintAlready",
+          tags_required: "reportComplaintNeedTags",
+          not_portfolio_owner: "reportComplaintError",
+          not_authenticated: "reportComplaintError",
+        };
+        const key = keyMap[code] || "reportComplaintError";
+        setModalError(t[key] ?? t.reportComplaintError ?? "");
+      });
   }
 
   /**
@@ -646,7 +687,7 @@ export function createReportScreen(opts = {}) {
     } else {
       complainBtn.textContent = t.reportComplaintButton ?? "";
       complainBtn.addEventListener("click", () => {
-        openComplaintModal(sheet.id);
+        openComplaintModal(sheet.id, name);
       });
     }
 
@@ -846,48 +887,6 @@ export function createReportScreen(opts = {}) {
         markPdfDownloaded();
       },
     });
-  });
-
-  modalCancel.addEventListener("click", () => {
-    if (submitting) return;
-    closeComplaintModal();
-  });
-
-  modalBackdrop.addEventListener("click", (event) => {
-    if (event.target === modalBackdrop && !submitting) {
-      closeComplaintModal();
-    }
-  });
-
-  modalSubmit.addEventListener("click", () => {
-    if (submitting || !complaintReviewId || selectedTags.size === 0) return;
-    const t = getStrings();
-    submitting = true;
-    syncModalActions();
-    setModalError("");
-
-    void submitReviewComplaint(complaintReviewId, [...selectedTags])
-      .then(() => {
-        const id = complaintReviewId;
-        sheets = sheets.map((sheet) =>
-          sheet.id === id ? { ...sheet, complained: true } : sheet,
-        );
-        closeComplaintModal();
-        renderSheets();
-      })
-      .catch((err) => {
-        submitting = false;
-        syncModalActions();
-        const code = err instanceof Error ? err.message : "complaint_failed";
-        const keyMap = {
-          complaint_already_exists: "reportComplaintAlready",
-          tags_required: "reportComplaintNeedTags",
-          not_portfolio_owner: "reportComplaintError",
-          not_authenticated: "reportComplaintError",
-        };
-        const key = keyMap[code] || "reportComplaintError";
-        setModalError(t[key] ?? t.reportComplaintError ?? "");
-      });
   });
 
   return {

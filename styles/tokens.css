@@ -481,25 +481,30 @@
   --report-screen-complain-radius: var(--radius-xs);
   --report-screen-complain-font-size: var(--font-size-sm);
   --report-screen-complain-font-weight: var(--font-weight-medium);
-  --report-screen-modal-z: calc(var(--report-screen-z) + 1);
-  --report-screen-modal-max-width: 400px;
-  --report-screen-modal-padding: var(--space-6);
-  --report-screen-modal-gap: var(--space-4);
-  --report-screen-modal-radius: var(--radius-md);
-  --report-screen-modal-title-size: var(--font-size-lg);
-  --report-screen-modal-title-weight: var(--font-weight-semibold);
-  --report-screen-modal-body-size: var(--font-size-base);
-  --report-screen-tags-gap: var(--space-2);
-  --report-screen-tag-padding: var(--space-3) var(--space-4);
+  --report-screen-complaint-gap: var(--space-4);
+  --report-screen-complaint-tip-padding: var(--space-4);
+  --report-screen-complaint-tip-radius: var(--radius-md);
+  --report-screen-complaint-tip-min-height: 66px;
+  --report-screen-complaint-tip-bg: var(--palette-preview-stub);
+  --report-screen-complaint-tip-size: var(--font-size-md);
+  --report-screen-complaint-tip-weight: var(--font-weight-regular);
+  --report-screen-complaint-tip-line: var(--line-height-snug);
+  --report-screen-complaint-tip-color: var(--color-text);
+  --report-screen-tags-gap: var(--space-4);
+  --report-screen-tag-padding: var(--space-6);
   --report-screen-tag-radius: var(--radius-md);
-  --report-screen-tag-label-size: var(--font-size-base);
-  --report-screen-tag-label-weight: var(--font-weight-medium);
-  --report-screen-tag-hint-size: var(--font-size-sm);
-  --report-screen-tag-border: var(--border-width) solid var(--color-border);
-  --report-screen-modal-actions-gap: var(--space-2);
-  --report-screen-modal-btn-height: var(--space-12);
-  --report-screen-modal-error-size: var(--font-size-sm);
-  --report-screen-modal-error-color: var(--color-error);
+  --report-screen-tag-gap: var(--space-1);
+  --report-screen-tag-bg: var(--color-surface-muted);
+  --report-screen-tag-bg-selected: var(--color-surface-muted);
+  --report-screen-tag-border: var(--border-width) solid transparent;
+  --report-screen-tag-border-selected: var(--border-width) solid
+    var(--color-text-strong);
+  --report-screen-tag-label-size: var(--font-size-lg);
+  --report-screen-tag-label-weight: var(--font-weight-regular);
+  --report-screen-tag-hint-size: var(--font-size-base);
+  --report-screen-tag-hint-opacity: 0.5;
+  --report-screen-complaint-error-size: var(--font-size-sm);
+  --report-screen-complaint-error-color: var(--color-error);
   /* Skeleton листов, пока грузится список ревью */
   --report-screen-skeleton-base: var(--color-surface-muted-active);
   --report-screen-skeleton-shine: color-mix(
@@ -943,6 +948,28 @@
   --home-screen-invite-explainer-media-ray-size: 155%;
   --home-screen-invite-explainer-media-ray-opacity: 1;
   --home-screen-invite-explainer-media-photo-fit: contain;
+  /* Mine not-ready: те же размеры медиа, что у invite */
+  --home-screen-mine-not-ready-explainer-media-width: var(
+    --home-screen-invite-explainer-media-width
+  );
+  --home-screen-mine-not-ready-explainer-media-height: var(
+    --home-screen-invite-explainer-media-height
+  );
+  --home-screen-mine-not-ready-explainer-media-radius: var(
+    --home-screen-invite-explainer-media-radius
+  );
+  --home-screen-mine-not-ready-explainer-media-bg: var(
+    --home-screen-invite-explainer-media-bg
+  );
+  --home-screen-mine-not-ready-explainer-media-ray-size: var(
+    --home-screen-invite-explainer-media-ray-size
+  );
+  --home-screen-mine-not-ready-explainer-media-ray-opacity: var(
+    --home-screen-invite-explainer-media-ray-opacity
+  );
+  --home-screen-mine-not-ready-explainer-media-photo-fit: var(
+    --home-screen-invite-explainer-media-photo-fit
+  );
   --home-screen-invite-bar-height: 72px;
   --home-screen-invite-bar-gap: var(--space-4);
   --home-screen-invite-bar-cluster-gap: var(--radius-sm);

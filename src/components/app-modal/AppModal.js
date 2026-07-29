@@ -53,6 +53,7 @@ function normalizeSize(value) {
  *   setDescription: (description: string | Node) => void;
  *   setPrimaryLabel: (label: string) => void;
  *   setSecondaryLabel: (label: string) => void;
+ *   setPrimaryDisabled: (disabled: boolean) => void;
  *   setActionsVisible: (flags: { primary?: boolean; secondary?: boolean }) => void;
  *   setCloseAriaLabel: (label: string) => void;
  * }}
@@ -170,6 +171,13 @@ export function createAppModal(opts = {}) {
    */
   function setSecondaryLabel(label) {
     secondaryBtn.textContent = label ?? "";
+  }
+
+  /**
+   * @param {boolean} disabled
+   */
+  function setPrimaryDisabled(disabled) {
+    primaryBtn.disabled = Boolean(disabled);
   }
 
   /**
@@ -341,6 +349,7 @@ export function createAppModal(opts = {}) {
     setDescription,
     setPrimaryLabel,
     setSecondaryLabel,
+    setPrimaryDisabled,
     setActionsVisible,
     setCloseAriaLabel,
   };

@@ -122,7 +122,7 @@ as $$
     when 'spam' then 20
     when 'harassment' then 20
     when 'offensive' then 20
-    when 'irrelevant' then 20
+    when 'ai_slop' then 20
     else null
   end;
 $$;

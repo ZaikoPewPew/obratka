@@ -18,13 +18,15 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 
 ## Жалоба (теги v1)
 
+Модалка — `createAppModal` (`size: "md"`): title + «Обратная связь от {name}», tip-callout, мультивыбор тегов-карточек, CTA «Туда его!» / «Да не, не стоит».
+
 | Тег | Ключ i18n |
 |-----|-----------|
 | `low_effort` | `complaintTagLowEffort` |
 | `spam` | `complaintTagSpam` |
 | `harassment` | `complaintTagHarassment` |
 | `offensive` | `complaintTagOffensive` |
-| `irrelevant` | `complaintTagIrrelevant` |
+| `ai_slop` | `complaintTagAiSlop` |
 
 - **Не** добавлять теги «не согласен с грейдом» / useful-useless.
 - Веса и порог бана — **только SQL**; в UI и explainer репутации на home весов нет.

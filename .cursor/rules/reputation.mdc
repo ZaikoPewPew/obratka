@@ -10,7 +10,7 @@ alwaysApply: true
 - Автор на `/report` жалуется на **конкретный лист** (`review_id`): кнопка «Пожаловаться» → модалка тегов.
 - Без жалобы = ок. Явного «всё ок» нет.
 - 1 жалоба на ревью (`UNIQUE (review_id, reporter_id)`). Ревьюер не видит `reporter_id`.
-- Теги v1: `low_effort` · `spam` · `harassment` · `offensive` · `irrelevant`.
+- Теги v1: `low_effort` · `spam` · `harassment` · `offensive` · `ai_slop`.
 - **Не** добавлять теги «не согласен с грейдом» / useful-useless.
 - Веса и порог — **только SQL**; в UI и explainer репутации весов нет.
 

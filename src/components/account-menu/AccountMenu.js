@@ -22,7 +22,6 @@ function getAccountMenuCloseFallbackMs() {
  * @param {{
  *   onSettings?: () => void | Promise<void>;
  *   onInvite?: () => void | Promise<void>;
- *   onContacts?: () => void | Promise<void>;
  *   onRules?: () => void | Promise<void>;
  *   onSignOut?: () => void | Promise<void>;
  *   onClose?: () => void;
@@ -66,17 +65,12 @@ export function createAccountMenu(opts = {}) {
   inviteBtn.className = "account-menu__action";
   inviteBtn.setAttribute("role", "menuitem");
 
-  const contactsBtn = document.createElement("button");
-  contactsBtn.type = "button";
-  contactsBtn.className = "account-menu__action";
-  contactsBtn.setAttribute("role", "menuitem");
-
   const rulesBtn = document.createElement("button");
   rulesBtn.type = "button";
   rulesBtn.className = "account-menu__action";
   rulesBtn.setAttribute("role", "menuitem");
 
-  actions.append(settingsBtn, inviteBtn, contactsBtn, rulesBtn);
+  actions.append(settingsBtn, inviteBtn, rulesBtn);
 
   const secondDivider = document.createElement("div");
   secondDivider.className = "account-menu__divider";
@@ -103,7 +97,6 @@ export function createAccountMenu(opts = {}) {
     email.textContent = accountEmail || t.homeAccountEmailFallback || "";
     settingsBtn.textContent = t.homeAccountSettings ?? "";
     inviteBtn.textContent = t.homeAccountInvite ?? "";
-    contactsBtn.textContent = t.homeAccountContacts ?? "";
     rulesBtn.textContent = t.homeAccountRules ?? "";
     signOutBtn.textContent = t.homeAccountSignOut ?? "";
     signOutBtn.disabled = false;
@@ -174,10 +167,6 @@ export function createAccountMenu(opts = {}) {
 
   inviteBtn.addEventListener("click", () => {
     void close().then(() => opts.onInvite?.());
-  });
-
-  contactsBtn.addEventListener("click", () => {
-    void close().then(() => opts.onContacts?.());
   });
 
   rulesBtn.addEventListener("click", () => {
