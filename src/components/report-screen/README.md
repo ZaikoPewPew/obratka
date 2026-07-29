@@ -7,9 +7,9 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 ## Сейчас
 
 - Список завершённых листов ревью по `portfolioId`; пока грузится — skeleton-строки (`--report-screen-skeleton-*`), без текста-заглушки
-- На каждом листе кнопка **«Пожаловаться»** → модалка с тегами (мультивыбор)
+- На каждом листе кнопка **«Пожаловаться»** → модалка с тегами (**ровно 1** причина; окно **6 часов** после ревью)
 - Без жалобы лист считается «ок»; явного чипа «всё ок» нет
-- Одна жалоба на лист (`review_complaints`, RPC `submit_review_complaint`) → штраф репутации ревьюера на сервере
+- Одна жалоба на лист (`review_complaints`, RPC `submit_review_complaint`) → штраф репутации ревьюера на сервере (−20); после окна без жалобы ревьюер получает +10 (`settle_review_reputation_rewards`)
 - Справа: дефолт mesh + мокап листа; **Скачать PDF** можно много раз (лист снова выезжает → улетает → done)
 - В строке листа — EN Title Case должность ревьюера (`formatPortfolioRole`: Senior Product Designer / Product Design Lead / Head Of Design)
 - Секции листа из `answers` через `buildReportSections` (`mode: "full"`): L2 кросс-сигналы, L1, pain, итог `tier × gradeZone` + `reportSummaryLead`, `advice`, опц. **`dictation`**. Схема полей — [`QUIZ.md`](../../../QUIZ.md). Старые листы с `hire` / visual 1–10 **не** распарсятся.
@@ -18,7 +18,7 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 
 ## Жалоба (теги v1)
 
-Модалка — `createAppModal` (`size: "md"`): title + «Обратная связь от {name}», tip-callout, мультивыбор тегов-карточек, CTA «Туда его!» / «Да не, не стоит».
+Модалка — `createAppModal` (`size: "md"`): title + «Обратная связь от {name}», tip-callout, **один** тег (radio), CTA «Туда его!» / «Да не, не стоит». Вне окна 6ч кнопка дизейблится (`reportComplaintWindowClosedButton`).
 
 | Тег | Ключ i18n |
 |-----|-----------|
@@ -30,7 +30,7 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 
 - **Не** добавлять теги «не согласен с грейдом» / useful-useless.
 - Веса и порог бана — **только SQL**; в UI и explainer репутации на home весов нет.
-- Штраф = `max(weight(tag))` по выбранным тегам; при `reputation <= 0` → автобан (`ban_reason = reputation`).
+- Штраф = вес выбранного тега (−20); при `reputation <= -100` → автобан (`ban_reason = reputation`). Старт 20; +10 после окна без жалобы.
 - Ревьюер не видит `reporter_id`.
 
 Правило: `.cursor/rules/reputation.mdc`. Оператор / разбан: [`supabase/BAN.md`](../../../supabase/BAN.md).

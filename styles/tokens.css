@@ -727,14 +727,6 @@
     var(--color-text) 50%,
     transparent
   );
-  --home-screen-reputation-explainer-callout-padding: var(--space-4);
-  --home-screen-reputation-explainer-callout-radius: var(--radius-md);
-  --home-screen-reputation-explainer-callout-min-height: 66px;
-  --home-screen-reputation-explainer-callout-bg: var(--palette-preview-stub);
-  --home-screen-reputation-explainer-callout-size: var(--font-size-md);
-  --home-screen-reputation-explainer-callout-weight: var(--font-weight-regular);
-  --home-screen-reputation-explainer-callout-line: var(--line-height-snug);
-  --home-screen-reputation-explainer-callout-color: var(--color-text);
   /* Explainer игровой валюты (Figma Modal 496:4403) */
   --home-screen-balance-explainer-gap: var(--space-4);
   --home-screen-balance-explainer-media-width: 182px;

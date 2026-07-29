@@ -2,6 +2,10 @@ import { getSession, setSession } from "../app/session.js";
 import { getAuthUserAvatarUrl } from "./auth.js";
 import { fetchMyProfile, updateMyProfile } from "./profiles.js";
 import { getSupabase } from "../lib/supabaseClient.js";
+import {
+  clampReputation,
+  settleReviewReputationRewards,
+} from "./reviewComplaints.js";
 
 /** Награда за завершённое ревью (начисляет сервер в handle_review_inserted). */
 export const REVIEW_REWARD = 10;
@@ -67,6 +71,7 @@ function coerceBalance(value) {
  */
 export async function refreshSessionFromProfile() {
   const genAtStart = walletMutationGen;
+  await settleReviewReputationRewards();
   const profile = await fetchMyProfile();
   if (!profile) return getSession();
 
@@ -110,7 +115,7 @@ export async function refreshSessionFromProfile() {
     reputation:
       typeof profile.reputation === "number" &&
       Number.isFinite(profile.reputation)
-        ? Math.max(0, Math.floor(profile.reputation))
+        ? clampReputation(profile.reputation)
         : session.reputation,
     onboardingDone:
       typeof profile.onboarding_done === "boolean"

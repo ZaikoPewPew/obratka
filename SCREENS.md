@@ -28,7 +28,7 @@ referral → auth → authCode → onboarding → home
 | 5b | `url-screen` | `/portfolio` | Подача URL (баланс); чип «На главную»; done на том же экране |
 | 6 | `review-screen` + `review-panel` + `scale-slider` | `/quiz` → `/quiz/done` | Квиз: grade → context/structure/metrics → visual 1–5 (+ pain если ≤2) → **tier** → advice; финал + улет отчёта. SoT: [`QUIZ.md`](QUIZ.md) |
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
-| 8 | `report-screen` | `/report` | Отчёт автору: листы + жалоба + PDF (мокап листа → done после скачивания) |
+| 8 | `report-screen` | `/report` | Отчёт автору: листы + жалоба (1 тег, окно 6ч) + PDF (мокап листа → done после скачивания) |
 | — | `ban-screen` | `/banned` | Аккаунт заблокирован; «Выйти» + «Связаться» (242px); красный mesh; deep link escape-proof |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query (`?ref=`, `?lang=`) сохраняются.

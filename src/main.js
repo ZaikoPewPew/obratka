@@ -59,6 +59,7 @@ import {
   canSubmitPortfolio,
   refreshSessionFromProfile,
 } from "./api/wallet.js";
+import { clampReputation } from "./api/reviewComplaints.js";
 import { createDictationEngine, isWebSpeechSupported } from "./lib/dictation/createDictationEngine.js";
 import { createReviewPanel } from "./components/review-panel/ReviewPanel.js";
 import { createReviewScreen } from "./components/review-screen/ReviewScreen.js";
@@ -1441,7 +1442,7 @@ async function applyProviderUser(user, provider) {
         typeof profile.balance === "number" ? profile.balance : next.balance,
       reputation:
         typeof profile.reputation === "number"
-          ? profile.reputation
+          ? clampReputation(profile.reputation)
           : next.reputation,
       onboardingDone: Boolean(profile.onboarding_done),
       role: profile.role ?? next.role,

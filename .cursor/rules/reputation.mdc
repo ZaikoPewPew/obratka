@@ -10,20 +10,23 @@ alwaysApply: true
 - Автор на `/report` жалуется на **конкретный лист** (`review_id`): кнопка «Пожаловаться» → модалка тегов.
 - Без жалобы = ок. Явного «всё ок» нет.
 - 1 жалоба на ревью (`UNIQUE (review_id, reporter_id)`). Ревьюер не видит `reporter_id`.
+- Ровно **1** тег на жалобу. Окно жалобы: **6 часов** с `reviews.created_at`.
 - Теги v1: `low_effort` · `spam` · `harassment` · `offensive` · `ai_slop`.
 - **Не** добавлять теги «не согласен с грейдом» / useful-useless.
 - Веса и порог — **только SQL**; в UI и explainer репутации весов нет.
+- Чип: абсолют со знаком (`+20` / `0` / `-40`); иконка `>0` positive · `=0` neutral · `<0` negative.
 
 ## Сервер
 
-- `profiles.reputation` (default 100), клиент read-only (`protect_profiles_reputation`).
-- RPC `submit_review_complaint` → штраф `max(weight)` → при `reputation <= 0` → `banned_at` + `ban_reason = reputation`.
+- `profiles.reputation` (default **20**, floor **−100**), клиент read-only (`protect_profiles_reputation`).
+- RPC `submit_review_complaint` → штраф веса тега (−20) → при `reputation <= -100` → `banned_at` + `ban_reason = reputation`.
+- После окна без жалобы: `settle_review_reputation_rewards` → **+10** ревьюеру (`reviews.reputation_settled_at`).
 - SQL: `supabase/sql/review_complaints.sql`. Оператор: `supabase/BAN.md`.
 
 ## Клиент
 
 - API: `src/api/reviewComplaints.js`
-- UI: `report-screen` (жалоба, skeleton листов, PDF через `shareReviewPdf` — не ломать / не redesign без задачи), home чип репутации (explainer по клику)
+- UI: `report-screen` (жалоба — radio 1 тег, окно 6ч, skeleton листов, PDF через `shareReviewPdf` — не ломать / не redesign без задачи), home чип репутации (explainer по клику)
 - Апелляция: ban-screen «Связаться» (вручную)
 
 ## Вне v1

@@ -238,21 +238,6 @@
   line-height: var(--home-screen-reputation-explainer-card-label-line);
 }
 
-.home-screen__reputation-explainer-callout {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: var(--home-screen-reputation-explainer-callout-min-height);
-  margin: 0;
-  padding: var(--home-screen-reputation-explainer-callout-padding);
-  border-radius: var(--home-screen-reputation-explainer-callout-radius);
-  background: var(--home-screen-reputation-explainer-callout-bg);
-  color: var(--home-screen-reputation-explainer-callout-color);
-  font-family: var(--font-family);
-  font-size: var(--home-screen-reputation-explainer-callout-size);
-  font-weight: var(--home-screen-reputation-explainer-callout-weight);
-  line-height: var(--home-screen-reputation-explainer-callout-line);
-}
-
 @media (max-width: 560px) {
   .home-screen__reputation-explainer-row {
     flex-direction: column;

@@ -25,7 +25,8 @@
 | `redeem_referral(text)` | нет | да | один раз на аккаунт |
 | `spend_submit_cost()` | нет | да | legacy списание; подача — `submit_portfolio` |
 | `submit_portfolio(text,text,text,text)` | нет | да | atomic spend + insert, max 1 pending; reject non-http(s) URL (`invalid_url`) |
-| `submit_review_complaint(uuid, text[])` | нет | да | жалоба на лист |
+| `submit_review_complaint(uuid, text[])` | нет | да | жалоба на лист (1 тег, окно 6ч) |
+| `settle_review_reputation_rewards()` | нет | да | lazy +10 за чистые ревью после окна |
 | `heartbeat_legendary_presence()` | нет | да | ping `last_seen_at` только для `tier=legendary` |
 | `list_online_legendaries()` | нет | да | список онлайн VIP (id/name/avatar) |
 | `legendary_presence_ttl()` | нет | нет | internal TTL 2 min |
@@ -37,7 +38,7 @@
 | `profile_grade(uuid)` | нет | нет | оракул грейдов, только internal |
 | `purge_expired_review_claims()` | нет | нет | internal (claim / heartbeat / `portfolio_reviewer_slots`) |
 | `handle_review_inserted()` | нет | нет | trigger-only |
-| `review_complaint_tag_weight(text)` / `review_complaint_ban_threshold()` | нет | нет | веса жалоб не наружу |
+| `review_complaint_tag_weight(text)` / `review_complaint_ban_threshold()` / `review_complaint_window()` / `review_reputation_*` | нет | нет | веса / порог / окно не наружу |
 
 Важно: Postgres по умолчанию даёт `EXECUTE` роли `PUBLIC`, а `anon` её наследует. Поэтому у каждой новой функции нужен явный `revoke ... from public` **и** `from anon`, иначе она автоматически появится в `/rest/v1/rpc/...` для незалогиненных.
 

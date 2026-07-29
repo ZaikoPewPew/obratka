@@ -15,7 +15,13 @@ export const REVIEW_COMPLAINT_TAGS = /** @type {const} */ ([
 ]);
 
 /** Стартовое значение, если в сессии/профиле ещё нет поля. */
-export const REPUTATION_DEFAULT = 100;
+export const REPUTATION_DEFAULT = 20;
+
+/** Пол шкалы / порог автобана (зеркало SQL `review_complaint_ban_threshold`). */
+export const REPUTATION_FLOOR = -100;
+
+/** Окно жалобы после submit ревью (зеркало SQL `review_complaint_window`). */
+export const COMPLAINT_WINDOW_MS = 6 * 60 * 60 * 1000;
 
 /**
  * @typedef {{
@@ -28,6 +34,8 @@ export const REPUTATION_DEFAULT = 100;
  *   reviewerRole: string | null;
  *   createdAt: string | null;
  *   complained: boolean;
+ *   canComplain: boolean;
+ *   complaintOpenUntil: string | null;
  *   answers: import("../utils/reviewReport.js").ReviewAnswers | null;
  * }} PortfolioReviewSheet
  */
@@ -57,38 +65,48 @@ export function formatReviewerTitle(grade, role) {
 }
 
 /**
+ * @param {unknown} value
+ * @returns {number}
+ */
+export function clampReputation(value) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return REPUTATION_DEFAULT;
+  }
+  return Math.min(
+    Number.MAX_SAFE_INTEGER,
+    Math.max(REPUTATION_FLOOR, Math.trunc(value)),
+  );
+}
+
+/**
  * @returns {number}
  */
 export function getReputation() {
   const session = getSession();
   const value = session?.reputation;
   return typeof value === "number" && Number.isFinite(value)
-    ? Math.max(0, Math.floor(value))
+    ? clampReputation(value)
     : REPUTATION_DEFAULT;
 }
 
 /**
- * Смещение от стартовой репутации (чип: −10 / 0 / +10).
+ * Подпись чипа / title: абсолют со знаком (`+20` / `0` / `-40`).
  * @param {number} [reputation]
- * @returns {number}
+ * @returns {string}
  */
-export function getReputationDelta(reputation = getReputation()) {
-  const value =
-    typeof reputation === "number" && Number.isFinite(reputation)
-      ? Math.max(0, Math.floor(reputation))
-      : REPUTATION_DEFAULT;
-  return value - REPUTATION_DEFAULT;
+export function formatReputation(reputation = getReputation()) {
+  const n = clampReputation(reputation);
+  if (n === 0) return "0";
+  return n > 0 ? `+${n}` : String(n);
 }
 
 /**
- * Подпись чипа / title: `0`, `+10`, `-20`.
- * @param {number} [delta]
+ * @deprecated Используй formatReputation — чип теперь абсолют, не дельта.
+ * @param {number} [reputation]
  * @returns {string}
  */
-export function formatReputationDelta(delta = getReputationDelta()) {
-  const n = Math.trunc(delta);
-  if (n === 0) return "0";
-  return n > 0 ? `+${n}` : String(n);
+export function formatReputationDelta(reputation = getReputation()) {
+  return formatReputation(reputation);
 }
 
 /**
@@ -96,10 +114,35 @@ export function formatReputationDelta(delta = getReputationDelta()) {
  * @returns {number}
  */
 export function writeReputationLocal(next) {
-  const value = Math.max(0, Math.floor(next));
+  const value = clampReputation(next);
   const session = getSession() ?? {};
   setSession({ ...session, reputation: value });
   return value;
+}
+
+/**
+ * Deadline окна жалобы (ISO) или null, если createdAt битый.
+ * @param {string | null | undefined} createdAt
+ * @returns {string | null}
+ */
+export function complaintOpenUntil(createdAt) {
+  if (typeof createdAt !== "string" || !createdAt) return null;
+  const start = Date.parse(createdAt);
+  if (!Number.isFinite(start)) return null;
+  return new Date(start + COMPLAINT_WINDOW_MS).toISOString();
+}
+
+/**
+ * Можно ли ещё жаловаться на лист (клиентское зеркало окна 6ч).
+ * @param {{ createdAt?: string | null; complained?: boolean }} sheet
+ * @param {number} [nowMs]
+ * @returns {boolean}
+ */
+export function canComplainAboutReview(sheet, nowMs = Date.now()) {
+  if (!sheet || sheet.complained) return false;
+  const until = complaintOpenUntil(sheet.createdAt);
+  if (!until) return false;
+  return nowMs <= Date.parse(until);
 }
 
 /**
@@ -124,12 +167,14 @@ function mapComplaintError(message) {
     "reporter_banned",
     "review_required",
     "tags_required",
+    "too_many_tags",
     "invalid_tag",
     "review_not_found",
     "portfolio_not_found",
     "not_portfolio_owner",
     "cannot_complain_own_review",
     "complaint_already_exists",
+    "complaint_window_closed",
     "reviewer_profile_not_found",
   ];
   for (const code of codes) {
@@ -139,7 +184,20 @@ function mapComplaintError(message) {
 }
 
 /**
- * Листы ревью портфолио для автора (+ флаг «уже жаловался»).
+ * Lazy +10 за чистые ревью после окна (идемпотентно).
+ * @returns {Promise<void>}
+ */
+export async function settleReviewReputationRewards() {
+  const supabase = getSupabase();
+  if (!supabase) return;
+  const { error } = await supabase.rpc("settle_review_reputation_rewards");
+  if (error && import.meta.env.DEV) {
+    console.warn("[reviewComplaints] settle", error.message);
+  }
+}
+
+/**
+ * Листы ревью портфолио для автора (+ флаг «уже жаловался» / окно жалобы).
  *
  * @param {string} portfolioId
  * @returns {Promise<PortfolioReviewSheet[]>}
@@ -147,6 +205,8 @@ function mapComplaintError(message) {
 export async function listPortfolioReviewSheets(portfolioId) {
   const supabase = getSupabase();
   if (!supabase || !portfolioId) return [];
+
+  await settleReviewReputationRewards();
 
   const {
     data: { user },
@@ -194,9 +254,15 @@ export async function listPortfolioReviewSheets(portfolioId) {
     }
   }
 
+  const nowMs = Date.now();
+
   return (rows || [])
     .map((row) => {
       if (!row || typeof row.id !== "string") return null;
+      const createdAt =
+        typeof row.created_at === "string" ? row.created_at : null;
+      const complained = complainedIds.has(row.id);
+      const openUntil = complaintOpenUntil(createdAt);
       return {
         id: row.id,
         portfolioId:
@@ -219,9 +285,10 @@ export async function listPortfolioReviewSheets(portfolioId) {
           typeof row.reviewer_role === "string" && row.reviewer_role.trim()
             ? row.reviewer_role.trim()
             : null,
-        createdAt:
-          typeof row.created_at === "string" ? row.created_at : null,
-        complained: complainedIds.has(row.id),
+        createdAt,
+        complained,
+        complaintOpenUntil: openUntil,
+        canComplain: canComplainAboutReview({ createdAt, complained }, nowMs),
         answers: parseReviewAnswers(row.answers),
       };
     })
@@ -242,6 +309,9 @@ export async function submitReviewComplaint(reviewId, tags) {
   const clean = [...new Set(tags.filter(isReviewComplaintTag))];
   if (!reviewId || clean.length === 0) {
     throw new Error("tags_required");
+  }
+  if (clean.length > 1) {
+    throw new Error("too_many_tags");
   }
 
   const { data, error } = await supabase.rpc("submit_review_complaint", {

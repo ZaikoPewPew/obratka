@@ -16,7 +16,7 @@
 | `leagues.mdc` | Тихий матчинг по `profiles.grade` |
 | `referrals.mdc` | Invite-only: validate → redeem, 2 слота, без наград |
 | `ban.mdc` | Escape-proof `/banned`, операторский / автобан |
-| `reputation.mdc` | Жалобы на листы → репутация → автобан |
+| `reputation.mdc` | Жалобы: 1 тег / окно 6ч; шкала 20…−100; +10 settle; автобан |
 | `supabase-sql.mdc` | Порядок SQL, RPC, RLS (glob `supabase/**`) |
 | `security.mdc` | Секреты, RLS, клиент: anon ок; `service_role` никогда |
 | `wallet.mdc` | Баланс: `submit_portfolio` / award; клиент не пишет `balance` |
@@ -55,7 +55,7 @@
 | `/quiz` | Квиз: visual 1–5, условный pain, `tier` (не hire); advice + mic — [`QUIZ.md`](../QUIZ.md) |
 | `/quiz/done` | Финал квиза |
 | `/done` | Запасной success (deep link) |
-| `/report` | Листы ревью автора + жалоба → репутация |
+| `/report` | Листы + жалоба (1 тег, окно 6ч) → reputation v2 |
 | `/banned` | Аккаунт заблокирован (escape-proof; в т.ч. автобан) |
 
 | Что | Где |
@@ -101,7 +101,7 @@ SQL / API: `supabase/sql/referrals.sql`, `src/api/referrals.js`.
 ## Ban (шпаргалка)
 
 `profiles.banned_at` → `/banned`. Клиент не пишет ban/tier/reputation. UI: статичный `banBrandMarkSvg`, не `setVariant("invalid")`.  
-Автобан: жалобы на листы → `reputation` → порог. Оператор: [`supabase/BAN.md`](../supabase/BAN.md).  
+Автобан: жалоба (−20) → `reputation <= -100` → `banned_at`. Чистые ревью после 6ч → +10 (`settle_review_reputation_rewards`). Старт `20`. Оператор: [`supabase/BAN.md`](../supabase/BAN.md).  
 Жалобы: `reputation.mdc`, `supabase/sql/review_complaints.sql`, `src/api/reviewComplaints.js`.
 
 ## Auth (шпаргалка)
@@ -140,7 +140,7 @@ API: `src/api/auth.js`. Edge: `supabase/functions/telegram-auth/`.
 | `portfolios.sql` | очередь + лиги |
 | `portfolio_submit.sql` | RPC `submit_portfolio` (atomic spend+insert, max 1 pending) |
 | `review_claims.sql` | claim-слоты (после portfolios); award в trigger |
-| `review_complaints.sql` | жалобы на листы → reputation → автобан |
+| `review_complaints.sql` | reputation v2 (старт 20 / бан −100 / 1 тег / 6ч / +10 settle) |
 | `ban-templates.sql` | операторский бан |
 
 Порядок и паттерны — `supabase-sql.mdc`.

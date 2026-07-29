@@ -23,8 +23,8 @@ import {
   refreshWalletFromServer,
 } from "../../api/wallet.js";
 import {
-  formatReputationDelta,
-  getReputationDelta,
+  formatReputation,
+  getReputation,
 } from "../../api/reviewComplaints.js";
 import { listOnlineLegendaries } from "../../api/presence.js";
 import { getSession, setSession } from "../../app/session.js";
@@ -102,13 +102,13 @@ const REPUTATION_ICON_SVG = {
 };
 
 /**
- * Вариант иконки чипа репутации по дельте от 100.
- * @param {number} delta
+ * Вариант иконки чипа репутации по абсолютному значению.
+ * @param {number} reputation
  * @returns {ReputationIconKind}
  */
-function reputationIconKindFor(delta) {
-  if (delta > 0) return "positive";
-  if (delta < 0) return "negative";
+function reputationIconKindFor(reputation) {
+  if (reputation > 0) return "positive";
+  if (reputation < 0) return "negative";
   return "neutral";
 }
 
@@ -866,10 +866,7 @@ export function createHomeScreen({
   reputationCard.append(reputationCardValue, reputationCardLabel);
   reputationRow.append(reputationMedia, reputationCard);
 
-  const reputationBody = document.createElement("p");
-  reputationBody.className = "home-screen__reputation-explainer-callout";
-
-  reputationExplainer.append(reputationRow, reputationBody);
+  reputationExplainer.append(reputationRow);
 
   const reputationModal = createAppModal({
     size: "md",
@@ -1297,9 +1294,9 @@ export function createHomeScreen({
       formatString(t.homeBalanceAria, { balance }),
     );
 
-    const reputationDelta = formatReputationDelta();
-    reputationValue.textContent = reputationDelta;
-    const nextReputationKind = reputationIconKindFor(getReputationDelta());
+    const reputationLabel = formatReputation();
+    reputationValue.textContent = reputationLabel;
+    const nextReputationKind = reputationIconKindFor(getReputation());
     if (nextReputationKind !== reputationIconKind) {
       reputationIconKind = nextReputationKind;
       const nextIcon = createReputationIcon(reputationIconKind);
@@ -1308,7 +1305,7 @@ export function createHomeScreen({
     }
     reputationChip.setAttribute(
       "aria-label",
-      formatString(t.homeReputationAria, { reputation: reputationDelta }),
+      formatString(t.homeReputationAria, { reputation: reputationLabel }),
     );
 
     profileBtn.setAttribute("aria-label", t.homeProfileAria);
@@ -3008,14 +3005,11 @@ export function createHomeScreen({
     const t = getStrings();
     reputationCardValue.textContent = fixHangingPrepositions(
       formatString(t.homeReputationCardTitle ?? "", {
-        reputation: formatReputationDelta(),
+        reputation: formatReputation(),
       }),
     );
     reputationCardLabel.textContent = fixHangingPrepositions(
       t.homeReputationCardLabel ?? "",
-    );
-    reputationBody.textContent = fixHangingPrepositions(
-      t.homeReputationBody ?? "",
     );
     reputationModal.setTitle(
       fixHangingPrepositions(t.homeReputationTitle ?? ""),

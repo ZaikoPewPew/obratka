@@ -145,9 +145,9 @@ order by banned_at desc;
 
 ### Автобан по репутации
 
-Жалоба автора на лист (`submit_review_complaint`) сразу снижает `profiles.reputation` ревьюера. Веса тегов и порог — только в SQL (`review_complaints.sql`), не в UI.
+Жалоба автора на лист (`submit_review_complaint`) сразу снижает `profiles.reputation` ревьюера (ровно 1 тег, окно 6ч). Веса тегов и порог — только в SQL (`review_complaints.sql`), не в UI. После окна без жалобы lazy `settle_review_reputation_rewards` даёт ревьюеру +10.
 
-При `reputation <= 0` выставляются `banned_at = now()` и `ban_reason = 'reputation'`. Апелляция — вручную через «Связаться» на `/banned`, затем разбан (и при необходимости вернуть `reputation`) из Dashboard.
+При `reputation <= -100` выставляются `banned_at = now()` и `ban_reason = 'reputation'`. Апелляция — вручную через «Связаться» на `/banned`, затем разбан (и при необходимости вернуть `reputation`) из Dashboard.
 
 Разбан после автобана:
 
@@ -156,7 +156,7 @@ update public.profiles
 set
   banned_at = null,
   ban_reason = null,
-  reputation = 100  -- по ситуации
+  reputation = 20  -- по ситуации
 where id = '00000000-0000-0000-0000-000000000000';
 ```
 
@@ -165,7 +165,7 @@ where id = '00000000-0000-0000-0000-000000000000';
 ```sql
 select id, display_name, email, reputation, banned_at, ban_reason
 from public.profiles
-where reputation < 100
+where reputation < 20
 order by reputation asc;
 
 select c.created_at, c.tags, c.penalty, c.reviewer_id, c.reporter_id, c.review_id

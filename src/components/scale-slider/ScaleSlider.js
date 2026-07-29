@@ -347,9 +347,19 @@ export function createScaleSlider({
     return max === min ? 0 : (value - min) / (max - min);
   }
 
-  function valueFromProgress(progress) {
-    const raw = min + clampProgress(progress) * (max - min);
-    return snapToStop(raw);
+  function rawFromProgress(progress) {
+    return min + clampProgress(progress) * (max - min);
+  }
+
+  /** Drag: сегмент [n, n+1) → ступень n (не midpoint). */
+  function valueFromProgressFloor(progress) {
+    const raw = rawFromProgress(progress);
+    return Math.min(max, Math.max(min, Math.floor(raw)));
+  }
+
+  /** Release: ближайший стоп. */
+  function valueFromProgressNearest(progress) {
+    return snapToStop(rawFromProgress(progress));
   }
 
   function snapToStop(raw) {
@@ -609,14 +619,14 @@ export function createScaleSlider({
 
   function setFromClientX(clientX) {
     const progress = progressFromClientX(clientX);
-    const value = valueFromProgress(progress);
+    const value = valueFromProgressFloor(progress);
     const prev = Number(input.value);
     const wasIdle = input.dataset.touched !== "1";
     input.dataset.touched = "1";
     input.value = String(value);
     setTargetProgress(progress);
     syncStops(value);
-    // Drag: текст всегда = текущий стоп, без очереди анимаций.
+    // Drag: текст = левая ступень сегмента (floor), без очереди анимаций.
     if (value !== prev || wasIdle || displayedTitle === idleTitle) {
       syncReadoutTitle(value, { immediate: true });
     }
@@ -625,7 +635,7 @@ export function createScaleSlider({
   }
 
   function snapToValue() {
-    const snapped = valueFromProgress(targetProgress);
+    const snapped = valueFromProgressNearest(targetProgress);
     input.value = String(snapped);
     setTargetProgress(progressFromValue(snapped));
     syncStops(snapped);

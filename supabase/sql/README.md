@@ -11,8 +11,8 @@
 | `portfolio_submit.sql` | RPC `submit_portfolio` (atomic spend 30 + insert, max 1 pending); revoke client INSERT |
 | `referrals.sql` | персональный `referral_code` (max 2 uses), seed `YTHWKPDWAK`, RPC validate/redeem; без наград |
 | `portfolios.sql` | portfolios/reviews, лиги; SELECT only (INSERT через `submit_portfolio`) |
-| `review_claims.sql` | claims + award balance (+10) в `handle_review_inserted`; `portfolio_reviewer_slots` вызывает `purge_expired_review_claims` перед list |
-| `review_complaints.sql` | reputation + RPC complaint |
+| `review_claims.sql` | claims + award balance (+10) в `handle_review_inserted`; `portfolio_reviewer_slots` / claim / heartbeat зовут `purge_expired_review_claims` + `settle_review_reputation_rewards` |
+| `review_complaints.sql` | reputation v2 (старт 20, бан −100, 1 тег, окно 6ч, +10 settle) + RPC complaint |
 | `subscribers_count.sql` | RPC count (legacy) |
 | `subscribers_rls.sql` | RLS + revoke на live `subscribers`, если таблица есть |
 | `ban-templates.sql` | операторский бан / разбан |

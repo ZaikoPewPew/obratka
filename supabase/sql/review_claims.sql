@@ -96,6 +96,11 @@ begin
   end if;
 
   perform public.purge_expired_review_claims();
+  begin
+    perform public.settle_review_reputation_rewards();
+  exception when undefined_function then
+    null;
+  end;
 
   select * into p
   from public.portfolios
@@ -187,6 +192,11 @@ begin
   end if;
 
   perform public.purge_expired_review_claims();
+  begin
+    perform public.settle_review_reputation_rewards();
+  exception when undefined_function then
+    null;
+  end;
 
   update public.review_claims
   set expires_at = now() + ttl
@@ -249,6 +259,11 @@ begin
   end if;
 
   perform public.purge_expired_review_claims();
+  begin
+    perform public.settle_review_reputation_rewards();
+  exception when undefined_function then
+    null;
+  end;
 
   return query
   select

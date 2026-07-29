@@ -111,7 +111,7 @@
 | `public.profiles` | 1:1 с user; онбординг, баланс, `reputation`, tier, ban, `referral_code` (лимит 2); триггер `handle_new_user` |
 | `public.referral_seed_codes` | bootstrap-коды (seed `YTHWKPDWAK`); только через RPC |
 | `public.portfolios` / `reviews` | очередь ревью с матчингом по лиге грейда |
-| `public.review_complaints` | жалобы автора на лист → штраф `reputation` → автобан |
+| `public.review_complaints` | жалобы автора (1 тег, окно 6ч) → −20 / +10 settle → автобан при `reputation <= -100` |
 | `public.subscribers` | legacy waitlist API (`subscribers.js`), не entry UX |
 | Edge `telegram-auth` | проверка Telegram hash → сессия |
 
@@ -184,10 +184,10 @@ D спокойно дописывает квиз → INSERT +10 → 4-й лис�
 
 | Что | Детали |
 |-----|--------|
-| Где UI | `/report` — список листов; «Пожаловаться» → модалка тегов (мультивыбор). Без жалобы = ок |
+| Где UI | `/report` — список листов; «Пожаловаться» → модалка (1 тег). Без жалобы = ок; окно 6ч |
 | Теги v1 | `low_effort`, `spam`, `harassment`, `offensive`, `ai_slop` (веса только в SQL) |
-| Штраф | одна жалоба = `max(weight(tag))`; старт `reputation = 100`; бан при `<= 0` |
-| Ревьюер | чип репутации на home + explainer **без** таблицы весов |
+| Штраф / плюс | жалоба = −20 (1 тег); старт `20`; бан при `<= -100`; +10 после окна без жалобы |
+| Ревьюер | чип = абсолют со знаком + explainer **без** таблицы весов |
 | Апелляция | вручную («Связаться» на `/banned`) |
 | SQL / API | [`review_complaints.sql`](supabase/sql/review_complaints.sql), [`reviewComplaints.js`](src/api/reviewComplaints.js) |
 

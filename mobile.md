@@ -24,7 +24,7 @@
 | `/review` | iframe / external, таймер 45 s, чип rec (заметки), выход |
 | `/quiz` | квиз; микрофон в поле «Главный совет» |
 | `/quiz` → done | шаги, PDF reveal |
-| `/report` | листы (+ dictation), жалоба (теги v1), PDF |
+| `/report` | листы (+ dictation), жалоба (1 тег v1, окно 6ч), PDF |
 | `/banned` | красный mesh, «Выйти» / «Связаться»; deep link escape-proof |
 | Язык | `?lang=en`, кнопка RU↔EN, aria/title |
 | Тема | `data-theme="dark"`, контраст контролов |

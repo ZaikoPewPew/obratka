@@ -51,7 +51,7 @@ update public.profiles
 set
   banned_at = null,
   ban_reason = null
-  -- , reputation = 100  -- раскомментируй после автобана по reputation
+  -- , reputation = 20  -- раскомментируй после автобана по reputation
 where id = '00000000-0000-0000-0000-000000000000';
 -- where email = 'user@example.com';
 -- where telegram_username = 'username';

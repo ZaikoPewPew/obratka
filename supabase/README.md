@@ -19,7 +19,7 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 | `sql/portfolios.sql` | portfolios/reviews, лиги; INSERT pending/0/target=3 |
 | `sql/portfolio_submit.sql` | RPC `submit_portfolio` (atomic spend 30 + insert, max 1 pending); revoke client INSERT |
 | `sql/review_claims.sql` | claims + award (+10); `portfolio_reviewer_slots` + purge expired; apply — [`sql/README.md`](sql/README.md) § «Как применять» |
-| `sql/review_complaints.sql` | жалобы на листы → `reputation` → автобан |
+| `sql/review_complaints.sql` | жалобы на листы → reputation v2 (старт 20 / бан −100 / +10 settle) → автобан |
 | `sql/subscribers_rls.sql` | RLS на legacy `subscribers` (если таблица есть) |
 | `sql/ban-templates.sql` | Copy-paste SQL: бан / разбан / поиск |
 | `sql/delete-account-templates.sql` | полное удаление тестового аккаунта |
@@ -59,7 +59,7 @@ Google Authorized redirect URI в Cloud Console: `https://<project-ref>.supabase
 | Таблица / сервис | Кто читает/пишет |
 |-----------------|------------------|
 | `auth.users` | Supabase Auth (все провайдеры) |
-| `profiles` | `profiles.js`, `onboarding.js`, `wallet.js`, `referrals.js`, `reviewComplaints.js`; автосоздание триггером; `banned_at` → ban-screen; `reputation` → чип на home; `referral_code` (лимит 2) |
+| `profiles` | `profiles.js`, `onboarding.js`, `wallet.js`, `referrals.js`, `reviewComplaints.js`; автосоздание триггером; `banned_at` → ban-screen; `reputation` (default 20, floor −100) → чип на home (`formatReputation`); `referral_code` (лимит 2) |
 | `referral_seed_codes` | только через RPC (bootstrap `YTHWKPDWAK`) |
 | `portfolios` / `reviews` | `portfolios.js` (очередь по лигам; INSERT blocked if banned / league mismatch) |
 | `review_complaints` | `reviewComplaints.js` (insert только RPC; select своих жалоб автором) |

@@ -27,7 +27,8 @@ create table if not exists public.profiles (
   banned_at timestamptz,
   ban_reason text,
   -- Reviewer reputation (complaints → auto-ban). Clients cannot write; see review_complaints.sql.
-  reputation integer not null default 100 check (reputation >= 0),
+  -- v2: default 20, floor −100 (ban threshold). Full RPC in review_complaints.sql.
+  reputation integer not null default 20 check (reputation >= -100),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -59,14 +60,17 @@ alter table public.profiles
 
 -- Idempotent for DBs created before reputation existed (RPC in review_complaints.sql).
 alter table public.profiles
-  add column if not exists reputation integer not null default 100;
+  add column if not exists reputation integer not null default 20;
+
+alter table public.profiles
+  alter column reputation set default 20;
 
 alter table public.profiles
   drop constraint if exists profiles_reputation_check;
 
 alter table public.profiles
   add constraint profiles_reputation_check
-  check (reputation >= 0);
+  check (reputation >= -100);
 
 -- Idempotent for DBs created before referral columns existed (full RPCs in referrals.sql).
 alter table public.profiles

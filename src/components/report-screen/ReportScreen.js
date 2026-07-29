@@ -81,8 +81,8 @@ export function createReportScreen(opts = {}) {
   let sheets = [];
   /** @type {string | null} */
   let complaintReviewId = null;
-  /** @type {Set<string>} */
-  let selectedTags = new Set();
+  /** @type {string | null} */
+  let selectedTag = null;
   let submitting = false;
   let loading = false;
   let loadToken = 0;
@@ -189,7 +189,7 @@ export function createReportScreen(opts = {}) {
 
   const tagsList = document.createElement("div");
   tagsList.className = "report-screen__tags";
-  tagsList.setAttribute("role", "group");
+  tagsList.setAttribute("role", "radiogroup");
 
   /** @type {Map<string, HTMLButtonElement>} */
   const tagButtons = new Map();
@@ -199,6 +199,7 @@ export function createReportScreen(opts = {}) {
     btn.type = "button";
     btn.className = "report-screen__tag";
     btn.dataset.tag = tag;
+    btn.setAttribute("role", "radio");
 
     const tagLabel = document.createElement("span");
     tagLabel.className = "report-screen__tag-label";
@@ -212,11 +213,7 @@ export function createReportScreen(opts = {}) {
 
     btn.addEventListener("click", () => {
       if (submitting) return;
-      if (selectedTags.has(tag)) {
-        selectedTags.delete(tag);
-      } else {
-        selectedTags.add(tag);
-      }
+      selectedTag = selectedTag === tag ? null : tag;
       syncTagSelection();
       syncModalActions();
     });
@@ -242,7 +239,7 @@ export function createReportScreen(opts = {}) {
     },
     onClose: () => {
       complaintReviewId = null;
-      selectedTags = new Set();
+      selectedTag = null;
       submitting = false;
       syncTagSelection();
       syncModalActions();
@@ -529,14 +526,14 @@ export function createReportScreen(opts = {}) {
     for (const tag of REVIEW_COMPLAINT_TAGS) {
       const btn = tagButtons.get(tag);
       if (!btn) continue;
-      const on = selectedTags.has(tag);
+      const on = selectedTag === tag;
       btn.classList.toggle("report-screen__tag--selected", on);
-      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.setAttribute("aria-checked", on ? "true" : "false");
     }
   }
 
   function syncModalActions() {
-    complaintModal.setPrimaryDisabled(submitting || selectedTags.size === 0);
+    complaintModal.setPrimaryDisabled(submitting || !selectedTag);
   }
 
   function setModalError(message) {
@@ -552,7 +549,7 @@ export function createReportScreen(opts = {}) {
   function closeComplaintModal() {
     if (!complaintModal.isOpen()) {
       complaintReviewId = null;
-      selectedTags = new Set();
+      selectedTag = null;
       submitting = false;
       syncTagSelection();
       syncModalActions();
@@ -569,7 +566,7 @@ export function createReportScreen(opts = {}) {
   function openComplaintModal(reviewId, reviewerName) {
     const t = getStrings();
     complaintReviewId = reviewId;
-    selectedTags = new Set();
+    selectedTag = null;
     submitting = false;
     syncTagSelection();
     syncModalActions();
@@ -591,17 +588,19 @@ export function createReportScreen(opts = {}) {
    * @returns {void}
    */
   function submitComplaint() {
-    if (submitting || !complaintReviewId || selectedTags.size === 0) return;
+    if (submitting || !complaintReviewId || !selectedTag) return;
     const t = getStrings();
     submitting = true;
     syncModalActions();
     setModalError("");
 
-    void submitReviewComplaint(complaintReviewId, [...selectedTags])
+    void submitReviewComplaint(complaintReviewId, [selectedTag])
       .then(() => {
         const id = complaintReviewId;
         sheets = sheets.map((sheet) =>
-          sheet.id === id ? { ...sheet, complained: true } : sheet,
+          sheet.id === id
+            ? { ...sheet, complained: true, canComplain: false }
+            : sheet,
         );
         void complaintModal.close().then(() => {
           renderSheets();
@@ -614,6 +613,8 @@ export function createReportScreen(opts = {}) {
         const keyMap = {
           complaint_already_exists: "reportComplaintAlready",
           tags_required: "reportComplaintNeedTags",
+          too_many_tags: "reportComplaintNeedTags",
+          complaint_window_closed: "reportComplaintWindowClosed",
           not_portfolio_owner: "reportComplaintError",
           not_authenticated: "reportComplaintError",
         };
@@ -683,6 +684,10 @@ export function createReportScreen(opts = {}) {
     if (sheet.complained) {
       complainBtn.disabled = true;
       complainBtn.textContent = t.reportComplaintSubmitted ?? "";
+      complainBtn.classList.add("report-screen__complain--done");
+    } else if (!sheet.canComplain) {
+      complainBtn.disabled = true;
+      complainBtn.textContent = t.reportComplaintWindowClosedButton ?? "";
       complainBtn.classList.add("report-screen__complain--done");
     } else {
       complainBtn.textContent = t.reportComplaintButton ?? "";

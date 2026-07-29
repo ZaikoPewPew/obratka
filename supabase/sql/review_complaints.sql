@@ -1,27 +1,34 @@
 -- public.review_complaints + profiles.reputation — жалобы на листы ревью → репутация → автобан
 -- Depends on: profiles.sql, portfolios.sql (reviews).
 -- Применяется через Supabase migrations / MCP apply_migration.
+--
+-- v2: старт 20; минус до −100; одна причина на жалобу; окно 6ч; +10 после окна без жалобы.
 
 -- ---------------------------------------------------------------------------
 -- profiles.reputation (клиент read-only; пишет только RPC / SQL Editor)
 -- ---------------------------------------------------------------------------
 
 alter table public.profiles
-  add column if not exists reputation integer not null default 100;
+  add column if not exists reputation integer not null default 20;
+
+alter table public.profiles
+  alter column reputation set default 20;
 
 alter table public.profiles
   drop constraint if exists profiles_reputation_check;
 
 alter table public.profiles
   add constraint profiles_reputation_check
-  check (reputation >= 0);
+  check (reputation >= -100);
 
--- Backfill на случай add column без default на старых строках (idempotent).
+-- Legacy → v2: только старый default 100 (чип показывал «0»). Не трогаем
+-- уже сдвинутые / отрицательные; повторный apply не затирает наигранную шкалу.
 update public.profiles
-set reputation = 100
-where reputation is null;
+set reputation = 20
+where banned_at is null
+  and reputation = 100;
 
--- Bypass для security definer RPC (автоштраф / автобан).
+-- Bypass для security definer RPC (автоштраф / автобан / +10 settle).
 -- Клиентский JWT всё ещё authenticated — без флага protect_* режет UPDATE.
 create or replace function public.protect_profiles_ban()
 returns trigger
@@ -67,6 +74,22 @@ create trigger profiles_protect_reputation
   execute function public.protect_profiles_reputation();
 
 -- ---------------------------------------------------------------------------
+-- reviews.reputation_settled_at — окно жалобы закрыто / +10 выдан или отменён
+-- ---------------------------------------------------------------------------
+
+alter table public.reviews
+  add column if not exists reputation_settled_at timestamptz;
+
+-- Не ретроактивно награждать старые листы при apply миграции.
+update public.reviews
+set reputation_settled_at = coalesce(reputation_settled_at, now())
+where reputation_settled_at is null;
+
+create index if not exists reviews_reputation_settle_idx
+  on public.reviews (created_at)
+  where reputation_settled_at is null;
+
+-- ---------------------------------------------------------------------------
 -- review_complaints
 -- ---------------------------------------------------------------------------
 
@@ -79,8 +102,22 @@ create table if not exists public.review_complaints (
   penalty integer not null check (penalty > 0),
   created_at timestamptz not null default now(),
   constraint review_complaints_one_per_reporter unique (review_id, reporter_id),
-  constraint review_complaints_tags_nonempty check (cardinality(tags) >= 1)
+  constraint review_complaints_tags_one check (cardinality(tags) = 1)
 );
+
+-- Старые мульти-тег жалобы → один тег; затем жёсткий check = 1.
+alter table public.review_complaints
+  drop constraint if exists review_complaints_tags_nonempty;
+
+update public.review_complaints
+set tags = tags[1:1]
+where cardinality(tags) > 1;
+
+alter table public.review_complaints
+  drop constraint if exists review_complaints_tags_one;
+
+alter table public.review_complaints
+  add constraint review_complaints_tags_one check (cardinality(tags) = 1);
 
 create index if not exists review_complaints_reviewer_id_idx
   on public.review_complaints (reviewer_id);
@@ -106,10 +143,19 @@ revoke all on table public.review_complaints from anon;
 grant select on table public.review_complaints to authenticated;
 
 -- ---------------------------------------------------------------------------
--- Серверный конфиг весов / порога (не отдаём клиенту как SoT)
+-- Серверный конфиг (не отдаём клиенту как SoT)
 -- ---------------------------------------------------------------------------
--- Старт reputation = 100; вес тега = 20; штраф жалобы = max(весов);
--- бан при reputation <= 0. Пять независимых жалоб → автобан.
+-- Старт reputation = 20; вес тега = 20; ровно 1 тег на жалобу;
+-- окно жалобы 6ч; +10 после окна без жалобы; бан при reputation <= -100.
+
+create or replace function public.review_reputation_default()
+returns integer
+language sql
+immutable
+set search_path = public
+as $$
+  select 20;
+$$;
 
 create or replace function public.review_complaint_tag_weight(tag text)
 returns integer
@@ -133,7 +179,74 @@ language sql
 immutable
 set search_path = public
 as $$
-  select 0;
+  select -100;
+$$;
+
+create or replace function public.review_complaint_window()
+returns interval
+language sql
+immutable
+set search_path = public
+as $$
+  select interval '6 hours';
+$$;
+
+create or replace function public.review_reputation_clean_reward()
+returns integer
+language sql
+immutable
+set search_path = public
+as $$
+  select 10;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- +10 за ревью без жалобы после закрытия окна (lazy)
+-- ---------------------------------------------------------------------------
+
+create or replace function public.settle_review_reputation_rewards()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  reward integer := public.review_reputation_clean_reward();
+  window_iv interval := public.review_complaint_window();
+  rec record;
+  n integer;
+begin
+  perform set_config('app.bypass_profile_guards', 'on', true);
+
+  for rec in
+    select r.id, r.reviewer_id
+    from public.reviews r
+    where r.reputation_settled_at is null
+      and r.created_at <= now() - window_iv
+      and not exists (
+        select 1
+        from public.review_complaints c
+        where c.review_id = r.id
+      )
+    order by r.created_at asc
+    limit 200
+    for update of r skip locked
+  loop
+    update public.reviews
+    set reputation_settled_at = now()
+    where id = rec.id
+      and reputation_settled_at is null;
+
+    get diagnostics n = row_count;
+    if n = 0 then
+      continue;
+    end if;
+
+    update public.profiles
+    set reputation = reputation + reward
+    where id = rec.reviewer_id;
+  end loop;
+end;
 $$;
 
 -- ---------------------------------------------------------------------------
@@ -160,7 +273,11 @@ declare
   penalty integer := 0;
   new_rep integer;
   already_banned boolean;
+  floor_rep integer := public.review_complaint_ban_threshold();
+  next_rep integer;
 begin
+  perform public.settle_review_reputation_rewards();
+
   if uid is null then
     raise exception 'not_authenticated';
   end if;
@@ -201,12 +318,21 @@ begin
     raise exception 'tags_required';
   end if;
 
+  if cardinality(clean_tags) > 1 then
+    raise exception 'too_many_tags';
+  end if;
+
   select * into r
   from public.reviews
   where id = p_review_id;
 
   if not found then
     raise exception 'review_not_found';
+  end if;
+
+  if r.created_at is null
+     or now() > r.created_at + public.review_complaint_window() then
+    raise exception 'complaint_window_closed';
   end if;
 
   select * into p
@@ -251,6 +377,11 @@ begin
     penalty
   );
 
+  -- Жалоба закрывает settle: без +10 за этот лист.
+  update public.reviews
+  set reputation_settled_at = coalesce(reputation_settled_at, now())
+  where id = p_review_id;
+
   select banned_at is not null into already_banned
   from public.profiles
   where id = r.reviewer_id
@@ -260,18 +391,21 @@ begin
     raise exception 'reviewer_profile_not_found';
   end if;
 
+  select greatest(floor_rep, reputation - penalty) into next_rep
+  from public.profiles
+  where id = r.reviewer_id;
+
   update public.profiles
   set
-    reputation = greatest(0, reputation - penalty),
+    reputation = next_rep,
     banned_at = case
       when already_banned then banned_at
-      when greatest(0, reputation - penalty) <= public.review_complaint_ban_threshold()
-        then now()
+      when next_rep <= floor_rep then now()
       else banned_at
     end,
     ban_reason = case
       when already_banned then ban_reason
-      when greatest(0, reputation - penalty) <= public.review_complaint_ban_threshold()
+      when next_rep <= floor_rep
         then coalesce(nullif(ban_reason, ''), 'reputation')
       else ban_reason
     end
@@ -284,7 +418,7 @@ begin
     'tags', to_jsonb(clean_tags),
     'penalty', penalty,
     'reviewer_reputation', new_rep,
-    'reviewer_banned', new_rep <= public.review_complaint_ban_threshold()
+    'reviewer_banned', new_rep <= floor_rep
   );
 end;
 $$;
@@ -293,6 +427,10 @@ revoke all on function public.submit_review_complaint(uuid, text[]) from public;
 revoke all on function public.submit_review_complaint(uuid, text[]) from anon;
 grant execute on function public.submit_review_complaint(uuid, text[]) to authenticated;
 
+revoke all on function public.settle_review_reputation_rewards() from public;
+revoke all on function public.settle_review_reputation_rewards() from anon;
+grant execute on function public.settle_review_reputation_rewards() to authenticated;
+
 revoke all on function public.review_complaint_tag_weight(text) from public;
 revoke all on function public.review_complaint_tag_weight(text) from anon;
 revoke all on function public.review_complaint_tag_weight(text) from authenticated;
@@ -300,3 +438,15 @@ revoke all on function public.review_complaint_tag_weight(text) from authenticat
 revoke all on function public.review_complaint_ban_threshold() from public;
 revoke all on function public.review_complaint_ban_threshold() from anon;
 revoke all on function public.review_complaint_ban_threshold() from authenticated;
+
+revoke all on function public.review_complaint_window() from public;
+revoke all on function public.review_complaint_window() from anon;
+revoke all on function public.review_complaint_window() from authenticated;
+
+revoke all on function public.review_reputation_clean_reward() from public;
+revoke all on function public.review_reputation_clean_reward() from anon;
+revoke all on function public.review_reputation_clean_reward() from authenticated;
+
+revoke all on function public.review_reputation_default() from public;
+revoke all on function public.review_reputation_default() from anon;
+revoke all on function public.review_reputation_default() from authenticated;
