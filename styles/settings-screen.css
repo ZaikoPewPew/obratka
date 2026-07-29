@@ -39,10 +39,24 @@
 }
 
 .settings-screen__mark {
-  display: flex;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: var(--settings-screen-mark-width);
   height: var(--settings-screen-mark-height);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
   color: var(--settings-screen-color);
+  cursor: pointer;
+}
+
+.settings-screen__mark:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .settings-screen__mark-img {

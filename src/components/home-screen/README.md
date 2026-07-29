@@ -2,7 +2,7 @@
 
 Path: **`/home`**. После onboarding: шапка (лого, репутация, баланс, аватар) + лента карточек портфолио + нижний док: переключатель **На ревью / Мои посты / Рейтинг** и кнопка **«Закинуть своё»** (квадрат с плюсом/замком справа от таббара).
 
-Файл: [`HomeScreen.js`](./HomeScreen.js). Стили: [`styles/home-screen.css`](../../../styles/home-screen.css). Токены `--home-screen-*` в [`styles/tokens.css`](../../../styles/tokens.css). Слева снизу — fixed [`legendary-online-panel`](../legendary-online-panel/) («p4p в сети», poll вместе с home; клик → explainer Figma `492:4009`; скрыт если никого нет). Справа снизу — fixed [`contact-fab`](../contact-fab/) (Telegram, Figma `478:1814`).
+Файл: [`HomeScreen.js`](./HomeScreen.js). Стили: [`styles/home-screen.css`](../../../styles/home-screen.css). Токены `--home-screen-*` в [`styles/tokens.css`](../../../styles/tokens.css). Слева снизу — fixed [`legendary-online-panel`](../legendary-online-panel/) («p4p в сети», poll вместе с home; клик → explainer Figma `492:4009`; скрыт если никого нет). Справа снизу — fixed [`feedback`](../feedback/) (Telegram).
 
 ## Поведение
 
@@ -129,14 +129,14 @@ CTA «Закинуть своё» (кнопка в доке у таббара) �
 Клиент-зеркало: [`src/api/leagues.js`](../../api/leagues.js). Сервер: [`supabase/sql/portfolios.sql`](../../../supabase/sql/portfolios.sql) + [`review_claims.sql`](../../../supabase/sql/review_claims.sql) (`can_review_portfolio`, claim-слоты, RLS).
 
 Лента по центру экрана (`--home-screen-body-padding-top` = 16px сверху); снизу запас под таббар (`--home-screen-body-padding-bottom`).  
-При `open` / reload cascade сверху вниз (`--home-screen-reveal-delay-*`): topbar (`motion-reveal-topbar`, без `filter`) → body (`motion-reveal`) → contact-fab. Tabbar-dock **без** своего slide (`motion-reveal-dock` не вешаем) — проявляется через opacity родителя (свой delayed slide давал рывок после fade; opacity на dock запрещён — ломает glass `backdrop-filter`). Track / blur / `--on-dark` на самом `.home-screen__tabbar`. Hide/show дока по скроллу не трогает entrance.
+При `open` / reload cascade сверху вниз (`--home-screen-reveal-delay-*`): topbar (`motion-reveal-topbar`, без `filter`) → body (`motion-reveal`) → feedback. Tabbar-dock **без** своего slide (`motion-reveal-dock` не вешаем) — проявляется через opacity родителя (свой delayed slide давал рывок после fade; opacity на dock запрещён — ломает glass `backdrop-filter`). Track / blur / `--on-dark` на самом `.home-screen__tabbar`. Hide/show дока по скроллу не трогает entrance.
 
 Рейтинг слева (топ по валюте) — компонент [`rating/`](../rating/), пока **не монтируется**.
 
 ### Профиль и баланс
 
 - Есть `session.avatarUrl` → только фото (круг), буква скрыта; нет URL / ошибка загрузки → тёмный круг + буква имени (картинка скрыта).
-- Логотип в шапке — blob-марка (`mark.svg` / `brandMarkSvg`), как на gradient-экранах.
+- Логотип в шапке — blob-марка (`mark.svg` / `brandMarkSvg`), кнопка → вкладка «На ревью» (`feed`); уже на `feed` — скролл вверх. Тот же клик на settings → `/home` на `feed` (`homeMarkAria`).
 - Empty state ленты — карточка `--home-screen-empty-*` (радиус 24, высота 326, muted-фон, текст по центру).
 - Если в `profiles.avatar_url` пусто — при refresh подтягиваем picture из Auth и пишем в профиль.
 - При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.
@@ -146,7 +146,7 @@ CTA «Закинуть своё» (кнопка в доке у таббара) �
 - Подача — RPC `submit_portfolio` (spend 30); legacy `spend_submit_cost`; награда за ревью (+10) — в `handle_review_inserted`.
 - CTA «Закинуть своё»: всегда плюс; слот занят локально → flash+buzz submit без модалки; иначе без монет → buzz submit + чип баланса + flash фона (`motion-control-error-buzz`, `--home-screen-tabbar-submit-bg-error` / `--motion-control-error-buzz-*`); серверный gate — `applyRoute` (`hasFreeMineSlot` параллельно с `reconcileSessionAccess`); notices (no slots / pending limit / already reviewed) — `noticeModal`.
 - Клик по аватару профиля → `account-menu` из Figma `467:1320`, раскрывающийся влево от правого края аватара с отступом 16px вниз (без выхода за viewport).
-- В меню `displayName` (из `profiles.display_name`) и email не кликабельны; «Настройки» → `/settings`, «Пригласить» → explainer `homeInvite*` (Figma `492:4030`): фото [`currency-referal.png`](../../assets/home/modal/currency-referal.png) на фоне `--palette-gray-100` + Lottie `rotating-ray` между фоном и PNG + бар `uses из max` / код + copy / «Поделиться»; copy и share кладут полный текст `homeInviteMessage` (`{url}`, `{code}`); при `uses >= max` — текст `homeInviteCodeExhausted`, статичные галочки, без share (бар на всю ширину); модалка без CTA (закрытие крестиком / backdrop); «Правила» → `createSidePanel` + [`content/rules.json`](../../../content/rules.json) (Figma `517:4740`); «Выйти» → полный Supabase `signOut` + очистка локальной сессии. Связь с админом — FAB `contact-fab`.
+- В меню `displayName` (из `profiles.display_name`) и email не кликабельны; «Настройки» → `/settings`, «Пригласить» → explainer `homeInvite*` (Figma `492:4030`): фото [`currency-referal.png`](../../assets/home/modal/currency-referal.png) на фоне `--palette-gray-100` + Lottie `rotating-ray` между фоном и PNG + бар `uses из max` / код + copy / «Поделиться»; copy и share кладут полный текст `homeInviteMessage` (`{url}`, `{code}`); при `uses >= max` — текст `homeInviteCodeExhausted`, статичные галочки, без share (бар на всю ширину); модалка без CTA (закрытие крестиком / backdrop); «Правила» → `createSidePanel` + [`content/rules.json`](../../../content/rules.json) (Figma `517:4740`); «Выйти» → полный Supabase `signOut` + очистка локальной сессии. Связь с админом — FAB `feedback`.
 
 Логотип в шапке декоративный и не сбрасывает сессию.
 
@@ -218,7 +218,7 @@ Entrance на `--open`: `--home-screen-reveal-delay-topbar` / `-body` / `-fab` �
 
 Токены intro-модалки: `--home-screen-review-intro-media-*` (max 552, aspect кадра).
 
-Ключи: `homeTitle`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeEmptyMineActive`, `homeEmptyMineCompleted`, `homeMineSlotFree`, `homeMineSlotFreeAria`, `homePendingLimit*`, `homeTabFeed`, `homeTabMine`, `homeTabRating`, `homeRatingEmpty`, `homeRatingListAria`, `homeRatingNameFallback`, `homeRatingPlaceAria`, `homeRatingBalanceAria`, `homeTabsAria`, `homeMineFilterActive`, `homeMineFilterCompleted`, `homeMineFilterAria`, `homeAddPortfolio`, `homeBalance*`, `homeReputation*`, `homeInvite*` (в т.ч. `homeInviteMessage`), `homeTabMineReadyAria`, `homeTabFeedNewAria`, `homeProfileAria`, `homeAccount*`, `homeRulesCloseAria`, `homeContactFab*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `gradeUndefined`, `homePlatformWebLetter`, `homePlatformSite`, `homeSubmitCost`. Правила сообщества: [`content/rules.json`](../../../content/rules.json).
+Ключи: `homeTitle`, `homeMarkAria`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeEmptyMineActive`, `homeEmptyMineCompleted`, `homeMineSlotFree`, `homeMineSlotFreeAria`, `homePendingLimit*`, `homeTabFeed`, `homeTabMine`, `homeTabRating`, `homeRatingEmpty`, `homeRatingListAria`, `homeRatingNameFallback`, `homeRatingPlaceAria`, `homeRatingBalanceAria`, `homeTabsAria`, `homeMineFilterActive`, `homeMineFilterCompleted`, `homeMineFilterAria`, `homeAddPortfolio`, `homeBalance*`, `homeReputation*`, `homeInvite*` (в т.ч. `homeInviteMessage`), `homeTabMineReadyAria`, `homeTabFeedNewAria`, `homeProfileAria`, `homeAccount*`, `homeRulesCloseAria`, `homeFeedback*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `gradeUndefined`, `homePlatformWebLetter`, `homePlatformSite`, `homeSubmitCost`. Правила сообщества: [`content/rules.json`](../../../content/rules.json).
 
 `homeCardOwnTitle` / `homeCardOwnAria` / `homeCardReviewedLabel` / `homeAlreadyReviewed*` в locales — legacy (в UI не используются; own-копирайт = `homeCardReport*` / `Pending*`; отревьюенные кейсы фильтруются из ленты).
 

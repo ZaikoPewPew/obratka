@@ -1155,27 +1155,29 @@
   --home-screen-reveal-delay-tabbar: var(--motion-delay-4);
   --home-screen-reveal-delay-fab: var(--motion-delay-5);
 
-  /* FAB «быстрая связь» (Telegram), Figma 478:1814 */
-  --contact-fab-size: 56px;
-  --contact-fab-offset: var(--space-4);
-  --contact-fab-radius: var(--radius-md);
-  --contact-fab-icon: 24px;
-  --contact-fab-z: var(--home-screen-tabbar-z);
-  --contact-fab-bg: var(--color-accent);
-  --contact-fab-bg-hover: var(--color-accent-hover);
-  --contact-fab-bg-active: var(--color-accent-active);
-  --contact-fab-color: var(--color-on-accent);
-  --contact-fab-color-hover: var(--color-on-accent-hover);
-  --contact-fab-color-active: var(--color-on-accent-active);
-  --contact-fab-tooltip-padding-x: var(--space-2);
-  --contact-fab-tooltip-padding-y: var(--space-1);
-  --contact-fab-tooltip-radius: var(--radius-xs);
-  --contact-fab-tooltip-bg: var(--color-text);
-  --contact-fab-tooltip-color: var(--color-surface);
-  --contact-fab-tooltip-font-size: var(--font-size-xs);
-  --contact-fab-tooltip-font-weight: var(--font-weight-medium);
-  --contact-fab-tooltip-offset: var(--space-2);
-  --contact-fab-tooltip-z: 1;
+  /* FAB feedback (Telegram) */
+  --feedback-size: 56px;
+  --feedback-offset: var(--space-4);
+  --feedback-padding-x: var(--space-4);
+  --feedback-padding-y: var(--space-3);
+  --feedback-radius: var(--radius-md);
+  --feedback-icon: 24px;
+  --feedback-z: var(--home-screen-tabbar-z);
+  --feedback-bg: var(--color-accent);
+  --feedback-bg-hover: var(--color-accent-hover);
+  --feedback-bg-active: var(--color-accent-active);
+  --feedback-color: var(--color-on-accent);
+  --feedback-color-hover: var(--color-on-accent-hover);
+  --feedback-color-active: var(--color-on-accent-active);
+  --feedback-tooltip-padding-x: var(--space-2);
+  --feedback-tooltip-padding-y: var(--space-1);
+  --feedback-tooltip-radius: var(--radius-xs);
+  --feedback-tooltip-bg: var(--color-text);
+  --feedback-tooltip-color: var(--color-surface);
+  --feedback-tooltip-font-size: var(--font-size-xs);
+  --feedback-tooltip-font-weight: var(--font-weight-medium);
+  --feedback-tooltip-offset: var(--space-2);
+  --feedback-tooltip-z: 1;
 
   /* Отдельный экран настроек (пока заглушка) */
   --settings-screen-z: var(--home-screen-z);

@@ -5,7 +5,10 @@ import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 /**
  * Отдельный экран настроек. Пока содержит продуктовую заглушку.
  *
- * @param {{ onBack?: () => void | Promise<void> }} [opts]
+ * @param {{
+ *   onBack?: () => void | Promise<void>;
+ *   onGoFeed?: () => void | Promise<void>;
+ * }} [opts]
  */
 export function createSettingsScreen(opts = {}) {
   let closing = false;
@@ -18,9 +21,9 @@ export function createSettingsScreen(opts = {}) {
   const topbar = document.createElement("header");
   topbar.className = "settings-screen__topbar";
 
-  const mark = document.createElement("div");
+  const mark = document.createElement("button");
+  mark.type = "button";
   mark.className = "settings-screen__mark";
-  mark.setAttribute("aria-hidden", "true");
   mark.innerHTML = brandMarkSvg("settings-screen__mark-img");
 
   const backBtn = document.createElement("button");
@@ -52,6 +55,7 @@ export function createSettingsScreen(opts = {}) {
     description.textContent = t.settingsNotReady ?? "";
     backBtn.textContent = t.settingsBack ?? "";
     backBtn.setAttribute("aria-label", t.settingsBackAria ?? t.settingsBack ?? "");
+    mark.setAttribute("aria-label", t.homeMarkAria ?? t.homeTabFeed ?? "");
   }
 
   function open() {
@@ -98,6 +102,10 @@ export function createSettingsScreen(opts = {}) {
 
   backBtn.addEventListener("click", () => {
     void opts.onBack?.();
+  });
+
+  mark.addEventListener("click", () => {
+    void (opts.onGoFeed ?? opts.onBack)?.();
   });
 
   return { root, open, close };

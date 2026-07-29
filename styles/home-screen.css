@@ -36,7 +36,7 @@
 
 .home-screen--open .home-screen__topbar,
 .home-screen--open .home-screen__body,
-.home-screen--open .contact-fab {
+.home-screen--open .feedback {
   animation-duration: var(--motion-reveal-duration);
   animation-timing-function: var(--motion-reveal-ease);
   animation-fill-mode: both;
@@ -60,7 +60,7 @@
  * Track bg / blur / --on-dark остаются на .home-screen__tabbar.
  */
 
-.home-screen--open .contact-fab {
+.home-screen--open .feedback {
   animation-name: motion-reveal-topbar;
   animation-delay: var(--home-screen-reveal-delay-fab);
 }
@@ -78,7 +78,7 @@
 
   .home-screen--open .home-screen__topbar,
   .home-screen--open .home-screen__body,
-  .home-screen--open .contact-fab {
+  .home-screen--open .feedback {
     animation: none;
     opacity: 1;
     filter: none;
@@ -124,13 +124,25 @@
 }
 
 .home-screen__mark {
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: var(--home-screen-mark-width);
   height: var(--home-screen-mark-height);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
   color: var(--color-text);
   text-decoration: none;
+  cursor: pointer;
+}
+
+.home-screen__mark:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .home-screen__mark-img {

@@ -1,19 +1,19 @@
 import { getStrings } from "../../i18n.js";
 import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
-import telegramIconSvg from "../../assets/home/telegram.svg?raw";
+import feedbackIconSvg from "../../assets/home/feedback.svg?raw";
 
 /**
- * Иконка Telegram — inline SVG, чтобы `currentColor` наследовал цвет кнопки.
+ * Иконка feedback — inline SVG, чтобы `currentColor` наследовал цвет кнопки.
  * @returns {SVGElement}
  */
-function createTelegramIcon() {
+function createFeedbackIcon() {
   const wrap = document.createElement("span");
-  wrap.innerHTML = telegramIconSvg.trim();
+  wrap.innerHTML = feedbackIconSvg.trim();
   const svg = wrap.firstElementChild;
   if (!(svg instanceof SVGElement)) {
-    throw new Error("telegram.svg must be a root <svg>");
+    throw new Error("feedback.svg must be a root <svg>");
   }
-  svg.classList.add("contact-fab__icon");
+  svg.classList.add("feedback__icon");
   svg.setAttribute("aria-hidden", "true");
   svg.setAttribute("width", "24");
   svg.setAttribute("height", "24");
@@ -21,7 +21,7 @@ function createTelegramIcon() {
 }
 
 /**
- * Fixed FAB «быстрая связь» (Figma 478:1814) — Telegram админа.
+ * Fixed FAB feedback — Telegram админа (`COMMUNITY_CONTACT_URL`).
  *
  * @param {{ href?: string }} [opts]
  * @returns {{
@@ -29,23 +29,23 @@ function createTelegramIcon() {
  *   syncCopy: () => void;
  * }}
  */
-export function createContactFab({ href = COMMUNITY_CONTACT_URL } = {}) {
+export function createFeedback({ href = COMMUNITY_CONTACT_URL } = {}) {
   const root = document.createElement("a");
-  root.className = "contact-fab";
+  root.className = "feedback";
   root.href = href;
   root.target = "_blank";
   root.rel = "noopener noreferrer";
 
   const tip = document.createElement("span");
-  tip.className = "contact-fab__tip";
+  tip.className = "feedback__tip";
   tip.setAttribute("aria-hidden", "true");
 
-  root.append(createTelegramIcon(), tip);
+  root.append(createFeedbackIcon(), tip);
 
   function syncCopy() {
     const t = getStrings();
-    const label = t.homeContactFabAria ?? "";
-    const tooltip = t.homeContactFabTooltip ?? "";
+    const label = t.homeFeedbackAria ?? "";
+    const tooltip = t.homeFeedbackTooltip ?? "";
     root.setAttribute("aria-label", label);
     root.title = tooltip;
     tip.textContent = tooltip;

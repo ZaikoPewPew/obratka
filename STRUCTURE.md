@@ -51,7 +51,7 @@
 | Папка | Роль |
 |-------|------|
 | `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `config/` ([README](src/config/README.md): review session + contacts), `lib/` ([README](src/lib/README.md): supabase + **dictation**), `assets/` |
-| `styles/` | Токены + UI. Entry: tokens/base/entrance/app-modal/iframe-shell/home/legendary-online-panel/contact-fab/tabs-panel/account-menu/settings/success/ban/report |
+| `styles/` | Токены + UI. Entry: tokens/base/entrance/app-modal/iframe-shell/home/legendary-online-panel/feedback/tabs-panel/account-menu/settings/success/ban/report |
 | `content/` | `locales.json`, onboarding, embed-hosts, founder-avatars |
 | `public/` | Статика по URL (favicon и т.п.) |
 | `supabase/` | SQL (`profiles`, `legendary_presence`, `rating_leaderboard`, `wallet`, `portfolios`, `portfolio_submit`, `review_claims`, `review_complaints`, `referrals`, …) + Edge `telegram-auth`; доступы и адвайзоры — `SECURITY.md` |
@@ -81,7 +81,7 @@
 ```
 
 `/referral` — invite-only gate (`validate_referral`); после входа у юзера свой код (лимит 2), шаринг с home.  
-`/home` — feed/mine/rating; активный вид хранится в query через `homeRoute`; feed/mine/rating используют SWR-кэш (`homeListCache`); рейтинг — топ-50 (`listRatingTop`); aside «Легенды онлайн»; FAB «быстрая связь» (`contact-fab`). Intro до claim; отправленный отчёт → disabled-карточка; mine report gate; фильтр Активные/Завершенные (`tabs-panel`); free-slot «Мои на ревью» до `MAX_MINE_PENDING` (=1); точка на «На ревью» (`feedSeen`); точка на «Мои» и «Завершенные» (`mineReadySeen`); tabbar-dock (glass tabs + «Закинуть своё») с контрастом над превью (`--on-dark`); на open/reload — entrance cascade (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
+`/home` — feed/mine/rating; активный вид хранится в query через `homeRoute`; feed/mine/rating используют SWR-кэш (`homeListCache`); рейтинг — топ-50 (`listRatingTop`); aside «Легенды онлайн»; FAB feedback (`feedback`). Intro до claim; отправленный отчёт → disabled-карточка; mine report gate; фильтр Активные/Завершенные (`tabs-panel`); free-slot «Мои на ревью» до `MAX_MINE_PENDING` (=1); точка на «На ревью» (`feedSeen`); точка на «Мои» и «Завершенные» (`mineReadySeen`); tabbar-dock (glass tabs + «Закинуть своё») с контрастом над превью (`--on-dark`); на open/reload — entrance cascade (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
 `/portfolio` — подача URL; чип «На главную» (скрыт на done); done на том же экране.  
 `/review` = просмотр портфолио + таймер **45 s** (`REVIEW_SESSION_SECONDS` в `src/config/review.js`) + опциональная надиктовка (чип rec → `answers.dictation`).  
 iframe: таймер паузится при уходе со вкладки; external: wall-clock без паузы, конец → `Timer-end.wav` + quiz.  

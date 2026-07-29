@@ -11,7 +11,7 @@
 - «Настройки» → колбэк → `/settings` (заглушка).
 - «Пригласить» открывает `homeInvite*`-модалку; copy и share кладут полный текст `homeInviteMessage` (`{url}`, `{code}`), не только код или ссылку.
 - «Правила» → `createSidePanel` с текстом из `content/rules.json` (`getCommunityRules`).
-- Связь с админом — через FAB (`contact-fab`), не пункт меню.
+- Связь с админом — через FAB (`feedback`), не пункт меню.
 - «Выйти» → `signOut` + `clearHomeListCache` + `clearMineReadySeen` + `clearFeedSeen` → `/referral`.
 - Навигация, модалки / side-panel и завершение сессии передаются колбэками наверх (без `go()` внутри меню).
 

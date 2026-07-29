@@ -62,7 +62,7 @@ import { createSidePanel } from "../side-panel/SidePanel.js";
 import { createAccountMenu } from "../account-menu/AccountMenu.js";
 import { createTabsPanel } from "../tabs-panel/TabsPanel.js";
 import { createLegendaryOnlinePanel } from "../legendary-online-panel/LegendaryOnlinePanel.js";
-import { createContactFab } from "../contact-fab/ContactFab.js";
+import { createFeedback } from "../feedback/Feedback.js";
 import { createExplainerMediaRay } from "./explainerMediaRay.js";
 import boneIconUrl from "../../assets/home/bone.svg";
 import balanceCardDucksUrl from "../../assets/home/modal/balance-card-ducks.svg";
@@ -555,9 +555,9 @@ export function createHomeScreen({
   const topbar = document.createElement("header");
   topbar.className = "home-screen__topbar";
 
-  const mark = document.createElement("div");
+  const mark = document.createElement("button");
+  mark.type = "button";
   mark.className = "home-screen__mark";
-  mark.setAttribute("aria-hidden", "true");
   mark.innerHTML = brandMarkSvg("home-screen__mark-img");
 
   const topActions = document.createElement("div");
@@ -1105,15 +1105,15 @@ export function createHomeScreen({
   tabbarDock.className = "home-screen__tabbar-dock";
   tabbarDock.append(tabbar, addBtn);
 
-  const contactFab = createContactFab();
+  const feedback = createFeedback();
 
-  // Временно скрыт с фронта (оставляем компонент и логику нетронутыми).
   root.append(
     title,
     topbar,
     body,
     tabbarDock,
     legendaryOnlinePanel.root,
+    feedback.root,
     noticeModal.root,
     reputationModal.root,
     balanceModal.root,
@@ -1245,6 +1245,7 @@ export function createHomeScreen({
     ratingTab.textContent = t.homeTabRating;
     ratingEmpty.textContent = t.homeRatingEmpty;
     ratingList.setAttribute("aria-label", t.homeRatingListAria);
+    mark.setAttribute("aria-label", t.homeMarkAria ?? t.homeTabFeed ?? "");
     syncFeedTabAria();
     syncMineTabAria();
     tabbar.setAttribute("aria-label", t.homeTabsAria);
@@ -1283,7 +1284,7 @@ export function createHomeScreen({
     accountMenu.syncContent();
 
     legendaryOnlinePanel.syncCopy();
-    contactFab.syncCopy();
+    feedback.syncCopy();
     syncProfileAvatar();
     scheduleTabThumbSync();
   }
@@ -1889,6 +1890,21 @@ export function createHomeScreen({
     setLoading(true);
     await refresh();
   }
+
+  /** Лого в шапке → вкладка ленты «На ревью»; если уже там — скролл вверх. */
+  function goToFeedTab() {
+    if (activeTab === "feed") {
+      showTabbar();
+      body.scrollTop = 0;
+      lastScrollTop = 0;
+      return;
+    }
+    void setActiveTab("feed");
+  }
+
+  mark.addEventListener("click", () => {
+    goToFeedTab();
+  });
 
   /**
    * @param {unknown} value

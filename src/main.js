@@ -1326,6 +1326,10 @@ const settingsScreen = createSettingsScreen({
   onBack: () => {
     go("home", { search: buildHomeSearch(lastHomeView) });
   },
+  onGoFeed: () => {
+    lastHomeView = { tab: "feed", filter: "active" };
+    go("home", { search: buildHomeSearch({ tab: "feed" }) });
+  },
 });
 
 const homeScreen = createHomeScreen({

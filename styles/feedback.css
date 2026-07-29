@@ -1,0 +1,71 @@
+/* Fixed FAB feedback на home. */
+
+.feedback {
+  box-sizing: border-box;
+  position: absolute;
+  right: var(--feedback-offset);
+  bottom: var(--feedback-offset);
+  z-index: var(--feedback-z);
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--feedback-size);
+  height: var(--feedback-size);
+  margin: 0;
+  padding: var(--feedback-padding-y) var(--feedback-padding-x);
+  border: none;
+  border-radius: var(--feedback-radius);
+  background: var(--feedback-bg);
+  color: var(--feedback-color);
+  text-decoration: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.feedback:hover {
+  background: var(--feedback-bg-hover);
+  color: var(--feedback-color-hover);
+}
+
+.feedback:active {
+  background: var(--feedback-bg-active);
+  color: var(--feedback-color-active);
+}
+
+.feedback:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.feedback__icon {
+  display: block;
+  width: var(--feedback-icon);
+  height: var(--feedback-icon);
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.feedback__tip {
+  box-sizing: border-box;
+  position: absolute;
+  bottom: calc(100% + var(--feedback-tooltip-offset));
+  right: 0;
+  z-index: var(--feedback-tooltip-z);
+  display: none;
+  padding: var(--feedback-tooltip-padding-y) var(--feedback-tooltip-padding-x);
+  border-radius: var(--feedback-tooltip-radius);
+  background: var(--feedback-tooltip-bg);
+  color: var(--feedback-tooltip-color);
+  font-family: var(--font-family);
+  font-size: var(--feedback-tooltip-font-size);
+  font-weight: var(--feedback-tooltip-font-weight);
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.feedback:hover .feedback__tip,
+.feedback:focus-visible .feedback__tip {
+  display: block;
+}

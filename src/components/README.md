@@ -21,9 +21,9 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `auth-screen/` | `/registration` | Email → auth-code / Telegram / Google (shell) |
 | `auth-code-screen/` | `/registration/code` | OTP verify + resend cooldown (shell) |
 | `onboarding-screen/` | `/onboarding` | UI → `profiles` (shell) |
-| `home-screen/` | `/home` | хаб + SWR feed/mine/rating + intro + mine gate + feedSeen / 3/3 + tabbar-dock (glass / `--on-dark` / entrance) + wallet + репутация + invite + «Топы в сети» + contact FAB |
+| `home-screen/` | `/home` | хаб + SWR feed/mine/rating + intro + mine gate + feedSeen / 3/3 + tabbar-dock (glass / `--on-dark` / entrance) + wallet + репутация + invite + «Топы в сети» + feedback FAB |
 | `legendary-online-panel/` | — | fixed-чип «Топы в сети» слева снизу на home |
-| `contact-fab/` | — | fixed FAB «быстрая связь» (Telegram) справа снизу на home |
+| `feedback/` | — | fixed FAB feedback (Telegram) справа снизу на home |
 | `account-menu/` | — | поповер профиля (settings / invite / contacts / rules / sign out) |
 | `settings-screen/` | `/settings` | заглушка настроек |
 | `url-screen/` | `/portfolio` | back-chip → home; submit + done (`setVariant("done")`; shell) |
