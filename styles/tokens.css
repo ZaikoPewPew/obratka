@@ -928,7 +928,8 @@
   --home-screen-locked-modal-body-size: var(--font-size-base);
   --home-screen-locked-modal-z: calc(var(--home-screen-z) + 1);
   --home-screen-review-intro-media-width: 552px;
-  --home-screen-review-intro-media-height: 268px;
+  /* primer.mp4 1256×720 → ~317px при ширине 552 */
+  --home-screen-review-intro-media-aspect: 1256 / 720;
   --home-screen-review-intro-media-radius: var(--radius-md);
   --home-screen-review-intro-media-bg: var(--color-surface-muted);
   --home-screen-review-intro-media-border-width: var(--border-width);

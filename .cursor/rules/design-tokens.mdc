@@ -34,7 +34,7 @@ alwaysApply: true
   - Glass: `backdrop-filter` / track-bg живут на `.home-screen__tabbar`, **не** на dock.
 - Home entrance: `--home-screen-reveal-delay-*` (topbar → body → dock → fab).
 - Tabs panel (Активные/Завершенные на «Мои»): `--tabs-panel-*` (`styles/tabs-panel.css`, [`tabs-panel/README.md`](../../src/components/tabs-panel/README.md)); не хардкодить цвета/размеры сегмента.
-- Intro-модалка home: `--home-screen-review-intro-media-*` (видео 552×268).
+- Intro-модалка home: `--home-screen-review-intro-media-*` (видео max 552, Fit по кадру).
 - Auth OTP: `--auth-code-resend-cooldown`.
 - Brand mark: `--url-screen-brand-*` vs `--url-screen-brand-done-*`; **invalid не меняет size**.
 - App modal: `--app-modal-*` (`styles/app-modal.css`, [`app-modal/README.md`](../../src/components/app-modal/README.md)).

@@ -133,7 +133,7 @@ function createReputationIcon(kind) {
 }
 
 /**
- * Видео-слот intro-модалки (552×268): autoplay / loop / muted.
+ * Видео-слот intro-модалки (max 552, Fit к кадру): autoplay / loop / muted.
  *
  * @returns {{
  *   root: HTMLDivElement;

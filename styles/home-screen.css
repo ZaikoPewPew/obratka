@@ -407,7 +407,8 @@
   display: block;
   width: 100%;
   max-width: var(--home-screen-review-intro-media-width);
-  height: var(--home-screen-review-intro-media-height);
+  height: auto;
+  aspect-ratio: var(--home-screen-review-intro-media-aspect);
   margin: 0 auto;
   overflow: hidden;
   border: var(--home-screen-review-intro-media-border-width) solid
@@ -420,15 +421,8 @@
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   pointer-events: none;
-}
-
-@media (max-width: 560px) {
-  .home-screen__review-intro-media {
-    height: auto;
-    aspect-ratio: 552 / 268;
-  }
 }
 
 .home-screen__chip:hover {
