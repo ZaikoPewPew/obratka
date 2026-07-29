@@ -147,6 +147,23 @@ order by banned_at desc;
 
 Жалоба автора на лист (`submit_review_complaint`) сразу снижает `profiles.reputation` ревьюера (ровно 1 тег, окно 6ч от `portfolios.completed_at`). Веса тегов и порог — только в SQL (`review_complaints.sql`), не в UI. После окна без жалобы lazy `settle_review_reputation_rewards` даёт ревьюеру +10.
 
+Окно жалобы смотрит на **`completed_at`** (момент done / 3 из 3), **не** на `updated_at`. Если кнопки «Пожаловаться» нет — проверь колонку / значение:
+
+```sql
+select id, status, completed_at, updated_at, reviews_count, target_reviews
+from public.portfolios
+where id = '00000000-0000-0000-0000-000000000000';
+```
+
+Тест: заново открыть окно на 6ч:
+
+```sql
+update public.portfolios
+set completed_at = now()
+where id = '00000000-0000-0000-0000-000000000000'
+  and status = 'done';
+```
+
 При `reputation <= -100` выставляются `banned_at = now()` и `ban_reason = 'reputation'`. Апелляция — вручную через «Связаться» на `/banned`, затем разбан (и при необходимости вернуть `reputation`) из Dashboard.
 
 Разбан после автобана:

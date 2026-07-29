@@ -23,6 +23,7 @@ alwaysApply: true
 - RPC `submit_review_complaint` → штраф веса тега (−20) → при `reputation <= -100` → `banned_at` + `ban_reason = reputation`.
 - После окна без жалобы: `settle_review_reputation_rewards` → **+10** ревьюеру (`reviews.reputation_settled_at`); settle тоже от `completed_at`.
 - SQL: `supabase/sql/review_complaints.sql`. Оператор: `supabase/BAN.md`.
+- Окно = **`completed_at`**, не `updated_at`. Тест reopen: `update portfolios set completed_at = now() where id = … and status = 'done'`.
 
 ## Клиент
 

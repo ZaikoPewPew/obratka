@@ -12,7 +12,7 @@
 | `referrals.sql` | персональный `referral_code` (max 2 uses), seed `YTHWKPDWAK`, RPC validate/redeem; без наград |
 | `portfolios.sql` | portfolios/reviews, лиги; SELECT only (INSERT через `submit_portfolio`) |
 | `review_claims.sql` | claims + award balance (+10) в `handle_review_inserted`; `portfolio_reviewer_slots` / claim / heartbeat зовут `purge_expired_review_claims` + `settle_review_reputation_rewards` |
-| `review_complaints.sql` | reputation (старт 0, бан −100, 1 тег, окно 6ч от done, +10 settle) + RPC complaint. После apply: закомментировать ONE-SHOT `reputation 20→0` |
+| `review_complaints.sql` | reputation (старт 0, бан −100, 1 тег, окно 6ч от done, +10 settle) + RPC complaint. После apply: закомментировать ONE-SHOT `reputation in (100, 20) → 0` |
 | `subscribers_count.sql` | RPC count (legacy) |
 | `subscribers_rls.sql` | RLS + revoke на live `subscribers`, если таблица есть |
 | `ban-templates.sql` | операторский бан / разбан |
@@ -36,9 +36,11 @@
 |------------|--------------|
 | Весь claims-слой / overshoot (дверь без live, late insert, RLS insert на `done`) | весь [`review_claims.sql`](review_claims.sql) (drop CHECK + claim/trigger + `reviews_insert_own`) |
 | Только слоты + purge expired | с `drop function … portfolio_reviewer_slots` до конца функции **и** `revoke`/`grant` на неё (в конце файла) |
-| Окно жалобы от done + старт reputation 0 | [`portfolios.sql`](portfolios.sql) (колонка `completed_at`) → [`review_claims.sql`](review_claims.sql) (триггер) → весь [`review_complaints.sql`](review_complaints.sql); после первого apply **закомментировать** ONE-SHOT `reputation 20→0` |
+| Окно жалобы от done + старт reputation 0 | [`portfolios.sql`](portfolios.sql) (колонка `completed_at`) → [`review_claims.sql`](review_claims.sql) (триггер) → весь [`review_complaints.sql`](review_complaints.sql); после первого apply **закомментировать** ONE-SHOT `reputation in (100, 20) → 0` |
 
 Клиентский фикс залипающих «Аноним»-слотов (keepalive `pagehide` + `sessionStorage` `obratka.reviewClaim`) **не** требует SQL — достаточно деплоя фронта. SQL-purge в `portfolio_reviewer_slots` — доп. hardening, чтобы expired не светились до следующего claim/heartbeat.
+
+**Окно жалобы:** старт = `portfolios.completed_at`, не `updated_at`. Reopen для теста / ops — см. [`../BAN.md`](../BAN.md) § Автобан по репутации.
 
 Обзор — [`../README.md`](../README.md).  
 **Как банить юзеров:** [`../BAN.md`](../BAN.md).  

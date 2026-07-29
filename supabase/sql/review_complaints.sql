@@ -22,17 +22,12 @@ alter table public.profiles
   add constraint profiles_reputation_check
   check (reputation >= -100);
 
--- Legacy → v2: только старый default 100 (чип показывал «0»).
-update public.profiles
-set reputation = 20
-where banned_at is null
-  and reputation = 100;
-
--- ONE-SHOT: старт 20 → 0. После первого apply на prod — закомментировать
--- (иначе re-apply обнулит тех, кто снова дошёл до ровно 20 через settle).
+-- ONE-SHOT: legacy старты 100 / 20 → 0. После первого apply на prod —
+-- закомментировать (иначе re-apply обнулит тех, кто снова дошёл до ровно
+-- 20 через settle).
 update public.profiles
 set reputation = 0
-where reputation = 20;
+where reputation in (100, 20);
 
 -- Bypass для security definer RPC (автоштраф / автобан / +10 settle).
 -- Клиентский JWT всё ещё authenticated — без флага protect_* режет UPDATE.
