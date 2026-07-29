@@ -404,6 +404,11 @@ begin
     status = case
       when p.reviews_count + 1 >= p.target_reviews then 'done'
       else p.status
+    end,
+    completed_at = case
+      when p.reviews_count + 1 >= p.target_reviews
+        then coalesce(p.completed_at, now())
+      else p.completed_at
     end
   where id = new.portfolio_id;
 

@@ -30,7 +30,7 @@ npm run dev
 | `/review` | Просмотр портфолио + таймер 45 s (iframe pause / external wall-clock) + звук конца + надиктовка (rec) |
 | `/quiz` → `/quiz/done` | Квиз (visual 1–5, условный pain, рыночный `tier`, mic в совете) и финал — [`QUIZ.md`](QUIZ.md) |
 | `/done` | Успех подачи (deep link / sync) |
-| `/report` | Листы автору (+ заметки с просмотра) + жалоба (1 тег, окно 6ч) |
+| `/report` | Листы автору (+ заметки с просмотра) + жалоба (1 тег, окно 6ч от done; вне окна кнопку скрывать) |
 | `/banned` | Аккаунт заблокирован (escape-proof; в т.ч. автобан по репутации) |
 
 ### Переменные окружения
@@ -74,7 +74,7 @@ npm run dev
 **Email ↔ Google:** Automatic linking в Supabase (одна verified email = один user). Telegram (`tg{id}@t.me`) не склеивается.  
 Ошибки identity / rate-limit мапятся в `auth.js` → i18n (`authIdentityConflict`, `authOtpRateLimit`).  
 **Рефералы:** validate до auth / redeem после логина; 1 код на юзера, лимит 2; без наград. Seed: `YTHWKPDWAK`. См. [`supabase/sql/referrals.sql`](supabase/sql/referrals.sql), [`src/api/referrals.js`](src/api/referrals.js).  
-**Репутация:** жалоба на лист в `/report` (ровно 1 тег, окно 6ч) → −20; старт `20`, бан при `<= -100`; +10 после окна без жалобы. См. [`supabase/BAN.md`](supabase/BAN.md), [`src/api/reviewComplaints.js`](src/api/reviewComplaints.js).  
+**Репутация:** жалоба на лист в `/report` (ровно 1 тег, окно 6ч от `portfolios.completed_at`) → −20; старт `0`, бан при `<= -100`; +10 после окна без жалобы. См. [`supabase/BAN.md`](supabase/BAN.md), [`src/api/reviewComplaints.js`](src/api/reviewComplaints.js).  
 API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](src/components/auth-screen/README.md).
 
 ## Документация

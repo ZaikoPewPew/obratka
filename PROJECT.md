@@ -32,8 +32,8 @@
 
 - **SWR ленты:** `feed` / `mine` / `rating` в memory + `sessionStorage` (`obratka.homeLists.<userId>`); open / смена таба / F5 без skeleton при hit; тихий `refresh`; logout → `clearHomeListCache`.
 - **Silent refresh:** при тех же id карточек — патч только reviewer-слотов (без thum.io); новые id — rebuild + reveal только для них.
-- **Порядок feed:** `sortFeedForSlotClosure` — ближе к 3/3 → FIFO; `reviewedByMe` вниз (не newest-first). Дверь claim = `reviews_count < target` (live не лимит; late overshoot ок). См. home-screen README.
-- **Отправленный отчёт:** `reviewedByMe` появляется только после INSERT в `reviews`; карточка disabled с оверлеем «Отчёт отправлен», без intro/notice и повторного claim.
+- **Порядок feed:** `sortFeedForSlotClosure` — ближе к 3/3 → FIFO (не newest-first). Уже отревьюенные (`reviewedByMe`) **фильтруются** из ленты до сорта. Дверь claim = `reviews_count < target` (live не лимит; late overshoot ок). См. home-screen README.
+- **Отправленный отчёт:** `reviewedByMe` только после INSERT в `reviews`; карточка исчезает из твоей ленты (и из `listFeedPortfolioIds` для точки «новый кейс»), без intro/notice и повторного claim.
 - **Intro до claim:** клик по чужой карточке → если уже набрали target (`isPortfolioOpenForReview`) → `homeNoSlots*`; иначе `createAppModal` `homeReviewIntro*` (тайтл + описание + видео-пример, CTA «Сюдаа его!») → claim → `/review`. «Не сейчас» / закрытие — без claim.
 - **Abort / hard nav:** SPA `releaseHeldClaim`; `pagehide` → `releasePortfolioClaimKeepalive`; per-tab `obratka.reviewClaim` + boot reconcile — active «Аноним» не залипает после ухода (см. `review-claims.mdc`). SQL: `portfolio_reviewer_slots` чистит expired перед list.
 - **Mine report gate:** `reviewsCount < targetReviews` → `homeMineNotReady*`; иначе `/report`. Own-карточки всегда `cursor: pointer` (не `not-allowed`).
@@ -110,8 +110,8 @@
 | `auth.users` | Supabase Auth |
 | `public.profiles` | 1:1 с user; онбординг, баланс, `reputation`, tier, ban, `referral_code` (лимит 2); триггер `handle_new_user` |
 | `public.referral_seed_codes` | bootstrap-коды (seed `YTHWKPDWAK`); только через RPC |
-| `public.portfolios` / `reviews` | очередь ревью с матчингом по лиге грейда |
-| `public.review_complaints` | жалобы автора (1 тег, окно 6ч) → −20 / +10 settle → автобан при `reputation <= -100` |
+| `public.portfolios` / `reviews` | очередь ревью с матчингом по лиге грейда; `portfolios.completed_at` — старт окна жалобы / settle |
+| `public.review_complaints` | жалобы автора (1 тег, окно 6ч от done) → −20 / +10 settle → автобан при `reputation <= -100` |
 | `public.subscribers` | legacy waitlist API (`subscribers.js`), не entry UX |
 | Edge `telegram-auth` | проверка Telegram hash → сессия |
 
@@ -184,10 +184,10 @@ D спокойно дописывает квиз → INSERT +10 → 4-й лис�
 
 | Что | Детали |
 |-----|--------|
-| Где UI | `/report` — список листов; «Пожаловаться» → модалка (1 тег). Без жалобы = ок; окно 6ч |
+| Где UI | `/report` — список листов; «Пожаловаться» → модалка (1 тег). Без жалобы = ок; окно **6ч от `completed_at`** (момент done); вне окна кнопку скрывать |
 | Теги v1 | `low_effort`, `spam`, `harassment`, `offensive`, `ai_slop` (веса только в SQL) |
-| Штраф / плюс | жалоба = −20 (1 тег); старт `20`; бан при `<= -100`; +10 после окна без жалобы |
-| Ревьюер | чип = абсолют со знаком + explainer **без** таблицы весов |
+| Штраф / плюс | жалоба = −20 (1 тег); старт `0`; бан при `<= -100`; +10 после окна без жалобы (settle тоже от done) |
+| Ревьюер | чип = абсолют без плюса (`100` / `0` / `-20`) + explainer **без** таблицы весов |
 | Апелляция | вручную («Связаться» на `/banned`) |
 | SQL / API | [`review_complaints.sql`](supabase/sql/review_complaints.sql), [`reviewComplaints.js`](src/api/reviewComplaints.js) |
 

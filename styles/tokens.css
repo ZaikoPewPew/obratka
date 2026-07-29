@@ -495,10 +495,9 @@
   --report-screen-tag-radius: var(--radius-md);
   --report-screen-tag-gap: var(--space-1);
   --report-screen-tag-bg: var(--color-surface-muted);
-  --report-screen-tag-bg-selected: var(--color-surface-muted);
+  --report-screen-tag-bg-selected: var(--color-choice-selected);
+  --report-screen-tag-color-selected: var(--color-on-choice-selected);
   --report-screen-tag-border: var(--border-width) solid transparent;
-  --report-screen-tag-border-selected: var(--border-width) solid
-    var(--color-text-strong);
   --report-screen-tag-label-size: var(--font-size-lg);
   --report-screen-tag-label-weight: var(--font-weight-regular);
   --report-screen-tag-hint-size: var(--font-size-base);
@@ -1026,14 +1025,6 @@
     --color-surface-muted
   );
   --home-screen-preview-browser-viewport-radius: var(--radius-md);
-  /* Reviewed-by-me overlay on feed preview */
-  --home-screen-reviewed-overlay-bg: var(--color-surface-muted);
-  --home-screen-reviewed-chip-gap: var(--space-2);
-  --home-screen-reviewed-label-size: var(--font-size-base);
-  --home-screen-reviewed-label-weight: var(--font-weight-regular);
-  --home-screen-reviewed-label-color: var(--palette-gray-900);
-  --home-screen-reviewed-chip-icon-size: 24px;
-  --home-screen-reviewed-chip-icon-color: var(--color-success);
   --home-screen-person-height: 52px;
   --home-screen-person-padding: 10px var(--space-4) 10px 10px;
   --home-screen-person-radius: 500px;

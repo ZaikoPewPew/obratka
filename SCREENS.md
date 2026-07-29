@@ -28,7 +28,7 @@ referral → auth → authCode → onboarding → home
 | 5b | `url-screen` | `/portfolio` | Подача URL (баланс); чип «На главную»; done на том же экране |
 | 6 | `review-screen` + `review-panel` + `scale-slider` | `/quiz` → `/quiz/done` | Квиз: grade → context/structure/metrics → visual 1–5 (+ pain если ≤2) → **tier** → advice; финал + улет отчёта. SoT: [`QUIZ.md`](QUIZ.md) |
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
-| 8 | `report-screen` | `/report` | Отчёт автору: листы + жалоба (1 тег, окно 6ч) + PDF (мокап листа → done после скачивания) |
+| 8 | `report-screen` | `/report` | Отчёт автору: листы + жалоба (1 тег, окно 6ч от done; вне окна кнопку скрывать) + PDF (мокап листа → done после скачивания) |
 | — | `ban-screen` | `/banned` | Аккаунт заблокирован; «Выйти» + «Связаться» (242px); красный mesh; deep link escape-proof |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query (`?ref=`, `?lang=`) сохраняются.
@@ -84,7 +84,7 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 
 Handoff соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
-`home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки feed/mine/rating (топ-50 `listRatingTop`); SWR `homeListCache`; fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB «быстрая связь» (`contact-fab`, Telegram); intro до claim (`homeReviewIntro*`); `reviewedByMe` после submit → disabled + оверлей; mine report gate (`homeMineNotReady*`); фильтр Активные/Завершенные (`tabs-panel`); free-slot «Мои на ревью» до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / `homePendingLimit*`); нет монет → buzz submit + чип баланса; точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`); entrance cascade на `--open` (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
+`home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки feed/mine/rating (топ-50 `listRatingTop`); SWR `homeListCache`; fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB «быстрая связь» (`contact-fab`, Telegram); intro до claim (`homeReviewIntro*`); `reviewedByMe` после submit → фильтр из ленты; mine report gate (`homeMineNotReady*`); фильтр Активные/Завершенные (`tabs-panel`); free-slot «Мои на ревью» до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / `homePendingLimit*`); нет монет → buzz submit + чип баланса; точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`); entrance cascade на `--open` (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
 `account-menu` — поповер под аватаром; identity read-only; settings / invite (`homeInviteMessage` на copy/share) / contacts / rules / sign out.
 `side-panel` — боковая панель справа (home → «Правила», Figma `517:4740`); слот контента; без `history` / `go()`.  
 `settings-screen` — side-route `/settings` (заглушка).

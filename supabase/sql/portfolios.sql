@@ -15,12 +15,18 @@ create table if not exists public.portfolios (
     check (reviews_count >= 0),
   status text not null default 'pending'
     check (status in ('pending', 'done', 'skipped')),
+  -- Moment status first became done (3/3); complaint window + settle start here.
+  completed_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 -- reviews_count может превысить target_reviews (in-flight overshoot после
 -- закрытия ленты). Старый CHECK portfolios_reviews_within_target снят в
 -- review_claims.sql при повторном apply.
+
+-- Idempotent for DBs created before completed_at existed.
+alter table public.portfolios
+  add column if not exists completed_at timestamptz;
 
 create index if not exists portfolios_status_created_idx
   on public.portfolios (status, created_at desc);
@@ -166,6 +172,11 @@ begin
     status = case
       when p.reviews_count + 1 >= p.target_reviews then 'done'
       else p.status
+    end,
+    completed_at = case
+      when p.reviews_count + 1 >= p.target_reviews
+        then coalesce(p.completed_at, now())
+      else p.completed_at
     end
   where id = new.portfolio_id;
 

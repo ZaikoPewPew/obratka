@@ -18,12 +18,12 @@ alwaysApply: true
 7. **Не** использовать `createBrandScreenVisual` / `setVariant("invalid")` на ban-screen.
 8. «Выйти» на ban-screen → signOut → `/registration` (или `/referral`, если gate ещё не пройден); повторный логин того же аккаунта снова → `/banned`.
 9. RLS: banned не INSERT portfolios/reviews (`is_profile_banned`).
-10. Автобан: жалобы на листы → `reputation` (старт **20**, floor **−100**) → при `<= -100` те же `banned_at` (`ban_reason = reputation`; см. `reputation.mdc`).
+10. Автобан: жалобы на листы → `reputation` (старт **0**, floor **−100**) → при `<= -100` те же `banned_at` (`ban_reason = reputation`; см. `reputation.mdc`).
 
 ## Оператор
 
 Правки только Dashboard SQL / Table Editor. Шпаргалка: `supabase/BAN.md`, шаблоны: `supabase/sql/ban-templates.sql`.  
-После автобана по репутации при разбане при необходимости вернуть `reputation` (часто **20**).
+После автобана по репутации при разбане при необходимости вернуть `reputation` (часто **0**).
 
 ## Код
 

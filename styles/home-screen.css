@@ -860,12 +860,6 @@
   --home-screen-card-surface: var(--home-screen-card-bg);
 }
 
-/* Уже отправил отчёт: без клика/модалки; оверлей на превью сам даёт статус. */
-.home-screen__card--reviewed:disabled {
-  cursor: default;
-  opacity: 1;
-}
-
 /* Свободный слот «Мои → Активные» (Figma Type=Queue) */
 .home-screen__card--slot-empty {
   width: 100%;
@@ -1033,46 +1027,6 @@
 
 .home-screen__preview--ready .home-screen__preview-img {
   opacity: 1;
-}
-
-.home-screen__preview-reviewed {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  pointer-events: none;
-  border-radius: inherit;
-  background: var(--home-screen-reviewed-overlay-bg);
-}
-
-.home-screen__preview-reviewed-chip {
-  box-sizing: border-box;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--home-screen-reviewed-chip-gap);
-  color: var(--home-screen-reviewed-chip-icon-color);
-}
-
-.home-screen__preview-reviewed-chip-icon {
-  display: block;
-  flex-shrink: 0;
-  width: var(--home-screen-reviewed-chip-icon-size);
-  height: var(--home-screen-reviewed-chip-icon-size);
-}
-
-.home-screen__preview-reviewed-label {
-  margin: 0;
-  font-family: var(--font-family);
-  font-weight: var(--home-screen-reviewed-label-weight);
-  font-size: var(--home-screen-reviewed-label-size);
-  line-height: var(--line-height-normal);
-  text-align: center;
-  color: var(--home-screen-reviewed-label-color);
 }
 
 @media (prefers-reduced-motion: reduce) {

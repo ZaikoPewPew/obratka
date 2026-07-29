@@ -321,8 +321,13 @@
 }
 
 .report-screen__tag--selected {
-  border: var(--report-screen-tag-border-selected);
   background: var(--report-screen-tag-bg-selected);
+  color: var(--report-screen-tag-color-selected);
+}
+
+.report-screen__tag--selected:hover {
+  background: var(--report-screen-tag-bg-selected);
+  color: var(--report-screen-tag-color-selected);
 }
 
 .report-screen__tag:focus-visible {
@@ -342,6 +347,10 @@
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-snug);
   opacity: var(--report-screen-tag-hint-opacity);
+}
+
+.report-screen__tag--selected .report-screen__tag-hint {
+  color: var(--report-screen-tag-color-selected);
 }
 
 .report-screen__complaint-error {

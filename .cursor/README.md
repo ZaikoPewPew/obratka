@@ -16,7 +16,7 @@
 | `leagues.mdc` | Тихий матчинг по `profiles.grade` |
 | `referrals.mdc` | Invite-only: validate → redeem, 2 слота, без наград |
 | `ban.mdc` | Escape-proof `/banned`, операторский / автобан |
-| `reputation.mdc` | Жалобы: 1 тег / окно 6ч; шкала 20…−100; +10 settle; автобан |
+| `reputation.mdc` | Жалобы: 1 тег / окно 6ч от done; шкала 0…−100; +10 settle; автобан |
 | `supabase-sql.mdc` | Порядок SQL, RPC, RLS (glob `supabase/**`) |
 | `security.mdc` | Секреты, RLS, клиент: anon ок; `service_role` никогда |
 | `wallet.mdc` | Баланс: `submit_portfolio` / award; клиент не пишет `balance` |
@@ -55,7 +55,7 @@
 | `/quiz` | Квиз: visual 1–5, условный pain, `tier` (не hire); advice + mic — [`QUIZ.md`](../QUIZ.md) |
 | `/quiz/done` | Финал квиза |
 | `/done` | Запасной success (deep link) |
-| `/report` | Листы + жалоба (1 тег, окно 6ч) → reputation v2 |
+| `/report` | Листы + жалоба (1 тег, окно 6ч от done; кнопку вне окна скрывать) → reputation (старт 0) |
 | `/banned` | Аккаунт заблокирован (escape-proof; в т.ч. автобан) |
 
 | Что | Где |
@@ -69,7 +69,7 @@
 
 Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `legendary-online-panel`, `contact-fab`, `tabs-panel`, `account-menu`, `settings-screen`, `success-screen`, `ban-screen`, `report-screen`.
 
-**Home:** вкладки feed/mine/rating (топ-50 `listRatingTop`, кэш `homeListCache`); query через `homeRoute` (`?tab=mine&filter=completed`, Back/Forward без remount); SWR memory + `obratka.homeLists.<userId>`; silent slot patch; feed sort `sortFeedForSlotClosure`; `reviewedByMe` только после submit → disabled + оверлей; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); фильтр Активные/Завершенные (`tabs-panel`; 3/3 → Завершенные); на «Мои на ревью» — free-slot до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / `homePendingLimit*`); точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`; гаснет при открытии feed); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`; гаснет при открытии «Завершенные»); fixed-чип «Топы в сети» (`legendary-online-panel`); FAB «быстрая связь» (`contact-fab`); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) + `--on-dark` через `backdropLuminance`; на `open`/reload — entrance cascade `--home-screen-reveal-delay-*` (topbar → body → dock `motion-reveal-dock` **без** opacity на предке glass → fab). Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache` + `clearMineReadySeen` + `clearFeedSeen`.
+**Home:** вкладки feed/mine/rating (топ-50 `listRatingTop`, кэш `homeListCache`); query через `homeRoute` (`?tab=mine&filter=completed`, Back/Forward без remount); SWR memory + `obratka.homeLists.<userId>`; silent slot patch; feed sort `sortFeedForSlotClosure`; `reviewedByMe` после submit → фильтр из ленты; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); фильтр Активные/Завершенные (`tabs-panel`; 3/3 → Завершенные); на «Мои на ревью» — free-slot до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / `homePendingLimit*`); точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`; гаснет при открытии feed); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`; гаснет при открытии «Завершенные»); fixed-чип «Топы в сети» (`legendary-online-panel`); FAB «быстрая связь» (`contact-fab`); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) + `--on-dark` через `backdropLuminance`; на `open`/reload — entrance cascade `--home-screen-reveal-delay-*` (topbar → body → dock `motion-reveal-dock` **без** opacity на предке glass → fab). Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache` + `clearMineReadySeen` + `clearFeedSeen`.
 **Url-screen:** чип `.url-screen__back` (`urlScreenBack*`) → home; на done скрыт.  
 Подробно: [`home-screen/README.md`](../src/components/home-screen/README.md), [`url-screen/README.md`](../src/components/url-screen/README.md).
 
@@ -101,7 +101,7 @@ SQL / API: `supabase/sql/referrals.sql`, `src/api/referrals.js`.
 ## Ban (шпаргалка)
 
 `profiles.banned_at` → `/banned`. Клиент не пишет ban/tier/reputation. UI: статичный `banBrandMarkSvg`, не `setVariant("invalid")`.  
-Автобан: жалоба (−20) → `reputation <= -100` → `banned_at`. Чистые ревью после 6ч → +10 (`settle_review_reputation_rewards`). Старт `20`. Оператор: [`supabase/BAN.md`](../supabase/BAN.md).  
+Автобан: жалоба (−20) → `reputation <= -100` → `banned_at`. Чистые ревью после 6ч от done → +10 (`settle_review_reputation_rewards`). Старт `0`. Оператор: [`supabase/BAN.md`](../supabase/BAN.md).  
 Жалобы: `reputation.mdc`, `supabase/sql/review_complaints.sql`, `src/api/reviewComplaints.js`.
 
 ## Auth (шпаргалка)
@@ -140,7 +140,7 @@ API: `src/api/auth.js`. Edge: `supabase/functions/telegram-auth/`.
 | `portfolios.sql` | очередь + лиги |
 | `portfolio_submit.sql` | RPC `submit_portfolio` (atomic spend+insert, max 1 pending) |
 | `review_claims.sql` | claim-слоты (после portfolios); award в trigger |
-| `review_complaints.sql` | reputation v2 (старт 20 / бан −100 / 1 тег / 6ч / +10 settle) |
+| `review_complaints.sql` | reputation (старт 0 / бан −100 / 1 тег / 6ч от done / +10 settle) |
 | `ban-templates.sql` | операторский бан |
 
 Порядок и паттерны — `supabase-sql.mdc`.

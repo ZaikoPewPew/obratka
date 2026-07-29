@@ -22,7 +22,7 @@
 | `success*` | `/done` |
 | `settings*` | `/settings` (заглушка) |
 | `ban*` | `/banned` |
-| `reportScreen*` / `reportComplaint*` / `complaintTag*` | `/report` (листы + жалоба: ровно 1 тег, окно 6ч — `reportComplaintWindowClosed*`; теги v1: `low_effort` · `spam` · `harassment` · `offensive` · `ai_slop`) |
+| `reportScreen*` / `reportComplaint*` / `complaintTag*` | `/report` (листы + жалоба: ровно 1 тег, окно 6ч от done — `reportComplaintWindowClosed`; вне окна кнопку скрывать; теги v1: `low_effort` · `spam` · `harassment` · `offensive` · `ai_slop`) |
 | `review*` / `reviewRec*` / `reviewAdviceRec*` / `reviewTier*` / `reviewPain*` / `reviewContextShort`·`Value*`·`Hint*` / `reviewVisualShort`·`Value*`·`Hint*` (1–5) / `report*` / `reportDictationTitle` | `/quiz` (шкалы + условный pain + tier + микрофон в совете), PDF; rec на `/review` |
 | `frame*` / `controls*` / `embedBlocked*` | iframe-shell `/review` (в т.ч. external viewer) |
 

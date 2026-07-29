@@ -52,7 +52,7 @@ where email = 'user@example.com';
 
 Колонки `banned_at` / `ban_reason` клиенту read-only (триггер `protect_profiles_ban`). INSERT в `portfolios` / `reviews` для забаненных режет RLS (`is_profile_banned`).
 
-Автобан: жалобы на листы снижают `profiles.reputation` (−20 за тег); при `reputation <= -100` выставляется `banned_at` (`ban_reason = reputation`). Старт **20**; после окна 6ч без жалобы ревьюер получает +10. Апелляция — «Связаться». См. [`supabase/BAN.md`](../../../supabase/BAN.md), `reputation.mdc`.
+Автобан: жалобы на листы снижают `profiles.reputation` (−20 за тег); при `reputation <= -100` выставляется `banned_at` (`ban_reason = reputation`). Старт **0**; после окна 6ч без жалобы ревьюер получает +10. Апелляция — «Связаться». См. [`supabase/BAN.md`](../../../supabase/BAN.md), `reputation.mdc`.
 
 ## Стили
 

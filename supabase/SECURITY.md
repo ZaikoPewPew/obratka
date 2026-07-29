@@ -25,8 +25,8 @@
 | `redeem_referral(text)` | нет | да | один раз на аккаунт |
 | `spend_submit_cost()` | нет | да | legacy списание; подача — `submit_portfolio` |
 | `submit_portfolio(text,text,text,text)` | нет | да | atomic spend + insert, max 1 pending; reject non-http(s) URL (`invalid_url`) |
-| `submit_review_complaint(uuid, text[])` | нет | да | жалоба на лист (1 тег, окно 6ч) |
-| `settle_review_reputation_rewards()` | нет | да | lazy +10 за чистые ревью после окна |
+| `submit_review_complaint(uuid, text[])` | нет | да | жалоба на лист (1 тег, окно 6ч от done) |
+| `settle_review_reputation_rewards()` | нет | да | lazy +10 за чистые ревью после окна (от completed_at) |
 | `heartbeat_legendary_presence()` | нет | да | ping `last_seen_at` только для `tier=legendary` |
 | `list_online_legendaries()` | нет | да | список онлайн VIP (id/name/avatar) |
 | `legendary_presence_ttl()` | нет | нет | internal TTL 2 min |

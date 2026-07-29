@@ -460,10 +460,10 @@ export function isPortfolioOpenForReview(item) {
 
 /**
  * Порядок ленты «На ревью» под быстрое закрытие target слотов автора:
- * 1) уже отправил отчёт (`reviews`) — вниз (на home disabled);
- * 2) меньше остаётся до target — выше (сначала 2/3, потом 1/3, потом 0/3);
- * 3) tie-break: старше выше (`createdAt` ASC, FIFO).
+ * 1) меньше остаётся до target — выше (сначала 2/3, потом 1/3, потом 0/3);
+ * 2) tie-break: старше выше (`createdAt` ASC, FIFO).
  * Live claims не двигают карточку вниз — дверь открыта, пока completed < target.
+ * `reviewedByMe` уже отфильтрованы в `listPortfoliosForReview`.
  * Стабильный сорт: не мутирует вход.
  *
  * @param {PortfolioQueueItem[]} items
@@ -477,13 +477,11 @@ function sortFeedForSlotClosure(items) {
       return {
         item,
         index,
-        reviewedByMe: item.reviewedByMe ? 1 : 0,
         remaining: Math.max(0, target - completed),
         createdAt: typeof item.createdAt === "string" ? item.createdAt : "",
       };
     })
     .sort((a, b) => {
-      if (a.reviewedByMe !== b.reviewedByMe) return a.reviewedByMe - b.reviewedByMe;
       if (a.remaining !== b.remaining) return a.remaining - b.remaining;
       if (a.createdAt !== b.createdAt) return a.createdAt < b.createdAt ? -1 : 1;
       return a.index - b.index;
@@ -501,13 +499,13 @@ export function clearSubmittedPortfolios() {
 /**
  * Очередь на ревью: чужие pending в лиге ревьюера (RLS), без своих.
  * Карточка остаётся до 3/3 completed-отчётов (`status=pending`);
- * `reviewedByMe` — только после INSERT в `reviews` (submit отчёта), не claim /
- * abort / уход с квиза. На home такие карточки disabled + оверлей, без модалки.
+ * `reviewedByMe` — после INSERT в `reviews` (submit отчёта), не claim /
+ * abort / уход с квиза — такие кейсы **фильтруются из ленты**.
  * Active claims не прячут карточку и не закрывают claim: дверь =
  * `reviews_count < target`. Late in-flight после done сдаёт лист и получает +10.
  *
  * Порядок (после слотов) — `sortFeedForSlotClosure`: ближе к target
- * (больше completed) → старше (FIFO); `reviewedByMe` вниз. Не newest-first.
+ * (больше completed) → старше (FIFO). Не newest-first.
  *
  * @returns {Promise<PortfolioQueueItem[]>}
  */
@@ -557,8 +555,9 @@ export async function listPortfoliosForReview() {
     item.reviewedByMe = reviewedIds.has(item.id);
     return item;
   });
+  const open = mapped.filter((item) => !item.reviewedByMe);
 
-  return sortFeedForSlotClosure(await attachReviewerSlots(mapped));
+  return sortFeedForSlotClosure(await attachReviewerSlots(open));
 }
 
 /**
@@ -596,7 +595,8 @@ export async function listMyPortfolios() {
 
 /**
  * Id чужих pending-портфолио в ленте (для точки «новый кейс» на «На ревью»).
- * Лёгкий запрос: только id, без слотов / reviewedByMe / сорта. Лиги — через RLS.
+ * Без слотов / сорта; исключает уже отревьюенные (`reviews`), как
+ * `listPortfoliosForReview`. Лиги — через RLS.
  *
  * @returns {Promise<string[]>}
  */
@@ -624,9 +624,24 @@ export async function listFeedPortfolioIds() {
     return [];
   }
 
+  const { data: myReviews, error: reviewsError } = await supabase
+    .from("reviews")
+    .select("portfolio_id")
+    .eq("reviewer_id", user.id);
+
+  if (reviewsError && import.meta.env.DEV) {
+    console.warn("[portfolios] listFeedPortfolioIds reviews", reviewsError.message);
+  }
+
+  const reviewedIds = new Set(
+    (myReviews || [])
+      .map((r) => (r && typeof r.portfolio_id === "string" ? r.portfolio_id : ""))
+      .filter(Boolean),
+  );
+
   return (rows || [])
     .map((row) => (row?.id != null ? String(row.id) : ""))
-    .filter(Boolean);
+    .filter((id) => id && !reviewedIds.has(id));
 }
 
 /**

@@ -15,12 +15,12 @@ export const REVIEW_COMPLAINT_TAGS = /** @type {const} */ ([
 ]);
 
 /** Стартовое значение, если в сессии/профиле ещё нет поля. */
-export const REPUTATION_DEFAULT = 20;
+export const REPUTATION_DEFAULT = 0;
 
 /** Пол шкалы / порог автобана (зеркало SQL `review_complaint_ban_threshold`). */
 export const REPUTATION_FLOOR = -100;
 
-/** Окно жалобы после submit ревью (зеркало SQL `review_complaint_window`). */
+/** Окно жалобы после done портфолио (зеркало SQL `review_complaint_window`). */
 export const COMPLAINT_WINDOW_MS = 6 * 60 * 60 * 1000;
 
 /**
@@ -90,14 +90,12 @@ export function getReputation() {
 }
 
 /**
- * Подпись чипа / title: абсолют со знаком (`+20` / `0` / `-40`).
+ * Подпись чипа / title: абсолют без плюса (`100` / `0` / `-20`).
  * @param {number} [reputation]
  * @returns {string}
  */
 export function formatReputation(reputation = getReputation()) {
-  const n = clampReputation(reputation);
-  if (n === 0) return "0";
-  return n > 0 ? `+${n}` : String(n);
+  return String(clampReputation(reputation));
 }
 
 /**
@@ -121,26 +119,27 @@ export function writeReputationLocal(next) {
 }
 
 /**
- * Deadline окна жалобы (ISO) или null, если createdAt битый.
- * @param {string | null | undefined} createdAt
+ * Deadline окна жалобы (ISO) или null, если completedAt битый.
+ * Старт окна — `portfolios.completed_at` (момент done / 3 из 3).
+ * @param {string | null | undefined} completedAt
  * @returns {string | null}
  */
-export function complaintOpenUntil(createdAt) {
-  if (typeof createdAt !== "string" || !createdAt) return null;
-  const start = Date.parse(createdAt);
+export function complaintOpenUntil(completedAt) {
+  if (typeof completedAt !== "string" || !completedAt) return null;
+  const start = Date.parse(completedAt);
   if (!Number.isFinite(start)) return null;
   return new Date(start + COMPLAINT_WINDOW_MS).toISOString();
 }
 
 /**
- * Можно ли ещё жаловаться на лист (клиентское зеркало окна 6ч).
- * @param {{ createdAt?: string | null; complained?: boolean }} sheet
+ * Можно ли ещё жаловаться на лист (клиентское зеркало окна 6ч от done).
+ * @param {{ completedAt?: string | null; complained?: boolean }} sheet
  * @param {number} [nowMs]
  * @returns {boolean}
  */
 export function canComplainAboutReview(sheet, nowMs = Date.now()) {
   if (!sheet || sheet.complained) return false;
-  const until = complaintOpenUntil(sheet.createdAt);
+  const until = complaintOpenUntil(sheet.completedAt);
   if (!until) return false;
   return nowMs <= Date.parse(until);
 }
@@ -213,6 +212,24 @@ export async function listPortfolioReviewSheets(portfolioId) {
   } = await supabase.auth.getUser();
   if (!user?.id) return [];
 
+  const { data: portfolioRow, error: portfolioError } = await supabase
+    .from("portfolios")
+    .select("completed_at")
+    .eq("id", portfolioId)
+    .maybeSingle();
+
+  if (portfolioError && import.meta.env.DEV) {
+    console.warn(
+      "[reviewComplaints] listPortfolioReviewSheets portfolio",
+      portfolioError.message,
+    );
+  }
+
+  const completedAt =
+    portfolioRow && typeof portfolioRow.completed_at === "string"
+      ? portfolioRow.completed_at
+      : null;
+
   const { data: rows, error } = await supabase
     .from("reviews")
     .select(
@@ -255,6 +272,7 @@ export async function listPortfolioReviewSheets(portfolioId) {
   }
 
   const nowMs = Date.now();
+  const openUntil = complaintOpenUntil(completedAt);
 
   return (rows || [])
     .map((row) => {
@@ -262,7 +280,6 @@ export async function listPortfolioReviewSheets(portfolioId) {
       const createdAt =
         typeof row.created_at === "string" ? row.created_at : null;
       const complained = complainedIds.has(row.id);
-      const openUntil = complaintOpenUntil(createdAt);
       return {
         id: row.id,
         portfolioId:
@@ -288,7 +305,10 @@ export async function listPortfolioReviewSheets(portfolioId) {
         createdAt,
         complained,
         complaintOpenUntil: openUntil,
-        canComplain: canComplainAboutReview({ createdAt, complained }, nowMs),
+        canComplain: canComplainAboutReview(
+          { completedAt, complained },
+          nowMs,
+        ),
         answers: parseReviewAnswers(row.answers),
       };
     })

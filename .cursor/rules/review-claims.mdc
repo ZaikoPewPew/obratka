@@ -30,8 +30,8 @@ alwaysApply: true
 - Когда `reviews_count` достигает target → `status = done`, лента закрыта; новые claim → `no_slots` / `portfolio_not_pending`.
 - **In-flight без кика:** клиент **не** abort’ит `/review`/`quiz` при закрытии карточки. Heartbeat не делает `go("home")` на ошибке. Late INSERT с живым claim после `done` — ок (`reviews_count` сверх target; **та же** +10). RLS `reviews_insert_own` допускает `status in ('pending','done')`; claim жёстко в триггере.
 - UI слотов на карточке: первые **target** лиц (completed + active); report / PDF / жалобы — **все** листы.
-- RPC-ошибки → `portfolioRpcErrorCode` → home notices (`homeNoSlots*`); `already_reviewed` → silent refresh (карточка disabled + оверлей, без модалки).
-- `reviewedByMe` = строка в `reviews` после submit отчёта, не claim/abort/уход с квиза.
+- RPC-ошибки → `portfolioRpcErrorCode` → home notices (`homeNoSlots*`); `already_reviewed` → silent refresh (карточка исчезает из ленты, без модалки).
+- `reviewedByMe` = строка в `reviews` после submit отчёта, не claim/abort/уход с квиза; такие кейсы **фильтруются** из `listPortfoliosForReview` / `listFeedPortfolioIds`.
 - `portfolio_reviewer_slots` должна быть **VOLATILE** (STABLE → PostgREST 405); в начале RPC — `purge_expired_review_claims` (expired не светятся в UI до следующего claim).
 - Apply SQL: [`supabase/sql/README.md`](../../supabase/sql/README.md) § «Как применять» / «Повторный apply».
 - Продукт: [`PROJECT.md`](../../PROJECT.md) § Claims, слоты и overshoot.

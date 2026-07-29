@@ -74,7 +74,6 @@ import currencyReferalUrl from "../../assets/home/modal/currency-referal.png";
 import reviewIntroVideoUrl from "../../assets/video/primer.mp4";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
 import lockIconSvg from "../../assets/home/lock.svg?raw";
-import reviewedCheckIconSvg from "../../assets/home/reviewed-check.svg?raw";
 import reputationNeutralIconSvg from "../../assets/home/reputation-neutral.svg?raw";
 import reputationPositiveIconSvg from "../../assets/home/reputation-positive.svg?raw";
 import reputationNegativeIconSvg from "../../assets/home/reputation-negative.svg?raw";
@@ -210,24 +209,6 @@ function createSubmitIcon(kind) {
     throw new Error(`${kind}.svg must be a root <svg>`);
   }
   svg.classList.add("home-screen__tabbar-submit-icon");
-  svg.setAttribute("aria-hidden", "true");
-  svg.setAttribute("width", "24");
-  svg.setAttribute("height", "24");
-  return svg;
-}
-
-/**
- * Галочка «отчёт отправлен» на превью карточки ленты.
- * @returns {SVGElement}
- */
-function createReviewedCheckIcon() {
-  const wrap = document.createElement("span");
-  wrap.innerHTML = reviewedCheckIconSvg.trim();
-  const svg = wrap.firstElementChild;
-  if (!(svg instanceof SVGElement)) {
-    throw new Error("reviewed-check.svg must be a root <svg>");
-  }
-  svg.classList.add("home-screen__preview-reviewed-chip-icon");
   svg.setAttribute("aria-hidden", "true");
   svg.setAttribute("width", "24");
   svg.setAttribute("height", "24");
@@ -2362,24 +2343,6 @@ export function createHomeScreen({
     previewBrowser.append(previewBrowserBar, previewBrowserViewport);
     preview.append(previewBrowser);
 
-    if (item.reviewedByMe) {
-      const reviewed = document.createElement("div");
-      reviewed.className = "home-screen__preview-reviewed";
-      reviewed.setAttribute("aria-hidden", "true");
-
-      const chip = document.createElement("span");
-      chip.className = "home-screen__preview-reviewed-chip";
-
-      const label = document.createElement("p");
-      label.className = "home-screen__preview-reviewed-label";
-      label.setAttribute("data-i18n", "homeCardReviewedLabel");
-      label.textContent = t.homeCardReviewedLabel ?? "";
-
-      chip.append(createReviewedCheckIcon(), label);
-      reviewed.append(chip);
-      preview.append(reviewed);
-    }
-
     const meta = document.createElement("div");
     meta.className = "home-screen__card-meta";
 
@@ -2482,16 +2445,8 @@ export function createHomeScreen({
       button.addEventListener("click", () => {
         openOwnCard(latestItem(item.id) ?? item);
       });
-    } else if (item.reviewedByMe) {
-      // Только после submit отчёта (`reviews` row), не claim / abort.
-      button.classList.add("home-screen__card--reviewed");
-      button.disabled = true;
-      button.title = t.homeCardReviewedLabel ?? t.homeAlreadyReviewedTitle;
-      button.setAttribute(
-        "aria-label",
-        t.homeCardReviewedLabel ?? t.homeAlreadyReviewedTitle,
-      );
     } else {
+      // `reviewedByMe` уже отфильтрованы в `listPortfoliosForReview`.
       button.addEventListener("click", () => {
         openReviewIntro(latestItem(item.id) ?? item);
       });

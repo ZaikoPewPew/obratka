@@ -86,7 +86,7 @@
 `/review` = просмотр портфолио + таймер **45 s** (`REVIEW_SESSION_SECONDS` в `src/config/review.js`) + опциональная надиктовка (чип rec → `answers.dictation`).  
 iframe: таймер паузится при уходе со вкладки; external: wall-clock без паузы, конец → `Timer-end.wav` + quiz.  
 `/quiz` = опрос (`review-panel` + [`scale-slider`](src/components/scale-slider/README.md) на шагах понятность/визуал **1–5**; условный pain; рыночный `tier`); в поле «Главный совет» — микрофон. Спека: [`QUIZ.md`](QUIZ.md). Не путать с login-`session.js` (`obratka.session`).  
-`/report` = листы ревью автора (+ секция надиктовки) + жалоба (1 тег, окно 6ч) → reputation v2 (старт 20 / бан −100 / +10 settle). Вход только когда собраны все ревью.  
+`/report` = листы ревью автора (+ секция надиктовки) + жалоба (1 тег, окно 6ч от done) → reputation (старт 0 / бан −100 / +10 settle). Вход только когда собраны все ревью.  
 `/banned` = бан (в т.ч. автобан при `reputation <= -100`).
 
 Клиентский кэш ленты: `sessionStorage` ключ `obratka.homeLists.<userId>`; seen готовых отчётов: `localStorage` `obratka.mineReadySeen.<userId>`; seen кейсов ленты: `localStorage` `obratka.feedSeen.<userId>` (все сбрасываются на logout).  

@@ -676,27 +676,27 @@ export function createReportScreen(opts = {}) {
 
     textCol.append(nameEl, labelEl);
     meta.append(avatar, textCol);
-
-    const complainBtn = document.createElement("button");
-    complainBtn.type = "button";
-    complainBtn.className = "report-screen__complain";
+    li.append(meta);
 
     if (sheet.complained) {
+      const complainBtn = document.createElement("button");
+      complainBtn.type = "button";
+      complainBtn.className =
+        "report-screen__complain report-screen__complain--done";
       complainBtn.disabled = true;
       complainBtn.textContent = t.reportComplaintSubmitted ?? "";
-      complainBtn.classList.add("report-screen__complain--done");
-    } else if (!sheet.canComplain) {
-      complainBtn.disabled = true;
-      complainBtn.textContent = t.reportComplaintWindowClosedButton ?? "";
-      complainBtn.classList.add("report-screen__complain--done");
-    } else {
+      li.append(complainBtn);
+    } else if (sheet.canComplain) {
+      const complainBtn = document.createElement("button");
+      complainBtn.type = "button";
+      complainBtn.className = "report-screen__complain";
       complainBtn.textContent = t.reportComplaintButton ?? "";
       complainBtn.addEventListener("click", () => {
         openComplaintModal(sheet.id, name);
       });
+      li.append(complainBtn);
     }
 
-    li.append(meta, complainBtn);
     return li;
   }
 

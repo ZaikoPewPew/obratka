@@ -2,17 +2,18 @@
 -- Depends on: profiles.sql, portfolios.sql (reviews).
 -- Применяется через Supabase migrations / MCP apply_migration.
 --
--- v2: старт 20; минус до −100; одна причина на жалобу; окно 6ч; +10 после окна без жалобы.
+-- Старт reputation = 0; минус до −100; одна причина на жалобу;
+-- окно 6ч от portfolios.completed_at (момент done / 3 из 3); +10 после окна без жалобы.
 
 -- ---------------------------------------------------------------------------
 -- profiles.reputation (клиент read-only; пишет только RPC / SQL Editor)
 -- ---------------------------------------------------------------------------
 
 alter table public.profiles
-  add column if not exists reputation integer not null default 20;
+  add column if not exists reputation integer not null default 0;
 
 alter table public.profiles
-  alter column reputation set default 20;
+  alter column reputation set default 0;
 
 alter table public.profiles
   drop constraint if exists profiles_reputation_check;
@@ -21,12 +22,17 @@ alter table public.profiles
   add constraint profiles_reputation_check
   check (reputation >= -100);
 
--- Legacy → v2: только старый default 100 (чип показывал «0»). Не трогаем
--- уже сдвинутые / отрицательные; повторный apply не затирает наигранную шкалу.
+-- Legacy → v2: только старый default 100 (чип показывал «0»).
 update public.profiles
 set reputation = 20
 where banned_at is null
   and reputation = 100;
+
+-- ONE-SHOT: старт 20 → 0. После первого apply на prod — закомментировать
+-- (иначе re-apply обнулит тех, кто снова дошёл до ровно 20 через settle).
+update public.profiles
+set reputation = 0
+where reputation = 20;
 
 -- Bypass для security definer RPC (автоштраф / автобан / +10 settle).
 -- Клиентский JWT всё ещё authenticated — без флага protect_* режет UPDATE.
@@ -72,6 +78,34 @@ create trigger profiles_protect_reputation
   before update on public.profiles
   for each row
   execute function public.protect_profiles_reputation();
+
+-- ---------------------------------------------------------------------------
+-- portfolios.completed_at — старт окна жалобы / settle (момент done)
+-- ---------------------------------------------------------------------------
+
+alter table public.portfolios
+  add column if not exists completed_at timestamptz;
+
+-- Backfill: N-е ревью по порядку (= момент 3 из 3), иначе updated_at.
+update public.portfolios p
+set completed_at = coalesce(
+  (
+    select r.created_at
+    from public.reviews r
+    where r.portfolio_id = p.id
+    order by r.created_at asc
+    offset greatest(p.target_reviews - 1, 0)
+    limit 1
+  ),
+  p.updated_at,
+  p.created_at
+)
+where p.status = 'done'
+  and p.completed_at is null;
+
+create index if not exists portfolios_completed_at_idx
+  on public.portfolios (completed_at)
+  where completed_at is not null;
 
 -- ---------------------------------------------------------------------------
 -- reviews.reputation_settled_at — окно жалобы закрыто / +10 выдан или отменён
@@ -145,7 +179,8 @@ grant select on table public.review_complaints to authenticated;
 -- ---------------------------------------------------------------------------
 -- Серверный конфиг (не отдаём клиенту как SoT)
 -- ---------------------------------------------------------------------------
--- Старт reputation = 20; вес тега = 20; ровно 1 тег на жалобу;
+-- Старт reputation = 0; вес тега = 20; ровно 1 тег на жалобу;
+-- окно 6ч от portfolios.completed_at; +10 settle после окна без жалобы.
 -- окно жалобы 6ч; +10 после окна без жалобы; бан при reputation <= -100.
 
 create or replace function public.review_reputation_default()
@@ -221,14 +256,16 @@ begin
   for rec in
     select r.id, r.reviewer_id
     from public.reviews r
+    join public.portfolios p on p.id = r.portfolio_id
     where r.reputation_settled_at is null
-      and r.created_at <= now() - window_iv
+      and p.completed_at is not null
+      and p.completed_at <= now() - window_iv
       and not exists (
         select 1
         from public.review_complaints c
         where c.review_id = r.id
       )
-    order by r.created_at asc
+    order by p.completed_at asc, r.created_at asc
     limit 200
     for update of r skip locked
   loop
@@ -330,17 +367,18 @@ begin
     raise exception 'review_not_found';
   end if;
 
-  if r.created_at is null
-     or now() > r.created_at + public.review_complaint_window() then
-    raise exception 'complaint_window_closed';
-  end if;
-
   select * into p
   from public.portfolios
   where id = r.portfolio_id;
 
   if not found then
     raise exception 'portfolio_not_found';
+  end if;
+
+  -- Окно жалобы: 6ч от done портфолио (completed_at), не от submit листа.
+  if p.completed_at is null
+     or now() > p.completed_at + public.review_complaint_window() then
+    raise exception 'complaint_window_closed';
   end if;
 
   if p.owner_id is distinct from uid then
