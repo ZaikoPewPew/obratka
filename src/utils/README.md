@@ -26,7 +26,7 @@
 | `inviteGate.js` | device flag `obratka.inviteGatePassed` после validate; переживает logout / `clearSession` |
 | `backdropLuminance.js` | яркость фона под элементом (home tabbar → `--on-dark`; не ломать glass blur / entrance dock) |
 | `homeRoute.js` | parse/build/canonical query для `/home`: `feed` / `mine` / `rating` и фильтр mine |
-| `homeListCache.js` | SWR-кэш ленты home (`feed`/`mine`/`rating`, memory + `sessionStorage` `obratka.homeLists.<userId>`); `clearHomeListCache` на logout |
+| `homeListCache.js` | SWR-кэш ленты home (`feed`/`mine`/`rating`, memory + `sessionStorage` `obratka.homeLists.<userId>`); UI-hit только непустой массив (`[]` → skeleton); `clearHomeListCache` на logout |
 | `feedSeen.js` | seen id кейсов ленты для точки на «На ревью» (`localStorage` `obratka.feedSeen.<userId>`); открытие feed гасит; seed baseline; `clearFeedSeen` на logout |
 | `mineReadySeen.js` | seen id готовых отчётов для точки на «Мои» / «Завершенные» (`localStorage` `obratka.mineReadySeen.<userId>`); открытие «Завершенные» гасит; `clearMineReadySeen` на logout |
 

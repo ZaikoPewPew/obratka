@@ -2540,14 +2540,17 @@ export function createHomeScreen({
   }
 
   /**
-   * Показать кэш вкладки без skeleton. `[]` — валидный hit.
+   * Показать кэш вкладки без skeleton.
+   * Непустой массив — hit; `null` / `[]` — miss (skeleton → cards|empty).
+   * Пустой `[]` как hit давал flash «шаром покати» на F5, пока refresh не
+   * подтвердит пустоту или не подтянет карточки.
    * @param {HomeTabId} tab
    * @returns {boolean}
    */
   function showTabFromCache(tab) {
     const userId = getSession()?.userId;
     const cached = getCachedHomeList(userId, tab);
-    if (cached == null) return false;
+    if (cached == null || cached.length === 0) return false;
     loading = false;
     revealItems = false;
     wasSkeletonLoading = false;

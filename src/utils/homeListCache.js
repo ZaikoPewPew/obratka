@@ -1,7 +1,8 @@
 /**
  * SWR-кэш вкладок home: feed / mine / rating.
  * Memory + sessionStorage (`obratka.homeLists.<userId>`), чтобы SPA и F5
- * не мигали skeleton при наличии данных.
+ * не мигали skeleton при наличии **непустых** данных. Пустой `[]` для UI —
+ * miss (skeleton), иначе flash empty до revalidate.
  */
 
 /** @typedef {'feed' | 'mine' | 'rating'} HomeListTabId */
@@ -89,7 +90,9 @@ function persist(userId, tabs) {
 }
 
 /**
- * Кэш вкладки: `null` = miss (skeleton), массив (в т.ч. `[]`) = hit.
+ * Кэш вкладки: `null` = miss; непустой массив = hit (UI сразу).
+ * Пустой `[]` для UI — тоже miss (skeleton до confirm refresh), иначе F5
+ * мелькает empty до прихода данных.
  *
  * @param {string | null | undefined} userId
  * @param {HomeListTabId} tab

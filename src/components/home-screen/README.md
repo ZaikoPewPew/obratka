@@ -114,7 +114,7 @@ list pending (RLS лига) → filter !reviewedByMe → attachReviewerSlots →
 
 ### Лента и карточки
 
-SWR: при `open` / смене таба / F5 — если есть кэш вкладки (`feed` / `mine`, memory + `sessionStorage` по `userId`), карточки сразу; иначе skeleton (cold miss). Затем тихий `refresh()` поверх кэша. Пустой `[]` — валидный hit. Кэш сбрасывается на logout (`clearHomeListCache`). Порядок feed в кэше = уже отсортированный ответ `listPortfoliosForReview`.
+SWR: при `open` / смене таба / F5 — если есть **непустой** кэш вкладки (`feed` / `mine` / `rating`, memory + `sessionStorage` по `userId`), карточки сразу; иначе skeleton (cold miss или кэш `[]`). Затем тихий `refresh()` поверх кэша → cards | empty. Пустой `[]` **не** показывают как empty до confirm — иначе flash «шаром покати». Кэш сбрасывается на logout (`clearHomeListCache`). Порядок feed в кэше = уже отсортированный ответ `listPortfoliosForReview`.
 
 После skeleton данные с `motion-reveal` stagger; после тихого refetch при тех же id — только патч reviewer-слотов (без пересборки DOM / thum.io); новые карточки — full rebuild + reveal только для новых id.
 

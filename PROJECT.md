@@ -30,7 +30,7 @@
 
 ### Home — что нового в UX
 
-- **SWR ленты:** `feed` / `mine` / `rating` в memory + `sessionStorage` (`obratka.homeLists.<userId>`); open / смена таба / F5 без skeleton при hit; тихий `refresh`; logout → `clearHomeListCache`.
+- **SWR ленты:** `feed` / `mine` / `rating` в memory + `sessionStorage` (`obratka.homeLists.<userId>`); open / смена таба / F5 без skeleton при **непустом** hit; кэш `[]` → skeleton до confirm refresh; тихий `refresh`; logout → `clearHomeListCache`.
 - **Silent refresh:** при тех же id карточек — патч только reviewer-слотов (без thum.io); новые id — rebuild + reveal только для них.
 - **Порядок feed:** `sortFeedForSlotClosure` — ближе к 3/3 → FIFO (не newest-first). Уже отревьюенные (`reviewedByMe`) **фильтруются** из ленты до сорта. Дверь claim = `reviews_count < target` (live не лимит; late overshoot ок). См. home-screen README.
 - **Отправленный отчёт:** `reviewedByMe` только после INSERT в `reviews`; карточка исчезает из твоей ленты (и из `listFeedPortfolioIds` для точки «новый кейс»), без intro/notice и повторного claim.
