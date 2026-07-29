@@ -79,7 +79,7 @@
 - **Framer на `*.framer.ai`**
 - Cargo (`cargo.site`, `cargocollective.com`), Format, Carbonmade, Read.cv, Are.na, Semplice, Super, Dropfile и аналоги
 - Squarespace, Carrd, Pixieset, Indexhibit, Elementor Cloud, Canva Sites (`*.my.canva.site`)
-- GitHub Pages (`*.github.io`), Netlify (`*.netlify.app`) — заголовки задаёт проект; при блоке сработает iframe fallback
+- GitHub Pages (`*.github.io`), Netlify (`*.netlify.app`) — заголовки задаёт проект; при блоке сработает iframe fallback. Same-origin кейс (app и портфолио на одном `user.github.io`) — iframe ок; детект blocked смотрит только `about:*`, не «readable location»
 - Личные / кастомные домены (в т.ч. Tilda/Framer на своём домене; **Readymag на своём** уйдёт в external через probe/fallback)
 - Опубликованный Webflow: `*.webflow.io`
 

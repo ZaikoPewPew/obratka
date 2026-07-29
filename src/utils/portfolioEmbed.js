@@ -171,9 +171,13 @@ export async function probeReadymagPortfolio(portfolioUrl, opts = {}) {
 }
 
 /**
- * Если iframe-URL кросс-ориджин, а document/location читаются —
- * браузер подставил blank/error (XFO/CSP/сеть) → framing blocked.
- * SecurityError на location → чужой документ реально загрузился.
+ * Framing blocked после load/error optimistic iframe?
+ *
+ * - `about:blank` / `about:*` (XFO/CSP/сеть) → blocked → external UI.
+ * - SecurityError на `location` → чужой документ сел → iframe ok.
+ * - Читаемый `http(s)` href → документ реально загрузился (в т.ч. same-origin
+ *   GH Pages: `…github.io/obratka` ↔ `…github.io/NewPortfolio`) → iframe ok.
+ *   Старый `return true` на любом readable location ложно кидал github.io в external.
  *
  * @param {HTMLIFrameElement | null | undefined} iframe
  * @returns {boolean}
@@ -187,7 +191,9 @@ export function isLikelyFrameBlocked(iframe) {
     if (!href || href === "about:blank" || href.startsWith("about:")) {
       return true;
     }
-    // Same-origin accessible document for a remote portfolio URL = blocked shim.
+    if (/^https?:\/\//i.test(href)) {
+      return false;
+    }
     return true;
   } catch {
     return false;

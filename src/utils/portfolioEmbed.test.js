@@ -204,11 +204,29 @@ describe("isLikelyFrameBlocked", () => {
     assert.equal(isLikelyFrameBlocked(iframe), true);
   });
 
+  it("treats about:neterror as blocked", () => {
+    const iframe = {
+      contentWindow: { location: { href: "about:neterror?e=nssFailure" } },
+    };
+    assert.equal(isLikelyFrameBlocked(iframe), true);
+  });
+
   it("treats cross-origin SecurityError as embedded", () => {
     const iframe = {
       contentWindow: {
         get location() {
           throw new DOMException("Blocked", "SecurityError");
+        },
+      },
+    };
+    assert.equal(isLikelyFrameBlocked(iframe), false);
+  });
+
+  it("keeps same-origin github.io portfolio in iframe", () => {
+    const iframe = {
+      contentWindow: {
+        location: {
+          href: "https://zaikopewpew.github.io/NewPortfolio/",
         },
       },
     };
