@@ -28,6 +28,7 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 | `sql/portfolio_preview_cache.sql` | Storage-бакет `portfolio-previews` для кэша превью-скриншотов (Edge `portfolio-preview`) |
 | `functions/telegram-auth/` | Telegram Login Widget → сессия Supabase Auth |
 | `functions/portfolio-preview/` | Прокси/кэш перед thum.io для превью карточек (429-hardening) |
+| `functions/portfolio-embed-probe/` | XFO/CSP frame-ancestors (+ Readymag HTML) → iframe vs external |
 
 Подробнее по SQL: [`sql/README.md`](sql/README.md).  
 **Бан юзеров:** [`BAN.md`](BAN.md) ← начинать отсюда.  

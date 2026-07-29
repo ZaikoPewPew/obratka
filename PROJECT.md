@@ -260,7 +260,7 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 - Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `side-panel`, `account-menu`, `tabs-panel`, `legendary-online-panel`, `feedback`, `scale-slider`
 - Home state: `src/utils/homeRoute.js` (query) + `homeListCache.js` + `feedSeen.js` + `mineReadySeen.js` (кэши сбрасываются в `exitAuthenticatedSession`)
 - Review timer: `src/config/review.js` (`REVIEW_SESSION_SECONDS`); iframe pause / external wall-clock; end sound `src/assets/audio/Timer-end.wav`
-- Portfolio embed: `src/utils/embedHosts.js` + `portfolioEmbed.js` (Figma/YouTube rewrite; blocklist → external; optimistic iframe + Readymag probe + frame-block fallback). Каталог: [`content/embed-hosts.md`](content/embed-hosts.md)
+- Portfolio embed: `src/utils/embedHosts.js` + `portfolioEmbed.js` + Edge `portfolio-embed-probe` (XFO/CSP; Figma/YouTube rewrite; blocklist → external; optimistic iframe + Readymag probe + frame-block fallback). Каталог: [`content/embed-hosts.md`](content/embed-hosts.md)
 - Dictation: `src/lib/dictation/` (Web Speech MVP; external `setKeepAliveInBackground`)
 - Url-screen: чип «На главную» (`.url-screen__back`, скрыт на done) → `onExit` → home
 

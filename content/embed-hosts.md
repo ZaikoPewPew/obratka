@@ -63,7 +63,7 @@
 - `webflow.com` / `tilda.cc` — редактор и маркетинг. `tilda.ws` — опубликованные проекты на поддомене Tilda (`X-Frame-Options: SAMEORIGIN`, проверено). Сайты на **своём домене** или `*.webflow.io` в этот список **не** входят.
 - `*.framer.website` и `framer.com` режутся. **`*.framer.ai` — не режем** (iframe ок, проверено на `dsgn-thinking.framer.ai`). Кастомный домен Framer — тоже iframe OK.
 - Широкий суффикс `adobe.com` намеренно ловит Adobe Portfolio / Express и соседние страницы Adobe. Опубликованные сайты на `*.myportfolio.com` — отдельная запись (не суффикс `adobe.com`).
-- **Readymag на своём домене** (`oliviagrace.work` и т.п.) суффиксом не ловится: HTML-probe (если CORS пустит) + **iframe fallback** → UI «Открыть и начать». На `readymag.com` / `readymag.website` — сразу external.
+- **Readymag на своём домене** (`oliviagrace.work` и т.п.) суффиксом не ловится: Edge `portfolio-embed-probe` (XFO/CSP) → external; CORS HTML-probe и `about:*` fallback — запасные. На `readymag.com` / `readymag.website` — сразу external. Chromium при XFO `DENY` даёт тот же `SecurityError`, что у живого iframe — без Edge детект blocked не срабатывает.
 - `*.wixsite.com` / `*.pixpa.com` / `*.journoportfolio.com` — в external (заголовки / отчёт 2026-07).
 - `*.vercel.app` — дефолтный CSP Vercel режет чужой iframe (report2); кастомный домен на Vercel — optimistic + fallback.
 - Weebly / Strikingly / Bento / Universe / SmugMug / Google Sites — external (report2).

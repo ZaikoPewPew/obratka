@@ -9,3 +9,7 @@ verify_jwt = false
 # Called directly from <img src> (no Authorization/apikey header available);
 # public thum.io proxy/cache, see functions/portfolio-preview/README.md.
 verify_jwt = false
+
+[functions.portfolio-embed-probe]
+# Authenticated review flow only; server-side XFO/CSP probe (see README).
+verify_jwt = true
