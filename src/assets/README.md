@@ -4,9 +4,9 @@
 
 ## `home/`
 
-Чипы / иконки шапки и карточек ленты (`bone.svg`, `reputation-*.svg`, `plus.svg` / `lock.svg` для CTA «Закинуть», …).
+Чипы / иконки шапки и карточек ленты (`bone.svg`, `reputation-*.svg`, `plus.svg` для CTA «Закинуть», …).
 `reputation-*.svg` — inline через `?raw` (группа `.home-screen__reputation-eyes` для анимации взгляда).
-`plus.svg` / `lock.svg` — inline через `?raw` на кнопке submit (currentColor).
+`plus.svg` — inline через `?raw` на кнопке submit (currentColor).
 
 ### `home/modal/`
 

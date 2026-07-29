@@ -73,7 +73,6 @@ import currencyEmptyDuckUrl from "../../assets/home/modal/currency-empty-duck.pn
 import currencyReferalUrl from "../../assets/home/modal/currency-referal.png";
 import reviewIntroVideoUrl from "../../assets/video/primer.mp4";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
-import lockIconSvg from "../../assets/home/lock.svg?raw";
 import reputationNeutralIconSvg from "../../assets/home/reputation-neutral.svg?raw";
 import reputationPositiveIconSvg from "../../assets/home/reputation-positive.svg?raw";
 import reputationNegativeIconSvg from "../../assets/home/reputation-negative.svg?raw";
@@ -195,18 +194,16 @@ function createReviewIntroVideo() {
 }
 
 /**
- * Plus / lock для кнопки «Закинуть своё» — inline SVG: в `<img>` currentColor не
+ * Plus для кнопки «Закинуть своё» — inline SVG: в `<img>` currentColor не
  * наследует color кнопки.
- * @param {'plus' | 'lock'} kind
  * @returns {SVGElement}
  */
-function createSubmitIcon(kind) {
-  const raw = kind === "lock" ? lockIconSvg : plusIconSvg;
+function createSubmitIcon() {
   const wrap = document.createElement("span");
-  wrap.innerHTML = raw.trim();
+  wrap.innerHTML = plusIconSvg.trim();
   const svg = wrap.firstElementChild;
   if (!(svg instanceof SVGElement)) {
-    throw new Error(`${kind}.svg must be a root <svg>`);
+    throw new Error("plus.svg must be a root <svg>");
   }
   svg.classList.add("home-screen__tabbar-submit-icon");
   svg.setAttribute("aria-hidden", "true");
@@ -570,16 +567,9 @@ export function createHomeScreen({
   const addBtn = document.createElement("button");
   addBtn.type = "button";
   addBtn.className = "home-screen__tabbar-submit";
-  /** @type {'plus' | 'lock'} */
-  let submitIconKind = "plus";
-  addBtn.append(createSubmitIcon(submitIconKind));
+  addBtn.append(createSubmitIcon());
   /** @type {number} */
   let submitErrorFlashTimer = 0;
-  /**
-   * Pending-слот занят по последнему известному факту (кэш / mine-список / RPC).
-   * Нужен, когда `localActiveMinePendingCount()` ещё `null`.
-   */
-  let submitSlotBlocked = false;
 
   const balanceChip = document.createElement("button");
   balanceChip.type = "button";
@@ -1266,7 +1256,6 @@ export function createHomeScreen({
     syncMineFilterPanel();
     addBtn.setAttribute("aria-label", t.homeAddPortfolio);
     addBtn.title = t.homeAddPortfolio;
-    syncSubmitButton();
 
     const balance = getBalance();
     balanceValue.textContent = String(balance);
@@ -1331,28 +1320,6 @@ export function createHomeScreen({
   function buzzSubmitLocked() {
     flashSubmitError();
     playControlErrorBuzz(balanceChip);
-  }
-
-  /**
-   * Нет уток или pending-слот занят → иконка замка.
-   * @returns {boolean}
-   */
-  function isSubmitLocked() {
-    if (!canSubmitPortfolio()) return true;
-    const pending = localActiveMinePendingCount();
-    if (pending != null) {
-      submitSlotBlocked = pending >= MAX_MINE_PENDING;
-      return submitSlotBlocked;
-    }
-    return submitSlotBlocked;
-  }
-
-  /** Плюс ↔ замок по доступности подачи. */
-  function syncSubmitButton() {
-    const nextKind = isSubmitLocked() ? "lock" : "plus";
-    if (nextKind === submitIconKind) return;
-    submitIconKind = nextKind;
-    addBtn.replaceChildren(createSubmitIcon(nextKind));
   }
 
   /**
@@ -2677,7 +2644,6 @@ export function createHomeScreen({
     ) {
       items = nextItems;
       patchListSlots(nextItems);
-      syncSubmitButton();
       return;
     }
     const prevIds = new Set(prevVisible.map((item) => item.id).filter(Boolean));
@@ -2690,7 +2656,6 @@ export function createHomeScreen({
       revealNewOnly: hadRenderedItems,
       prevIds,
     });
-    syncSubmitButton();
   }
 
   async function refresh() {
