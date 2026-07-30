@@ -544,31 +544,38 @@
   font-weight: var(--home-screen-rating-role-weight);
 }
 
-.home-screen__rating-balance {
+.home-screen__rating-reputation {
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  gap: var(--home-screen-rating-balance-gap);
-  min-width: var(--home-screen-rating-balance-min-width);
-  height: var(--home-screen-rating-balance-height);
-  padding-inline: var(--home-screen-rating-balance-padding-x);
-  border-radius: var(--home-screen-rating-balance-radius);
-  background: var(--home-screen-rating-balance-bg);
+  gap: var(--home-screen-rating-reputation-gap);
+  min-width: var(--home-screen-rating-reputation-min-width);
+  height: var(--home-screen-rating-reputation-height);
+  padding-inline: var(--home-screen-rating-reputation-padding-x);
+  border-radius: var(--home-screen-rating-reputation-radius);
+  background: var(--home-screen-rating-reputation-bg);
   color: var(--color-text);
   font-family: var(--font-family);
-  font-size: var(--home-screen-rating-balance-size);
-  font-weight: var(--home-screen-rating-balance-weight);
+  font-size: var(--home-screen-rating-reputation-size);
+  font-weight: var(--home-screen-rating-reputation-weight);
   line-height: normal;
   white-space: nowrap;
 }
 
-.home-screen__rating-balance-icon {
+.home-screen__rating-reputation-icon {
   display: block;
   flex-shrink: 0;
-  width: var(--home-screen-rating-balance-icon);
-  height: var(--home-screen-rating-balance-icon);
+  width: var(--home-screen-rating-reputation-icon);
+  height: var(--home-screen-rating-reputation-icon);
+  overflow: visible;
+  color: inherit;
+}
+
+/* В топе глазки статичны — idle-loop только у чипа в шапке. */
+.home-screen__rating-reputation .home-screen__reputation-eyes {
+  animation: none;
 }
 
 /* Skeleton рейтинга: кости static + общий shimmer-sweep по карточке */
@@ -615,8 +622,8 @@
   width: var(--home-screen-rating-skeleton-line-role-width);
 }
 
-.home-screen__rating-balance--skeleton {
-  width: var(--home-screen-rating-skeleton-balance-width);
+.home-screen__rating-reputation--skeleton {
+  width: var(--home-screen-rating-skeleton-reputation-width);
   background-color: var(--home-screen-skeleton-base);
 }
 

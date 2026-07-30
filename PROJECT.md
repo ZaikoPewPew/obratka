@@ -40,7 +40,7 @@
 - **Фильтр «Мои»:** сегмент Активные / Завершенные (`tabs-panel`); завершённые = 3/3 (`reviewsCount >= targetReviews`).
 - **Free-slot «Мои на ревью»:** до `MAX_MINE_PENDING` (=1) — реальная карточка или dashed «Свободный слот» (`homeMineSlotFree*`). CTA «Закинуть»: сначала занятый слот → `homePendingLimit*`, потом нет монет → buzz на submit + чипе баланса. Подача — RPC `submit_portfolio` (atomic spend+insert).
 - **Экономика:** `REVIEW_REWARD = 10`, `SUBMIT_COST = 30` (старт `balance = 0` → 3 чужих ревью до своей подачи). Награда только после submit отчёта; abort/release claim — без монет. Свободный слот + нет монет на «Закинуть своё» → error-buzz на submit + чипе баланса (без модалки). Правило: `.cursor/rules/wallet.mdc`.
-- **Вкладка «Рейтинг»:** третий tab `rating`; топ-50 по `balance` (`listRatingTop` / `rating_leaderboard.sql`, снапшот раз в сутки); карточки в `.home-screen__rating-list` (aside `rating/` **не** монтируется); плашка баланса `min-width`/`height` 52px, padding-x 16px.
+- **Вкладка «Рейтинг»:** третий tab `rating`; топ-50 по `reputation` (`listRatingTop` / `rating_leaderboard.sql`, снапшот раз в сутки); карточки в `.home-screen__rating-list` (aside `rating/` **не** монтируется); плашка репутации `min-width`/`height` 52px, padding-x 16px (иконки positive/neutral/negative).
 - **«Топы в сети»:** fixed-чип слева снизу (`legendary-online-panel` + heartbeat/list RPC); скрыт, если никого нет.
 - **Deep links home:** `/home`, `?tab=mine`, `?tab=mine&filter=completed`, `?tab=rating`; query канонизирует `homeRoute.js`, Back/Forward переключает вид без remount.
 - **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 45` (review shell + intro copy). iframe — пауза при скрытой вкладке; external — wall-clock без паузы; конец → `src/assets/audio/Timer-end.wav` + стоп надиктовки → quiz.
@@ -205,7 +205,7 @@ SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `p
 | Апелляция | вручную («Связаться» на `/banned`) |
 | SQL / API | [`review_complaints.sql`](supabase/sql/review_complaints.sql), [`reviewComplaints.js`](src/api/reviewComplaints.js) |
 
-**Вне v1:** `misleading`, очередь модерации, троттлинг жалобщиков, публичный рейтинг репутации, влияние на лиги.
+**Вне v1:** `misleading`, очередь модерации, троттлинг жалобщиков, влияние на лиги.
 
 ## Слои UI
 

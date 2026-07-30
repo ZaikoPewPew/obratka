@@ -565,7 +565,7 @@
    * App modal (Figma Modal: Size=600 / 800 / Size3).
    * Красный #EA4335 в макете — только слот контента, не фон в UI.
    */
-  --app-modal-z: var(--z-modal);
+  --app-modal-z: calc(var(--z-modal) + 30);
   --app-modal-backdrop-padding: var(--space-6);
   --app-modal-width-md: 600px;
   --app-modal-width-lg: 800px;
@@ -636,7 +636,7 @@
    * Side panel (Figma SidePanel 517:4740).
    * Справа, inset 16; ширина 500; высота = экран − insets.
    */
-  --side-panel-z: var(--z-modal);
+  --side-panel-z: calc(var(--z-modal) + 20);
   --side-panel-inset: var(--space-4);
   --side-panel-width: 650px;
   --side-panel-padding: var(--space-6);
@@ -877,19 +877,19 @@
   --home-screen-rating-name-weight: var(--home-screen-name-weight);
   --home-screen-rating-role-size: var(--home-screen-meta-font-size);
   --home-screen-rating-role-weight: var(--home-screen-role-weight);
-  --home-screen-rating-balance-height: 52px;
-  --home-screen-rating-balance-min-width: 52px;
-  --home-screen-rating-balance-padding-x: var(--space-4);
-  --home-screen-rating-balance-radius: var(--radius-md);
-  --home-screen-rating-balance-bg: var(--color-surface);
-  --home-screen-rating-balance-gap: var(--space-1);
-  --home-screen-rating-balance-icon: var(--home-screen-chip-icon);
-  --home-screen-rating-balance-size: var(--home-screen-meta-font-size);
-  --home-screen-rating-balance-weight: var(--font-weight-medium);
+  --home-screen-rating-reputation-height: 52px;
+  --home-screen-rating-reputation-min-width: 52px;
+  --home-screen-rating-reputation-padding-x: var(--space-4);
+  --home-screen-rating-reputation-radius: var(--radius-md);
+  --home-screen-rating-reputation-bg: var(--color-surface);
+  --home-screen-rating-reputation-gap: var(--space-1);
+  --home-screen-rating-reputation-icon: var(--home-screen-chip-icon);
+  --home-screen-rating-reputation-size: var(--home-screen-meta-font-size);
+  --home-screen-rating-reputation-weight: var(--font-weight-medium);
   /* Skeleton карточки рейтинга: базы/шиммер общие с лентой */
   --home-screen-rating-skeleton-line-name-width: 119px;
   --home-screen-rating-skeleton-line-role-width: 206px;
-  --home-screen-rating-skeleton-balance-width: 94px;
+  --home-screen-rating-skeleton-reputation-width: 94px;
   /* Aside (rating-panel stub / legacy); legendary online — fixed-чип */
   --home-screen-aside-width: 278px;
   --home-screen-aside-min-height: 462px;

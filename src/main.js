@@ -1112,33 +1112,6 @@ function clearFrameBlockWatch() {
  * @param {string} hostLabel
  */
 function escalateOptimisticEmbedToExternal(hostLabel) {
-  // #region agent log
-  {
-    const payload = {
-      sessionId: "1948db",
-      runId: "embed",
-      hypothesisId: "H3",
-      location: "main.js:escalateOptimisticEmbedToExternal",
-      message: "escalate to external",
-      data: {
-        hostLabel,
-        modeBefore: embedPlan?.mode ?? null,
-        openUrl: embedPlan?.openUrl || portfolioUrl || "",
-      },
-      timestamp: Date.now(),
-    };
-    globalThis.__DBG_1948db = globalThis.__DBG_1948db || [];
-    globalThis.__DBG_1948db.push(payload);
-    fetch("http://127.0.0.1:7456/ingest/4ffd5680-c2dd-408a-9f58-53e871b7f5b9", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Debug-Session-Id": "1948db",
-      },
-      body: JSON.stringify(payload),
-    }).catch(() => {});
-  }
-  // #endregion
   if (!embedPlan || embedPlan.mode !== "iframe") return;
   const openUrl = embedPlan.openUrl || portfolioUrl || "";
   if (!openUrl) return;
@@ -1176,37 +1149,6 @@ function watchOptimisticFrame(plan, generation) {
     clearFrameBlockWatch();
     if (embedPlan?.mode !== "iframe") return;
     const blocked = isLikelyFrameBlocked(frame);
-    // #region agent log
-    {
-      const payload = {
-        sessionId: "1948db",
-        runId: "embed",
-        hypothesisId: "H2",
-        location: "main.js:watchOptimisticFrame.finish",
-        message: "frame watch finish",
-        data: {
-          blocked,
-          generation,
-          embedWatchGeneration,
-          mode: embedPlan?.mode,
-          frameSrc: plan.frameSrc,
-          hostLabel: plan.hostLabel,
-          externalHidden: externalViewer?.hidden ?? null,
-        },
-        timestamp: Date.now(),
-      };
-      globalThis.__DBG_1948db = globalThis.__DBG_1948db || [];
-      globalThis.__DBG_1948db.push(payload);
-      fetch("http://127.0.0.1:7456/ingest/4ffd5680-c2dd-408a-9f58-53e871b7f5b9", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Debug-Session-Id": "1948db",
-        },
-        body: JSON.stringify(payload),
-      }).catch(() => {});
-    }
-    // #endregion
     if (!blocked) return;
     escalateOptimisticEmbedToExternal(plan.hostLabel);
   };
@@ -1241,34 +1183,6 @@ function watchOptimisticFrame(plan, generation) {
  */
 function probeOptimisticReadymag(url, generation) {
   void probeReadymagPortfolio(url).then((isReadymag) => {
-    // #region agent log
-    {
-      const payload = {
-        sessionId: "1948db",
-        runId: "embed",
-        hypothesisId: "H4",
-        location: "main.js:probeOptimisticReadymag",
-        message: "readymag probe result",
-        data: {
-          isReadymag,
-          generation,
-          embedWatchGeneration,
-          mode: embedPlan?.mode ?? null,
-        },
-        timestamp: Date.now(),
-      };
-      globalThis.__DBG_1948db = globalThis.__DBG_1948db || [];
-      globalThis.__DBG_1948db.push(payload);
-      fetch("http://127.0.0.1:7456/ingest/4ffd5680-c2dd-408a-9f58-53e871b7f5b9", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Debug-Session-Id": "1948db",
-        },
-        body: JSON.stringify(payload),
-      }).catch(() => {});
-    }
-    // #endregion
     if (!isReadymag || generation !== embedWatchGeneration) return;
     if (embedPlan?.mode !== "iframe") return;
     escalateOptimisticEmbedToExternal("Readymag");
@@ -1284,37 +1198,6 @@ function probeOptimisticFramePolicy(url, generation) {
   void probePortfolioEmbed(url, {
     embedderOrigin: window.location.origin,
   }).then((result) => {
-    // #region agent log
-    {
-      const payload = {
-        sessionId: "1948db",
-        runId: "post-fix",
-        hypothesisId: "H-edge",
-        location: "main.js:probeOptimisticFramePolicy",
-        message: "edge frame policy probe",
-        data: {
-          canFrame: result.canFrame,
-          reason: result.reason ?? null,
-          hostLabel: result.hostLabel ?? null,
-          error: result.error ?? null,
-          generation,
-          embedWatchGeneration,
-          mode: embedPlan?.mode ?? null,
-        },
-        timestamp: Date.now(),
-      };
-      globalThis.__DBG_1948db = globalThis.__DBG_1948db || [];
-      globalThis.__DBG_1948db.push(payload);
-      fetch("http://127.0.0.1:7456/ingest/4ffd5680-c2dd-408a-9f58-53e871b7f5b9", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Debug-Session-Id": "1948db",
-        },
-        body: JSON.stringify(payload),
-      }).catch(() => {});
-    }
-    // #endregion
     if (generation !== embedWatchGeneration) return;
     if (embedPlan?.mode !== "iframe") return;
     if (result.canFrame !== false) return;

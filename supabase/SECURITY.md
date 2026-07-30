@@ -30,7 +30,7 @@
 | `heartbeat_legendary_presence()` | нет | да | ping `last_seen_at` только для `tier=legendary` |
 | `list_online_legendaries()` | нет | да | список онлайн VIP (id/name/avatar) |
 | `legendary_presence_ttl()` | нет | нет | internal TTL 2 min |
-| `list_rating_top()` | нет | да | топ-50 по balance из снапшота (пересборка раз в 24 ч) |
+| `list_rating_top()` | нет | да | топ-50 по reputation из снапшота (пересборка раз в 24 ч) |
 | `rating_leaderboard_ttl()` | нет | нет | internal TTL 24 h |
 | `refresh_rating_leaderboard()` | нет | нет | internal security definer, зовётся из `list_rating_top` |
 | `protect_profiles_last_seen()` | нет | нет | trigger-only |

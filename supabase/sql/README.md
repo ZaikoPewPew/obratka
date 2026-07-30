@@ -6,7 +6,7 @@
 |------|------|
 | `profiles.sql` | `public.profiles`, protect tier/ban/reputation/**balance**/grade, `is_profile_banned` (self-only), telegram_id из app_metadata |
 | `legendary_presence.sql` | `last_seen_at` + RPC heartbeat/list для `tier=legendary` (после profiles) |
-| `rating_leaderboard.sql` | снапшот топ-50 по `balance` + RPC `list_rating_top` (ленивая пересборка раз в 24 ч; после profiles) |
+| `rating_leaderboard.sql` | снапшот топ-50 по `reputation` + RPC `list_rating_top` (ленивая пересборка раз в 24 ч; после profiles) |
 | `wallet.sql` | `protect_profiles_balance` + RPC `spend_submit_cost` (legacy, cost 30) |
 | `portfolio_submit.sql` | RPC `submit_portfolio` (atomic spend 30 + insert, max 1 pending); revoke client INSERT |
 | `referrals.sql` | персональный `referral_code` (max 2 uses), seed `YTHWKPDWAK`, RPC validate/redeem; без наград |

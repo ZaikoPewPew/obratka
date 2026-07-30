@@ -188,33 +188,6 @@ export function isLikelyFrameBlocked(iframe) {
     const win = iframe.contentWindow;
     if (!win) return true;
     const href = String(win.location?.href || "");
-    // #region agent log
-    {
-      const blockedEarly =
-        !href || href === "about:blank" || href.startsWith("about:");
-      const httpOk = /^https?:\/\//i.test(href);
-      const result = blockedEarly ? true : httpOk ? false : true;
-      const payload = {
-        sessionId: "1948db",
-        runId: "embed",
-        hypothesisId: "H1",
-        location: "portfolioEmbed.js:isLikelyFrameBlocked",
-        message: "frame blocked check",
-        data: { href, blockedEarly, httpOk, result },
-        timestamp: Date.now(),
-      };
-      globalThis.__DBG_1948db = globalThis.__DBG_1948db || [];
-      globalThis.__DBG_1948db.push(payload);
-      fetch("http://127.0.0.1:7456/ingest/4ffd5680-c2dd-408a-9f58-53e871b7f5b9", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Debug-Session-Id": "1948db",
-        },
-        body: JSON.stringify(payload),
-      }).catch(() => {});
-    }
-    // #endregion
     if (!href || href === "about:blank" || href.startsWith("about:")) {
       return true;
     }
@@ -223,29 +196,6 @@ export function isLikelyFrameBlocked(iframe) {
     }
     return true;
   } catch {
-    // #region agent log
-    {
-      const payload = {
-        sessionId: "1948db",
-        runId: "embed",
-        hypothesisId: "H1",
-        location: "portfolioEmbed.js:isLikelyFrameBlocked",
-        message: "SecurityError → not blocked",
-        data: { result: false },
-        timestamp: Date.now(),
-      };
-      globalThis.__DBG_1948db = globalThis.__DBG_1948db || [];
-      globalThis.__DBG_1948db.push(payload);
-      fetch("http://127.0.0.1:7456/ingest/4ffd5680-c2dd-408a-9f58-53e871b7f5b9", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Debug-Session-Id": "1948db",
-        },
-        body: JSON.stringify(payload),
-      }).catch(() => {});
-    }
-    // #endregion
     return false;
   }
 }

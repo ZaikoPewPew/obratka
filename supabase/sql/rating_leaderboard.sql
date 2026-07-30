@@ -1,4 +1,4 @@
--- Rating leaderboard: топ-50 профилей по balance, снапшот раз в сутки.
+-- Rating leaderboard: топ-50 профилей по reputation, снапшот раз в сутки.
 -- Apply after profiles.sql. Читать только через RPC list_rating_top.
 
 create table if not exists public.rating_leaderboard (
@@ -8,9 +8,29 @@ create table if not exists public.rating_leaderboard (
   avatar_url text,
   grade text,
   role text,
-  balance integer not null default 0,
+  reputation integer not null default 0,
   refreshed_at timestamptz not null default now()
 );
+
+-- Живая БД: старая колонка balance → reputation (CREATE IF NOT EXISTS колонку не меняет).
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'rating_leaderboard'
+      and column_name = 'balance'
+  ) and not exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'rating_leaderboard'
+      and column_name = 'reputation'
+  ) then
+    alter table public.rating_leaderboard rename column balance to reputation;
+  end if;
+end $$;
 
 -- Доступ только через security definer RPC — политик нет намеренно.
 alter table public.rating_leaderboard enable row level security;
@@ -33,8 +53,8 @@ revoke all on function public.rating_leaderboard_ttl() from public;
 revoke all on function public.rating_leaderboard_ttl() from anon;
 revoke all on function public.rating_leaderboard_ttl() from authenticated;
 
--- Пересборка снапшота: топ-50 по balance, без banned, только после онбординга.
--- SECURITY DEFINER: читает чужие profiles.balance, которые закрыты RLS.
+-- Пересборка снапшота: топ-50 по reputation, без banned, только после онбординга.
+-- SECURITY DEFINER: читает чужие profiles.reputation, которые закрыты RLS.
 create or replace function public.refresh_rating_leaderboard()
 returns void
 language plpgsql
@@ -46,20 +66,20 @@ begin
   delete from public.rating_leaderboard where true;
 
   insert into public.rating_leaderboard
-    (place, profile_id, display_name, avatar_url, grade, role, balance, refreshed_at)
+    (place, profile_id, display_name, avatar_url, grade, role, reputation, refreshed_at)
   select
-    (row_number() over (order by p.balance desc, p.created_at asc, p.id asc))::smallint,
+    (row_number() over (order by p.reputation desc, p.created_at asc, p.id asc))::smallint,
     p.id,
     p.display_name,
     p.avatar_url,
     p.grade,
     p.role,
-    p.balance,
+    p.reputation,
     now()
   from public.profiles p
   where p.banned_at is null
     and p.onboarding_done
-  order by p.balance desc, p.created_at asc, p.id asc
+  order by p.reputation desc, p.created_at asc, p.id asc
   limit 50;
 end;
 $$;
@@ -81,7 +101,7 @@ returns table (
   avatar_url text,
   grade text,
   role text,
-  balance integer
+  reputation integer
 )
 language plpgsql
 volatile
@@ -118,7 +138,7 @@ begin
     l.avatar_url,
     l.grade,
     l.role,
-    l.balance
+    l.reputation
   from public.rating_leaderboard l
   order by l.place asc;
 end;
@@ -127,3 +147,6 @@ $$;
 revoke all on function public.list_rating_top() from public;
 revoke all on function public.list_rating_top() from anon;
 grant execute on function public.list_rating_top() to authenticated;
+
+-- Сбросить старый снапшот (могли лежать числа balance): следующий list_rating_top пересоберёт.
+delete from public.rating_leaderboard where true;

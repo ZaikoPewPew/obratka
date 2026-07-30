@@ -1,4 +1,4 @@
-import { formatString, getLocale, getStrings } from "../../i18n.js";
+import { formatString, getStrings } from "../../i18n.js";
 import {
   formatPortfolioGrade,
   formatPortfolioRole,
@@ -121,6 +121,27 @@ function createReputationIcon(kind) {
     throw new Error(`reputation-${kind}.svg must be a root <svg>`);
   }
   svg.classList.add("home-screen__chip-icon", "home-screen__reputation-icon");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("width", "24");
+  svg.setAttribute("height", "24");
+  svg.setAttribute("focusable", "false");
+  return svg;
+}
+
+/**
+ * Статичный SVG репутации для плашки в топ-50 (без idle-анимации глазок).
+ * @param {number} reputation
+ * @returns {SVGElement}
+ */
+function createRatingReputationIcon(reputation) {
+  const kind = reputationIconKindFor(reputation);
+  const wrap = document.createElement("span");
+  wrap.innerHTML = REPUTATION_ICON_SVG[kind].trim();
+  const svg = wrap.firstElementChild;
+  if (!(svg instanceof SVGElement)) {
+    throw new Error(`reputation-${kind}.svg must be a root <svg>`);
+  }
+  svg.classList.add("home-screen__rating-reputation-icon");
   svg.setAttribute("aria-hidden", "true");
   svg.setAttribute("width", "24");
   svg.setAttribute("height", "24");
@@ -2088,11 +2109,11 @@ export function createHomeScreen({
 
     text.append(lineName, lineRole);
 
-    const balance = document.createElement("span");
-    balance.className =
-      "home-screen__rating-balance home-screen__rating-balance--skeleton";
+    const reputation = document.createElement("span");
+    reputation.className =
+      "home-screen__rating-reputation home-screen__rating-reputation--skeleton";
 
-    card.append(avatar, text, balance);
+    card.append(avatar, text, reputation);
     li.append(card);
     return li;
   }
@@ -2107,7 +2128,7 @@ export function createHomeScreen({
   }
 
   /**
-   * Карточка топ-50 (Figma RaitingCard): аватар + место, имя/роль, баланс.
+   * Карточка топ-50 (Figma RaitingCard): аватар + место, имя/роль, репутация.
    *
    * @param {import("../../api/rating.js").RatingTopItem} item
    * @returns {HTMLLIElement}
@@ -2180,28 +2201,23 @@ export function createHomeScreen({
 
     text.append(nameEl, roleEl);
 
-    const balance = document.createElement("span");
-    balance.className = "home-screen__rating-balance";
-    balance.setAttribute(
+    const reputation = document.createElement("span");
+    reputation.className = "home-screen__rating-reputation";
+    reputation.setAttribute(
       "aria-label",
-      formatString(t.homeRatingBalanceAria, { balance: item.balance }),
+      formatString(t.homeRatingReputationAria, {
+        reputation: formatReputation(item.reputation),
+      }),
     );
 
-    const balanceIcon = document.createElement("img");
-    balanceIcon.className = "home-screen__rating-balance-icon";
-    balanceIcon.src = boneIconUrl;
-    balanceIcon.alt = "";
-    balanceIcon.width = 24;
-    balanceIcon.height = 24;
-    balanceIcon.decoding = "async";
-    balanceIcon.setAttribute("aria-hidden", "true");
+    const reputationIcon = createRatingReputationIcon(item.reputation);
 
-    const balanceValue = document.createElement("span");
-    balanceValue.className = "home-screen__rating-balance-value";
-    balanceValue.textContent = Number(item.balance).toLocaleString(getLocale());
+    const reputationValue = document.createElement("span");
+    reputationValue.className = "home-screen__rating-reputation-value";
+    reputationValue.textContent = formatReputation(item.reputation);
 
-    balance.append(balanceIcon, balanceValue);
-    card.append(avatar, text, balance);
+    reputation.append(reputationIcon, reputationValue);
+    card.append(avatar, text, reputation);
     li.append(card);
     return li;
   }

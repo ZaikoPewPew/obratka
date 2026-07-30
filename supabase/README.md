@@ -13,7 +13,7 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 | `SECURITY.md` | Матрица доступа к RPC, состояние адвайзоров, отложенное до Pro |
 | `sql/profiles.sql` | `public.profiles`, protect tier/ban/reputation/balance/grade, referral |
 | `sql/legendary_presence.sql` | `last_seen_at` + heartbeat/list для legendary online |
-| `sql/rating_leaderboard.sql` | снапшот топ-50 по `balance` + RPC `list_rating_top` |
+| `sql/rating_leaderboard.sql` | снапшот топ-50 по `reputation` + RPC `list_rating_top` |
 | `sql/wallet.sql` | protect balance + RPC `spend_submit_cost` (legacy, cost 30) |
 | `sql/referrals.sql` | referral-код на профиль (лимит 2), seed `YTHWKPDWAK`, RPC validate/redeem |
 | `sql/portfolios.sql` | portfolios/reviews, лиги; INSERT pending/0/target=3 |

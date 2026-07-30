@@ -1,4 +1,5 @@
 import { getSupabase } from "../lib/supabaseClient.js";
+import { clampReputation } from "./reviewComplaints.js";
 
 /**
  * @typedef {{
@@ -8,12 +9,12 @@ import { getSupabase } from "../lib/supabaseClient.js";
  *   avatarUrl: string;
  *   grade: string;
  *   role: string;
- *   balance: number;
+ *   reputation: number;
  * }} RatingTopItem
  */
 
 /**
- * Топ-50 профилей по балансу (вкладка «Рейтинг»).
+ * Топ-50 профилей по репутации (вкладка «Рейтинг»).
  * Снапшот обновляется на сервере раз в сутки (`list_rating_top`).
  * При ошибке RPC — `null` (не кэшировать как пустой топ).
  *
@@ -47,7 +48,7 @@ export async function listRatingTop() {
           typeof row?.avatar_url === "string" ? row.avatar_url.trim() : "",
         grade: typeof row?.grade === "string" ? row.grade : "",
         role: typeof row?.role === "string" ? row.role : "",
-        balance: Math.max(0, Number(row?.balance) || 0),
+        reputation: clampReputation(Number(row?.reputation) || 0),
       };
     })
     .filter(Boolean);
