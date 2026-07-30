@@ -329,14 +329,14 @@
   }
 
   .home-screen__reputation-eyes,
-  .home-screen__chip--reputation:hover .home-screen__reputation-eyes,
-  .home-screen__chip--reputation:focus-visible .home-screen__reputation-eyes {
+  .home-screen__chip--reputation.home-screen__chip--icon-boost
+    .home-screen__reputation-eyes {
     animation: none;
   }
 
   .home-screen__balance-duck,
-  .home-screen__chip--balance:hover .home-screen__balance-duck,
-  .home-screen__chip--balance:focus-visible .home-screen__balance-duck {
+  .home-screen__chip--balance.home-screen__chip--icon-boost
+    .home-screen__balance-duck {
     animation: none;
   }
 

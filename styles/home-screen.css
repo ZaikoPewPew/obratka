@@ -461,31 +461,22 @@
     infinite;
 }
 
-/* Hover/focus: сразу один цикл без idle-паузы, скорость как у активной фазы. */
-.home-screen__chip--reputation:focus-visible .home-screen__reputation-eyes {
+/*
+ * Hover/focus boost: класс вешает JS и держит до animationend,
+ * чтобы цикл не обрывался при уходе курсора (см. bindChipIconBoost).
+ */
+.home-screen__chip--reputation.home-screen__chip--icon-boost
+  .home-screen__reputation-eyes {
   animation: motion-reputation-eyes-look-once
     var(--motion-reputation-eyes-hover-duration)
     var(--motion-reputation-eyes-ease) 1 forwards;
 }
 
-.home-screen__chip--balance:focus-visible .home-screen__balance-duck {
+.home-screen__chip--balance.home-screen__chip--icon-boost
+  .home-screen__balance-duck {
   animation: motion-balance-duck-float-once
     var(--motion-balance-duck-hover-duration) var(--motion-balance-duck-ease) 1
     forwards;
-}
-
-@media (hover: hover) {
-  .home-screen__chip--reputation:hover .home-screen__reputation-eyes {
-    animation: motion-reputation-eyes-look-once
-      var(--motion-reputation-eyes-hover-duration)
-      var(--motion-reputation-eyes-ease) 1 forwards;
-  }
-
-  .home-screen__chip--balance:hover .home-screen__balance-duck {
-    animation: motion-balance-duck-float-once
-      var(--motion-balance-duck-hover-duration) var(--motion-balance-duck-ease)
-      1 forwards;
-  }
 }
 
 .home-screen__chip-value {

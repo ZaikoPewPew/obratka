@@ -130,6 +130,82 @@ function createReputationIcon(kind) {
   return svg;
 }
 
+const CHIP_ICON_BOOST_CLASS = "home-screen__chip--icon-boost";
+const CHIP_ICON_BOOST_ANIMATIONS = new Set([
+  "motion-reputation-eyes-look-once",
+  "motion-balance-duck-float-once",
+]);
+
+/**
+ * Hover/focus: один цикл без idle-паузы; класс держится до animationend,
+ * чтобы уход курсора не обрывал взгляд/волны.
+ *
+ * @param {HTMLElement} chip
+ * @param {string} animatedSelector
+ */
+function bindChipIconBoost(chip, animatedSelector) {
+  let playing = false;
+
+  function getAnimated() {
+    return chip.querySelector(animatedSelector);
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function canHoverBoost() {
+    return window.matchMedia("(hover: hover)").matches;
+  }
+
+  function isInteracting() {
+    return chip.matches(":hover") || chip.matches(":focus-visible");
+  }
+
+  function clearBoostIfIdle() {
+    if (isInteracting()) return;
+    chip.classList.remove(CHIP_ICON_BOOST_CLASS);
+    playing = false;
+  }
+
+  function startBoost() {
+    if (prefersReducedMotion()) return;
+    const el = getAnimated();
+    if (!el) return;
+    chip.classList.remove(CHIP_ICON_BOOST_CLASS);
+    // Restart one-shot if already mid-boost (re-enter / re-focus).
+    void el.getBoundingClientRect();
+    chip.classList.add(CHIP_ICON_BOOST_CLASS);
+    playing = true;
+  }
+
+  chip.addEventListener("pointerenter", () => {
+    if (!canHoverBoost()) return;
+    startBoost();
+  });
+  chip.addEventListener("focusin", startBoost);
+  chip.addEventListener("pointerleave", () => {
+    if (!playing) clearBoostIfIdle();
+  });
+  chip.addEventListener("focusout", (event) => {
+    if (
+      event.relatedTarget instanceof Node &&
+      chip.contains(event.relatedTarget)
+    ) {
+      return;
+    }
+    if (!playing) clearBoostIfIdle();
+  });
+  chip.addEventListener("animationend", (event) => {
+    const el = getAnimated();
+    if (!el || event.target !== el) return;
+    if (!CHIP_ICON_BOOST_ANIMATIONS.has(event.animationName)) return;
+    if (!chip.classList.contains(CHIP_ICON_BOOST_CLASS)) return;
+    playing = false;
+    clearBoostIfIdle();
+  });
+}
+
 /**
  * Видео-слот intro-модалки (max 552, Fit к кадру): autoplay / loop / muted.
  *
@@ -600,6 +676,8 @@ export function createHomeScreen({
   reputationValue.className = "home-screen__chip-value";
 
   reputationChip.append(reputationIcon, reputationValue);
+  bindChipIconBoost(reputationChip, ".home-screen__reputation-eyes");
+  bindChipIconBoost(balanceChip, ".home-screen__balance-duck");
 
   const profileBtn = document.createElement("button");
   profileBtn.type = "button";
