@@ -106,7 +106,6 @@ const FRAME_BLOCK_SETTLE_MS = 50;
 const frameWrap = document.querySelector("[data-frame]");
 const frame = document.querySelector("#portfolio-frame");
 const externalViewer = document.querySelector("[data-external-viewer]");
-const externalBodyEl = document.querySelector("[data-external-body]");
 const openExternalBtn = document.querySelector('[data-action="open-external"]');
 const timerEl = document.querySelector("[data-timer]");
 const abortReviewBtn = document.querySelector('[data-action="abort-review"]');
@@ -915,12 +914,6 @@ function syncLocaleDependentAttrs() {
     frame.title = formatString(t.iframeTitle, { name: portfolioName });
   }
 
-  if (externalBodyEl && embedPlan?.mode === "external") {
-    externalBodyEl.textContent = formatString(t.embedBlockedBody, {
-      host: embedPlan.hostLabel,
-    });
-  }
-
   syncDictationChrome();
 }
 
@@ -1538,8 +1531,14 @@ function openAbortReviewModal() {
   });
 }
 
-async function confirmAbortReview() {
-  await abortReviewModal.close();
+function confirmAbortReview() {
+  // Сразу с кейса: не ждать fade модалки и reconcile в applyRoute.
+  abortReviewModal.root.classList.remove("app-modal--open");
+  abortReviewModal.root.hidden = true;
+  abortReviewModal.root.setAttribute("aria-hidden", "true");
+  leaveSessionShell();
+  void stopDictation();
+  void homeScreen.open(lastHomeView);
   go("home", { search: buildHomeSearch(lastHomeView) });
 }
 
@@ -1870,6 +1869,20 @@ async function applyRoute(id, opts = {}) {
     } else if (id === "report") {
       // Open по кэшу — settle+profile не блокируют первый paint /report.
       // Ban/gone догоняют фоном (exit уже внутри reconcile).
+      void reconcileSessionAccess().then((access) => {
+        if (access === "gone") return;
+        if (access === "banned" && activeRouteId !== "banned") {
+          go("banned", { replace: true });
+        }
+      });
+    } else if (
+      id === "home" &&
+      (prevRouteId === "review" ||
+        prevRouteId === "quiz" ||
+        prevRouteId === "done")
+    ) {
+      // Выход с review-workspace (abort / «На главную»): не держать shell
+      // на сети — ban/gone догоняют фоном.
       void reconcileSessionAccess().then((access) => {
         if (access === "gone") return;
         if (access === "banned" && activeRouteId !== "banned") {

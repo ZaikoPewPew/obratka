@@ -33,7 +33,7 @@ Auth-gated deep link (`home` / `settings` / `onboarding` / `report` / `url` / `s
 | `quiz` | `/quiz` | Квиз после таймера; шкалы context/visual 1–5 ([`scale-slider`](../components/scale-slider/README.md)); условный pain; рыночный `tier`; микрофон в поле «Главный совет» |
 | `done` | `/quiz/done` | Финал квиза (review-panel done + улет отчёта) |
 | `success` | `/done` | Успех подачи портфолио (success-screen) |
-| `report` | `/report` | Отчёт автору (листы + жалоба) |
+| `report` | `/report` | Отчёт автору (листы → side-panel → жалоба) |
 | `banned` | `/banned` | Аккаунт заблокирован (ban-screen); escape-proof |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query вроде `?ref=` / `?lang=` сохраняются.  

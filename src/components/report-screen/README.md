@@ -7,7 +7,8 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 ## Сейчас
 
 - Список завершённых листов ревью по `portfolioId`; пока грузится — skeleton-строки (`--report-screen-skeleton-*`), без текста-заглушки
-- На каждом листе кнопка **«Пожаловаться»** → модалка с тегами (**ровно 1** причина; окно **6 часов** после `done` портфолио / готовности отчёта)
+- На каждом листе с `answers` кнопка **«Посмотреть»** → `createSidePanel` с полным текстом листа (`buildReportSections`, `mode: "full"`)
+- Внутри панели — **«Пожаловаться»** → модалка с тегами (**ровно 1** причина; окно **6 часов** после `done` портфолио / готовности отчёта). Без просмотра листа жаловаться нельзя
 - Без жалобы лист считается «ок»; явного чипа «всё ок» нет
 - Одна жалоба на лист (`review_complaints`, RPC `submit_review_complaint`) → штраф репутации ревьюера на сервере (−20); после окна без жалобы ревьюер получает +10 (`settle_review_reputation_rewards`)
 - Справа: дефолт mesh + мокап листа; **Скачать PDF** можно много раз (лист снова выезжает → улетает → done)
@@ -16,9 +17,16 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 - PDF: все ревьюеры, **1 дизайнер = 1 страница** (`shareReviewPdf`)
 - CTA: серая «На главную» + тёмная «Скачать PDF» (пока нет листов — та же тёмная, только `cursor: not-allowed`)
 
+## Просмотр листа (side-panel)
+
+- Каркас: [`createSidePanel`](../side-panel/README.md) — title = имя ревьюера, description = грейд/роль
+- Тело: секции через `.side-panel__section*`; внизу «Пожаловаться» / «Жалоба отправлена»
+- Вне окна 6ч кнопку жалобы **скрывать** (не disabled «Срок жалобы истёк»)
+- Escape / backdrop закрывают панель; при уходе с `/report` панель тоже закрывается
+
 ## Жалоба (теги v1)
 
-Модалка — `createAppModal` (`size: "md"`): sticky header (title + «Обратная связь от {name}» + close) / sticky actions («Туда его!» / «Да не, не стоит»); в слоте скроллятся tip + теги. Выбранный тег: фон `--color-choice-selected` (`#8BB5FF`), текст белый. Вне окна 6ч кнопку «Пожаловаться» **скрывать** (не disabled «Срок жалобы истёк»).
+Модалка — `createAppModal` (`size: "md"`): sticky header (title + «Обратная связь от {name}» + close) / sticky actions («Туда его!» / «Да не, не стоит»); в слоте скроллятся tip + теги. Выбранный тег: фон `--color-choice-selected` (`#8BB5FF`), текст белый. Открывается **из панели** просмотра листа.
 
 | Тег | Ключ i18n |
 |-----|-----------|
@@ -53,6 +61,7 @@ PDF / секции: [`src/utils/reviewReport.js`](../../utils/reviewReport.js), 
 ## Стили
 
 `styles/report-screen.css` + токены `--report-screen-*` / `--shell-review-report-*`.  
+Строка списка / кнопка жалобы в панели: `.report-screen__sheet-action`.  
 На короткой visual лист clamp’ится ≥ `--shell-review-report-gap-below-brand` под лого (`--shell-review-report-shift-shown-effective`).
 
 См. [`SCREENS.md`](../../../SCREENS.md), [`supabase/sql/review_complaints.sql`](../../../supabase/sql/review_complaints.sql), [`PROJECT.md`](../../../PROJECT.md) § Репутация.

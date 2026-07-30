@@ -22,9 +22,9 @@
 | `success*` | `/done` |
 | `settings*` | `/settings` (заглушка) |
 | `ban*` | `/banned` |
-| `reportScreen*` / `reportComplaint*` / `complaintTag*` | `/report` (листы + жалоба: ровно 1 тег, окно 6ч от done — `reportComplaintWindowClosed`; вне окна кнопку скрывать; теги v1: `low_effort` · `spam` · `harassment` · `offensive` · `ai_slop`) |
+| `reportScreen*` / `reportSheet*` / `reportComplaint*` / `complaintTag*` | `/report` (листы → «Посмотреть» в side-panel → жалоба: ровно 1 тег, окно 6ч от done — `reportComplaintWindowClosed`; вне окна кнопку жалобы скрывать; теги v1: `low_effort` · `spam` · `harassment` · `offensive` · `ai_slop`) |
 | `review*` / `reviewRec*` / `reviewAbort*` / `reviewAdviceRec*` / `reviewTier*` / `reviewPain*` / `reviewContextShort`·`Value*`·`Hint*` / `reviewVisualShort`·`Value*`·`Hint*` (1–5) / `report*` / `reportDictationTitle` | `/quiz` (шкалы + условный pain + tier + микрофон в совете), PDF; rec + abort confirm на `/review` |
-| `frame*` / `controls*` / `embedBlocked*` | iframe-shell `/review` (в т.ч. external viewer) |
+| `frame*` / `controls*` / `embedBlocked*` (`embedBlockedStep*` · `embedBlockedOpen` · `embedBlockedAria` · `embedBlockedMediaAria`) | iframe-shell `/review` (в т.ч. external viewer: видео-слот + 4 шага + CTA) |
 
 ### Auth-защита (ключи)
 

@@ -180,7 +180,7 @@ D спокойно дописывает квиз → INSERT +10 → 4-й лис�
 
 ## Встраивание портфолио (iframe / external)
 
-На `/review` URL — iframe или UI «Открыть и начать» (`embedBlocked*`).
+На `/review` URL — iframe или UI «Открыть и начать» (`embedBlocked*`: видео-слот + 4 шага + CTA).
 
 | Стратегия | Когда |
 |-----------|--------|
@@ -198,7 +198,7 @@ SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `p
 
 | Что | Детали |
 |-----|--------|
-| Где UI | `/report` — список листов; «Пожаловаться» → модалка (1 тег). Без жалобы = ок; окно **6ч от `completed_at`** (момент done); вне окна кнопку скрывать |
+| Где UI | `/report` — список листов; «Посмотреть» → side-panel → «Пожаловаться» → модалка (1 тег). Без жалобы = ок; окно **6ч от `completed_at`** (момент done); вне окна кнопку жалобы скрывать |
 | Теги v1 | `low_effort`, `spam`, `harassment`, `offensive`, `ai_slop` (веса только в SQL) |
 | Штраф / плюс | жалоба = −20 (1 тег); старт `0`; бан при `<= -100`; +10 после окна без жалобы (settle тоже от done) |
 | Ревьюер | чип = абсолют без плюса (`100` / `0` / `-20`) + explainer **без** таблицы весов |
@@ -220,7 +220,7 @@ SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `p
 | Quiz | `review-screen` + `review-panel` + [`scale-slider`](src/components/scale-slider/README.md) (context/visual **1–5**; условный `pain`; рыночный `tier`) + mic → `advice`. SoT: [`QUIZ.md`](QUIZ.md) |
 | Success | `success-screen` (`/done`) |
 | Ban | `ban-screen` — статичный красный mesh + `banBrandMarkSvg` |
-| Report | `report-screen` — листы (+ надиктовка) + жалоба + PDF |
+| Report | `report-screen` — листы (+ надиктовка) → просмотр в side-panel → жалоба + PDF |
 | Settings | `settings-screen` (`/settings`, заглушка) |
 
 Handoff соседних brand-экранов: `go(id, { handoff: true })` — правый visual без повторной анимации.

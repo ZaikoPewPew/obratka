@@ -35,7 +35,8 @@ alwaysApply: true
 | `onboarding*` | `/onboarding` (в т.ч. `onboardingSaveFailed`) |
 | `url*` / `urlScreenBack*` | `/portfolio` (в т.ч. чип «На главную») |
 | `ban*` | `/banned` |
-| `reportScreen*` / `reportComplaint*` / `complaintTag*` | `/report` + жалоба на лист |
+| `frame*` / `controls*` / `embedBlocked*` (`embedBlockedStep*` · `embedBlockedOpen` · `embedBlockedAria` · `embedBlockedMediaAria`) | iframe-shell `/review` (external: видео-слот + шаги + CTA) |
+| `reportScreen*` / `reportSheet*` / `reportComplaint*` / `complaintTag*` | `/report` + просмотр листа (side-panel) + жалоба на лист |
 | `reviewRec*` / `reviewAdviceRec*` / `reportDictationTitle` / `reviewAbort*` | чип rec на `/review`, микрофон в поле совета, секция надиктовки в листе, confirm «Прервать ревью?» |
 | `reviewTier*` / `reviewPain*` / `reviewGrade*` / `reviewStructure*` / `reviewMetrics*` | шаги квиза (tier = рыночный уровень, не `profiles.tier`) |
 | `reportTier*` / `reportSummary*` / `reportCross*` / `reportPain*` / `reportGrade*` / `reportContext*` / `reportStructure*` / `reportMetrics*` / `reportVisual*` / `reportAdviceTitle` | тексты PDF-листа |

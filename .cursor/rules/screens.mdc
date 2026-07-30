@@ -24,7 +24,7 @@ alwaysApply: true
 | `quiz` | `/quiz` (шкалы context/visual 1–5 через `scale-slider`; условный pain; `tier`; микрофон в поле «Главный совет») |
 | `done` | `/quiz/done` |
 | `success` | `/done` (deep link / запасной; submit URL остаётся на url-screen) |
-| `report` | `/report` (листы + жалоба; только «Мои») |
+| `report` | `/report` (листы → просмотр в side-panel → жалоба; только «Мои») |
 | `banned` | `/banned` (escape-proof при `session.banned`) |
 
 `session.js` — login-сессия пользователя, не экран `/review`.
@@ -33,7 +33,7 @@ alwaysApply: true
 
 - Home pick → intro-модалка (видео-пример) → CTA → **claim** → `/review` (опц. надиктовка заметок) → quiz (опц. микрофон в поле совета); abort → home **без** награды (см. `review-claims.mdc`, `dictation.mdc`).
 - Submit URL → `setVariant("done")` на url-screen + `syncRoute("success")`; не прыгать на success-screen. Back-chip `.url-screen__back` (`urlScreenBack*`) → home; на done скрыт.
-- Mine / `isOwn` → `onOpenReport` → `/report` (листы + жалоба) только когда собраны все ревью; иначе модалка `homeMineNotReady*`.
+- Mine / `isOwn` → `onOpenReport` → `/report` (листы → side-panel → жалоба) только когда собраны все ревью; иначе модалка `homeMineNotReady*`.
 - Ban: любой route → `banned` (`flow.js`); см. `ban.mdc`.
 - Auth gate: deep link на auth-gated экраны (`home`, `settings`, `onboarding`, `report`, `url`, `success`, `review`, `quiz`, `done`) без `session.userId` → `resolveEntryScreen` (referral / auth); с сессией без онбординга → `onboarding`. Управляется в `flow.js`, не в экранах.
 - Auth: `src/api/auth.js`; UI — `auth-screen` + `auth-code-screen`. Automatic linking Email↔Google; OTP cooldown; Manual `linkIdentity` — вне скоупа.

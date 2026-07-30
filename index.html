@@ -199,19 +199,158 @@
             data-external-viewer
             hidden
             aria-hidden="true"
+            data-i18n-aria="embedBlockedAria"
+            aria-label="Портфолио откроется в новой вкладке"
           >
-            <div class="iframe-shell__external-card">
-              <p
-                class="iframe-shell__external-title"
-                data-i18n="embedBlockedTitle"
-              >Этот сайт нельзя показать во фрейме</p>
-              <p class="iframe-shell__external-body" data-external-body></p>
+            <div class="iframe-shell__external-panel">
+              <div class="iframe-shell__external-card">
+                <div
+                  class="iframe-shell__external-media"
+                  data-external-media
+                  data-i18n-aria="embedBlockedMediaAria"
+                  aria-label="Видео-инструкция"
+                ></div>
+                <ol class="iframe-shell__external-steps">
+                  <li class="iframe-shell__external-step">
+                    <span
+                      class="iframe-shell__external-step-icon"
+                      aria-hidden="true"
+                    >
+                      <svg
+                        class="iframe-shell__external-step-glyph"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 17.3 18.3"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M2.65 8.65C2.65 11.9637 5.33629 14.65 8.65 14.65M8.65 14.65V17.65M8.65 14.65C10.0521 14.65 11.3418 14.1691 12.3633 13.3633M14.65 8.65C14.65 9.27186 14.5554 9.87161 14.3798 10.4357M0.65 1.65L6.65 7.65M16.65 17.65L12.3633 13.3633M6.65 7.65V8.65C6.65 9.75457 7.54543 10.65 8.65 10.65H9.65M6.65 7.65L9.65 10.65M9.65 10.65L12.3633 13.3633M10.65 6.65V2.65C10.65 1.54543 9.75457 0.65 8.65 0.65C7.54543 0.65 6.65 1.54543 6.65 2.65V3.15"
+                          stroke="currentColor"
+                          stroke-width="1.3"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    <span class="iframe-shell__external-step-copy">
+                      <span
+                        class="iframe-shell__external-step-title"
+                        data-i18n="embedBlockedStep1Title"
+                      >Нажми «Открыть и начать»</span>
+                      <span
+                        class="iframe-shell__external-step-body"
+                        data-i18n="embedBlockedStep1Body"
+                      >Портфолио откроется в новой вкладке</span>
+                    </span>
+                  </li>
+                  <li class="iframe-shell__external-step">
+                    <span
+                      class="iframe-shell__external-step-icon"
+                      aria-hidden="true"
+                    >
+                      <svg
+                        class="iframe-shell__external-step-glyph"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 17.3 17.3"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M8.65 3.15V0.65C13.0683 0.65 16.65 4.23172 16.65 8.65C16.65 13.0683 13.0683 16.65 8.65 16.65C4.23172 16.65 0.65 13.0683 0.65 8.65C0.65 6.44086 1.54543 4.44086 2.99315 2.99315M8.65 8.65L5.65 5.65"
+                          stroke="currentColor"
+                          stroke-width="1.3"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    <span class="iframe-shell__external-step-copy">
+                      <span
+                        class="iframe-shell__external-step-title"
+                        data-i18n="embedBlockedStep2Title"
+                      >Изучи портфолио</span>
+                      <span
+                        class="iframe-shell__external-step-body"
+                        data-i18n="embedBlockedStep2Body"
+                      >Таймер начнёт отсчёт автоматически</span>
+                    </span>
+                  </li>
+                  <li class="iframe-shell__external-step">
+                    <span
+                      class="iframe-shell__external-step-icon"
+                      aria-hidden="true"
+                    >
+                      <svg
+                        class="iframe-shell__external-step-glyph"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 11.3 17.3"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M6.65 13.65C6.65 15.3069 5.30685 16.65 3.65 16.65C1.99315 16.65 0.65 15.3069 0.65 13.65C0.65 11.9931 1.99315 10.65 3.65 10.65C5.30685 10.65 6.65 11.9931 6.65 13.65ZM6.65 13.65V2.65M6.65 2.65V0.65H10.65V2.65H6.65Z"
+                          stroke="currentColor"
+                          stroke-width="1.3"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    <span class="iframe-shell__external-step-copy">
+                      <span
+                        class="iframe-shell__external-step-title"
+                        data-i18n="embedBlockedStep3Title"
+                      >Дождись сигнала</span>
+                      <span
+                        class="iframe-shell__external-step-body"
+                        data-i18n="embedBlockedStep3Body"
+                      >Когда время закончится, ты услышишь звук</span>
+                    </span>
+                  </li>
+                  <li class="iframe-shell__external-step">
+                    <span
+                      class="iframe-shell__external-step-icon"
+                      aria-hidden="true"
+                    >
+                      <svg
+                        class="iframe-shell__external-step-glyph"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 19.941 12.4858"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M0.65 4.65H10.65M0.65 0.65H10.65M0.65 8.65H6.65M10.5815 8.98143L13.1429 11.5429C13.5334 11.9334 14.1666 11.9334 14.5571 11.5429L19.291 6.80903"
+                          stroke="currentColor"
+                          stroke-width="1.3"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    <span class="iframe-shell__external-step-copy">
+                      <span
+                        class="iframe-shell__external-step-title"
+                        data-i18n="embedBlockedStep4Title"
+                      >Пройди опрос</span>
+                      <span
+                        class="iframe-shell__external-step-body"
+                        data-i18n="embedBlockedStep4Body"
+                      >Вернись и ответь на несколько вопросов</span>
+                    </span>
+                  </li>
+                </ol>
+              </div>
               <button
                 type="button"
                 class="iframe-shell__external-open"
                 data-action="open-external"
                 data-i18n="embedBlockedOpen"
-              >Открыть портфолио</button>
+              >Открыть и начать</button>
             </div>
           </div>
         </section>

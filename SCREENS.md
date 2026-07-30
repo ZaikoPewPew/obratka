@@ -28,7 +28,7 @@ referral → auth → authCode → onboarding → home
 | 5b | `url-screen` | `/portfolio` | Подача URL (баланс); чип «На главную»; done на том же экране |
 | 6 | `review-screen` + `review-panel` + `scale-slider` | `/quiz` → `/quiz/done` | Квиз: grade → context/structure/metrics → visual 1–5 (+ pain если ≤2) → **tier** → advice; финал + улет отчёта. SoT: [`QUIZ.md`](QUIZ.md) |
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
-| 8 | `report-screen` | `/report` | Отчёт автору: листы + жалоба (1 тег, окно 6ч от done; вне окна кнопку скрывать) + PDF (мокап листа → done после скачивания) |
+| 8 | `report-screen` | `/report` | Отчёт автору: листы → «Посмотреть» (side-panel) → жалоба (1 тег, окно 6ч от done; вне окна кнопку скрывать) + PDF (мокап листа → done после скачивания) |
 | — | `ban-screen` | `/banned` | Аккаунт заблокирован; «Выйти» + «Связаться» (242px); красный mesh; deep link escape-proof |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query (`?ref=`, `?lang=`) сохраняются.
@@ -126,7 +126,7 @@ src/components/
   review-panel/           ← шаги квиза
   scale-slider/           ← шкалы context (1–5) / visual (1–5)
   success-screen/         ← /done (подача портфолио)
-  report-screen/          ← /report (листы ревью + жалоба)
+  report-screen/          ← /report (листы → side-panel → жалоба)
   ban-screen/             ← /banned (аккаунт заблокирован)
   rating/                 ← неиспользуемый aside (вкладка рейтинга — в home-screen)
 
@@ -204,7 +204,7 @@ Shared (не экраны флоу):
 | iframe-shell + timer + rec | `/review` | UI (заметки → `answers.dictation`) |
 | `createReviewScreen` + `createReviewPanel` (+ `createScaleSlider`) | `/quiz` | UI: visual 1–5, условный pain, `tier`; mic → `advice`. См. [`QUIZ.md`](QUIZ.md) |
 | `createSuccessScreen` | `/done` | UI (deep link / generic; submit остаётся на url-screen) |
-| `createReportScreen` | `/report` | UI (листы + жалоба на лист) |
+| `createReportScreen` | `/report` | UI (листы → просмотр → жалоба на лист) |
 | `createBanScreen` | `/banned` | UI (блок аккаунта; static evil mark) |
 
 ### Handoff

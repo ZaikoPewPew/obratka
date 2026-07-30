@@ -80,13 +80,20 @@ await panel.close();
 - Escape / клик по backdrop → `close()`
 - **Не** писать `history` / `go()` внутри
 
-## Кейс на home
+## Кейсы
+
+### Home — правила
 
 Account-menu → «Правила» → текст из [`content/rules.json`](../../../content/rules.json) через `getCommunityRules()` (`homeRulesCloseAria` — только aria крестика в locales). Строки `body` (через `\n`) рендерятся как маркированный список (`.side-panel__section-list`).
+
+### Report — просмотр листа
+
+`/report` → «Посмотреть» на строке листа → полный текст (`buildReportSections`) + «Пожаловаться» внизу панели. См. [`../report-screen/README.md`](../report-screen/README.md).
 
 ## Связанные доки
 
 - [`../account-menu/README.md`](../account-menu/README.md)
+- [`../report-screen/README.md`](../report-screen/README.md)
 - [`../app-modal/README.md`](../app-modal/README.md)
 - [`../../../content/README.md`](../../../content/README.md)
 - [`../../../styles/README.md`](../../../styles/README.md)

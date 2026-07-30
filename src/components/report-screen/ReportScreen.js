@@ -23,6 +23,7 @@ import {
   submitReviewComplaint,
 } from "../../api/reviewComplaints.js";
 import { createAppModal } from "../app-modal/AppModal.js";
+import { createSidePanel } from "../side-panel/SidePanel.js";
 
 const BRAND_MARK_CLASS = "report-screen__brand-mark";
 const BRAND_MARK_SVG = brandMarkSvg(BRAND_MARK_CLASS);
@@ -56,7 +57,7 @@ const TAG_I18N_KEYS = {
 };
 
 /**
- * Отчёт автору портфолио: список листов + жалоба + PDF.
+ * Отчёт автору портфолио: список листов → просмотр в side-panel → жалоба + PDF.
  *
  * @param {{
  *   onPrimary?: () => void | Promise<void>;
@@ -79,6 +80,8 @@ export function createReportScreen(opts = {}) {
   let closing = false;
   /** @type {import("../../api/reviewComplaints.js").PortfolioReviewSheet[]} */
   let sheets = [];
+  /** @type {string | null} */
+  let viewingSheetId = null;
   /** @type {string | null} */
   let complaintReviewId = null;
   /** @type {string | null} */
@@ -247,7 +250,13 @@ export function createReportScreen(opts = {}) {
     },
   });
   complaintModal.content.append(complaintBody);
-  root.append(complaintModal.root);
+
+  const sheetPanel = createSidePanel({
+    onClose: () => {
+      viewingSheetId = null;
+    },
+  });
+  root.append(sheetPanel.root, complaintModal.root);
 
   function brandMarkEl() {
     return /** @type {SVGElement | null} */ (brandSlot.querySelector("svg"));
@@ -559,6 +568,88 @@ export function createReportScreen(opts = {}) {
     void complaintModal.close();
   }
 
+  function closeSheetPanel() {
+    viewingSheetId = null;
+    if (!sheetPanel.isOpen()) return;
+    void sheetPanel.close();
+  }
+
+  /**
+   * @param {import("../../api/reviewComplaints.js").PortfolioReviewSheet} sheet
+   * @param {number} index
+   */
+  function syncSheetPanelContent(sheet, index) {
+    const t = getStrings();
+    const name =
+      (sheet.reviewerDisplayName && sheet.reviewerDisplayName.trim()) ||
+      t.reportSheetReviewerFallback ||
+      "";
+    const gradeLabel = sheetGradeLabel(sheet, index);
+
+    sheetPanel.setTitle(name);
+    sheetPanel.setDescription(gradeLabel);
+    sheetPanel.setCloseAriaLabel(t.reportSheetPanelCloseAria ?? "");
+
+    /** @type {HTMLElement[]} */
+    const nodes = [];
+
+    if (sheet.answers) {
+      const sections = buildReportSections(sheet.answers, t, {
+        seed: sheet.id,
+      });
+      for (const section of sections) {
+        const wrap = document.createElement("section");
+        wrap.className = "side-panel__section";
+
+        const heading = document.createElement("h3");
+        heading.className = "side-panel__section-title";
+        heading.textContent = section.title;
+
+        const bodyEl = document.createElement("p");
+        bodyEl.className = "side-panel__section-body";
+        bodyEl.textContent = fixHangingPrepositions(section.body);
+
+        wrap.append(heading, bodyEl);
+        nodes.push(wrap);
+      }
+    }
+
+    if (sheet.complained || sheet.canComplain) {
+      const actions = document.createElement("div");
+      actions.className = "report-screen__sheet-panel-actions";
+
+      const complainBtn = document.createElement("button");
+      complainBtn.type = "button";
+      complainBtn.className = "report-screen__sheet-action";
+
+      if (sheet.complained) {
+        complainBtn.classList.add("report-screen__sheet-action--done");
+        complainBtn.disabled = true;
+        complainBtn.textContent = t.reportComplaintSubmitted ?? "";
+      } else {
+        complainBtn.textContent = t.reportComplaintButton ?? "";
+        complainBtn.addEventListener("click", () => {
+          openComplaintModal(sheet.id, name);
+        });
+      }
+
+      actions.append(complainBtn);
+      nodes.push(actions);
+    }
+
+    sheetPanel.content.replaceChildren(...nodes);
+  }
+
+  /**
+   * @param {import("../../api/reviewComplaints.js").PortfolioReviewSheet} sheet
+   * @param {number} index
+   */
+  function openSheetPanel(sheet, index) {
+    viewingSheetId = sheet.id;
+    syncSheetPanelContent(sheet, index);
+    sheetPanel.open();
+  }
+
   /**
    * @param {string} reviewId
    * @param {string} reviewerName
@@ -604,6 +695,14 @@ export function createReportScreen(opts = {}) {
         );
         void complaintModal.close().then(() => {
           renderSheets();
+          if (!viewingSheetId) return;
+          const index = sheets.findIndex((row) => row.id === viewingSheetId);
+          const sheet = index >= 0 ? sheets[index] : null;
+          if (!sheet) {
+            closeSheetPanel();
+            return;
+          }
+          syncSheetPanelContent(sheet, index);
         });
       })
       .catch((err) => {
@@ -678,23 +777,21 @@ export function createReportScreen(opts = {}) {
     meta.append(avatar, textCol);
     li.append(meta);
 
-    if (sheet.complained) {
-      const complainBtn = document.createElement("button");
-      complainBtn.type = "button";
-      complainBtn.className =
-        "report-screen__complain report-screen__complain--done";
-      complainBtn.disabled = true;
-      complainBtn.textContent = t.reportComplaintSubmitted ?? "";
-      li.append(complainBtn);
-    } else if (sheet.canComplain) {
-      const complainBtn = document.createElement("button");
-      complainBtn.type = "button";
-      complainBtn.className = "report-screen__complain";
-      complainBtn.textContent = t.reportComplaintButton ?? "";
-      complainBtn.addEventListener("click", () => {
-        openComplaintModal(sheet.id, name);
+    if (sheet.answers) {
+      const viewBtn = document.createElement("button");
+      viewBtn.type = "button";
+      viewBtn.className = "report-screen__sheet-action";
+      viewBtn.textContent = t.reportSheetViewButton ?? "";
+      viewBtn.setAttribute(
+        "aria-label",
+        formatString(t.reportSheetViewAria ?? "", { name }) ||
+          t.reportSheetViewButton ||
+          "",
+      );
+      viewBtn.addEventListener("click", () => {
+        openSheetPanel(sheet, index);
       });
-      li.append(complainBtn);
+      li.append(viewBtn);
     }
 
     return li;
@@ -766,6 +863,7 @@ export function createReportScreen(opts = {}) {
   function open(openOpts = {}) {
     closing = false;
     closeComplaintModal();
+    closeSheetPanel();
     cancelReportLaunch();
     clearDoneMesh();
     clearReportSheet();
@@ -818,6 +916,7 @@ export function createReportScreen(opts = {}) {
     }
 
     closeComplaintModal();
+    closeSheetPanel();
     loadToken += 1;
     loading = false;
     cancelReportLaunch();
