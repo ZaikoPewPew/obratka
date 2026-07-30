@@ -592,6 +592,7 @@ function isCompletedOwnItem(item) {
  *
  * @param {{
  *   onOpenPortfolio: (item: HomePortfolioItem) => void | Promise<void>;
+ *   onPreviewPortfolio?: (item: HomePortfolioItem) => void;
  *   onOpenReport?: (item: HomePortfolioItem) => void | Promise<void>;
  *   onAddPortfolio?: () => void | Promise<void>;
  *   onOpenSettings?: () => void | Promise<void>;
@@ -611,6 +612,7 @@ function isCompletedOwnItem(item) {
  */
 export function createHomeScreen({
   onOpenPortfolio,
+  onPreviewPortfolio,
   onOpenReport,
   onAddPortfolio,
   onOpenSettings,
@@ -1446,6 +1448,7 @@ export function createHomeScreen({
     reviewIntroModal.setActionsVisible({ primary: true, secondary: true });
     reviewIntroModal.open();
     reviewIntroVideo.play();
+    onPreviewPortfolio?.(item);
   }
 
   function closeReviewIntroModal() {

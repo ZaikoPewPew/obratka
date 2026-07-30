@@ -118,7 +118,7 @@ SWR: при `open` / смене таба / F5 — если есть **непус
 
 После skeleton данные с `motion-reveal` stagger; после тихого refetch при тех же id — только патч reviewer-слотов (без пересборки DOM / thum.io); новые карточки — full rebuild + reveal только для новых id.
 
-Клик по чужой карточке → если уже `reviewsCount >= target` (`isPortfolioOpenForReview`) → `homeNoSlots*` + refresh; иначе intro-модалка: тайтл + описание + видео-слот (max 552, Fit `primer.mp4`, autoplay/loop/muted) → CTA «Сюдаа его!» → `onOpenPortfolio` → `claimPortfolioReview` → `/review`. «Не сейчас» / закрытие — без claim; видео стопается.  
+Клик по чужой карточке → если уже `reviewsCount >= target` (`isPortfolioOpenForReview`) → `homeNoSlots*` + refresh; иначе intro-модалка: тайтл + описание + видео-слот (max 552, Fit `primer.mp4`, autoplay/loop/muted) → параллельно `onPreviewPortfolio` (prefetch Edge/Readymag embed-probe) → CTA «Сюдаа его!» → `onOpenPortfolio` → `claimPortfolioReview` → `/review` уже с известным iframe/external. «Не сейчас» / закрытие — без claim; видео стопается.  
 Active claims не закрывают дверь; late submit после `done` принимает сервер (+10). На карточке — первые `target` аватарок.  
 Abort / hard navigation: release через SPA `releaseHeldClaim` или `pagehide` keepalive + per-tab `sessionStorage` reconcile (см. `review-claims.mdc`) — active «Аноним» не должен залипать после ухода.  
 Своя (`isOwn`, вкладка «Мои») кликабельна всегда: собраны все ревью (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report` (листы + жалоба; при overshoot листов может быть > target); иначе explainer `homeMineNotReady*` («Отчёт ещё не готов»: фото [`currency-empty-duck.png`](../../assets/home/modal/currency-empty-duck.png) на фоне `--palette-gray-100` + Lottie `rotating-ray`, те же размеры медиа что у invite, secondary «Ясн»). Title / aria карточки — `homeCardReport*` либо `homeCardReportPending*`, пересинхронизируются при silent-патче слотов.  
@@ -189,7 +189,7 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 ## API модуля
 
-`createHomeScreen({ onOpenPortfolio, onOpenReport?, onAddPortfolio?, onOpenSettings?, onSignOut?, onViewChange? })` → `{ root, open(view?), close, setItems, setView, getView, refresh, showNotice }`.
+`createHomeScreen({ onOpenPortfolio, onPreviewPortfolio?, onOpenReport?, onAddPortfolio?, onOpenSettings?, onSignOut?, onViewChange? })` → `{ root, open(view?), close, setItems, setView, getView, refresh, showNotice }`.
 
 Внутреннее: `activeTab` `feed` \| `mine` \| `rating`; `mineFilter` `active` \| `completed`; `refresh` читает соответствующий list API (`listPortfoliosForReview` / `listMyPortfolios` / `listRatingTop`; на чужих вкладках ещё `listFeedPortfolioIds` для точки); кэш вкладок — [`homeListCache.js`](../../utils/homeListCache.js) (`feed`/`mine`/`rating`).
 

@@ -9,8 +9,8 @@
 1. **Спец-embed** — переписать URL (Figma, YouTube) и грузить iframe.
 2. **Нельзя** — сразу внешняя вкладка + UI в оболочке (суффиксы в `EXTERNAL_EMBED_HOSTS`).
 3. **Можно / неизвестно** — пробуем iframe as-is; дополнительно:
-   - HTML-probe маркеров Readymag (best-effort, CORS часто режет);
-   - если iframe остаётся `about:blank` / error (XFO/CSP/сеть) → эскалация в external UI и сброс таймера до кнопки «Открыть и начать».
+   - **prefetch на home intro** (и перед «Следующий кейс»): Edge `portfolio-embed-probe` + Readymag HTML-probe, чтобы к `/review` уже знать `external` и не мигать broken iframe + таймером;
+   - runtime: если iframe остаётся `about:blank` / error (XFO/CSP/сеть) → эскалация в external UI и сброс таймера до кнопки «Открыть и начать».
 
 Безопасность iframe (`#portfolio-frame`): `sandbox` без `allow-top-navigation` (скрипты/формы/попапы разрешены; увод top-окна — нет), `referrerpolicy="no-referrer"`. URL при submit и при открытии `/review` — только `http(s)` (клиент `normalizePortfolioUrl` + RPC `submit_portfolio`).
 

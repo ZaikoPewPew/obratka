@@ -427,13 +427,24 @@ body {
 
 .iframe-shell__external-media {
   box-sizing: border-box;
+  display: flex;
   flex: 0 0 var(--frame-external-media-width);
+  align-items: flex-start;
+  justify-content: center;
   width: var(--frame-external-media-width);
   height: var(--frame-external-media-height);
   border: var(--frame-external-media-border);
   border-radius: var(--frame-external-media-radius);
   background: var(--frame-external-media-bg);
   overflow: hidden;
+}
+
+.iframe-shell__external-media-video {
+  display: block;
+  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
 }
 
 .iframe-shell__external-steps {

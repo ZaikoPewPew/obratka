@@ -67,7 +67,10 @@ import { createBanScreen } from "./components/ban-screen/BanScreen.js";
 import { createUrlScreen } from "./components/url-screen/UrlScreen.js";
 import { createSettingsScreen } from "./components/settings-screen/SettingsScreen.js";
 import { REVIEW_SESSION_SECONDS } from "./config/review.js";
-import { probePortfolioEmbed } from "./api/portfolioEmbedProbe.js";
+import {
+  probePortfolioEmbed,
+  resolvePortfolioEmbedPlan,
+} from "./api/portfolioEmbedProbe.js";
 import {
   isLikelyFrameBlocked,
   probeReadymagPortfolio,
@@ -80,6 +83,7 @@ import { startTabAttention } from "./utils/tabAttention.js";
 import { fixHangingPrepositions } from "./utils/hangingPrepositions.js";
 import currencyDuckLeaveUrl from "./assets/home/modal/currency-duck-leave.png";
 import timerEndUrl from "./assets/audio/Timer-end.wav";
+import externalEmbedVideoUrl from "./assets/video/primer_not_iframe.mp4";
 
 const SESSION_TOTAL_MS = REVIEW_SESSION_SECONDS * 1000;
 const TAB_ATTENTION_FAVICON = `${String(import.meta.env.BASE_URL || "/").replace(/\/?$/, "/")}assets/svg/favicon_timer.svg`;
@@ -102,12 +106,21 @@ const PORTFOLIO_FRAME_SANDBOX =
 const FRAME_BLOCK_WATCH_MS = 8000;
 /** Пауза после load, чтобы браузер успел подставить blank/error. */
 const FRAME_BLOCK_SETTLE_MS = 50;
+/**
+ * Сколько ждать prefetch probe при старте ревью (intro обычно уже прогрел).
+ * Дальше — optimistic iframe + runtime fallback.
+ */
+const EMBED_PREFETCH_WAIT_MS = 2500;
 
 const frameWrap = document.querySelector("[data-frame]");
 const frame = document.querySelector("#portfolio-frame");
 const externalViewer = document.querySelector("[data-external-viewer]");
+const externalMedia = document.querySelector("[data-external-media]");
 const openExternalBtn = document.querySelector('[data-action="open-external"]');
 const timerEl = document.querySelector("[data-timer]");
+
+/** @type {HTMLVideoElement | null} */
+let externalMediaVideo = null;
 const abortReviewBtn = document.querySelector('[data-action="abort-review"]');
 const frameReloadBtn = document.querySelector('[data-action="reload-frame"]');
 const frameBackBtn = document.querySelector('[data-action="frame-back"]');
@@ -169,6 +182,15 @@ let reviewSubmitPromise = null;
 let claimHeartbeatId = null;
 /** @type {import("./utils/portfolioEmbed.js").PortfolioEmbedPlan | null} */
 let embedPlan = null;
+/**
+ * Prefetch embed-плана по URL (intro на home → к моменту claim уже готов).
+ * @type {Map<string, {
+ *   syncPlan: import("./utils/portfolioEmbed.js").PortfolioEmbedPlan;
+ *   plan: import("./utils/portfolioEmbed.js").PortfolioEmbedPlan | null;
+ *   ready: Promise<import("./utils/portfolioEmbed.js").PortfolioEmbedPlan>;
+ * }>}
+ */
+const embedPrefetchByUrl = new Map();
 /** @type {string} */
 let portfolioName = getStrings().brandName;
 
@@ -380,6 +402,7 @@ async function exitAuthenticatedSession() {
   reviewSubmitted = false;
   stopClaimHeartbeat();
   embedPlan = null;
+  embedPrefetchByUrl.clear();
   portfolioName = getStrings().brandName;
   pendingSuccessPreset = "generic";
   pendingReportPortfolioId = null;
@@ -649,7 +672,7 @@ async function claimAndStartReview(item, opts = {}) {
   resetDictationSession();
   enterSessionShell();
   await closeReview();
-  applyPortfolio(item.url, {
+  await applyPortfolio(item.url, {
     portfolioId: id,
     applicantName: item.name,
     applicantAvatar: item.avatarUrl,
@@ -695,6 +718,7 @@ async function openNextReviewCase() {
     for (const item of items) {
       if (excludeId && item.id === excludeId) continue;
       if (!isPortfolioOpenForReview(item)) continue;
+      if (item.url) prefetchPortfolioEmbed(item.url);
       const started = await claimAndStartReview(item, {
         showNoSlotsNotice: false,
       });
@@ -914,12 +938,165 @@ function syncLocaleDependentAttrs() {
     frame.title = formatString(t.iframeTitle, { name: portfolioName });
   }
 
+  if (externalMediaVideo) {
+    const mediaAria = t.embedBlockedMediaAria ?? "";
+    if (mediaAria) {
+      externalMediaVideo.setAttribute("aria-label", mediaAria);
+    } else {
+      externalMediaVideo.removeAttribute("aria-label");
+    }
+  }
+
   syncDictationChrome();
+}
+
+/**
+ * Видео-инструкция в слоте external UI (primer_not_iframe).
+ * @returns {HTMLVideoElement | null}
+ */
+function ensureExternalMediaVideo() {
+  if (externalMediaVideo) return externalMediaVideo;
+  if (!externalMedia) return null;
+
+  const video = document.createElement("video");
+  video.className = "iframe-shell__external-media-video";
+  video.src = externalEmbedVideoUrl;
+  video.muted = true;
+  video.defaultMuted = true;
+  video.loop = true;
+  video.playsInline = true;
+  video.autoplay = false;
+  video.preload = "metadata";
+  video.setAttribute("muted", "");
+  video.setAttribute("playsinline", "");
+  video.setAttribute("webkit-playsinline", "");
+  video.disablePictureInPicture = true;
+  video.controls = false;
+  video.setAttribute("aria-hidden", "false");
+
+  externalMedia.append(video);
+  externalMediaVideo = video;
+  return video;
+}
+
+/**
+ * @param {boolean} isExternal
+ */
+function syncExternalMediaPlayback(isExternal) {
+  const video = ensureExternalMediaVideo();
+  if (!video) return;
+  if (isExternal) {
+    try {
+      video.currentTime = 0;
+    } catch {
+      /* ignore seek before ready */
+    }
+    const playPromise = video.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(() => {
+        /* autoplay can be blocked — silent */
+      });
+    }
+    return;
+  }
+  video.pause();
+  try {
+    video.currentTime = 0;
+  } catch {
+    /* ignore */
+  }
 }
 
 function openPortfolioExternally() {
   if (!embedPlan?.openUrl) return;
   window.open(embedPlan.openUrl, "_blank", "noopener,noreferrer");
+}
+
+/**
+ * @param {string} url
+ * @param {import("./utils/portfolioEmbed.js").PortfolioEmbedPlan} plan
+ */
+function rememberEmbedPrefetch(url, plan) {
+  const safeUrl = normalizePortfolioUrl(url);
+  if (!safeUrl || !plan) return;
+  const ready = Promise.resolve(plan);
+  embedPrefetchByUrl.set(safeUrl, {
+    syncPlan: plan,
+    plan,
+    ready,
+  });
+}
+
+/**
+ * Старт probe на intro (или заранее перед claim). Идемпотентно по URL.
+ * @param {string | null | undefined} url
+ */
+function prefetchPortfolioEmbed(url) {
+  const safeUrl = normalizePortfolioUrl(url);
+  if (!safeUrl) return;
+  if (embedPrefetchByUrl.has(safeUrl)) return;
+
+  const syncPlan = resolvePortfolioEmbed(safeUrl);
+  if (
+    syncPlan.mode === "external" ||
+    syncPlan.allowFullscreen ||
+    !syncPlan.frameSrc
+  ) {
+    rememberEmbedPrefetch(safeUrl, syncPlan);
+    return;
+  }
+
+  const ready = resolvePortfolioEmbedPlan(safeUrl, {
+    embedderOrigin: window.location.origin,
+  }).catch(() => syncPlan);
+
+  embedPrefetchByUrl.set(safeUrl, {
+    syncPlan,
+    plan: null,
+    ready,
+  });
+
+  void ready.then((plan) => {
+    const entry = embedPrefetchByUrl.get(safeUrl);
+    if (!entry || entry.ready !== ready) return;
+    embedPrefetchByUrl.set(safeUrl, {
+      syncPlan: entry.syncPlan,
+      plan,
+      ready,
+    });
+  });
+}
+
+/**
+ * План для `/review`: ждём prefetch до EMBED_PREFETCH_WAIT_MS, иначе sync.
+ * @param {string} safeUrl
+ * @returns {Promise<import("./utils/portfolioEmbed.js").PortfolioEmbedPlan>}
+ */
+async function resolveEmbedPlanForReview(safeUrl) {
+  prefetchPortfolioEmbed(safeUrl);
+  const entry = embedPrefetchByUrl.get(safeUrl);
+  if (!entry) {
+    return resolvePortfolioEmbed(safeUrl);
+  }
+  if (entry.plan) {
+    return entry.plan;
+  }
+
+  let settled = false;
+  const plan = await Promise.race([
+    entry.ready.then((resolved) => {
+      settled = true;
+      return resolved;
+    }),
+    new Promise((resolve) => {
+      window.setTimeout(() => {
+        if (!settled) resolve(entry.syncPlan);
+      }, EMBED_PREFETCH_WAIT_MS);
+    }),
+  ]);
+  return /** @type {import("./utils/portfolioEmbed.js").PortfolioEmbedPlan} */ (
+    plan
+  );
 }
 
 function clearFrameBlockWatch() {
@@ -967,9 +1144,12 @@ function escalateOptimisticEmbedToExternal(hostLabel) {
   if (!openUrl) return;
 
   const wasRunning = sessionStarted && !sessionEnded;
-  applyEmbedPlan(
-    toExternalEmbedPlan(openUrl, hostLabel || embedPlan.hostLabel || "site"),
+  const nextPlan = toExternalEmbedPlan(
+    openUrl,
+    hostLabel || embedPlan.hostLabel || "site",
   );
+  rememberEmbedPrefetch(openUrl, nextPlan);
+  applyEmbedPlan(nextPlan);
   if (wasRunning || sessionStarted) {
     armSession();
   }
@@ -1164,6 +1344,7 @@ function applyEmbedPlan(plan) {
   frameWrap.classList.toggle("iframe-shell__frame--external", isExternal);
   externalViewer.hidden = !isExternal;
   externalViewer.setAttribute("aria-hidden", isExternal ? "false" : "true");
+  syncExternalMediaPlayback(isExternal);
 
   if (isExternal) {
     frame.removeAttribute("allow");
@@ -1207,7 +1388,7 @@ function syncPortfolioName(label) {
  *   applicantAvatar?: string;
  * }} [options]
  */
-function applyPortfolio(url, options = {}) {
+async function applyPortfolio(url, options = {}) {
   const safeUrl = normalizePortfolioUrl(url);
   portfolioId =
     typeof options.portfolioId === "string" && options.portfolioId.trim()
@@ -1233,7 +1414,7 @@ function applyPortfolio(url, options = {}) {
   }
 
   portfolioUrl = safeUrl;
-  const plan = resolvePortfolioEmbed(safeUrl);
+  const plan = await resolveEmbedPlanForReview(safeUrl);
   applyEmbedPlan(plan);
 
   if (options.openExternal && plan.mode === "external") {
@@ -1482,6 +1663,7 @@ function leaveSessionShell() {
   if (!shell) return;
   shell.hidden = true;
   shell.classList.remove("iframe-shell--entered");
+  syncExternalMediaPlayback(false);
 }
 
 const abortReviewMedia = document.createElement("div");
@@ -1587,6 +1769,10 @@ const settingsScreen = createSettingsScreen({
 });
 
 const homeScreen = createHomeScreen({
+  onPreviewPortfolio: (item) => {
+    // Intro открыт — греем Edge/Readymag probe, чтобы `/review` сразу знал mode.
+    if (item?.url) prefetchPortfolioEmbed(item.url);
+  },
   onOpenPortfolio: async (item) => {
     // Intro CTA → тот же claimAndStartReview, что и «Следующий кейс» (без intro).
     await claimAndStartReview(item, { showNoSlotsNotice: true });

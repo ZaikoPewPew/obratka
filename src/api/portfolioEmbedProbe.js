@@ -1,4 +1,9 @@
 import { getSupabase, isSupabaseConfigured } from "../lib/supabaseClient.js";
+import {
+  probeReadymagPortfolio,
+  resolvePortfolioEmbed,
+  toExternalEmbedPlan,
+} from "../utils/portfolioEmbed.js";
 
 /**
  * @typedef {{
@@ -8,6 +13,43 @@ import { getSupabase, isSupabaseConfigured } from "../lib/supabaseClient.js";
  *   error?: string,
  * }} PortfolioEmbedProbeResult
  */
+
+/**
+ * Sync-резолвер + Edge/Readymag probe для optimistic iframe.
+ * Blocklist / Figma / YouTube — сразу без сети.
+ * `canFrame === false` или Readymag → external plan до открытия `/review`.
+ *
+ * @param {string} portfolioUrl
+ * @param {{ embedderOrigin?: string, timeoutMs?: number }} [opts]
+ * @returns {Promise<import("../utils/portfolioEmbed.js").PortfolioEmbedPlan>}
+ */
+export async function resolvePortfolioEmbedPlan(portfolioUrl, opts = {}) {
+  const plan = resolvePortfolioEmbed(portfolioUrl);
+  if (plan.mode === "external" || plan.allowFullscreen || !plan.frameSrc) {
+    return plan;
+  }
+
+  const timeoutMs =
+    typeof opts.timeoutMs === "number" && opts.timeoutMs > 0
+      ? opts.timeoutMs
+      : 5000;
+
+  const [policy, isReadymag] = await Promise.all([
+    probePortfolioEmbed(portfolioUrl, { ...opts, timeoutMs }),
+    probeReadymagPortfolio(portfolioUrl, { timeoutMs }),
+  ]);
+
+  if (isReadymag) {
+    return toExternalEmbedPlan(portfolioUrl, "Readymag");
+  }
+  if (policy.canFrame === false) {
+    return toExternalEmbedPlan(
+      portfolioUrl,
+      policy.hostLabel || plan.hostLabel || "site",
+    );
+  }
+  return plan;
+}
 
 /**
  * @param {string} portfolioUrl

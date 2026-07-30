@@ -46,6 +46,7 @@
 | Файл | Роль |
 |------|------|
 | `primer.mp4` | пример ревью в intro-модалке home (`homeReviewIntro*`, autoplay/loop/muted) |
+| `primer_not_iframe.mp4` | инструкция в external UI на `/review` (`.iframe-shell__external-media`, autoplay/loop/muted) |
 
 ### `brandMarks.js` — API
 
