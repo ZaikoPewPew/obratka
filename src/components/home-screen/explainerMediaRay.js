@@ -5,6 +5,9 @@ import rotatingRayAnimation from "../../assets/home/modal/rotating-ray.json";
  * Lottie «Rotating Ray» под PNG в explainer-медиа.
  * Модалки стартуют `hidden` → после `open()` нужен `sync()` (resize + play).
  *
+ * Размеры / цвет (#F3F4F7) / когда нужен filter:
+ * [`src/assets/home/modal/README.md`](../../assets/home/modal/README.md)
+ *
  * @returns {{ root: HTMLElement, sync: () => void, destroy: () => void }}
  */
 export function createExplainerMediaRay() {

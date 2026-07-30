@@ -1,0 +1,18 @@
+---
+description: PNG + Lottie rotating-ray в explainer-модалках (размеры, цвет #F3F4F7, sync)
+globs: src/components/home-screen/**/*.{js,css,md},src/assets/home/modal/**/*,styles/home-screen.css,styles/iframe-shell.css,styles/tokens.css,src/main.js,src/components/app-modal/**
+alwaysApply: false
+---
+
+# Explainer media (PNG + Lottie)
+
+SoT: [`src/assets/home/modal/README.md`](../../src/assets/home/modal/README.md).
+
+## Жёсткие правила
+
+1. Новый explainer с фото → `createExplainerMediaRay()` + PNG поверх; после `open()` — `ray.sync()`.
+2. Без plate (белая модалка): слот как **p4p** — высота **268px**, лучи **155%** + `height: auto` + `aspect-ratio: 1 / 1`, `filter: var(--home-screen-explainer-media-ray-on-light-filter)` → цвет **`#F3F4F7`** (`--palette-gray-100`).
+3. С plate gray-100 (invite / mine-not-ready): высота **256px**, те же 155%, **без** filter на лучах.
+4. Не менять `invert(%)` filter произвольно — только токен `--home-screen-explainer-media-ray-on-light-filter` (= ≈ gray-100).
+5. Скорость Lottie — только в фабрике (`setSpeed(1/3)`).
+6. Abort `/review` алиасит p2p-токены (`--shell-abort-explainer-media-*`), не invent свои размеры.

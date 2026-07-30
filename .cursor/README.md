@@ -7,6 +7,7 @@
 | Файл | О чём |
 |------|--------|
 | `design-tokens.mdc` | Только `var(--…)` из `tokens.css`, Montserrat, motion (`motion-reveal-dock` / duck / error-buzz / home glass) |
+| `explainer-media.mdc` | PNG + Lottie `rotating-ray` в модалках: 155% / 268px, цвет `#F3F4F7`, `sync()` |
 | `i18n.mdc` | UI-строки только из `locales.json` (ru/en) |
 | `typography.mdc` | Висячие предлоги 1–3 буквы → NBSP (`fixHangingPrepositions`) |
 | `screens.mdc` | Экран = модуль, `go()`, paths, home (feedSeen / 3/3 / rating / legendary), handoff |
@@ -33,6 +34,7 @@
 | Brand visual / variants | `src/components/brand-screen-visual/` |
 | Brand split-shell | `src/components/brand-screen-shell/` |
 | App modal | `src/components/app-modal/` (`createAppModal`, `--app-modal-*`) |
+| Explainer PNG + Lottie | [`src/assets/home/modal/README.md`](../src/assets/home/modal/README.md) (`rotating-ray`, `#F3F4F7`, 155%/268px) |
 | Tabs panel | `src/components/tabs-panel/` (`createTabsPanel`, `--tabs-panel-*`) |
 | Legendary online | `src/components/legendary-online-panel/` (fixed-чип «Топы в сети») |
 | Brand marks / morph | `src/assets/brand/brandMarks.js` |

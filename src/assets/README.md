@@ -10,7 +10,8 @@
 
 ### `home/modal/`
 
-Ассеты тел модалок на главной (explainer’ы и т.п.):
+Ассеты тел модалок (explainers): PNG + общий Lottie.  
+**Как юзать (размеры, цвет `#F3F4F7`, sync):** [`home/modal/README.md`](home/modal/README.md).
 
 | Файл | Роль |
 |------|------|
