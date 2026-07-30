@@ -7,4 +7,5 @@
 ## Состав
 
 - `assets/svg/favicon.svg` — favicon сайта (`index.html`).
+- `assets/svg/favicon_timer.svg` — alert-favicon при истечении таймера ревью (мигание вкладки, `tabAttention.js`).
 - `assets/svg/home-preview-browser-controls.svg` — контролы превью браузера на home-card (`HomeScreen`).

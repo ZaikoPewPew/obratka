@@ -7,6 +7,7 @@
   "locales": {
     "ru": {
       "metaTitle": "Обратка",
+      "metaTitleAttention": "Время вышло — вернись",
       "controlsAria": "Управление айфреймом",
       "frameBackButton": "Назад",
       "frameBackButtonTitle": "Назад",
@@ -491,6 +492,7 @@
     },
     "en": {
       "metaTitle": "Obratka",
+      "metaTitleAttention": "Time’s up — come back",
       "controlsAria": "Iframe controls",
       "frameBackButton": "Back",
       "frameBackButtonTitle": "Back",

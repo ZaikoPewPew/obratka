@@ -74,10 +74,12 @@ import {
 } from "./utils/portfolioEmbed.js";
 import { normalizePortfolioUrl } from "./utils/portfolioMeta.js";
 import { getMotionFocusDelayMs } from "./utils/motionTokens.js";
+import { startTabAttention } from "./utils/tabAttention.js";
 import brandLogoUrl from "./assets/brand/logo.svg";
 import timerEndUrl from "./assets/audio/Timer-end.wav";
 
 const SESSION_TOTAL_MS = REVIEW_SESSION_SECONDS * 1000;
+const TAB_ATTENTION_FAVICON = `${String(import.meta.env.BASE_URL || "/").replace(/\/?$/, "/")}assets/svg/favicon_timer.svg`;
 const TIMER_TICK_MS = 10;
 /** Продление claim TTL, пока пользователь на review/quiz. */
 const CLAIM_HEARTBEAT_MS = 2 * 60 * 1000;
@@ -1344,6 +1346,10 @@ function lockFrameAndShowReview() {
   sessionEnded = true;
   syncDictationChrome();
   playTimerEndSound();
+  startTabAttention({
+    alertTitle: getStrings().metaTitleAttention,
+    alertFaviconHref: TAB_ATTENTION_FAVICON,
+  });
   openReview();
 }
 
