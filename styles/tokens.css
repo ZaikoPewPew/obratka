@@ -706,53 +706,9 @@
   --home-screen-chip-font-size: var(--font-size-base);
   --home-screen-chip-font-weight: var(--font-weight-medium);
   --home-screen-reputation-chip-gap: var(--space-1);
-  --home-screen-reputation-explainer-gap: var(--space-4);
-  --home-screen-reputation-explainer-media-width: 180px;
-  --home-screen-reputation-explainer-media-height: 216px;
-  --home-screen-reputation-explainer-media-radius: var(--radius-md);
-  --home-screen-reputation-explainer-media-bg: var(--color-surface-muted);
-  --home-screen-reputation-explainer-card-padding: var(--space-4);
-  --home-screen-reputation-explainer-card-gap: var(--space-1);
-  --home-screen-reputation-explainer-card-radius: var(--radius-md);
-  --home-screen-reputation-explainer-card-bg: var(--color-surface-muted);
-  --home-screen-reputation-explainer-card-value-size: var(--font-size-lg);
-  --home-screen-reputation-explainer-card-value-weight: var(--font-weight-semibold);
-  --home-screen-reputation-explainer-card-value-line: var(--line-height-snug);
-  --home-screen-reputation-explainer-card-label-size: var(--font-size-base);
-  --home-screen-reputation-explainer-card-label-weight: var(--font-weight-regular);
-  --home-screen-reputation-explainer-card-label-line: var(--line-height-snug);
-  --home-screen-reputation-explainer-card-label-color: color-mix(
-    in srgb,
-    var(--color-text) 50%,
-    transparent
-  );
-  /* Explainer игровой валюты (Figma Modal 496:4403) */
-  --home-screen-balance-explainer-gap: var(--space-4);
-  --home-screen-balance-explainer-media-width: 182px;
-  --home-screen-balance-explainer-media-height: 216px;
-  --home-screen-balance-explainer-media-radius: var(--radius-md);
-  --home-screen-balance-explainer-media-bg: var(--color-surface-muted);
-  --home-screen-p2p-explainer-media-width: 268px;
-  --home-screen-p2p-explainer-media-height: 216px;
-  --home-screen-p2p-explainer-media-radius: var(--radius-md);
-  --home-screen-p2p-explainer-media-bg: var(--color-surface-muted);
+  /* Explainer-медиа 552×268: PNG + Lottie, без подложки */
   --home-screen-explainer-media-ray-size: 210%;
   --home-screen-explainer-media-ray-opacity: 1;
-  --home-screen-balance-explainer-card-padding: var(--space-4);
-  --home-screen-balance-explainer-card-gap: var(--space-1);
-  --home-screen-balance-explainer-card-radius: var(--radius-md);
-  --home-screen-balance-explainer-card-bg: var(--color-surface-muted);
-  --home-screen-balance-explainer-card-title-size: var(--font-size-lg);
-  --home-screen-balance-explainer-card-title-weight: var(--font-weight-semibold);
-  --home-screen-balance-explainer-card-title-line: var(--line-height-snug);
-  --home-screen-balance-explainer-card-body-size: var(--font-size-base);
-  --home-screen-balance-explainer-card-body-weight: var(--font-weight-regular);
-  --home-screen-balance-explainer-card-body-line: var(--line-height-snug);
-  --home-screen-balance-explainer-card-body-color: var(--color-text-muted);
-  --home-screen-balance-explainer-card-deco-width: 66px;
-  --home-screen-balance-explainer-card-deco-height: 73px;
-  --home-screen-balance-explainer-card-deco-right: 20px;
-  --home-screen-balance-explainer-card-deco-bottom: 13px;
   --home-screen-profile-size: var(--space-12);
   --home-screen-avatar-radius: var(--radius-pill);
   --home-screen-avatar-letter-bg: var(--palette-gray-900);
@@ -939,7 +895,7 @@
   --home-screen-invite-explainer-media-ray-size: 155%;
   --home-screen-invite-explainer-media-ray-opacity: 1;
   --home-screen-invite-explainer-media-photo-fit: contain;
-  /* Mine not-ready: те же размеры медиа, что у invite */
+  /* Mine not-ready: то же строение медиа, что у invite */
   --home-screen-mine-not-ready-explainer-media-width: var(
     --home-screen-invite-explainer-media-width
   );
@@ -960,6 +916,59 @@
   );
   --home-screen-mine-not-ready-explainer-media-photo-fit: var(
     --home-screen-invite-explainer-media-photo-fit
+  );
+  /* p4p / Уточки / Репутация: 552×268, PNG + Lottie без подложки */
+  --home-screen-p2p-explainer-media-width: var(
+    --home-screen-invite-explainer-media-width
+  );
+  --home-screen-p2p-explainer-media-height: 268px;
+  --home-screen-p2p-explainer-media-radius: var(
+    --home-screen-invite-explainer-media-radius
+  );
+  --home-screen-p2p-explainer-media-ray-size: var(
+    --home-screen-invite-explainer-media-ray-size
+  );
+  --home-screen-p2p-explainer-media-ray-opacity: var(
+    --home-screen-invite-explainer-media-ray-opacity
+  );
+  --home-screen-p2p-explainer-media-photo-fit: var(
+    --home-screen-invite-explainer-media-photo-fit
+  );
+  --home-screen-balance-explainer-media-width: var(
+    --home-screen-p2p-explainer-media-width
+  );
+  --home-screen-balance-explainer-media-height: var(
+    --home-screen-p2p-explainer-media-height
+  );
+  --home-screen-balance-explainer-media-radius: var(
+    --home-screen-p2p-explainer-media-radius
+  );
+  --home-screen-balance-explainer-media-ray-size: var(
+    --home-screen-p2p-explainer-media-ray-size
+  );
+  --home-screen-balance-explainer-media-ray-opacity: var(
+    --home-screen-p2p-explainer-media-ray-opacity
+  );
+  --home-screen-balance-explainer-media-photo-fit: var(
+    --home-screen-p2p-explainer-media-photo-fit
+  );
+  --home-screen-reputation-explainer-media-width: var(
+    --home-screen-p2p-explainer-media-width
+  );
+  --home-screen-reputation-explainer-media-height: var(
+    --home-screen-p2p-explainer-media-height
+  );
+  --home-screen-reputation-explainer-media-radius: var(
+    --home-screen-p2p-explainer-media-radius
+  );
+  --home-screen-reputation-explainer-media-ray-size: var(
+    --home-screen-p2p-explainer-media-ray-size
+  );
+  --home-screen-reputation-explainer-media-ray-opacity: var(
+    --home-screen-p2p-explainer-media-ray-opacity
+  );
+  --home-screen-reputation-explainer-media-photo-fit: var(
+    --home-screen-p2p-explainer-media-photo-fit
   );
   --home-screen-invite-bar-height: 72px;
   --home-screen-invite-bar-gap: var(--space-4);

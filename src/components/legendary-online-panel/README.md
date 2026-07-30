@@ -1,6 +1,6 @@
 # `legendary-online-panel` — «p4p в сети»
 
-Fixed-чип слева снизу на `/home` (Figma `489:3318`). Показывает аватары пользователей с `tier = legendary`, у которых свежий `last_seen_at` (RPC `list_online_legendaries`). Офлайн и пустой список — блок скрыт целиком. Клик → explainer `homeLegendaryOnline*` (Figma `492:4009`, фото `currency-p2p.png`).
+Fixed-чип слева снизу на `/home` (Figma `489:3318`). Показывает аватары пользователей с `tier = legendary`, у которых свежий `last_seen_at` (RPC `list_online_legendaries`). Офлайн и пустой список — блок скрыт целиком. Клик → explainer `homeLegendaryOnline*` (Figma `492:4009`): фото [`currency-p2p.png`](../../assets/home/modal/currency-p2p.png) + Lottie `rotating-ray` (552×268, без подложки), secondary «Ясн».
 
 Файл: [`LegendaryOnlinePanel.js`](./LegendaryOnlinePanel.js). Стили: [`styles/legendary-online-panel.css`](../../../styles/legendary-online-panel.css). Токены: `--legendary-online-*` в [`styles/tokens.css`](../../../styles/tokens.css).
 

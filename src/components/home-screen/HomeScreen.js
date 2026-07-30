@@ -1,5 +1,4 @@
 import { formatString, getLocale, getStrings } from "../../i18n.js";
-import { formatPlural } from "../../utils/plural.js";
 import {
   formatPortfolioGrade,
   formatPortfolioRole,
@@ -65,7 +64,6 @@ import { createLegendaryOnlinePanel } from "../legendary-online-panel/LegendaryO
 import { createFeedback } from "../feedback/Feedback.js";
 import { createExplainerMediaRay } from "./explainerMediaRay.js";
 import boneIconUrl from "../../assets/home/bone.svg";
-import balanceCardDucksUrl from "../../assets/home/modal/balance-card-ducks.svg";
 import currencyDuckUrl from "../../assets/home/modal/currency-duck.png";
 import currencyGhostUrl from "../../assets/home/modal/currency-ghost.png";
 import currencyP2pUrl from "../../assets/home/modal/currency-p2p.png";
@@ -882,12 +880,6 @@ export function createHomeScreen({
     },
   });
 
-  const reputationExplainer = document.createElement("div");
-  reputationExplainer.className = "home-screen__reputation-explainer";
-
-  const reputationRow = document.createElement("div");
-  reputationRow.className = "home-screen__reputation-explainer-row";
-
   const reputationMedia = document.createElement("div");
   reputationMedia.className = "home-screen__reputation-explainer-media";
 
@@ -897,25 +889,11 @@ export function createHomeScreen({
   reputationPhoto.className = "home-screen__explainer-media-photo";
   reputationPhoto.src = currencyGhostUrl;
   reputationPhoto.alt = "";
-  reputationPhoto.width = 180;
-  reputationPhoto.height = 216;
+  reputationPhoto.width = 1104;
+  reputationPhoto.height = 536;
   reputationPhoto.decoding = "async";
 
   reputationMedia.append(reputationRay.root, reputationPhoto);
-
-  const reputationCard = document.createElement("div");
-  reputationCard.className = "home-screen__reputation-explainer-card";
-
-  const reputationCardValue = document.createElement("p");
-  reputationCardValue.className = "home-screen__reputation-explainer-card-value";
-
-  const reputationCardLabel = document.createElement("p");
-  reputationCardLabel.className = "home-screen__reputation-explainer-card-label";
-
-  reputationCard.append(reputationCardValue, reputationCardLabel);
-  reputationRow.append(reputationMedia, reputationCard);
-
-  reputationExplainer.append(reputationRow);
 
   const reputationModal = createAppModal({
     size: "md",
@@ -924,10 +902,7 @@ export function createHomeScreen({
       void reputationModal.close();
     },
   });
-  reputationModal.content.append(reputationExplainer);
-
-  const balanceExplainer = document.createElement("div");
-  balanceExplainer.className = "home-screen__balance-explainer";
+  reputationModal.content.append(reputationMedia);
 
   const balanceMedia = document.createElement("div");
   balanceMedia.className = "home-screen__balance-explainer-media";
@@ -938,32 +913,11 @@ export function createHomeScreen({
   balancePhoto.className = "home-screen__explainer-media-photo";
   balancePhoto.src = currencyDuckUrl;
   balancePhoto.alt = "";
-  balancePhoto.width = 182;
-  balancePhoto.height = 216;
+  balancePhoto.width = 1104;
+  balancePhoto.height = 536;
   balancePhoto.decoding = "async";
 
   balanceMedia.append(balanceRay.root, balancePhoto);
-
-  const balanceCard = document.createElement("div");
-  balanceCard.className = "home-screen__balance-explainer-card";
-
-  const balanceCardTitle = document.createElement("p");
-  balanceCardTitle.className = "home-screen__balance-explainer-card-title";
-
-  const balanceCardBody = document.createElement("p");
-  balanceCardBody.className = "home-screen__balance-explainer-card-body";
-
-  const balanceCardDeco = document.createElement("img");
-  balanceCardDeco.className = "home-screen__balance-explainer-card-deco";
-  balanceCardDeco.src = balanceCardDucksUrl;
-  balanceCardDeco.alt = "";
-  balanceCardDeco.width = 66;
-  balanceCardDeco.height = 73;
-  balanceCardDeco.decoding = "async";
-  balanceCardDeco.setAttribute("aria-hidden", "true");
-
-  balanceCard.append(balanceCardTitle, balanceCardBody, balanceCardDeco);
-  balanceExplainer.append(balanceMedia, balanceCard);
 
   const balanceModal = createAppModal({
     size: "md",
@@ -972,10 +926,7 @@ export function createHomeScreen({
       void balanceModal.close();
     },
   });
-  balanceModal.content.append(balanceExplainer);
-
-  const p2pExplainer = document.createElement("div");
-  p2pExplainer.className = "home-screen__reputation-explainer-row";
+  balanceModal.content.append(balanceMedia);
 
   const p2pMedia = document.createElement("div");
   p2pMedia.className = "home-screen__p2p-explainer-media";
@@ -986,23 +937,11 @@ export function createHomeScreen({
   p2pPhoto.className = "home-screen__explainer-media-photo";
   p2pPhoto.src = currencyP2pUrl;
   p2pPhoto.alt = "";
-  p2pPhoto.width = 268;
-  p2pPhoto.height = 216;
+  p2pPhoto.width = 1104;
+  p2pPhoto.height = 536;
   p2pPhoto.decoding = "async";
 
   p2pMedia.append(p2pRay.root, p2pPhoto);
-
-  const p2pCard = document.createElement("div");
-  p2pCard.className = "home-screen__reputation-explainer-card";
-
-  const p2pCardTitle = document.createElement("p");
-  p2pCardTitle.className = "home-screen__reputation-explainer-card-value";
-
-  const p2pCardBody = document.createElement("p");
-  p2pCardBody.className = "home-screen__reputation-explainer-card-label";
-
-  p2pCard.append(p2pCardTitle, p2pCardBody);
-  p2pExplainer.append(p2pMedia, p2pCard);
 
   const legendaryOnlineModal = createAppModal({
     size: "md",
@@ -1011,7 +950,7 @@ export function createHomeScreen({
       void legendaryOnlineModal.close();
     },
   });
-  legendaryOnlineModal.content.append(p2pExplainer);
+  legendaryOnlineModal.content.append(p2pMedia);
 
   const reviewIntroVideo = createReviewIntroVideo();
 
@@ -2964,27 +2903,7 @@ export function createHomeScreen({
 
   function openBalanceModal() {
     const t = getStrings();
-    const balance = getBalance();
-    const balanceFormatted = Number(balance).toLocaleString(getLocale());
-    balanceCardTitle.textContent = fixHangingPrepositions(
-      formatPlural(
-        {
-          one: t.homeBalanceCardTitleOne,
-          few: t.homeBalanceCardTitleFew,
-          many: t.homeBalanceCardTitleMany,
-          other: t.homeBalanceCardTitleOther ?? t.homeBalanceCardTitleMany,
-        },
-        balance,
-        { balance: balanceFormatted },
-        getLocale(),
-      ),
-    );
-    balanceCardBody.textContent = fixHangingPrepositions(
-      t.homeBalanceCardBody ?? "",
-    );
-    balanceModal.setTitle(
-      fixHangingPrepositions(t.homeBalanceTitle ?? ""),
-    );
+    balanceModal.setTitle(fixHangingPrepositions(t.homeBalanceTitle ?? ""));
     balanceModal.setDescription(
       fixHangingPrepositions(t.homeBalanceDesc ?? ""),
     );
@@ -2998,12 +2917,6 @@ export function createHomeScreen({
 
   function openLegendaryOnlineModal() {
     const t = getStrings();
-    p2pCardTitle.textContent = fixHangingPrepositions(
-      t.homeLegendaryOnlineCardTitle ?? "",
-    );
-    p2pCardBody.textContent = fixHangingPrepositions(
-      t.homeLegendaryOnlineCardBody ?? "",
-    );
     legendaryOnlineModal.setTitle(
       fixHangingPrepositions(t.homeLegendaryOnlineTitle ?? ""),
     );
@@ -3020,14 +2933,6 @@ export function createHomeScreen({
 
   function openReputationModal() {
     const t = getStrings();
-    reputationCardValue.textContent = fixHangingPrepositions(
-      formatString(t.homeReputationCardTitle ?? "", {
-        reputation: formatReputation(),
-      }),
-    );
-    reputationCardLabel.textContent = fixHangingPrepositions(
-      t.homeReputationCardLabel ?? "",
-    );
     reputationModal.setTitle(
       fixHangingPrepositions(t.homeReputationTitle ?? ""),
     );

@@ -14,12 +14,12 @@
 
 | Файл | Роль |
 |------|------|
-| `currency-duck.png` | фото в explainer «Валюта сообщества» |
+| `currency-duck.png` | фото в explainer «Уточки» (поверх Lottie, 552×268) |
 | `currency-referal.png` | фото в invite-explainer (поверх Lottie на `#F3F4F7`) |
 | `currency-empty-duck.png` | фото в mine not-ready explainer (поверх Lottie на `#F3F4F7`) |
-| `balance-card-ducks.svg` | декор карточки «Уточки» |
-| `currency-ghost.png` | фото в explainer «Репутация в нашей обратке» |
-| `currency-p2p.png` | фото в explainer «p4p в сети» |
+| `balance-card-ducks.svg` | legacy-декор (не используется) |
+| `currency-ghost.png` | фото в explainer «Репутация» (поверх Lottie, 552×268) |
+| `currency-p2p.png` | фото в explainer «p4p в сети» (поверх Lottie, 552×268) |
 | `rotating-ray.json` | Lottie-лучи под PNG в explainer-медиа |
 
 ## `brand/`

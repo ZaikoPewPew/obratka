@@ -189,179 +189,6 @@
   padding-inline: var(--home-screen-chip-padding-x) var(--space-5);
 }
 
-.home-screen__reputation-explainer {
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: var(--home-screen-reputation-explainer-gap);
-  min-width: 0;
-}
-
-.home-screen__reputation-explainer-row {
-  box-sizing: border-box;
-  display: flex;
-  align-items: stretch;
-  gap: var(--home-screen-reputation-explainer-gap);
-  min-width: 0;
-}
-
-.home-screen__reputation-explainer-media {
-  box-sizing: border-box;
-  position: relative;
-  display: block;
-  flex: 0 0 auto;
-  width: var(--home-screen-reputation-explainer-media-width);
-  height: var(--home-screen-reputation-explainer-media-height);
-  overflow: hidden;
-  border-radius: var(--home-screen-reputation-explainer-media-radius);
-  background: var(--home-screen-reputation-explainer-media-bg);
-}
-
-.home-screen__reputation-explainer-card {
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: var(--home-screen-reputation-explainer-card-gap);
-  flex: 1 1 auto;
-  min-width: 0;
-  min-height: var(--home-screen-reputation-explainer-media-height);
-  padding: var(--home-screen-reputation-explainer-card-padding);
-  border-radius: var(--home-screen-reputation-explainer-card-radius);
-  background: var(--home-screen-reputation-explainer-card-bg);
-}
-
-.home-screen__reputation-explainer-card-value,
-.home-screen__reputation-explainer-card-label {
-  margin: 0;
-  font-family: var(--font-family);
-}
-
-.home-screen__reputation-explainer-card-value {
-  color: var(--color-text);
-  font-size: var(--home-screen-reputation-explainer-card-value-size);
-  font-weight: var(--home-screen-reputation-explainer-card-value-weight);
-  line-height: var(--home-screen-reputation-explainer-card-value-line);
-}
-
-.home-screen__reputation-explainer-card-label {
-  color: var(--home-screen-reputation-explainer-card-label-color);
-  font-size: var(--home-screen-reputation-explainer-card-label-size);
-  font-weight: var(--home-screen-reputation-explainer-card-label-weight);
-  line-height: var(--home-screen-reputation-explainer-card-label-line);
-}
-
-@media (max-width: 560px) {
-  .home-screen__reputation-explainer-row {
-    flex-direction: column;
-  }
-
-  .home-screen__reputation-explainer-media {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 180 / 216;
-  }
-
-  .home-screen__reputation-explainer-card {
-    min-height: 0;
-  }
-}
-
-.home-screen__balance-explainer {
-  box-sizing: border-box;
-  display: flex;
-  align-items: stretch;
-  gap: var(--home-screen-balance-explainer-gap);
-  min-width: 0;
-}
-
-.home-screen__balance-explainer-media {
-  box-sizing: border-box;
-  position: relative;
-  display: block;
-  flex: 0 0 auto;
-  width: var(--home-screen-balance-explainer-media-width);
-  height: var(--home-screen-balance-explainer-media-height);
-  overflow: hidden;
-  border-radius: var(--home-screen-balance-explainer-media-radius);
-  background: var(--home-screen-balance-explainer-media-bg);
-}
-
-.home-screen__balance-explainer-card {
-  box-sizing: border-box;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--home-screen-balance-explainer-card-gap);
-  flex: 1 1 auto;
-  min-width: 0;
-  min-height: var(--home-screen-balance-explainer-media-height);
-  padding: var(--home-screen-balance-explainer-card-padding);
-  overflow: hidden;
-  border-radius: var(--home-screen-balance-explainer-card-radius);
-  background: var(--home-screen-balance-explainer-card-bg);
-}
-
-.home-screen__balance-explainer-card-title,
-.home-screen__balance-explainer-card-body {
-  position: relative;
-  z-index: 1;
-  margin: 0;
-  font-family: var(--font-family);
-}
-
-.home-screen__balance-explainer-card-title {
-  color: var(--color-text);
-  font-size: var(--home-screen-balance-explainer-card-title-size);
-  font-weight: var(--home-screen-balance-explainer-card-title-weight);
-  line-height: var(--home-screen-balance-explainer-card-title-line);
-}
-
-.home-screen__balance-explainer-card-body {
-  color: var(--home-screen-balance-explainer-card-body-color);
-  font-size: var(--home-screen-balance-explainer-card-body-size);
-  font-weight: var(--home-screen-balance-explainer-card-body-weight);
-  line-height: var(--home-screen-balance-explainer-card-body-line);
-}
-
-.home-screen__balance-explainer-card-deco {
-  box-sizing: border-box;
-  position: absolute;
-  right: var(--home-screen-balance-explainer-card-deco-right);
-  bottom: var(--home-screen-balance-explainer-card-deco-bottom);
-  width: var(--home-screen-balance-explainer-card-deco-width);
-  height: var(--home-screen-balance-explainer-card-deco-height);
-  pointer-events: none;
-  user-select: none;
-}
-
-@media (max-width: 560px) {
-  .home-screen__balance-explainer {
-    flex-direction: column;
-  }
-
-  .home-screen__balance-explainer-media {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 182 / 216;
-  }
-
-  .home-screen__balance-explainer-card {
-    min-height: 0;
-  }
-}
-
-.home-screen__p2p-explainer-media {
-  box-sizing: border-box;
-  position: relative;
-  display: block;
-  flex: 0 0 auto;
-  width: var(--home-screen-p2p-explainer-media-width);
-  height: var(--home-screen-p2p-explainer-media-height);
-  overflow: hidden;
-  border-radius: var(--home-screen-p2p-explainer-media-radius);
-  background: var(--home-screen-p2p-explainer-media-bg);
-}
-
 .home-screen__explainer-media-ray {
   box-sizing: border-box;
   position: absolute;
@@ -389,14 +216,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-@media (max-width: 560px) {
-  .home-screen__p2p-explainer-media {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 268 / 216;
-  }
 }
 
 .home-screen__review-intro-media {
@@ -1435,7 +1254,10 @@
 }
 
 .home-screen__invite-explainer-media,
-.home-screen__mine-not-ready-explainer-media {
+.home-screen__mine-not-ready-explainer-media,
+.home-screen__p2p-explainer-media,
+.home-screen__balance-explainer-media,
+.home-screen__reputation-explainer-media {
   box-sizing: border-box;
   position: relative;
   display: block;
@@ -1456,6 +1278,24 @@
   background: var(--home-screen-mine-not-ready-explainer-media-bg);
 }
 
+.home-screen__p2p-explainer-media {
+  width: var(--home-screen-p2p-explainer-media-width);
+  height: var(--home-screen-p2p-explainer-media-height);
+  border-radius: var(--home-screen-p2p-explainer-media-radius);
+}
+
+.home-screen__balance-explainer-media {
+  width: var(--home-screen-balance-explainer-media-width);
+  height: var(--home-screen-balance-explainer-media-height);
+  border-radius: var(--home-screen-balance-explainer-media-radius);
+}
+
+.home-screen__reputation-explainer-media {
+  width: var(--home-screen-reputation-explainer-media-width);
+  height: var(--home-screen-reputation-explainer-media-height);
+  border-radius: var(--home-screen-reputation-explainer-media-radius);
+}
+
 .home-screen__invite-explainer-media .home-screen__explainer-media-ray {
   width: var(--home-screen-invite-explainer-media-ray-size);
   height: auto;
@@ -1470,12 +1310,45 @@
   opacity: var(--home-screen-mine-not-ready-explainer-media-ray-opacity);
 }
 
+.home-screen__p2p-explainer-media .home-screen__explainer-media-ray {
+  width: var(--home-screen-p2p-explainer-media-ray-size);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  opacity: var(--home-screen-p2p-explainer-media-ray-opacity);
+}
+
+.home-screen__balance-explainer-media .home-screen__explainer-media-ray {
+  width: var(--home-screen-balance-explainer-media-ray-size);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  opacity: var(--home-screen-balance-explainer-media-ray-opacity);
+}
+
+.home-screen__reputation-explainer-media .home-screen__explainer-media-ray {
+  width: var(--home-screen-reputation-explainer-media-ray-size);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  opacity: var(--home-screen-reputation-explainer-media-ray-opacity);
+}
+
 .home-screen__invite-explainer-media .home-screen__explainer-media-photo {
   object-fit: var(--home-screen-invite-explainer-media-photo-fit);
 }
 
 .home-screen__mine-not-ready-explainer-media .home-screen__explainer-media-photo {
   object-fit: var(--home-screen-mine-not-ready-explainer-media-photo-fit);
+}
+
+.home-screen__p2p-explainer-media .home-screen__explainer-media-photo {
+  object-fit: var(--home-screen-p2p-explainer-media-photo-fit);
+}
+
+.home-screen__balance-explainer-media .home-screen__explainer-media-photo {
+  object-fit: var(--home-screen-balance-explainer-media-photo-fit);
+}
+
+.home-screen__reputation-explainer-media .home-screen__explainer-media-photo {
+  object-fit: var(--home-screen-reputation-explainer-media-photo-fit);
 }
 
 .home-screen__invite-bar {

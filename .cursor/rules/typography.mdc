@@ -17,17 +17,6 @@ alwaysApply: true
 ```js
 import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
 
-el.textContent = fixHangingPrepositions(
-  formatPlural(
-    {
-      one: t.homeBalanceCardTitleOne,
-      few: t.homeBalanceCardTitleFew,
-      many: t.homeBalanceCardTitleMany,
-    },
-    balance,
-    { balance },
-    getLocale(),
-  ),
-);
+modal.setTitle(fixHangingPrepositions(t.homeBalanceTitle ?? ""));
 modal.setDescription(fixHangingPrepositions(t.homeBalanceDesc ?? ""));
 ```
