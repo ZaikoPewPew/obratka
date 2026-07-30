@@ -260,7 +260,9 @@ export function createReportScreen(opts = {}) {
       viewingSheetId = null;
     },
   });
-  root.append(sheetPanel.root, complaintModal.root);
+  // Не внутрь .report-screen: у экрана transform/filter → containing block,
+  // fixed-панель клипается по padding и съедает sticky footer.
+  document.body.append(sheetPanel.root, complaintModal.root);
 
   function brandMarkEl() {
     return /** @type {SVGElement | null} */ (brandSlot.querySelector("svg"));

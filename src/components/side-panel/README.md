@@ -6,7 +6,8 @@
 Каркас один; **тело** (слот `content`) и опциональный **footer** меняются по кейсу.  
 Не экран флоу — не пишет `history`, не вызывает `go()`. Монтаж и оркестрация снаружи.
 
-Header и footer **зафиксированы** (`flex-shrink: 0`); скроллится только `.side-panel__content` — как в `app-modal`.
+Header и footer **зафиксированы** (`flex-shrink: 0` / `flex: 0 0 auto`); скроллится только `.side-panel__content` (`flex: 1 1 0`) — как в `app-modal`.  
+Report монтирует sheet-panel в `document.body`, не внутрь экрана с `transform`/`filter`.
 
 ## Макет → код
 

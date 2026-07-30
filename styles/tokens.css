@@ -515,11 +515,11 @@
   --report-screen-complain-radius: var(--radius-xs);
   --report-screen-complain-font-size: var(--font-size-sm);
   --report-screen-complain-font-weight: var(--font-weight-medium);
-  --report-screen-sheet-panel-btn-height: var(--shell-review-control-height);
-  --report-screen-sheet-panel-btn-padding-x: var(--shell-review-control-padding-x);
+  --report-screen-sheet-panel-btn-height: var(--space-12);
+  --report-screen-sheet-panel-btn-padding-x: var(--space-5);
   --report-screen-sheet-panel-btn-radius: var(--radius-md);
-  --report-screen-sheet-panel-btn-font-size: var(--shell-review-control-font-size);
-  --report-screen-sheet-panel-btn-font-weight: var(--shell-review-control-font-weight);
+  --report-screen-sheet-panel-btn-font-size: var(--font-size-base);
+  --report-screen-sheet-panel-btn-font-weight: var(--font-weight-medium);
   --report-screen-sheet-panel-btn-icon-gap: var(--space-2);
   --report-screen-sheet-panel-btn-icon-size: var(--space-6);
   --report-screen-complaint-gap: var(--space-4);

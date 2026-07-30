@@ -22,8 +22,8 @@
 
 .report-screen--open {
   opacity: 1;
-  transform: translateY(0);
-  filter: blur(0);
+  transform: none;
+  filter: none;
   pointer-events: auto;
 }
 
