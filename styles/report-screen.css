@@ -271,24 +271,80 @@
   opacity: 0.85;
 }
 
-.report-screen__sheet-panel-actions {
+.report-screen__sheet-panel-btn {
   box-sizing: border-box;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--report-screen-sheet-panel-actions-gap);
-  padding-top: var(--report-screen-sheet-panel-actions-pad-top);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--report-screen-sheet-panel-btn-icon-gap);
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: var(--report-screen-sheet-panel-btn-height);
+  margin: 0;
+  padding: 0 var(--report-screen-sheet-panel-btn-padding-x);
+  border: none;
+  border-radius: var(--report-screen-sheet-panel-btn-radius);
+  font-family: var(--font-family);
+  font-size: var(--report-screen-sheet-panel-btn-font-size);
+  font-weight: var(--report-screen-sheet-panel-btn-font-weight);
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
 }
 
-.report-screen__sheet-panel-actions .report-screen__sheet-action:not(:disabled) {
+.report-screen__sheet-panel-btn:disabled {
+  cursor: default;
+  opacity: var(--opacity-disabled);
+}
+
+.report-screen__sheet-panel-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.report-screen__sheet-panel-btn-icon {
+  flex: 0 0 auto;
+  width: var(--report-screen-sheet-panel-btn-icon-size);
+  height: var(--report-screen-sheet-panel-btn-icon-size);
+}
+
+.report-screen__sheet-panel-btn-label {
+  min-width: 0;
+}
+
+.report-screen__sheet-panel-btn--download {
   background: var(--color-surface-muted);
+  color: var(--color-text);
 }
 
-.report-screen__sheet-panel-actions .report-screen__sheet-action:hover:not(:disabled) {
+.report-screen__sheet-panel-btn--download:hover:not(:disabled) {
   background: var(--color-surface-muted-hover);
 }
 
-.report-screen__sheet-panel-actions .report-screen__sheet-action:active:not(:disabled) {
+.report-screen__sheet-panel-btn--download:active:not(:disabled) {
   background: var(--color-surface-muted-active);
+}
+
+.report-screen__sheet-panel-btn--complain {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.report-screen__sheet-panel-btn--complain:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.report-screen__sheet-panel-btn--complain:active:not(:disabled) {
+  background: var(--color-accent-active);
+}
+
+.report-screen__sheet-panel-btn--complain:focus-visible {
+  outline-color: var(--color-focus-ring-on-accent);
+}
+
+.report-screen__sheet-panel-btn--complain.report-screen__sheet-panel-btn--done {
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
 }
 
 .report-screen__complaint {

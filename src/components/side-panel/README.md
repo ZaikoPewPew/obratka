@@ -3,8 +3,10 @@
 Боковая панель справа по Figma **SidePanel**  
 ([node `517:4740`](https://www.figma.com/design/KhsEJRKjBaDm6xaj3zJh2s/%D0%9E%D0%B1%D1%80%D0%B0%D1%82%D0%BA%D0%B0?node-id=517-4740)).
 
-Каркас один; **тело** (слот `content`) меняется по кейсу.  
+Каркас один; **тело** (слот `content`) и опциональный **footer** меняются по кейсу.  
 Не экран флоу — не пишет `history`, не вызывает `go()`. Монтаж и оркестрация снаружи.
+
+Header и footer **зафиксированы** (`flex-shrink: 0`); скроллится только `.side-panel__content` — как в `app-modal`.
 
 ## Макет → код
 
@@ -16,6 +18,7 @@
 | Title 24 + muted subtitle 14 | `.side-panel__title` / `__description` |
 | Close 56×56, radius 16 | `.side-panel__close` |
 | Текст правил | слот `.side-panel__content` (+ `__intro` / `__section*`) |
+| Sticky CTA (report) | слот `.side-panel__footer` |
 
 Waitlist-низ из болванки макета (инпут / аватары) **не** переносится.
 
@@ -55,7 +58,8 @@ await panel.close();
 |--------------|------------|
 | `root` | backdrop (его вешают в DOM) |
 | `panel` | панель `role="dialog"` |
-| `content` | слот под кастомный DOM |
+| `content` | слот под кастомный DOM (скролл) |
+| `footer` | sticky низ (CTA); пустой скрыт (`:empty`) |
 | `open()` / `close()` | `close` → `Promise` после fade |
 | `isOpen()` | backdrop открыт + класс `--open` |
 | `setTitle` / `setDescription` | копирайт шапки |
@@ -88,7 +92,7 @@ Account-menu → «Правила» → текст из [`content/rules.json`](.
 
 ### Report — просмотр листа
 
-`/report` → «Посмотреть» на строке листа → полный текст (`buildReportSections`) + «Пожаловаться» внизу панели. См. [`../report-screen/README.md`](../report-screen/README.md).
+`/report` → «Посмотреть» на строке листа → полный текст (`buildReportSections`) в `content` + sticky footer: «Скачать PDF» (один лист) + «Пожаловаться». См. [`../report-screen/README.md`](../report-screen/README.md).
 
 ## Связанные доки
 

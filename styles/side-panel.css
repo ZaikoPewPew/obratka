@@ -166,6 +166,20 @@
   display: none;
 }
 
+.side-panel__footer {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--side-panel-footer-gap);
+  flex-shrink: 0;
+  background: var(--side-panel-bg);
+}
+
+.side-panel__footer:empty {
+  display: none;
+}
+
 .side-panel__intro {
   margin: 0;
   color: var(--side-panel-intro-color);

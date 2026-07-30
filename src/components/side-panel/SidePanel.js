@@ -22,7 +22,7 @@ function getSidePanelCloseFallbackMs() {
 
 /**
  * Боковая панель справа (Figma SidePanel).
- * Каркас: title / description / слот / close. Не экран флоу.
+ * Каркас: title / description / слот `content` / слот `footer` / close. Не экран флоу.
  * Панель всегда opaque — только slide; backdrop отдельно fade.
  *
  * @param {{
@@ -37,6 +37,7 @@ function getSidePanelCloseFallbackMs() {
  *   root: HTMLElement;
  *   panel: HTMLElement;
  *   content: HTMLElement;
+ *   footer: HTMLElement;
  *   open: () => void;
  *   close: () => Promise<void>;
  *   isOpen: () => boolean;
@@ -99,7 +100,10 @@ export function createSidePanel(opts = {}) {
   const content = document.createElement("div");
   content.className = "side-panel__content";
 
-  panel.append(header, content);
+  const footer = document.createElement("div");
+  footer.className = "side-panel__footer";
+
+  panel.append(header, content, footer);
   root.append(backdrop, panel);
 
   /**
@@ -243,6 +247,7 @@ export function createSidePanel(opts = {}) {
     root,
     panel,
     content,
+    footer,
     open,
     close,
     isOpen,

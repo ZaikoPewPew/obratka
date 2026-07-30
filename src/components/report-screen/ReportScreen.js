@@ -35,6 +35,10 @@ const DOWNLOAD_ICON_SVG = `<svg class="report-screen__btn-icon" width="24" heigh
   <path d="M7 19L5.78311 18.9954C3.12231 18.8818 1 16.6888 1 14C1 11.3501 3.06139 9.18169 5.66806 9.01084C6.78942 6.64027 9.20316 5 12 5C15.5268 5 18.4445 7.60822 18.9293 11.001L19 11C21.2091 11 23 12.7909 23 15C23 17.1422 21.316 18.8911 19.1996 18.9951L17 19M12 10V18M9 15L12 18L15 15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`;
 
+const SHEET_PANEL_DOWNLOAD_ICON_SVG = `<svg class="report-screen__sheet-panel-btn-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M7 19L5.78311 18.9954C3.12231 18.8818 1 16.6888 1 14C1 11.3501 3.06139 9.18169 5.66806 9.01084C6.78942 6.64027 9.20316 5 12 5C15.5268 5 18.4445 7.60822 18.9293 11.001L19 11C21.2091 11 23 12.7909 23 15C23 17.1422 21.316 18.8911 19.1996 18.9951L17 19M12 10V18M9 15L12 18L15 15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`;
+
 /** @type {Record<(typeof REVIEW_COMPLAINT_TAGS)[number], { label: string; hint: string }>} */
 const TAG_I18N_KEYS = {
   low_effort: {
@@ -570,8 +574,36 @@ export function createReportScreen(opts = {}) {
 
   function closeSheetPanel() {
     viewingSheetId = null;
+    sheetPanel.content.replaceChildren();
+    sheetPanel.footer.replaceChildren();
     if (!sheetPanel.isOpen()) return;
     void sheetPanel.close();
+  }
+
+  /**
+   * @param {import("../../api/reviewComplaints.js").PortfolioReviewSheet} sheet
+   * @param {number} index
+   */
+  function downloadSheetPdf(sheet, index) {
+    if (!sheet.answers) return;
+    const t = getStrings();
+    const reviewerName =
+      (sheet.reviewerDisplayName && sheet.reviewerDisplayName.trim()) ||
+      t.reportSheetReviewerFallback ||
+      "";
+    shareReviewPdf(
+      [
+        {
+          answers: sheet.answers,
+          reviewerName,
+          sheetLabel: sheetGradeLabel(sheet, index),
+          seed: sheet.id,
+        },
+      ],
+      {
+        portfolioName: portfolioName || t.brandName,
+      },
+    );
   }
 
   /**
@@ -614,16 +646,40 @@ export function createReportScreen(opts = {}) {
       }
     }
 
-    if (sheet.complained || sheet.canComplain) {
-      const actions = document.createElement("div");
-      actions.className = "report-screen__sheet-panel-actions";
+    sheetPanel.content.replaceChildren(...nodes);
 
+    /** @type {HTMLElement[]} */
+    const footerNodes = [];
+
+    const downloadBtn = document.createElement("button");
+    downloadBtn.type = "button";
+    downloadBtn.className =
+      "report-screen__sheet-panel-btn report-screen__sheet-panel-btn--download";
+    downloadBtn.disabled = !sheet.answers;
+    downloadBtn.setAttribute(
+      "aria-label",
+      formatString(t.reportSheetDownloadPdfAria ?? "", { name }) ||
+        t.reportScreenDownloadPdf ||
+        "",
+    );
+    downloadBtn.insertAdjacentHTML("afterbegin", SHEET_PANEL_DOWNLOAD_ICON_SVG);
+    const downloadLabel = document.createElement("span");
+    downloadLabel.className = "report-screen__sheet-panel-btn-label";
+    downloadLabel.textContent = t.reportScreenDownloadPdf ?? "";
+    downloadBtn.append(downloadLabel);
+    downloadBtn.addEventListener("click", () => {
+      downloadSheetPdf(sheet, index);
+    });
+    footerNodes.push(downloadBtn);
+
+    if (sheet.complained || sheet.canComplain) {
       const complainBtn = document.createElement("button");
       complainBtn.type = "button";
-      complainBtn.className = "report-screen__sheet-action";
+      complainBtn.className =
+        "report-screen__sheet-panel-btn report-screen__sheet-panel-btn--complain";
 
       if (sheet.complained) {
-        complainBtn.classList.add("report-screen__sheet-action--done");
+        complainBtn.classList.add("report-screen__sheet-panel-btn--done");
         complainBtn.disabled = true;
         complainBtn.textContent = t.reportComplaintSubmitted ?? "";
       } else {
@@ -633,11 +689,10 @@ export function createReportScreen(opts = {}) {
         });
       }
 
-      actions.append(complainBtn);
-      nodes.push(actions);
+      footerNodes.push(complainBtn);
     }
 
-    sheetPanel.content.replaceChildren(...nodes);
+    sheetPanel.footer.replaceChildren(...footerNodes);
   }
 
   /**
