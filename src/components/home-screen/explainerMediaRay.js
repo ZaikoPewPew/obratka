@@ -2,9 +2,10 @@ import lottie from "lottie-web";
 import rotatingRayAnimation from "../../assets/home/modal/rotating-ray.json";
 
 /**
- * Lottie «Rotating Ray» под PNG в explainer-медиа (между muted-фоном и фото).
+ * Lottie «Rotating Ray» под PNG в explainer-медиа.
+ * Модалки стартуют `hidden` → после `open()` нужен `sync()` (resize + play).
  *
- * @returns {{ root: HTMLElement, destroy: () => void }}
+ * @returns {{ root: HTMLElement, sync: () => void, destroy: () => void }}
  */
 export function createExplainerMediaRay() {
   const root = document.createElement("div");
@@ -23,6 +24,10 @@ export function createExplainerMediaRay() {
 
   return {
     root,
+    sync() {
+      anim.resize();
+      anim.play();
+    },
     destroy() {
       anim.destroy();
     },

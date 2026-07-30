@@ -1492,6 +1492,9 @@ export function createHomeScreen({
     mineNotReadyModal.setCloseAriaLabel(t.homeMineNotReadyCloseAria ?? "");
     mineNotReadyModal.setActionsVisible({ primary: false, secondary: true });
     mineNotReadyModal.open();
+    requestAnimationFrame(() => {
+      mineNotReadyRay.sync();
+    });
   }
 
   /**
@@ -1610,6 +1613,9 @@ export function createHomeScreen({
     inviteModal.setSecondaryLabel("");
     inviteModal.setActionsVisible({ primary: false, secondary: false });
     inviteModal.open();
+    requestAnimationFrame(() => {
+      inviteRay.sync();
+    });
   }
 
   /** Текст приглашения для буфера / Web Share (`homeInviteMessage`: `{url}`, `{code}`). */
@@ -2913,6 +2919,9 @@ export function createHomeScreen({
     );
     balanceModal.setActionsVisible({ primary: false, secondary: true });
     balanceModal.open();
+    requestAnimationFrame(() => {
+      balanceRay.sync();
+    });
   }
 
   function openLegendaryOnlineModal() {
@@ -2929,6 +2938,9 @@ export function createHomeScreen({
     );
     legendaryOnlineModal.setActionsVisible({ primary: false, secondary: true });
     legendaryOnlineModal.open();
+    requestAnimationFrame(() => {
+      p2pRay.sync();
+    });
   }
 
   function openReputationModal() {
@@ -2943,6 +2955,9 @@ export function createHomeScreen({
     );
     reputationModal.setActionsVisible({ primary: false, secondary: true });
     reputationModal.open();
+    requestAnimationFrame(() => {
+      reputationRay.sync();
+    });
   }
 
   reputationChip.addEventListener("click", () => {

@@ -709,6 +709,8 @@
   /* Explainer-медиа 552×268: PNG + Lottie, без подложки */
   --home-screen-explainer-media-ray-size: 210%;
   --home-screen-explainer-media-ray-opacity: 1;
+  /* Белые лучи → мягкий серый, чтобы читались на белой модалке */
+  --home-screen-explainer-media-ray-on-light-filter: brightness(0) invert(88%);
   --home-screen-profile-size: var(--space-12);
   --home-screen-avatar-radius: var(--radius-pill);
   --home-screen-avatar-letter-bg: var(--palette-gray-900);

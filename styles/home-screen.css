@@ -1315,6 +1315,8 @@
   height: auto;
   aspect-ratio: 1 / 1;
   opacity: var(--home-screen-p2p-explainer-media-ray-opacity);
+  /* Белый Lottie на белой модалке без plate → перекрасить в мягкий серый */
+  filter: var(--home-screen-explainer-media-ray-on-light-filter);
 }
 
 .home-screen__balance-explainer-media .home-screen__explainer-media-ray {
@@ -1322,6 +1324,7 @@
   height: auto;
   aspect-ratio: 1 / 1;
   opacity: var(--home-screen-balance-explainer-media-ray-opacity);
+  filter: var(--home-screen-explainer-media-ray-on-light-filter);
 }
 
 .home-screen__reputation-explainer-media .home-screen__explainer-media-ray {
@@ -1329,6 +1332,7 @@
   height: auto;
   aspect-ratio: 1 / 1;
   opacity: var(--home-screen-reputation-explainer-media-ray-opacity);
+  filter: var(--home-screen-explainer-media-ray-on-light-filter);
 }
 
 .home-screen__invite-explainer-media .home-screen__explainer-media-photo {
