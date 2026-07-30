@@ -13,4 +13,4 @@
 
 Перед `/review` home intro греет Edge/Readymag probe (`onPreviewPortfolio` → `prefetchPortfolioEmbed`), чтобы external UI не мигал через broken iframe.
 
-Видео-слот: `.iframe-shell__external-media` → `primer_not_iframe.mp4` (ширина 100%, overflow сверху по центру; play при external mode).
+Видео-слот: `.iframe-shell__external-media` → `primer_not_iframe.mp4` (по высоте фрейма, верхний левый край; overflow; play при external mode).

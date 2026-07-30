@@ -430,7 +430,7 @@ body {
   display: flex;
   flex: 0 0 var(--frame-external-media-width);
   align-items: flex-start;
-  justify-content: center;
+  justify-content: flex-start;
   width: var(--frame-external-media-width);
   height: var(--frame-external-media-height);
   border: var(--frame-external-media-border);
@@ -442,8 +442,8 @@ body {
 .iframe-shell__external-media-video {
   display: block;
   flex-shrink: 0;
-  width: 100%;
-  height: auto;
+  width: auto;
+  height: 100%;
   pointer-events: none;
 }
 
