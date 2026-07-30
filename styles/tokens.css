@@ -274,6 +274,18 @@
   --control-name-color: var(--color-black);
   /* Не подходить вплотную к таймеру; одна строка + ellipsis */
   --control-name-max-width: 200px;
+  /* «Прервать ревью» вместо avatar + name в шапке */
+  --control-abort-width: 129px;
+  --control-abort-height: 32px;
+  --control-abort-padding-y: 7px;
+  --control-abort-padding-x: var(--space-3);
+  --control-abort-radius: var(--radius-xs);
+  --control-abort-bg: var(--color-surface);
+  --control-abort-bg-hover: var(--color-surface-muted-hover);
+  --control-abort-bg-active: var(--color-surface-muted-active);
+  --control-abort-color: var(--color-text);
+  --control-abort-font-size: var(--font-size-xs);
+  --control-abort-font-weight: var(--font-weight-medium);
   --control-timer-font-size: var(--font-size-base);
   --control-timer-font-weight: var(--font-weight-regular);
   --control-timer-color: var(--color-black);
@@ -564,6 +576,19 @@
   --app-modal-btn-primary-bg-hover: var(--color-accent-hover);
   --app-modal-btn-primary-bg-active: var(--color-accent-active);
   --app-modal-btn-primary-color: var(--color-on-accent);
+  /* Destructive primary (Прервать) — Google red #EA4335 */
+  --app-modal-btn-danger-bg: var(--palette-google-red);
+  --app-modal-btn-danger-bg-hover: color-mix(
+    in srgb,
+    var(--palette-google-red) 88%,
+    var(--palette-black)
+  );
+  --app-modal-btn-danger-bg-active: color-mix(
+    in srgb,
+    var(--palette-google-red) 76%,
+    var(--palette-black)
+  );
+  --app-modal-btn-danger-color: var(--color-on-accent);
   --app-modal-btn-secondary-bg: var(--color-surface-muted);
   --app-modal-btn-secondary-bg-hover: var(--color-surface-muted-hover);
   --app-modal-btn-secondary-bg-active: var(--color-surface-muted-active);
@@ -953,6 +978,25 @@
   );
   --home-screen-balance-explainer-media-photo-fit: var(
     --home-screen-p2p-explainer-media-photo-fit
+  );
+  /* Abort review explainer — те же размеры, что «Уточки» */
+  --shell-abort-explainer-media-width: var(
+    --home-screen-balance-explainer-media-width
+  );
+  --shell-abort-explainer-media-height: var(
+    --home-screen-balance-explainer-media-height
+  );
+  --shell-abort-explainer-media-radius: var(
+    --home-screen-balance-explainer-media-radius
+  );
+  --shell-abort-explainer-media-ray-size: var(
+    --home-screen-balance-explainer-media-ray-size
+  );
+  --shell-abort-explainer-media-ray-opacity: var(
+    --home-screen-balance-explainer-media-ray-opacity
+  );
+  --shell-abort-explainer-media-photo-fit: var(
+    --home-screen-balance-explainer-media-photo-fit
   );
   --home-screen-reputation-explainer-media-width: var(
     --home-screen-p2p-explainer-media-width

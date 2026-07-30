@@ -246,6 +246,23 @@
   outline-color: var(--color-focus-ring-on-accent);
 }
 
+.app-modal__btn--danger {
+  background: var(--app-modal-btn-danger-bg);
+  color: var(--app-modal-btn-danger-color);
+}
+
+.app-modal__btn--danger:hover:not(:disabled) {
+  background: var(--app-modal-btn-danger-bg-hover);
+}
+
+.app-modal__btn--danger:active:not(:disabled) {
+  background: var(--app-modal-btn-danger-bg-active);
+}
+
+.app-modal__btn--danger:focus-visible {
+  outline-color: var(--color-focus-ring-on-accent);
+}
+
 .app-modal__btn--secondary {
   background: var(--app-modal-btn-secondary-bg);
   color: var(--app-modal-btn-secondary-color);

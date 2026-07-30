@@ -16,7 +16,7 @@
 | Заголовок + Описание | `title` / `description` |
 | Close 56×56, radius 16 | `.app-modal__close` |
 | Красная зона `#EA4335` | слот `.app-modal__content` (**без** красного фона — только placeholder в макете) |
-| Primary (тёмная) / Secondary (muted) | `.app-modal__btn--primary` / `--secondary` |
+| Primary (тёмная) / Secondary (muted) / Danger (Google red) | `.app-modal__btn--primary` / `--secondary` / `--danger` (`primaryTone: "danger"`) |
 
 Padding 24, gap секций 16, radius диалога 24 — всё через `--app-modal-*`.
 
@@ -76,6 +76,7 @@ await modal.close();
 | `setTitle` / `setDescription` | копирайт (`setDescription` принимает `string` или `Node`) |
 | `setPrimaryLabel` / `setSecondaryLabel` | кнопки |
 | `setPrimaryDisabled(disabled)` | disable primary (нет выбора / submit) |
+| `setPrimaryTone("default" \| "danger")` | destructive primary (красный) |
 | `setActionsVisible({ primary, secondary })` | скрыть ряд / кнопки |
 | `setCloseAriaLabel` | aria у крестика |
 
@@ -86,6 +87,7 @@ await modal.close();
 | `size` | `"md"` | ширина |
 | `title` / `description` | `""` | шапка |
 | `primaryLabel` / `secondaryLabel` | `""` | без label → кнопка скрыта |
+| `primaryTone` | `"default"` | `"danger"` → красный primary |
 | `showPrimary` / `showSecondary` | `true` если есть label | явный override |
 | `closeOnBackdrop` / `closeOnEscape` | `true` | закрытие |
 | `onClose` / `onPrimary` / `onSecondary` | — | колбэки |
@@ -124,7 +126,7 @@ await modal.close();
 |----|---------------------|
 | Новый кейс с title + слот + 1–2 CTA | Inline notice без оверлея |
 | Общий каркас под разные тела | Ban / brand split-экраны |
-| Home: review intro (`homeReviewIntro*`, видео `primer.mp4`), mine not-ready (`homeMineNotReady*`, `currency-empty-duck.png` + Lottie), invite explainer (`homeInvite*`, Figma `492:4030`; copy/share = `homeInviteMessage`), pending-limit (`homePendingLimit*`), reputation explainer (`homeReputation*`), balance explainer (`homeBalance*`), p4p online explainer (`homeLegendaryOnline*`), contacts; report: complaint (`reportComplaint*`, теги в слоте) | Inline notice без оверлея / ban / brand split; нет монет на submit → error-buzz без модалки |
+| Home: review intro (`homeReviewIntro*`, видео `primer.mp4`), mine not-ready (`homeMineNotReady*`, `currency-empty-duck.png` + Lottie), invite explainer (`homeInvite*`, Figma `492:4030`; copy/share = `homeInviteMessage`), pending-limit (`homePendingLimit*`), reputation explainer (`homeReputation*`), balance explainer (`homeBalance*`), p4p online explainer (`homeLegendaryOnline*`), contacts; review: abort confirm (`reviewAbort*`, `currency-duck-leave.png` + Lottie, danger primary); report: complaint (`reportComplaint*`, теги в слоте) | Inline notice без оверлея / ban / brand split; нет монет на submit → error-buzz без модалки |
 
 Слот intro на home: `.home-screen__review-intro-media` + `--home-screen-review-intro-media-*`.
 

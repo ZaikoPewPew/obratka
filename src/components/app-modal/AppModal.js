@@ -23,6 +23,14 @@ function normalizeSize(value) {
 }
 
 /**
+ * @param {unknown} value
+ * @returns {"default" | "danger"}
+ */
+function normalizePrimaryTone(value) {
+  return value === "danger" ? "danger" : "default";
+}
+
+/**
  * Универсальная модалка по Figma Modal (600 / 800 / 1000).
  * Красная зона в макете → `content` (слот под кастомный контент кейса).
  *
@@ -33,6 +41,7 @@ function normalizeSize(value) {
  *   closeAriaLabel?: string;
  *   primaryLabel?: string;
  *   secondaryLabel?: string;
+ *   primaryTone?: "default" | "danger";
  *   showPrimary?: boolean;
  *   showSecondary?: boolean;
  *   closeOnBackdrop?: boolean;
@@ -54,6 +63,7 @@ function normalizeSize(value) {
  *   setPrimaryLabel: (label: string) => void;
  *   setSecondaryLabel: (label: string) => void;
  *   setPrimaryDisabled: (disabled: boolean) => void;
+ *   setPrimaryTone: (tone: "default" | "danger") => void;
  *   setActionsVisible: (flags: { primary?: boolean; secondary?: boolean }) => void;
  *   setCloseAriaLabel: (label: string) => void;
  * }}
@@ -67,6 +77,7 @@ export function createAppModal(opts = {}) {
   const closeOnEscape = opts.closeOnEscape !== false;
 
   let size = normalizeSize(opts.size);
+  let primaryTone = normalizePrimaryTone(opts.primaryTone);
   let closing = false;
   let openAnimFrame = 0;
   /** @type {Element | null} */
@@ -126,6 +137,14 @@ export function createAppModal(opts = {}) {
   actions.append(primaryBtn, secondaryBtn);
   dialog.append(header, content, actions);
   root.append(dialog);
+
+  /**
+   * @param {"default" | "danger"} tone
+   */
+  function setPrimaryTone(tone) {
+    primaryTone = normalizePrimaryTone(tone);
+    primaryBtn.classList.toggle("app-modal__btn--danger", primaryTone === "danger");
+  }
 
   /**
    * @param {string} title
@@ -222,6 +241,7 @@ export function createAppModal(opts = {}) {
     setDescription(opts.description ?? "");
     setPrimaryLabel(opts.primaryLabel ?? "");
     setSecondaryLabel(opts.secondaryLabel ?? "");
+    setPrimaryTone(primaryTone);
     setCloseAriaLabel(opts.closeAriaLabel ?? "");
     setActionsVisible({
       primary: opts.showPrimary !== false && Boolean(opts.primaryLabel),
@@ -350,6 +370,7 @@ export function createAppModal(opts = {}) {
     setPrimaryLabel,
     setSecondaryLabel,
     setPrimaryDisabled,
+    setPrimaryTone,
     setActionsVisible,
     setCloseAriaLabel,
   };

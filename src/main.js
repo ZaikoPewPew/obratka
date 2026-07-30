@@ -56,6 +56,8 @@ import { createReviewScreen } from "./components/review-screen/ReviewScreen.js";
 import { createAuthScreen } from "./components/auth-screen/AuthScreen.js";
 import { createAuthCodeScreen } from "./components/auth-code-screen/AuthCodeScreen.js";
 import { createHomeScreen } from "./components/home-screen/HomeScreen.js";
+import { createExplainerMediaRay } from "./components/home-screen/explainerMediaRay.js";
+import { createAppModal } from "./components/app-modal/AppModal.js";
 import { createOnboardingScreen } from "./components/onboarding-screen/OnboardingScreen.js";
 import { DEFAULT_ONBOARDING_ROLE } from "./api/onboarding.js";
 import { createReferralScreen } from "./components/referral-screen/ReferralScreen.js";
@@ -75,7 +77,8 @@ import {
 import { normalizePortfolioUrl } from "./utils/portfolioMeta.js";
 import { getMotionFocusDelayMs } from "./utils/motionTokens.js";
 import { startTabAttention } from "./utils/tabAttention.js";
-import brandLogoUrl from "./assets/brand/logo.svg";
+import { fixHangingPrepositions } from "./utils/hangingPrepositions.js";
+import currencyDuckLeaveUrl from "./assets/home/modal/currency-duck-leave.png";
 import timerEndUrl from "./assets/audio/Timer-end.wav";
 
 const SESSION_TOTAL_MS = REVIEW_SESSION_SECONDS * 1000;
@@ -106,8 +109,7 @@ const externalViewer = document.querySelector("[data-external-viewer]");
 const externalBodyEl = document.querySelector("[data-external-body]");
 const openExternalBtn = document.querySelector('[data-action="open-external"]');
 const timerEl = document.querySelector("[data-timer]");
-const avatarEl = document.querySelector("[data-portfolio-avatar]");
-const nameEl = document.querySelector("[data-portfolio-name]");
+const abortReviewBtn = document.querySelector('[data-action="abort-review"]');
 const frameReloadBtn = document.querySelector('[data-action="reload-frame"]');
 const frameBackBtn = document.querySelector('[data-action="frame-back"]');
 const frameForwardBtn = document.querySelector('[data-action="frame-forward"]');
@@ -1195,62 +1197,12 @@ function applyEmbedPlan(plan) {
   }
 }
 
-function showBrandChrome() {
-  const t = getStrings();
-  portfolioName = t.brandName;
-  if (nameEl) {
-    nameEl.textContent = t.brandName;
-  }
-  if (avatarEl) {
-    avatarEl.onerror = null;
-    avatarEl.onload = null;
-    avatarEl.classList.remove("iframe-shell__avatar--broken");
-    avatarEl.classList.add("iframe-shell__avatar--brand");
-    avatarEl.src = brandLogoUrl;
-    avatarEl.alt = t.brandLogoAlt;
-    avatarEl.setAttribute("aria-label", t.brandLogoAlt);
-  }
+function syncPortfolioName(label) {
+  portfolioName =
+    typeof label === "string" && label.trim()
+      ? label.trim()
+      : getStrings().brandName;
   syncLocaleDependentAttrs();
-}
-
-function syncPortfolioChrome({ label, avatar }) {
-  portfolioName = label;
-  if (nameEl) {
-    nameEl.textContent = label;
-  }
-  setPortfolioAvatar(avatar);
-  syncLocaleDependentAttrs();
-}
-
-/**
- * @param {string} primary
- */
-function setPortfolioAvatar(primary) {
-  if (!avatarEl) return;
-
-  avatarEl.classList.remove("iframe-shell__avatar--broken", "iframe-shell__avatar--brand");
-  avatarEl.alt = "";
-  avatarEl.removeAttribute("aria-label");
-
-  const showBroken = () => {
-    avatarEl.removeAttribute("src");
-    avatarEl.classList.add("iframe-shell__avatar--broken");
-  };
-
-  avatarEl.onerror = showBroken;
-  avatarEl.onload = () => {
-    // 1×1 / пустые заглушки части CDN не показываем как аватар кандидата.
-    if (avatarEl.naturalWidth < 8 || avatarEl.naturalHeight < 8) {
-      showBroken();
-      return;
-    }
-    avatarEl.classList.remove("iframe-shell__avatar--broken");
-  };
-  if (primary) {
-    avatarEl.src = primary;
-  } else {
-    showBroken();
-  }
 }
 
 /**
@@ -1272,15 +1224,8 @@ function applyPortfolio(url, options = {}) {
     typeof options.applicantName === "string" && options.applicantName.trim()
       ? options.applicantName.trim()
       : safeUrl || String(url || "").trim() || getStrings().brandName;
-  const applicantAvatar =
-    typeof options.applicantAvatar === "string"
-      ? options.applicantAvatar.trim()
-      : "";
 
-  syncPortfolioChrome({
-    label: applicantName,
-    avatar: applicantAvatar,
-  });
+  syncPortfolioName(applicantName);
 
   if (!safeUrl) {
     portfolioUrl = "";
@@ -1544,6 +1489,66 @@ function leaveSessionShell() {
   if (!shell) return;
   shell.hidden = true;
   shell.classList.remove("iframe-shell--entered");
+}
+
+const abortReviewMedia = document.createElement("div");
+abortReviewMedia.className = "iframe-shell__abort-explainer-media";
+
+const abortReviewRay = createExplainerMediaRay();
+
+const abortReviewPhoto = document.createElement("img");
+abortReviewPhoto.className = "home-screen__explainer-media-photo";
+abortReviewPhoto.src = currencyDuckLeaveUrl;
+abortReviewPhoto.alt = "";
+abortReviewPhoto.width = 1104;
+abortReviewPhoto.height = 536;
+abortReviewPhoto.decoding = "async";
+
+abortReviewMedia.append(abortReviewRay.root, abortReviewPhoto);
+
+const abortReviewModal = createAppModal({
+  size: "md",
+  primaryTone: "danger",
+  onPrimary: () => {
+    void confirmAbortReview();
+  },
+  onSecondary: () => {
+    void abortReviewModal.close();
+  },
+});
+abortReviewModal.content.append(abortReviewMedia);
+document.body.append(abortReviewModal.root);
+
+function openAbortReviewModal() {
+  const t = getStrings();
+  abortReviewModal.setTitle(fixHangingPrepositions(t.reviewAbortTitle ?? ""));
+  abortReviewModal.setDescription(
+    fixHangingPrepositions(t.reviewAbortDesc ?? ""),
+  );
+  abortReviewModal.setPrimaryLabel(t.reviewAbortConfirm ?? "");
+  abortReviewModal.setSecondaryLabel(t.reviewAbortCancel ?? "");
+  abortReviewModal.setCloseAriaLabel(
+    t.reviewAbortCloseAria ?? t.modalCloseAria ?? "",
+  );
+  abortReviewModal.setPrimaryTone("danger");
+  abortReviewModal.setActionsVisible({ primary: true, secondary: true });
+  abortReviewModal.open();
+  requestAnimationFrame(() => {
+    abortReviewRay.sync();
+  });
+}
+
+async function confirmAbortReview() {
+  await abortReviewModal.close();
+  go("home", { search: buildHomeSearch(lastHomeView) });
+}
+
+function requestAbortReview() {
+  if (reviewSubmitted) {
+    go("home", { search: buildHomeSearch(lastHomeView) });
+    return;
+  }
+  openAbortReviewModal();
 }
 
 const urlScreen = createUrlScreen({
@@ -2135,8 +2140,12 @@ dictationBtn?.addEventListener("click", () => {
   void toggleDictation("notes");
 });
 
+abortReviewBtn?.addEventListener("click", () => {
+  requestAbortReview();
+});
+
 applyDocumentI18n();
-showBrandChrome();
+syncPortfolioName(getStrings().brandName);
 renderTimer();
 syncDictationChrome();
 if (shell) {

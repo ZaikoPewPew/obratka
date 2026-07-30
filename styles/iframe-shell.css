@@ -52,6 +52,63 @@ body {
   justify-self: end;
 }
 
+.iframe-shell__abort {
+  appearance: none;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-abort-width);
+  height: var(--control-abort-height);
+  padding: var(--control-abort-padding-y) var(--control-abort-padding-x);
+  border: none;
+  border-radius: var(--control-abort-radius);
+  background: var(--control-abort-bg);
+  color: var(--control-abort-color);
+  font-family: var(--font-family);
+  font-size: var(--control-abort-font-size);
+  font-weight: var(--control-abort-font-weight);
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) ease;
+}
+
+.iframe-shell__abort:hover {
+  background: var(--control-abort-bg-hover);
+}
+
+.iframe-shell__abort:active {
+  background: var(--control-abort-bg-active);
+}
+
+.iframe-shell__abort:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.iframe-shell__abort-explainer-media {
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+  overflow: hidden;
+  width: var(--shell-abort-explainer-media-width);
+  height: var(--shell-abort-explainer-media-height);
+  border-radius: var(--shell-abort-explainer-media-radius);
+}
+
+.iframe-shell__abort-explainer-media .home-screen__explainer-media-ray {
+  width: var(--shell-abort-explainer-media-ray-size);
+  height: var(--shell-abort-explainer-media-ray-size);
+  opacity: var(--shell-abort-explainer-media-ray-opacity);
+  filter: var(--home-screen-explainer-media-ray-on-light-filter);
+}
+
+.iframe-shell__abort-explainer-media .home-screen__explainer-media-photo {
+  object-fit: var(--shell-abort-explainer-media-photo-fit);
+}
+
 .iframe-shell__avatar {
   flex-shrink: 0;
   width: var(--control-avatar-size);

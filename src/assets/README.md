@@ -15,6 +15,7 @@
 | Файл | Роль |
 |------|------|
 | `currency-duck.png` | фото в explainer «Уточки» (поверх Lottie, 552×268) |
+| `currency-duck-leave.png` | фото в confirm «Прервать ревью?» на `/review` (поверх Lottie, 552×268) |
 | `currency-referal.png` | фото в invite-explainer (поверх Lottie на `#F3F4F7`) |
 | `currency-empty-duck.png` | фото в mine not-ready explainer (поверх Lottie на `#F3F4F7`) |
 | `balance-card-ducks.svg` | legacy-декор (не используется) |
