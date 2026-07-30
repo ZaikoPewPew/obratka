@@ -16,4 +16,4 @@ Fixed-чип слева снизу на `/home` (Figma `489:3318`). Показы
 
 При переходе 0 → N — класс `--enter` + `motion-reveal` (въезд снизу). До 3 аватаров в чипе; точка онлайна сверху справа на каждом. Hover по аватару — тултип с ФИО (`displayName`, `legendary-online-panel__tip`).
 
-Рейтинг валюты на вкладке `?tab=rating` — внутри [`home-screen`](../home-screen/README.md) (`listRatingTop`). Папка [`rating/`](../rating/) — неиспользуемый aside, не путать.
+Рейтинг по репутации на вкладке `?tab=rating` — внутри [`home-screen`](../home-screen/README.md) (`listRatingTop`). Папка [`rating/`](../rating/) — неиспользуемый aside, не путать.

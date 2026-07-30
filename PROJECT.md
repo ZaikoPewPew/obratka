@@ -13,7 +13,7 @@
 | Path-роутинг + entry по сессии | wired |
 | Auth: Email OTP, Telegram, Google | wired → `auth.users` + `profiles` |
 | Онбординг → `profiles` | wired |
-| Home: лента/мои/рейтинг, URL-query, баланс, репутация, account-menu | wired (рейтинг — `listRatingTop` / топ-50) |
+| Home: лента/мои/рейтинг, URL-query, баланс, репутация, account-menu | wired (рейтинг — `listRatingTop` / топ-50 по `reputation`) |
 | Home: SWR-кэш вкладок + silent slot patch | wired (`homeListCache.js`: feed/mine/rating) |
 | Home: точка «новый кейс» на «На ревью» | wired (`feedSeen.js` + `listFeedPortfolioIds`) |
 | Home: «Топы в сети» (fixed-чип) | wired (`legendary-online-panel` + `legendary_presence`) |
@@ -202,6 +202,7 @@ SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `p
 | Теги v1 | `low_effort`, `spam`, `harassment`, `offensive`, `ai_slop` (веса только в SQL) |
 | Штраф / плюс | жалоба = −20 (1 тег); старт `0`; бан при `<= -100`; +10 после окна без жалобы (settle тоже от done) |
 | Ревьюер | чип = абсолют без плюса (`100` / `0` / `-20`) + explainer **без** таблицы весов |
+| Публичный топ | `/home?tab=rating` — топ-50 по `reputation` (`listRatingTop` / `rating_leaderboard.sql`); в карточке иконки positive/neutral/negative |
 | Апелляция | вручную («Связаться» на `/banned`) |
 | SQL / API | [`review_complaints.sql`](supabase/sql/review_complaints.sql), [`reviewComplaints.js`](src/api/reviewComplaints.js) |
 
@@ -215,7 +216,7 @@ SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `p
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
 | Side panel | [`side-panel`](src/components/side-panel/README.md) — панель справа (слот); home → «Правила» |
-| Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `feedback`; feed/mine/rating (`listRatingTop`); URL-query; лента SWR; Активные/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` / entrance cascade |
+| Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `feedback`; feed/mine/rating (`listRatingTop`, топ-50 по репутации); URL-query; лента SWR; Активные/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` / entrance cascade |
 | Review | `index.html` `.iframe-shell` + таймер + чип **rec** (заметки → `answers.dictation`) в `main.js`; embed: `resolvePortfolioEmbed` / external UI |
 | Quiz | `review-screen` + `review-panel` + [`scale-slider`](src/components/scale-slider/README.md) (context/visual **1–5**; условный `pain`; рыночный `tier`) + mic → `advice`. SoT: [`QUIZ.md`](QUIZ.md) |
 | Success | `success-screen` (`/done`) |

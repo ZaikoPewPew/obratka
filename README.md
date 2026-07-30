@@ -24,7 +24,7 @@ npm run dev
 | `/registration` | Email → code / Telegram / Google |
 | `/registration/code` | Код из письма (6 ячеек) |
 | `/onboarding` | Вопросы профиля |
-| `/home` | Очередь / мои / рейтинг (топ-50); SWR, report gate, точки feedSeen + 3/3, intro до claim, tabbar-dock + submit (glass / `--on-dark` / entrance cascade); вид синхронизирован с query |
+| `/home` | Очередь / мои / рейтинг (топ-50 по репутации); SWR, report gate, точки feedSeen + 3/3, intro до claim, tabbar-dock + submit (glass / `--on-dark` / entrance cascade); вид синхронизирован с query |
 | `/settings` | Заглушка настроек (из account-menu) |
 | `/portfolio` | Подача URL; чип «На главную»; done на том же экране |
 | `/review` | Просмотр портфолио + таймер 45 s (iframe pause / external wall-clock) + звук конца + надиктовка (rec) |

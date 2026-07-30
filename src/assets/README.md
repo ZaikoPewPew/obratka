@@ -5,7 +5,7 @@
 ## `home/`
 
 Чипы / иконки шапки и карточек ленты (`bone.svg`, `reputation-*.svg`, `plus.svg` для CTA «Закинуть», `feedback.svg` paper plane для FAB feedback, …).
-`reputation-*.svg` — inline через `?raw` (группа `.home-screen__reputation-eyes` для анимации взгляда).
+`reputation-*.svg` — inline через `?raw` (группа `.home-screen__reputation-eyes` для анимации взгляда на чипе; в топ-50 на вкладке «Рейтинг» — те же SVG статично, без idle-loop).
 `plus.svg` / `feedback.svg` — inline через `?raw` (`currentColor`).
 
 ### `home/modal/`

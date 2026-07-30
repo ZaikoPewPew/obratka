@@ -1,6 +1,6 @@
 # `rating` — оболочка aside (не в entry)
 
-Папка `src/components/rating/` — **неиспользуемый** sticky aside под левую колонку home. В продукте вкладка «Рейтинг» уже живёт **внутри** [`home-screen`](../home-screen/README.md): карточки `.home-screen__rating-list` + API [`listRatingTop`](../../api/rating.js) / SQL `rating_leaderboard.sql`.
+Папка `src/components/rating/` — **неиспользуемый** sticky aside под левую колонку home. В продукте вкладка «Рейтинг» уже живёт **внутри** [`home-screen`](../home-screen/README.md): карточки `.home-screen__rating-list` + API [`listRatingTop`](../../api/rating.js) (топ-50 по репутации) / SQL `rating_leaderboard.sql`.
 
 Левый sticky aside на desktop раньше занимал [`legendary-online-panel`](../legendary-online-panel/) (теперь fixed-чип слева снизу); этот модуль рейтинга **не** монтируется.
 

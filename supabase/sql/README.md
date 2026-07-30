@@ -37,6 +37,7 @@
 | Весь claims-слой / overshoot (дверь без live, late insert, RLS insert на `done`) | весь [`review_claims.sql`](review_claims.sql) (drop CHECK + claim/trigger + `reviews_insert_own`) |
 | Только слоты + purge expired | с `drop function … portfolio_reviewer_slots` до конца функции **и** `revoke`/`grant` на неё (в конце файла) |
 | Окно жалобы от done + старт reputation 0 | [`portfolios.sql`](portfolios.sql) (колонка `completed_at`) → [`review_claims.sql`](review_claims.sql) (триггер) → весь [`review_complaints.sql`](review_complaints.sql); ONE-SHOT `100/20 → 0` на prod уже прогнан и в файле закомментирован — не раскомментировать при re-apply |
+| Топ-50: метрика `balance` → `reputation` | весь [`rating_leaderboard.sql`](rating_leaderboard.sql) (rename колонки + RPC + `DELETE` снапшота; следующий `list_rating_top` пересоберёт) |
 
 Клиентский фикс залипающих «Аноним»-слотов (keepalive `pagehide` + `sessionStorage` `obratka.reviewClaim`) **не** требует SQL — достаточно деплоя фронта. SQL-purge в `portfolio_reviewer_slots` — доп. hardening, чтобы expired не светились до следующего claim/heartbeat.
 

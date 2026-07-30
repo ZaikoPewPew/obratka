@@ -7,7 +7,7 @@
 - `side-panel.css` — боковая панель (`createSidePanel`, `--side-panel-*`).
 - `iframe-shell.css` — оболочка `/review` (таймер, **`.iframe-shell__rec`**, external viewer), `.url-screen*` (в т.ч. **`.url-screen__back`**, `__error*`, `__input-wrap--invalid`), `.auth-screen*` / `.auth-code-screen*` (в т.ч. `__cells--invalid`), `.review-screen*` / `.review-panel*` (в т.ч. **`.review-panel__rec`**, **`.review-panel__scale-*` / `__slider-*`** — шкалы [`scale-slider`](../src/components/scale-slider/README.md)). Таймер: iframe pause / external wall-clock; звук конца — `src/assets/audio/Timer-end.wav`.
 - `brand-screen.css` — **заготовка** выноса общих split-стилей из iframe-shell.
-- `home-screen.css` — главная `/home` (topbar, лента, вкладка рейтинга `.home-screen__rating-list`, tabbar-dock: glass tabs + submit + tab-dot, `--on-dark`).
+- `home-screen.css` — главная `/home` (topbar, лента, вкладка рейтинга `.home-screen__rating-list` / плашка `.home-screen__rating-reputation`, tabbar-dock: glass tabs + submit + tab-dot, `--on-dark`).
 - `legendary-online-panel.css` — fixed-чип «Топы в сети» слева снизу на home.
 - `feedback.css` — fixed FAB feedback (Telegram) на home.
 - `tabs-panel.css` — сегмент Активные / Завершенные на «Мои» (`createTabsPanel`, `--tabs-panel-*`).

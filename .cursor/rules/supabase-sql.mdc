@@ -12,7 +12,7 @@ alwaysApply: false
 
 1. `profiles.sql`
 2. `legendary_presence.sql` (`last_seen_at` + heartbeat/list)
-3. `rating_leaderboard.sql` (снапшот топ-50 + `list_rating_top`)
+3. `rating_leaderboard.sql` (снапшот топ-50 по `reputation` + `list_rating_top`)
 4. `wallet.sql` (protect balance + `spend_submit_cost`)
 5. `portfolios.sql`
 6. `portfolio_submit.sql` (после portfolios; atomic submit + revoke INSERT)
