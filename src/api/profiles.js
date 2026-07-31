@@ -1,4 +1,5 @@
 import { getSupabase } from "../lib/supabaseClient.js";
+import { normalizeProfileSettings } from "./profileSettings.js";
 
 /** @typedef {'free' | 'pro' | 'legendary'} ProfileTier */
 
@@ -13,6 +14,7 @@ import { getSupabase } from "../lib/supabaseClient.js";
  *   email?: string | null;
  *   role?: string | null;
  *   grade?: string | null;
+ *   workplace?: string | null;
  *   tier?: ProfileTier;
  *   domains?: string[] | null;
  *   goals?: string[] | null;
@@ -25,11 +27,26 @@ import { getSupabase } from "../lib/supabaseClient.js";
  *   referral_entry_code?: string | null;
  *   banned_at?: string | null;
  *   reputation?: number;
+ *   created_at?: string | null;
  * }} Profile
  */
 
 const PROFILE_SELECT =
-  "id, auth_provider, display_name, avatar_url, telegram_id, telegram_username, email, role, grade, tier, domains, goals, onboarding, onboarding_done, balance, referral_code, referral_uses, referred_by, referral_entry_code, banned_at, reputation";
+  "id, auth_provider, display_name, avatar_url, telegram_id, telegram_username, email, role, grade, workplace, tier, domains, goals, onboarding, onboarding_done, balance, referral_code, referral_uses, referred_by, referral_entry_code, banned_at, reputation, created_at";
+
+/** Колонки, которые клиент вообще может попытаться обновить (сервер всё равно режет guards). */
+const CLIENT_WRITABLE_KEYS = new Set([
+  "display_name",
+  "avatar_url",
+  "telegram_username",
+  "role",
+  "grade",
+  "workplace",
+  "domains",
+  "goals",
+  "onboarding",
+  "onboarding_done",
+]);
 
 /**
  * @param {Profile | null | undefined} profile
@@ -75,21 +92,17 @@ export async function updateMyProfile(patch) {
     throw new Error("not_authenticated");
   }
 
-  // tier / ban / reputation / balance / referral / last_seen / grade-after-onboarding — server-managed.
-  const {
-    tier: _tier,
-    id: _id,
-    banned_at: _bannedAt,
-    ban_reason: _banReason,
-    reputation: _reputation,
-    balance: _balance,
-    last_seen_at: _lastSeenAt,
-    referral_code: _referralCode,
-    referral_uses: _referralUses,
-    referred_by: _referredBy,
-    referral_entry_code: _referralEntryCode,
-    ...safePatch
-  } = patch;
+  /** @type {Record<string, unknown>} */
+  const safePatch = {};
+  for (const [key, value] of Object.entries(patch ?? {})) {
+    if (CLIENT_WRITABLE_KEYS.has(key)) {
+      safePatch[key] = value;
+    }
+  }
+
+  if (Object.keys(safePatch).length === 0) {
+    throw new Error("profile_update_empty");
+  }
 
   const { data, error } = await supabase
     .from("profiles")
@@ -102,4 +115,18 @@ export async function updateMyProfile(patch) {
     throw new Error(error.message || "profile_update_failed");
   }
   return data;
+}
+
+/**
+ * Сохраняет только разрешённые поля профиля из `/settings`.
+ *
+ * @param {Record<string, unknown>} input
+ * @returns {Promise<Profile | null>}
+ */
+export async function updateMySettings(input) {
+  const normalized = normalizeProfileSettings(input);
+  if (!normalized.ok) {
+    throw new Error(normalized.error);
+  }
+  return updateMyProfile(normalized.patch);
 }

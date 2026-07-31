@@ -12,6 +12,7 @@
 | Фон `#242426`, radius 16, padding 16 | `--notification-bg` / `--notification-radius` / `--notification-padding` |
 | Иконка error 24 + текст 14 Montserrat + close 24 | `.notification__icon` / `__message` / `__close` |
 | Gap 8 между элементами | `--notification-gap` |
+| Close скрыт по умолчанию | `--notification-close-display: none` → `inline-flex` чтобы показать |
 
 Позиция на home: **16px справа**, **16px ниже аватара** (`--notification-inset-*`).
 

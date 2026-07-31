@@ -25,7 +25,7 @@ alwaysApply: true
 2. Новая security definer функция → сразу `revoke all ... from public` + `from anon`, потом `grant execute ... to authenticated` (`PUBLIC` даёт EXECUTE по умолчанию, `anon` его наследует). Матрица доступа — [`supabase/SECURITY.md`](../../supabase/SECURITY.md).
 3. Mutations claims / referrals / ban / tier — RPC `security definer` + `set search_path = public`, не прямой INSERT/UPDATE с клиента.
 4. Не `grant` лишнего на `anon`/`authenticated`; seed-таблицы без прямого SELECT.
-5. Клиент не пишет: `banned_at`, `ban_reason`, `tier`, `balance`, `reputation`; grade/role — только до `onboarding_done`.
+5. Клиент не пишет: `banned_at`, `ban_reason`, `tier`, `balance`, `reputation`; grade — только до `onboarding_done`; identity (`email`, `telegram_id`, `auth_provider`, `created_at`) и сброс `onboarding_done` — серверные guards + column grants.
 6. Баланс: `submit_portfolio` RPC (atomic spend+insert, max 1 pending); legacy `spend_submit_cost`; награда за ревью — в `handle_review_inserted`; не `updateMyProfile({ balance })`.
 7. Не ослаблять лиги / claim-триггеры «для удобства UI».
 

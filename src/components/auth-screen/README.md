@@ -39,6 +39,12 @@ Visual `invalid`, пока видна **любая** ошибка (email **ил�
 
 ## Env / Dashboard
 
+Быстрая проверка (env + `external.email`, без отправки писем):
+
+```bash
+node --env-file=.env scripts/verify-email-otp-setup.mjs
+```
+
 См. `.env.example` и `supabase/functions/telegram-auth/README.md`:
 
 - `SUPABASE_URL`, `SUPABASE_ANON_KEY`
@@ -47,24 +53,27 @@ Visual `invalid`, пока видна **любая** ошибка (email **ил�
 
 ### Email (Supabase Auth → Providers → Email)
 
-1. Включить Email provider.
-2. **Важно:** `signInWithOtp` по умолчанию шлёт **magic link**, не 6-значный код.  
-   Чтобы приходил код для экрана `/registration/code`, поменяй шаблон письма:
+1. Включить Email provider (проверка: `GET /auth/v1/settings` → `external.email: true`).
+2. **Сначала custom SMTP** (Dashboard → Authentication → Emails → SMTP Settings).  
+   Без SMTP на Free **нельзя править** шаблоны («Set up custom SMTP to edit templates») — уходят дефолты. Для UI `/registration/code` дефолт Confirm signup = только ссылка (проверено: link-only). SMTP: Resend / Postmark / SendGrid — креды только в Dashboard, см. [`SECURITY.md`](../../../supabase/SECURITY.md).
+3. **Критично для `/registration/code`:** в письме должен быть **`{{ .Token }}`** (6 цифр).  
+   При `mailer_autoconfirm: false` (Confirm email включён) первый `signInWithOtp` для **нового** юзера часто шлёт **Confirm sign up**. Дефолт без `{{ .Token }}` — ячейки кода не сработают.
 
-   **Authentication → Email Templates → Magic Link** (и при необходимости Confirm signup):
+   После SMTP → **Emails → Templates**, правь оба:
 
-   - убери или не опирайся только на `{{ .ConfirmationURL }}`;
-   - добавь код: `{{ .Token }}` (6 цифр).
+   - **Magic link or OTP**
+   - **Confirm sign up**
 
-   Пример тела:
+   В теле обязательно код (ссылку можно оставить вторым способом):
 
    ```text
    Ваш код для входа: {{ .Token }}
    ```
 
-   Если в шаблоне есть только ссылка — на почту придёт ссылка, а UI с ячейками кода не сработает.
-3. Redirect URLs (для Google / ссылок, если оставишь):
+   Альтернатива: Providers → Email → выключить **Confirm email** (`mailer_autoconfirm`), тогда уходит Magic link or OTP; всё равно добавь `{{ .Token }}` в этот шаблон.
+4. Redirect URLs (Authentication → URL Configuration):
    - `http://localhost:5173/`
+   - `http://127.0.0.1:5173/` (если гоняешь Vite так)
    - `https://zaikopewpew.github.io/obratka/`
 
 ### Google (Supabase Auth → Providers → Google)

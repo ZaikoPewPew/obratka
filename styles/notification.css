@@ -74,7 +74,7 @@
 
 .notification__close {
   box-sizing: border-box;
-  display: inline-flex;
+  display: var(--notification-close-display);
   flex-shrink: 0;
   align-items: center;
   justify-content: center;

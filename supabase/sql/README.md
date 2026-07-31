@@ -4,7 +4,7 @@
 
 | Файл | Роль |
 |------|------|
-| `profiles.sql` | `public.profiles`, protect tier/ban/reputation/**balance**/grade, `is_profile_banned` (self-only), telegram_id из app_metadata |
+| `profiles.sql` | `public.profiles`, workplace, protect tier/ban/reputation/**balance**/grade/identity, column-level UPDATE, `is_profile_banned` (self-only), telegram_id из app_metadata |
 | `legendary_presence.sql` | `last_seen_at` + RPC heartbeat/list для `tier=legendary` (после profiles) |
 | `rating_leaderboard.sql` | снапшот топ-50 по `reputation` + RPC `list_rating_top` (ленивая пересборка раз в 24 ч; после profiles) |
 | `wallet.sql` | `protect_profiles_balance` + RPC `spend_submit_cost` (legacy, cost 30) |
@@ -38,10 +38,31 @@
 | Только слоты + purge expired | с `drop function … portfolio_reviewer_slots` до конца функции **и** `revoke`/`grant` на неё (в конце файла) |
 | Окно жалобы от done + старт reputation 0 | [`portfolios.sql`](portfolios.sql) (колонка `completed_at`) → [`review_claims.sql`](review_claims.sql) (триггер) → весь [`review_complaints.sql`](review_complaints.sql); ONE-SHOT `100/20 → 0` на prod уже прогнан и в файле закомментирован — не раскомментировать при re-apply |
 | Топ-50: метрика `balance` → `reputation` | весь [`rating_leaderboard.sql`](rating_leaderboard.sql) (rename колонки + RPC + `DELETE` снапшота; следующий `list_rating_top` пересоберёт) |
+| Профиль `/settings`: `workplace` + identity guards + column UPDATE + grade-only lock | блок `workplace` / CHECK / `protect_profiles_grade` / `protect_profiles_identity` / grants в конце [`profiles.sql`](profiles.sql) (или весь файл) |
 
 Клиентский фикс залипающих «Аноним»-слотов (keepalive `pagehide` + `sessionStorage` `obratka.reviewClaim`) **не** требует SQL — достаточно деплоя фронта. SQL-purge в `portfolio_reviewer_slots` — доп. hardening, чтобы expired не светились до следующего claim/heartbeat.
 
 **Окно жалобы:** старт = `portfolios.completed_at`, не `updated_at`. Reopen для теста / ops — см. [`../BAN.md`](../BAN.md) § Автобан по репутации.
+
+### Проверка после apply профиля (`/settings`)
+
+Под своим JWT:
+
+```sql
+-- свои разрешённые поля (ожидание: ok)
+update public.profiles
+set display_name = display_name,
+    telegram_username = telegram_username,
+    role = role,
+    workplace = workplace
+where id = auth.uid();
+
+-- identity / economy (ожидание: exception или 0 rows из-за column grant)
+update public.profiles set email = 'pwned@example.com' where id = auth.uid();
+update public.profiles set onboarding_done = false where id = auth.uid();
+update public.profiles set grade = 'senior' where id = auth.uid() and onboarding_done;
+update public.profiles set balance = balance + 1 where id = auth.uid();
+```
 
 Обзор — [`../README.md`](../README.md).  
 **Как банить юзеров:** [`../BAN.md`](../BAN.md).  

@@ -40,7 +40,7 @@ Telegram Edge: [`functions/telegram-auth/README.md`](functions/telegram-auth/REA
 
 | Провайдер | Где настраивать |
 |-----------|-----------------|
-| **Email OTP** | Dashboard → Authentication → Providers → Email; шаблон **Magic Link** должен содержать `{{ .Token }}` (иначе уходит ссылка, не код). При наплыве регистраций — обязателен custom SMTP, см. [`SECURITY.md`](SECURITY.md) § «Наплыв регистраций» |
+| **Email OTP** | Dashboard → Authentication → Providers → Email; в шаблонах **Magic Link** и **Confirm signup** обязателен `{{ .Token }}` (при Confirm email включённом новый signup шлёт Confirm signup — дефолт только ссылка, UI `/registration/code` ломается). При наплыве — custom SMTP, см. [`SECURITY.md`](SECURITY.md) § «Наплыв регистраций». Чеклист: [`auth-screen/README.md`](../src/components/auth-screen/README.md) § Email |
 | **Telegram** | `TELEGRAM_BOT_ID` в клиенте + `TELEGRAM_BOT_TOKEN` в Edge secrets |
 | **Google** | Dashboard → Providers → Google (Client ID/Secret из Google Cloud) |
 

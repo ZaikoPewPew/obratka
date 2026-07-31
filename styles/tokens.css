@@ -1290,13 +1290,15 @@
   --notification-font-weight: var(--font-weight-regular);
   --notification-line-height: 1.2;
   --notification-icon-size: 24px;
+  /* Close: `none` скрыт; включить → `inline-flex` */
+  --notification-close-display: none;
   --notification-close-radius: var(--radius-xs);
   --notification-close-hover-opacity: 0.72;
   --notification-duration: var(--motion-notification-duration);
   --notification-ease: var(--motion-notification-ease);
   --notification-hold: var(--motion-notification-hold);
 
-  /* Отдельный экран настроек (пока заглушка) */
+  /* Отдельный экран настроек (/settings — профиль) */
   --settings-screen-z: var(--home-screen-z);
   --settings-screen-bg: var(--color-bg);
   --settings-screen-color: var(--color-text);
@@ -1316,15 +1318,57 @@
   --settings-screen-back-size: var(--font-size-base);
   --settings-screen-back-weight: var(--font-weight-medium);
   --settings-screen-body-padding: var(--space-4);
+  --settings-screen-body-padding-bottom: var(--space-10);
   --settings-screen-card-width: var(--home-screen-feed-width);
   --settings-screen-card-padding: var(--space-8);
-  --settings-screen-card-gap: var(--space-3);
+  --settings-screen-card-gap: var(--space-6);
   --settings-screen-card-radius: var(--radius-xl);
   --settings-screen-card-bg: var(--color-surface-muted);
   --settings-screen-title-size: var(--font-size-2xl);
   --settings-screen-title-weight: var(--font-weight-medium);
   --settings-screen-description-size: var(--font-size-base);
   --settings-screen-description-color: var(--color-text-muted);
+  --settings-screen-form-gap: var(--space-5);
+  --settings-screen-field-gap: var(--space-2);
+  --settings-screen-label-size: var(--font-size-sm);
+  --settings-screen-label-weight: var(--font-weight-medium);
+  --settings-screen-label-color: var(--color-text-muted);
+  --settings-screen-input-height: var(--space-12);
+  --settings-screen-input-padding-x: var(--space-4);
+  --settings-screen-input-radius: var(--radius-md);
+  --settings-screen-input-bg: var(--color-surface);
+  --settings-screen-input-color: var(--color-text);
+  --settings-screen-input-size: var(--font-size-base);
+  --settings-screen-input-weight: var(--font-weight-regular);
+  --settings-screen-input-placeholder: var(--color-text-subtle);
+  --settings-screen-input-border-invalid: var(--color-error-border-strong);
+  --settings-screen-readonly-bg: color-mix(
+    in srgb,
+    var(--color-surface) 72%,
+    var(--color-surface-muted-active)
+  );
+  --settings-screen-readonly-color: var(--color-text);
+  --settings-screen-hint-size: var(--font-size-xs);
+  --settings-screen-hint-color: var(--color-text-subtle);
+  --settings-screen-error-size: var(--font-size-xs);
+  --settings-screen-error-color: var(--color-error);
+  --settings-screen-status-size: var(--font-size-sm);
+  --settings-screen-status-color: var(--color-text-muted);
+  --settings-screen-status-success-color: var(--color-text);
+  --settings-screen-status-error-color: var(--color-error);
+  --settings-screen-actions-gap: var(--space-3);
+  --settings-screen-save-height: var(--space-12);
+  --settings-screen-save-padding-x: var(--space-6);
+  --settings-screen-save-radius: var(--radius-md);
+  --settings-screen-save-bg: var(--color-accent);
+  --settings-screen-save-bg-hover: var(--color-accent-hover);
+  --settings-screen-save-bg-active: var(--color-accent-active);
+  --settings-screen-save-color: var(--color-on-accent);
+  --settings-screen-save-size: var(--font-size-base);
+  --settings-screen-save-weight: var(--font-weight-medium);
+  --settings-screen-skeleton-height: var(--space-12);
+  --settings-screen-skeleton-radius: var(--radius-md);
+  --settings-screen-skeleton-bg: var(--color-surface-muted-active);
 
   /* Auth (стиль старого PDF/done: divider + provider buttons) */
   --auth-screen-divider-height: 27px;

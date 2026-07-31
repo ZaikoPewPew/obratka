@@ -27,7 +27,7 @@ Auth-gated deep link (`home` / `settings` / `onboarding` / `report` / `url` / `s
 | `authCode` | `/registration/code` | 6-digit Email OTP + resend cooldown |
 | `onboarding` | `/onboarding` | Онбординг → profiles |
 | `home` | `/home` | Хаб: SWR feed/mine/rating + feedSeen/3/3 + «Топы в сети» + tabbar-dock (entrance / glass / `--on-dark`) + меню профиля |
-| `settings` | `/settings` | Отдельный экран настроек (пока заглушка) |
+| `settings` | `/settings` | Профиль: имя / Telegram / роль / workplace |
 | `url` | `/portfolio` | Подача URL; back-chip → home; done на том же экране |
 | `review` | `/review` | Ревью: iframe + таймер 45 s (pause / external wall-clock + `Timer-end.wav`) + чип rec |
 | `quiz` | `/quiz` | Квиз после таймера; шкалы context/visual 1–5 ([`scale-slider`](../components/scale-slider/README.md)); условный pain; рыночный `tier`; микрофон в поле «Главный совет» |

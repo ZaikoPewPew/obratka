@@ -11,6 +11,8 @@ create table if not exists public.profiles (
   email text,
   role text,
   grade text,
+  -- Optional free-text workplace from /settings (not a league/auth field).
+  workplace text,
   -- Membership: free (default) / pro (paid) / legendary (manual VIP). Not onboarding `role`.
   tier text not null default 'free' check (tier in ('free', 'pro', 'legendary')),
   domains text[] not null default '{}'::text[],
@@ -84,6 +86,75 @@ alter table public.profiles
 
 alter table public.profiles
   add column if not exists referral_entry_code text;
+
+-- Optional workplace from /settings.
+alter table public.profiles
+  add column if not exists workplace text;
+
+-- Sanitize before CHECK constraints (idempotent; keeps apply safe on live data).
+update public.profiles
+set workplace = left(workplace, 120)
+where workplace is not null and char_length(workplace) > 120;
+
+update public.profiles
+set display_name = left(display_name, 80)
+where display_name is not null and char_length(display_name) > 80;
+
+update public.profiles
+set telegram_username = null
+where telegram_username is not null
+  and telegram_username !~ '^[A-Za-z0-9_]{5,32}$';
+
+update public.profiles
+set role = 'other'
+where role is not null
+  and role not in (
+    'web-designer',
+    'product-designer',
+    'emotional-designer',
+    'ux-ui-designer',
+    'other'
+  );
+
+alter table public.profiles
+  drop constraint if exists profiles_workplace_len_check;
+
+alter table public.profiles
+  add constraint profiles_workplace_len_check
+  check (workplace is null or char_length(workplace) <= 120);
+
+alter table public.profiles
+  drop constraint if exists profiles_display_name_len_check;
+
+alter table public.profiles
+  add constraint profiles_display_name_len_check
+  check (display_name is null or char_length(display_name) <= 80);
+
+alter table public.profiles
+  drop constraint if exists profiles_role_check;
+
+alter table public.profiles
+  add constraint profiles_role_check
+  check (
+    role is null
+    or role in (
+      'web-designer',
+      'product-designer',
+      'emotional-designer',
+      'ux-ui-designer',
+      'other'
+    )
+  );
+
+alter table public.profiles
+  drop constraint if exists profiles_telegram_username_check;
+
+alter table public.profiles
+  add constraint profiles_telegram_username_check
+  check (
+    telegram_username is null
+    or telegram_username ~ '^[A-Za-z0-9_]{5,32}$'
+  );
 
 create or replace function public.set_profiles_updated_at()
 returns trigger
@@ -201,7 +272,8 @@ create trigger profiles_protect_balance
   for each row
   execute function public.protect_profiles_balance();
 
--- Grade / role: only before onboarding_done (or service_role / SQL Editor).
+-- Grade: only before onboarding_done (or service_role / SQL Editor).
+-- Role may change later from /settings (whitelist CHECK + client allowlist).
 create or replace function public.protect_profiles_grade()
 returns trigger
 language plpgsql
@@ -211,13 +283,10 @@ begin
   if current_setting('app.bypass_profile_guards', true) = 'on' then
     return new;
   end if;
-  if (
-    new.grade is distinct from old.grade
-    or new.role is distinct from old.role
-  )
+  if new.grade is distinct from old.grade
      and coalesce(old.onboarding_done, false) is true
      and coalesce(auth.jwt() ->> 'role', 'service_role') is distinct from 'service_role' then
-    raise exception 'profiles.grade/role locked after onboarding';
+    raise exception 'profiles.grade locked after onboarding';
   end if;
   return new;
 end;
@@ -228,6 +297,39 @@ create trigger profiles_protect_grade
   before update on public.profiles
   for each row
   execute function public.protect_profiles_grade();
+
+-- Identity + onboarding lock: clients cannot spoof Auth fields or reopen grade lock.
+create or replace function public.protect_profiles_identity()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if current_setting('app.bypass_profile_guards', true) = 'on' then
+    return new;
+  end if;
+  if coalesce(auth.jwt() ->> 'role', 'service_role') = 'service_role' then
+    return new;
+  end if;
+  if new.email is distinct from old.email
+     or new.telegram_id is distinct from old.telegram_id
+     or new.auth_provider is distinct from old.auth_provider
+     or new.created_at is distinct from old.created_at then
+    raise exception 'profiles.identity fields are read-only for clients';
+  end if;
+  if coalesce(old.onboarding_done, false) is true
+     and new.onboarding_done is distinct from true then
+    raise exception 'profiles.onboarding_done cannot be cleared by clients';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_protect_identity on public.profiles;
+create trigger profiles_protect_identity
+  before update on public.profiles
+  for each row
+  execute function public.protect_profiles_identity();
 
 -- Used by portfolios/reviews RLS (security definer — no recursive RLS on profiles).
 -- Client oracle: only reports ban for auth.uid(); other uid → false (no leak).
@@ -352,7 +454,22 @@ create policy "profiles_update_own"
 
 revoke all on table public.profiles from anon;
 revoke all on table public.profiles from public;
-grant select, update on public.profiles to authenticated;
+grant select on table public.profiles to authenticated;
+-- Column-level UPDATE: only product fields the client may write.
+-- Identity / economy / moderation / referral / timestamps stay non-updatable via grant.
+revoke update on table public.profiles from authenticated;
+grant update (
+  display_name,
+  avatar_url,
+  telegram_username,
+  role,
+  grade,
+  workplace,
+  domains,
+  goals,
+  onboarding,
+  onboarding_done
+) on table public.profiles to authenticated;
 
 revoke all on function public.protect_profiles_balance() from public;
 revoke all on function public.protect_profiles_balance() from anon;
@@ -360,3 +477,6 @@ revoke all on function public.protect_profiles_balance() from authenticated;
 revoke all on function public.protect_profiles_grade() from public;
 revoke all on function public.protect_profiles_grade() from anon;
 revoke all on function public.protect_profiles_grade() from authenticated;
+revoke all on function public.protect_profiles_identity() from public;
+revoke all on function public.protect_profiles_identity() from anon;
+revoke all on function public.protect_profiles_identity() from authenticated;

@@ -25,7 +25,7 @@
 | Report: листы (+ `dictation`) + жалоба + PDF | wired |
 | Referrals validate/redeem / share | wired (1 код / 2 слота, seed `YTHWKPDWAK`, без наград) |
 | App modal (shared overlays) | wired |
-| Settings `/settings` | UI-заглушка |
+| Settings `/settings` | wired (профиль) |
 | Legacy waitlist UI | **удалён** (спека в `mobile.md` § Архив) |
 
 ### Home — что нового в UX
@@ -108,7 +108,7 @@
 | Сущность | Файл / роль |
 |----------|-------------|
 | `auth.users` | Supabase Auth |
-| `public.profiles` | 1:1 с user; онбординг, баланс, `reputation`, tier, ban, `referral_code` (лимит 2); триггер `handle_new_user` |
+| `public.profiles` | 1:1 с user; онбординг, баланс, `reputation`, tier, ban, `referral_code` (лимит 2), `workplace`; триггер `handle_new_user` |
 | `public.referral_seed_codes` | bootstrap-коды (seed `YTHWKPDWAK`); только через RPC |
 | `public.portfolios` / `reviews` | очередь ревью с матчингом по лиге грейда; `portfolios.completed_at` — старт окна жалобы / settle |
 | `public.review_complaints` | жалобы автора (1 тег, окно 6ч от done) → −20 / +10 settle → автобан при `reputation <= -100` |
@@ -222,7 +222,7 @@ SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `p
 | Success | `success-screen` (`/done`) |
 | Ban | `ban-screen` — статичный красный mesh + `banBrandMarkSvg` |
 | Report | `report-screen` — листы (+ надиктовка) → просмотр в side-panel → жалоба + PDF |
-| Settings | `settings-screen` (`/settings`, заглушка) |
+| Settings | `settings-screen` (`/settings`, профиль) |
 
 Handoff соседних brand-экранов: `go(id, { handoff: true })` — правый visual без повторной анимации.
 

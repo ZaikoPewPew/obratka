@@ -1649,6 +1649,9 @@ const settingsScreen = createSettingsScreen({
     lastHomeView = { tab: "feed", filter: "active" };
     go("home", { search: buildHomeSearch({ tab: "feed" }) });
   },
+  onSaved: async () => {
+    await refreshSessionFromProfile();
+  },
 });
 
 const homeScreen = createHomeScreen({

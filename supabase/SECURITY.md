@@ -62,7 +62,7 @@ order by 1;
 
 | Таблица | Клиент | Комментарий |
 |---|---|---|
-| `profiles` | select/update своих | `banned_at`, `ban_reason`, `tier`, `balance`, `reputation`, `last_seen_at` режут триггеры `protect_profiles_*`; grade — только до `onboarding_done` |
+| `profiles` | select своих; UPDATE только product-колонок | column-level grant: `display_name`, `avatar_url`, `telegram_username`, `role`, `grade`, `workplace`, `domains`, `goals`, `onboarding`, `onboarding_done`. Триггеры `protect_profiles_*`: `banned_at`/`ban_reason`, `tier`, `balance`, `reputation`, `last_seen_at`, **grade после onboarding**, identity (`email`/`telegram_id`/`auth_provider`/`created_at`), запрет сброса `onboarding_done`. Role после онбординга можно менять из `/settings` (CHECK whitelist) |
 | `portfolios` / `reviews` | по RLS (лиги, own); portfolios **без** client INSERT | insert портфолио только RPC `submit_portfolio`; INSERT review требует живой claim |
 | `review_claims` | только `select` | mutations — исключительно через RPC |
 | `review_complaints` | insert только RPC | `reporter_id` ревьюеру не виден |
@@ -142,6 +142,8 @@ Apply SQL: [`sql/README.md`](sql/README.md) § «Как применять». П
 ## Наплыв регистраций: custom SMTP (Free-план)
 
 На Free-плане Email OTP (`signInWithOtp` → `/auth/v1/otp`) уходит через встроенный почтовый релей Supabase, у которого низкий и недокументированно жёсткий лимит писем без своего SMTP. При резком наплыве регистраций (сотни за короткое окно) это выглядит как «код не пришёл» массово.
+
+**Также:** без custom SMTP Dashboard **не даёт править** Email Templates («Set up custom SMTP to edit templates»). Дефолтный Confirm sign up — только ссылка; для UI `/registration/code` нужен `{{ .Token }}` в **Magic link or OTP** и **Confirm sign up** — см. [`auth-screen/README.md`](../src/components/auth-screen/README.md).
 
 **Проверить перед любым анонсом/ростом:**
 
