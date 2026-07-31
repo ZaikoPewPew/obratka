@@ -109,6 +109,8 @@ UI-часть: [`src/components/home-screen/README.md`](../src/components/home-s
 | *(MCP)* | `grade_league_null_as_league_1` | null/unknown grade → лига 1 (как junior) |
 | *(MCP)* | `wrap_auth_uid_rls_initplan` | `auth.uid()` → `(select auth.uid())` в 6 RLS-политиках (`profiles_select_own`, `profiles_update_own`, `portfolios_select_feed`, `reviews_insert_own`, `review_claims_select_visible`, `reviews_select_reviewer_or_owner`, `review_complaints_select_own`) — снят `auth_rls_initplan` WARN, доступ не менялся |
 | *(MCP)* | `portfolio_reviewer_slots_purge_expired` | `purge_expired_review_claims` в начале `portfolio_reviewer_slots` (expired anonymous не светятся до следующего claim) |
+| *(MCP)* | `profiles_workplace_and_settings_constraints` | колонка `workplace` + CHECK на длину `display_name` / `workplace`, whitelist `role`, формат `telegram_username` (нужна для `/settings`; без неё `select` профиля → 400) |
+| *(MCP)* | `profiles_identity_guard_and_column_grants` | `protect_profiles_grade` теперь режет только `grade` (role редактируется из `/settings`); новый `protect_profiles_identity` (`email` / `telegram_id` / `auth_provider` / `created_at` + запрет сброса `onboarding_done`); table-level UPDATE → column-level grant |
 
 Отражены в `sql/*.sql`, чтобы файлы оставались источником правды при чистом развёртывании.
 

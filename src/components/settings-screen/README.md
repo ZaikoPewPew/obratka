@@ -16,7 +16,7 @@
 
 Сохранение — `updateMySettings` → allowlist patch через `updateMyProfile`. Системные поля (`email`, `grade`, `balance`, …) клиент не пишет. После save `main.js` зовёт `refreshSessionFromProfile`, чтобы home / account-menu подхватили имя и роль.
 
-**SQL:** перед деплоем фронта нужно применить блок `workplace` / identity guards / column grants из [`supabase/sql/profiles.sql`](../../../supabase/sql/profiles.sql) (см. [`supabase/sql/README.md`](../../../supabase/sql/README.md)). Без колонки `workplace` загрузка профиля на `/settings` упадёт.
+**SQL:** блок `workplace` / identity guards / column grants из [`supabase/sql/profiles.sql`](../../../supabase/sql/profiles.sql) уже применён на prod (см. [`supabase/SECURITY.md`](../../../supabase/SECURITY.md) § Миграции). Без колонки `workplace` любой `select` профиля отдаёт 400 — не деплоить фронт на базу без неё.
 
 Компонент сообщает о возврате через `onBack`; клик по логотипу → `onGoFeed` (вкладка «На ревью»). History и `go()` остаются в `main.js`. Deep link `/settings` — после онбординга (`flow.js`).
 
