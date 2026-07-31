@@ -107,6 +107,23 @@ export function getMotionControlErrorBuzz() {
 }
 
 /**
+ * Toast Notification: длительность slide + авто-hide.
+ * @returns {{ durationMs: number; holdMs: number; easing: string }}
+ */
+export function getMotionNotification() {
+  return {
+    durationMs: parseCssTimeMs(
+      readCssVar("--motion-notification-duration"),
+      600,
+    ),
+    holdMs: parseCssTimeMs(readCssVar("--motion-notification-hold"), 3600),
+    easing:
+      readCssVar("--motion-notification-ease") ||
+      "cubic-bezier(0.16, 1, 0.3, 1)",
+  };
+}
+
+/**
  * Cooldown кнопки «Отправить ещё раз» на экране email OTP.
  * @returns {number}
  */

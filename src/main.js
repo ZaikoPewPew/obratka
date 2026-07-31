@@ -2004,12 +2004,7 @@ async function applyRoute(id, opts = {}) {
   const showPendingLimitIfNeeded = () => {
     if (!pendingLimitBlocked) return;
     const t = getStrings();
-    homeScreen.showNotice({
-      title: t.homePendingLimitTitle ?? "",
-      body: t.homePendingLimit ?? "",
-      closeLabel: t.homePendingLimitClose,
-      closeAria: t.homePendingLimitCloseAria,
-    });
+    homeScreen.showNotification(t.homeNotifySlotTaken ?? "");
   };
 
   // Back/Forward между вкладками home: экран уже смонтирован, меняем только вид.

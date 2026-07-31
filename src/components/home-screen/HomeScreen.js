@@ -62,6 +62,7 @@ import { createAccountMenu } from "../account-menu/AccountMenu.js";
 import { createTabsPanel } from "../tabs-panel/TabsPanel.js";
 import { createLegendaryOnlinePanel } from "../legendary-online-panel/LegendaryOnlinePanel.js";
 import { createFeedback } from "../feedback/Feedback.js";
+import { createNotification } from "../notification/Notification.js";
 import { createExplainerMediaRay } from "./explainerMediaRay.js";
 import boneIconUrl from "../../assets/home/bone.svg";
 import currencyDuckUrl from "../../assets/home/modal/currency-duck.png";
@@ -629,6 +630,7 @@ function isCompletedOwnItem(item) {
  *   getView: () => { tab: HomeTabId; filter: MineFilterId };
  *   refresh: () => Promise<void>;
  *   showNotice: (opts: { title: string; body: string; closeLabel?: string; closeAria?: string }) => void;
+ *   showNotification: (message: string) => void;
  * }}
  */
 export function createHomeScreen({
@@ -1146,6 +1148,7 @@ export function createHomeScreen({
   tabbarDock.append(tabbar, addBtn);
 
   const feedback = createFeedback();
+  const notification = createNotification();
 
   root.append(
     title,
@@ -1154,6 +1157,7 @@ export function createHomeScreen({
     tabbarDock,
     legendaryOnlinePanel.root,
     feedback.root,
+    notification.root,
     noticeModal.root,
     reputationModal.root,
     balanceModal.root,
@@ -1325,6 +1329,7 @@ export function createHomeScreen({
 
     legendaryOnlinePanel.syncCopy();
     feedback.syncCopy();
+    notification.setCloseAriaLabel(t.notificationCloseAria ?? "");
     syncProfileAvatar();
     scheduleTabThumbSync();
   }
@@ -1385,17 +1390,28 @@ export function createHomeScreen({
    * Нет mine-кэша — не ждём сеть: gate слота в applyRoute.
    */
   function tryAddPortfolio() {
+    const t = getStrings();
     const pending = localActiveMinePendingCount();
     if (pending != null && pending >= MAX_MINE_PENDING) {
       flashSubmitError();
+      notification.show(t.homeNotifySlotTaken ?? "");
       return;
     }
 
     if (!canSubmitPortfolio()) {
       buzzSubmitLocked();
+      notification.show(t.homeNotifyNoDucks ?? "");
       return;
     }
     void onAddPortfolio?.();
+  }
+
+  /**
+   * Toast под аватаром (нет уток / слот занят).
+   * @param {string} message
+   */
+  function showNotification(message) {
+    notification.show(message);
   }
 
   /**
@@ -2860,6 +2876,7 @@ export function createHomeScreen({
     closeNoticeModal();
     closeReviewIntroModal();
     closeInviteModal();
+    void notification.hide();
     void closeAccountMenu();
     void rulesPanel.close();
     root.setAttribute("aria-busy", "false");
@@ -3013,5 +3030,6 @@ export function createHomeScreen({
     getView: () => ({ tab: activeTab, filter: mineFilter }),
     refresh,
     showNotice,
+    showNotification,
   };
 }

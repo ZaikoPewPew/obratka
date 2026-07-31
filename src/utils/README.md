@@ -54,6 +54,7 @@ Home idle / haptic: уточка баланса (`motion-balance-duck-float`), �
 | `getMotionFieldError` | `--motion-field-error-*` (текст ошибки) |
 | `getMotionFieldErrorVisual` | `--motion-field-error-visual-*` (mesh + evil) |
 | `getMotionControlErrorBuzz` | `--motion-control-error-buzz-*` (отказ CTA) |
+| `getMotionNotification` | `--motion-notification-*` (toast slide + hold) |
 | `getAuthCodeResendCooldownMs` | `--auth-code-resend-cooldown` |
 | `getMotionAdvanceDelayMs` / `getMotionFocusDelayMs` | квиз |
 | `getReportLaunchMotion` | уход PDF/preview-листа |

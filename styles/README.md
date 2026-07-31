@@ -10,6 +10,7 @@
 - `home-screen.css` — главная `/home` (topbar, лента, вкладка рейтинга `.home-screen__rating-list` / плашка `.home-screen__rating-reputation`, tabbar-dock: glass tabs + submit + tab-dot, `--on-dark`).
 - `legendary-online-panel.css` — fixed-чип «Топы в сети» слева снизу на home.
 - `feedback.css` — fixed FAB feedback (Telegram) на home.
+- `notification.css` — toast Notification (top-right под аватаром home).
 - `tabs-panel.css` — сегмент Активные / Завершенные на «Мои» (`createTabsPanel`, `--tabs-panel-*`).
 - `success-screen.css` — `/done` (пресеты успеха).
 - `ban-screen.css` — `/banned` (блок аккаунта, красный mesh).
@@ -19,7 +20,7 @@
 
 ## Что подключено из `index.html`
 
-`tokens.css` → `base.css` → `entrance.css` → `app-modal.css` → `side-panel.css` → `iframe-shell.css` → `success-screen.css` → `report-screen.css` → `ban-screen.css` → `home-screen.css` → `legendary-online-panel.css` → `feedback.css` → `tabs-panel.css` → `account-menu.css` → `settings-screen.css`.
+`tokens.css` → `base.css` → `entrance.css` → `app-modal.css` → `side-panel.css` → `iframe-shell.css` → `success-screen.css` → `report-screen.css` → `ban-screen.css` → `home-screen.css` → `legendary-online-panel.css` → `feedback.css` → `notification.css` → `tabs-panel.css` → `account-menu.css` → `settings-screen.css`.
 
 Архив waitlist-CSS удалён (`desktop` / `mobile` / `apply` / `access-modal` / `notification` / `privacy-policy-panel`). Историческая спека: [`mobile.md`](../mobile.md).
 

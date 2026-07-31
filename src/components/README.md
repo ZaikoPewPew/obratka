@@ -10,6 +10,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | [`brand-screen-shell/`](brand-screen-shell/README.md) | Split-каркас (form-pane + visual); все brand-gate экраны |
 | [`app-modal/`](app-modal/README.md) | Универсальная модалка (слот контента + primary/secondary) |
 | [`side-panel/`](side-panel/README.md) | Боковая панель справа (слот контента; home → «Правила») |
+| [`notification/`](notification/README.md) | Toast top-right (нет уток / слот занят на home) |
 | [`tabs-panel/`](tabs-panel/README.md) | Сегмент Активные / Завершенные на «Мои» (`createTabsPanel`) |
 | Field errors | [`../utils/FIELD_ERROR.md`](../utils/FIELD_ERROR.md) — обводка + текст ошибки |
 

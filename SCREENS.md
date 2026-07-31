@@ -84,7 +84,7 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 
 Handoff соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
-`home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки feed/mine/rating (топ-50 по репутации, `listRatingTop`); SWR `homeListCache`; fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB feedback (`feedback`, Telegram); intro до claim (`homeReviewIntro*`); `reviewedByMe` после submit → фильтр из ленты; mine report gate (`homeMineNotReady*`); фильтр Активные/Завершенные (`tabs-panel`); free-slot «Мои на ревью» до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / `homePendingLimit*`); нет монет → buzz submit + чип баланса; точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`); entrance cascade на `--open` (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
+`home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки feed/mine/rating (топ-50 по репутации, `listRatingTop`); SWR `homeListCache`; fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB feedback (`feedback`, Telegram); toast `notification` (нет уток / слот занят); intro до claim (`homeReviewIntro*`); `reviewedByMe` после submit → фильтр из ленты; mine report gate (`homeMineNotReady*`); фильтр Активные/Завершенные (`tabs-panel`); free-slot «Мои на ревью» до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / toast `homeNotifySlotTaken`); нет монет → toast `homeNotifyNoDucks` + buzz submit + чип баланса; точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`); entrance cascade на `--open` (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
 `account-menu` — поповер под аватаром; identity read-only; settings / invite (`homeInviteMessage` на copy/share) / contacts / rules / sign out.
 `side-panel` — боковая панель справа (home → «Правила», Figma `517:4740`); слот контента; без `history` / `go()`.  
 `settings-screen` — side-route `/settings` (заглушка).
@@ -119,6 +119,7 @@ src/components/
   home-screen/
   legendary-online-panel/ ← fixed-чип «Топы в сети» (слева снизу)
   feedback/            ← fixed FAB feedback (Telegram)
+  notification/        ← toast top-right (нет уток / слот занят)
   account-menu/          ← поповер профиля под аватаром
   settings-screen/       ← /settings (пока заглушка)
   url-screen/
@@ -167,6 +168,7 @@ styles/
   home-screen.css
   legendary-online-panel.css
   feedback.css
+  notification.css
   tabs-panel.css
   account-menu.css
   settings-screen.css
@@ -263,6 +265,7 @@ iframe — пауза при `visibility hidden`; external — wall-clock + де
 - [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — feed/mine/rating, URL-query, SWR, intro до claim, mine gate, feedSeen/3/3, «Топы в сети», contact FAB, tabbar-dock, entrance cascade / glass / `--on-dark`
 - [`src/components/legendary-online-panel/README.md`](src/components/legendary-online-panel/README.md) — fixed-чип «Топы в сети»
 - [`src/components/feedback/README.md`](src/components/feedback/README.md) — fixed FAB feedback (Telegram)
+- [`src/components/notification/README.md`](src/components/notification/README.md) — toast (нет уток / слот занят)
 - [`src/api/rating.js`](src/api/rating.js) — `listRatingTop` (топ-50 по репутации)
 - [`src/components/url-screen/README.md`](src/components/url-screen/README.md) — back-chip + done
 - [`src/config/review.js`](src/config/review.js) — `REVIEW_SESSION_SECONDS`

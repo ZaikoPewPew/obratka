@@ -126,7 +126,7 @@ await modal.close();
 |----|---------------------|
 | Новый кейс с title + слот + 1–2 CTA | Inline notice без оверлея |
 | Общий каркас под разные тела | Ban / brand split-экраны |
-| Home: review intro (`homeReviewIntro*`, видео `primer.mp4`), mine not-ready (`homeMineNotReady*`, `currency-empty-duck.png` + Lottie), invite explainer (`homeInvite*`, Figma `492:4030`; copy/share = `homeInviteMessage`), pending-limit (`homePendingLimit*`), reputation explainer (`homeReputation*`), balance explainer (`homeBalance*`), p4p online explainer (`homeLegendaryOnline*`), contacts; review: abort confirm (`reviewAbort*`, `currency-duck-leave.png` + Lottie, danger primary); report: complaint (`reportComplaint*`, теги в слоте) | Inline notice без оверлея / ban / brand split; нет монет на submit → error-buzz без модалки |
+| Home: review intro (`homeReviewIntro*`, видео `primer.mp4`), mine not-ready (`homeMineNotReady*`, `currency-empty-duck.png` + Lottie), invite explainer (`homeInvite*`, Figma `492:4030`; copy/share = `homeInviteMessage`), reputation explainer (`homeReputation*`), balance explainer (`homeBalance*`), p4p online explainer (`homeLegendaryOnline*`), contacts; review: abort confirm (`reviewAbort*`, `currency-duck-leave.png` + Lottie, danger primary); report: complaint (`reportComplaint*`, теги в слоте) | Inline notice без оверлея / ban / brand split; нет уток / слот занят на submit → toast `notification` + error-buzz (не модалка) |
 
 Слот intro на home: `.home-screen__review-intro-media` + `--home-screen-review-intro-media-*`.
 
