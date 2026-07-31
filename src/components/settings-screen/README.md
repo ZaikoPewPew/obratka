@@ -1,6 +1,9 @@
 # `settings-screen`
 
-Отдельный экран `/settings`, открываемый из меню профиля (`account-menu`).
+Профиль в **side-panel** поверх home (deep link `/settings`).
+
+Открывается из меню профиля (`account-menu`) или deep link.  
+Не полный экран флоу: использует [`createSidePanel`](../side-panel/README.md) — sticky header (title + close) и sticky footer (Save + status), скролл только у формы.
 
 ## Поля
 
@@ -14,10 +17,9 @@
 | Где работаешь | `profiles.workplace` | edit, optional |
 | Дата создания | `profiles.created_at` | read-only |
 
-Сохранение — `updateMySettings` → allowlist patch через `updateMyProfile`. Системные поля (`email`, `grade`, `balance`, …) клиент не пишет. После save `main.js` зовёт `refreshSessionFromProfile`, чтобы home / account-menu подхватили имя и роль.
+Сохранение — `updateMySettings` → allowlist patch. После save `main.js` зовёт `refreshSessionFromProfile`.  
+Закрытие (крестик / backdrop / Escape) → `onClose` → `go("home")` с `lastHomeView`. History пишет только `main.js`.
 
-**SQL:** блок `workplace` / identity guards / column grants из [`supabase/sql/profiles.sql`](../../../supabase/sql/profiles.sql) уже применён на prod (см. [`supabase/SECURITY.md`](../../../supabase/SECURITY.md) § Миграции). Без колонки `workplace` любой `select` профиля отдаёт 400 — не деплоить фронт на базу без неё.
+**SQL:** блок `workplace` / identity guards / column grants уже на prod (см. [`supabase/SECURITY.md`](../../../supabase/SECURITY.md)).
 
-Компонент сообщает о возврате через `onBack`; клик по логотипу → `onGoFeed` (вкладка «На ревью»). History и `go()` остаются в `main.js`. Deep link `/settings` — после онбординга (`flow.js`).
-
-Стили: `styles/settings-screen.css`. Токены: `--settings-screen-*`. i18n: `settings*`.
+Стили формы: `styles/settings-screen.css` + `--settings-screen-*`. Каркас панели — `styles/side-panel.css`. i18n: `settings*`.

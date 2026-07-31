@@ -20,7 +20,7 @@
 | `modalCloseAria` | общая модалка (`app-modal`) |
 | `url*` / `urlModal*` / `urlScreen*` / `urlScreenBack*` | `/portfolio` (в т.ч. чип «На главную») |
 | `success*` | `/done` |
-| `settings*` | `/settings` (профиль) |
+| `settings*` | `/settings` (side-panel профиля) |
 | `ban*` | `/banned` |
 | `reportScreen*` / `reportSheet*` / `reportComplaint*` / `complaintTag*` | `/report` (листы → «Посмотреть» в side-panel → жалоба: ровно 1 тег, окно 6ч от done — `reportComplaintWindowClosed`; вне окна кнопку жалобы скрывать; теги v1: `low_effort` · `spam` · `harassment` · `offensive` · `ai_slop`) |
 | `review*` / `reviewRec*` / `reviewAbort*` / `reviewAdviceRec*` / `reviewTier*` / `reviewPain*` / `reviewContextShort`·`Value*`·`Hint*` / `reviewVisualShort`·`Value*`·`Hint*` (1–5) / `report*` / `reportDictationTitle` | `/quiz` (шкалы + условный pain + tier + микрофон в совете), PDF; rec + abort confirm на `/review` |

@@ -1,6 +1,4 @@
 import { getLocale, getStrings } from "../../i18n.js";
-import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
-import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
 import { fetchMyProfile, updateMySettings } from "../../api/profiles.js";
 import {
@@ -12,6 +10,7 @@ import {
 import { formatPortfolioGrade } from "../../api/portfolios.js";
 import { DEFAULT_ONBOARDING_ROLE } from "../../api/onboarding.js";
 import onboardingContent from "../../../content/onboarding.json";
+import { createSidePanel } from "../side-panel/SidePanel.js";
 
 /**
  * @typedef {{
@@ -67,53 +66,32 @@ function asText(value) {
 }
 
 /**
- * Профиль в `/settings`: имя, Telegram, профессия, место работы + read-only email/grade/дата.
+ * Профиль в side-panel (`/settings` поверх home): sticky header/footer.
  *
  * @param {{
- *   onBack?: () => void | Promise<void>;
- *   onGoFeed?: () => void | Promise<void>;
+ *   onClose?: () => void | Promise<void>;
  *   onSaved?: () => void | Promise<void>;
  * }} [opts]
  */
 export function createSettingsScreen(opts = {}) {
-  let closing = false;
   let loading = false;
   let saving = false;
   let loadEpoch = 0;
   /** @type {SettingsFormValues | null} */
   let baseline = null;
+  let closingFromRoute = false;
 
-  const root = document.createElement("section");
-  root.className = "settings-screen";
-  root.setAttribute("aria-labelledby", "settings-screen-title");
-  root.hidden = true;
+  const FORM_ID = "settings-profile-form";
 
-  const topbar = document.createElement("header");
-  topbar.className = "settings-screen__topbar";
-
-  const mark = document.createElement("button");
-  mark.type = "button";
-  mark.className = "settings-screen__mark";
-  mark.innerHTML = brandMarkSvg("settings-screen__mark-img");
-
-  const backBtn = document.createElement("button");
-  backBtn.type = "button";
-  backBtn.className = "settings-screen__back";
-
-  topbar.append(mark, backBtn);
-
-  const body = document.createElement("div");
-  body.className = "settings-screen__body";
-
-  const card = document.createElement("div");
-  card.className = "settings-screen__card";
-
-  const title = document.createElement("h1");
-  title.className = "settings-screen__title";
-  title.id = "settings-screen-title";
-
-  const description = document.createElement("p");
-  description.className = "settings-screen__description";
+  const panel = createSidePanel({
+    closeOnBackdrop: true,
+    closeOnEscape: true,
+    onClose: () => {
+      loadEpoch += 1;
+      if (closingFromRoute) return;
+      void opts.onClose?.();
+    },
+  });
 
   const loadingBox = document.createElement("div");
   loadingBox.className = "settings-screen__loading";
@@ -130,6 +108,7 @@ export function createSettingsScreen(opts = {}) {
 
   const form = document.createElement("form");
   form.className = "settings-screen__form";
+  form.id = FORM_ID;
   form.noValidate = true;
   form.hidden = true;
 
@@ -233,19 +212,6 @@ export function createSettingsScreen(opts = {}) {
     roleSelect.append(el);
   }
 
-  const actions = document.createElement("div");
-  actions.className = "settings-screen__actions";
-
-  const saveBtn = document.createElement("button");
-  saveBtn.type = "submit";
-  saveBtn.className = "settings-screen__save";
-
-  const status = document.createElement("p");
-  status.className = "settings-screen__status";
-  status.setAttribute("aria-live", "polite");
-
-  actions.append(saveBtn, status);
-
   form.append(
     displayNameField.field,
     emailField.field,
@@ -254,12 +220,19 @@ export function createSettingsScreen(opts = {}) {
     roleField.field,
     workplaceField.field,
     createdAtField.field,
-    actions,
   );
 
-  card.append(title, description, loadingBox, loadError, form);
-  body.append(card);
-  root.append(topbar, body);
+  const saveBtn = document.createElement("button");
+  saveBtn.type = "submit";
+  saveBtn.className = "settings-screen__save";
+  saveBtn.setAttribute("form", FORM_ID);
+
+  const status = document.createElement("p");
+  status.className = "settings-screen__status";
+  status.setAttribute("aria-live", "polite");
+
+  panel.content.replaceChildren(loadingBox, loadError, form);
+  panel.footer.replaceChildren(saveBtn, status);
 
   /**
    * @returns {SettingsFormValues}
@@ -316,7 +289,10 @@ export function createSettingsScreen(opts = {}) {
    */
   function setStatus(message, kind = "idle") {
     status.textContent = message;
-    status.classList.toggle("settings-screen__status--success", kind === "success");
+    status.classList.toggle(
+      "settings-screen__status--success",
+      kind === "success",
+    );
     status.classList.toggle("settings-screen__status--error", kind === "error");
   }
 
@@ -393,11 +369,11 @@ export function createSettingsScreen(opts = {}) {
 
   function syncCopy() {
     const t = getStrings();
-    title.textContent = t.settingsTitle ?? "";
-    description.textContent = fixHangingPrepositions(t.settingsDescription ?? "");
-    backBtn.textContent = t.settingsBack ?? "";
-    backBtn.setAttribute("aria-label", t.settingsBackAria ?? t.settingsBack ?? "");
-    mark.setAttribute("aria-label", t.homeMarkAria ?? t.homeTabFeed ?? "");
+    panel.setTitle(t.settingsTitle ?? "");
+    panel.setDescription(
+      fixHangingPrepositions(t.settingsDescription ?? ""),
+    );
+    panel.setCloseAriaLabel(t.settingsBackAria ?? t.modalCloseAria ?? "");
 
     displayNameField.label.textContent = t.settingsDisplayNameLabel ?? "";
     /** @type {HTMLInputElement} */ (displayNameField.control).placeholder =
@@ -512,46 +488,21 @@ export function createSettingsScreen(opts = {}) {
   }
 
   function open() {
-    closing = false;
+    closingFromRoute = false;
     syncCopy();
-    root.hidden = false;
-    root.classList.remove("settings-screen--open");
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        root.classList.add("settings-screen--open");
-      });
-    });
+    panel.open();
     void loadProfile();
   }
 
+  /**
+   * @returns {Promise<void>}
+   */
   function close() {
     loadEpoch += 1;
-    if (root.hidden || closing) return Promise.resolve();
-    if (!root.classList.contains("settings-screen--open")) {
-      root.hidden = true;
-      return Promise.resolve();
-    }
-
-    closing = true;
-    root.classList.remove("settings-screen--open");
-    return new Promise((resolve) => {
-      let finished = false;
-      const finish = () => {
-        if (finished) return;
-        finished = true;
-        root.removeEventListener("transitionend", onEnd);
-        window.clearTimeout(fallbackId);
-        root.hidden = true;
-        closing = false;
-        resolve();
-      };
-      const onEnd = (event) => {
-        if (event.target === root && event.propertyName === "opacity") {
-          finish();
-        }
-      };
-      root.addEventListener("transitionend", onEnd);
-      const fallbackId = window.setTimeout(finish, getScreenCloseFallbackMs());
+    if (!panel.isOpen()) return Promise.resolve();
+    closingFromRoute = true;
+    return panel.close().finally(() => {
+      closingFromRoute = false;
     });
   }
 
@@ -601,7 +552,9 @@ export function createSettingsScreen(opts = {}) {
         await opts.onSaved?.();
       } catch (err) {
         const code =
-          err instanceof Error && err.message ? err.message : "profile_update_failed";
+          err instanceof Error && err.message
+            ? err.message
+            : "profile_update_failed";
         if (
           code === "display_name_required" ||
           code === "display_name_too_long" ||
@@ -621,13 +574,5 @@ export function createSettingsScreen(opts = {}) {
     })();
   });
 
-  backBtn.addEventListener("click", () => {
-    void opts.onBack?.();
-  });
-
-  mark.addEventListener("click", () => {
-    void (opts.onGoFeed ?? opts.onBack)?.();
-  });
-
-  return { root, open, close };
+  return { root: panel.root, open, close, isOpen: panel.isOpen };
 }

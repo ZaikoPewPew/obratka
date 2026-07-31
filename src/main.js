@@ -1642,12 +1642,9 @@ const urlScreen = createUrlScreen({
 });
 
 const settingsScreen = createSettingsScreen({
-  onBack: () => {
+  onClose: () => {
+    if (activeRouteId !== "settings") return;
     go("home", { search: buildHomeSearch(lastHomeView) });
-  },
-  onGoFeed: () => {
-    lastHomeView = { tab: "feed", filter: "active" };
-    go("home", { search: buildHomeSearch({ tab: "feed" }) });
   },
   onSaved: async () => {
     await refreshSessionFromProfile();
@@ -2063,6 +2060,9 @@ async function applyRoute(id, opts = {}) {
       return;
     }
     if (target === "settings") {
+      // Side-panel поверх home (как rules), deep link /settings сохраняем.
+      // Не парсить search с /settings — иначе lastHomeView сбросится в feed.
+      void homeScreen.open(lastHomeView);
       settingsScreen.open();
       return;
     }
@@ -2098,7 +2098,7 @@ async function applyRoute(id, opts = {}) {
     if (id !== "auth") closers.push(authScreen.close(closeOpts));
     if (id !== "authCode") closers.push(authCodeScreen.close(closeOpts));
     if (id !== "onboarding") closers.push(onboardingScreen.close(closeOpts));
-    if (id !== "home") closers.push(homeScreen.close());
+    if (id !== "home" && id !== "settings") closers.push(homeScreen.close());
     if (id !== "settings") closers.push(settingsScreen.close());
     if (id !== "url") closers.push(urlScreen.close(closeOpts));
     if (id !== "success") closers.push(successScreen.close());

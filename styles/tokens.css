@@ -1298,36 +1298,7 @@
   --notification-ease: var(--motion-notification-ease);
   --notification-hold: var(--motion-notification-hold);
 
-  /* Отдельный экран настроек (/settings — профиль) */
-  --settings-screen-z: var(--home-screen-z);
-  --settings-screen-bg: var(--color-bg);
-  --settings-screen-color: var(--color-text);
-  --settings-screen-motion-duration: var(--motion-screen-duration);
-  --settings-screen-motion-ease: var(--motion-screen-ease);
-  --settings-screen-motion-shift: var(--motion-screen-shift);
-  --settings-screen-topbar-height: var(--home-screen-topbar-height);
-  --settings-screen-topbar-padding: var(--home-screen-topbar-padding);
-  --settings-screen-mark-width: var(--home-screen-mark-width);
-  --settings-screen-mark-height: var(--home-screen-mark-height);
-  --settings-screen-back-height: var(--home-screen-chip-height);
-  --settings-screen-back-padding: var(--space-3) var(--space-4);
-  --settings-screen-back-radius: var(--radius-pill);
-  --settings-screen-back-bg: var(--color-surface-muted);
-  --settings-screen-back-bg-hover: var(--color-surface-muted-hover);
-  --settings-screen-back-bg-active: var(--color-surface-muted-active);
-  --settings-screen-back-size: var(--font-size-base);
-  --settings-screen-back-weight: var(--font-weight-medium);
-  --settings-screen-body-padding: var(--space-4);
-  --settings-screen-body-padding-bottom: var(--space-10);
-  --settings-screen-card-width: var(--home-screen-feed-width);
-  --settings-screen-card-padding: var(--space-8);
-  --settings-screen-card-gap: var(--space-6);
-  --settings-screen-card-radius: var(--radius-xl);
-  --settings-screen-card-bg: var(--color-surface-muted);
-  --settings-screen-title-size: var(--font-size-2xl);
-  --settings-screen-title-weight: var(--font-weight-medium);
-  --settings-screen-description-size: var(--font-size-base);
-  --settings-screen-description-color: var(--color-text-muted);
+  /* Форма профиля в side-panel (/settings поверх home) */
   --settings-screen-form-gap: var(--space-5);
   --settings-screen-field-gap: var(--space-2);
   --settings-screen-label-size: var(--font-size-sm);
@@ -1336,7 +1307,7 @@
   --settings-screen-input-height: var(--space-12);
   --settings-screen-input-padding-x: var(--space-4);
   --settings-screen-input-radius: var(--radius-md);
-  --settings-screen-input-bg: var(--color-surface);
+  --settings-screen-input-bg: var(--color-surface-muted);
   --settings-screen-input-color: var(--color-text);
   --settings-screen-input-size: var(--font-size-base);
   --settings-screen-input-weight: var(--font-weight-regular);
@@ -1344,7 +1315,7 @@
   --settings-screen-input-border-invalid: var(--color-error-border-strong);
   --settings-screen-readonly-bg: color-mix(
     in srgb,
-    var(--color-surface) 72%,
+    var(--color-surface-muted) 72%,
     var(--color-surface-muted-active)
   );
   --settings-screen-readonly-color: var(--color-text);
@@ -1356,7 +1327,6 @@
   --settings-screen-status-color: var(--color-text-muted);
   --settings-screen-status-success-color: var(--color-text);
   --settings-screen-status-error-color: var(--color-error);
-  --settings-screen-actions-gap: var(--space-3);
   --settings-screen-save-height: var(--space-12);
   --settings-screen-save-padding-x: var(--space-6);
   --settings-screen-save-radius: var(--radius-md);

@@ -95,6 +95,10 @@ Account-menu → «Правила» → текст из [`content/rules.json`](.
 
 `/report` → «Посмотреть» на строке листа → полный текст (`buildReportSections`) в `content` + sticky footer: «Скачать PDF» (один лист) + «Пожаловаться». См. [`../report-screen/README.md`](../report-screen/README.md).
 
+### Settings — профиль
+
+`/settings` → `createSettingsScreen` монтирует форму в `content` + sticky Save в `footer` поверх home. См. [`../settings-screen/README.md`](../settings-screen/README.md).
+
 ## Связанные доки
 
 - [`../account-menu/README.md`](../account-menu/README.md)

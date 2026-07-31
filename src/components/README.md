@@ -26,7 +26,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `legendary-online-panel/` | — | fixed-чип «Топы в сети» слева снизу на home |
 | `feedback/` | — | fixed FAB feedback (Telegram) справа снизу на home |
 | `account-menu/` | — | поповер профиля (settings / invite / contacts / rules / sign out) |
-| `settings-screen/` | `/settings` | заглушка настроек |
+| `settings-screen/` | `/settings` | профиль в side-panel поверх home |
 | `url-screen/` | `/portfolio` | back-chip → home; submit + done (`setVariant("done")`; shell) |
 | `review-screen/` | `/quiz` | квиз + PDF-лист |
 | `success-screen/` | `/done` | пресеты успеха (deep link) |
