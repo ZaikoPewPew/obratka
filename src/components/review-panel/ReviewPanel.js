@@ -212,6 +212,8 @@ function createStep(content) {
  *   setDictationRecording: (recording: boolean) => void;
  *   setDictationTranscript: (text: string) => void;
  *   setAdviceText: (text: string) => void;
+ *   setNextCaseBusy: (busy: boolean) => void;
+ *   setNextCaseVisible: (visible: boolean) => void;
  * }}
  */
 export function createReviewPanel(options = {}) {
@@ -645,6 +647,9 @@ export function createReviewPanel(options = {}) {
   nextCaseBtn.className =
     "iframe-shell__btn review-panel__done-btn review-panel__done-btn--next";
   nextCaseBtn.textContent = t.reviewDoneNextCase;
+  /* Скрыта, пока main не подтвердит кандидата через prewarm. */
+  nextCaseBtn.hidden = true;
+  nextCaseBtn.setAttribute("aria-hidden", "true");
 
   actions.append(exitBtn, nextCaseBtn);
   done.append(doneTitle, actions);
@@ -867,8 +872,34 @@ export function createReviewPanel(options = {}) {
    * @param {Record<string, FormDataEntryValue> | null} [answers]
    * @returns {Promise<void>}
    */
+  /**
+   * @param {boolean} busy
+   */
+  function setNextCaseBusy(busy) {
+    const next = Boolean(busy);
+    nextCaseBtn.disabled = next;
+    exitBtn.disabled = next;
+    nextCaseBtn.setAttribute("aria-busy", next ? "true" : "false");
+    nextCaseBtn.classList.toggle("review-panel__done-btn--busy", next);
+    const strings = getStrings();
+    nextCaseBtn.textContent = next
+      ? strings.reviewDoneNextCaseBusy
+      : strings.reviewDoneNextCase;
+  }
+
+  /**
+   * @param {boolean} visible
+   */
+  function setNextCaseVisible(visible) {
+    const show = Boolean(visible);
+    nextCaseBtn.hidden = !show;
+    nextCaseBtn.setAttribute("aria-hidden", show ? "false" : "true");
+    if (!show) setNextCaseBusy(false);
+  }
+
   async function showDone(answers = null) {
     clearAdvanceTimer();
+    setNextCaseVisible(false);
 
     if (!done.hidden && form.hidden) {
       onReportReveal?.(false, { submitted: true });
@@ -1272,6 +1303,8 @@ export function createReviewPanel(options = {}) {
   });
 
   nextCaseBtn.addEventListener("click", () => {
+    if (nextCaseBtn.disabled || nextCaseBtn.hidden) return;
+    setNextCaseBusy(true);
     onNextCase?.();
   });
 
@@ -1291,6 +1324,8 @@ export function createReviewPanel(options = {}) {
     dictationBase = "";
     syncDictationChrome();
     currentStep = 0;
+    setNextCaseBusy(false);
+    setNextCaseVisible(false);
     showForm();
     renderStep();
   }
@@ -1352,5 +1387,7 @@ export function createReviewPanel(options = {}) {
       adviceInput.scrollTop = adviceInput.scrollHeight;
       syncAdviceMeta();
     },
+    setNextCaseBusy,
+    setNextCaseVisible,
   };
 }

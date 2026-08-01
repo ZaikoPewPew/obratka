@@ -481,6 +481,7 @@
   --shell-review-done-title-size: var(--font-size-3xl);
   --shell-review-done-title-weight: var(--font-weight-regular);
   --shell-review-done-actions-gap: var(--space-3);
+  --shell-review-done-btn-busy-opacity: var(--auth-screen-submit-busy-opacity);
 
   /* Success screen (тайтл + exit, без листа) */
   --success-screen-z: var(--z-modal);

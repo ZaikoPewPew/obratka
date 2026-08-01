@@ -204,6 +204,10 @@ let portfolioName = getStrings().brandName;
 
 /** Надиктовка с /review → answers.dictation */
 let dictationText = "";
+/** Уже отполированный текст заметок (не полировать повторно на submit). */
+let dictationPolishedText = "";
+/** Уже отполированный текст совета. */
+let advicePolishedText = "";
 let dictationRecording = false;
 /**
  * Куда уходит транскрипт: заметки на `/review` или поле «Главный совет» в квизе.
@@ -308,37 +312,56 @@ const reviewPanel = createReviewPanel({
     void toggleDictation("advice");
   },
   onComplete: (answers) => {
+    const pid = portfolioId;
     reviewSubmitPromise = (async () => {
       try {
         await stopDictation({ polish: false });
         const locale = getLocale();
-        let dictation = dictationText.trim().slice(0, DICTATION_MAX_LEN);
-        if (dictation) {
-          dictation = await polishDictationText(dictation, {
-            maxLen: DICTATION_MAX_LEN,
-            locale,
-          });
-          dictationText = dictation;
+        const dictation = dictationText.trim().slice(0, DICTATION_MAX_LEN);
+        const adviceRaw =
+          answers && typeof answers.advice === "string"
+            ? answers.advice.trim()
+            : "";
+        const needsDictationPolish =
+          Boolean(dictation) && dictation !== dictationPolishedText;
+        const needsAdvicePolish =
+          Boolean(adviceRaw) && adviceRaw !== advicePolishedText;
+
+        const [nextDictation, nextAdvice] = await Promise.all([
+          needsDictationPolish
+            ? polishDictationText(dictation, {
+                maxLen: DICTATION_MAX_LEN,
+                locale,
+              })
+            : Promise.resolve(dictation),
+          needsAdvicePolish
+            ? polishDictationText(adviceRaw, {
+                maxLen: ADVICE_MAX_LEN,
+                locale,
+              })
+            : Promise.resolve(adviceRaw),
+        ]);
+
+        if (nextDictation) {
+          dictationText = nextDictation;
+          dictationPolishedText = nextDictation;
         }
         let payload = answers;
-        if (answers && typeof answers.advice === "string" && answers.advice.trim()) {
-          const advice = await polishDictationText(answers.advice.trim(), {
-            maxLen: ADVICE_MAX_LEN,
-            locale,
-          });
-          payload = { ...answers, advice };
-          reviewPanel.setAdviceText?.(advice);
+        if (adviceRaw) {
+          payload = { ...answers, advice: nextAdvice };
+          advicePolishedText = nextAdvice;
+          reviewPanel.setAdviceText?.(nextAdvice);
         }
-        if (payload && dictation) {
-          payload = { ...payload, dictation };
+        if (payload && nextDictation) {
+          payload = { ...payload, dictation: nextDictation };
         }
-        if (portfolioId) {
-          await submitPortfolioReview(portfolioId, payload ?? null);
+        if (pid) {
+          await submitPortfolioReview(pid, payload ?? null);
           reviewSubmitted = true;
           claimHeld = false;
           clearPersistedReviewClaim();
           stopClaimHeartbeat();
-          await awardReviewReward();
+          void awardReviewReward();
         }
       } catch (err) {
         if (import.meta.env.DEV) {
@@ -352,6 +375,7 @@ const reviewPanel = createReviewPanel({
   onDoneChange: (done) => {
     if (done) {
       if (activeRouteId !== "done") syncRoute("done");
+      void prewarmNextReviewCase();
       return;
     }
     if (activeRouteId === "done") syncRoute("quiz");
@@ -428,6 +452,8 @@ async function exitAuthenticatedSession() {
   stopClaimHeartbeat();
   embedPlan = null;
   embedPrefetchByUrl.clear();
+  nextCasePreload = null;
+  nextCasePrewarmGen += 1;
   portfolioName = getStrings().brandName;
   pendingSuccessPreset = "generic";
   pendingReportPortfolioId = null;
@@ -614,6 +640,60 @@ async function releaseOrphanedReviewClaim() {
 /** Защита от двойного клика «Следующий кейс». */
 let nextCaseOpening = false;
 
+/** TTL прогрева ленты на done-экране. */
+const NEXT_CASE_PRELOAD_TTL_MS = 60_000;
+
+/**
+ * @type {{
+ *   excludeId: string | null;
+ *   items: import("./api/portfolios.js").PortfolioQueueItem[];
+ *   at: number;
+ * } | null}
+ */
+let nextCasePreload = null;
+/** Инвалидация устаревших prewarm при повторном done. */
+let nextCasePrewarmGen = 0;
+
+/**
+ * Кандидаты на «Следующий кейс» (без текущего portfolioId).
+ * @param {import("./api/portfolios.js").PortfolioQueueItem[]} items
+ * @param {string | null} excludeId
+ * @returns {import("./api/portfolios.js").PortfolioQueueItem[]}
+ */
+function nextCaseCandidates(items, excludeId) {
+  return items.filter((item) => {
+    if (excludeId && item.id === excludeId) return false;
+    return isPortfolioOpenForReview(item);
+  });
+}
+
+/**
+ * На done: свежая лента + prefetch embed 1–2 кандидатов; показать/скрыть кнопку.
+ * @returns {Promise<void>}
+ */
+async function prewarmNextReviewCase() {
+  const excludeId = portfolioId;
+  const gen = ++nextCasePrewarmGen;
+  reviewPanel.setNextCaseVisible?.(false);
+  try {
+    const items = await listPortfoliosForReview();
+    if (gen !== nextCasePrewarmGen) return;
+    nextCasePreload = { excludeId, items, at: Date.now() };
+    const candidates = nextCaseCandidates(items, excludeId);
+    reviewPanel.setNextCaseVisible?.(candidates.length > 0);
+    for (const item of candidates.slice(0, 2)) {
+      if (item.url) prefetchPortfolioEmbed(item.url);
+    }
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.warn("[review] prewarmNextReviewCase", err);
+    }
+    if (gen !== nextCasePrewarmGen) return;
+    nextCasePreload = null;
+    reviewPanel.setNextCaseVisible?.(false);
+  }
+}
+
 /**
  * Claim + старт `/review`. Тот же путь, что CTA intro на home (без модалки).
  *
@@ -714,7 +794,7 @@ async function claimAndStartReview(item, opts = {}) {
 }
 
 /**
- * После done: свежая лента → первый доступный кейс → claim → `/review`.
+ * После done: прогретая лента (или свежая) → claim → `/review`.
  * Нет кандидатов / все claim провалились → home.
  * @returns {Promise<void>}
  */
@@ -729,6 +809,38 @@ async function openNextReviewCase() {
     await releaseHeldClaim();
 
     const excludeId = portfolioId;
+
+    /**
+     * @param {import("./api/portfolios.js").PortfolioQueueItem[]} list
+     * @returns {Promise<boolean>}
+     */
+    async function tryClaimFromList(list) {
+      for (const item of list) {
+        if (excludeId && item.id === excludeId) continue;
+        if (!isPortfolioOpenForReview(item)) continue;
+        if (item.url) prefetchPortfolioEmbed(item.url);
+        const started = await claimAndStartReview(item, {
+          showNoSlotsNotice: false,
+        });
+        if (started) {
+          clearHomeListCache(getSession()?.userId);
+          nextCasePreload = null;
+          return true;
+        }
+      }
+      return false;
+    }
+
+    const preload = nextCasePreload;
+    const preloadFresh =
+      Boolean(preload) &&
+      preload.excludeId === excludeId &&
+      Date.now() - preload.at < NEXT_CASE_PRELOAD_TTL_MS;
+
+    if (preloadFresh) {
+      if (await tryClaimFromList(preload.items)) return;
+    }
+
     let items;
     try {
       items = await listPortfoliosForReview();
@@ -736,23 +848,16 @@ async function openNextReviewCase() {
       if (import.meta.env.DEV) {
         console.warn("[review] listPortfoliosForReview", err);
       }
+      reviewPanel.setNextCaseBusy?.(false);
+      reviewPanel.setNextCaseVisible?.(false);
       go("home", { replace: true });
       return;
     }
 
-    for (const item of items) {
-      if (excludeId && item.id === excludeId) continue;
-      if (!isPortfolioOpenForReview(item)) continue;
-      if (item.url) prefetchPortfolioEmbed(item.url);
-      const started = await claimAndStartReview(item, {
-        showNoSlotsNotice: false,
-      });
-      if (started) {
-        clearHomeListCache(getSession()?.userId);
-        return;
-      }
-    }
+    if (await tryClaimFromList(items)) return;
 
+    reviewPanel.setNextCaseBusy?.(false);
+    reviewPanel.setNextCaseVisible?.(false);
     go("home", { replace: true });
   } finally {
     nextCaseOpening = false;
@@ -777,6 +882,8 @@ function clearReviewSessionState() {
   reviewSubmitPromise = null;
   claimHeld = false;
   embedPlan = null;
+  nextCasePreload = null;
+  nextCasePrewarmGen += 1;
   portfolioName = getStrings().brandName;
   // После снятия claimHeld — иначе sync снова покажет Rec.
   resetDictationSession();
@@ -916,6 +1023,7 @@ async function polishStoppedDictation(target) {
       maxLen: ADVICE_MAX_LEN,
       locale,
     });
+    advicePolishedText = polished;
     reviewPanel.setAdviceText?.(polished);
     return;
   }
@@ -925,6 +1033,7 @@ async function polishStoppedDictation(target) {
     maxLen: DICTATION_MAX_LEN,
     locale,
   });
+  dictationPolishedText = dictationText;
 }
 
 /**
@@ -970,6 +1079,8 @@ function resetDictationSession() {
   dictationEngine?.destroy();
   dictationEngine = null;
   dictationText = "";
+  dictationPolishedText = "";
+  advicePolishedText = "";
   dictationRecording = false;
   dictationTarget = "notes";
   setDictationWaveform();

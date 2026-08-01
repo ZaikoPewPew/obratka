@@ -9,7 +9,7 @@
 ## API
 
 `createReviewPanel({ getPortfolioName?, onReportReveal?, onComplete?, onDoneChange?, onExit?, onNextCase?, onDictationToggle? })`  
-→ `{ root, form, open, close, reset, focus, openDone, setDictationSupported, setDictationRecording, setDictationTranscript, setAdviceText }`.
+→ `{ root, form, open, close, reset, focus, openDone, setDictationSupported, setDictationRecording, setDictationTranscript, setAdviceText, setNextCaseBusy, setNextCaseVisible }`.
 
 ## Шаги
 
@@ -54,7 +54,7 @@ Progress считает только **видимые** шаги (6 или 7 в 
 1. Шаги single / multi / scale / advice (контент из локалей `review*`).
 2. Шаг advice → `onReportReveal(true)` (лист справа на `review-screen`, `mode: "preview"`).
 3. Submit → `answersFromFormData` → `onComplete(answers)` (награда; снаружи могут добавить `dictation`) + `showDone` + `onReportReveal(false, { submitted: true })` + `onDoneChange(true)` → URL `/quiz/done`.
-4. CTA → `onExit` → home; `onNextCase` → свежая лента + claim следующего доступного кейса → `/review` (без intro; нет кандидатов → home). Оркестрация в `main.js`.
+4. CTA → `onExit` → home; `onNextCase` → claim следующего (лента + embed прогреваются на done через `prewarmNextReviewCase` в `main.js`). Если кандидатов нет — кнопка «Следующий кейс» скрыта (`setNextCaseVisible`), только «На главную». Пока идёт переход — `setNextCaseBusy`. Оркестрация в `main.js`.
 
 Смена шага: leave/enter пачки `stage` + footer на `--motion-reveal-*` (`getMotionReveal`).  
 Переход в done: form/top уходят, затем enter `review-panel__done`.
@@ -65,7 +65,7 @@ Progress считает только **видимые** шаги (6 или 7 в 
 
 Классы `.review-panel__*` в `iframe-shell.css`; токены `--shell-review-*` / `--shell-review-rec-*` / `--shell-review-slider-*`.  
 Шкалы: [`scale-slider`](../scale-slider/README.md).  
-Ключи: `review*`, `reviewDone*`, `reviewContinue`, `reviewAdviceRec*`, `reviewTier*`, `reviewPain*`, `reviewContextShort` / `Value*` / `Hint*`, `reviewVisualShort` / `Value*` / `Hint*` (1–5).  
+Ключи: `review*`, `reviewDone*` (`reviewDoneNextCaseBusy`), `reviewContinue`, `reviewAdviceRec*`, `reviewTier*`, `reviewPain*`, `reviewContextShort` / `Value*` / `Hint*`, `reviewVisualShort` / `Value*` / `Hint*` (1–5).  
 Мигание индикатора записи: `motion-recording-blink` в `styles/entrance.css`.
 
 См. [`QUIZ.md`](../../../QUIZ.md), [`review-screen/README.md`](../review-screen/README.md), [`lib/dictation/README.md`](../../lib/dictation/README.md), [`SCREENS.md`](../../../SCREENS.md).

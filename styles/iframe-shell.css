@@ -1411,6 +1411,16 @@ body {
   color: var(--shell-review-submit-active-text);
 }
 
+.review-panel__done-btn--busy {
+  opacity: var(--shell-review-done-btn-busy-opacity);
+  pointer-events: none;
+}
+
+.review-panel__done-btn--exit:disabled,
+.review-panel__done-btn--next:disabled {
+  cursor: default;
+}
+
 .review-screen {
   box-sizing: border-box;
   position: fixed;
