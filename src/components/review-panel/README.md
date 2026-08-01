@@ -4,7 +4,7 @@
 
 **Полная спека пула вопросов, схемы `answers`, L1/L2/L3 отчёта:** [`QUIZ.md`](../../../QUIZ.md).
 
-Надиктовка с `/review` **не** в panel: `main.js` мержит `answers.dictation` в `onComplete` перед `submitPortfolioReview`. См. [`lib/dictation/README.md`](../../lib/dictation/README.md).
+Надиктовка с `/review` **не** в panel: `main.js` мержит `answers.dictation` в `onComplete` перед `submitPortfolioReview` (после polish). См. [`lib/dictation/README.md`](../../lib/dictation/README.md), [`dictationPolish.js`](../../api/dictationPolish.js).
 
 ## API
 

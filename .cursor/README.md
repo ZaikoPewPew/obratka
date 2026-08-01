@@ -13,7 +13,7 @@
 | `screens.mdc` | Экран = модуль, `go()`, paths, home (feedSeen / 3/3 / rating / legendary), handoff |
 | `brand-ui.mdc` | Visual variants, field errors, marks — не копипастить mesh |
 | `review-claims.mdc` | Claim / heartbeat / release; награда только после submit |
-| `dictation.mdc` | Надиктовка: `/review` → `answers.dictation` + микрофон в поле совета (Web Speech MVP) |
+| `dictation.mdc` | Надиктовка: Web Speech + post-edit Edge `polish-dictation` (`ZAI_API_KEY`); Whisper = план B |
 | `leagues.mdc` | Тихий матчинг по `profiles.grade` |
 | `referrals.mdc` | Invite-only: validate → redeem, 2 слота, без наград |
 | `ban.mdc` | Escape-proof `/banned`, операторский / автобан |
@@ -66,7 +66,7 @@
 | Оркестрация | `main.js` → `go()` / `applyRoute()` / `syncRoute()` |
 | Screens | `src/components/*-screen/` |
 | Квиз | `review-screen/` + `review-panel/` + [`scale-slider/`](../src/components/scale-slider/README.md) |
-| Надиктовка | `src/lib/dictation/` + `.iframe-shell__rec` + `.review-panel__rec` |
+| Надиктовка | `src/lib/dictation/` + `.iframe-shell__rec` + `.review-panel__rec` + Edge `polish-dictation` |
 | Онбординг-контент | `content/onboarding.json`, `content/onboarding.md` |
 
 Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `legendary-online-panel`, `feedback`, `tabs-panel`, `account-menu`, `settings-screen`, `success-screen`, `ban-screen`, `report-screen`.
@@ -88,12 +88,13 @@ Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-scre
 
 ## Dictation (шпаргалка)
 
-1. На `/review` чип rec → Web Speech → текст в памяти.
+1. На `/review` чип rec → Web Speech → текст в памяти (`dictationText`).
 2. В квизе кнопка микрофона в поле «Главный совет» → текст прямо в `advice`.
-3. Submit мержит `answers.dictation` (опционально) → секция листа.
-4. Аудио не upload; Whisper — план B за тем же `DictationEngine`.
-5. Таймер: iframe — пауза при скрытой вкладке; external — wall-clock + keep-alive STT; конец → `Timer-end.wav` + стоп → quiz.
-6. Код: `src/lib/dictation/`; правило `dictation.mdc`.
+3. После stop / перед submit — post-edit пунктуации через Edge `polish-dictation` (`src/api/dictationPolish.js`); default `glm-4.5-flash` + fallback; секрет `ZAI_API_KEY` только в Function secrets. Не STT. Все модели упали → сырой текст, submit ок.
+4. Submit мержит `answers.dictation` (опционально) → секция листа.
+5. Аудио не upload; Whisper — план B за тем же `DictationEngine`.
+6. Таймер: iframe — пауза при скрытой вкладке; external — wall-clock + keep-alive STT; конец → `Timer-end.wav` + стоп → quiz.
+7. Код: `src/lib/dictation/`; Edge: `supabase/functions/polish-dictation/`; правило `dictation.mdc`.
 
 ## Portfolio embed (шпаргалка)
 

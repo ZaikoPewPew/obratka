@@ -29,13 +29,14 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 | `functions/telegram-auth/` | Telegram Login Widget → сессия Supabase Auth |
 | `functions/portfolio-preview/` | Прокси/кэш перед thum.io для превью карточек (429-hardening) |
 | `functions/portfolio-embed-probe/` | XFO/CSP frame-ancestors (+ Readymag HTML) → iframe vs external |
-| `functions/polish-dictation/` | Post-edit надиктовки (Z.AI Flash); секрет `ZAI_API_KEY` |
+| `functions/polish-dictation/` | Post-edit надиктовки (пунктуация через Z.AI Flash, default `glm-4.5-flash` + fallback); soft-fail → сырой текст; секрет `ZAI_API_KEY`; JWT обязателен — [`functions/polish-dictation/README.md`](functions/polish-dictation/README.md) |
 
 Подробнее по SQL: [`sql/README.md`](sql/README.md).  
 **Бан юзеров:** [`BAN.md`](BAN.md) ← начинать отсюда.  
 **Доступы / адвайзоры:** [`SECURITY.md`](SECURITY.md).  
 Telegram Edge: [`functions/telegram-auth/README.md`](functions/telegram-auth/README.md).  
-Превью Edge: [`functions/portfolio-preview/README.md`](functions/portfolio-preview/README.md).
+Превью Edge: [`functions/portfolio-preview/README.md`](functions/portfolio-preview/README.md).  
+Polish Edge: [`functions/polish-dictation/README.md`](functions/polish-dictation/README.md).
 
 ## Auth-провайдеры
 
@@ -44,6 +45,14 @@ Telegram Edge: [`functions/telegram-auth/README.md`](functions/telegram-auth/REA
 | **Email OTP** | Dashboard → Authentication → Providers → Email; в шаблонах **Magic Link** и **Confirm signup** обязателен `{{ .Token }}` (при Confirm email включённом новый signup шлёт Confirm signup — дефолт только ссылка, UI `/registration/code` ломается). При наплыве — custom SMTP, см. [`SECURITY.md`](SECURITY.md) § «Наплыв регистраций». Чеклист: [`auth-screen/README.md`](../src/components/auth-screen/README.md) § Email |
 | **Telegram** | `TELEGRAM_BOT_ID` в клиенте + `TELEGRAM_BOT_TOKEN` в Edge secrets |
 | **Google** | Dashboard → Providers → Google (Client ID/Secret из Google Cloud) |
+
+### Edge secrets (сводка)
+
+| Secret | Function |
+|--------|----------|
+| `TELEGRAM_BOT_TOKEN` | `telegram-auth` |
+| `ZAI_API_KEY` (+ опц. `ZAI_MODEL`, `ZAI_MODEL_FALLBACK`) | `polish-dictation` (default `glm-4.5-flash`) |
+| `THUMIO_AUTH_KEY` (опц.) | `portfolio-preview` |
 
 Redirect URLs (Site URL / Additional Redirect URLs):
 

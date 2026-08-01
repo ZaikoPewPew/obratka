@@ -55,6 +55,6 @@ Env / Dashboard: `.env.example`, `src/components/auth-screen/README.md`, `supaba
 | `reviewComplaints.js` | жалобы на листы: `listPortfolioReviewSheets` (с `answers` / `canComplain` от `completed_at`) / `submitReviewComplaint` / `getReputation` / `formatReputation`; теги v1 без весов на клиенте; окно 6ч от done; RPC `submit_review_complaint` + `settle_review_reputation_rewards` |
 | `referrals.js` | `validateReferral` / `redeemReferral` / `fetchMyReferral`; реэкспорт `normalizeReferralCode` / `buildReferralShareUrl` / `REFERRAL_MAX_USES` из `utils/referralCode.js` (RPC + seed `YTHWKPDWAK`; **без наград**) |
 | `portfolioEmbedProbe.js` | Edge `portfolio-embed-probe`: XFO/CSP → canFrame; `resolvePortfolioEmbedPlan` (sync + probe) для prefetch до `/review` |
-| `dictationPolish.js` | Edge `polish-dictation`: post-edit Web Speech текста (пунктуация); fallback на сырой текст |
+| `dictationPolish.js` | Edge `polish-dictation`: post-edit Web Speech текста (пунктуация / пробелы / регистр; **не** STT; default `glm-4.5-flash`). `polishDictationText(text, { maxLen, locale })` → при ошибке/таймауте/всех упавших моделях **сырой** текст (submit не блокируется). Секрет `ZAI_API_KEY` только в Function. SoT: [`supabase/functions/polish-dictation/README.md`](../../supabase/functions/polish-dictation/README.md) |
 
 См. [`SCREENS.md`](../../SCREENS.md), [`supabase/sql/referrals.sql`](../../supabase/sql/referrals.sql).

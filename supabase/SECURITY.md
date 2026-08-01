@@ -166,6 +166,21 @@ Apply SQL: [`sql/README.md`](sql/README.md) § «Как применять». П
 
 Подробности: [`functions/portfolio-preview/README.md`](functions/portfolio-preview/README.md).
 
+## Edge: post-edit надиктовки (`polish-dictation`)
+
+Сырой Web Speech текст после stop / перед submit проходит пунктуацию через Z.AI Flash. Это **не** STT: аудио не принимаем.
+
+| | |
+|--|--|
+| Function | [`functions/polish-dictation/`](functions/polish-dictation/README.md) |
+| Клиент | [`src/api/dictationPolish.js`](../src/api/dictationPolish.js) |
+| JWT | `verify_jwt = true` |
+| Secret | `ZAI_API_KEY` (опц. `ZAI_MODEL`, `ZAI_MODEL_FALLBACK`) — **не** в клиентском бандле |
+| Default model | `glm-4.5-flash` (Free); запасная `glm-4.7-flash` |
+| Soft-fail | все модели / upstream / нет ключа / таймаут → исходный `text` (`skipped: true`); клиент тоже fallback на сырой; submit **не** блокируется |
+
+Смена модели / провайдера — только внутри Function; контракт `{ text } → { text }` стабилен.
+
 ## Наплыв регистраций: холодный старт ленты
 
 Новый профиль стартует с `balance = 0`; `submit_portfolio` стоит 30, `handle_review_inserted` начисляет 10 за ревью — подать своё портфолио можно только после 3 чужих ревью. Стартовый бонус балансом сознательно **не** даём (риск нарушить экономику / фарм мультиаккаунтами — решение продукта 2026-07-26).

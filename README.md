@@ -101,7 +101,8 @@ API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](
 | [`src/components/url-screen/README.md`](src/components/url-screen/README.md) | Подача URL: back-chip + done |
 | [`src/components/report-screen/README.md`](src/components/report-screen/README.md) | Листы ревью + жалоба |
 | [`src/config/README.md`](src/config/README.md) | `REVIEW_SESSION_SECONDS`, contacts |
-| [`src/lib/dictation/README.md`](src/lib/dictation/README.md) | Надиктовка: `/review` → `answers.dictation` + микрофон в поле совета |
+| [`src/lib/dictation/README.md`](src/lib/dictation/README.md) | Надиктовка: `/review` → `answers.dictation` + mic в совете; post-edit → [`polish-dictation`](supabase/functions/polish-dictation/README.md) |
+| [`supabase/functions/polish-dictation/README.md`](supabase/functions/polish-dictation/README.md) | Edge post-edit пунктуации (Z.AI `glm-4.5-flash` + fallback; soft-fail → сырой текст; `ZAI_API_KEY`) |
 | [`supabase/README.md`](supabase/README.md) | SQL и Edge Functions |
 | [`supabase/BAN.md`](supabase/BAN.md) | Бан / автобан по репутации (Table/SQL + шаблоны) |
 | [`.cursor/README.md`](.cursor/README.md) | Карта для агента Cursor |

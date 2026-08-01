@@ -38,7 +38,7 @@ Progress в panel считает только **видимые** шаги (pain 
 | `pain` | string[] | `composition` · `contrast` · `components` · `overloaded` (можно `[]`) | нет (обычно только при visual ≤ 2) |
 | `tier` | string | `early` · `mid` · `strong` · `top` | да |
 | `advice` | string | 100–1000 символов в UI | да (пустая строка пройдёт парсер, но submit UI не пустит) |
-| `dictation` | string | заметки с `/review` | нет |
+| `dictation` | string | заметки с `/review` (после Web Speech + опц. polish пунктуации) | нет |
 
 **Не путать** `answers.tier` (рынок кейсов) с `profiles.tier` (лиги ревью) — разные сущности.
 
@@ -57,7 +57,7 @@ Progress в panel считает только **видимые** шаги (pain 
 | 5 | `reviewVisualLabel` / short «Визуал» | `visual` | scale 1–5 | 5 ступеней (`reviewVisualValue1…5`) |
 | 5a | `reviewPainLabel` — «Что конкретно тянет вниз?» | `pain[]` | checkbox | Только если **visual ≤ 2**. Composition · Contrast · Components · Overloaded. Можно пусто. Без «всё ок». |
 | 6 | `reviewTierLabel` — уровень проектов / рынка | `tier` | radio | Рано · Средние компании · Сильные команды · Топ рынка |
-| 7 | `reviewAdviceLabel` — главный совет | `advice` | textarea + mic | min 100 / max 1000; опц. надиктовка → тот же `advice` |
+| 7 | `reviewAdviceLabel` — главный совет | `advice` | textarea + mic | min 100 / max 1000; опц. надиктовка → тот же `advice`; перед submit — polish пунктуации (Edge) |
 
 Авто-advance: single + scale (кроме pain и advice).  
 При уходе с visual при значении ≥ 3 — pain checkbox сбрасываются.
@@ -68,7 +68,8 @@ Progress в panel считает только **видимые** шаги (pain 
 
 ## Трактовка в PDF / листе (`buildReportSections`)
 
-Детерминированно, **без LLM**. Вариант формулировки из банка 0/1 — hash(`seed` + key), обычно `seed = review_id`.
+Детерминированно, **без LLM** на L1/L2/L3. Вариант формулировки из банка 0/1 — hash(`seed` + key), обычно `seed = review_id`.  
+(Отдельно: поля `advice` / `dictation` могут пройти post-edit пунктуации через Edge `polish-dictation` — это правка текста юзера, не генерация вердикта. Soft-fail: все модели / upstream упали → сырой текст, submit ок.)
 
 ### Зоны шкал (L1)
 
@@ -141,7 +142,7 @@ Progress в panel считает только **видимые** шаги (pain 
 | `reportTier*` | L1 tier (preview) |
 | `reportCross*` | L2 |
 | `reportSummaryLead` / `reportSummary*` | L3 |
-| `reportAdviceTitle` / `reportDictationTitle` | сырой текст |
+| `reportAdviceTitle` / `reportDictationTitle` | сырой/отполированный текст юзера (не LLM-вердикт L1–L3) |
 
 Правило префиксов: [`.cursor/rules/i18n.mdc`](.cursor/rules/i18n.mdc).
 
@@ -173,6 +174,8 @@ commit;
 | [`ScaleSlider.js`](src/components/scale-slider/ScaleSlider.js) | шкалы 1–5 |
 | [`reviewReport.js`](src/utils/reviewReport.js) | parse + L1/L2/L3 |
 | [`reviewReport.dictation.test.js`](src/utils/reviewReport.dictation.test.js) | smoke tier/dictation |
+| [`dictationPolish.js`](src/api/dictationPolish.js) | Edge post-edit пунктуации `advice` / `dictation`; soft-fail → сырой текст |
+| [`polish-dictation`](supabase/functions/polish-dictation/README.md) | Z.AI Flash Edge (`glm-4.5-flash` + fallback) |
 | [`shareReviewPdf.js`](src/utils/shareReviewPdf.js) | PDF из секций |
 | [`report-screen`](src/components/report-screen/README.md) | авторский `/report` |
 | [`locales.json`](content/locales.json) | все строки |

@@ -45,4 +45,5 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `scale-slider/` | — | Шкалы оценки context/visual: canvas-сетка, ступени + приписки, min/max — [`README`](scale-slider/README.md) |
 
 Движок диктовки: [`../lib/dictation/README.md`](../lib/dictation/README.md).  
+Post-edit: [`../api/dictationPolish.js`](../api/dictationPolish.js) → [`polish-dictation`](../../supabase/functions/polish-dictation/README.md).  
 См. [`PROJECT.md`](../../PROJECT.md) — Entrypoint.

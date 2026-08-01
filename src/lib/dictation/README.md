@@ -11,7 +11,35 @@ MVP: **Web Speech API** (браузер) → текст в памяти сесс
 
 Аудио **не** грузим и **не** храним. Серверная транскрипция (Whisper) — следующий шаг за тем же контрактом.
 
-После stop / перед submit сырой текст опционально проходит **post-edit** (пунктуация) через Edge [`polish-dictation`](../../../supabase/functions/polish-dictation/README.md) + [`dictationPolish.js`](../../api/dictationPolish.js). Это не STT: модель правит уже готовый текст; ключ только в Function secrets (`ZAI_API_KEY`).
+## Post-edit (пунктуация)
+
+После stop / перед submit сырой текст проходит **post-edit** через Edge [`polish-dictation`](../../../supabase/functions/polish-dictation/README.md) + [`dictationPolish.js`](../../api/dictationPolish.js).
+
+| | |
+|--|--|
+| Что делает | пунктуация, пробелы, регистр |
+| Что **не** делает | STT, смена смысла, перевод, саммари, «улучшение» ревью |
+| Модель | `glm-4.5-flash` (Free); запасная `glm-4.7-flash` |
+| Секреты | `ZAI_API_KEY` (+ опц. `ZAI_MODEL`, `ZAI_MODEL_FALLBACK`) только в Function secrets |
+| Soft-fail | любая ошибка / все модели упали / таймаут / нет ключа → **сырой текст как есть**; submit **не** блокируется |
+
+### Soft-fail (двойной)
+
+1. **Edge:** цепочка моделей (primary → fallback) с ретраями на `1305`/429/5xx. Если все попытки исчерпаны → HTTP 200 `{ text: <исходный>, skipped: true, error: "zai_1305" | … }`.
+2. **Клиент:** `polishDictationText` при invoke-error, таймауте (~14 s), пустом `text` или network → возвращает исходную строку. Abort / pagehide polish **не** ждут.
+
+Итог: поле совета, `answers.dictation` и PDF всегда получают хоть какой-то текст юзера — отполированный или сырой Web Speech.
+
+### Когда в `main.js`
+
+| Событие | `stopDictation({ polish })` / вызов |
+|---------|--------------------------------------|
+| Toggle stop (notes / advice) | `polish: true` → notes в `dictationText`, advice через `setAdviceText` |
+| Конец таймера → quiz (`openReview`) | `polish: true` на notes (async) |
+| Submit квиза (`onComplete`) | `polishDictationText` на `dictation` + `advice` |
+| Abort / pagehide / reset | stop **без** polish |
+
+Клиент: `polishDictationText(text, { maxLen, locale })` — `functions.invoke("polish-dictation")`, timeout ~14 s. SoT Function: [`polish-dictation/README.md`](../../../supabase/functions/polish-dictation/README.md).
 
 ## Контракт `DictationEngine`
 
@@ -38,9 +66,9 @@ MVP: **Web Speech API** (браузер) → текст в памяти сесс
 
 1. Движок один на review-сессию; `dictationTarget` = `notes` (чип rec) или `advice` (поле квиза).
 2. На живом `/review` (claim + таймер) показать `.iframe-shell__rec`; в квизе кнопку показывает `reviewPanel.setDictationSupported`.
-3. Toggle → `start` / `stop`. Для `notes` копим `dictationText` (cap `DICTATION_MAX_LEN`); для `advice` перед стартом `resetTranscript()`, дальше текст уходит в `reviewPanel.setDictationTranscript` и дописывается к тому, что уже было в поле.
-4. Конец таймера / уход / pagehide / submit → `stop`.
-5. `submitPortfolioReview` → в `answers` добавить `dictation`, если непусто (`advice` идёт из формы как обычно).
+3. Toggle → `start` / `stop` (`stopDictation({ polish: true })` на ручном stop). Для `notes` копим `dictationText` (cap `DICTATION_MAX_LEN`); для `advice` перед стартом `resetTranscript()`, дальше текст уходит в `reviewPanel.setDictationTranscript` и дописывается к тому, что уже было в поле.
+4. Конец таймера / уход / pagehide → `stop` (polish только на таймере→quiz и ручном stop; abort/pagehide — без).
+5. Перед `submitPortfolioReview` — ещё раз polish `dictation` + `advice`, затем мерж `dictation` в payload.
 6. Новая сессия → `resetDictationSession()`.
 
 Таймер просмотра: `REVIEW_SESSION_SECONDS = 45` в [`src/config/review.js`](../../config/review.js) — отдельно от claim TTL 20 min; ту же величину показывает intro-модалка home.
@@ -85,6 +113,6 @@ MVP: **Web Speech API** (браузер) → текст в памяти сесс
 
 `MediaRecorder` → Edge Function → Whisper; тот же `DictationEngine`. Секрет API — только Function secrets ([`security.mdc`](../../../.cursor/rules/security.mdc)).
 
-Post-edit текста (уже есть): `polish-dictation` / `ZAI_API_KEY` — см. [`supabase/functions/polish-dictation/README.md`](../../../supabase/functions/polish-dictation/README.md).
+Post-edit текста уже на проде: подробности — [`supabase/functions/polish-dictation/README.md`](../../../supabase/functions/polish-dictation/README.md).
 
 См. правило [`.cursor/rules/dictation.mdc`](../../../.cursor/rules/dictation.mdc), [`SCREENS.md`](../../../SCREENS.md).

@@ -67,6 +67,7 @@
 - `*.wixsite.com` / `*.pixpa.com` / `*.journoportfolio.com` — в external (заголовки / отчёт 2026-07).
 - `*.vercel.app` — дефолтный CSP Vercel режет чужой iframe (report2); кастомный домен на Vercel — optimistic + fallback.
 - Weebly / Strikingly / Bento / Universe / SmugMug / Google Sites — external (report2).
+- **Super** (`*.super.site`) — контент из Notion, но отдаётся со своего домена без XFO / `frame-ancestors`: iframe ок, в blocklist **не** добавлять (записи `notion.so` / `notion.site` на него не распространяются).
 - **Не** режем по апексу: `wix.com`, `editorx.com`, `github.io`, `netlify.app`, `carrd.co` (optimistic; у хостингов заголовки может переопределить проект).
 - Иконка площадки на карточке (`platformBrandIcon.js`) **не** равна embed-стратегии: бренд можно показать и при optimistic iframe (пример: `*.webflow.io`, `*.framer.ai`, Cargo / Format / Squarespace / Canva).
 - **PDF** — не отдельный хост: прямой `.pdf` пробуем как iframe (браузерный просмотрщик). Drive/Dropbox уже в «Нельзя» или optimistic. Отдельный режим не нужен, пока нет массовых ссылок.
@@ -91,6 +92,7 @@
 |----------|-----------|---------|
 | Свой / кастомный домен | iframe ок | optimistic |
 | `*.framer.ai` | iframe ок | optimistic |
+| `*.super.site` | нет XFO / нет `frame-ancestors` (проверено 2026-08) | optimistic |
 | `tilda.ws` | `SAMEORIGIN` | external |
 | Readymag (`*.website` / `*.com`) | не открывается | external |
 | Readymag custom (`oliviagrace.work`) | `XFO: DENY` | optimistic → probe/fallback → external |

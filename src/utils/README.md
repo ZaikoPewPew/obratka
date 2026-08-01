@@ -33,7 +33,8 @@
 
 Тесты: `*.test.js` рядом (в т.ч. `homeRoute.test.js`, `plural.test.js`, `hangingPrepositions.test.js`, `reviewReport.dictation.test.js`) + `src/app/routes.test.js` (`npm test`).
 
-Движок надиктовки (не utils): [`src/lib/dictation/README.md`](../lib/dictation/README.md).
+Движок надиктовки (не utils): [`src/lib/dictation/README.md`](../lib/dictation/README.md).  
+Post-edit пунктуации: [`src/api/dictationPolish.js`](../api/dictationPolish.js) → [`polish-dictation`](../../supabase/functions/polish-dictation/README.md).
 
 ## Ошибки полей brand-экранов
 

@@ -70,6 +70,13 @@ describe("resolvePortfolioEmbed", () => {
     assert.equal(findExternalEmbedHost("dsgn-thinking.framer.ai"), null);
   });
 
+  it("keeps Super sites as optimistic iframe", () => {
+    const plan = resolvePortfolioEmbed("https://khazimuratov.super.site/");
+    assert.equal(plan.mode, "iframe");
+    assert.equal(plan.frameSrc, "https://khazimuratov.super.site/");
+    assert.equal(findExternalEmbedHost("khazimuratov.super.site"), null);
+  });
+
   it("routes Tilda.ws published hosts to external", () => {
     const plan = resolvePortfolioEmbed(
       "https://kmvdigital.tilda.ws/about_me",

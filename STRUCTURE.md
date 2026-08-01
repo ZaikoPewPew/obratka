@@ -42,6 +42,7 @@
 | Google Client ID/Secret | Supabase Auth → Providers → Google |
 | Email OTP | Supabase Auth → Providers → Email |
 | `TELEGRAM_BOT_TOKEN` | Edge Function secrets (`telegram-auth`) |
+| `ZAI_API_KEY` (опц. `ZAI_MODEL`, `ZAI_MODEL_FALLBACK`) | Edge Function secrets (`polish-dictation`; default `glm-4.5-flash`) |
 | Redirect URLs | `http://localhost:5173/`, `https://zaikopewpew.github.io/obratka/` |
 
 См. `.env.example` и `src/components/auth-screen/README.md`.
@@ -54,7 +55,7 @@
 | `styles/` | Токены + UI. Entry: tokens/base/entrance/app-modal/iframe-shell/home/legendary-online-panel/feedback/tabs-panel/account-menu/settings/success/ban/report |
 | `content/` | `locales.json`, onboarding, embed-hosts, founder-avatars |
 | `public/` | Статика по URL (favicon и т.п.) |
-| `supabase/` | SQL (`profiles`, `legendary_presence`, `rating_leaderboard`, `wallet`, `portfolios`, `portfolio_submit`, `review_claims`, `review_complaints`, `referrals`, …) + Edge `telegram-auth`; доступы и адвайзоры — `SECURITY.md` |
+| `supabase/` | SQL (`profiles`, `legendary_presence`, `rating_leaderboard`, `wallet`, `portfolios`, `portfolio_submit`, `review_claims`, `review_complaints`, `referrals`, …) + Edge (`telegram-auth`, `portfolio-preview`, `portfolio-embed-probe`, `polish-dictation`); доступы — `SECURITY.md` |
 | `.cursor/` | Правила агента (`rules/*.mdc`) и карта (`.cursor/README.md`) |
 
 ### Brand UI (кратко)
@@ -83,17 +84,18 @@
 `/referral` — invite-only gate (`validate_referral`); после входа у юзера свой код (лимит 2), шаринг с home.  
 `/home` — feed/mine/rating; активный вид хранится в query через `homeRoute`; feed/mine/rating используют SWR-кэш (`homeListCache`); рейтинг — топ-50 по репутации (`listRatingTop`); aside «Легенды онлайн»; FAB feedback (`feedback`). Intro до claim; отправленный отчёт → disabled-карточка; mine report gate; фильтр Активные/Завершенные (`tabs-panel`); free-slot «Мои на ревью» до `MAX_MINE_PENDING` (=1); точка на «На ревью» (`feedSeen`); точка на «Мои» и «Завершенные» (`mineReadySeen`); tabbar-dock (glass tabs + «Закинуть своё») с контрастом над превью (`--on-dark`); на open/reload — entrance cascade (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
 `/portfolio` — подача URL; чип «На главную» (скрыт на done); done на том же экране.  
-`/review` = просмотр портфолио + таймер **45 s** (`REVIEW_SESSION_SECONDS` в `src/config/review.js`) + опциональная надиктовка (чип rec → `answers.dictation`).  
+`/review` = просмотр портфолио + таймер **45 s** (`REVIEW_SESSION_SECONDS` в `src/config/review.js`) + опциональная надиктовка (чип rec → `answers.dictation`) + post-edit пунктуации (Edge `polish-dictation`; soft-fail → сырой текст).  
 iframe / external: каталог [`content/embed-hosts.md`](content/embed-hosts.md) (`embedHosts` / `portfolioEmbed` + Edge `portfolio-embed-probe` XFO/CSP; Readymag probe + frame-block → external UI).  
 iframe: таймер паузится при уходе со вкладки; external: wall-clock без паузы, конец → `Timer-end.wav` + quiz.  
-`/quiz` = опрос (`review-panel` + [`scale-slider`](src/components/scale-slider/README.md) на шагах понятность/визуал **1–5**; условный pain; рыночный `tier`); в поле «Главный совет» — микрофон. Спека: [`QUIZ.md`](QUIZ.md). Не путать с login-`session.js` (`obratka.session`).  
+`/quiz` = опрос (`review-panel` + [`scale-slider`](src/components/scale-slider/README.md) на шагах понятность/визуал **1–5**; условный pain; рыночный `tier`); в поле «Главный совет» — микрофон (тот же polish). Спека: [`QUIZ.md`](QUIZ.md). Не путать с login-`session.js` (`obratka.session`).  
 `/report` = листы ревью автора (+ секция надиктовки) + жалоба (1 тег, окно 6ч от done) → reputation (старт 0 / бан −100 / +10 settle). Вход только когда собраны все ревью.  
 `/banned` = бан (в т.ч. автобан при `reputation <= -100`).
 
 Клиентский кэш ленты: `sessionStorage` ключ `obratka.homeLists.<userId>`; seen готовых отчётов: `localStorage` `obratka.mineReadySeen.<userId>`; seen кейсов ленты: `localStorage` `obratka.feedSeen.<userId>` (все сбрасываются на logout).  
 `localStorage`-сессия — UX-кэш: boot проверяет cached `userId` через Supabase Auth; auth-gated deep links без user не открываются.
 Таймер просмотра: `REVIEW_SESSION_SECONDS` в `src/config/review.js` (не путать с claim TTL 20 min).  
-Диктовка: [`src/lib/dictation/README.md`](src/lib/dictation/README.md).
+Диктовка: [`src/lib/dictation/README.md`](src/lib/dictation/README.md).  
+Polish: [`supabase/functions/polish-dictation/README.md`](supabase/functions/polish-dictation/README.md).
 ## Auth (кратко)
 
 | Провайдер | Модуль |

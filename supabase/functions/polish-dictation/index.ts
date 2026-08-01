@@ -9,7 +9,8 @@ import { createClient } from "npm:@supabase/supabase-js@2";
  * → { text } | { text, skipped: true } | error
  *
  * Секрет: ZAI_API_KEY (Dashboard / `supabase secrets set`).
- * Модель по умолчанию: glm-4.7-flash (бесплатная); переопределение — ZAI_MODEL.
+ * Модель по умолчанию: glm-4.5-flash (бесплатная); переопределение — ZAI_MODEL,
+ * запасные — ZAI_MODEL_FALLBACK (через запятую).
  */
 
 const corsHeaders: Record<string, string> = {
@@ -20,11 +21,18 @@ const corsHeaders: Record<string, string> = {
 };
 
 const ZAI_BASE_URL = "https://api.z.ai/api/paas/v4/chat/completions";
-const DEFAULT_MODEL = "glm-4.7-flash";
+const DEFAULT_MODEL = "glm-4.5-flash";
+const DEFAULT_FALLBACK_MODELS = ["glm-4.7-flash"];
 const DEFAULT_MAX_LEN = 4000;
 const HARD_MAX_LEN = 8000;
 const MIN_LEN = 8;
-const FETCH_TIMEOUT_MS = 12_000;
+// Общий бюджет держим ниже клиентского таймаута в src/api/dictationPolish.js.
+const ATTEMPT_TIMEOUT_MS = 7_000;
+const TOTAL_BUDGET_MS = 12_000;
+const RETRY_BACKOFF_MS = 600;
+
+/** Коды Z.AI, при которых имеет смысл повторить: перегрузка / конкурентность. */
+const RETRYABLE_ZAI_CODES = new Set(["1302", "1303", "1305"]);
 
 function json(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -121,6 +129,35 @@ function extractAssistantText(payload: unknown): string {
   return "";
 }
 
+/** Цепочка моделей: основная + запасные, без дублей. */
+function resolveModels(): string[] {
+  const primary = (Deno.env.get("ZAI_MODEL") || "").trim() || DEFAULT_MODEL;
+  const configured = (Deno.env.get("ZAI_MODEL_FALLBACK") || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const fallbacks = configured.length ? configured : DEFAULT_FALLBACK_MODELS;
+  return [...new Set([primary, ...fallbacks])];
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Z.AI отдаёт код и в теле 200-ответа, и в теле ошибки. */
+function zaiErrorCode(payload: unknown): string {
+  const row = payload && typeof payload === "object"
+    ? (payload as Record<string, unknown>)
+    : null;
+  const err = row?.error && typeof row.error === "object"
+    ? (row.error as Record<string, unknown>)
+    : null;
+  const code = err?.code;
+  if (typeof code === "string") return code;
+  if (typeof code === "number") return String(code);
+  return "";
+}
+
 function stripWrappingQuotes(text: string): string {
   const t = text.trim();
   if (
@@ -167,49 +204,86 @@ Deno.serve(async (req) => {
 
   const input = rawText.slice(0, maxLen);
   const locale = normalizeLocale(body.locale);
-  const model = (Deno.env.get("ZAI_MODEL") || DEFAULT_MODEL).trim() ||
-    DEFAULT_MODEL;
+  const models = resolveModels();
+  const deadline = Date.now() + TOTAL_BUDGET_MS;
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const upstream = await fetch(ZAI_BASE_URL, {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: systemPrompt(locale) },
-          { role: "user", content: input },
-        ],
-        temperature: 0.2,
-        max_tokens: Math.min(4096, Math.max(256, Math.ceil(maxLen * 1.2))),
-        thinking: { type: "disabled" },
-      }),
-    });
+  const payloadBase = {
+    messages: [
+      { role: "system", content: systemPrompt(locale) },
+      { role: "user", content: input },
+    ],
+    temperature: 0.2,
+    max_tokens: Math.min(4096, Math.max(256, Math.ceil(maxLen * 1.2))),
+    // Без этого reasoning съедает лимит токенов и content приходит пустым.
+    thinking: { type: "disabled" },
+  };
 
-    if (!upstream.ok) {
-      const errText = await upstream.text().catch(() => "");
-      console.error("[polish-dictation] zai", upstream.status, errText.slice(0, 400));
-      // Fallback: сырой текст, submit не ломаем.
-      return json({ text: input, skipped: true, error: "upstream_failed" });
+  let lastError = "upstream_failed";
+
+  for (const model of models) {
+    // Перегрузка бесплатного тира лечится повтором чаще, чем сменой модели.
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      if (Date.now() >= deadline) {
+        return json({ text: input, skipped: true, error: "deadline" });
+      }
+
+      const controller = new AbortController();
+      const budget = Math.min(ATTEMPT_TIMEOUT_MS, deadline - Date.now());
+      const timer = setTimeout(() => controller.abort(), budget);
+      try {
+        const upstream = await fetch(ZAI_BASE_URL, {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({ model, ...payloadBase }),
+        });
+
+        const raw = await upstream.text();
+        let payload: unknown = null;
+        try {
+          payload = JSON.parse(raw);
+        } catch {
+          payload = null;
+        }
+        const code = zaiErrorCode(payload);
+
+        if (!upstream.ok || code) {
+          console.error(
+            "[polish-dictation] zai",
+            model,
+            upstream.status,
+            raw.slice(0, 400),
+          );
+          const retryable = upstream.status === 429 ||
+            upstream.status >= 500 ||
+            RETRYABLE_ZAI_CODES.has(code);
+          lastError = code ? `zai_${code}` : "upstream_failed";
+          if (retryable) {
+            await sleep(RETRY_BACKOFF_MS);
+            continue;
+          }
+          break;
+        }
+
+        const polished = stripWrappingQuotes(extractAssistantText(payload));
+        if (!polished) {
+          lastError = "empty_model";
+          break;
+        }
+        return json({ text: polished.slice(0, maxLen), model });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "fetch_failed";
+        console.error("[polish-dictation]", model, message);
+        lastError = "fetch_failed";
+      } finally {
+        clearTimeout(timer);
+      }
     }
-
-    const payload = await upstream.json();
-    const polished = stripWrappingQuotes(extractAssistantText(payload));
-    if (!polished) {
-      return json({ text: input, skipped: true, error: "empty_model" });
-    }
-    return json({ text: polished.slice(0, maxLen) });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "fetch_failed";
-    console.error("[polish-dictation]", message);
-    return json({ text: input, skipped: true, error: "fetch_failed" });
-  } finally {
-    clearTimeout(timer);
   }
+
+  // Fallback: сырой текст, submit не ломаем.
+  return json({ text: input, skipped: true, error: lastError });
 });

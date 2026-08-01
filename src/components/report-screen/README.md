@@ -58,7 +58,8 @@ reportScreen.open({ portfolioId: item.id, portfolioName: item.name });
 Клиент: [`src/api/reviewComplaints.js`](../../api/reviewComplaints.js) — `listPortfolioReviewSheets` (с `answers`) / `submitReviewComplaint`.  
 PDF / секции: [`src/utils/reviewReport.js`](../../utils/reviewReport.js), [`src/utils/shareReviewPdf.js`](../../utils/shareReviewPdf.js).  
 Спека квиза и трактовок: [`QUIZ.md`](../../../QUIZ.md).  
-Надиктовка: [`src/lib/dictation/README.md`](../../lib/dictation/README.md).
+Надиктовка: [`src/lib/dictation/README.md`](../../lib/dictation/README.md).  
+Post-edit пунктуации (перед сохранением в лист): [`supabase/functions/polish-dictation/README.md`](../../../supabase/functions/polish-dictation/README.md).
 
 ## Стили
 

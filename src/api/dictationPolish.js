@@ -7,7 +7,8 @@ const MIN_LEN = 8;
 
 /**
  * Post-edit сырого транскрипта через Edge `polish-dictation` (Z.AI Flash).
- * При любой ошибке / таймауте возвращает исходный текст — submit не блокируем.
+ * При любой ошибке / таймауте / soft-fail Edge (`skipped`) возвращает
+ * исходный текст — submit не блокируем.
  *
  * @param {string} text
  * @param {{ maxLen?: number, locale?: string, timeoutMs?: number }} [opts]
