@@ -1013,6 +1013,14 @@
   background: var(--home-screen-card-reviewed-bg);
 }
 
+.home-screen__card:hover .home-screen__preview--reviewed {
+  background: var(--home-screen-card-reviewed-bg-hover);
+}
+
+.home-screen__card:active .home-screen__preview--reviewed {
+  background: var(--home-screen-card-reviewed-bg-active);
+}
+
 .home-screen__card-reviewed {
   display: flex;
   flex-direction: column;

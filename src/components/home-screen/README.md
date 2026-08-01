@@ -34,7 +34,7 @@ Thumb: `syncListFilterPanel()` переставляет пилл `instant` **т�
 | **Ждёт ревью** (`active`, default) | `listPortfoliosForReview()` — open queue |
 | **Уже отревьюено** (`completed`) | `listReviewedPortfolios()` — свои сданные отчёты; карточка `--reviewed`: вместо скриншота — серое превью с галочкой + `homeCardReviewedLabel` («Отчёт отправлен») по центру, слоты ревьюеров и зона автора обычные; клик → URL портфолио в новой вкладке (без claim / intro) |
 
-Empty «Уже отревьюено»: `homeEmptyFeedReviewed` (визуал free-slot, `--static`). Кэш: `feed` + `feedReviewed` в [`homeListCache`](../../utils/homeListCache.js). Токены статуса: `--home-screen-card-reviewed-*` (заливка `--color-surface-muted`, галочка `--color-success` из `assets/home/report-sent.svg`).
+Empty «Уже отревьюено»: `homeEmptyFeedReviewed` (визуал free-slot, `--static`). Кэш: `feed` + `feedReviewed` в [`homeListCache`](../../utils/homeListCache.js). Токены статуса: `--home-screen-card-reviewed-*` (заливка `--color-surface-muted`, галочка `--color-success` из `assets/home/report-sent.svg`). Заливка превью совпадает с фоном карточки, поэтому hover / press ведём и на превью (`-bg-hover` / `-bg-active`) — иначе карточка не реагирует на мышь.
 
 **Мои посты**
 

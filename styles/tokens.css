@@ -706,6 +706,9 @@
   --home-screen-progress-radius: var(--radius-pill);
   /* Статус «Отчёт отправлен» вместо превью (сегмент «Уже отревьюено») */
   --home-screen-card-reviewed-bg: var(--color-surface-muted);
+  /* Заливка превью = фон карточки → ховер/press ведём теми же ступенями */
+  --home-screen-card-reviewed-bg-hover: var(--color-surface-muted-hover);
+  --home-screen-card-reviewed-bg-active: var(--color-surface-muted-active);
   --home-screen-card-reviewed-gap: var(--space-2);
   --home-screen-card-reviewed-icon-size: var(--space-6);
   --home-screen-card-reviewed-icon-color: var(--color-success);
