@@ -3,7 +3,8 @@
 -- Применяется через Supabase migrations / MCP apply_migration.
 --
 -- Старт reputation = 0; минус до −100; одна причина на жалобу;
--- окно 6ч от portfolios.completed_at (момент done / 3 из 3); +10 после окна без жалобы.
+-- окно 6ч от portfolios.completed_at (момент done / 3 из 3; fallback = N-е ревью);
+-- +10 после окна без жалобы.
 
 -- ---------------------------------------------------------------------------
 -- profiles.reputation (клиент read-only; пишет только RPC / SQL Editor)
@@ -230,6 +231,34 @@ as $$
   select 10;
 $$;
 
+-- Старт окна жалобы / settle: completed_at, иначе момент N-го ревью.
+create or replace function public.portfolio_complaint_window_start(
+  p_portfolio_id uuid
+)
+returns timestamptz
+language sql
+stable
+set search_path = public
+as $$
+  select coalesce(
+    p.completed_at,
+    (
+      select r.created_at
+      from public.reviews r
+      where r.portfolio_id = p.id
+      order by r.created_at asc
+      offset greatest(coalesce(p.target_reviews, 3) - 1, 0)
+      limit 1
+    )
+  )
+  from public.portfolios p
+  where p.id = p_portfolio_id;
+$$;
+
+revoke all on function public.portfolio_complaint_window_start(uuid) from public;
+revoke all on function public.portfolio_complaint_window_start(uuid) from anon;
+revoke all on function public.portfolio_complaint_window_start(uuid) from authenticated;
+
 -- ---------------------------------------------------------------------------
 -- +10 за ревью без жалобы после закрытия окна (lazy)
 -- ---------------------------------------------------------------------------
@@ -249,18 +278,25 @@ begin
   perform set_config('app.bypass_profile_guards', 'on', true);
 
   for rec in
-    select r.id, r.reviewer_id
+    select
+      r.id,
+      r.reviewer_id,
+      r.portfolio_id,
+      ws.window_start
     from public.reviews r
     join public.portfolios p on p.id = r.portfolio_id
+    cross join lateral (
+      select public.portfolio_complaint_window_start(p.id) as window_start
+    ) ws
     where r.reputation_settled_at is null
-      and p.completed_at is not null
-      and p.completed_at <= now() - window_iv
+      and ws.window_start is not null
+      and ws.window_start <= now() - window_iv
       and not exists (
         select 1
         from public.review_complaints c
         where c.review_id = r.id
       )
-    order by p.completed_at asc, r.created_at asc
+    order by ws.window_start asc, r.created_at asc
     limit 200
     for update of r skip locked
   loop
@@ -273,6 +309,13 @@ begin
     if n = 0 then
       continue;
     end if;
+
+    -- Self-heal: если completed_at пуст, зафиксируем вычисленный старт окна.
+    update public.portfolios
+    set completed_at = coalesce(completed_at, rec.window_start)
+    where id = rec.portfolio_id
+      and completed_at is null
+      and rec.window_start is not null;
 
     update public.profiles
     set reputation = reputation + reward
@@ -307,6 +350,7 @@ declare
   already_banned boolean;
   floor_rep integer := public.review_complaint_ban_threshold();
   next_rep integer;
+  window_start timestamptz;
 begin
   perform public.settle_review_reputation_rewards();
 
@@ -370,10 +414,20 @@ begin
     raise exception 'portfolio_not_found';
   end if;
 
-  -- Окно жалобы: 6ч от done портфолио (completed_at), не от submit листа.
-  if p.completed_at is null
-     or now() > p.completed_at + public.review_complaint_window() then
+  -- Окно жалобы: 6ч от done портфолио (completed_at / N-е ревью), не от submit листа.
+  window_start := public.portfolio_complaint_window_start(p.id);
+  if window_start is null
+     or now() > window_start + public.review_complaint_window() then
     raise exception 'complaint_window_closed';
+  end if;
+
+  -- Self-heal: пустой completed_at у done не должен прятать кнопку / ломать RPC.
+  if p.completed_at is null then
+    update public.portfolios
+    set completed_at = window_start
+    where id = p.id
+      and completed_at is null;
+    p.completed_at := window_start;
   end if;
 
   if p.owner_id is distinct from uid then

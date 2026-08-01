@@ -8,7 +8,7 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 
 - Список завершённых листов ревью по `portfolioId`; пока грузится — skeleton-строки (`--report-screen-skeleton-*`), без текста-заглушки
 - На каждом листе с `answers` кнопка **«Посмотреть»** → `createSidePanel` с полным текстом листа (`buildReportSections`, `mode: "full"`)
-- Sticky footer панели: **«Скачать PDF»** (только этот лист) + **«Пожаловаться»** → модалка с тегами (**ровно 1** причина; окно **6 часов** после `done` портфолио / готовности отчёта). Без просмотра листа жаловаться нельзя
+- Sticky footer панели: **«Скачать PDF»** (только этот лист) + **«Пожаловаться»** → модалка с тегами (**ровно 1** причина; окно **6 часов** после `done` портфолио / готовности отчёта; старт = `completed_at`, иначе N-е ревью). Без просмотра листа жаловаться нельзя
 - Side-panel / complaint-modal монтируются в `document.body` (не внутрь `.report-screen`: иначе `transform`/`filter` клипают sticky footer)
 - Без жалобы лист считается «ок»; явного чипа «всё ок» нет
 - Одна жалоба на лист (`review_complaints`, RPC `submit_review_complaint`) → штраф репутации ревьюера на сервере (−20); после окна без жалобы ревьюер получает +10 (`settle_review_reputation_rewards`)
@@ -25,6 +25,19 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 - Sticky footer (как header): **«Скачать PDF»** (только этот лист) + **«Пожаловаться»** / «Жалоба отправлена»
 - Вне окна 6ч кнопку жалобы **скрывать** (не disabled «Срок жалобы истёк»); PDF остаётся
 - Escape / backdrop закрывают панель; при уходе с `/report` панель тоже закрывается
+
+## Окно жалобы (6 часов)
+
+Кнопка «Пожаловаться» видна, только пока `sheet.canComplain === true` (или лист уже с жалобой → «Жалоба отправлена»). Доступность считает **клиент** и дублирует **сервер** — правила зеркальны.
+
+- **Старт окна:** `portfolios.completed_at` (момент done / N из N). Если поле пустое (legacy-строки / гонка триггера) — fallback на `created_at` **N-го ревью** по `target_reviews`. Пока N ревью нет — старт `null`, кнопка скрыта.
+- **Длительность:** `COMPLAINT_WINDOW_MS` = **6 часов** (зеркало SQL `review_complaint_window()`). После `старт + 6ч` кнопку скрываем.
+- **Клиент:** [`src/utils/complaintWindow.js`](../../utils/complaintWindow.js) — `resolveComplaintWindowStart` / `complaintOpenUntil` / `canComplainAboutReview`. `listPortfolioReviewSheets` тянет `completed_at` + `target_reviews` + `created_at` всех листов и прокидывает `canComplain` / `complaintOpenUntil` в каждый `sheet`.
+- **Сервер:** `submit_review_complaint` и `settle_review_reputation_rewards` берут старт из `portfolio_complaint_window_start(portfolio_id)` (тот же fallback). Пустой `completed_at` у `done`-портфолио **self-heal**-ится вычисленным стартом, чтобы окно не терялось. Вне окна RPC → `complaint_window_closed`.
+- Битый / отсутствующий старт **не** маскируется под «срок истёк»: в DEV клиент логирует `complaint window start unresolved`.
+- Тесты границ окна и состояний кнопки: [`src/utils/complaintWindow.test.js`](../../utils/complaintWindow.test.js).
+
+Reopen окна для теста / ops — [`supabase/BAN.md`](../../../supabase/BAN.md) § Автобан по репутации.
 
 ## Жалоба (теги v1)
 
@@ -55,7 +68,8 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 reportScreen.open({ portfolioId: item.id, portfolioName: item.name });
 ```
 
-Клиент: [`src/api/reviewComplaints.js`](../../api/reviewComplaints.js) — `listPortfolioReviewSheets` (с `answers`) / `submitReviewComplaint`.  
+Клиент: [`src/api/reviewComplaints.js`](../../api/reviewComplaints.js) — `listPortfolioReviewSheets` (с `answers` / `canComplain`) / `submitReviewComplaint`.  
+Окно жалобы (старт + 6ч, fallback N-е ревью): [`src/utils/complaintWindow.js`](../../utils/complaintWindow.js).  
 PDF / секции: [`src/utils/reviewReport.js`](../../utils/reviewReport.js), [`src/utils/shareReviewPdf.js`](../../utils/shareReviewPdf.js).  
 Спека квиза и трактовок: [`QUIZ.md`](../../../QUIZ.md).  
 Надиктовка: [`src/lib/dictation/README.md`](../../lib/dictation/README.md).  

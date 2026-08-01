@@ -38,7 +38,7 @@
 | `profile_grade(uuid)` | нет | нет | оракул грейдов, только internal |
 | `purge_expired_review_claims()` | нет | нет | internal (claim / heartbeat / `portfolio_reviewer_slots`) |
 | `handle_review_inserted()` | нет | нет | trigger-only |
-| `review_complaint_tag_weight(text)` / `review_complaint_ban_threshold()` / `review_complaint_window()` / `review_reputation_*` | нет | нет | веса / порог / окно не наружу |
+| `review_complaint_tag_weight(text)` / `review_complaint_ban_threshold()` / `review_complaint_window()` / `portfolio_complaint_window_start(uuid)` / `review_reputation_*` | нет | нет | веса / порог / окно / старт окна (completed_at ↔ N-е ревью) не наружу |
 
 Важно: Postgres по умолчанию даёт `EXECUTE` роли `PUBLIC`, а `anon` её наследует. Поэтому у каждой новой функции нужен явный `revoke ... from public` **и** `from anon`, иначе она автоматически появится в `/rest/v1/rpc/...` для незалогиненных.
 

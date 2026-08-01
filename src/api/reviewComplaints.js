@@ -1,7 +1,22 @@
 import { getSupabase } from "../lib/supabaseClient.js";
 import { getSession, setSession } from "../app/session.js";
-import { formatPortfolioRole } from "./portfolios.js";
+import {
+  DEFAULT_TARGET_REVIEWS,
+  formatPortfolioRole,
+} from "./portfolios.js";
 import { parseReviewAnswers } from "../utils/reviewReport.js";
+import {
+  canComplainAboutReview,
+  complaintOpenUntil,
+  resolveComplaintWindowStart,
+} from "../utils/complaintWindow.js";
+
+export {
+  COMPLAINT_WINDOW_MS,
+  canComplainAboutReview,
+  complaintOpenUntil,
+  resolveComplaintWindowStart,
+} from "../utils/complaintWindow.js";
 
 /** @typedef {'low_effort' | 'spam' | 'harassment' | 'offensive' | 'ai_slop'} ReviewComplaintTag */
 
@@ -19,9 +34,6 @@ export const REPUTATION_DEFAULT = 0;
 
 /** Пол шкалы / порог автобана (зеркало SQL `review_complaint_ban_threshold`). */
 export const REPUTATION_FLOOR = -100;
-
-/** Окно жалобы после done портфолио (зеркало SQL `review_complaint_window`). */
-export const COMPLAINT_WINDOW_MS = 6 * 60 * 60 * 1000;
 
 /**
  * @typedef {{
@@ -119,32 +131,6 @@ export function writeReputationLocal(next) {
 }
 
 /**
- * Deadline окна жалобы (ISO) или null, если completedAt битый.
- * Старт окна — `portfolios.completed_at` (момент done / 3 из 3).
- * @param {string | null | undefined} completedAt
- * @returns {string | null}
- */
-export function complaintOpenUntil(completedAt) {
-  if (typeof completedAt !== "string" || !completedAt) return null;
-  const start = Date.parse(completedAt);
-  if (!Number.isFinite(start)) return null;
-  return new Date(start + COMPLAINT_WINDOW_MS).toISOString();
-}
-
-/**
- * Можно ли ещё жаловаться на лист (клиентское зеркало окна 6ч от done).
- * @param {{ completedAt?: string | null; complained?: boolean }} sheet
- * @param {number} [nowMs]
- * @returns {boolean}
- */
-export function canComplainAboutReview(sheet, nowMs = Date.now()) {
-  if (!sheet || sheet.complained) return false;
-  const until = complaintOpenUntil(sheet.completedAt);
-  if (!until) return false;
-  return nowMs <= Date.parse(until);
-}
-
-/**
  * @param {unknown} tag
  * @returns {tag is ReviewComplaintTag}
  */
@@ -214,7 +200,7 @@ export async function listPortfolioReviewSheets(portfolioId) {
 
   const { data: portfolioRow, error: portfolioError } = await supabase
     .from("portfolios")
-    .select("completed_at")
+    .select("completed_at, target_reviews, status")
     .eq("id", portfolioId)
     .maybeSingle();
 
@@ -229,6 +215,12 @@ export async function listPortfolioReviewSheets(portfolioId) {
     portfolioRow && typeof portfolioRow.completed_at === "string"
       ? portfolioRow.completed_at
       : null;
+  const targetReviews =
+    portfolioRow &&
+    typeof portfolioRow.target_reviews === "number" &&
+    Number.isFinite(portfolioRow.target_reviews)
+      ? Math.max(1, Math.floor(portfolioRow.target_reviews))
+      : DEFAULT_TARGET_REVIEWS;
 
   const { data: rows, error } = await supabase
     .from("reviews")
@@ -271,8 +263,30 @@ export async function listPortfolioReviewSheets(portfolioId) {
     }
   }
 
+  const reviewCreatedAts = (rows || []).map((row) =>
+    row && typeof row.created_at === "string" ? row.created_at : null,
+  );
+  const windowStart = resolveComplaintWindowStart({
+    completedAt,
+    targetReviews,
+    reviewCreatedAts,
+  });
   const nowMs = Date.now();
-  const openUntil = complaintOpenUntil(completedAt);
+  const openUntil = complaintOpenUntil(completedAt, {
+    targetReviews,
+    reviewCreatedAts,
+  });
+
+  if (
+    import.meta.env.DEV &&
+    !windowStart &&
+    (rows || []).length >= targetReviews
+  ) {
+    console.warn(
+      "[reviewComplaints] complaint window start unresolved",
+      { portfolioId, completedAt, targetReviews },
+    );
+  }
 
   return (rows || [])
     .map((row) => {
@@ -306,7 +320,12 @@ export async function listPortfolioReviewSheets(portfolioId) {
         complained,
         complaintOpenUntil: openUntil,
         canComplain: canComplainAboutReview(
-          { completedAt, complained },
+          {
+            completedAt,
+            complained,
+            targetReviews,
+            reviewCreatedAts,
+          },
           nowMs,
         ),
         answers: parseReviewAnswers(row.answers),

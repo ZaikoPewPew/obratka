@@ -145,9 +145,9 @@ order by banned_at desc;
 
 ### Автобан по репутации
 
-Жалоба автора на лист (`submit_review_complaint`) сразу снижает `profiles.reputation` ревьюера (ровно 1 тег, окно 6ч от `portfolios.completed_at`). Веса тегов и порог — только в SQL (`review_complaints.sql`), не в UI. После окна без жалобы lazy `settle_review_reputation_rewards` даёт ревьюеру +10.
+Жалоба автора на лист (`submit_review_complaint`) сразу снижает `profiles.reputation` ревьюера (ровно 1 тег, окно 6ч от `portfolios.completed_at`, с fallback на N-е ревью). Веса тегов и порог — только в SQL (`review_complaints.sql`), не в UI. После окна без жалобы lazy `settle_review_reputation_rewards` даёт ревьюеру +10.
 
-Окно жалобы смотрит на **`completed_at`** (момент done / 3 из 3), **не** на `updated_at`. Если кнопки «Пожаловаться» нет — проверь колонку / значение:
+Окно жалобы смотрит на **`completed_at`** (момент done / 3 из 3; если `null` — на момент N-го ревью), **не** на `updated_at`. Если кнопки «Пожаловаться» нет — проверь колонку / значение / срок 6ч:
 
 ```sql
 select id, status, completed_at, updated_at, reviews_count, target_reviews
