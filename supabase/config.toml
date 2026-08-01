@@ -13,3 +13,7 @@ verify_jwt = false
 [functions.portfolio-embed-probe]
 # Authenticated review flow only; server-side XFO/CSP probe (see README).
 verify_jwt = true
+
+[functions.polish-dictation]
+# Post-edit Web Speech transcript (Z.AI); requires user JWT + ZAI_API_KEY secret.
+verify_jwt = true

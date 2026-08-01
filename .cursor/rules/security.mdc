@@ -14,7 +14,7 @@ alwaysApply: true
 **Можно в клиент / `.env` / `.env.production` / бандл:**  
 `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `TELEGRAM_BOT_ID`, `TELEGRAM_BOT_USERNAME`.
 
-**Никогда:** `service_role`, `TELEGRAM_BOT_TOKEN`, Google Client Secret, любые Dashboard secrets.
+**Никогда:** `service_role`, `TELEGRAM_BOT_TOKEN`, Google Client Secret, `ZAI_API_KEY`, любые Dashboard secrets.
 
 - Браузерный клиент — только [`src/lib/supabaseClient.js`](../../src/lib/supabaseClient.js) (anon). Не плодить `createClient` с другим ключом.
 - Edge `telegram-auth`: `service_role` / bot token — только Function secrets; клиент не шлёт admin-ключ.

@@ -49,6 +49,36 @@ const CLIENT_WRITABLE_KEYS = new Set([
 ]);
 
 /**
+ * Последний успешно загруженный профиль: `/settings` рисует форму сразу
+ * и молча ревалидирует (как homeListCache у вкладок home).
+ *
+ * @type {{ userId: string; profile: Profile } | null}
+ */
+let profileCache = null;
+
+/**
+ * @param {Profile | null | undefined} profile
+ */
+function writeProfileCache(profile) {
+  if (!profile?.id) return;
+  profileCache = { userId: profile.id, profile };
+}
+
+/**
+ * @param {string | null | undefined} userId
+ * @returns {Profile | null}
+ */
+export function getCachedMyProfile(userId) {
+  if (!userId || profileCache?.userId !== userId) return null;
+  return profileCache.profile;
+}
+
+/** Сброс кэша: logout / смена аккаунта. */
+export function clearMyProfileCache() {
+  profileCache = null;
+}
+
+/**
  * @param {Profile | null | undefined} profile
  * @returns {boolean}
  */
@@ -74,6 +104,7 @@ export async function fetchMyProfile() {
     }
     return null;
   }
+  writeProfileCache(data);
   return data;
 }
 
@@ -114,6 +145,7 @@ export async function updateMyProfile(patch) {
   if (error) {
     throw new Error(error.message || "profile_update_failed");
   }
+  writeProfileCache(data);
   return data;
 }
 

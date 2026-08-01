@@ -211,6 +211,7 @@ function createStep(content) {
  *   setDictationSupported: (supported: boolean) => void;
  *   setDictationRecording: (recording: boolean) => void;
  *   setDictationTranscript: (text: string) => void;
+ *   setAdviceText: (text: string) => void;
  * }}
  */
 export function createReviewPanel(options = {}) {
@@ -1342,6 +1343,12 @@ export function createReviewPanel(options = {}) {
         .filter(Boolean)
         .join(" ")
         .slice(0, ADVICE_MAX_LEN);
+      adviceInput.scrollTop = adviceInput.scrollHeight;
+      syncAdviceMeta();
+    },
+    /** Абсолютная запись в поле совета (после polish / без живой записи). */
+    setAdviceText: (text) => {
+      adviceInput.value = String(text ?? "").slice(0, ADVICE_MAX_LEN);
       adviceInput.scrollTop = adviceInput.scrollHeight;
       syncAdviceMeta();
     },

@@ -11,6 +11,8 @@ MVP: **Web Speech API** (браузер) → текст в памяти сесс
 
 Аудио **не** грузим и **не** храним. Серверная транскрипция (Whisper) — следующий шаг за тем же контрактом.
 
+После stop / перед submit сырой текст опционально проходит **post-edit** (пунктуация) через Edge [`polish-dictation`](../../../supabase/functions/polish-dictation/README.md) + [`dictationPolish.js`](../../api/dictationPolish.js). Это не STT: модель правит уже готовый текст; ключ только в Function secrets (`ZAI_API_KEY`).
+
 ## Контракт `DictationEngine`
 
 | Метод | Смысл |
@@ -82,5 +84,7 @@ MVP: **Web Speech API** (браузер) → текст в памяти сесс
 ## Дальше (план B)
 
 `MediaRecorder` → Edge Function → Whisper; тот же `DictationEngine`. Секрет API — только Function secrets ([`security.mdc`](../../../.cursor/rules/security.mdc)).
+
+Post-edit текста (уже есть): `polish-dictation` / `ZAI_API_KEY` — см. [`supabase/functions/polish-dictation/README.md`](../../../supabase/functions/polish-dictation/README.md).
 
 См. правило [`.cursor/rules/dictation.mdc`](../../../.cursor/rules/dictation.mdc), [`SCREENS.md`](../../../SCREENS.md).

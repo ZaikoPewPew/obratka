@@ -9,7 +9,7 @@
 ## API
 
 `createReviewPanel({ getPortfolioName?, onReportReveal?, onComplete?, onDoneChange?, onExit?, onNextCase?, onDictationToggle? })`  
-→ `{ root, form, open, close, reset, focus, openDone, setDictationSupported, setDictationRecording, setDictationTranscript }`.
+→ `{ root, form, open, close, reset, focus, openDone, setDictationSupported, setDictationRecording, setDictationTranscript, setAdviceText }`.
 
 ## Шаги
 
@@ -45,6 +45,7 @@ Progress считает только **видимые** шаги (6 или 7 в 
 - `setDictationSupported(bool)` — показать / скрыть кнопку (Web Speech);
 - `setDictationRecording(bool)` — мигающий красный индикатор вместо микрофона; на переходе `false → true` запоминает текущий текст поля как базу;
 - `setDictationTranscript(text)` — база + транскрипт в `textarea` (cap 1000), счётчик и reveal листа обновляются как при ручном вводе.
+- `setAdviceText(text)` — абсолютная запись в поле совета (после polish Edge; без живой записи).
 
 Во время записи поле readonly, `reset()` гасит состояние надиктовки.
 

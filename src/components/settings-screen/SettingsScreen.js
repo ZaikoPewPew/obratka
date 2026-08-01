@@ -1,6 +1,11 @@
 import { getLocale, getStrings } from "../../i18n.js";
 import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
-import { fetchMyProfile, updateMySettings } from "../../api/profiles.js";
+import {
+  fetchMyProfile,
+  getCachedMyProfile,
+  updateMySettings,
+} from "../../api/profiles.js";
+import { getSession } from "../../app/session.js";
 import {
   PROFILE_DISPLAY_NAME_MAX,
   PROFILE_ROLE_VALUES,
@@ -473,16 +478,27 @@ export function createSettingsScreen(opts = {}) {
 
   async function loadProfile() {
     const epoch = ++loadEpoch;
-    setViewMode("loading");
     setStatus("");
     clearFieldErrors();
+
+    const cached = getCachedMyProfile(getSession()?.userId);
+    if (cached) {
+      fillForm(cached);
+      setViewMode("ready");
+    } else {
+      setViewMode("loading");
+    }
+
     const profile = await fetchMyProfile();
     if (epoch !== loadEpoch) return;
     if (!profile) {
+      if (cached) return;
       baseline = null;
       setViewMode("error");
       return;
     }
+    // Пользователь уже правит форму — не затирать ввод ответом ревалидации.
+    if (cached && isDirty()) return;
     fillForm(profile);
     setViewMode("ready");
   }

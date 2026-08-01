@@ -37,7 +37,12 @@ import {
   getInviteGatePassed,
   setInviteGatePassed,
 } from "./utils/inviteGate.js";
-import { fetchMyProfile, isProfileBanned, updateMyProfile } from "./api/profiles.js";
+import {
+  clearMyProfileCache,
+  fetchMyProfile,
+  isProfileBanned,
+  updateMyProfile,
+} from "./api/profiles.js";
 import { heartbeatLegendaryPresence } from "./api/presence.js";
 import {
   redeemReferral,
@@ -50,6 +55,7 @@ import {
   refreshSessionFromProfile,
 } from "./api/wallet.js";
 import { clampReputation } from "./api/reviewComplaints.js";
+import { polishDictationText } from "./api/dictationPolish.js";
 import { createDictationEngine, isWebSpeechSupported } from "./lib/dictation/createDictationEngine.js";
 import { createReviewPanel } from "./components/review-panel/ReviewPanel.js";
 import { createReviewScreen } from "./components/review-screen/ReviewScreen.js";
@@ -96,6 +102,8 @@ const REVIEW_CLAIM_STORAGE_KEY = "obratka.reviewClaim";
 const LEGENDARY_PRESENCE_HEARTBEAT_MS = 60 * 1000;
 /** Потолок длины надиктовки в answers.dictation. */
 const DICTATION_MAX_LEN = 4000;
+/** Совпадает с ADVICE_MAX_LEN в ReviewPanel. */
+const ADVICE_MAX_LEN = 1000;
 /**
  * Sandbox портфолио-iframe: скрипты/формы/попапы ок, без top-navigation
  * (вредоносный сайт автора не уводит окно приложения).
@@ -300,14 +308,30 @@ const reviewPanel = createReviewPanel({
     void toggleDictation("advice");
   },
   onComplete: (answers) => {
-    void stopDictation();
-    const dictation = dictationText.trim().slice(0, DICTATION_MAX_LEN);
-    const payload =
-      answers && dictation
-        ? { ...answers, dictation }
-        : answers;
     reviewSubmitPromise = (async () => {
       try {
+        await stopDictation({ polish: false });
+        const locale = getLocale();
+        let dictation = dictationText.trim().slice(0, DICTATION_MAX_LEN);
+        if (dictation) {
+          dictation = await polishDictationText(dictation, {
+            maxLen: DICTATION_MAX_LEN,
+            locale,
+          });
+          dictationText = dictation;
+        }
+        let payload = answers;
+        if (answers && typeof answers.advice === "string" && answers.advice.trim()) {
+          const advice = await polishDictationText(answers.advice.trim(), {
+            maxLen: ADVICE_MAX_LEN,
+            locale,
+          });
+          payload = { ...answers, advice };
+          reviewPanel.setAdviceText?.(advice);
+        }
+        if (payload && dictation) {
+          payload = { ...payload, dictation };
+        }
         if (portfolioId) {
           await submitPortfolioReview(portfolioId, payload ?? null);
           reviewSubmitted = true;
@@ -383,6 +407,7 @@ async function exitAuthenticatedSession() {
   clearHomeListCache(sessionUserId);
   clearMineReadySeen(sessionUserId);
   clearFeedSeen(sessionUserId);
+  clearMyProfileCache();
   clearSession();
   clearSubmittedPortfolios();
   setPendingAuthEmail(null);
@@ -859,13 +884,47 @@ function syncDictationBackgroundPolicy() {
   dictationEngine?.setKeepAliveInBackground?.(embedPlan?.mode === "external");
 }
 
-async function stopDictation() {
+/**
+ * @param {{ polish?: boolean }} [opts]
+ */
+async function stopDictation(opts = {}) {
+  const target = dictationTarget;
   if (dictationEngine) {
     await dictationEngine.stop();
   }
   dictationRecording = false;
   setDictationWaveform();
   syncDictationChrome();
+  if (opts.polish) {
+    await polishStoppedDictation(target);
+  }
+}
+
+/**
+ * Post-edit после stop: notes → dictationText; advice → поле совета.
+ * @param {"notes" | "advice"} target
+ */
+async function polishStoppedDictation(target) {
+  const locale = getLocale();
+  if (target === "advice") {
+    const form = reviewPanel?.form;
+    const raw = form
+      ? String(new FormData(form).get("advice") || "").trim()
+      : "";
+    if (!raw) return;
+    const polished = await polishDictationText(raw, {
+      maxLen: ADVICE_MAX_LEN,
+      locale,
+    });
+    reviewPanel.setAdviceText?.(polished);
+    return;
+  }
+  const raw = dictationText.trim();
+  if (!raw) return;
+  dictationText = await polishDictationText(raw, {
+    maxLen: DICTATION_MAX_LEN,
+    locale,
+  });
 }
 
 /**
@@ -897,7 +956,7 @@ async function toggleDictation(target) {
   dictationBusy = true;
   try {
     if (dictationRecording) {
-      await stopDictation();
+      await stopDictation({ polish: true });
       return;
     }
     await startDictation(target);
@@ -1311,7 +1370,9 @@ function openReview() {
     return;
   }
 
-  void stopDictation();
+  void (async () => {
+    await stopDictation({ polish: true });
+  })();
 
   void homeScreen.close();
   void settingsScreen.close();
@@ -1935,9 +1996,9 @@ async function applyRoute(id, opts = {}) {
       if (access === "gone") return;
       session = getSession();
       urlSlotFree = slotResult.ok ? slotResult.free : false;
-    } else if (id === "report") {
-      // Open по кэшу — settle+profile не блокируют первый paint /report.
-      // Ban/gone догоняют фоном (exit уже внутри reconcile).
+    } else if (id === "report" || id === "settings") {
+      // Open по кэшу — settle+profile не блокируют первый paint /report
+      // и side-panel настроек. Ban/gone догоняют фоном (exit уже внутри reconcile).
       void reconcileSessionAccess().then((access) => {
         if (access === "gone") return;
         if (access === "banned" && activeRouteId !== "banned") {
@@ -2056,13 +2117,25 @@ async function applyRoute(id, opts = {}) {
     if (target === "home") {
       const view = currentHomeView();
       canonicalizeHomeSearch(view);
-      void homeScreen.open(view);
+      // Возврат из side-panel настроек: home не закрывался — только вид,
+      // иначе повторный entrance-каскад и скролл ленты в 0.
+      if (prevRouteId === "settings") {
+        void homeScreen.setView(view);
+      } else {
+        void homeScreen.open(view);
+      }
       return;
     }
     if (target === "settings") {
       // Side-panel поверх home (как rules), deep link /settings сохраняем.
       // Не парсить search с /settings — иначе lastHomeView сбросится в feed.
-      void homeScreen.open(lastHomeView);
+      // Home уже на экране → только setView: иначе повторный entrance-каскад,
+      // сброс скролла ленты и лишний refetch списков.
+      if (prevRouteId === "home") {
+        void homeScreen.setView(lastHomeView);
+      } else {
+        void homeScreen.open(lastHomeView);
+      }
       settingsScreen.open();
       return;
     }
