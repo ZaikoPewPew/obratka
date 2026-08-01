@@ -1,15 +1,16 @@
 /**
- * SWR-кэш вкладок home: feed / mine / rating.
+ * SWR-кэш вкладок home: feed / feedReviewed / mine / rating.
  * Memory + sessionStorage (`obratka.homeLists.<userId>`), чтобы SPA и F5
  * не мигали skeleton при наличии **непустых** данных. Пустой `[]` для UI —
  * miss (skeleton), иначе flash empty до revalidate.
  */
 
-/** @typedef {'feed' | 'mine' | 'rating'} HomeListTabId */
+/** @typedef {'feed' | 'feedReviewed' | 'mine' | 'rating'} HomeListTabId */
 
 /**
  * @typedef {{
  *   feed: unknown[] | null;
+ *   feedReviewed: unknown[] | null;
  *   mine: unknown[] | null;
  *   rating: unknown[] | null;
  * }} HomeListTabsCache
@@ -24,7 +25,7 @@ const memoryByUser = new Map();
  * @returns {HomeListTabsCache}
  */
 function emptyTabs() {
-  return { feed: null, mine: null, rating: null };
+  return { feed: null, feedReviewed: null, mine: null, rating: null };
 }
 
 /**
@@ -50,10 +51,20 @@ function isItemList(value) {
 function parseStored(raw) {
   if (!raw || typeof raw !== "object") return null;
   const feed = "feed" in raw && raw.feed === null ? null : raw.feed;
+  const feedReviewed =
+    "feedReviewed" in raw && raw.feedReviewed === null
+      ? null
+      : raw.feedReviewed;
   const mine = "mine" in raw && raw.mine === null ? null : raw.mine;
   const rating = "rating" in raw && raw.rating === null ? null : raw.rating;
   return {
     feed: feed == null ? null : isItemList(feed) ? feed : null,
+    feedReviewed:
+      feedReviewed == null
+        ? null
+        : isItemList(feedReviewed)
+          ? feedReviewed
+          : null,
     mine: mine == null ? null : isItemList(mine) ? mine : null,
     rating: rating == null ? null : isItemList(rating) ? rating : null,
   };

@@ -11,7 +11,7 @@
 - `legendary-online-panel.css` — fixed-чип «Топы в сети» слева снизу на home.
 - `feedback.css` — fixed FAB feedback (Telegram) на home.
 - `notification.css` — toast Notification (top-right под аватаром home).
-- `tabs-panel.css` — сегмент Активные / Завершенные на «Мои» (`createTabsPanel`, `--tabs-panel-*`).
+- `tabs-panel.css` — сегмент feed/mine на home (`createTabsPanel`, `--tabs-panel-*`).
 - `success-screen.css` — `/done` (пресеты успеха).
 - `ban-screen.css` — `/banned` (блок аккаунта, красный mesh).
 - `report-screen.css` — `/report` (листы + жалоба).
@@ -45,7 +45,8 @@
 | `--url-screen-error-mesh-*` | палитра invalid (= ban) |
 | `--auth-screen-*` | divider / providers / OTP hint / links |
 | `--auth-code-*` | ячейки OTP / caret / `--auth-code-resend-cooldown` |
-| `--shell-review-*` | квиз / report / done |
+| `--shell-review-*` | квиз / report / done (в т.ч. `--shell-review-done-btn-padding-x`, `--shell-review-done-loader-*`) |
+| `--home-screen-card-reviewed-*` | лейбл «Отчёт отправлен» на карточке сегмента «Уже отревьюено» |
 | `--shell-review-slider-*` | шкалы context/visual (readout / hint / track / canvas / thumb / stops / title motion) |
 | `--control-rec-*` / `--color-recording` | чип надиктовки в шапке `/review` |
 | `--shell-review-rec-*` | кнопка надиктовки в поле «Главный совет» |
@@ -53,7 +54,7 @@
 | `--home-screen-review-intro-*` | видео-слот intro-модалки (max 552, aspect 1256/720) |
 | `--home-screen-tabbar-*` | glass track (gray-900 10% / white on-dark 20% / blur 20), hide/thumb/label/contrast; dock-gap + submit (56×56 Google blue) + tab-dot (6px Google red) |
 | `--home-screen-reveal-delay-*` | entrance stagger на `/home` (topbar → body → dock → fab); dock = `motion-reveal-dock` **без** opacity (glass `backdrop-filter`) |
-| `--tabs-panel-*` | сегмент Активные/Завершенные (track / tab / thumb / tab-dot) |
+| `--tabs-panel-*` | сегмент feed/mine (track / tab / thumb / tab-dot) |
 | `--app-modal-*` | универсальная модалка (Figma Modal) |
 
 Handoff без анимации visual: класс `.url-screen--handoff` + `brandScreenTransition.js`.

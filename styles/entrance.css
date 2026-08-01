@@ -320,7 +320,8 @@
     filter: none;
   }
 
-  .auth-screen__provider-loader {
+  .auth-screen__provider-loader,
+  .review-panel__done-loader {
     animation: none;
   }
 

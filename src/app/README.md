@@ -55,7 +55,7 @@ referral → auth → (authCode) → onboarding → home
 
 Auth-защита и Dashboard: [`auth-screen/README.md`](../components/auth-screen/README.md).  
 Brand visual / field errors: [`brand-screen-visual`](../components/brand-screen-visual/README.md), [`FIELD_ERROR.md`](../utils/FIELD_ERROR.md).  
-Home: [`home-screen/README.md`](../components/home-screen/README.md) (`homeRoute` query, feed/mine/rating топ-50 по репутации, SWR `homeListCache`, intro до claim, mine report gate, feedSeen/3/3, «Топы в сети», tabbar-dock + submit, entrance cascade).
+Home: [`home-screen/README.md`](../components/home-screen/README.md) (`homeRoute` query feed/mine/rating + filter на feed|mine, топ-50 по репутации, SWR `homeListCache` feed/feedReviewed/mine/rating, Ждёт/Уже + Ещё/Завершенные, intro до claim, mine report gate, feedSeen/3/3, «Топы в сети», tabbar-dock + submit, entrance cascade).
 Url: [`url-screen/README.md`](../components/url-screen/README.md) (back-chip + done).  
 Надиктовка (`/review` + поле совета): [`lib/dictation/README.md`](../lib/dictation/README.md).  
 Post-edit пунктуации: [`dictationPolish.js`](../api/dictationPolish.js) → Edge [`polish-dictation`](../../supabase/functions/polish-dictation/README.md).  

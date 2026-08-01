@@ -84,7 +84,7 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 
 Handoff соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
-`home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки feed/mine/rating (топ-50 по репутации, `listRatingTop`); SWR `homeListCache`; fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB feedback (`feedback`, Telegram); toast `notification` (нет уток / слот занят); intro до claim (`homeReviewIntro*`); `reviewedByMe` после submit → фильтр из ленты; mine report gate (`homeMineNotReady*`); фильтр Активные/Завершенные (`tabs-panel`); free-slot «Мои на ревью» до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / toast `homeNotifySlotTaken`); нет монет → toast `homeNotifyNoDucks` + buzz submit + чип баланса; точка на «На ревью» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`); entrance cascade на `--open` (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
+`home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки Чужие/Мои/Рейтинг (`feed`/`mine`/`rating`, топ-50 по репутации, `listRatingTop`); SWR `homeListCache` (`feed`/`feedReviewed`/`mine`/`rating`); fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB feedback (`feedback`, Telegram); toast `notification` (нет уток / слот занят); intro до claim (`homeReviewIntro*`); на feed — сегмент «Ждёт ревью / Уже отревьюено» (`tabs-panel`; reviewed → `listReviewedPortfolios` + лейбл `homeCardReviewedLabel`); open-лента без `reviewedByMe`; mine report gate (`homeMineNotReady*`); на mine — «Ещё на ревью / Завершенные»; free-slot «Ещё на ревью» до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / toast `homeNotifySlotTaken`); нет монет → toast `homeNotifyNoDucks` + buzz submit + чип баланса; точка на «Чужие посты» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`); entrance cascade на `--open` (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
 `account-menu` — поповер под аватаром; identity read-only; settings / invite (`homeInviteMessage` на copy/share) / contacts / rules / sign out.
 `side-panel` — боковая панель справа (home → «Правила», Figma `517:4740`); слот контента; без `history` / `go()`.  
 `settings-screen` — side-panel поверх home на `/settings` (editable name/Telegram/role/workplace; email/grade/created_at read-only; sticky Save).
@@ -112,7 +112,7 @@ src/components/
   brand-screen-visual/    ← mesh + марка, variants
   app-modal/              ← универсальная модалка (слот + CTA)
   side-panel/             ← боковая панель справа (слот; «Правила»)
-  tabs-panel/             ← сегмент Активные/Завершенные (Figma tabspanel)
+  tabs-panel/             ← сегмент feed/mine (Figma tabspanel)
   referral-screen/
   auth-screen/
   auth-code-screen/
@@ -138,8 +138,8 @@ src/utils/
   brandScreenTransition.js / meshGradientWash.js / motionTokens.js
   backdropLuminance.js    ← яркость фона под tabbar → --on-dark
   homeRoute.js            ← /home query ↔ feed/mine/rating + mine filter
-  homeListCache.js        ← SWR feed/mine/rating (memory + sessionStorage)
-  feedSeen.js             ← seen id кейсов ленты → точка на «На ревью»
+  homeListCache.js        ← SWR feed/feedReviewed/mine/rating (memory + sessionStorage)
+  feedSeen.js             ← seen id open-ленты → точка на «Чужие посты»
   mineReadySeen.js        ← seen id готовых отчётов → точка на «Мои» / «Завершенные»
   reviewReport.js         ← answers → секции PDF (tier × gradeZone, L1/L2/L3; см. QUIZ.md)
 
@@ -195,7 +195,7 @@ Shared (не экраны флоу):
 | `createBrandScreenShell` | split form + visual |
 | `createBrandScreenVisual` | mesh + марка |
 | `createAppModal` | оверлей-диалог; слот `content` + primary/secondary; без `history` |
-| `createTabsPanel` | сегмент табов (Активные/Завершенные на «Мои») |
+| `createTabsPanel` | сегмент табов (feed: Ждёт/Уже; mine: Ещё/Завершенные) |
 
 | Фабрика | Path | Статус |
 |---------|------|--------|
@@ -203,7 +203,7 @@ Shared (не экраны флоу):
 | `createAuthScreen` | `/registration` | UI + Email → authCode / Telegram / Google (shell) |
 | `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` (shell) |
 | `createOnboardingScreen` | `/onboarding` | UI → profiles (shell) |
-| `createHomeScreen` | `/home` + query | UI (feed/mine/rating топ-50 по репутации + SWR + intro + mine gate + Активные/Завершенные + free-slot + feedSeen/3/3 + «Топы в сети» + feedback + tabbar-dock + entrance cascade) |
+| `createHomeScreen` | `/home` + query | UI (Чужие/Мои/Рейтинг топ-50 + SWR + intro + mine gate + Ждёт/Уже + Ещё/Завершенные + free-slot + feedSeen/3/3 + «Топы в сети» + feedback + tabbar-dock + entrance cascade) |
 | `createSettingsScreen` | `/settings` | Side-panel профиля (sticky Save) |
 | `createUrlScreen` | `/portfolio` | UI (back-chip → home; submit + done via `setVariant`; shell) |
 | iframe-shell + timer + rec | `/review` | UI (заметки → `answers.dictation`) |
@@ -232,7 +232,7 @@ Home entrance: `--home-screen-reveal-delay-*` + `motion-reveal-dock` (тольк
 
 ## i18n
 
-Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeCardReport*` / `homeCardReportPending*` / `homeTabMineReadyAria` / `homeReputation*` / `homeBalance*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*`, `modalCloseAria`, `url*` / `urlScreenBack*`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `reviewRec*` / `reviewAdviceRec*` / `reviewContextShort`·`Value*`·`Hint*` / `reviewVisualShort`·`Value*`·`Hint*` / `report*` / `reportDictationTitle`, `frame*` / `controls*`).
+Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeFeedFilter*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeEmptyFeedReviewed` / `homeCardReviewedLabel` / `homeCardReport*` / `homeCardReportPending*` / `homeTabMineReadyAria` / `homeReputation*` / `homeBalance*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*`, `modalCloseAria`, `url*` / `urlScreenBack*`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `reviewRec*` / `reviewAdviceRec*` / `reviewContextShort`·`Value*`·`Hint*` / `reviewVisualShort`·`Value*`·`Hint*` / `report*` / `reportDictationTitle`, `frame*` / `controls*`).
 Правило: `.cursor/rules/i18n.mdc`.
 
 Таймер `/review` и intro copy: `REVIEW_SESSION_SECONDS` в [`src/config/review.js`](src/config/review.js).  
@@ -274,7 +274,7 @@ iframe — пауза при `visibility hidden`; external — wall-clock + де
 - [`src/config/review.js`](src/config/review.js) — `REVIEW_SESSION_SECONDS`
 - [`src/utils/homeListCache.js`](src/utils/homeListCache.js) — кэш вкладок home
 - [`src/utils/homeRoute.js`](src/utils/homeRoute.js) — parse/build/canonical home query
-- [`src/utils/feedSeen.js`](src/utils/feedSeen.js) — seen кейсов ленты → точка на «На ревью»
+- [`src/utils/feedSeen.js`](src/utils/feedSeen.js) — seen кейсов open-ленты → точка на «Чужие посты»
 - [`src/utils/mineReadySeen.js`](src/utils/mineReadySeen.js) — seen 3/3 → точка на «Мои» / «Завершенные»
 - [`QUIZ.md`](QUIZ.md) — пул вопросов, схема `answers`, L1/L2/L3 PDF
 - [`src/components/scale-slider/README.md`](src/components/scale-slider/README.md) — шкалы квиза 1–5 (canvas, ступени, приписки)

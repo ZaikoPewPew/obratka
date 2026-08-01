@@ -22,14 +22,18 @@ describe("parseHomeView", () => {
     assert.equal(parseHomeView("?tab=MINE").tab, "mine");
   });
 
-  it("reads filter only on mine", () => {
+  it("reads filter on feed and mine", () => {
     assert.deepEqual(parseHomeView("?tab=mine&filter=completed"), {
       tab: "mine",
       filter: "completed",
     });
     assert.deepEqual(parseHomeView("?tab=feed&filter=completed"), {
       tab: "feed",
-      filter: "active",
+      filter: "completed",
+    });
+    assert.deepEqual(parseHomeView("?filter=completed"), {
+      tab: "feed",
+      filter: "completed",
     });
     assert.deepEqual(parseHomeView("?tab=rating&filter=completed"), {
       tab: "rating",
@@ -54,7 +58,7 @@ describe("buildHomeSearch", () => {
   it("omits defaults", () => {
     assert.deepEqual(buildHomeSearch(), {});
     assert.deepEqual(buildHomeSearch({ tab: "feed" }), {});
-    assert.deepEqual(buildHomeSearch({ tab: "feed", filter: "completed" }), {});
+    assert.deepEqual(buildHomeSearch({ tab: "feed", filter: "active" }), {});
     assert.deepEqual(buildHomeSearch({ tab: "mine", filter: "active" }), {
       tab: "mine",
     });
@@ -66,10 +70,13 @@ describe("buildHomeSearch", () => {
       tab: "mine",
       filter: "completed",
     });
+    assert.deepEqual(buildHomeSearch({ tab: "feed", filter: "completed" }), {
+      filter: "completed",
+    });
     assert.deepEqual(buildHomeSearch({ tab: "rating" }), { tab: "rating" });
   });
 
-  it("drops filter outside mine", () => {
+  it("drops filter outside feed/mine", () => {
     assert.deepEqual(buildHomeSearch({ tab: "rating", filter: "completed" }), {
       tab: "rating",
     });
@@ -86,6 +93,13 @@ describe("isCanonicalHomeSearch", () => {
     assert.equal(
       isCanonicalHomeSearch("?tab=mine&filter=completed", {
         tab: "mine",
+        filter: "completed",
+      }),
+      true,
+    );
+    assert.equal(
+      isCanonicalHomeSearch("?filter=completed", {
+        tab: "feed",
         filter: "completed",
       }),
       true,

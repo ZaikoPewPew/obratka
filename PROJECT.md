@@ -14,8 +14,9 @@
 | Auth: Email OTP, Telegram, Google | wired → `auth.users` + `profiles` |
 | Онбординг → `profiles` | wired |
 | Home: лента/мои/рейтинг, URL-query, баланс, репутация, account-menu | wired (рейтинг — `listRatingTop` / топ-50 по `reputation`) |
-| Home: SWR-кэш вкладок + silent slot patch | wired (`homeListCache.js`: feed/mine/rating) |
-| Home: точка «новый кейс» на «На ревью» | wired (`feedSeen.js` + `listFeedPortfolioIds`) |
+| Home: SWR-кэш вкладок + silent slot patch | wired (`homeListCache.js`: feed/feedReviewed/mine/rating) |
+| Home: точка «новый кейс» на «Чужие посты» | wired (`feedSeen.js` + `listFeedPortfolioIds`) |
+| Home: сегмент «Ждёт / Уже отревьюено» | wired (`listReviewedPortfolios` + `tabs-panel` на feed; RLS exists review) |
 | Home: «Топы в сети» (fixed-чип) | wired (`legendary-online-panel` + `legendary_presence`) |
 | Home: free-slot «Мои» + max 1 pending | wired (`MAX_MINE_PENDING`, `submit_portfolio`) |
 | Home tabbar dock: glass + «Закинуть своё» справа | wired (`tabbar-dock`, `--on-dark`, entrance `motion-reveal-dock`) |
@@ -30,23 +31,23 @@
 
 ### Home — что нового в UX
 
-- **SWR ленты:** `feed` / `mine` / `rating` в memory + `sessionStorage` (`obratka.homeLists.<userId>`); open / смена таба / F5 без skeleton при **непустом** hit; кэш `[]` → skeleton до confirm refresh; тихий `refresh`; logout → `clearHomeListCache`.
+- **SWR ленты:** `feed` / `feedReviewed` / `mine` / `rating` в memory + `sessionStorage` (`obratka.homeLists.<userId>`); open / смена таба / F5 без skeleton при **непустом** hit; кэш `[]` → skeleton до confirm refresh; тихий `refresh`; logout → `clearHomeListCache`.
 - **Silent refresh:** при тех же id карточек — патч только reviewer-слотов (без thum.io); новые id — rebuild + reveal только для них.
-- **Порядок feed:** `sortFeedForSlotClosure` — ближе к 3/3 → FIFO (не newest-first). Уже отревьюенные (`reviewedByMe`) **фильтруются** из ленты до сорта. Дверь claim = `reviews_count < target` (live не лимит; late overshoot ок). См. home-screen README.
-- **Отправленный отчёт:** `reviewedByMe` только после INSERT в `reviews`; карточка исчезает из твоей ленты (и из `listFeedPortfolioIds` для точки «новый кейс»), без intro/notice и повторного claim.
+- **Порядок feed:** `sortFeedForSlotClosure` — ближе к 3/3 → FIFO (не newest-first). Уже отревьюенные (`reviewedByMe`) **фильтруются** из open-ленты («Ждёт ревью») до сорта; видны в сегменте «Уже отревьюено» (`listReviewedPortfolios`). Дверь claim = `reviews_count < target` (live не лимит; late overshoot ок). См. home-screen README.
+- **Отправленный отчёт:** `reviewedByMe` только после INSERT в `reviews`; карточка уходит из «Ждёт ревью» (и из `listFeedPortfolioIds` для точки «новый кейс») в «Уже отревьюено», без intro/notice и повторного claim.
 - **Intro до claim:** клик по чужой карточке → если уже набрали target (`isPortfolioOpenForReview`) → `homeNoSlots*`; иначе `createAppModal` `homeReviewIntro*` (тайтл + описание + видео-пример, CTA «Сюдаа его!») → claim → `/review`. «Не сейчас» / закрытие — без claim.
 - **Abort / hard nav:** SPA `releaseHeldClaim`; `pagehide` → `releasePortfolioClaimKeepalive`; per-tab `obratka.reviewClaim` + boot reconcile — active «Аноним» не залипает после ухода (см. `review-claims.mdc`). SQL: `portfolio_reviewer_slots` чистит expired перед list.
 - **Mine report gate:** `reviewsCount < targetReviews` → `homeMineNotReady*`; иначе `/report`. Own-карточки всегда `cursor: pointer` (не `not-allowed`).
-- **Фильтр «Мои»:** сегмент Активные / Завершенные (`tabs-panel`); завершённые = 3/3 (`reviewsCount >= targetReviews`).
-- **Free-slot «Мои на ревью»:** до `MAX_MINE_PENDING` (=1) — реальная карточка или dashed «Свободный слот» (`homeMineSlotFree*`). CTA «Закинуть»: сначала занятый слот → toast `homeNotifySlotTaken`, потом нет монет → toast `homeNotifyNoDucks` + buzz на submit + чипе баланса. Подача — RPC `submit_portfolio` (atomic spend+insert).
+- **Сегменты tabs-panel:** на «Чужие посты» — Ждёт ревью / Уже отревьюено; на «Мои» — Ещё на ревью / Завершенные (`reviewsCount >= targetReviews`).
+- **Free-slot «Ещё на ревью»:** до `MAX_MINE_PENDING` (=1) — реальная карточка или dashed «Свободный слот» (`homeMineSlotFree*`). CTA «Закинуть»: сначала занятый слот → toast `homeNotifySlotTaken`, потом нет монет → toast `homeNotifyNoDucks` + buzz на submit + чипе баланса. Подача — RPC `submit_portfolio` (atomic spend+insert).
 - **Экономика:** `REVIEW_REWARD = 10`, `SUBMIT_COST = 30` (старт `balance = 0` → 3 чужих ревью до своей подачи). Награда только после submit отчёта; abort/release claim — без монет. Свободный слот + нет монет на «Закинуть своё» → error-buzz на submit + чипе баланса (без модалки). Правило: `.cursor/rules/wallet.mdc`.
 - **Вкладка «Рейтинг»:** третий tab `rating`; топ-50 по `reputation` (`listRatingTop` / `rating_leaderboard.sql`, снапшот раз в сутки); карточки в `.home-screen__rating-list` (aside `rating/` **не** монтируется); плашка репутации `min-width`/`height` 52px, padding-x 16px (иконки positive/neutral/negative).
 - **«Топы в сети»:** fixed-чип слева снизу (`legendary-online-panel` + heartbeat/list RPC); скрыт, если никого нет.
-- **Deep links home:** `/home`, `?tab=mine`, `?tab=mine&filter=completed`, `?tab=rating`; query канонизирует `homeRoute.js`, Back/Forward переключает вид без remount.
+- **Deep links home:** `/home`, `?filter=completed` (Чужие / уже отревьюено), `?tab=mine`, `?tab=mine&filter=completed`, `?tab=rating`; query канонизирует `homeRoute.js`, Back/Forward переключает вид без remount.
 - **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 45` (review shell + intro copy). iframe — пауза при скрытой вкладке; external — wall-clock без паузы; конец → `src/assets/audio/Timer-end.wav` + стоп надиктовки (+ polish notes) → quiz.
 - **Tabbar dock:** glass-таббар + кнопка «Закинуть своё» справа (56×56, Google blue, gap 8px); hide при скролле уезжает весь док. Светлый трек — gray-900 10% + blur 20; тёмный превью → `--on-dark` — white 20%.
 - **Чипы шапки:** репутация → баланс → аватар. Submit и уведомления из topbar убраны.
-- **Точка на «На ревью»:** красная 6px в углу вкладки при **новом** кейсе в ленте; открытие «На ревью» гасит (`feedSeen`), новый id снова зажигает.
+- **Точка на «Чужие посты»:** красная 6px в углу вкладки при **новом** кейсе в open-ленте; открытие «Чужие посты» гасит (`feedSeen`), новый id снова зажигает.
 - **Точка на «Мои посты»:** красная 6px в углу вкладки при **непросмотренном** готовом отчёте (3/3); открытие «Завершенные» гасит (`mineReadySeen`), новый готовый id снова зажигает.
 - Подробно: [`home-screen/README.md`](src/components/home-screen/README.md).
 
@@ -216,7 +217,7 @@ SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `p
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
 | Side panel | [`side-panel`](src/components/side-panel/README.md) — панель справа (слот); home → «Правила» |
-| Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `feedback`; feed/mine/rating (`listRatingTop`, топ-50 по репутации); URL-query; лента SWR; Активные/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` / entrance cascade |
+| Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `feedback`; feed/mine/rating (`listRatingTop`, топ-50 по репутации); URL-query; лента SWR (`feed`/`feedReviewed`/`mine`/`rating`); Ждёт/Уже + Ещё/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` / entrance cascade |
 | Review | `index.html` `.iframe-shell` + таймер + чип **rec** (заметки → `answers.dictation` + polish) в `main.js`; embed: `resolvePortfolioEmbed` / external UI |
 | Quiz | `review-screen` + `review-panel` + [`scale-slider`](src/components/scale-slider/README.md) (context/visual **1–5**; условный `pain`; рыночный `tier`) + mic → `advice`. SoT: [`QUIZ.md`](QUIZ.md) |
 | Success | `success-screen` (`/done`) |

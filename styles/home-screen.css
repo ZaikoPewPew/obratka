@@ -708,6 +708,11 @@
   --home-screen-card-surface: var(--home-screen-slot-empty-card-bg);
 }
 
+/* Некликабельная карточка (empty state) */
+.home-screen__card--static {
+  cursor: default;
+}
+
 .home-screen__slot-empty-preview {
   box-sizing: border-box;
   display: grid;
@@ -1003,6 +1008,21 @@
   overflow: visible;
 }
 
+.home-screen__card--reviewed .home-screen__card-progress {
+  width: auto;
+  min-width: var(--home-screen-progress-width);
+  padding-inline: var(--home-screen-card-reviewed-padding-x);
+}
+
+.home-screen__card-reviewed-label {
+  font-family: var(--font-family);
+  font-size: var(--home-screen-card-reviewed-size);
+  font-weight: var(--home-screen-card-reviewed-weight);
+  line-height: normal;
+  color: var(--home-screen-card-reviewed-color);
+  white-space: nowrap;
+}
+
 .home-screen__reviewer-slots {
   box-sizing: border-box;
   display: inline-flex;
@@ -1140,6 +1160,7 @@
   flex-shrink: 0;
 }
 
+/* Empty state ленты / «Завершенные» — визуал свободного слота */
 .home-screen__empty {
   box-sizing: border-box;
   display: flex;
@@ -1147,17 +1168,7 @@
   justify-content: center;
   width: 100%;
   max-width: var(--home-screen-empty-width);
-  height: var(--home-screen-empty-height);
   margin: 0;
-  padding: var(--home-screen-empty-padding);
-  border-radius: var(--home-screen-empty-radius);
-  background: var(--home-screen-empty-bg);
-  color: var(--home-screen-empty-color);
-  font-family: var(--font-family);
-  font-size: var(--home-screen-empty-font-size);
-  font-weight: var(--home-screen-empty-font-weight);
-  line-height: normal;
-  text-align: center;
 }
 
 .home-screen__empty[hidden] {

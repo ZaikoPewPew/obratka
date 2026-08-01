@@ -1,5 +1,6 @@
 /**
- * Вкладки home ↔ query (`/home?tab=mine&filter=completed`).
+ * Вкладки home ↔ query (`/home?tab=mine&filter=completed`,
+ * `/home?filter=completed` для ленты «Уже отревьюено»).
  *
  * Экран один (`ROUTE_PATHS.home`), вкладка и сегмент — параметры, как `?id=`
  * у `/report`. Дефолты (`feed` / `active`) в URL не пишем.
@@ -34,8 +35,17 @@ function toSearchParams(search) {
 }
 
 /**
+ * Вкладки, на которых сегмент `filter` имеет смысл.
+ * @param {HomeTabId} tab
+ * @returns {boolean}
+ */
+function tabSupportsFilter(tab) {
+  return tab === "feed" || tab === "mine";
+}
+
+/**
  * Вкладка + сегмент из query. Мусор и дефолты → `feed` / `active`.
- * `filter` имеет смысл только на `mine`.
+ * `filter` имеет смысл на `feed` и `mine`.
  *
  * @param {string | URLSearchParams | null | undefined} search
  * @returns {HomeView}
@@ -50,7 +60,7 @@ export function parseHomeView(search) {
       : DEFAULT_HOME_TAB
   );
 
-  if (tab !== "mine") {
+  if (!tabSupportsFilter(tab)) {
     return { tab, filter: DEFAULT_MINE_FILTER };
   }
 
@@ -68,7 +78,7 @@ export function parseHomeView(search) {
 
 /**
  * Канонический search для `go` / `syncRoute`: без дефолтов и без `filter`
- * вне вкладки «Мои».
+ * вне вкладок с сегментом (feed / mine).
  *
  * @param {{ tab?: HomeTabId; filter?: MineFilterId }} [view]
  * @returns {Record<string, string>}
@@ -84,7 +94,7 @@ export function buildHomeSearch(view = {}) {
   /** @type {Record<string, string>} */
   const search = {};
   if (tab !== DEFAULT_HOME_TAB) search[HOME_TAB_PARAM] = tab;
-  if (tab === "mine" && filter !== DEFAULT_MINE_FILTER) {
+  if (tabSupportsFilter(tab) && filter !== DEFAULT_MINE_FILTER) {
     search[HOME_FILTER_PARAM] = filter;
   }
   return search;

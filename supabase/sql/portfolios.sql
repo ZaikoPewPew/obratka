@@ -196,7 +196,8 @@ create trigger reviews_after_insert
 alter table public.portfolios enable row level security;
 alter table public.reviews enable row level security;
 
--- Лента: свои всегда; чужие pending — только в лиге ревьюера.
+-- Лента: свои всегда; чужие pending — только в лиге ревьюера;
+-- уже отревьюенные (в т.ч. done) — для сегмента «Уже отревьюено».
 drop policy if exists "portfolios_select_feed" on public.portfolios;
 create policy "portfolios_select_feed"
   on public.portfolios for select
@@ -206,6 +207,12 @@ create policy "portfolios_select_feed"
     or (
       status = 'pending'
       and public.can_review_portfolio(owner_id, (select auth.uid()))
+    )
+    or exists (
+      select 1
+      from public.reviews r
+      where r.portfolio_id = portfolios.id
+        and r.reviewer_id = (select auth.uid())
     )
   );
 

@@ -481,7 +481,16 @@
   --shell-review-done-title-size: var(--font-size-3xl);
   --shell-review-done-title-weight: var(--font-weight-regular);
   --shell-review-done-actions-gap: var(--space-3);
-  --shell-review-done-btn-busy-opacity: var(--auth-screen-submit-busy-opacity);
+  --shell-review-done-btn-padding-x: var(--space-6);
+  --shell-review-done-loader-size: 28px;
+  --shell-review-done-loader-stroke: 2.5px;
+  --shell-review-done-loader-duration: 700ms;
+  --shell-review-done-loader-track: color-mix(
+    in srgb,
+    var(--shell-review-submit-text) 28%,
+    transparent
+  );
+  --shell-review-done-loader-arc: var(--shell-review-submit-text);
 
   /* Success screen (тайтл + exit, без листа) */
   --success-screen-z: var(--z-modal);
@@ -695,6 +704,11 @@
   --home-screen-progress-padding: 10px;
   --home-screen-progress-bg: var(--color-surface);
   --home-screen-progress-radius: var(--radius-pill);
+  /* Статус «Отчёт отправлен» вместо слотов (сегмент «Уже отревьюено») */
+  --home-screen-card-reviewed-padding-x: var(--space-4);
+  --home-screen-card-reviewed-size: var(--font-size-sm);
+  --home-screen-card-reviewed-weight: var(--font-weight-medium);
+  --home-screen-card-reviewed-color: var(--color-text-muted);
   /* 3×32 + 2×(−4) = 88 */
   --home-screen-progress-slots-width: 88px;
   --home-screen-progress-slots-height: var(--space-8);

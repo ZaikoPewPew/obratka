@@ -54,7 +54,7 @@ Progress считает только **видимые** шаги (6 или 7 в 
 1. Шаги single / multi / scale / advice (контент из локалей `review*`).
 2. Шаг advice → `onReportReveal(true)` (лист справа на `review-screen`, `mode: "preview"`).
 3. Submit → `answersFromFormData` → `onComplete(answers)` (награда; снаружи могут добавить `dictation`) + `showDone` + `onReportReveal(false, { submitted: true })` + `onDoneChange(true)` → URL `/quiz/done`.
-4. CTA → `onExit` → home; `onNextCase` → claim следующего (лента + embed прогреваются на done через `prewarmNextReviewCase` в `main.js`). Если кандидатов нет — кнопка «Следующий кейс» скрыта (`setNextCaseVisible`), только «На главную». Пока идёт переход — `setNextCaseBusy`. Оркестрация в `main.js`.
+4. CTA → `onExit` → home; `onNextCase` → claim следующего (лента + embed прогреваются на done через `prewarmNextReviewCase` в `main.js`). Если кандидатов нет — кнопка «Следующий кейс» скрыта (`setNextCaseVisible`), только «На главную». Пока идёт переход — `setNextCaseBusy`: вместо подписи крутится `.review-panel__done-loader` (тот же язык, что loader провайдеров на `/registration`), подпись уходит в `aria-label` (`reviewDoneNextCaseBusy`). Оркестрация в `main.js`.
 
 Смена шага: leave/enter пачки `stage` + footer на `--motion-reveal-*` (`getMotionReveal`).  
 Переход в done: form/top уходят, затем enter `review-panel__done`.
@@ -63,7 +63,8 @@ Progress считает только **видимые** шаги (6 или 7 в 
 
 ## Стили / i18n
 
-Классы `.review-panel__*` в `iframe-shell.css`; токены `--shell-review-*` / `--shell-review-rec-*` / `--shell-review-slider-*`.  
+Классы `.review-panel__*` в `iframe-shell.css`; токены `--shell-review-*` / `--shell-review-rec-*` / `--shell-review-slider-*` / `--shell-review-done-loader-*`.  
+CTA на done — hug по контенту (`--shell-review-done-btn-padding-x`), не растягиваются на всю ширину.  
 Шкалы: [`scale-slider`](../scale-slider/README.md).  
 Ключи: `review*`, `reviewDone*` (`reviewDoneNextCaseBusy`), `reviewContinue`, `reviewAdviceRec*`, `reviewTier*`, `reviewPain*`, `reviewContextShort` / `Value*` / `Hint*`, `reviewVisualShort` / `Value*` / `Hint*` (1–5).  
 Мигание индикатора записи: `motion-recording-blink` в `styles/entrance.css`.

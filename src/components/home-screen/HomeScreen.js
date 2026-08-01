@@ -7,6 +7,7 @@ import {
   listMyPortfolios,
   listPortfoliosForReview,
   listReadyOwnReportIds,
+  listReviewedPortfolios,
   MAX_MINE_PENDING,
   portfolioPreviewUrl,
 } from "../../api/portfolios.js";
@@ -317,8 +318,11 @@ const SKELETON_CARD_COUNT = 5;
  */
 const MINE_ACTIVE_SKELETON_CARD_COUNT = MAX_MINE_PENDING;
 
-/** Сколько skeleton-карточек показывать, пока грузится рейтинг. */
-const RATING_SKELETON_CARD_COUNT = 8;
+/**
+ * Skeleton рейтинга — на всю длину топа (`list_rating_top` отдаёт 50),
+ * чтобы список сразу был скроллящимся и не «подпрыгивал» после загрузки.
+ */
+const RATING_SKELETON_CARD_COUNT = 50;
 
 /**
  * Обновление active-слотов, пока home открыт. Каждый тик — полный `refresh()`
@@ -855,26 +859,34 @@ export function createHomeScreen({
   const feed = document.createElement("div");
   feed.className = "home-screen__feed";
 
-  const mineFilterPanel = createTabsPanel({
+  const listFilterPanel = createTabsPanel({
     tabs: [
       { id: "active", label: "" },
       { id: "completed", label: "" },
     ],
     activeId: "active",
     onChange: (id) => {
-      setMineFilter(/** @type {MineFilterId} */ (id));
+      setListFilter(/** @type {MineFilterId} */ (id));
     },
   });
-  mineFilterPanel.root.hidden = true;
+  listFilterPanel.root.hidden = true;
 
   const list = document.createElement("ul");
   list.className = "home-screen__list";
 
-  const empty = document.createElement("p");
+  const empty = document.createElement("div");
   empty.className = "home-screen__empty";
   empty.hidden = true;
 
-  feed.append(mineFilterPanel.root, list, empty);
+  const emptyVisual = createSlotEmptyVisual("");
+  const emptyLabel = emptyVisual.label;
+  const emptyCard = document.createElement("div");
+  emptyCard.className =
+    "home-screen__card home-screen__card--slot-empty home-screen__card--static";
+  emptyCard.append(emptyVisual.preview, emptyVisual.meta);
+  empty.append(emptyCard);
+
+  feed.append(listFilterPanel.root, list, empty);
 
   const ratingView = document.createElement("div");
   ratingView.className = "home-screen__rating";
@@ -1170,6 +1182,9 @@ export function createHomeScreen({
 
   /** @type {HomePortfolioItem[]} */
   let items = [];
+  /** Кейсы «Уже отревьюено» (лента, сегмент completed). */
+  /** @type {HomePortfolioItem[]} */
+  let reviewedItems = [];
   /** @type {import("../../api/rating.js").RatingTopItem[]} */
   let ratingItems = [];
   let loading = false;
@@ -1181,6 +1196,8 @@ export function createHomeScreen({
   let wasSkeletonLoading = false;
   /** @type {HomeTabId} */
   let activeTab = "feed";
+  /** @type {MineFilterId} */
+  let feedFilter = "active";
   /** @type {MineFilterId} */
   let mineFilter = "active";
   /**
@@ -1277,12 +1294,14 @@ export function createHomeScreen({
           : t.homeListAria,
     );
     if (activeTab === "mine") {
-      empty.textContent =
+      emptyLabel.textContent =
         mineFilter === "completed"
           ? (t.homeEmptyMineCompleted ?? t.homeEmptyMine)
           : "";
+    } else if (activeTab === "feed" && feedFilter === "completed") {
+      emptyLabel.textContent = t.homeEmptyFeedReviewed ?? t.homeEmpty;
     } else {
-      empty.textContent = t.homeEmpty;
+      emptyLabel.textContent = t.homeEmpty;
     }
     feedTabLabel.textContent = t.homeTabFeed;
     mineTabLabel.textContent = t.homeTabMine;
@@ -1293,12 +1312,8 @@ export function createHomeScreen({
     syncFeedTabAria();
     syncMineTabAria();
     tabbar.setAttribute("aria-label", t.homeTabsAria);
-    mineFilterPanel.setLabels({
-      active: t.homeMineFilterActive ?? "",
-      completed: t.homeMineFilterCompleted ?? "",
-    });
-    mineFilterPanel.setAriaLabel(t.homeMineFilterAria ?? "");
-    syncMineFilterPanel();
+    syncListFilterCopy();
+    syncListFilterPanel();
     addBtn.setAttribute("aria-label", t.homeAddPortfolio);
     addBtn.title = t.homeAddPortfolio;
 
@@ -1449,7 +1464,55 @@ export function createHomeScreen({
    */
   function latestItem(id) {
     if (!id) return null;
-    return items.find((entry) => entry.id === id) ?? null;
+    return (
+      items.find((entry) => entry.id === id) ??
+      reviewedItems.find((entry) => entry.id === id) ??
+      null
+    );
+  }
+
+  /** Текущий сегмент tabs-panel для активной вкладки. */
+  function currentListFilter() {
+    return activeTab === "mine" ? mineFilter : feedFilter;
+  }
+
+  /**
+   * Список, который рисуем сейчас (feed open / feed reviewed / mine).
+   * @returns {HomePortfolioItem[]}
+   */
+  function getActiveItems() {
+    if (activeTab === "feed" && feedFilter === "completed") {
+      return reviewedItems;
+    }
+    return items;
+  }
+
+  /**
+   * @param {HomePortfolioItem[]} next
+   */
+  function assignActiveItems(next) {
+    if (activeTab === "feed" && feedFilter === "completed") {
+      reviewedItems = next;
+      return;
+    }
+    items = next;
+  }
+
+  function syncListFilterCopy() {
+    const t = getStrings();
+    if (activeTab === "mine") {
+      listFilterPanel.setLabels({
+        active: t.homeMineFilterActive ?? "",
+        completed: t.homeMineFilterCompleted ?? "",
+      });
+      listFilterPanel.setAriaLabel(t.homeMineFilterAria ?? "");
+      return;
+    }
+    listFilterPanel.setLabels({
+      active: t.homeFeedFilterActive ?? "",
+      completed: t.homeFeedFilterCompleted ?? "",
+    });
+    listFilterPanel.setAriaLabel(t.homeFeedFilterAria ?? "");
   }
 
   /**
@@ -1820,16 +1883,27 @@ export function createHomeScreen({
     if (mineReady === next) return;
     mineReady = next;
     mineTabDot.hidden = !next;
-    mineFilterPanel.setTabDot("completed", next);
+    listFilterPanel.setTabDot(
+      "completed",
+      activeTab === "mine" ? next : false,
+    );
     syncMineTabAria();
   }
 
-  function syncMineFilterPanel() {
-    const wasHidden = mineFilterPanel.root.hidden;
-    mineFilterPanel.root.hidden = activeTab !== "mine";
-    if (wasHidden && !mineFilterPanel.root.hidden) {
+  function syncListFilterPanel() {
+    const show = activeTab === "feed" || activeTab === "mine";
+    const wasHidden = listFilterPanel.root.hidden;
+    listFilterPanel.root.hidden = !show;
+    if (!show) return;
+    const filter = currentListFilter();
+    listFilterPanel.setActive(filter, { instant: true });
+    listFilterPanel.setTabDot(
+      "completed",
+      activeTab === "mine" ? mineReady : false,
+    );
+    if (wasHidden) {
       requestAnimationFrame(() => {
-        mineFilterPanel.syncThumb(true);
+        listFilterPanel.syncThumb(true);
       });
     }
   }
@@ -1846,29 +1920,42 @@ export function createHomeScreen({
    * @param {'tab' | 'filter'} reason
    */
   function emitViewChange(reason) {
-    onViewChange?.({ tab: activeTab, filter: mineFilter, reason });
+    onViewChange?.({ tab: activeTab, filter: currentListFilter(), reason });
   }
 
   /**
    * @param {MineFilterId} next
    * @param {{ silent?: boolean }} [opts]
    */
-  function setMineFilter(next, opts = {}) {
-    if (mineFilter === next) return;
-    mineFilter = next;
-    mineFilterPanel.setActive(next);
+  function setListFilter(next, opts = {}) {
+    if (activeTab === "mine") {
+      if (mineFilter === next) return;
+      mineFilter = next;
+      listFilterPanel.setActive(next);
+      body.scrollTop = 0;
+      lastScrollTop = 0;
+      if (next === "completed") {
+        acknowledgeMineReady(readyOwnCardIds(items));
+      }
+      syncCopy();
+      renderList();
+      if (!opts.silent) emitViewChange("filter");
+      return;
+    }
+    if (activeTab !== "feed") return;
+    if (feedFilter === next) return;
+    feedFilter = next;
+    listFilterPanel.setActive(next);
     body.scrollTop = 0;
     lastScrollTop = 0;
-    if (next === "completed") {
-      acknowledgeMineReady(readyOwnCardIds(items));
-    }
     syncCopy();
     renderList();
     if (!opts.silent) emitViewChange("filter");
   }
 
   /**
-   * На `mine` режет список по Мои на ревью / Мои завершенные; на `feed` — как есть.
+   * На `mine` режет список по Мои на ревью / Мои завершенные;
+   * на `feed` список уже выбран сегментом (open / reviewed).
    *
    * @param {HomePortfolioItem[]} listItems
    * @returns {HomePortfolioItem[]}
@@ -1939,7 +2026,8 @@ export function createHomeScreen({
     activeTab = tab;
     refreshEpoch += 1;
     syncTabButtons(tab);
-    syncMineFilterPanel();
+    syncListFilterCopy();
+    syncListFilterPanel();
     syncActiveView();
     showTabbar();
     body.scrollTop = 0;
@@ -1998,18 +2086,25 @@ export function createHomeScreen({
    */
   function applyViewState(view = {}) {
     const nextTab = normalizeTab(view.tab, activeTab);
-    const nextFilter =
-      nextTab === "mine"
-        ? normalizeFilter(view.filter, mineFilter)
-        : DEFAULT_MINE_FILTER;
+    const supportsFilter = nextTab === "feed" || nextTab === "mine";
+    const nextFilter = supportsFilter
+      ? normalizeFilter(
+          view.filter,
+          nextTab === "mine" ? mineFilter : feedFilter,
+        )
+      : DEFAULT_MINE_FILTER;
 
     if (activeTab !== nextTab) {
       activeTab = nextTab;
       refreshEpoch += 1;
     }
-    if (mineFilter !== nextFilter) {
+    if (nextTab === "mine" && mineFilter !== nextFilter) {
       mineFilter = nextFilter;
-      mineFilterPanel.setActive(nextFilter, { instant: true });
+    } else if (nextTab === "feed" && feedFilter !== nextFilter) {
+      feedFilter = nextFilter;
+    }
+    if (supportsFilter) {
+      listFilterPanel.setActive(nextFilter, { instant: true });
     }
   }
 
@@ -2021,19 +2116,26 @@ export function createHomeScreen({
    */
   async function setView(view = {}) {
     const nextTab = normalizeTab(view.tab, activeTab);
-    const nextFilter =
-      nextTab === "mine"
-        ? normalizeFilter(view.filter, mineFilter)
-        : DEFAULT_MINE_FILTER;
+    const supportsFilter = nextTab === "feed" || nextTab === "mine";
+    const nextFilter = supportsFilter
+      ? normalizeFilter(
+          view.filter,
+          nextTab === "mine" ? mineFilter : feedFilter,
+        )
+      : DEFAULT_MINE_FILTER;
 
     // Фильтр до вкладки: renderList внутри setActiveTab уже режет по нему.
     if (nextTab === activeTab) {
-      setMineFilter(nextFilter, { silent: true });
+      setListFilter(nextFilter, { silent: true });
       return;
     }
-    if (mineFilter !== nextFilter) {
+    if (nextTab === "mine") {
       mineFilter = nextFilter;
-      mineFilterPanel.setActive(nextFilter, { instant: true });
+    } else if (nextTab === "feed") {
+      feedFilter = nextFilter;
+    }
+    if (supportsFilter) {
+      listFilterPanel.setActive(nextFilter, { instant: true });
     }
     await setActiveTab(nextTab, { silent: true });
   }
@@ -2277,6 +2379,40 @@ export function createHomeScreen({
   }
 
   /**
+   * Визуал свободного слота (Figma Type=Queue): dashed-превью с подписью
+   * по центру + два meta-пилла. Общий для карточки слота и empty state.
+   * @param {string} labelText
+   * @returns {{
+   *   preview: HTMLDivElement;
+   *   meta: HTMLDivElement;
+   *   label: HTMLParagraphElement;
+   * }}
+   */
+  function createSlotEmptyVisual(labelText) {
+    const preview = document.createElement("div");
+    preview.className = "home-screen__slot-empty-preview";
+
+    const label = document.createElement("p");
+    label.className = "home-screen__slot-empty-label";
+    label.textContent = labelText;
+    preview.append(label);
+
+    const meta = document.createElement("div");
+    meta.className = "home-screen__slot-empty-meta";
+    meta.setAttribute("aria-hidden", "true");
+
+    const metaWide = document.createElement("span");
+    metaWide.className =
+      "home-screen__slot-empty-pill home-screen__slot-empty-pill--wide";
+    const metaNarrow = document.createElement("span");
+    metaNarrow.className =
+      "home-screen__slot-empty-pill home-screen__slot-empty-pill--narrow";
+    meta.append(metaWide, metaNarrow);
+
+    return { preview, meta, label };
+  }
+
+  /**
    * Placeholder свободного слота (Figma Type=Queue) на «Мои → Мои на ревью».
    * @returns {HTMLLIElement}
    */
@@ -2293,27 +2429,11 @@ export function createHomeScreen({
       t.homeMineSlotFreeAria ?? t.homeMineSlotFree ?? "",
     );
 
-    const preview = document.createElement("div");
-    preview.className = "home-screen__slot-empty-preview";
+    const { preview, meta, label } = createSlotEmptyVisual(
+      t.homeMineSlotFree ?? "",
+    );
     preview.setAttribute("aria-hidden", "true");
-
-    const label = document.createElement("p");
-    label.className = "home-screen__slot-empty-label";
     label.setAttribute("data-i18n", "homeMineSlotFree");
-    label.textContent = t.homeMineSlotFree ?? "";
-    preview.append(label);
-
-    const meta = document.createElement("div");
-    meta.className = "home-screen__slot-empty-meta";
-    meta.setAttribute("aria-hidden", "true");
-
-    const metaWide = document.createElement("span");
-    metaWide.className =
-      "home-screen__slot-empty-pill home-screen__slot-empty-pill--wide";
-    const metaNarrow = document.createElement("span");
-    metaNarrow.className =
-      "home-screen__slot-empty-pill home-screen__slot-empty-pill--narrow";
-    meta.append(metaWide, metaNarrow);
 
     button.append(preview, meta);
     button.addEventListener("click", () => {
@@ -2472,22 +2592,39 @@ export function createHomeScreen({
     const progress = document.createElement("div");
     progress.className = "home-screen__card-progress";
 
-    const slots = document.createElement("div");
-    slots.className = "home-screen__reviewer-slots";
-    fillReviewerSlots(slots, item);
-    progress.append(slots);
+    if (item.reviewedByMe) {
+      const reviewedLabel = document.createElement("span");
+      reviewedLabel.className = "home-screen__card-reviewed-label";
+      reviewedLabel.textContent = t.homeCardReviewedLabel ?? "";
+      progress.append(reviewedLabel);
+    } else {
+      const slots = document.createElement("div");
+      slots.className = "home-screen__reviewer-slots";
+      fillReviewerSlots(slots, item);
+      progress.append(slots);
+    }
 
     meta.append(person, progress);
     button.append(preview, meta);
 
-    if (item.isOwn) {
+    if (item.reviewedByMe) {
+      button.classList.add("home-screen__card--reviewed");
+      const label = t.homeCardReviewedLabel ?? "";
+      button.title = label;
+      button.setAttribute("aria-label", label);
+      button.addEventListener("click", () => {
+        const latest = latestItem(item.id) ?? item;
+        const url = typeof latest.url === "string" ? latest.url.trim() : "";
+        if (!url) return;
+        window.open(url, "_blank", "noopener,noreferrer");
+      });
+    } else if (item.isOwn) {
       button.classList.add("home-screen__card--own");
       syncOwnCardCopy(button, item);
       button.addEventListener("click", () => {
         openOwnCard(latestItem(item.id) ?? item);
       });
     } else {
-      // `reviewedByMe` уже отфильтрованы в `listPortfoliosForReview`.
       button.addEventListener("click", () => {
         openReviewIntro(latestItem(item.id) ?? item);
       });
@@ -2507,7 +2644,7 @@ export function createHomeScreen({
   function renderList(opts = {}) {
     const revealNewOnly = opts.revealNewOnly === true;
     const prevIds = opts.prevIds instanceof Set ? opts.prevIds : null;
-    const visible = visibleFor(items);
+    const visible = visibleFor(getActiveItems());
     list.replaceChildren();
     const showMineSlots =
       activeTab === "mine" && mineFilter === "active" && !loading;
@@ -2590,30 +2727,51 @@ export function createHomeScreen({
    */
   function showTabFromCache(tab) {
     const userId = getSession()?.userId;
-    const cached = getCachedHomeList(userId, tab);
-    if (cached == null || cached.length === 0) return false;
-    loading = false;
-    revealItems = false;
-    wasSkeletonLoading = false;
-    root.setAttribute("aria-busy", "false");
     if (tab === "rating") {
+      const cached = getCachedHomeList(userId, tab);
+      if (cached == null || cached.length === 0) return false;
+      loading = false;
+      revealItems = false;
+      wasSkeletonLoading = false;
+      root.setAttribute("aria-busy", "false");
       ratingItems = /** @type {import("../../api/rating.js").RatingTopItem[]} */ (
         cached
       );
       renderRatingList();
       return true;
     }
-    const t = getStrings();
-    list.setAttribute(
-      "aria-label",
-      tab === "mine" ? t.homeListMineAria : t.homeListAria,
-    );
-    items = /** @type {HomePortfolioItem[]} */ (cached);
-    if (tab === "mine") {
-      syncMineReadyFromIds(readyOwnCardIds(items));
-    } else if (tab === "feed") {
+    if (tab === "feed") {
+      const openCached = getCachedHomeList(userId, "feed");
+      const reviewedCached = getCachedHomeList(userId, "feedReviewed");
+      const activeCached =
+        feedFilter === "completed" ? reviewedCached : openCached;
+      if (activeCached == null || activeCached.length === 0) return false;
+      loading = false;
+      revealItems = false;
+      wasSkeletonLoading = false;
+      root.setAttribute("aria-busy", "false");
+      if (openCached != null) {
+        items = /** @type {HomePortfolioItem[]} */ (openCached);
+      }
+      if (reviewedCached != null) {
+        reviewedItems = /** @type {HomePortfolioItem[]} */ (reviewedCached);
+      }
+      const t = getStrings();
+      list.setAttribute("aria-label", t.homeListAria);
       syncFeedUnseenFromIds(feedCardIds(items));
+      renderList();
+      return true;
     }
+    const cached = getCachedHomeList(userId, tab);
+    if (cached == null || cached.length === 0) return false;
+    loading = false;
+    revealItems = false;
+    wasSkeletonLoading = false;
+    root.setAttribute("aria-busy", "false");
+    const t = getStrings();
+    list.setAttribute("aria-label", t.homeListMineAria);
+    items = /** @type {HomePortfolioItem[]} */ (cached);
+    syncMineReadyFromIds(readyOwnCardIds(items));
     renderList();
     return true;
   }
@@ -2708,7 +2866,7 @@ export function createHomeScreen({
   function setItems(next, opts = {}) {
     const nextItems = Array.isArray(next) ? next : [];
     const silent = opts.silent === true;
-    const prevVisible = visibleFor(items);
+    const prevVisible = visibleFor(getActiveItems());
     const nextVisible = visibleFor(nextItems);
     if (
       silent &&
@@ -2716,7 +2874,7 @@ export function createHomeScreen({
       !list.querySelector(".home-screen__item--skeleton") &&
       canPatchListSlots(prevVisible, nextVisible)
     ) {
-      items = nextItems;
+      assignActiveItems(nextItems);
       patchListSlots(nextItems);
       return;
     }
@@ -2725,7 +2883,7 @@ export function createHomeScreen({
       silent &&
       prevVisible.length > 0 &&
       !list.querySelector(".home-screen__item--skeleton");
-    items = nextItems;
+    assignActiveItems(nextItems);
     renderList({
       revealNewOnly: hadRenderedItems,
       prevIds,
@@ -2764,10 +2922,55 @@ export function createHomeScreen({
       }
       return;
     }
-    const next =
-      tab === "mine"
-        ? await listMyPortfolios()
-        : await listPortfoliosForReview();
+
+    if (tab === "feed") {
+      const [open, reviewed] = await Promise.all([
+        listPortfoliosForReview(),
+        listReviewedPortfolios(),
+      ]);
+      if (epoch !== refreshEpoch) return;
+      const wasLoading = loading;
+      revealItems = wasLoading;
+      loading = false;
+      root.setAttribute("aria-busy", "false");
+      const userId = getSession()?.userId;
+      setCachedHomeList(userId, "feed", open);
+      setCachedHomeList(userId, "feedReviewed", reviewed);
+      const prevDisplay = getActiveItems();
+      items = open;
+      reviewedItems = reviewed;
+      const display = feedFilter === "completed" ? reviewed : open;
+      const prevVisible = visibleFor(prevDisplay);
+      const nextVisible = visibleFor(display);
+      if (
+        !wasLoading &&
+        !list.querySelector(".home-screen__item--skeleton") &&
+        canPatchListSlots(prevVisible, nextVisible)
+      ) {
+        patchListSlots(display);
+      } else {
+        const prevIds = new Set(
+          prevVisible.map((item) => item.id).filter(Boolean),
+        );
+        const hadRenderedItems =
+          !wasLoading &&
+          prevVisible.length > 0 &&
+          !list.querySelector(".home-screen__item--skeleton");
+        renderList({
+          revealNewOnly: hadRenderedItems,
+          prevIds,
+        });
+      }
+      await refreshMineReady(epoch, tab, []);
+      await refreshFeedUnseen(epoch, tab, open);
+      const online = await onlineLegendariesPromise;
+      if (epoch === refreshEpoch) {
+        legendaryOnlinePanel.setItems(online);
+      }
+      return;
+    }
+
+    const next = await listMyPortfolios();
     if (epoch !== refreshEpoch) return;
     const wasLoading = loading;
     revealItems = wasLoading;
@@ -2815,7 +3018,8 @@ export function createHomeScreen({
     root.hidden = false;
     root.classList.remove("home-screen--open");
     syncTabButtons(activeTab);
-    syncMineFilterPanel();
+    syncListFilterCopy();
+    syncListFilterPanel();
     syncActiveView();
     showTabbar();
     lastScrollTop = 0;
@@ -2869,9 +3073,10 @@ export function createHomeScreen({
     loading = false;
     revealItems = false;
     wasSkeletonLoading = false;
+    feedFilter = "active";
     mineFilter = "active";
-    mineFilterPanel.setActive("active", { instant: true });
-    syncMineFilterPanel();
+    listFilterPanel.setActive("active", { instant: true });
+    syncListFilterPanel();
     showTabbar();
     closeNoticeModal();
     closeReviewIntroModal();
@@ -3027,7 +3232,7 @@ export function createHomeScreen({
     close,
     setItems,
     setView,
-    getView: () => ({ tab: activeTab, filter: mineFilter }),
+    getView: () => ({ tab: activeTab, filter: currentListFilter() }),
     refresh,
     showNotice,
     showNotification,

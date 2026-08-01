@@ -561,6 +561,80 @@ export async function listPortfoliosForReview() {
 }
 
 /**
+ * Кейсы, по которым текущий пользователь уже сдал отчёт (сегмент
+ * «Уже отревьюено»). Включает pending и done — RLS пускает через
+ * `exists` по своей строке в `reviews`. Порядок = свежесть ревью.
+ *
+ * @returns {Promise<PortfolioQueueItem[]>}
+ */
+export async function listReviewedPortfolios() {
+  const supabase = getSupabase();
+  if (!supabase) return [];
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.id) return [];
+
+  const { data: myReviews, error: reviewsError } = await supabase
+    .from("reviews")
+    .select("portfolio_id, created_at")
+    .eq("reviewer_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(FEED_QUERY_LIMIT);
+
+  if (reviewsError) {
+    if (import.meta.env.DEV) {
+      console.warn("[portfolios] listReviewedPortfolios reviews", reviewsError.message);
+    }
+    return [];
+  }
+
+  /** @type {string[]} */
+  const orderedIds = [];
+  const seen = new Set();
+  for (const row of myReviews || []) {
+    const id =
+      row && typeof row.portfolio_id === "string" ? row.portfolio_id : "";
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    orderedIds.push(id);
+  }
+  if (orderedIds.length === 0) return [];
+
+  const { data: rows, error } = await supabase
+    .from("portfolios")
+    .select(
+      "id, owner_id, url, name, role, avatar_url, target_reviews, reviews_count, status, created_at",
+    )
+    .in("id", orderedIds);
+
+  if (error) {
+    if (import.meta.env.DEV) {
+      console.warn("[portfolios] listReviewedPortfolios", error.message);
+    }
+    return [];
+  }
+
+  /** @type {Map<string, PortfolioQueueItem>} */
+  const byId = new Map();
+  for (const row of rows || []) {
+    const item = mapPortfolioRow(row, user.id);
+    item.reviewedByMe = true;
+    byId.set(item.id, item);
+  }
+
+  /** @type {PortfolioQueueItem[]} */
+  const ordered = [];
+  for (const id of orderedIds) {
+    const item = byId.get(id);
+    if (item) ordered.push(item);
+  }
+
+  return attachReviewerSlots(ordered);
+}
+
+/**
  * Портфолио текущего пользователя (для вкладки «Мои»; UI переключателя — снаружи).
  *
  * @returns {Promise<PortfolioQueueItem[]>}

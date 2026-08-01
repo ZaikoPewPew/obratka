@@ -11,7 +11,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | [`app-modal/`](app-modal/README.md) | Универсальная модалка (слот контента + primary/secondary) |
 | [`side-panel/`](side-panel/README.md) | Боковая панель справа (слот контента; home → «Правила») |
 | [`notification/`](notification/README.md) | Toast top-right (нет уток / слот занят на home) |
-| [`tabs-panel/`](tabs-panel/README.md) | Сегмент Активные / Завершенные на «Мои» (`createTabsPanel`) |
+| [`tabs-panel/`](tabs-panel/README.md) | Сегмент feed/mine на home (`createTabsPanel`) |
 | Field errors | [`../utils/FIELD_ERROR.md`](../utils/FIELD_ERROR.md) — обводка + текст ошибки |
 
 ## Продуктовый флоу

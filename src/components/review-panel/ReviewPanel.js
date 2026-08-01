@@ -40,6 +40,34 @@ const MIC_PATH =
   "M4.5 8.25C4.5 10.7353 6.51472 12.75 9 12.75M9 12.75C11.4853 12.75 13.5 10.7353 13.5 8.25M9 12.75V15M9 9.75C8.17157 9.75 7.5 9.07843 7.5 8.25V3.75C7.5 2.92157 8.17157 2.25 9 2.25C9.82843 2.25 10.5 2.92157 10.5 3.75V8.25C10.5 9.07843 9.82843 9.75 9 9.75Z";
 
 /**
+ * Спиннер CTA — тот же язык, что loader провайдеров на `/registration`.
+ * @returns {SVGSVGElement}
+ */
+function createDoneLoader() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "review-panel__done-loader");
+  svg.setAttribute("width", "28");
+  svg.setAttribute("height", "28");
+  svg.setAttribute("viewBox", "0 0 28 28");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("aria-hidden", "true");
+  const track = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "circle",
+  );
+  track.setAttribute("class", "review-panel__done-loader-track");
+  track.setAttribute("cx", "14");
+  track.setAttribute("cy", "14");
+  track.setAttribute("r", "11");
+  const arc = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  arc.setAttribute("class", "review-panel__done-loader-arc");
+  arc.setAttribute("d", "M25 14a11 11 0 0 0-11-11");
+  arc.setAttribute("stroke-linecap", "round");
+  svg.append(track, arc);
+  return svg;
+}
+
+/**
  * @returns {SVGSVGElement}
  */
 function createMicIcon() {
@@ -646,7 +674,10 @@ export function createReviewPanel(options = {}) {
   nextCaseBtn.type = "button";
   nextCaseBtn.className =
     "iframe-shell__btn review-panel__done-btn review-panel__done-btn--next";
-  nextCaseBtn.textContent = t.reviewDoneNextCase;
+  const nextCaseLabel = document.createElement("span");
+  nextCaseLabel.className = "review-panel__done-btn-label";
+  nextCaseLabel.textContent = t.reviewDoneNextCase;
+  nextCaseBtn.append(nextCaseLabel, createDoneLoader());
   /* Скрыта, пока main не подтвердит кандидата через prewarm. */
   nextCaseBtn.hidden = true;
   nextCaseBtn.setAttribute("aria-hidden", "true");
@@ -867,12 +898,6 @@ export function createReviewPanel(options = {}) {
   }
 
   /**
-   * Финальный вопрос → done слева; PDF-лист уезжает вниз справа.
-   * Form/top уходят на --motion-reveal-*, done входит тем же языком.
-   * @param {Record<string, FormDataEntryValue> | null} [answers]
-   * @returns {Promise<void>}
-   */
-  /**
    * @param {boolean} busy
    */
   function setNextCaseBusy(busy) {
@@ -882,9 +907,10 @@ export function createReviewPanel(options = {}) {
     nextCaseBtn.setAttribute("aria-busy", next ? "true" : "false");
     nextCaseBtn.classList.toggle("review-panel__done-btn--busy", next);
     const strings = getStrings();
-    nextCaseBtn.textContent = next
-      ? strings.reviewDoneNextCaseBusy
-      : strings.reviewDoneNextCase;
+    nextCaseBtn.setAttribute(
+      "aria-label",
+      next ? strings.reviewDoneNextCaseBusy : strings.reviewDoneNextCase,
+    );
   }
 
   /**
@@ -897,6 +923,12 @@ export function createReviewPanel(options = {}) {
     if (!show) setNextCaseBusy(false);
   }
 
+  /**
+   * Финальный вопрос → done слева; PDF-лист уезжает вниз справа.
+   * Form/top уходят на --motion-reveal-*, done входит тем же языком.
+   * @param {Record<string, FormDataEntryValue> | null} [answers]
+   * @returns {Promise<void>}
+   */
   async function showDone(answers = null) {
     clearAdvanceTimer();
     setNextCaseVisible(false);

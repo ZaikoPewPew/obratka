@@ -1373,14 +1373,19 @@ body {
 }
 
 .review-panel__done-btn {
-  flex: 1 1 0;
+  position: relative;
+  flex: 0 0 auto;
   min-height: var(--shell-review-control-height);
-  padding: var(--shell-review-control-padding-y) var(--shell-review-control-padding-x);
+  padding: var(--shell-review-control-padding-y) var(--shell-review-done-btn-padding-x);
   border-radius: var(--radius-md);
   font-size: var(--shell-review-control-font-size);
   font-weight: var(--shell-review-control-font-weight);
   line-height: var(--shell-review-control-line-height);
   text-align: center;
+}
+
+.review-panel__done-btn[hidden] {
+  display: none !important;
 }
 
 .review-panel__done-btn--exit {
@@ -1412,8 +1417,47 @@ body {
 }
 
 .review-panel__done-btn--busy {
-  opacity: var(--shell-review-done-btn-busy-opacity);
+  cursor: wait;
   pointer-events: none;
+}
+
+/* Лейбл остаётся в потоке — ширина кнопки не прыгает под спиннер. */
+.review-panel__done-btn--busy .review-panel__done-btn-label {
+  visibility: hidden;
+}
+
+.review-panel__done-btn--busy .review-panel__done-loader {
+  display: block;
+}
+
+.review-panel__done-loader {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  box-sizing: border-box;
+  width: var(--shell-review-done-loader-size);
+  height: var(--shell-review-done-loader-size);
+  margin-top: calc(var(--shell-review-done-loader-size) / -2);
+  margin-left: calc(var(--shell-review-done-loader-size) / -2);
+  animation-name: motion-spin;
+  animation-duration: var(--shell-review-done-loader-duration);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.review-panel__done-loader-track,
+.review-panel__done-loader-arc {
+  fill: none;
+  stroke-width: var(--shell-review-done-loader-stroke);
+}
+
+.review-panel__done-loader-track {
+  stroke: var(--shell-review-done-loader-track);
+}
+
+.review-panel__done-loader-arc {
+  stroke: var(--shell-review-done-loader-arc);
 }
 
 .review-panel__done-btn--exit:disabled,
