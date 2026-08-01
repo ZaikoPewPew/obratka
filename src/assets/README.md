@@ -4,9 +4,10 @@
 
 ## `home/`
 
-Чипы / иконки шапки и карточек ленты (`bone.svg`, `reputation-*.svg`, `plus.svg` для CTA «Закинуть», `feedback.svg` paper plane для FAB feedback, …).
+Чипы / иконки шапки и карточек ленты (`bone.svg`, `reputation-*.svg`, `plus.svg` для CTA «Закинуть», `feedback.svg` paper plane для FAB feedback, `report-sent.svg` для статуса «Отчёт отправлен», …).
 `reputation-*.svg` — inline через `?raw` (группа `.home-screen__reputation-eyes` для анимации взгляда на чипе; в топ-50 на вкладке «Рейтинг» — те же SVG статично, без idle-loop).
-`plus.svg` / `feedback.svg` — inline через `?raw` (`currentColor`).
+`plus.svg` / `feedback.svg` / `report-sent.svg` — inline через `?raw` (`currentColor`).
+`report-sent.svg` — галочка в сером превью карточки сегмента «Уже отревьюено» (`--home-screen-card-reviewed-icon-color` → `--color-success`).
 
 ### `home/modal/`
 
