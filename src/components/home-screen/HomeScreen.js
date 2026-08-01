@@ -76,6 +76,7 @@ import plusIconSvg from "../../assets/home/plus.svg?raw";
 import reputationNeutralIconSvg from "../../assets/home/reputation-neutral.svg?raw";
 import reputationPositiveIconSvg from "../../assets/home/reputation-positive.svg?raw";
 import reputationNegativeIconSvg from "../../assets/home/reputation-negative.svg?raw";
+import reportSentIconSvg from "../../assets/home/report-sent.svg?raw";
 import slotPlusIconUrl from "../../assets/home/slot-plus.svg";
 
 const PREVIEW_BROWSER_CONTROLS_URL = `${
@@ -458,6 +459,39 @@ function attachHomeTooltip(host, label) {
  */
 function attachReviewerSlotTooltip(slot, label) {
   attachHomeTooltip(slot, label);
+}
+
+/**
+ * Превью карточки в сегменте «Уже отревьюено»: серая заливка вместо скриншота,
+ * по центру — галочка + статус.
+ *
+ * @param {string} label
+ * @returns {HTMLDivElement}
+ */
+function createReviewedPreview(label) {
+  const preview = document.createElement("div");
+  preview.className = "home-screen__preview home-screen__preview--reviewed";
+
+  const status = document.createElement("div");
+  status.className = "home-screen__card-reviewed";
+
+  const wrap = document.createElement("span");
+  wrap.innerHTML = reportSentIconSvg.trim();
+  const icon = wrap.firstElementChild;
+  if (!(icon instanceof SVGElement)) {
+    throw new Error("report-sent.svg must be a root <svg>");
+  }
+  icon.classList.add("home-screen__card-reviewed-icon");
+  icon.setAttribute("aria-hidden", "true");
+  icon.setAttribute("focusable", "false");
+
+  const text = document.createElement("span");
+  text.className = "home-screen__card-reviewed-label";
+  text.textContent = label;
+
+  status.append(icon, text);
+  preview.append(status);
+  return preview;
 }
 
 /**
@@ -1896,16 +1930,26 @@ export function createHomeScreen({
     listFilterPanel.root.hidden = !show;
     if (!show) return;
     const filter = currentListFilter();
-    listFilterPanel.setActive(filter, { instant: true });
+    // Только рассинхрон (смена вкладки / внешний setView): своё переключение
+    // сегмента уже вызвало анимированный setActive — instant его бы обрезал.
+    if (listFilterPanel.getActive() !== filter) {
+      listFilterPanel.setActive(filter, { instant: true });
+    }
     listFilterPanel.setTabDot(
       "completed",
       activeTab === "mine" ? mineReady : false,
     );
     if (wasHidden) {
-      requestAnimationFrame(() => {
-        listFilterPanel.syncThumb(true);
-      });
+      resyncListFilterThumb();
     }
+  }
+
+  /** Мгновенная перестановка пилла: смена вкладки / открытие home. */
+  function resyncListFilterThumb() {
+    if (listFilterPanel.root.hidden) return;
+    requestAnimationFrame(() => {
+      listFilterPanel.syncThumb(true);
+    });
   }
 
   function syncActiveView() {
@@ -2033,6 +2077,7 @@ export function createHomeScreen({
     body.scrollTop = 0;
     lastScrollTop = 0;
     syncCopy();
+    resyncListFilterThumb();
     if (!opts.silent) emitViewChange("tab");
     if (showTabFromCache(tab)) {
       void refresh();
@@ -2445,18 +2490,11 @@ export function createHomeScreen({
   }
 
   /**
+   * Превью-скриншот портфолио в рамке браузера.
    * @param {HomePortfolioItem} item
-   * @returns {HTMLLIElement}
+   * @returns {HTMLDivElement}
    */
-  function createCard(item) {
-    const t = getStrings();
-    const li = document.createElement("li");
-    li.className = "home-screen__item";
-
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "home-screen__card";
-
+  function createScreenshotPreview(item) {
     const preview = document.createElement("div");
     preview.className = "home-screen__preview home-screen__preview--loading";
 
@@ -2503,6 +2541,26 @@ export function createHomeScreen({
     previewBrowserViewport.append(previewImg);
     previewBrowser.append(previewBrowserBar, previewBrowserViewport);
     preview.append(previewBrowser);
+
+    return preview;
+  }
+
+  /**
+   * @param {HomePortfolioItem} item
+   * @returns {HTMLLIElement}
+   */
+  function createCard(item) {
+    const t = getStrings();
+    const li = document.createElement("li");
+    li.className = "home-screen__item";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "home-screen__card";
+
+    const preview = item.reviewedByMe
+      ? createReviewedPreview(t.homeCardReviewedLabel ?? "")
+      : createScreenshotPreview(item);
 
     const meta = document.createElement("div");
     meta.className = "home-screen__card-meta";
@@ -2592,17 +2650,10 @@ export function createHomeScreen({
     const progress = document.createElement("div");
     progress.className = "home-screen__card-progress";
 
-    if (item.reviewedByMe) {
-      const reviewedLabel = document.createElement("span");
-      reviewedLabel.className = "home-screen__card-reviewed-label";
-      reviewedLabel.textContent = t.homeCardReviewedLabel ?? "";
-      progress.append(reviewedLabel);
-    } else {
-      const slots = document.createElement("div");
-      slots.className = "home-screen__reviewer-slots";
-      fillReviewerSlots(slots, item);
-      progress.append(slots);
-    }
+    const slots = document.createElement("div");
+    slots.className = "home-screen__reviewer-slots";
+    fillReviewerSlots(slots, item);
+    progress.append(slots);
 
     meta.append(person, progress);
     button.append(preview, meta);
@@ -3027,6 +3078,7 @@ export function createHomeScreen({
     syncCopy();
     /* Instant: syncCopy → scheduleTabThumbSync() без instant даёт width 0→N поверх entrance. */
     scheduleTabThumbSync(true);
+    resyncListFilterThumb();
     setMineReady(
       hasUnseenMineReady(
         getSession()?.userId,

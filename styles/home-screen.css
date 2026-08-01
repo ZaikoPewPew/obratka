@@ -1008,10 +1008,23 @@
   overflow: visible;
 }
 
-.home-screen__card--reviewed .home-screen__card-progress {
-  width: auto;
-  min-width: var(--home-screen-progress-width);
-  padding-inline: var(--home-screen-card-reviewed-padding-x);
+/* Сегмент «Уже отревьюено»: вместо скриншота — серая заливка со статусом */
+.home-screen__preview--reviewed {
+  background: var(--home-screen-card-reviewed-bg);
+}
+
+.home-screen__card-reviewed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--home-screen-card-reviewed-gap);
+}
+
+.home-screen__card-reviewed-icon {
+  display: block;
+  width: var(--home-screen-card-reviewed-icon-size);
+  height: var(--home-screen-card-reviewed-icon-size);
+  color: var(--home-screen-card-reviewed-icon-color);
 }
 
 .home-screen__card-reviewed-label {
@@ -1020,7 +1033,7 @@
   font-weight: var(--home-screen-card-reviewed-weight);
   line-height: normal;
   color: var(--home-screen-card-reviewed-color);
-  white-space: nowrap;
+  text-align: center;
 }
 
 .home-screen__reviewer-slots {

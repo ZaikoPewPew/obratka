@@ -704,11 +704,14 @@
   --home-screen-progress-padding: 10px;
   --home-screen-progress-bg: var(--color-surface);
   --home-screen-progress-radius: var(--radius-pill);
-  /* Статус «Отчёт отправлен» вместо слотов (сегмент «Уже отревьюено») */
-  --home-screen-card-reviewed-padding-x: var(--space-4);
-  --home-screen-card-reviewed-size: var(--font-size-sm);
-  --home-screen-card-reviewed-weight: var(--font-weight-medium);
-  --home-screen-card-reviewed-color: var(--color-text-muted);
+  /* Статус «Отчёт отправлен» вместо превью (сегмент «Уже отревьюено») */
+  --home-screen-card-reviewed-bg: var(--color-surface-muted);
+  --home-screen-card-reviewed-gap: var(--space-2);
+  --home-screen-card-reviewed-icon-size: var(--space-6);
+  --home-screen-card-reviewed-icon-color: var(--color-success);
+  --home-screen-card-reviewed-size: var(--font-size-base);
+  --home-screen-card-reviewed-weight: var(--font-weight-regular);
+  --home-screen-card-reviewed-color: var(--color-text);
   /* 3×32 + 2×(−4) = 88 */
   --home-screen-progress-slots-width: 88px;
   --home-screen-progress-slots-height: var(--space-8);

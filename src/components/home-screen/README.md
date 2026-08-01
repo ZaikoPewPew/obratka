@@ -25,14 +25,16 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 
 Над списком — один [`createTabsPanel`](../tabs-panel/README.md) (Figma `476:1762`). Виден на **Чужие посты** и **Мои**; на `rating` скрыт. Лейблы и стейт фильтра раздельные (`feedFilter` / `mineFilter`); переключение сегмента **без** refetch / skeleton (на feed оба списка уже в кэше после `refresh`).
 
+Thumb: `syncListFilterPanel()` переставляет пилл `instant` **только** при рассинхроне (`getActive() !== currentListFilter()`), иначе `syncCopy()` внутри `setListFilter` обрезал бы анимацию своего же переключения. Мгновенный пересчёт после смены вкладки / открытия home — `resyncListFilterThumb()`.
+
 **Чужие посты**
 
 | Сегмент | API / критерий |
 |---------|----------------|
 | **Ждёт ревью** (`active`, default) | `listPortfoliosForReview()` — open queue |
-| **Уже отревьюено** (`completed`) | `listReviewedPortfolios()` — свои сданные отчёты; карточка `--reviewed` + лейбл `homeCardReviewedLabel` («Отчёт отправлен») вместо слотов; клик → URL портфолио в новой вкладке (без claim / intro) |
+| **Уже отревьюено** (`completed`) | `listReviewedPortfolios()` — свои сданные отчёты; карточка `--reviewed`: вместо скриншота — серое превью с галочкой + `homeCardReviewedLabel` («Отчёт отправлен») по центру, слоты ревьюеров и зона автора обычные; клик → URL портфолио в новой вкладке (без claim / intro) |
 
-Empty «Уже отревьюено»: `homeEmptyFeedReviewed` (визуал free-slot, `--static`). Кэш: `feed` + `feedReviewed` в [`homeListCache`](../../utils/homeListCache.js). Токены лейбла: `--home-screen-card-reviewed-*`.
+Empty «Уже отревьюено»: `homeEmptyFeedReviewed` (визуал free-slot, `--static`). Кэш: `feed` + `feedReviewed` в [`homeListCache`](../../utils/homeListCache.js). Токены статуса: `--home-screen-card-reviewed-*` (заливка `--color-surface-muted`, галочка `--color-success` из `assets/home/report-sent.svg`).
 
 **Мои посты**
 
@@ -222,7 +224,7 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 ## Стили / i18n / a11y
 
-Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, translucent track / on-dark track+label, motion hide/thumb/label/contrast) + `--home-screen-tabbar-dock-gap` / `--home-screen-tabbar-submit-*` (кнопка 56×56, r16, Google blue, hover/active через color-mix; error-flash Google red + `bg-duration`/`bg-ease` для transition синий↔красный; плюс 24) + `--home-screen-tabbar-tab-dot-*` (точка 6px, offset 8px, Google red). Точка на сегменте «Завершенные»: `--tabs-panel-tab-dot-*` (7px, right 22px). Лейбл «Отчёт отправлен»: `--home-screen-card-reviewed-*`.
+Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, translucent track / on-dark track+label, motion hide/thumb/label/contrast) + `--home-screen-tabbar-dock-gap` / `--home-screen-tabbar-submit-*` (кнопка 56×56, r16, Google blue, hover/active через color-mix; error-flash Google red + `bg-duration`/`bg-ease` для transition синий↔красный; плюс 24) + `--home-screen-tabbar-tab-dot-*` (точка 6px, offset 8px, Google red). Точка на сегменте «Завершенные»: `--tabs-panel-tab-dot-*` (7px, right 22px). Статус «Отчёт отправлен» в превью: `--home-screen-card-reviewed-*`.
 
 Glass track: `background` + `backdrop-filter: blur(var(--home-screen-tabbar-blur))` на **`.home-screen__tabbar`** (не на dock). Свап темы: `backdropLuminance` → `home-screen__tabbar--on-dark` (track / label). Не анимировать `opacity` на предке dock — иначе blur пропадает.
 
