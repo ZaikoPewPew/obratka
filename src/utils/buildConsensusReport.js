@@ -1,12 +1,14 @@
 /**
  * Сводный отчёт: тексты агрегатов осей + модель action cards через i18n.
  * L2/L3 per-reviewer сюда не копируем.
+ * Тексты осей многострочные (заголовок диапазона + строки голосов).
  */
 
 import {
   GRADE_ORDER,
   aggregatePortfolioReviews,
 } from "./aggregatePortfolioReviews.js";
+import { formatPlural } from "./plural.js";
 import { resolveActionCards } from "./resolveActionCards.js";
 import { PAIN_PRIORITY } from "./reviewReport.js";
 
@@ -53,12 +55,14 @@ function formatString(template, vars = {}) {
 /**
  * @param {unknown[]} sheetsOrAnswers
  * @param {Record<string, string>} t
+ * @param {{ locale?: string }} [opts]
  * @returns {ConsensusReport}
  */
-export function buildConsensusReport(sheetsOrAnswers, t) {
+export function buildConsensusReport(sheetsOrAnswers, t, opts = {}) {
+  const locale = opts.locale || "ru";
   const aggregate = aggregatePortfolioReviews(sheetsOrAnswers);
   const rawCards = resolveActionCards(aggregate);
-  const sections = buildConsensusSections(aggregate, t);
+  const sections = buildConsensusSections(aggregate, t, locale);
   const actionCards = rawCards
     .map((card) => localizeActionCard(card, t))
     .filter(Boolean);
@@ -74,16 +78,17 @@ export function buildConsensusReport(sheetsOrAnswers, t) {
 /**
  * @param {import("./aggregatePortfolioReviews.js").PortfolioReviewAggregate} aggregate
  * @param {Record<string, string>} t
+ * @param {string} [locale]
  * @returns {ConsensusSection[]}
  */
-export function buildConsensusSections(aggregate, t) {
+export function buildConsensusSections(aggregate, t, locale = "ru") {
   if (!aggregate || aggregate.n <= 0) return [];
 
   /** @type {ConsensusSection[]} */
   const sections = [];
   const n = aggregate.n;
 
-  const gradeBody = formatGradeLine(aggregate, t);
+  const gradeBody = formatGradeBlock(aggregate, t, locale);
   if (gradeBody) {
     sections.push({
       title: t.reportConsensusGradeTitle ?? t.reportGradeTitle ?? "",
@@ -91,11 +96,11 @@ export function buildConsensusSections(aggregate, t) {
     });
   }
 
-  const structureBody = formatCategoricalLine(
+  const structureBody = formatCategoricalBlock(
     aggregate.structure.counts,
     n,
     t,
-    "structure",
+    locale,
     (value) => labelForStructure(value, t),
   );
   if (structureBody) {
@@ -105,11 +110,11 @@ export function buildConsensusSections(aggregate, t) {
     });
   }
 
-  const metricsBody = formatCategoricalLine(
+  const metricsBody = formatCategoricalBlock(
     aggregate.metrics.counts,
     n,
     t,
-    "metrics",
+    locale,
     (value) => labelForMetrics(value, t),
   );
   if (metricsBody) {
@@ -119,7 +124,13 @@ export function buildConsensusSections(aggregate, t) {
     });
   }
 
-  const contextBody = formatScaleLine(aggregate.context, n, t, "context");
+  const contextBody = formatScaleBlock(
+    aggregate.context,
+    n,
+    t,
+    locale,
+    "context",
+  );
   if (contextBody) {
     sections.push({
       title: t.reportConsensusContextTitle ?? t.reportContextTitle ?? "",
@@ -127,7 +138,7 @@ export function buildConsensusSections(aggregate, t) {
     });
   }
 
-  const visualBody = formatScaleLine(aggregate.visual, n, t, "visual");
+  const visualBody = formatScaleBlock(aggregate.visual, n, t, locale, "visual");
   if (visualBody) {
     sections.push({
       title: t.reportConsensusVisualTitle ?? t.reportVisualTitle ?? "",
@@ -135,7 +146,7 @@ export function buildConsensusSections(aggregate, t) {
     });
   }
 
-  const painBody = formatPainLine(aggregate.pain.counts, n, t);
+  const painBody = formatPainBlock(aggregate.pain.counts, n, t, locale);
   if (painBody) {
     sections.push({
       title: t.reportConsensusPainTitle ?? t.reportPainTitle ?? "",
@@ -143,11 +154,11 @@ export function buildConsensusSections(aggregate, t) {
     });
   }
 
-  const tierBody = formatCategoricalLine(
+  const tierBody = formatCategoricalBlock(
     aggregate.tier.counts,
     n,
     t,
-    "tier",
+    locale,
     (value) => labelForTier(value, t),
   );
   if (tierBody) {
@@ -232,164 +243,169 @@ function categoryLabel(category, t) {
 /**
  * @param {import("./aggregatePortfolioReviews.js").PortfolioReviewAggregate} aggregate
  * @param {Record<string, string>} t
+ * @param {string} locale
  * @returns {string}
  */
-function formatGradeLine(aggregate, t) {
+function formatGradeBlock(aggregate, t, locale) {
   const n = aggregate.n;
   const { min, max, counts } = aggregate.grade;
-  const breakdown = formatBreakdown(counts, n, t, (value) =>
+  const votes = formatVoteLines(counts, t, locale, (value) =>
     labelForGrade(value, t),
   );
   if (!min || !max) {
-    return formatString(t.reportConsensusOfN ?? "{breakdown} ({n} из {n})", {
-      breakdown,
-      n,
-    });
+    return joinBlockLines([
+      formatString(t.reportConsensusCountHeader ?? "({n} из {n})", { n }),
+      ...votes,
+    ]);
   }
-  if (min === max) {
-    return formatString(
-      t.reportConsensusGradeSame ?? "{grade} ({n} из {n}). {breakdown}",
-      {
-        grade: labelForGrade(min, t),
-        n,
-        breakdown,
-      },
-    );
-  }
-  return formatString(
-    t.reportConsensusGradeRange ??
-      "от {from} до {to} ({n} из {n}). {breakdown}",
-    {
-      from: labelForGrade(min, t),
-      to: labelForGrade(max, t),
-      n,
-      breakdown,
-    },
-  );
+  const header =
+    min === max
+      ? formatString(t.reportConsensusGradeSame ?? "«{grade}» ({n} из {n})", {
+          grade: labelForGrade(min, t),
+          n,
+        })
+      : formatString(
+          t.reportConsensusGradeRange ??
+            "От «{from}» до «{to}» ({n} из {n})",
+          {
+            from: labelForGrade(min, t),
+            to: labelForGrade(max, t),
+            n,
+          },
+        );
+  return joinBlockLines([header, ...votes]);
 }
 
 /**
  * @param {Record<string, number>} counts
  * @param {number} n
  * @param {Record<string, string>} t
- * @param {string} _axis
+ * @param {string} locale
  * @param {(value: string) => string} labelFn
  * @returns {string}
  */
-function formatCategoricalLine(counts, n, t, _axis, labelFn) {
-  const entries = Object.entries(counts || {}).sort(
-    (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
-  );
+function formatCategoricalBlock(counts, n, t, locale, labelFn) {
+  const entries = sortedCountEntries(counts);
   if (entries.length === 0) return "";
 
+  const votes = formatVoteLines(counts, t, locale, labelFn);
   const [topValue, topCount] = entries[0];
-  const breakdown = formatBreakdown(counts, n, t, labelFn);
-
-  if (entries.length === 1 || topCount > n / 2) {
-    return formatString(
-      t.reportConsensusAxisMajority ?? "{label} ({count} из {n}). {breakdown}",
-      {
-        label: labelFn(topValue),
-        count: topCount,
-        n,
-        breakdown,
-      },
-    );
-  }
-
-  return formatString(
-    t.reportConsensusAxisSplit ?? "{breakdown} ({n} из {n}).",
-    {
-      breakdown,
-      n,
-    },
-  );
+  const header =
+    entries.length === 1 || topCount > n / 2
+      ? formatString(
+          t.reportConsensusAxisMajority ?? "«{label}» ({count} из {n})",
+          {
+            label: labelFn(topValue),
+            count: topCount,
+            n,
+          },
+        )
+      : formatString(t.reportConsensusCountHeader ?? "({n} из {n})", { n });
+  return joinBlockLines([header, ...votes]);
 }
 
 /**
  * @param {{ counts: Record<string, number>; min: number | null; max: number | null }} scale
  * @param {number} n
  * @param {Record<string, string>} t
+ * @param {string} locale
  * @param {"context" | "visual"} axis
  * @returns {string}
  */
-function formatScaleLine(scale, n, t, axis) {
+function formatScaleBlock(scale, n, t, locale, axis) {
   const { min, max, counts } = scale;
   if (min == null || max == null) return "";
-  const breakdown = formatBreakdown(counts, n, t, (value) =>
+  const votes = formatVoteLines(counts, t, locale, (value) =>
     labelForScale(axis, value, t),
   );
-  if (min === max) {
-    return formatString(
-      t.reportConsensusScaleSame ?? "{value} ({n} из {n}). {breakdown}",
-      {
-        value: labelForScale(axis, String(min), t),
-        n,
-        breakdown,
-      },
-    );
-  }
-  return formatString(
-    t.reportConsensusScaleRange ??
-      "от {from} до {to} ({n} из {n}). {breakdown}",
-    {
-      from: labelForScale(axis, String(min), t),
-      to: labelForScale(axis, String(max), t),
-      n,
-      breakdown,
-    },
-  );
+  const header =
+    min === max
+      ? formatString(t.reportConsensusScaleSame ?? "«{value}» ({n} из {n})", {
+          value: labelForScale(axis, String(min), t),
+          n,
+        })
+      : formatString(
+          t.reportConsensusScaleRange ??
+            "От «{from}» до «{to}» ({n} из {n})",
+          {
+            from: labelForScale(axis, String(min), t),
+            to: labelForScale(axis, String(max), t),
+            n,
+          },
+        );
+  return joinBlockLines([header, ...votes]);
 }
 
 /**
  * @param {Record<string, number>} counts
  * @param {number} n
  * @param {Record<string, string>} t
+ * @param {string} locale
  * @returns {string}
  */
-function formatPainLine(counts, n, t) {
+function formatPainBlock(counts, n, t, locale) {
   const known = PAIN_PRIORITY.filter((tag) => (counts[tag] || 0) > 0);
   if (known.length === 0) {
     return t.reportConsensusPainNone ?? "";
   }
-  const breakdown = formatBreakdown(
-    Object.fromEntries(known.map((tag) => [tag, counts[tag] || 0])),
-    n,
-    t,
-    (value) => labelForPain(value, t),
+  const filtered = Object.fromEntries(
+    known.map((tag) => [tag, counts[tag] || 0]),
   );
-  return formatString(
-    t.reportConsensusPainLine ?? "{breakdown} ({n} из {n}).",
-    {
-      breakdown,
-      n,
-    },
+  const votes = formatVoteLines(filtered, t, locale, (value) =>
+    labelForPain(value, t),
   );
+  return joinBlockLines([
+    formatString(t.reportConsensusCountHeader ?? "({n} из {n})", { n }),
+    ...votes,
+  ]);
+}
+
+/**
+ * @param {string[]} lines
+ * @returns {string}
+ */
+function joinBlockLines(lines) {
+  return lines.map((line) => String(line || "").trim()).filter(Boolean).join("\n");
 }
 
 /**
  * @param {Record<string, number>} counts
- * @param {number} _n
- * @param {Record<string, string>} t
- * @param {(value: string) => string} labelFn
- * @returns {string}
+ * @returns {[string, number][]}
  */
-function formatBreakdown(counts, _n, t, labelFn) {
-  const sep = t.reportConsensusBreakdownSep ?? ", ";
-  const itemTpl =
-    t.reportConsensusBreakdownItem ?? "{label} — {count}";
-  return Object.entries(counts || {})
-    .sort((a, b) => {
-      if (b[1] !== a[1]) return b[1] - a[1];
-      const ai = GRADE_ORDER.indexOf(/** @type {*} */ (a[0]));
-      const bi = GRADE_ORDER.indexOf(/** @type {*} */ (b[0]));
-      if (ai >= 0 && bi >= 0) return ai - bi;
-      return a[0].localeCompare(b[0]);
-    })
-    .map(([value, count]) =>
-      formatString(itemTpl, { label: labelFn(value), count }),
-    )
-    .join(sep);
+function sortedCountEntries(counts) {
+  return Object.entries(counts || {}).sort((a, b) => {
+    if (b[1] !== a[1]) return b[1] - a[1];
+    const ai = GRADE_ORDER.indexOf(/** @type {*} */ (a[0]));
+    const bi = GRADE_ORDER.indexOf(/** @type {*} */ (b[0]));
+    if (ai >= 0 && bi >= 0) return ai - bi;
+    const aNum = Number(a[0]);
+    const bNum = Number(b[0]);
+    if (Number.isFinite(aNum) && Number.isFinite(bNum)) return bNum - aNum;
+    return a[0].localeCompare(b[0]);
+  });
+}
+
+/**
+ * @param {Record<string, number>} counts
+ * @param {Record<string, string>} t
+ * @param {string} locale
+ * @param {(value: string) => string} labelFn
+ * @returns {string[]}
+ */
+function formatVoteLines(counts, t, locale, labelFn) {
+  return sortedCountEntries(counts).map(([value, count]) =>
+    formatPlural(
+      {
+        one: t.reportConsensusVoteOne,
+        few: t.reportConsensusVoteFew,
+        many: t.reportConsensusVoteMany,
+        other: t.reportConsensusVoteOther,
+      },
+      count,
+      { count, label: labelFn(value) },
+      locale,
+    ),
+  );
 }
 
 /**

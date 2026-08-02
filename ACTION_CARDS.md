@@ -1,14 +1,21 @@
 # Action Cards + сводный отчёт
 
-Сводка по **всем** листам с валидными `answers` и до **3** статичных рекомендаций на `/report` и в общем PDF.
+Сводка по **всем** листам с валидными `answers` и до **3** статичных рекомендаций — **только в общем PDF** (`shareConsensusPdf`). На экране `/report` сводки нет (список листов + личный PDF в панели).
 
 Личный PDF одного ревьюера (`shareReviewPdf` / side-panel) **без** action cards.
+
+## Куда править контент
+
+| Что | Где |
+|-----|-----|
+| URL гайдов / шаблонов / примеров | [`src/data/actionCards.json`](src/data/actionCards.json) — поля `links[].url`, `example.url` |
+| Заголовки, проблемы, шаги, подписи ссылок | [`content/locales.json`](content/locales.json) — ключи `reportAction*` (ru + en) |
 
 ## Поток
 
 ```text
 sheets.answers → aggregatePortfolioReviews → resolveActionCards
-                              ↘ buildConsensusReport → UI / shareConsensusPdf
+                              ↘ buildConsensusReport → shareConsensusPdf
 ```
 
 | Модуль | Роль |
@@ -16,7 +23,7 @@ sheets.answers → aggregatePortfolioReviews → resolveActionCards
 | [`src/data/actionCards.json`](src/data/actionCards.json) | id, category, trigger, priority, urls (`links` / `example`); **без** UI-copy |
 | [`src/utils/aggregatePortfolioReviews.js`](src/utils/aggregatePortfolioReviews.js) | counts / min–max / `adviceList` (dictation v1 не тащим) |
 | [`src/utils/resolveActionCards.js`](src/utils/resolveActionCards.js) | majority → max 3 cards |
-| [`src/utils/buildConsensusReport.js`](src/utils/buildConsensusReport.js) | тексты сводки + локализованные карточки |
+| [`src/utils/buildConsensusReport.js`](src/utils/buildConsensusReport.js) | тексты сводки (многострочные голоса) + локализованные карточки |
 | [`src/utils/shareConsensusPdf.js`](src/utils/shareConsensusPdf.js) | print iframe сводного PDF |
 
 ## Majority
@@ -36,10 +43,18 @@ Categorical nuance: если оба проблемных value набрали г
 
 Порядок: **structure → metrics → context → pain**; внутри pain — [`PAIN_PRIORITY`](src/utils/reviewReport.js) (`overloaded`, `contrast`, `composition`, `components`). Нет проблем → блок «План действий» скрыт.
 
-## i18n / UI
+## Формат сводки в PDF
 
-Ключи: `reportConsensus*`, `reportAction*` в [`content/locales.json`](content/locales.json).  
-Экран: [`report-screen`](src/components/report-screen/README.md) — сводка + карточки над списком листов; «Скачать PDF» → consensus.  
-Токены: `--report-action-*` в `styles/tokens.css`.
+Многострочно, например:
 
-Тесты: [`src/utils/consensusActionCards.test.js`](src/utils/consensusActionCards.test.js).
+```text
+От «С трудом» до «В целом понял» (3 из 3)
+2 голоса «В целом понял»
+1 голос «С трудом»
+```
+
+Ключи: `reportConsensus*Range` / `*Same` + `reportConsensusVoteOne|Few|Many|Other`.
+
+## i18n
+
+`reportConsensus*` · `reportAction*` — ru/en в `locales.json`.

@@ -3,7 +3,7 @@
  * Per-sheet остаётся в shareReviewPdf — без action cards.
  */
 
-import { formatString, getStrings } from "../i18n.js";
+import { formatString, getLocale, getStrings } from "../i18n.js";
 import { buildConsensusReport } from "./buildConsensusReport.js";
 
 /**
@@ -15,7 +15,9 @@ import { buildConsensusReport } from "./buildConsensusReport.js";
  */
 export function shareConsensusPdf(sheetsOrAnswers, options = {}) {
   const t = getStrings();
-  const report = buildConsensusReport(sheetsOrAnswers, t);
+  const report = buildConsensusReport(sheetsOrAnswers, t, {
+    locale: getLocale(),
+  });
   if (report.aggregate.n === 0) {
     options.onComplete?.();
     return;
@@ -142,13 +144,19 @@ function buildConsensusDocumentHtml({ title, portfolioName, report, t }) {
   );
 
   const summaryHtml = report.sections
-    .map(
-      (section) => `
+    .map((section) => {
+      const bodyHtml = String(section.body || "")
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => `<p>${escapeHtml(line)}</p>`)
+        .join("");
+      return `
       <section class="section">
         <h2>${escapeHtml(section.title)}</h2>
-        <p>${escapeHtml(section.body)}</p>
-      </section>`,
-    )
+        <div class="section-body">${bodyHtml}</div>
+      </section>`;
+    })
     .join("");
 
   let planHtml = "";
@@ -279,6 +287,9 @@ function buildConsensusDocumentHtml({ title, portfolioName, report, t }) {
       margin: 0;
       font-size: 14px;
       color: ${escapeHtml(theme.colorBody)};
+    }
+    .section-body p + p {
+      margin-top: 4px;
     }
     .card {
       margin: 0 0 16px;

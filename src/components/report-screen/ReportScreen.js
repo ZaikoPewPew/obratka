@@ -13,7 +13,6 @@ import {
   readSheetTranslateY,
 } from "../../utils/motionTokens.js";
 import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
-import { buildConsensusReport } from "../../utils/buildConsensusReport.js";
 import { buildReportSections } from "../../utils/reviewReport.js";
 import { shareConsensusPdf } from "../../utils/shareConsensusPdf.js";
 import { shareReviewPdf } from "../../utils/shareReviewPdf.js";
@@ -113,10 +112,6 @@ export function createReportScreen(opts = {}) {
   title.className = "report-screen__title";
   title.id = "report-screen-title";
 
-  const consensus = document.createElement("div");
-  consensus.className = "report-screen__consensus";
-  consensus.hidden = true;
-
   const sheetsList = document.createElement("ul");
   sheetsList.className = "report-screen__sheets";
   sheetsList.hidden = true;
@@ -141,7 +136,7 @@ export function createReportScreen(opts = {}) {
   downloadBtn.append(downloadLabel);
 
   actions.append(homeBtn, downloadBtn);
-  card.append(title, consensus, sheetsList, actions);
+  card.append(title, sheetsList, actions);
   panel.append(card);
 
   const visual = document.createElement("div");
@@ -511,133 +506,6 @@ export function createReportScreen(opts = {}) {
       rows.push({ answers: sheet.answers, reviewerName });
     }
     return rows;
-  }
-
-  function renderConsensus() {
-    consensus.replaceChildren();
-    if (loading) {
-      consensus.hidden = true;
-      return;
-    }
-
-    const inputs = consensusInputs();
-    if (inputs.length === 0) {
-      consensus.hidden = true;
-      return;
-    }
-
-    const t = getStrings();
-    const report = buildConsensusReport(inputs, t);
-    if (report.aggregate.n === 0) {
-      consensus.hidden = true;
-      return;
-    }
-
-    const summarySection = document.createElement("section");
-    summarySection.className = "report-screen__consensus-section";
-
-    const summaryHeading = document.createElement("h2");
-    summaryHeading.className = "report-screen__consensus-heading";
-    summaryHeading.textContent = t.reportConsensusTitle ?? "";
-
-    const summarySubtitle = document.createElement("p");
-    summarySubtitle.className = "report-screen__consensus-subtitle";
-    summarySubtitle.textContent = fixHangingPrepositions(
-      formatString(t.reportConsensusSubtitle ?? "", {
-        n: report.aggregate.n,
-        name: portfolioName || t.brandName,
-      }),
-    );
-
-    const summaryList = document.createElement("div");
-    summaryList.className = "report-screen__consensus-summary";
-
-    for (const section of report.sections) {
-      const row = document.createElement("div");
-      row.className = "report-screen__consensus-row";
-
-      const rowTitle = document.createElement("p");
-      rowTitle.className = "report-screen__consensus-row-title";
-      rowTitle.textContent = section.title;
-
-      const rowBody = document.createElement("p");
-      rowBody.className = "report-screen__consensus-row-body";
-      rowBody.textContent = fixHangingPrepositions(section.body);
-
-      row.append(rowTitle, rowBody);
-      summaryList.append(row);
-    }
-
-    summarySection.append(summaryHeading, summarySubtitle, summaryList);
-    consensus.append(summarySection);
-
-    if (report.actionCards.length > 0) {
-      const planSection = document.createElement("section");
-      planSection.className = "report-screen__consensus-section";
-
-      const planHeading = document.createElement("h2");
-      planHeading.className = "report-screen__consensus-heading";
-      planHeading.textContent = t.reportActionPlanTitle ?? "";
-
-      const cardsList = document.createElement("ul");
-      cardsList.className = "report-screen__action-cards";
-
-      for (const card of report.actionCards) {
-        const li = document.createElement("li");
-        li.className = "report-screen__action-card";
-
-        const badge = document.createElement("p");
-        badge.className = "report-screen__action-badge";
-        badge.textContent = card.categoryLabel;
-
-        const cardTitle = document.createElement("h3");
-        cardTitle.className = "report-screen__action-card-title";
-        cardTitle.textContent = fixHangingPrepositions(card.title);
-
-        const problem = document.createElement("p");
-        problem.className = "report-screen__action-card-problem";
-        problem.textContent = fixHangingPrepositions(card.problem);
-
-        li.append(badge, cardTitle, problem);
-
-        if (card.steps.length > 0) {
-          const steps = document.createElement("ol");
-          steps.className = "report-screen__action-steps";
-          for (const step of card.steps) {
-            const stepLi = document.createElement("li");
-            stepLi.textContent = fixHangingPrepositions(step);
-            steps.append(stepLi);
-          }
-          li.append(steps);
-        }
-
-        const linkItems = [...card.links];
-        if (card.example) linkItems.push(card.example);
-        if (linkItems.length > 0) {
-          const links = document.createElement("ul");
-          links.className = "report-screen__action-links";
-          for (const link of linkItems) {
-            const linkLi = document.createElement("li");
-            const anchor = document.createElement("a");
-            anchor.className = "report-screen__action-link";
-            anchor.href = link.url;
-            anchor.target = "_blank";
-            anchor.rel = "noopener noreferrer";
-            anchor.textContent = link.label;
-            linkLi.append(anchor);
-            links.append(linkLi);
-          }
-          li.append(links);
-        }
-
-        cardsList.append(li);
-      }
-
-      planSection.append(planHeading, cardsList);
-      consensus.append(planSection);
-    }
-
-    consensus.hidden = false;
   }
 
   /**
@@ -1040,13 +908,11 @@ export function createReportScreen(opts = {}) {
       for (let i = 0; i < SKELETON_SHEET_COUNT; i += 1) {
         sheetsList.append(buildSheetSkeleton());
       }
-      renderConsensus();
       syncDownloadButton();
       return;
     }
     if (sheets.length === 0) {
       sheetsList.hidden = true;
-      renderConsensus();
       syncDownloadButton();
       showReportMockup();
       return;
@@ -1055,7 +921,6 @@ export function createReportScreen(opts = {}) {
     sheets.forEach((sheet, index) => {
       sheetsList.append(buildSheetRow(sheet, index));
     });
-    renderConsensus();
     syncDownloadButton();
     showReportMockup();
   }

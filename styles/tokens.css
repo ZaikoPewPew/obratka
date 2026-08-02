@@ -579,43 +579,6 @@
   --report-screen-skeleton-line-label-width: 168px;
   --report-screen-skeleton-action-width: 128px;
 
-  /* Consensus + action cards на /report */
-  --report-action-gap: var(--space-5);
-  --report-action-section-gap: var(--space-3);
-  --report-action-title-size: var(--font-size-lg);
-  --report-action-title-weight: var(--font-weight-semibold);
-  --report-action-title-color: var(--color-text-strong);
-  --report-action-subtitle-size: var(--font-size-sm);
-  --report-action-subtitle-color: var(--color-text-muted);
-  --report-action-summary-gap: var(--space-2);
-  --report-action-summary-label-size: var(--font-size-sm);
-  --report-action-summary-label-weight: var(--font-weight-semibold);
-  --report-action-summary-label-color: var(--color-text-strong);
-  --report-action-summary-body-size: var(--font-size-sm);
-  --report-action-summary-body-color: var(--color-text);
-  --report-action-summary-max-height: min(28dvh, 220px);
-  --report-action-cards-gap: var(--space-3);
-  --report-action-cards-max-height: min(36dvh, 280px);
-  --report-action-card-padding: var(--space-4);
-  --report-action-card-radius: var(--radius-md);
-  --report-action-card-bg: var(--color-surface-muted);
-  --report-action-card-gap: var(--space-2);
-  --report-action-badge-size: var(--font-size-xs);
-  --report-action-badge-weight: var(--font-weight-semibold);
-  --report-action-badge-color: var(--color-text-muted);
-  --report-action-card-title-size: var(--font-size-base);
-  --report-action-card-title-weight: var(--font-weight-semibold);
-  --report-action-card-title-color: var(--color-text-strong);
-  --report-action-card-problem-size: var(--font-size-sm);
-  --report-action-card-problem-color: var(--color-text);
-  --report-action-steps-gap: var(--space-1);
-  --report-action-steps-size: var(--font-size-sm);
-  --report-action-steps-color: var(--color-text);
-  --report-action-links-gap: var(--space-1);
-  --report-action-link-size: var(--font-size-sm);
-  --report-action-link-color: var(--color-text-strong);
-  --report-action-link-weight: var(--font-weight-medium);
-
   /*
    * App modal (Figma Modal: Size=600 / 800 / Size3).
    * Красный #EA4335 в макете — только слот контента, не фон в UI.

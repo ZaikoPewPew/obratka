@@ -193,16 +193,17 @@ const consensus = buildConsensusReport(
     reportConsensusVisualTitle: "Visual",
     reportConsensusPainTitle: "Pain",
     reportConsensusTierTitle: "Tier",
-    reportConsensusGradeSame: "{grade} ({n} of {n}). {breakdown}",
-    reportConsensusGradeRange: "from {from} to {to} ({n} of {n}). {breakdown}",
-    reportConsensusAxisMajority: "{label} ({count} of {n}). {breakdown}",
-    reportConsensusAxisSplit: "{breakdown} ({n} of {n}).",
-    reportConsensusScaleSame: "{value} ({n} of {n}). {breakdown}",
-    reportConsensusScaleRange: "from {from} to {to} ({n} of {n}). {breakdown}",
-    reportConsensusPainLine: "{breakdown} ({n} of {n}).",
+    reportConsensusGradeSame: "“{grade}” ({n} of {n})",
+    reportConsensusGradeRange: "From “{from}” to “{to}” ({n} of {n})",
+    reportConsensusAxisMajority: "“{label}” ({count} of {n})",
+    reportConsensusScaleSame: "“{value}” ({n} of {n})",
+    reportConsensusScaleRange: "From “{from}” to “{to}” ({n} of {n})",
+    reportConsensusCountHeader: "({n} of {n})",
     reportConsensusPainNone: "None",
-    reportConsensusBreakdownItem: "{label} — {count}",
-    reportConsensusBreakdownSep: ", ",
+    reportConsensusVoteOne: "{count} vote “{label}”",
+    reportConsensusVoteFew: "{count} votes “{label}”",
+    reportConsensusVoteMany: "{count} votes “{label}”",
+    reportConsensusVoteOther: "{count} votes “{label}”",
     reviewGradeJunior: "Junior",
     reviewGradeMid: "Mid",
     reviewGradeSenior: "Senior",
@@ -255,6 +256,7 @@ const consensus = buildConsensusReport(
     reportActionContextLowStep1: "C step 1",
     reportActionContextLowLink1: "C link",
   },
+  { locale: "en" },
 );
 
 assert.equal(consensus.aggregate.n, 3);
@@ -265,6 +267,12 @@ assert.deepEqual(
 );
 assert.equal(consensus.actionCards[0].title, "Mess title");
 assert.ok(consensus.sections.length >= 3);
+const contextSection = consensus.sections.find((s) => s.title === "Context");
+assert.ok(contextSection);
+assert.match(
+  contextSection.body,
+  /From “C1” to “C2” \(3 of 3\)\n2 votes “C1”\n1 vote “C2”/,
+);
 assert.equal(consensus.adviceList[0].reviewerName, "Bob");
 assert.equal(consensus.adviceList[0].text, "Fix structure first");
 
