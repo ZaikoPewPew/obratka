@@ -97,6 +97,159 @@
   white-space: pre-line;
 }
 
+.report-screen__consensus {
+  display: flex;
+  flex-direction: column;
+  gap: var(--report-action-gap);
+  width: 100%;
+  text-align: left;
+}
+
+.report-screen__consensus[hidden] {
+  display: none !important;
+}
+
+.report-screen__consensus-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--report-action-section-gap);
+  min-width: 0;
+}
+
+.report-screen__consensus-heading {
+  margin: 0;
+  color: var(--report-action-title-color);
+  font-family: var(--font-family);
+  font-size: var(--report-action-title-size);
+  font-weight: var(--report-action-title-weight);
+  line-height: var(--line-height-snug);
+}
+
+.report-screen__consensus-subtitle {
+  margin: 0;
+  color: var(--report-action-subtitle-color);
+  font-family: var(--font-family);
+  font-size: var(--report-action-subtitle-size);
+  line-height: var(--line-height-snug);
+}
+
+.report-screen__consensus-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--report-action-summary-gap);
+  margin: 0;
+  max-height: var(--report-action-summary-max-height);
+  overflow: auto;
+}
+
+.report-screen__consensus-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.report-screen__consensus-row-title {
+  margin: 0;
+  color: var(--report-action-summary-label-color);
+  font-family: var(--font-family);
+  font-size: var(--report-action-summary-label-size);
+  font-weight: var(--report-action-summary-label-weight);
+  line-height: var(--line-height-snug);
+}
+
+.report-screen__consensus-row-body {
+  margin: 0;
+  color: var(--report-action-summary-body-color);
+  font-family: var(--font-family);
+  font-size: var(--report-action-summary-body-size);
+  line-height: var(--line-height-snug);
+}
+
+.report-screen__action-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--report-action-cards-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: var(--report-action-cards-max-height);
+  overflow: auto;
+}
+
+.report-screen__action-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--report-action-card-gap);
+  padding: var(--report-action-card-padding);
+  border-radius: var(--report-action-card-radius);
+  background: var(--report-action-card-bg);
+}
+
+.report-screen__action-badge {
+  margin: 0;
+  color: var(--report-action-badge-color);
+  font-family: var(--font-family);
+  font-size: var(--report-action-badge-size);
+  font-weight: var(--report-action-badge-weight);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: var(--line-height-snug);
+}
+
+.report-screen__action-card-title {
+  margin: 0;
+  color: var(--report-action-card-title-color);
+  font-family: var(--font-family);
+  font-size: var(--report-action-card-title-size);
+  font-weight: var(--report-action-card-title-weight);
+  line-height: var(--line-height-snug);
+}
+
+.report-screen__action-card-problem {
+  margin: 0;
+  color: var(--report-action-card-problem-color);
+  font-family: var(--font-family);
+  font-size: var(--report-action-card-problem-size);
+  line-height: var(--line-height-snug);
+}
+
+.report-screen__action-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--report-action-steps-gap);
+  margin: 0;
+  padding-left: var(--space-5);
+  color: var(--report-action-steps-color);
+  font-family: var(--font-family);
+  font-size: var(--report-action-steps-size);
+  line-height: var(--line-height-snug);
+}
+
+.report-screen__action-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--report-action-links-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.report-screen__action-link {
+  color: var(--report-action-link-color);
+  font-family: var(--font-family);
+  font-size: var(--report-action-link-size);
+  font-weight: var(--report-action-link-weight);
+  line-height: var(--line-height-snug);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.report-screen__action-link:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
 .report-screen__sheets {
   display: flex;
   flex-direction: column;

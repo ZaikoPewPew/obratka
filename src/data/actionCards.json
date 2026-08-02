@@ -1,0 +1,123 @@
+{
+  "structure_mess": {
+    "id": "structure_mess",
+    "category": "structure",
+    "trigger": "mess",
+    "priority": 1,
+    "links": [
+      {
+        "url": "https://example.com/notion-case-template",
+        "type": "template"
+      },
+      {
+        "url": "https://example.com/ux-storytelling",
+        "type": "guide"
+      }
+    ],
+    "example": {
+      "url": "https://example.com/ref-structure-case"
+    }
+  },
+  "structure_dump": {
+    "id": "structure_dump",
+    "category": "structure",
+    "trigger": "dump",
+    "priority": 1,
+    "links": [
+      {
+        "url": "https://example.com/artifacts-overload",
+        "type": "article"
+      }
+    ],
+    "example": {
+      "url": "https://example.com/ref-clean-research"
+    }
+  },
+  "metrics_none": {
+    "id": "metrics_none",
+    "category": "metrics",
+    "trigger": "none",
+    "priority": 2,
+    "links": [
+      {
+        "url": "https://example.com/ux-metrics-cheatsheet",
+        "type": "guide"
+      }
+    ],
+    "example": {
+      "url": "https://example.com/ref-metrics-impact"
+    }
+  },
+  "metrics_vanity": {
+    "id": "metrics_vanity",
+    "category": "metrics",
+    "trigger": "vanity",
+    "priority": 2,
+    "links": [
+      {
+        "url": "https://example.com/product-metrics-guide",
+        "type": "guide"
+      }
+    ]
+  },
+  "context_low": {
+    "id": "context_low",
+    "category": "context",
+    "trigger": "low",
+    "priority": 3,
+    "links": [
+      {
+        "url": "https://example.com/intro-block-template",
+        "type": "template"
+      }
+    ]
+  },
+  "pain_composition": {
+    "id": "pain_composition",
+    "category": "pain",
+    "trigger": "composition",
+    "priority": 4,
+    "links": [
+      {
+        "url": "https://example.com/ui-grids-guide",
+        "type": "guide"
+      }
+    ]
+  },
+  "pain_contrast": {
+    "id": "pain_contrast",
+    "category": "pain",
+    "trigger": "contrast",
+    "priority": 4,
+    "links": [
+      {
+        "url": "https://example.com/wcag-contrast-guide",
+        "type": "guide"
+      }
+    ]
+  },
+  "pain_components": {
+    "id": "pain_components",
+    "category": "pain",
+    "trigger": "components",
+    "priority": 4,
+    "links": [
+      {
+        "url": "https://example.com/figma-uikit-course",
+        "type": "guide"
+      }
+    ]
+  },
+  "pain_overloaded": {
+    "id": "pain_overloaded",
+    "category": "pain",
+    "trigger": "overloaded",
+    "priority": 4,
+    "links": [
+      {
+        "url": "https://example.com/modern-clean-ui",
+        "type": "article"
+      }
+    ]
+  }
+}

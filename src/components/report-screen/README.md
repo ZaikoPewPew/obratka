@@ -12,10 +12,11 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 - Side-panel / complaint-modal монтируются в `document.body` (не внутрь `.report-screen`: иначе `transform`/`filter` клипают sticky footer)
 - Без жалобы лист считается «ок»; явного чипа «всё ок» нет
 - Одна жалоба на лист (`review_complaints`, RPC `submit_review_complaint`) → штраф репутации ревьюера на сервере (−20); после окна без жалобы ревьюер получает +10 (`settle_review_reputation_rewards`)
-- Справа: дефолт mesh + мокап листа; **Скачать PDF** на экране качает **все** листы (лист снова выезжает → улетает → done); в панели — только открытый лист
+- Справа: дефолт mesh + мокап листа; **Скачать PDF** на экране качает **сводный** отчёт (агрегаты + план действий + советы списком); в панели — только открытый лист **без** action cards
+- Над списком листов: блок **«Сводка»** (`reportConsensus*`) по всем листам с `answers` + **«План действий»** (до 3 карточек из [`actionCards.json`](../../data/actionCards.json), если есть проблемные majority). Пустой план скрыт. Спека: [`ACTION_CARDS.md`](../../../ACTION_CARDS.md)
 - В строке листа — EN Title Case должность ревьюера (`formatPortfolioRole`: Senior Product Designer / Product Design Lead / Head Of Design)
 - Секции листа из `answers` через `buildReportSections` (`mode: "full"`): L2 кросс-сигналы, L1, pain, итог `tier × gradeZone` + `reportSummaryLead`, `advice`, опц. **`dictation`**. Схема полей — [`QUIZ.md`](../../../QUIZ.md). Старые листы с `hire` / visual 1–10 **не** распарсятся.
-- PDF: все ревьюеры, **1 дизайнер = 1 страница** (`shareReviewPdf`)
+- PDF экрана: [`shareConsensusPdf`](../../utils/shareConsensusPdf.js) — один документ. PDF панели: [`shareReviewPdf`](../../utils/shareReviewPdf.js) — 1 ревьюер = 1 страница, без рекомендаций
 - CTA: серая «На главную» + тёмная «Скачать PDF» (пока нет листов — та же тёмная, только `cursor: not-allowed`)
 
 ## Просмотр листа (side-panel)
@@ -70,14 +71,15 @@ reportScreen.open({ portfolioId: item.id, portfolioName: item.name });
 
 Клиент: [`src/api/reviewComplaints.js`](../../api/reviewComplaints.js) — `listPortfolioReviewSheets` (с `answers` / `canComplain`) / `submitReviewComplaint`.  
 Окно жалобы (старт + 6ч, fallback N-е ревью): [`src/utils/complaintWindow.js`](../../utils/complaintWindow.js).  
-PDF / секции: [`src/utils/reviewReport.js`](../../utils/reviewReport.js), [`src/utils/shareReviewPdf.js`](../../utils/shareReviewPdf.js).  
+PDF / секции: [`src/utils/reviewReport.js`](../../utils/reviewReport.js), [`src/utils/shareReviewPdf.js`](../../utils/shareReviewPdf.js) (лист), [`src/utils/shareConsensusPdf.js`](../../utils/shareConsensusPdf.js) (сводка).  
+Сводка + action cards: [`ACTION_CARDS.md`](../../../ACTION_CARDS.md), [`src/utils/buildConsensusReport.js`](../../utils/buildConsensusReport.js).  
 Спека квиза и трактовок: [`QUIZ.md`](../../../QUIZ.md).  
 Надиктовка: [`src/lib/dictation/README.md`](../../lib/dictation/README.md).  
 Post-edit пунктуации (перед сохранением в лист): [`supabase/functions/polish-dictation/README.md`](../../../supabase/functions/polish-dictation/README.md).
 
 ## Стили
 
-`styles/report-screen.css` + токены `--report-screen-*` / `--shell-review-report-*`.  
+`styles/report-screen.css` + токены `--report-screen-*` / `--report-action-*` / `--shell-review-report-*`.  
 Строка списка / кнопка жалобы в панели: `.report-screen__sheet-action`.  
 На короткой visual лист clamp’ится ≥ `--shell-review-report-gap-below-brand` под лого (`--shell-review-report-shift-shown-effective`).
 

@@ -111,9 +111,15 @@ export function parseReviewAnswers(raw) {
 /**
  * Приоритет проблем интерфейса (`pain`): чем раньше — тем важнее.
  * Показывается только при низкой оценке visual (см. review-panel).
+ * Также порядок pain-карточек в сводном плане действий.
  * @type {string[]}
  */
-const PAIN_PRIORITY = ["overloaded", "contrast", "composition", "components"];
+export const PAIN_PRIORITY = [
+  "overloaded",
+  "contrast",
+  "composition",
+  "components",
+];
 
 /**
  * L2 cross-signals: порядок в массиве = приоритет. Берём максимум 2.

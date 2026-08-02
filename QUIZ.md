@@ -176,7 +176,9 @@ commit;
 | [`reviewReport.dictation.test.js`](src/utils/reviewReport.dictation.test.js) | smoke tier/dictation |
 | [`dictationPolish.js`](src/api/dictationPolish.js) | Edge post-edit пунктуации `advice` / `dictation`; soft-fail → сырой текст |
 | [`polish-dictation`](supabase/functions/polish-dictation/README.md) | Z.AI Flash Edge (`glm-4.5-flash` + fallback) |
-| [`shareReviewPdf.js`](src/utils/shareReviewPdf.js) | PDF из секций |
+| [`shareReviewPdf.js`](src/utils/shareReviewPdf.js) | PDF одного листа |
+| [`shareConsensusPdf.js`](src/utils/shareConsensusPdf.js) | сводный PDF (агрегаты + action cards) |
+| [`ACTION_CARDS.md`](ACTION_CARDS.md) | majority → до 3 карточек на `/report` |
 | [`report-screen`](src/components/report-screen/README.md) | авторский `/report` |
 | [`locales.json`](content/locales.json) | все строки |
 
