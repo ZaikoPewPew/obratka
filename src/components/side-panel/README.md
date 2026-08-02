@@ -15,7 +15,7 @@ Report монтирует sheet-panel в `document.body`, не внутрь эк
 |-------|-----|
 | Панель 650×высота экрана | `--side-panel-width` + `top/right/bottom: inset` |
 | Inset 16 сверху / справа / снизу | `--side-panel-inset` |
-| Radius 24, padding 24, gap 16 | `--side-panel-*` |
+| Radius 24, padding 24, gap 16; секции body 24 | `--side-panel-*` / `--side-panel-body-gap` |
 | Title 24 + muted subtitle 14 | `.side-panel__title` / `__description` |
 | Close 56×56, radius 16 | `.side-panel__close` |
 | Текст правил | слот `.side-panel__content` (+ `__intro` / `__section*`) |

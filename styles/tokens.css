@@ -534,8 +534,6 @@
   --report-screen-sheet-panel-btn-radius: var(--radius-md);
   --report-screen-sheet-panel-btn-font-size: var(--font-size-base);
   --report-screen-sheet-panel-btn-font-weight: var(--font-weight-medium);
-  --report-screen-sheet-panel-btn-icon-gap: var(--space-2);
-  --report-screen-sheet-panel-btn-icon-size: var(--space-6);
   --report-screen-complaint-gap: var(--space-4);
   --report-screen-complaint-tip-padding: var(--space-4);
   --report-screen-complaint-tip-radius: var(--radius-md);
@@ -675,7 +673,7 @@
   --side-panel-close-bg-active: var(--color-surface-muted-active);
   --side-panel-close-icon-size: var(--space-6);
   --side-panel-close-color: var(--color-text);
-  --side-panel-body-gap: var(--space-4);
+  --side-panel-body-gap: var(--space-6);
   --side-panel-footer-gap: var(--space-3);
   --side-panel-intro-size: var(--font-size-md);
   --side-panel-intro-line-height: var(--line-height-normal);

@@ -35,10 +35,6 @@ const DOWNLOAD_ICON_SVG = `<svg class="report-screen__btn-icon" width="24" heigh
   <path d="M7 19L5.78311 18.9954C3.12231 18.8818 1 16.6888 1 14C1 11.3501 3.06139 9.18169 5.66806 9.01084C6.78942 6.64027 9.20316 5 12 5C15.5268 5 18.4445 7.60822 18.9293 11.001L19 11C21.2091 11 23 12.7909 23 15C23 17.1422 21.316 18.8911 19.1996 18.9951L17 19M12 10V18M9 15L12 18L15 15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`;
 
-const SHEET_PANEL_DOWNLOAD_ICON_SVG = `<svg class="report-screen__sheet-panel-btn-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path d="M7 19L5.78311 18.9954C3.12231 18.8818 1 16.6888 1 14C1 11.3501 3.06139 9.18169 5.66806 9.01084C6.78942 6.64027 9.20316 5 12 5C15.5268 5 18.4445 7.60822 18.9293 11.001L19 11C21.2091 11 23 12.7909 23 15C23 17.1422 21.316 18.8911 19.1996 18.9951L17 19M12 10V18M9 15L12 18L15 15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
-</svg>`;
-
 /** @type {Record<(typeof REVIEW_COMPLAINT_TAGS)[number], { label: string; hint: string }>} */
 const TAG_I18N_KEYS = {
   low_effort: {
@@ -664,11 +660,7 @@ export function createReportScreen(opts = {}) {
         t.reportScreenDownloadPdf ||
         "",
     );
-    downloadBtn.insertAdjacentHTML("afterbegin", SHEET_PANEL_DOWNLOAD_ICON_SVG);
-    const downloadLabel = document.createElement("span");
-    downloadLabel.className = "report-screen__sheet-panel-btn-label";
-    downloadLabel.textContent = t.reportScreenDownloadPdf ?? "";
-    downloadBtn.append(downloadLabel);
+    downloadBtn.textContent = t.reportScreenDownloadPdf ?? "";
     downloadBtn.addEventListener("click", () => {
       downloadSheetPdf(sheet, index);
     });

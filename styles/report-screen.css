@@ -276,9 +276,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--report-screen-sheet-panel-btn-icon-gap);
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 0 0 auto;
   min-height: var(--report-screen-sheet-panel-btn-height);
   margin: 0;
   padding: 0 var(--report-screen-sheet-panel-btn-padding-x);
@@ -302,48 +300,37 @@
   outline-offset: var(--focus-ring-offset);
 }
 
-.report-screen__sheet-panel-btn-icon {
-  flex: 0 0 auto;
-  width: var(--report-screen-sheet-panel-btn-icon-size);
-  height: var(--report-screen-sheet-panel-btn-icon-size);
-}
-
-.report-screen__sheet-panel-btn-label {
-  min-width: 0;
-}
-
 .report-screen__sheet-panel-btn--download {
-  background: var(--color-surface-muted);
-  color: var(--color-text);
-}
-
-.report-screen__sheet-panel-btn--download:hover:not(:disabled) {
-  background: var(--color-surface-muted-hover);
-}
-
-.report-screen__sheet-panel-btn--download:active:not(:disabled) {
-  background: var(--color-surface-muted-active);
-}
-
-.report-screen__sheet-panel-btn--complain {
   background: var(--color-accent);
   color: var(--color-on-accent);
 }
 
-.report-screen__sheet-panel-btn--complain:hover:not(:disabled) {
+.report-screen__sheet-panel-btn--download:hover:not(:disabled) {
   background: var(--color-accent-hover);
 }
 
-.report-screen__sheet-panel-btn--complain:active:not(:disabled) {
+.report-screen__sheet-panel-btn--download:active:not(:disabled) {
   background: var(--color-accent-active);
 }
 
-.report-screen__sheet-panel-btn--complain:focus-visible {
+.report-screen__sheet-panel-btn--download:focus-visible {
   outline-color: var(--color-focus-ring-on-accent);
 }
 
-.report-screen__sheet-panel-btn--complain.report-screen__sheet-panel-btn--done {
+.report-screen__sheet-panel-btn--complain {
   background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.report-screen__sheet-panel-btn--complain:hover:not(:disabled) {
+  background: var(--color-surface-muted-hover);
+}
+
+.report-screen__sheet-panel-btn--complain:active:not(:disabled) {
+  background: var(--color-surface-muted-active);
+}
+
+.report-screen__sheet-panel-btn--complain.report-screen__sheet-panel-btn--done {
   color: var(--color-text-muted);
 }
 
