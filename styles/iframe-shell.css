@@ -1430,6 +1430,19 @@ body {
   display: block;
 }
 
+.review-panel__done-btn--next.review-panel__done-btn--empty {
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  cursor: default;
+  pointer-events: none;
+}
+
+.review-panel__done-btn--next.review-panel__done-btn--empty:hover,
+.review-panel__done-btn--next.review-panel__done-btn--empty:active {
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+}
+
 .review-panel__done-loader {
   display: none;
   position: absolute;
@@ -1458,6 +1471,14 @@ body {
 
 .review-panel__done-loader-arc {
   stroke: var(--shell-review-done-loader-arc);
+}
+
+.review-panel__done-btn--exit .review-panel__done-loader-track {
+  stroke: var(--shell-review-done-loader-track-muted);
+}
+
+.review-panel__done-btn--exit .review-panel__done-loader-arc {
+  stroke: var(--shell-review-done-loader-arc-muted);
 }
 
 .review-panel__done-btn--exit:disabled,

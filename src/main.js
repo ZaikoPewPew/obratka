@@ -668,19 +668,23 @@ function nextCaseCandidates(items, excludeId) {
 }
 
 /**
- * На done: свежая лента + prefetch embed 1–2 кандидатов; показать/скрыть кнопку.
+ * На done: сразу показать «Следующий кейс» с лоадером; свежая лента +
+ * prefetch embed 1–2 кандидатов; без кандидатов — empty-подпись.
  * @returns {Promise<void>}
  */
 async function prewarmNextReviewCase() {
   const excludeId = portfolioId;
   const gen = ++nextCasePrewarmGen;
-  reviewPanel.setNextCaseVisible?.(false);
+  reviewPanel.setNextCaseVisible?.(true);
+  reviewPanel.setNextCasePreparing?.(true);
   try {
     const items = await listPortfoliosForReview();
     if (gen !== nextCasePrewarmGen) return;
     nextCasePreload = { excludeId, items, at: Date.now() };
     const candidates = nextCaseCandidates(items, excludeId);
-    reviewPanel.setNextCaseVisible?.(candidates.length > 0);
+    reviewPanel.setNextCasePreparing?.(false);
+    reviewPanel.setNextCaseVisible?.(true);
+    reviewPanel.setNextCaseEmpty?.(candidates.length === 0);
     for (const item of candidates.slice(0, 2)) {
       if (item.url) prefetchPortfolioEmbed(item.url);
     }
@@ -690,7 +694,9 @@ async function prewarmNextReviewCase() {
     }
     if (gen !== nextCasePrewarmGen) return;
     nextCasePreload = null;
-    reviewPanel.setNextCaseVisible?.(false);
+    reviewPanel.setNextCasePreparing?.(false);
+    reviewPanel.setNextCaseVisible?.(true);
+    reviewPanel.setNextCaseEmpty?.(true);
   }
 }
 
@@ -1101,6 +1107,20 @@ function renderTimer() {
   }
 }
 
+/**
+ * CTA external UI: до старта — «Открыть и начать», после — «Открыть сайт»
+ * (повторный клик только re-open вкладки, таймер не трогает).
+ */
+function syncExternalOpenButton() {
+  if (!openExternalBtn) return;
+  const key = sessionStarted ? "embedBlockedOpenSite" : "embedBlockedOpen";
+  openExternalBtn.setAttribute("data-i18n", key);
+  const label = getStrings()[key];
+  if (typeof label === "string" && label) {
+    openExternalBtn.textContent = label;
+  }
+}
+
 function syncLocaleDependentAttrs() {
   const t = getStrings();
 
@@ -1117,6 +1137,7 @@ function syncLocaleDependentAttrs() {
     }
   }
 
+  syncExternalOpenButton();
   syncDictationChrome();
 }
 
@@ -1616,6 +1637,7 @@ function armSession() {
   sessionEnded = false;
   sessionStarted = false;
   renderTimer();
+  syncExternalOpenButton();
 }
 
 function startTimer() {
@@ -1633,6 +1655,7 @@ function startTimer() {
     sessionDeadlineMs = null;
   }
   renderTimer();
+  syncExternalOpenButton();
   timerId = window.setInterval(tick, TIMER_TICK_MS);
 }
 
@@ -1673,7 +1696,8 @@ function syncExternalTimerFromDeadline() {
 }
 
 /**
- * Кнопка во фрейме: открыть портфолио снаружи и стартовать таймер один раз.
+ * Кнопка во фрейме: первый клик — открыть портфолио и стартовать таймер;
+ * дальше — только re-open вкладки («Открыть сайт»), без влияния на таймер.
  */
 function startExternalSession() {
   openPortfolioExternally();

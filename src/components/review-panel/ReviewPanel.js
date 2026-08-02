@@ -241,7 +241,10 @@ function createStep(content) {
  *   setDictationTranscript: (text: string) => void;
  *   setAdviceText: (text: string) => void;
  *   setNextCaseBusy: (busy: boolean) => void;
+ *   setNextCasePreparing: (preparing: boolean) => void;
+ *   setNextCaseEmpty: (empty: boolean) => void;
  *   setNextCaseVisible: (visible: boolean) => void;
+ *   setExitBusy: (busy: boolean) => void;
  * }}
  */
 export function createReviewPanel(options = {}) {
@@ -668,7 +671,10 @@ export function createReviewPanel(options = {}) {
   exitBtn.type = "button";
   exitBtn.className =
     "iframe-shell__btn review-panel__done-btn review-panel__done-btn--exit";
-  exitBtn.textContent = t.reviewDoneExit;
+  const exitLabel = document.createElement("span");
+  exitLabel.className = "review-panel__done-btn-label";
+  exitLabel.textContent = t.reviewDoneExit;
+  exitBtn.append(exitLabel, createDoneLoader());
 
   const nextCaseBtn = document.createElement("button");
   nextCaseBtn.type = "button";
@@ -678,11 +684,20 @@ export function createReviewPanel(options = {}) {
   nextCaseLabel.className = "review-panel__done-btn-label";
   nextCaseLabel.textContent = t.reviewDoneNextCase;
   nextCaseBtn.append(nextCaseLabel, createDoneLoader());
-  /* Скрыта, пока main не подтвердит кандидата через prewarm. */
+  /* Сразу на done с лоадером; без кандидатов — empty-подпись, не hide. */
   nextCaseBtn.hidden = true;
   nextCaseBtn.setAttribute("aria-hidden", "true");
 
   actions.append(exitBtn, nextCaseBtn);
+
+  /** Prewarm ленты на done — лоадер на next, exit кликабелен. */
+  let nextCasePreparing = false;
+  /** Клик «Следующий кейс» — claim / переход. */
+  let nextCaseOpeningBusy = false;
+  /** Кандидатов нет — disabled + короткая подпись. */
+  let nextCaseEmpty = false;
+  /** Клик «На главную» — ждём submit / release. */
+  let exitBusy = false;
   done.append(doneTitle, actions);
   root.append(heading, top, form, done);
 
@@ -897,20 +912,78 @@ export function createReviewPanel(options = {}) {
     onDoneChange?.(false);
   }
 
+  function syncDoneActions() {
+    const nextBusy = nextCasePreparing || nextCaseOpeningBusy;
+    const lockExit = exitBusy || nextCaseOpeningBusy;
+
+    nextCaseBtn.disabled = nextBusy || exitBusy || nextCaseEmpty;
+    exitBtn.disabled = lockExit;
+
+    nextCaseBtn.classList.toggle("review-panel__done-btn--busy", nextBusy);
+    nextCaseBtn.classList.toggle(
+      "review-panel__done-btn--empty",
+      nextCaseEmpty && !nextBusy,
+    );
+    exitBtn.classList.toggle("review-panel__done-btn--busy", exitBusy);
+
+    nextCaseBtn.setAttribute("aria-busy", nextBusy ? "true" : "false");
+    exitBtn.setAttribute("aria-busy", exitBusy ? "true" : "false");
+
+    const strings = getStrings();
+    let nextLabel = strings.reviewDoneNextCase;
+    let nextAria = strings.reviewDoneNextCase;
+    if (nextBusy) {
+      nextAria = strings.reviewDoneNextCaseBusy;
+    } else if (nextCaseEmpty) {
+      nextLabel = strings.reviewDoneNextCaseEmpty;
+      nextAria = strings.reviewDoneNextCaseEmpty;
+    }
+    nextCaseLabel.textContent = nextLabel;
+    nextCaseBtn.setAttribute("aria-label", nextAria);
+    exitBtn.setAttribute(
+      "aria-label",
+      exitBusy ? strings.reviewDoneExitBusy : strings.reviewDoneExit,
+    );
+  }
+
   /**
    * @param {boolean} busy
    */
   function setNextCaseBusy(busy) {
-    const next = Boolean(busy);
-    nextCaseBtn.disabled = next;
-    exitBtn.disabled = next;
-    nextCaseBtn.setAttribute("aria-busy", next ? "true" : "false");
-    nextCaseBtn.classList.toggle("review-panel__done-btn--busy", next);
-    const strings = getStrings();
-    nextCaseBtn.setAttribute(
-      "aria-label",
-      next ? strings.reviewDoneNextCaseBusy : strings.reviewDoneNextCase,
-    );
+    nextCaseOpeningBusy = Boolean(busy);
+    if (nextCaseOpeningBusy) nextCaseEmpty = false;
+    syncDoneActions();
+  }
+
+  /**
+   * Prewarm на done: кнопка видна с лоадером, «На главную» не блокируется.
+   * @param {boolean} preparing
+   */
+  function setNextCasePreparing(preparing) {
+    nextCasePreparing = Boolean(preparing);
+    if (nextCasePreparing) nextCaseEmpty = false;
+    syncDoneActions();
+  }
+
+  /**
+   * Нет кандидатов после prewarm — disabled + «Кейсов больше нет».
+   * @param {boolean} empty
+   */
+  function setNextCaseEmpty(empty) {
+    nextCaseEmpty = Boolean(empty);
+    if (nextCaseEmpty) {
+      nextCasePreparing = false;
+      nextCaseOpeningBusy = false;
+    }
+    syncDoneActions();
+  }
+
+  /**
+   * @param {boolean} busy
+   */
+  function setExitBusy(busy) {
+    exitBusy = Boolean(busy);
+    syncDoneActions();
   }
 
   /**
@@ -920,7 +993,12 @@ export function createReviewPanel(options = {}) {
     const show = Boolean(visible);
     nextCaseBtn.hidden = !show;
     nextCaseBtn.setAttribute("aria-hidden", show ? "false" : "true");
-    if (!show) setNextCaseBusy(false);
+    if (!show) {
+      nextCasePreparing = false;
+      nextCaseOpeningBusy = false;
+      nextCaseEmpty = false;
+      syncDoneActions();
+    }
   }
 
   /**
@@ -931,7 +1009,8 @@ export function createReviewPanel(options = {}) {
    */
   async function showDone(answers = null) {
     clearAdvanceTimer();
-    setNextCaseVisible(false);
+    setNextCaseVisible(true);
+    setNextCasePreparing(true);
 
     if (!done.hidden && form.hidden) {
       onReportReveal?.(false, { submitted: true });
@@ -1331,6 +1410,8 @@ export function createReviewPanel(options = {}) {
   });
 
   exitBtn.addEventListener("click", () => {
+    if (exitBtn.disabled) return;
+    setExitBusy(true);
     onExit?.();
   });
 
@@ -1356,7 +1437,10 @@ export function createReviewPanel(options = {}) {
     dictationBase = "";
     syncDictationChrome();
     currentStep = 0;
-    setNextCaseBusy(false);
+    exitBusy = false;
+    nextCasePreparing = false;
+    nextCaseOpeningBusy = false;
+    nextCaseEmpty = false;
     setNextCaseVisible(false);
     showForm();
     renderStep();
@@ -1420,6 +1504,9 @@ export function createReviewPanel(options = {}) {
       syncAdviceMeta();
     },
     setNextCaseBusy,
+    setNextCasePreparing,
+    setNextCaseEmpty,
     setNextCaseVisible,
+    setExitBusy,
   };
 }

@@ -11,7 +11,7 @@ alwaysApply: true
 
 1. Вход в ревью только через `claimPortfolioReview` → `claimHeld = true` → `go("review")`:
    - с home: карточка → intro → CTA «Сюдаа его!» → `claimAndStartReview`;
-   - с `/quiz/done`: «Следующий кейс» → `prewarmNextReviewCase` на done (лента + embed) → тот же `claimAndStartReview` (без intro); нет кандидатов → кнопка скрыта (`setNextCaseVisible`); занятость CTA — `setNextCaseBusy`.
+   - с `/quiz/done`: «Следующий кейс» сразу с лоадером (`setNextCasePreparing`) → `prewarmNextReviewCase` (лента + embed) → тот же `claimAndStartReview` (без intro); нет кандидатов → disabled + `reviewDoneNextCaseEmpty` (`setNextCaseEmpty`); клик — `setNextCaseBusy`. «На главную» — `setExitBusy` на время submit/release.
    Не открывать `/review` и не ставить `claimHeld` до успешного RPC.
 2. Пока review/quiz открыт: `heartbeatPortfolioClaim` (TTL **20 min**).
 3. Уход без submit (back / home / pagehide / abort): `releasePortfolioClaim` — **без** монет.
