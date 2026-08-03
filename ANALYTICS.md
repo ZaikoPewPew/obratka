@@ -118,8 +118,8 @@ referral_validated → auth_success → $pageview(onboarding) → onboarding_don
 
 | Event | Когда | Props |
 |-------|--------|-------|
-| `onboarding_step_viewed` | показ шага | `step_id` (`grade` / `domain` / `goal`) |
-| `onboarding_step_completed` | ответ / Далее | `step_id`, опц. `values` (enum, не free text) |
+| `onboarding_step_viewed` | показ шага | `step_id` (`grade` / `domain` / `goal` / `watch`) |
+| `onboarding_step_completed` | ответ / Далее | `step_id`, опц. `values` (enum, не free text; для `watch` — без values) |
 | `onboarding_back` | назад | `from_step_id` |
 | `auth_started` | клик Email / Telegram / Google | `provider` |
 | `auth_otp_requested` | OTP ушёл | — |

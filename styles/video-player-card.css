@@ -1,0 +1,240 @@
+/**
+ * VideoPlayerCard — Figma `616:1409`.
+ * Токены: `--video-player-*` в styles/tokens.css.
+ */
+
+.video-player-card {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: var(--video-player-min-height);
+  border-radius: var(--video-player-radius);
+  overflow: clip;
+  background: var(--video-player-bg);
+  box-shadow: var(--video-player-shadow);
+  color: var(--video-player-control-color);
+  isolation: isolate;
+}
+
+.video-player-card__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: var(--video-player-bg);
+}
+
+.video-player-card__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--video-player-scrim);
+  z-index: 1;
+}
+
+.video-player-card__center {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--video-player-center-size);
+  height: var(--video-player-center-size);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--video-player-center-bg);
+  backdrop-filter: blur(var(--video-player-center-blur));
+  -webkit-backdrop-filter: blur(var(--video-player-center-blur));
+  color: var(--video-player-control-color);
+  cursor: pointer;
+}
+
+.video-player-card__center:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring-on-accent);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.video-player-card__center[hidden] {
+  display: none;
+}
+
+.video-player-card__center-icon {
+  display: flex;
+  width: var(--video-player-center-icon-size);
+  height: var(--video-player-center-icon-size);
+  color: var(--video-player-control-color);
+}
+
+.video-player-card__center-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.video-player-card__progress {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: var(--video-player-progress-offset);
+  height: var(--video-player-progress-hit);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.video-player-card__progress:focus-visible {
+  outline: none;
+}
+
+.video-player-card__progress:focus-visible .video-player-card__progress-knob {
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--color-focus-ring-on-accent);
+}
+
+.video-player-card__progress-track {
+  position: relative;
+  width: 100%;
+  height: var(--video-player-progress-height);
+  background: var(--video-player-progress-track);
+}
+
+.video-player-card__progress-played {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0%;
+  background: var(--video-player-progress-played);
+}
+
+.video-player-card__progress-knob {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  translate: -50% -50%;
+  width: var(--video-player-knob-size);
+  height: var(--video-player-knob-size);
+  border-radius: var(--radius-pill);
+  background: var(--video-player-progress-played);
+  backdrop-filter: blur(var(--video-player-knob-blur));
+  -webkit-backdrop-filter: blur(var(--video-player-knob-blur));
+  pointer-events: none;
+}
+
+.video-player-card__controls {
+  position: absolute;
+  z-index: 2;
+  left: var(--video-player-controls-inset);
+  right: var(--video-player-controls-inset);
+  bottom: var(--video-player-controls-inset);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--video-player-controls-gap);
+  pointer-events: none;
+}
+
+.video-player-card__controls-left,
+.video-player-card__controls-right {
+  display: flex;
+  align-items: center;
+  gap: var(--video-player-controls-gap);
+  pointer-events: auto;
+}
+
+.video-player-card__btn {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--video-player-btn-size);
+  height: var(--video-player-btn-size);
+  margin: 0;
+  padding: var(--video-player-btn-padding);
+  border: none;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--video-player-control-color);
+  cursor: pointer;
+}
+
+.video-player-card__btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring-on-accent);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.video-player-card__btn-icon {
+  display: flex;
+  width: var(--video-player-btn-icon-size);
+  height: var(--video-player-btn-icon-size);
+  color: inherit;
+}
+
+.video-player-card__btn-icon[hidden] {
+  display: none;
+}
+
+.video-player-card__btn-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.video-player-card__time {
+  display: flex;
+  align-items: center;
+  gap: var(--video-player-time-gap);
+  height: var(--video-player-btn-size);
+  padding-inline: var(--video-player-btn-padding);
+  font-family: var(--font-family);
+  font-size: var(--video-player-time-size);
+  font-weight: var(--video-player-time-weight);
+  line-height: var(--video-player-time-line-height);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.video-player-card__time-current {
+  color: var(--video-player-time-current);
+}
+
+.video-player-card__time-sep,
+.video-player-card__time-total {
+  color: var(--video-player-time-total);
+}
+
+.video-player-card__speed {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: var(--video-player-speed-min-width);
+  height: var(--video-player-btn-size);
+  margin: 0;
+  padding: var(--video-player-btn-padding);
+  border: none;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--video-player-control-color);
+  font-family: var(--font-family);
+  font-size: var(--video-player-time-size);
+  font-weight: var(--video-player-time-weight);
+  line-height: var(--video-player-time-line-height);
+  text-align: right;
+  cursor: pointer;
+}
+
+.video-player-card__speed:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring-on-accent);
+  outline-offset: var(--focus-ring-offset);
+}

@@ -1304,3 +1304,36 @@
   animation-name: motion-reveal;
   animation-delay: var(--review-panel-reveal-delay-footer);
 }
+
+/* Шаг video: плеер занимает оставшуюся высоту, кнопка 24px ниже (form--advice gap). */
+.onboarding-screen .review-panel__form--video {
+  flex: 1 1 auto;
+  min-height: 0;
+  justify-content: flex-start;
+}
+
+.onboarding-screen .review-panel__form--video .review-panel__stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 0;
+}
+
+.onboarding-screen .review-panel__form--video .review-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.onboarding-screen .review-panel__form--video .review-panel__step--active {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.onboarding-screen__video-step {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+}

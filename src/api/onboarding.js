@@ -41,13 +41,16 @@ export async function saveOnboardingAnswers(answers) {
   const domains = asStringArray(/** @type {string | string[]} */ (payload.domain));
   const goals = asStringArray(/** @type {string | string[]} */ (payload.goal));
 
+  /** Видео-шаг не пишем в профиль. */
+  const { watch: _watch, ...onboardingPayload } = payload;
+
   await updateMyProfile({
     role: payload.role,
     grade,
     domains,
     goals,
-    onboarding: payload,
+    onboarding: onboardingPayload,
     onboarding_done: true,
   });
-  return payload;
+  return onboardingPayload;
 }

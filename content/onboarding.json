@@ -113,6 +113,12 @@
           "labelKey": "onboardingStepGoalFindTalent"
         }
       ]
+    },
+    {
+      "id": "watch",
+      "type": "video",
+      "required": false,
+      "video": "welcome"
     }
   ]
 }

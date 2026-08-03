@@ -11,6 +11,12 @@ import {
   getMotionReveal,
 } from "../../utils/motionTokens.js";
 import { createBrandScreenShell } from "../brand-screen-shell/BrandScreenShell.js";
+import { createVideoPlayerCard } from "../video-player-card/VideoPlayerCard.js";
+
+/** @type {Record<string, () => Promise<{ default: string }>>} */
+const ONBOARDING_VIDEO_LOADERS = {
+  welcome: () => import("../../assets/video/welcome.mp4"),
+};
 
 const CHECKBOX_IDLE_PATH =
   "M4 6C4 4.89543 4.89543 4 6 4H18C19.1046 4 20 4.89543 20 6V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V6Z";
@@ -126,10 +132,12 @@ function hasCheckboxValue(form, name) {
 
 /**
  * @param {unknown} type
- * @returns {"single" | "multi"}
+ * @returns {"single" | "multi" | "video"}
  */
 function normalizeStepType(type) {
-  return type === "multi" ? "multi" : "single";
+  if (type === "multi") return "multi";
+  if (type === "video") return "video";
+  return "single";
 }
 
 const BRAND_MARK_SVG = brandMarkSvg("url-screen__brand-mark");
@@ -218,14 +226,50 @@ export function createOnboardingScreen({ onComplete }) {
   /** @type {{
    *   step: HTMLElement;
    *   fieldName: string;
-   *   type: "single" | "multi";
+   *   type: "single" | "multi" | "video";
    *   title: string;
    *   validate: () => boolean;
    *   autoAdvance: boolean;
+   *   videoPlayer?: ReturnType<typeof createVideoPlayerCard> | null;
    * }[]} */
   const steps = contentSteps.map((stepDef, index) => {
     const fieldName = String(stepDef.id);
     const stepType = normalizeStepType(stepDef.type);
+    const isLast = index === contentSteps.length - 1;
+    const required = stepDef.required !== false;
+
+    if (stepType === "video") {
+      const videoKey =
+        typeof stepDef.video === "string" && stepDef.video
+          ? stepDef.video
+          : "welcome";
+      const player = createVideoPlayerCard({
+        ariaLabel: t.videoPlayerAria,
+      });
+      const loadVideo = ONBOARDING_VIDEO_LOADERS[videoKey];
+      if (loadVideo) {
+        void loadVideo()
+          .then((mod) => {
+            player.setSrc(mod.default);
+          })
+          .catch(() => {
+            /* src optional until asset resolves */
+          });
+      }
+      const wrap = document.createElement("div");
+      wrap.className = "onboarding-screen__video-step";
+      wrap.append(player.root);
+      return {
+        step: createStep(wrap),
+        fieldName,
+        type: stepType,
+        title: "",
+        validate: () => true,
+        autoAdvance: false,
+        videoPlayer: player,
+      };
+    }
+
     const inputType = stepType === "multi" ? "checkbox" : "radio";
     const options = Array.isArray(stepDef.options) ? stepDef.options : [];
     const choices = options.map((opt) =>
@@ -236,8 +280,6 @@ export function createOnboardingScreen({ onComplete }) {
         inputType,
       ),
     );
-    const isLast = index === contentSteps.length - 1;
-    const required = stepDef.required !== false;
     return {
       step: createStep(createOptions(...choices.map((c) => c.label))),
       fieldName,
@@ -250,6 +292,7 @@ export function createOnboardingScreen({ onComplete }) {
           : hasRadioValue(form, fieldName);
       },
       autoAdvance: stepType === "single" && !isLast,
+      videoPlayer: null,
     };
   });
 
@@ -328,20 +371,32 @@ export function createOnboardingScreen({ onComplete }) {
     return steps.findIndex((step) => !step.validate());
   }
 
+  function pauseInactiveVideos() {
+    steps.forEach((item, index) => {
+      if (index === currentStep) return;
+      item.videoPlayer?.pause();
+    });
+  }
+
   function syncChrome() {
     const isFirst = currentStep === 0;
     const isLast = currentStep === totalSteps - 1;
     const auto = Boolean(steps[currentStep]?.autoAdvance);
+    const isVideo = steps[currentStep]?.type === "video";
 
     backBtn.hidden = isFirst;
     top.classList.toggle("review-panel__top--first", isFirst);
     nextBtn.hidden = isLast || auto;
+    nextBtn.textContent = t.onboardingNext;
     submit.hidden = !isLast;
     footer.hidden = isLast ? false : auto;
-    form.classList.toggle("review-panel__form--advice", isLast);
+    form.classList.toggle("review-panel__form--advice", isLast || isVideo);
+    form.classList.toggle("review-panel__form--video", isVideo);
     showStepError(false);
 
-    questionTitle.textContent = steps[currentStep]?.title ?? t.onboardingTitle;
+    const title = steps[currentStep]?.title ?? "";
+    questionTitle.textContent = title || t.onboardingTitle;
+    question.hidden = isVideo || !title;
 
     const current = currentStep + 1;
     progressLabel.textContent = formatString(t.onboardingProgress, {
@@ -354,6 +409,7 @@ export function createOnboardingScreen({ onComplete }) {
       "aria-valuetext",
       formatString(t.onboardingProgress, { current, total: totalSteps }),
     );
+    pauseInactiveVideos();
   }
 
   /**
@@ -485,8 +541,17 @@ export function createOnboardingScreen({ onComplete }) {
   }
 
   function focusActiveStep() {
-    const active = steps[currentStep]?.step;
-    const focusable = active?.querySelector("input:not([disabled])");
+    const current = steps[currentStep];
+    if (current?.type === "video") {
+      const playBtn = current.step.querySelector(".video-player-card__center");
+      if (playBtn instanceof HTMLElement) {
+        playBtn.focus({ preventScroll: true });
+        return;
+      }
+      submit.focus({ preventScroll: true });
+      return;
+    }
+    const focusable = current?.step?.querySelector("input:not([disabled])");
     if (focusable instanceof HTMLElement) {
       focusable.focus({ preventScroll: true });
     }
@@ -528,6 +593,7 @@ export function createOnboardingScreen({ onComplete }) {
     const answers = {};
     const data = new FormData(form);
     for (const step of steps) {
+      if (step.type === "video") continue;
       if (step.type === "multi") {
         const values = data
           .getAll(step.fieldName)
@@ -572,6 +638,9 @@ export function createOnboardingScreen({ onComplete }) {
       if (input instanceof HTMLInputElement) {
         input.checked = false;
       }
+    }
+    for (const step of steps) {
+      step.videoPlayer?.pause();
     }
     currentStep = 0;
     renderStep();
@@ -634,6 +703,9 @@ export function createOnboardingScreen({ onComplete }) {
    */
   function close(opts = {}) {
     clearAdvanceTimer();
+    for (const step of steps) {
+      step.videoPlayer?.pause();
+    }
     return shell.close(opts);
   }
 

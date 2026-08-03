@@ -44,6 +44,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `review-screen/` | `/quiz` | Оболочка квиза + PDF reveal |
 | `review-panel/` | `/quiz` → `/quiz/done` | Шаги опроса + шкалы 1–5 + условный pain + `tier` + mic в advice + локальный done. SoT: [`QUIZ.md`](../../QUIZ.md) |
 | `scale-slider/` | — | Шкалы оценки context/visual: canvas-сетка, ступени + приписки, min/max — [`README`](scale-slider/README.md) |
+| `video-player-card/` | — | Кастомный плеер (play/mute/scrub/speed); шаг video онбординга |
 
 Движок диктовки: [`../lib/dictation/README.md`](../lib/dictation/README.md).  
 Post-edit: [`../api/dictationPolish.js`](../api/dictationPolish.js) → [`polish-dictation`](../../supabase/functions/polish-dictation/README.md).  
