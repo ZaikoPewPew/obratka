@@ -15,14 +15,18 @@
 - `success-screen.css` — `/done` (пресеты успеха).
 - `ban-screen.css` — `/banned` (блок аккаунта, красный mesh).
 - `report-screen.css` — `/report` (листы + жалоба).
+- `desktop-only-screen.css` — оверлей &lt;768px; импорт из фабрики JS (как `ban-screen.css`). Токены `--desktop-only-screen-*`.
 - `account-menu.css` / `settings-screen.css` — меню профиля / settings.
 - `rating-panel.css` — **не в entry**; оболочка неиспользуемого aside `src/components/rating/`.
+- `landing/styles/landing.css` — промо MPA; токены `--landing-*` в `tokens.css`.
 
 ## Что подключено из `index.html`
 
 `tokens.css` → `base.css` → `entrance.css` → `app-modal.css` → `side-panel.css` → `iframe-shell.css` → `success-screen.css` → `report-screen.css` → `ban-screen.css` → `home-screen.css` → `legendary-online-panel.css` → `feedback.css` → `notification.css` → `tabs-panel.css` → `account-menu.css` → `settings-screen.css`.
 
-Архив waitlist-CSS удалён (`desktop` / `mobile` / `apply` / `access-modal` / `notification` / `privacy-policy-panel`). Историческая спека: [`mobile.md`](../mobile.md).
+`desktop-only-screen.css` — side-effect import из `desktop-only-screen/`. Лендос — свой HTML entry (`landing/index.html`).
+
+Архив waitlist-CSS удалён (`desktop` / `mobile` / `apply` / `access-modal` / `notification` / `privacy-policy-panel`). Политика v1: [`mobile.md`](../mobile.md) (desktop-only гейт).
 
 ## Motion
 
@@ -56,6 +60,9 @@
 | `--home-screen-reveal-delay-*` | entrance stagger на `/home` (topbar → body → dock → fab); dock = `motion-reveal-dock` **без** opacity (glass `backdrop-filter`) |
 | `--tabs-panel-*` | сегмент feed/mine (track / tab / thumb / tab-dot) |
 | `--app-modal-*` | универсальная модалка (Figma Modal) |
+| `--desktop-only-screen-*` | оверлей &lt;768px (z / padding / card / brand) |
+| `--landing-*` | промо MPA (`landing/styles/landing.css`) |
+| `--breakpoint-min-desktop` | 768px (документация; в `@media` — литералы) |
 
 Handoff без анимации visual: класс `.url-screen--handoff` + `brandScreenTransition.js`.
 

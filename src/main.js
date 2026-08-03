@@ -70,6 +70,7 @@ import { createAppModal } from "./components/app-modal/AppModal.js";
 import { DEFAULT_ONBOARDING_ROLE } from "./api/onboarding.js";
 import { createReferralScreen } from "./components/referral-screen/ReferralScreen.js";
 import { createBanScreen } from "./components/ban-screen/BanScreen.js";
+import { createDesktopOnlyScreen } from "./components/desktop-only-screen/DesktopOnlyScreen.js";
 import { REVIEW_SESSION_SECONDS } from "./config/review.js";
 import {
   probePortfolioEmbed,
@@ -85,6 +86,10 @@ import { normalizePortfolioUrl } from "./utils/portfolioMeta.js";
 import { getMotionFocusDelayMs } from "./utils/motionTokens.js";
 import { startTabAttention } from "./utils/tabAttention.js";
 import { fixHangingPrepositions } from "./utils/hangingPrepositions.js";
+import {
+  isDesktopViewport,
+  subscribeDesktopViewport,
+} from "./utils/viewport.js";
 
 initAnalytics();
 
@@ -619,6 +624,14 @@ const banScreen = createBanScreen({
 });
 document.body.append(banScreen.root);
 
+const desktopOnlyScreen = createDesktopOnlyScreen();
+document.body.append(desktopOnlyScreen.root);
+
+/** Узкий viewport: полный desktop-only гейт. */
+let desktopOnlyActive = false;
+/** Один раз за загрузку страницы — не спамить при ресайзе. */
+let desktopOnlyGateTracked = false;
+
 let remainingMs = SESSION_TOTAL_MS;
 let timerId = null;
 /** Точный дедлайн конца сессии (wall-clock) — для external, пока вкладка в фоне. */
@@ -815,6 +828,7 @@ async function prewarmNextReviewCase() {
  */
 async function claimAndStartReview(item, opts = {}) {
   const showNoSlotsNotice = Boolean(opts.showNoSlotsNotice);
+  if (!isDesktopViewport() || desktopOnlyActive) return false;
   if (item?.isOwn || item?.reviewedByMe) return false;
   const id = typeof item?.id === "string" ? item.id : "";
   if (!id) return false;
@@ -2415,6 +2429,18 @@ async function applyRoute(id, opts = {}) {
     id = accessible;
   }
 
+  // Узкий viewport: не поднимать review-shell / quiz под оверлеем.
+  if (
+    desktopOnlyActive &&
+    (id === "review" || id === "quiz" || id === "done")
+  ) {
+    syncRoute("home", {
+      replace: true,
+      search: buildHomeSearch(lastHomeView),
+    });
+    id = "home";
+  }
+
   activeRouteId = id;
   syncDictationChrome();
   {
@@ -2677,6 +2703,67 @@ applyDocumentI18n();
 syncPortfolioName(getStrings().brandName);
 renderTimer();
 syncDictationChrome();
+
+/**
+ * Уход с review-workspace без модалки (гейт desktop-only).
+ * @returns {Promise<void>}
+ */
+async function suspendReviewForDesktopOnlyGate() {
+  const inReviewWorkspace =
+    activeRouteId === "review" ||
+    activeRouteId === "quiz" ||
+    activeRouteId === "done" ||
+    claimHeld;
+  if (!inReviewWorkspace) return;
+
+  track("review_aborted", {
+    portfolio_id: portfolioId || undefined,
+    route_id: activeRouteId || undefined,
+    reason: "desktop_only_gate",
+  });
+  leaveSessionShell();
+  void stopDictation();
+  await releaseHeldClaim();
+
+  if (
+    activeRouteId === "review" ||
+    activeRouteId === "quiz" ||
+    activeRouteId === "done"
+  ) {
+    void ensureHomeScreen().then((screen) => {
+      void screen.open(lastHomeView);
+    });
+    go("home", { search: buildHomeSearch(lastHomeView), replace: true });
+  }
+}
+
+/**
+ * @param {boolean} isDesktop
+ */
+function syncDesktopOnlyGate(isDesktop) {
+  const shouldGate = !isDesktop;
+  if (shouldGate === desktopOnlyActive) return;
+  desktopOnlyActive = shouldGate;
+  document.body.classList.toggle("desktop-only-gated", shouldGate);
+
+  if (shouldGate) {
+    desktopOnlyScreen.open();
+    if (!desktopOnlyGateTracked) {
+      desktopOnlyGateTracked = true;
+      track("desktop_only_gate_shown");
+    }
+    void suspendReviewForDesktopOnlyGate();
+    return;
+  }
+
+  void desktopOnlyScreen.close().then(() => {
+    applyDocumentI18n();
+  });
+}
+
+syncDesktopOnlyGate(isDesktopViewport());
+subscribeDesktopViewport(syncDesktopOnlyGate);
+
 if (shell) {
   shell.hidden = true;
   shell.classList.remove("iframe-shell--entered");

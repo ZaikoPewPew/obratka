@@ -6,7 +6,8 @@
 **Деплой:** GitHub Pages — https://zaikopewpew.github.io/obratka/  
 **Репозиторий:** https://github.com/ZaikoPewPew/obratka
 
-Карта экранов и URL: [`SCREENS.md`](SCREENS.md). Аналитика: [`ANALYTICS.md`](ANALYTICS.md).
+Карта экранов и URL: [`SCREENS.md`](SCREENS.md). Аналитика: [`ANALYTICS.md`](ANALYTICS.md).  
+**Desktop-only:** viewport &lt; 768px → заглушка — [`mobile.md`](mobile.md). Промо: [`landing/`](landing/README.md).
 
 ## Быстрый старт
 
@@ -16,7 +17,8 @@ cp .env.example .env   # заполнить SUPABASE_*, TELEGRAM_BOT_ID, VITE_PO
 npm run dev
 ```
 
-Обычно `http://localhost:5173` → `/referral` (или `/home` / `/onboarding`, если есть сессия).
+Обычно `http://localhost:5173` → `/referral` (или `/home` / `/onboarding`, если есть сессия).  
+Лендос: [http://localhost:5173/landing/](http://localhost:5173/landing/).
 
 | Path | Экран |
 |------|--------|
@@ -25,13 +27,14 @@ npm run dev
 | `/registration/code` | Код из письма (6 ячеек) |
 | `/onboarding` | Вопросы профиля |
 | `/home` | Очередь / мои / рейтинг (топ-50 по репутации); SWR, report gate, точки feedSeen + 3/3, intro до claim, tabbar-dock + submit (glass / `--on-dark` / entrance cascade); вид синхронизирован с query |
-| `/settings` | Заглушка настроек (из account-menu) |
+| `/settings` | Профиль в side-panel (из account-menu) |
 | `/portfolio` | Подача URL; чип «На главную»; done на том же экране |
 | `/review` | Просмотр портфолио + таймер 45 s (iframe pause / external wall-clock) + звук конца + надиктовка (rec) |
 | `/quiz` → `/quiz/done` | Квиз (visual 1–5, условный pain, рыночный `tier`, mic в совете) и финал — [`QUIZ.md`](QUIZ.md) |
 | `/done` | Успех подачи (deep link / sync) |
-| `/report` | Листы автору (+ заметки с просмотра) + жалоба (1 тег, окно 6ч от done; вне окна кнопку скрывать) |
+| `/report` | Листы автору (+ заметки) + жалоба; сводный PDF + action cards — [`ACTION_CARDS.md`](ACTION_CARDS.md) |
 | `/banned` | Аккаунт заблокирован (escape-proof; в т.ч. автобан по репутации) |
+| `/landing/` | Промо (отдельный Vite entry, без session) |
 
 ### Переменные окружения
 
@@ -86,7 +89,11 @@ API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](
 | [`SCREENS.md`](SCREENS.md) | Экраны, URL, handoff, visual variants, контракты |
 | [`PROJECT.md`](PROJECT.md) | Продукт, архитектура, бэкенд, roadmap |
 | [`STRUCTURE.md`](STRUCTURE.md) | Папки и env |
-| [`mobile.md`](mobile.md) | Мобильный UX продукта (+ архив waitlist) |
+| [`ACTION_CARDS.md`](ACTION_CARDS.md) | Сводный PDF: majority → action cards + `actionResources` |
+| [`ANALYTICS.md`](ANALYTICS.md) | PostHog: pageviews, воронки, чеклист новой фичи |
+| [`mobile.md`](mobile.md) | **Desktop-only** (&lt;768px → заглушка) + архив waitlist |
+| [`landing/README.md`](landing/README.md) | Промо-лендос (MPA entry, CTA → `/referral`) |
+| [`src/components/desktop-only-screen/README.md`](src/components/desktop-only-screen/README.md) | Оверлей «только с компьютера» |
 | [`src/app/README.md`](src/app/README.md) | Routes / router / flow / session |
 | [`src/api/README.md`](src/api/README.md) | Auth, profiles, referrals, wallet, portfolios, reviewComplaints |
 | [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) | Правый visual: `default` / `invalid` / `done` |
@@ -111,6 +118,7 @@ API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](
 
 ## Деплой
 
-Статика в `dist/`. На GitHub Pages `404.html` = копия `index.html` для deep link’ов.  
+Статика в `dist/` (`index.html` + `landing/index.html`). На GitHub Pages `404.html` = копия `index.html` для SPA deep link’ов.  
+Prod: https://zaikopewpew.github.io/obratka/ · лендос: https://zaikopewpew.github.io/obratka/landing/  
 `SUPABASE_*` и `TELEGRAM_*` нужны на этапе `npm run build` (CI).  
 Remote только `ZaikoPewPew/obratka` — см. `.cursor/rules/git-remote.mdc`.

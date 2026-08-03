@@ -13,6 +13,7 @@
 | Префикс | Экраны |
 |---------|--------|
 | `referral*` | `/referral` (validate errors: `referralExhausted`, …) |
+| `desktopOnly*` / `metaTitleDesktopOnly` | оверлей «только с компьютера» (&lt;768px) — [`mobile.md`](../mobile.md) |
 | `auth*` / `authEmail*` / `authCode*` / `authOtp*` / `authIdentityConflict` | `/registration`, `/registration/code` |
 | `onboarding*` | `/onboarding` |
 | `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeCardReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeFeedFilter*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeEmptyFeedReviewed` / `homeMineSlotFree*` / `homePendingLimit*` / `homeNotify*` / `notificationCloseAria` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeBalance*` / `homeAccount*` / `homeContacts*` / `homeRulesCloseAria` / `homeFeedback*` / `homeLegendaryOnline*` / `homeRating*` | `/home` (Чужие/Мои/Рейтинг топ-50, SWR feed+feedReviewed, Ждёт/Уже + Ещё/Завершенные, intro, mine gate, free-slot / toast, feedSeen + 3/3, слоты, invite `homeInviteMessage`, репутация / уточки, контакты / правила / FAB, «Топы в сети», меню профиля) |
@@ -23,6 +24,7 @@
 | `settings*` | `/settings` (side-panel профиля) |
 | `ban*` | `/banned` |
 | `reportScreen*` / `reportSheet*` / `reportComplaint*` / `complaintTag*` | `/report` (листы → «Посмотреть» в side-panel → жалоба: ровно 1 тег, окно 6ч от done — `reportComplaintWindowClosed`; вне окна кнопку жалобы скрывать; теги v1: `low_effort` · `spam` · `harassment` · `offensive` · `ai_slop`) |
+| `reportConsensus*` / `reportAction*` | сводный PDF + action cards ([`ACTION_CARDS.md`](../ACTION_CARDS.md)); подписи ссылок — в `actionResources.json` |
 | `review*` / `reviewRec*` / `reviewAbort*` / `reviewAdviceRec*` / `reviewTier*` / `reviewPain*` / `reviewContextShort`·`Value*`·`Hint*` / `reviewVisualShort`·`Value*`·`Hint*` (1–5) / `report*` / `reportDictationTitle` | `/quiz` (шкалы + условный pain + tier + микрофон в совете), PDF; rec + abort confirm на `/review` |
 | `frame*` / `controls*` / `embedBlocked*` (`embedBlockedStep*` · `embedBlockedOpen` · `embedBlockedOpenSite` · `embedBlockedAria` · `embedBlockedMediaAria`) | iframe-shell `/review` (в т.ч. external viewer: видео-слот + 4 шага + CTA; после старта CTA → «Открыть сайт») |
 

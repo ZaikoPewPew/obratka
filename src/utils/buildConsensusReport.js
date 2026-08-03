@@ -64,7 +64,7 @@ export function buildConsensusReport(sheetsOrAnswers, t, opts = {}) {
   const rawCards = resolveActionCards(aggregate);
   const sections = buildConsensusSections(aggregate, t, locale);
   const actionCards = rawCards
-    .map((card) => localizeActionCard(card, t))
+    .map((card) => localizeActionCard(card, t, locale))
     .filter(Boolean);
 
   return {
@@ -174,9 +174,10 @@ export function buildConsensusSections(aggregate, t, locale = "ru") {
 /**
  * @param {import("./resolveActionCards.js").ActionCardRecord} card
  * @param {Record<string, string>} t
+ * @param {string} [locale]
  * @returns {ConsensusActionCard | null}
  */
-export function localizeActionCard(card, t) {
+export function localizeActionCard(card, t, locale = "ru") {
   if (!card?.id) return null;
   const prefix = `reportAction${idToPascal(card.id)}`;
   const title = t[`${prefix}Title`] ?? "";
@@ -191,8 +192,8 @@ export function localizeActionCard(card, t) {
     steps.push(step);
   }
 
-  const links = (card.links || []).map((link, index) => ({
-    label: t[`${prefix}Link${index + 1}`] ?? link.url,
+  const links = (card.links || []).map((link) => ({
+    label: pickLocalizedText(link.title, locale) || link.url,
     url: link.url,
     type: link.type,
   }));
@@ -201,7 +202,8 @@ export function localizeActionCard(card, t) {
   let example = null;
   if (card.example?.url) {
     example = {
-      label: t[`${prefix}Example`] ?? card.example.url,
+      label:
+        pickLocalizedText(card.example.title, locale) || card.example.url,
       url: card.example.url,
     };
   }
@@ -216,6 +218,23 @@ export function localizeActionCard(card, t) {
     links,
     example,
   };
+}
+
+/**
+ * @param {string | Record<string, string> | undefined} value
+ * @param {string} locale
+ * @returns {string}
+ */
+function pickLocalizedText(value, locale) {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  return (
+    value[locale] ||
+    value.ru ||
+    value.en ||
+    Object.values(value).find((item) => typeof item === "string" && item) ||
+    ""
+  );
 }
 
 /**

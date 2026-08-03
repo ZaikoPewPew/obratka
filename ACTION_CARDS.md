@@ -8,21 +8,48 @@
 
 | Что | Где |
 |-----|-----|
-| URL гайдов / шаблонов / примеров | [`src/data/actionCards.json`](src/data/actionCards.json) — поля `links[].url`, `example.url` |
-| Заголовки, проблемы, шаги, подписи ссылок | [`content/locales.json`](content/locales.json) — ключи `reportAction*` (ru + en) |
+| Карточки проблем (id / category / trigger / priority) | [`src/data/actionCards.json`](src/data/actionCards.json) — **без** URL |
+| Источники (гайды / шаблоны / примеры) | [`src/data/actionResources.json`](src/data/actionResources.json) — `url`, `types`, `tags`, `covers`, `title` / `description` |
+| Заголовки, проблемы, шаги карточек | [`content/locales.json`](content/locales.json) — ключи `reportAction*` (ru + en) |
+
+## Модель источников
+
+Источник — первичная сущность. Один материал может закрывать несколько card id:
+
+```text
+uxfol_case_template
+├── types: guide, template
+├── tags: storytelling, research, impact, …
+└── covers: structure_mess, structure_dump, metrics_none, context_low
+```
+
+На резолве для каждой выбранной карточки подтягиваются ресурсы с `covers ∋ card.id`:
+
+- до **2** обычных ссылок (не `example`);
+- до **1** `example`;
+- порядок: сначала более узкие `covers` (специфичнее), затем id.
+
+Подписи ссылок — из `title.ru` / `title.en` ресурса (не из `locales`).
+
+CV-источник (`hanna_cv`) лежит в базе с пустым `covers` — пока нет card id под CV.
+
+Pain-карточки пока без ресурсов (добавить новые записи в `actionResources` с `covers: ["pain_*"]`).
 
 ## Поток
 
 ```text
 sheets.answers → aggregatePortfolioReviews → resolveActionCards
                               ↘ buildConsensusReport → shareConsensusPdf
+                                         ↑
+                              actionResources.covers
 ```
 
 | Модуль | Роль |
 |--------|------|
-| [`src/data/actionCards.json`](src/data/actionCards.json) | id, category, trigger, priority, urls (`links` / `example`); **без** UI-copy |
+| [`src/data/actionCards.json`](src/data/actionCards.json) | id, category, trigger, priority; **без** UI-copy и URL |
+| [`src/data/actionResources.json`](src/data/actionResources.json) | источники → `covers` card ids |
 | [`src/utils/aggregatePortfolioReviews.js`](src/utils/aggregatePortfolioReviews.js) | counts / min–max / `adviceList` (dictation v1 не тащим) |
-| [`src/utils/resolveActionCards.js`](src/utils/resolveActionCards.js) | majority → max 3 cards |
+| [`src/utils/resolveActionCards.js`](src/utils/resolveActionCards.js) | majority → max 3 cards + attach resources |
 | [`src/utils/buildConsensusReport.js`](src/utils/buildConsensusReport.js) | тексты сводки (многострочные голоса) + локализованные карточки |
 | [`src/utils/shareConsensusPdf.js`](src/utils/shareConsensusPdf.js) | print iframe сводного PDF |
 
@@ -57,4 +84,5 @@ Categorical nuance: если оба проблемных value набрали г
 
 ## i18n
 
-`reportConsensus*` · `reportAction*` — ru/en в `locales.json`.
+`reportConsensus*` · `reportAction*{Title,Problem,StepN,Category*}` — ru/en в `locales.json`.  
+Подписи ссылок — в `actionResources.json` (`title` / `description`).

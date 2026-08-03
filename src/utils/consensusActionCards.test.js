@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { aggregatePortfolioReviews, hasMajority } from "./aggregatePortfolioReviews.js";
 import {
+  listResourcesForCard,
   pickProblemValue,
   resolveActionCards,
 } from "./resolveActionCards.js";
@@ -107,6 +108,15 @@ assert.equal(cards.length, 3);
 assert.deepEqual(
   cards.map((card) => card.id),
   ["structure_mess", "metrics_none", "context_low"],
+);
+assert.ok(cards[0].links.length >= 1);
+assert.ok(cards[0].links.every((link) => link.url && !link.url.includes("example.com")));
+assert.ok(
+  listResourcesForCard("structure_mess").some((r) => r.id === "uxfol_case_template"),
+);
+assert.equal(
+  listResourcesForCard("structure_mess").find((r) => r.id === "hanna_cv"),
+  undefined,
 );
 
 // pain alone when higher axes clean
@@ -244,17 +254,12 @@ const consensus = buildConsensusReport(
     reportActionStructureMessTitle: "Mess title",
     reportActionStructureMessProblem: "Mess problem",
     reportActionStructureMessStep1: "Step 1",
-    reportActionStructureMessLink1: "Link 1",
-    reportActionStructureMessLink2: "Link 2",
-    reportActionStructureMessExample: "Example",
     reportActionMetricsNoneTitle: "Metrics title",
     reportActionMetricsNoneProblem: "Metrics problem",
     reportActionMetricsNoneStep1: "M step 1",
-    reportActionMetricsNoneLink1: "M link",
     reportActionContextLowTitle: "Context title",
     reportActionContextLowProblem: "Context problem",
     reportActionContextLowStep1: "C step 1",
-    reportActionContextLowLink1: "C link",
   },
   { locale: "en" },
 );
@@ -266,6 +271,9 @@ assert.deepEqual(
   ["structure_mess", "metrics_none", "context_low"],
 );
 assert.equal(consensus.actionCards[0].title, "Mess title");
+assert.ok(consensus.actionCards[0].links.length >= 1);
+assert.ok(consensus.actionCards[0].links[0].label);
+assert.ok(consensus.actionCards[0].example?.url);
 assert.ok(consensus.sections.length >= 3);
 const contextSection = consensus.sections.find((s) => s.title === "Context");
 assert.ok(contextSection);

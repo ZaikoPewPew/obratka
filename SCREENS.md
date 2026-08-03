@@ -30,6 +30,7 @@ referral → auth → authCode → onboarding → home
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
 | 8 | `report-screen` | `/report` | Отчёт автору: листы → «Посмотреть» (side-panel) → жалоба (1 тег, окно 6ч от done; вне окна кнопку скрывать) + PDF (мокап листа → done после скачивания) |
 | — | `ban-screen` | `/banned` | Аккаунт заблокирован; «Выйти» + «Связаться» (242px); красный mesh; deep link escape-proof |
+| — | `desktop-only-screen` | *(оверлей)* | Viewport &lt; 768px: «только с компьютера»; не маршрут; см. [`mobile.md`](mobile.md) |
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query (`?ref=`, `?lang=`) сохраняются.
 
@@ -39,6 +40,7 @@ referral → auth → authCode → onboarding → home
 - **Stale session:** cached `userId` на boot сверяется с Supabase Auth; без живого user очищается UX-кэш с сохранением referral-кода.
 - **Ban:** `profiles.banned_at` → всегда `/banned` (login, boot, любой deep link).
   Операторская шпаргалка: [`supabase/BAN.md`](supabase/BAN.md), шаблоны SQL: [`supabase/sql/ban-templates.sql`](supabase/sql/ban-templates.sql).
+- **Desktop-only:** viewport &lt; 768px → оверлей `desktop-only-screen` (не path); ревью/claim не стартуют. Спека: [`mobile.md`](mobile.md).
 
 SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.html` → `dist/404.html`.
 
@@ -128,20 +130,30 @@ src/components/
   review-panel/           ← шаги квиза
   scale-slider/           ← шкалы context (1–5) / visual (1–5)
   success-screen/         ← /done (подача портфолио)
-  report-screen/          ← /report (листы → side-panel → жалоба)
+  report-screen/          ← /report (листы → side-panel → жалоба; сводный PDF)
   ban-screen/             ← /banned (аккаунт заблокирован)
+  desktop-only-screen/    ← оверлей <768px (не path; см. mobile.md)
   rating/                 ← неиспользуемый aside (вкладка рейтинга — в home-screen)
+
+landing/                  ← промо MPA entry (без api/session)
+
+src/data/
+  actionCards.json        ← карточки проблем (без URL)
+  actionResources.json    ← источники → covers card ids
 
 src/utils/
   FIELD_ERROR.md          ← fieldError + urlScreenField
   fieldError.js / urlScreenField.js
   brandScreenTransition.js / meshGradientWash.js / motionTokens.js
   backdropLuminance.js    ← яркость фона под tabbar → --on-dark
+  viewport.js             ← DESKTOP_MIN_WIDTH_PX (768) + matchMedia
   homeRoute.js            ← /home query ↔ feed/mine/rating + mine filter
   homeListCache.js        ← SWR feed/feedReviewed/mine/rating (memory + sessionStorage)
   feedSeen.js             ← seen id open-ленты → точка на «Чужие посты»
   mineReadySeen.js        ← seen id готовых отчётов → точка на «Мои» / «Завершенные»
   reviewReport.js         ← answers → секции PDF (tier × gradeZone, L1/L2/L3; см. QUIZ.md)
+  aggregatePortfolioReviews.js / resolveActionCards.js / buildConsensusReport.js / shareConsensusPdf.js
+                          ← сводный PDF + action cards (см. ACTION_CARDS.md)
 
 src/config/
   review.js               ← REVIEW_SESSION_SECONDS (таймер /review + intro)
@@ -284,6 +296,10 @@ iframe — пауза при `visibility hidden`; external — wall-clock + де
 - [`src/components/app-modal/README.md`](src/components/app-modal/README.md) — универсальная модалка
 - [`src/components/side-panel/README.md`](src/components/side-panel/README.md) — боковая панель
 - [`src/components/tabs-panel/README.md`](src/components/tabs-panel/README.md) — сегмент табов
+- [`src/components/desktop-only-screen/README.md`](src/components/desktop-only-screen/README.md) — гейт &lt;768px («только с компьютера»)
+- [`mobile.md`](mobile.md) — политика desktop-only + QA + архив waitlist
+- [`landing/README.md`](landing/README.md) — промо MPA
+- [`ACTION_CARDS.md`](ACTION_CARDS.md) — сводный PDF + action cards / resources
 - [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — ошибки полей
 - [`src/assets/README.md`](src/assets/README.md) — марки / morph
 - [`src/components/auth-screen/README.md`](src/components/auth-screen/README.md)

@@ -27,6 +27,8 @@ alwaysApply: true
 - `--control-*` (в т.ч. `--control-rec-*` для чипа надиктовки на `/review`, `--shell-review-rec-*` для микрофона в поле совета, `--shell-review-slider-*` для шкал квиза), `--shell-*`, `--frame-*`, `--recall-*`. Аватар / «Заметки»: `--radius-xs`.
 - Recording indicator: `--color-recording` (алиас на `--palette-google-red`); пульс — `--motion-recording-blink-*` + `motion-recording-blink` в `entrance.css`.
 - Ban: `--shell-ban-mesh-*`, `--ban-screen-*`.
+- Desktop-only gate: `--desktop-only-screen-*`, `--breakpoint-min-desktop` (768; в `@media` — литералы).
+- Landing (MPA): `--landing-*` (`landing/styles/landing.css`).
 - Home tabbar: `--home-screen-tabbar-*` (hide / thumb / contrast / glass track).
   - Светлый фон: `--home-screen-tabbar-track-bg` = gray-900 **10%** + `--home-screen-tabbar-blur` (20); неактивный `--home-screen-tabbar-tab-color`.
   - Тёмный (`--on-dark`): `--home-screen-tabbar-track-bg-on-dark` = white **20%**; неактивный `--home-screen-tabbar-tab-color-on-dark`.

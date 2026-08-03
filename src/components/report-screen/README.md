@@ -72,7 +72,8 @@ reportScreen.open({ portfolioId: item.id, portfolioName: item.name });
 Клиент: [`src/api/reviewComplaints.js`](../../api/reviewComplaints.js) — `listPortfolioReviewSheets` (с `answers` / `canComplain`) / `submitReviewComplaint`.  
 Окно жалобы (старт + 6ч, fallback N-е ревью): [`src/utils/complaintWindow.js`](../../utils/complaintWindow.js).  
 PDF / секции: [`src/utils/reviewReport.js`](../../utils/reviewReport.js), [`src/utils/shareReviewPdf.js`](../../utils/shareReviewPdf.js) (лист), [`src/utils/shareConsensusPdf.js`](../../utils/shareConsensusPdf.js) (сводка).  
-Сводка + action cards: [`ACTION_CARDS.md`](../../../ACTION_CARDS.md), [`src/utils/buildConsensusReport.js`](../../utils/buildConsensusReport.js).  
+Сводка + action cards: [`ACTION_CARDS.md`](../../../ACTION_CARDS.md), [`src/utils/buildConsensusReport.js`](../../utils/buildConsensusReport.js), [`resolveActionCards.js`](../../utils/resolveActionCards.js).  
+Данные: [`actionCards.json`](../../data/actionCards.json) (триггеры) + [`actionResources.json`](../../data/actionResources.json) (URL / `covers`).  
 Спека квиза и трактовок: [`QUIZ.md`](../../../QUIZ.md).  
 Надиктовка: [`src/lib/dictation/README.md`](../../lib/dictation/README.md).  
 Post-edit пунктуации (перед сохранением в лист): [`supabase/functions/polish-dictation/README.md`](../../../supabase/functions/polish-dictation/README.md).

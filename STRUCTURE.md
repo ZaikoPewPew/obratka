@@ -12,9 +12,12 @@
 | `SCREENS.md` | Экраны + path-роутинг + контракты фабрик |
 | `QUIZ.md` | Пул вопросов квиза, схема `answers`, L1/L2/L3 PDF-отчёта |
 | `STRUCTURE.md` | Этот документ |
-| `mobile.md` | Мобильный UX продукта + архив waitlist-спеки |
+| `ACTION_CARDS.md` | Сводный PDF: majority → action cards + resources |
+| `ANALYTICS.md` | PostHog: фасад, pageviews, воронки |
+| `mobile.md` | **Desktop-only** гейт (&lt;768px) + архив waitlist / старого adaptive QA |
 | `index.html` | Каркас `.iframe-shell` (`/review`) + CSS entry |
-| `vite.config.js` | Vite, `VITE_BASE_PATH`, префиксы `VITE_` / `SUPABASE_` / `TELEGRAM_` |
+| `landing/` | Промо-лендос (отдельный Vite entry, без api/session) — [`landing/README.md`](landing/README.md) |
+| `vite.config.js` | Vite, MPA (`index` + `landing`), `VITE_BASE_PATH`, префиксы `VITE_` / `SUPABASE_` / `TELEGRAM_` |
 | `package.json` | Скрипты (`build` → ещё `404.html` для SPA) |
 | `.env.example` | Шаблон клиентских env |
 
@@ -53,9 +56,9 @@
 
 | Папка | Роль |
 |-------|------|
-| `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `config/` ([README](src/config/README.md): review session + contacts), `lib/` ([README](src/lib/README.md): supabase + **analytics** + **dictation**), `assets/` |
-| `styles/` | Токены + UI. Entry: tokens/base/entrance/app-modal/iframe-shell/home/legendary-online-panel/feedback/tabs-panel/account-menu/settings/success/ban/report |
-| `content/` | `locales.json`, onboarding, embed-hosts, founder-avatars |
+| `src/` | Код: `main.js`, `app/`, `components/` (в т.ч. `desktop-only-screen`), `utils/` (`viewport.js`, consensus/action cards), `data/` (`actionCards.json` + `actionResources.json`), `api/`, `config/` ([README](src/config/README.md)), `lib/` ([README](src/lib/README.md): supabase + **analytics** + **dictation**), `assets/` |
+| `styles/` | Токены + UI. Entry: tokens/base/entrance/app-modal/iframe-shell/home/…; `desktop-only-screen.css` — импорт из фабрики; лендос — `landing/styles/landing.css` + `--landing-*` |
+| `content/` | `locales.json`, onboarding, embed-hosts, founder-avatars, rules |
 | `public/` | Статика по URL (favicon и т.п.) |
 | `supabase/` | SQL (`profiles`, `legendary_presence`, `rating_leaderboard`, `wallet`, `portfolios`, `portfolio_submit`, `review_claims`, `review_complaints`, `referrals`, …) + Edge (`telegram-auth`, `portfolio-preview`, `portfolio-embed-probe`, `polish-dictation`); доступы — `SECURITY.md` |
 | `.cursor/` | Правила агента (`rules/*.mdc`) и карта (`.cursor/README.md`) |
@@ -69,6 +72,9 @@
 | App modal | [`src/components/app-modal/README.md`](src/components/app-modal/README.md) |
 | Tabs panel | [`src/components/tabs-panel/README.md`](src/components/tabs-panel/README.md) |
 | Scale slider (квиз 1–5) | [`src/components/scale-slider/README.md`](src/components/scale-slider/README.md) |
+| Desktop-only gate | [`src/components/desktop-only-screen/README.md`](src/components/desktop-only-screen/README.md) · [`mobile.md`](mobile.md) |
+| Landing (промо) | [`landing/README.md`](landing/README.md) |
+| Action cards / сводный PDF | [`ACTION_CARDS.md`](ACTION_CARDS.md) |
 | Квиз / отчёт (SoT) | [`QUIZ.md`](QUIZ.md) |
 | Ошибки полей | [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) |
 | Марки / morph | [`src/assets/README.md`](src/assets/README.md) |
@@ -90,8 +96,10 @@
 iframe / external: каталог [`content/embed-hosts.md`](content/embed-hosts.md) (`embedHosts` / `portfolioEmbed` + Edge `portfolio-embed-probe` XFO/CSP; Readymag probe + frame-block → external UI).  
 iframe: таймер паузится при уходе со вкладки; external: wall-clock без паузы, конец → `Timer-end.wav` + quiz.  
 `/quiz` = опрос (`review-panel` + [`scale-slider`](src/components/scale-slider/README.md) на шагах понятность/визуал **1–5**; условный pain; рыночный `tier`); в поле «Главный совет» — микрофон (тот же polish). Спека: [`QUIZ.md`](QUIZ.md). Не путать с login-`session.js` (`obratka.session`).  
-`/report` = листы ревью автора (+ секция надиктовки) + жалоба (1 тег, окно 6ч от done) → reputation (старт 0 / бан −100 / +10 settle). Вход только когда собраны все ревью.  
-`/banned` = бан (в т.ч. автобан при `reputation <= -100`).
+`/report` = листы ревью автора (+ секция надиктовки) + жалоба (1 тег, окно 6ч от done) → reputation (старт 0 / бан −100 / +10 settle). Сводный PDF — majority + action cards из `actionCards`/`actionResources` ([`ACTION_CARDS.md`](ACTION_CARDS.md)). Вход только когда собраны все ревью.  
+`/banned` = бан (в т.ч. автобан при `reputation <= -100`).  
+`/landing/` = промо MPA (без api/session); CTA → `/referral`.  
+Viewport &lt; 768px → оверлей `desktop-only-screen` ([`mobile.md`](mobile.md)).
 
 Клиентский кэш ленты: `sessionStorage` ключ `obratka.homeLists.<userId>`; seen готовых отчётов: `localStorage` `obratka.mineReadySeen.<userId>`; seen кейсов ленты: `localStorage` `obratka.feedSeen.<userId>` (все сбрасываются на logout).  
 `localStorage`-сессия — UX-кэш: boot проверяет cached `userId` через Supabase Auth; auth-gated deep links без user не открываются.

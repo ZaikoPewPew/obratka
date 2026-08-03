@@ -23,12 +23,14 @@
 | Review claim / heartbeat / release | wired (награда только после submit; unload = keepalive + `sessionStorage` reconcile; **overshoot** — см. § Claims) |
 | Review: iframe/external + таймер 45 s + **надиктовка** | wired (embed-hosts + probe/fallback; rec + mic в совете; post-edit пунктуации через Edge `polish-dictation`; SoT [`embed-hosts.md`](content/embed-hosts.md)) |
 | Подача URL + back-chip + done на url-screen | wired |
-| Report: листы (+ `dictation`) + жалоба + PDF | wired |
+| Report: листы (+ `dictation`) + жалоба + PDF | wired (сводный PDF + action cards — [`ACTION_CARDS.md`](ACTION_CARDS.md)) |
 | Referrals validate/redeem / share | wired (1 код / 2 слота, seed `YTHWKPDWAK`, без наград) |
 | Analytics (PostHog) | wired — pageviews + core funnel; SoT [`ANALYTICS.md`](ANALYTICS.md) |
 | App modal (shared overlays) | wired |
 | Settings `/settings` | wired (профиль) |
+| Landing `/landing/` | wired (MPA entry, без session; [`landing/README.md`](landing/README.md)) |
 | Legacy waitlist UI | **удалён** (спека в `mobile.md` § Архив) |
+| Mobile | **desktop-only** (&lt;768px → `desktop-only-screen`; см. `mobile.md`) |
 
 ### Home — что нового в UX
 
@@ -259,14 +261,17 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 
 **Подключено** (`index.html` + `main.js`):
 
-- CSS: `tokens`, `base`, `entrance`, `app-modal`, `side-panel`, `iframe-shell`, `success-screen`, `home-screen`, `legendary-online-panel`, `feedback`, `tabs-panel`, `account-menu`, `settings-screen`, `ban-screen`, `report-screen`
+- CSS: `tokens`, `base`, `entrance`, `app-modal`, `side-panel`, `iframe-shell`, `success-screen`, `home-screen`, `legendary-online-panel`, `feedback`, `tabs-panel`, `account-menu`, `settings-screen`, `ban-screen`, `report-screen` (+ `desktop-only-screen` через импорт фабрики)
 - Экраны: referral, auth, auth-code, onboarding, home, settings, url, review-shell (+ rec), quiz, success, report, ban
-- Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `side-panel`, `account-menu`, `tabs-panel`, `legendary-online-panel`, `feedback`, `scale-slider`
+- Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `side-panel`, `account-menu`, `tabs-panel`, `legendary-online-panel`, `feedback`, `scale-slider`, `desktop-only-screen` (гейт &lt;768px)
 - Home state: `src/utils/homeRoute.js` (query) + `homeListCache.js` + `feedSeen.js` + `mineReadySeen.js` (кэши сбрасываются в `exitAuthenticatedSession`)
 - Review timer: `src/config/review.js` (`REVIEW_SESSION_SECONDS`); iframe pause / external wall-clock; end sound `src/assets/audio/Timer-end.wav`
 - Portfolio embed: `src/utils/embedHosts.js` + `portfolioEmbed.js` + Edge `portfolio-embed-probe` (XFO/CSP; Figma/YouTube rewrite; blocklist → external; optimistic iframe + Readymag probe + frame-block fallback). Каталог: [`content/embed-hosts.md`](content/embed-hosts.md)
 - Dictation: `src/lib/dictation/` (Web Speech MVP; external `setKeepAliveInBackground`); post-edit текста — Edge [`polish-dictation`](supabase/functions/polish-dictation/README.md) + [`dictationPolish.js`](src/api/dictationPolish.js) (`ZAI_API_KEY` только в secrets; soft-fail → сырой текст)
 - Url-screen: чип «На главную» (`.url-screen__back`, скрыт на done) → `onExit` → home
+- Desktop-only: [`mobile.md`](mobile.md) + [`desktop-only-screen`](src/components/desktop-only-screen/README.md) + [`viewport.js`](src/utils/viewport.js)
+- Report consensus PDF: [`ACTION_CARDS.md`](ACTION_CARDS.md) — `actionCards.json` (триггеры) + `actionResources.json` (URL / covers) → `resolveActionCards` → `shareConsensusPdf`
+- Landing: отдельный Vite entry [`landing/`](landing/README.md) (`dist/landing/`); CTA → `/referral` (+ `?ref=`); без api/session
 
 Waitlist dual-layout удалён; историческая спека — [`mobile.md`](mobile.md) § Архив.
 

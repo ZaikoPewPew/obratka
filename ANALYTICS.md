@@ -100,8 +100,9 @@ resetAnalytics(); // logout
 | `review_claimed` | после успешного claim | `portfolio_id` | Вход в ревью |
 | `review_claim_failed` | client/RPC fail | `reason` | Отвал до `/review` |
 | `review_submitted` | после INSERT review | `portfolio_id` | Успех ревью (+монеты) |
-| `review_aborted` | confirm abort | `portfolio_id?`, `route_id?` | Уход без награды |
+| `review_aborted` | confirm abort / desktop-only gate | `portfolio_id?`, `route_id?`, `reason?` (`desktop_only_gate`) | Уход без награды |
 | `portfolio_submitted` | после `submit_portfolio` | — | Подача своего URL |
+| `desktop_only_gate_shown` | первый показ гейта &lt;768px за загрузку | — | Мобильный / узкий вход |
 
 Identify traits: `grade`, `tier`, `onboarding_done` (без email).
 

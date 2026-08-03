@@ -1,0 +1,217 @@
+{
+  "hanna_cv": {
+    "id": "hanna_cv",
+    "url": "https://slashdesigner.ru/lib/hanna-guide/cv",
+    "types": ["guide"],
+    "tags": ["cv", "ats", "resume", "product design"],
+    "covers": [],
+    "title": {
+      "ru": "Гайд Анны Лесной — CV",
+      "en": "Hanna Lesnaya guide — CV"
+    },
+    "description": {
+      "ru": "Руководство по созданию UX/Product Design CV: ATS, структура, формат, подача информации, полезные ресурсы.",
+      "en": "Guide to UX/Product Design CVs: ATS, structure, format, presentation, and useful resources."
+    }
+  },
+  "hanna_portfolio": {
+    "id": "hanna_portfolio",
+    "url": "https://slashdesigner.ru/lib/hanna-guide/portfolio",
+    "types": ["guide"],
+    "tags": ["portfolio", "case study", "storytelling", "nda"],
+    "covers": ["structure_mess", "structure_dump", "context_low"],
+    "title": {
+      "ru": "Гайд Анны Лесной — Portfolio",
+      "en": "Hanna Lesnaya guide — Portfolio"
+    },
+    "description": {
+      "ru": "Большой гайд по портфолио: минималистичное портфолио, кейсы, NDA, storytelling, примеры и подборки ресурсов.",
+      "en": "Large portfolio guide: minimal portfolio, cases, NDA, storytelling, examples, and resource lists."
+    }
+  },
+  "screenshots_not_enough": {
+    "id": "screenshots_not_enough",
+    "url": "https://dsgners.ru/n1kipetrov/9219-ya-dumal-chto-portfolio-eto-prosto-nabor-skrinshotov-ya-oshibalsya",
+    "types": ["article"],
+    "tags": ["portfolio", "structure", "storytelling", "mistakes"],
+    "covers": ["structure_mess", "structure_dump"],
+    "title": {
+      "ru": "Я думал, что портфолио — это просто набор скриншотов",
+      "en": "I thought a portfolio was just a set of screenshots"
+    },
+    "description": {
+      "ru": "Личный опыт создания портфолио: выбор проектов, структура, тексты, ошибки и выводы.",
+      "en": "Personal portfolio journey: project choice, structure, copy, mistakes, and takeaways."
+    }
+  },
+  "netology_product_portfolio": {
+    "id": "netology_product_portfolio",
+    "url": "https://netology.ru/blog/08-2022-portfolio-product-designer",
+    "types": ["article"],
+    "tags": ["portfolio", "hiring", "process", "impact", "role"],
+    "covers": ["structure_mess", "context_low", "metrics_none"],
+    "title": {
+      "ru": "Каким должно быть портфолио продуктового дизайнера",
+      "en": "What a product designer portfolio should look like"
+    },
+    "description": {
+      "ru": "Как работодатели оценивают портфолио, сколько кейсов показывать, как описывать процесс, роль и результаты.",
+      "en": "How employers judge portfolios, how many cases to show, and how to describe process, role, and results."
+    }
+  },
+  "ux_portfolio_playbook": {
+    "id": "ux_portfolio_playbook",
+    "url": "https://uxplaybook.org/portfolio",
+    "types": ["guide", "template"],
+    "tags": ["portfolio", "checklist", "template", "ux"],
+    "covers": ["structure_mess", "structure_dump", "context_low", "metrics_none"],
+    "title": {
+      "ru": "UX Portfolio Playbook",
+      "en": "UX Portfolio Playbook"
+    },
+    "description": {
+      "ru": "Комплексный playbook с шаблонами, чек-листами и рекомендациями по созданию UX-портфолио.",
+      "en": "Playbook with templates, checklists, and guidance for building a UX portfolio."
+    }
+  },
+  "hirehi_portfolio_unread": {
+    "id": "hirehi_portfolio_unread",
+    "url": "https://hirehi.ru/blog/portfolio-dizainera-kotoroe-ne-chitaiut-5-oshibok-iz-za-kotorykh-vam-otkazyvaiut",
+    "types": ["article"],
+    "tags": ["portfolio", "mistakes", "structure", "checklist"],
+    "covers": ["structure_mess", "structure_dump", "context_low"],
+    "title": {
+      "ru": "Портфолио дизайнера, которое не читают",
+      "en": "The designer portfolio nobody reads"
+    },
+    "description": {
+      "ru": "Разбор пяти главных ошибок портфолио, идеальной структуры кейса и чек-листа перед отправкой.",
+      "en": "Five portfolio mistakes, an ideal case structure, and a pre-send checklist."
+    }
+  },
+  "portfolio_red_flags": {
+    "id": "portfolio_red_flags",
+    "url": "https://www.linkedin.com/pulse/portfolio-red-flags-what-i-actually-look-when-hiring-ux-tim-huff-udidc/",
+    "types": ["article"],
+    "tags": ["hiring", "red flags", "impact", "strategy", "business"],
+    "covers": ["metrics_none", "metrics_vanity", "context_low"],
+    "title": {
+      "ru": "Portfolio Red Flags",
+      "en": "Portfolio Red Flags"
+    },
+    "description": {
+      "ru": "Что ищет VP Design при просмотре портфолио: красные флаги, стратегическое мышление и бизнес-ценность.",
+      "en": "What a VP Design looks for: red flags, strategic thinking, and business value."
+    }
+  },
+  "uxfol_case_template": {
+    "id": "uxfol_case_template",
+    "url": "https://blog.uxfol.io/ux-case-study-template/",
+    "types": ["guide", "template"],
+    "tags": ["storytelling", "research", "impact", "portfolio", "case study"],
+    "covers": [
+      "structure_mess",
+      "structure_dump",
+      "metrics_none",
+      "context_low"
+    ],
+    "title": {
+      "ru": "The Ultimate UX Case Study Template",
+      "en": "The Ultimate UX Case Study Template"
+    },
+    "description": {
+      "ru": "Подробный шаблон UX-кейса: структура, storytelling, impact, альтернативные форматы.",
+      "en": "Detailed UX case template: structure, storytelling, impact, and alternative formats."
+    }
+  },
+  "product_design_portfolio_cases": {
+    "id": "product_design_portfolio_cases",
+    "url": "https://uxpilot.ai/blogs/product-design-portfolio-case-studies",
+    "types": ["example"],
+    "tags": ["portfolio", "case study", "examples", "big tech"],
+    "covers": ["structure_mess", "structure_dump", "metrics_none"],
+    "title": {
+      "ru": "Product Design Portfolio Case Studies",
+      "en": "Product Design Portfolio Case Studies"
+    },
+    "description": {
+      "ru": "Разбор 12 реальных портфолио дизайнеров из Google, Apple, Meta и других компаний.",
+      "en": "Breakdown of 12 real designer portfolios from Google, Apple, Meta, and more."
+    }
+  },
+  "ixdf_ux_case_studies": {
+    "id": "ixdf_ux_case_studies",
+    "url": "https://ixdf.org/literature/topics/ux-case-studies",
+    "types": ["guide"],
+    "tags": ["case study", "structure", "fundamentals"],
+    "covers": ["structure_mess", "structure_dump"],
+    "title": {
+      "ru": "UX Case Studies (IxDF)",
+      "en": "UX Case Studies (IxDF)"
+    },
+    "description": {
+      "ru": "Базовое руководство по UX Case Study: что входит в кейс и зачем нужен каждый раздел.",
+      "en": "Basics of a UX case study: what belongs in a case and why each section matters."
+    }
+  },
+  "minto_pyramid_case": {
+    "id": "minto_pyramid_case",
+    "url": "https://uxplaybook.org/articles/ux-case-study-minto-pyramid-structure-guide",
+    "types": ["guide"],
+    "tags": ["case study", "minto", "storytelling", "structure"],
+    "covers": ["structure_mess", "structure_dump"],
+    "title": {
+      "ru": "How to Write UX Case Studies That Land You a Job",
+      "en": "How to Write UX Case Studies That Land You a Job"
+    },
+    "description": {
+      "ru": "Использование принципа Minto Pyramid для построения убедительных UX-кейсов.",
+      "en": "Using the Minto Pyramid to build convincing UX case studies."
+    }
+  },
+  "structure_hiring_managers": {
+    "id": "structure_hiring_managers",
+    "url": "https://medium.com/@maxrichy/how-to-structure-a-ux-case-study-that-hiring-managers-notice-4f0e9bf45fa4",
+    "types": ["article"],
+    "tags": ["case study", "hiring", "structure", "role"],
+    "covers": ["structure_mess", "context_low"],
+    "title": {
+      "ru": "How to Structure a UX Case Study that Hiring Managers Notice",
+      "en": "How to Structure a UX Case Study that Hiring Managers Notice"
+    },
+    "description": {
+      "ru": "Как построить кейс, который отвечает на главные вопросы hiring manager.",
+      "en": "How to structure a case that answers a hiring manager’s key questions."
+    }
+  },
+  "ux_case_examples_inspire": {
+    "id": "ux_case_examples_inspire",
+    "url": "https://uiuxdesigning.com/ux-case-study-examples/",
+    "types": ["example"],
+    "tags": ["case study", "examples", "storytelling", "portfolio"],
+    "covers": ["structure_mess", "structure_dump"],
+    "title": {
+      "ru": "7 Incredible UX Case Study Examples",
+      "en": "7 Incredible UX Case Study Examples"
+    },
+    "description": {
+      "ru": "Подборка и анализ лучших UX-кейсов с разбором структуры и storytelling.",
+      "en": "Curated UX case examples with structure and storytelling breakdowns."
+    }
+  },
+  "case_study_club": {
+    "id": "case_study_club",
+    "url": "https://www.casestudy.club/case-studies",
+    "types": ["example"],
+    "tags": ["case study", "library", "examples", "product design"],
+    "covers": ["structure_mess", "structure_dump", "metrics_none"],
+    "title": {
+      "ru": "Case Study Club",
+      "en": "Case Study Club"
+    },
+    "description": {
+      "ru": "Курируемая библиотека реальных UX/Product Design кейсов по десяткам тематик.",
+      "en": "Curated library of real UX/Product Design cases across dozens of topics."
+    }
+  }
+}
