@@ -13,6 +13,13 @@ import { getSession, setSession, clearSession } from "./app/session.js";
 import { completeOAuthFromUrl, signOut } from "./api/auth.js";
 import { getSupabase, refreshCachedAccessToken } from "./lib/supabaseClient.js";
 import {
+  identifyUser,
+  initAnalytics,
+  resetAnalytics,
+  track,
+  trackPage,
+} from "./lib/analytics.js";
+import {
   submitPortfolio,
   clearSubmittedPortfolios,
   submitPortfolioReview,
@@ -90,6 +97,8 @@ import { fixHangingPrepositions } from "./utils/hangingPrepositions.js";
 import currencyDuckLeaveUrl from "./assets/home/modal/currency-duck-leave.png";
 import timerEndUrl from "./assets/audio/Timer-end.wav";
 import externalEmbedVideoUrl from "./assets/video/primer_not_iframe.mp4";
+
+initAnalytics();
 
 const SESSION_TOTAL_MS = REVIEW_SESSION_SECONDS * 1000;
 const TAB_ATTENTION_FAVICON = `${String(import.meta.env.BASE_URL || "/").replace(/\/?$/, "/")}assets/svg/favicon_timer.svg`;
@@ -362,6 +371,7 @@ const reviewPanel = createReviewPanel({
           clearPersistedReviewClaim();
           stopClaimHeartbeat();
           void awardReviewReward();
+          track("review_submitted", { portfolio_id: pid });
         }
       } catch (err) {
         if (import.meta.env.DEV) {
@@ -433,6 +443,7 @@ async function exitAuthenticatedSession() {
   clearFeedSeen(sessionUserId);
   clearMyProfileCache();
   clearSession();
+  resetAnalytics();
   clearSubmittedPortfolios();
   setPendingAuthEmail(null);
   try {
@@ -721,6 +732,7 @@ async function claimAndStartReview(item, opts = {}) {
   if (!id) return false;
 
   if (!isPortfolioOpenForReview(item)) {
+    track("review_claim_failed", { reason: "client_no_slots" });
     if (showNoSlotsNotice) {
       const t = getStrings();
       homeScreen.showNotice({
@@ -738,6 +750,7 @@ async function claimAndStartReview(item, opts = {}) {
     await claimPortfolioReview(id);
   } catch (err) {
     const code = portfolioRpcErrorCode(err);
+    track("review_claim_failed", { reason: code || "unknown" });
     if (code === "no_slots") {
       if (showNoSlotsNotice) {
         const t = getStrings();
@@ -789,6 +802,7 @@ async function claimAndStartReview(item, opts = {}) {
     applicantAvatar: item.avatarUrl,
   });
   startClaimHeartbeat();
+  track("review_claimed", { portfolio_id: id });
   go("review");
   void homeScreen.close();
   if (embedPlan?.mode === "external") {
@@ -1797,6 +1811,10 @@ function confirmAbortReview() {
   abortReviewModal.root.classList.remove("app-modal--open");
   abortReviewModal.root.hidden = true;
   abortReviewModal.root.setAttribute("aria-hidden", "true");
+  track("review_aborted", {
+    portfolio_id: portfolioId || undefined,
+    route_id: activeRouteId || undefined,
+  });
   leaveSessionShell();
   void stopDictation();
   void homeScreen.open(lastHomeView);
@@ -1827,6 +1845,7 @@ const urlScreen = createUrlScreen({
         await refreshSessionFromProfile();
       }
       clearHomeListCache(getSession()?.userId);
+      track("portfolio_submitted");
     } catch {
       go("home", { replace: true });
       throw new Error("url.submit_failed");
@@ -1897,6 +1916,10 @@ const onboardingScreen = createOnboardingScreen({
           ? answers.role
           : session.role || DEFAULT_ONBOARDING_ROLE,
       grade: typeof answers?.grade === "string" ? answers.grade : session.grade,
+    });
+    track("onboarding_done", {
+      grade:
+        typeof answers?.grade === "string" ? answers.grade : undefined,
     });
     go("home", { replace: true, handoff: true });
   },
@@ -1992,6 +2015,14 @@ async function applyProviderUser(user, provider) {
   }
 
   setSession(next);
+  if (next.userId) {
+    identifyUser(next.userId, {
+      grade: next.grade ?? undefined,
+      tier: next.tier ?? undefined,
+      onboarding_done: Boolean(next.onboardingDone),
+    });
+    track("auth_success", { provider });
+  }
   syncLegendaryPresenceHeartbeat();
   return next;
 }
@@ -2087,6 +2118,7 @@ const referralScreen = createReferralScreen({
     const session = getSession() ?? {};
     setSession({ ...session, referralCode: result.code });
     setInviteGatePassed(true);
+    track("referral_validated");
     go("auth", { handoff: true });
   },
 });
@@ -2196,6 +2228,16 @@ async function applyRoute(id, opts = {}) {
 
   activeRouteId = id;
   syncDictationChrome();
+  {
+    /** @type {Record<string, unknown>} */
+    const pageProps = {};
+    if (id === "home") {
+      const view = currentHomeView();
+      pageProps.tab = view.tab;
+      pageProps.filter = view.filter;
+    }
+    trackPage(id, pageProps);
+  }
 
   const showPendingLimitIfNeeded = () => {
     if (!pendingLimitBlocked) return;
@@ -2490,6 +2532,14 @@ void (async () => {
       // Re-validate Auth + ban — не доверять одному UX-кэшу localStorage.
       // gone → exit на /referral; banned → start/applyRoute схлопнет на /banned.
       await reconcileSessionAccess();
+      const boot = getSession();
+      if (boot?.userId) {
+        identifyUser(boot.userId, {
+          grade: boot.grade ?? undefined,
+          tier: boot.tier ?? undefined,
+          onboarding_done: Boolean(boot.onboardingDone),
+        });
+      }
     }
   } catch (err) {
     if (import.meta.env.DEV) {

@@ -34,6 +34,7 @@
 | `SUPABASE_URL` / `SUPABASE_ANON_KEY` | Auth, profiles, referrals, portfolios, review_complaints RPC, (legacy) subscribers |
 | `TELEGRAM_BOT_ID` / `TELEGRAM_BOT_USERNAME` | Telegram Login Widget (публичные) |
 | `VITE_BASE_PATH` | base для GitHub Pages (`/obratka/`) |
+| `VITE_POSTHOG_KEY` / `VITE_POSTHOG_HOST` | PostHog project token + host (`us` / `eu`); без key — analytics no-op |
 
 ### Только Dashboard / Edge
 
