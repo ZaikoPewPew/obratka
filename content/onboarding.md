@@ -50,4 +50,5 @@ UI-кнопки и прогресс: ключи `onboarding*` в `locales.json`.
 
 Левая панель onboarding-screen читает видимые `steps` по порядку; правая — brand visual без изменений. `single` — radio + auto-advance; `multi` — checkbox + «Далее» / «Начать».
 
-Подробнее: [`onboarding-screen/README.md`](../src/components/onboarding-screen/README.md).
+Подробнее: [`onboarding-screen/README.md`](../src/components/onboarding-screen/README.md).  
+События воронки (wired + план): [`ANALYTICS.md`](../ANALYTICS.md).

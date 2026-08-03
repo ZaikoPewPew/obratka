@@ -6,13 +6,13 @@
 **Деплой:** GitHub Pages — https://zaikopewpew.github.io/obratka/  
 **Репозиторий:** https://github.com/ZaikoPewPew/obratka
 
-Карта экранов и URL: [`SCREENS.md`](SCREENS.md).
+Карта экранов и URL: [`SCREENS.md`](SCREENS.md). Аналитика: [`ANALYTICS.md`](ANALYTICS.md).
 
 ## Быстрый старт
 
 ```bash
 npm install
-cp .env.example .env   # заполнить SUPABASE_* и TELEGRAM_BOT_ID
+cp .env.example .env   # заполнить SUPABASE_*, TELEGRAM_BOT_ID, VITE_POSTHOG_*
 npm run dev
 ```
 
@@ -44,6 +44,8 @@ npm run dev
 | `TELEGRAM_BOT_ID` | число до `:` в токене BotFather (Login Widget) |
 | `TELEGRAM_BOT_USERNAME` | username бота (опционально) |
 | `VITE_BASE_PATH` | base для GitHub Pages (CI: `/obratka/`) |
+| `VITE_POSTHOG_KEY` | PostHog project token (публичный) |
+| `VITE_POSTHOG_HOST` | `https://us.i.posthog.com` или `https://eu.i.posthog.com` |
 
 **Не в клиентском `.env`:**
 

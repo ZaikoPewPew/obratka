@@ -25,6 +25,7 @@
 | Подача URL + back-chip + done на url-screen | wired |
 | Report: листы (+ `dictation`) + жалоба + PDF | wired |
 | Referrals validate/redeem / share | wired (1 код / 2 слота, seed `YTHWKPDWAK`, без наград) |
+| Analytics (PostHog) | wired — pageviews + core funnel; SoT [`ANALYTICS.md`](ANALYTICS.md) |
 | App modal (shared overlays) | wired |
 | Settings `/settings` | wired (профиль) |
 | Legacy waitlist UI | **удалён** (спека в `mobile.md` § Архив) |
@@ -273,9 +274,14 @@ Waitlist dual-layout удалён; историческая спека — [`mob
 
 | Где | Что |
 |-----|-----|
-| `.env` | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `TELEGRAM_BOT_ID` (+ optional username), `VITE_BASE_PATH` |
+| `.env` | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `TELEGRAM_BOT_ID` (+ optional username), `VITE_BASE_PATH`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST` |
 | Dashboard Auth | Email OTP, Google OAuth, Redirect URLs |
 | Edge secrets | `TELEGRAM_BOT_TOKEN`, `ZAI_API_KEY` (опц. `ZAI_MODEL` / `ZAI_MODEL_FALLBACK` для polish-dictation; default `glm-4.5-flash`) |
+
+## Аналитика (PostHog)
+
+Клиентский PostHog: [`src/lib/analytics.js`](src/lib/analytics.js) — pageviews из `applyRoute`, product-события воронки (referral → auth → onboarding → claim → submit).  
+SoT имён и чеклист «новая фича = аналитика»: [`ANALYTICS.md`](ANALYTICS.md). Правило агента: `.cursor/rules/analytics.mdc`.
 
 ## Roadmap (код)
 
@@ -285,6 +291,7 @@ Waitlist dual-layout удалён; историческая спека — [`mob
 3. Троттлинг злоупотреблений жалобой / тег `misleading` / очередь модерации.
 4. Редизайн жалоб / списка листов на `report-screen` (PDF-сводка уже есть).
 5. Диктовка план B: Whisper через Edge (контракт `DictationEngine` уже есть; MVP = Web Speech). Post-edit пунктуации уже wired — [`polish-dictation`](supabase/functions/polish-dictation/README.md).
+6. Добить step-events онбординга и ревью-воронки (intro / timer / quiz) — имена в [`ANALYTICS.md`](ANALYTICS.md) § планируемые.
 
 ## Команды
 

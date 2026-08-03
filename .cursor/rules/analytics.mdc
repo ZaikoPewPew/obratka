@@ -1,0 +1,38 @@
+---
+description: PostHog analytics — фасад, pageviews, воронки; новая фича = события
+alwaysApply: true
+---
+
+# Аналитика (PostHog)
+
+SoT: [`ANALYTICS.md`](../../ANALYTICS.md). Фасад: [`src/lib/analytics.js`](../../src/lib/analytics.js). Вызовы — преимущественно [`src/main.js`](../../src/main.js).
+
+## Жёсткие правила
+
+1. **Новая фича / смена воронки / новый CTA / новый экран** → сразу события (или явный pageview), запись в `ANALYTICS.md`, вызов через фасад. Чисто визуальный diff без поведения — исключение.
+2. Только фасад: `track` / `trackPage` / `identifyUser` / `resetAnalytics`. **Не** `posthog.capture` / `posthog.identify` в компонентах.
+3. Pageviews SPA — **только** из `applyRoute` (`trackPage`); `capture_pageview: false` в init.
+4. Имена: `snake_case` EN (`review_claimed`). Props без PII: **не** email, Telegram, JWT, advice/dictation text, полные URL портфолио, `ban_reason`.
+5. Identify = `profiles.id` (UUID); traits ок: `grade`, `tier`, `onboarding_done`. Logout → `resetAnalytics()`.
+6. Клики — именованные события на важных CTA, не «трекать всё». Autocapture / heatmaps — только по явной задаче.
+7. Env: `VITE_POSTHOG_KEY` + `VITE_POSTHOG_HOST` (публичный project token, как anon). Без key — no-op. Не personal API key.
+8. Wizard `@posthog/wizard` не использовать (vanilla Vite).
+
+## Куда вешать
+
+| Что | Где |
+|-----|-----|
+| Route settle | `applyRoute` → `trackPage` |
+| Auth / onboarding / claim / submit / abort | `main.js` после успеха/фейла |
+| UI CTA | колбэк наверх → `track` в `main` (экран сам PostHog не знает) |
+
+## Воронки (минимум при переделке)
+
+**Онбординг:** `referral_validated` → `auth_success` → step events → `onboarding_done` → home.  
+**Ревью:** intro → `review_claimed` / `review_claim_failed` → timer/quiz steps → `review_submitted` / `review_aborted`.
+
+Планируемые имена — таблица в `ANALYTICS.md`. При изменении флоу — обновить MD и PostHog funnel.
+
+## Проверка
+
+Network: `…/e/` → 200. Кабинет: Live events. Prod: ключ в `.env.production` (Pages).

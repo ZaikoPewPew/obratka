@@ -8,6 +8,7 @@
 |------|------|
 | `README.md` | Быстрый старт, env, auth, ссылки |
 | `PROJECT.md` | Продукт, архитектура, бэкенд, roadmap |
+| `ANALYTICS.md` | PostHog: фасад, pageviews, воронки, чеклист новой фичи |
 | `SCREENS.md` | Экраны + path-роутинг + контракты фабрик |
 | `QUIZ.md` | Пул вопросов квиза, схема `answers`, L1/L2/L3 PDF-отчёта |
 | `STRUCTURE.md` | Этот документ |
@@ -52,7 +53,7 @@
 
 | Папка | Роль |
 |-------|------|
-| `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `config/` ([README](src/config/README.md): review session + contacts), `lib/` ([README](src/lib/README.md): supabase + **dictation**), `assets/` |
+| `src/` | Код: `main.js`, `app/`, `components/`, `utils/`, `api/`, `config/` ([README](src/config/README.md): review session + contacts), `lib/` ([README](src/lib/README.md): supabase + **analytics** + **dictation**), `assets/` |
 | `styles/` | Токены + UI. Entry: tokens/base/entrance/app-modal/iframe-shell/home/legendary-online-panel/feedback/tabs-panel/account-menu/settings/success/ban/report |
 | `content/` | `locales.json`, onboarding, embed-hosts, founder-avatars |
 | `public/` | Статика по URL (favicon и т.п.) |

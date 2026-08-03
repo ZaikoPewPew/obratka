@@ -1,6 +1,6 @@
 # Cursor — проект «Обратка»
 
-Краткая карта для агента. Продукт: [`PROJECT.md`](../PROJECT.md). Экраны: [`SCREENS.md`](../SCREENS.md). Структура: [`STRUCTURE.md`](../STRUCTURE.md).
+Краткая карта для агента. Продукт: [`PROJECT.md`](../PROJECT.md). Экраны: [`SCREENS.md`](../SCREENS.md). Структура: [`STRUCTURE.md`](../STRUCTURE.md). Аналитика: [`ANALYTICS.md`](../ANALYTICS.md).
 
 ## Правила (`.cursor/rules/`)
 
@@ -18,6 +18,7 @@
 | `referrals.mdc` | Invite-only: validate → redeem, 2 слота, без наград |
 | `ban.mdc` | Escape-proof `/banned`, операторский / автобан |
 | `reputation.mdc` | Жалобы: 1 тег / окно 6ч от done; шкала 0…−100; +10 settle; автобан |
+| `analytics.mdc` | PostHog: фасад, pageviews, воронки; **новая фича = события** ([`ANALYTICS.md`](../ANALYTICS.md)) |
 | `supabase-sql.mdc` | Порядок SQL, RPC, RLS (glob `supabase/**`) |
 | `security.mdc` | Секреты, RLS, клиент: anon ок; `service_role` никогда |
 | `wallet.mdc` | Баланс: `submit_portfolio` / award; клиент не пишет `balance` |
@@ -177,6 +178,12 @@ Variants: `default` / `invalid` (без resize) / `done`. Handoff: `go(id, { han
 Награда: только после `submitPortfolioReview` → `handle_review_inserted` (`REVIEW_REWARD`).  
 CTA «Закинуть»: слот занят → `homePendingLimit*`; иначе нет монет → buzz submit + чип баланса (`motion-control-error-buzz`).  
 Клиент не пишет `profiles.balance`. Правило: `wallet.mdc`.
+
+## Analytics (шпаргалка)
+
+PostHog через `src/lib/analytics.js` (`track` / `trackPage` / `identifyUser`). Pageviews из `applyRoute`.  
+**Новая фича / смена воронки → события** (`analytics.mdc`). SoT имён: [`ANALYTICS.md`](../ANALYTICS.md).  
+Env: `VITE_POSTHOG_KEY` + `VITE_POSTHOG_HOST` (`.env.production` для Pages).
 
 ## Исследования
 
