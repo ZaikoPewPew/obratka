@@ -49,7 +49,7 @@
 | `primer.mp4` | пример ревью в intro-модалке home (`homeReviewIntro*`, autoplay/loop/muted) |
 | `primer_not_iframe.mp4` | инструкция в external UI на `/review` (`.iframe-shell__external-media`, autoplay/loop/muted) |
 | `welcome.mp4` | шаг video онбординга (4 из 4) |
-| `icon-play.svg` / `icon-pause.svg` / `icon-sound.svg` / `icon-mute.svg` / `icon-play-compact.svg` | контролы [`VideoPlayerCard`](../components/video-player-card/README.md) |
+| `icon-play.svg` / `icon-pause.svg` / `icon-sound.svg` / `icon-mute.svg` / `icon-play-compact.svg` / `icon-pause-compact.svg` | контролы [`VideoPlayerCard`](../components/video-player-card/README.md) |
 
 ### `brandMarks.js` — API
 

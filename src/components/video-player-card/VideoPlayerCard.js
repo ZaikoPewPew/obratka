@@ -10,6 +10,7 @@ import pauseIconSvg from "../../assets/video/icon-pause.svg?raw";
 import soundIconSvg from "../../assets/video/icon-sound.svg?raw";
 import muteIconSvg from "../../assets/video/icon-mute.svg?raw";
 import playCompactIconSvg from "../../assets/video/icon-play-compact.svg?raw";
+import pauseCompactIconSvg from "../../assets/video/icon-pause-compact.svg?raw";
 
 const PLAYBACK_RATES = [1, 1.5, 2];
 
@@ -78,6 +79,10 @@ export function createVideoPlayerCard(opts = {}) {
   scrim.className = "video-player-card__scrim";
   scrim.setAttribute("aria-hidden", "true");
 
+  const chrome = document.createElement("div");
+  chrome.className = "video-player-card__chrome";
+  chrome.setAttribute("aria-hidden", "true");
+
   const centerBtn = document.createElement("button");
   centerBtn.type = "button";
   centerBtn.className = "video-player-card__center";
@@ -85,7 +90,16 @@ export function createVideoPlayerCard(opts = {}) {
     "aria-label",
     t.videoPlayerPlayAria || "Play",
   );
-  centerBtn.append(iconFromRaw(playCompactIconSvg, "video-player-card__center-icon"));
+  const centerPlayIcon = iconFromRaw(
+    playCompactIconSvg,
+    "video-player-card__center-icon",
+  );
+  const centerPauseIcon = iconFromRaw(
+    pauseCompactIconSvg,
+    "video-player-card__center-icon",
+  );
+  centerPauseIcon.hidden = true;
+  centerBtn.append(centerPlayIcon, centerPauseIcon);
 
   const progress = document.createElement("div");
   progress.className = "video-player-card__progress";
@@ -163,14 +177,15 @@ export function createVideoPlayerCard(opts = {}) {
   right.append(speedBtn);
   controls.append(left, right);
 
-  root.append(video, scrim, centerBtn, progress, controls);
+  root.append(video, scrim, chrome, centerBtn, progress, controls);
 
   function syncPlayingUi() {
     const playing = !video.paused && !video.ended;
     root.classList.toggle("video-player-card--playing", playing);
     playIcon.hidden = playing;
     pauseIcon.hidden = !playing;
-    centerBtn.hidden = playing;
+    centerPlayIcon.hidden = playing;
+    centerPauseIcon.hidden = !playing;
     playBtn.setAttribute(
       "aria-label",
       playing

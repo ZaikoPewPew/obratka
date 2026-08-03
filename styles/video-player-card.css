@@ -37,6 +37,20 @@
   z-index: 1;
 }
 
+/* Нижнее меню: градиент + backdrop blur под контролами. */
+.video-player-card__chrome {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--video-player-chrome-height);
+  pointer-events: none;
+  background: var(--video-player-chrome);
+  backdrop-filter: blur(var(--video-player-chrome-blur));
+  -webkit-backdrop-filter: blur(var(--video-player-chrome-blur));
+}
+
 .video-player-card__center {
   position: absolute;
   z-index: 3;
@@ -65,15 +79,15 @@
   outline-offset: var(--focus-ring-offset);
 }
 
-.video-player-card__center[hidden] {
-  display: none;
-}
-
 .video-player-card__center-icon {
   display: flex;
   width: var(--video-player-center-icon-size);
   height: var(--video-player-center-icon-size);
   color: var(--video-player-control-color);
+}
+
+.video-player-card__center-icon[hidden] {
+  display: none;
 }
 
 .video-player-card__center-icon svg {

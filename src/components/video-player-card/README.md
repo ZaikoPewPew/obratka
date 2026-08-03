@@ -12,10 +12,11 @@ createVideoPlayerCard({ src?, ariaLabel? }) → {
 
 ## Возможности
 
-- play / pause (центр + кнопка слева + клик по видео)
+- play / pause (центр play↔pause + кнопка слева + клик по видео)
 - mute / unmute
 - scrub по прогресс-бару (pointer + клавиши)
 - скорость: `1x` → `1.5x` → `2x` (цикл)
+- нижний chrome: градиент + `backdrop-filter` blur под контролами
 
 ## Стили
 

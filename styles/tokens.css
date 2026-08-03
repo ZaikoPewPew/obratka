@@ -464,17 +464,20 @@
   --shell-review-submit-active-bg: var(--color-accent-active);
   --shell-review-submit-active-text: var(--color-on-accent-active);
 
-  /* VideoPlayerCard (Figma 616:1409) — 340×602 */
+  /* VideoPlayerCard (Figma 616:1409 / pause 616:2694) — 340×602 */
   --video-player-width: 340px;
   --video-player-height: 602px;
   --video-player-radius: var(--radius-xl);
   --video-player-bg: var(--palette-gray-175);
   --video-player-shadow: var(--shadow-card);
-  --video-player-scrim: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.4) 100%
+  --video-player-scrim: rgba(0, 0, 0, 0.1);
+  --video-player-chrome: linear-gradient(
+    180.03deg,
+    rgba(0, 0, 0, 0) 0.03%,
+    rgba(0, 0, 0, 0.4) 99.97%
   );
+  --video-player-chrome-height: 104px;
+  --video-player-chrome-blur: 12px;
   --video-player-control-color: var(--palette-white);
   --video-player-center-size: 80px;
   --video-player-center-icon-size: 40px;
