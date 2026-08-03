@@ -464,9 +464,10 @@
   --shell-review-submit-active-bg: var(--color-accent-active);
   --shell-review-submit-active-text: var(--color-on-accent-active);
 
-  /* VideoPlayerCard (Figma 616:1409) */
+  /* VideoPlayerCard (Figma 616:1409) — 340×602 */
+  --video-player-width: 340px;
+  --video-player-height: 602px;
   --video-player-radius: var(--radius-xl);
-  --video-player-min-height: 360px;
   --video-player-bg: var(--palette-gray-175);
   --video-player-shadow: var(--shadow-card);
   --video-player-scrim: linear-gradient(
@@ -498,6 +499,9 @@
   --video-player-time-current: rgba(255, 255, 255, 0.94);
   --video-player-time-total: rgba(238, 238, 251, 0.55);
   --video-player-speed-min-width: 60px;
+  /* Онбординг шаг video: CTA 340×76 под плеером */
+  --onboarding-video-cta-width: 340px;
+  --onboarding-video-cta-height: 76px;
   --shell-review-chip-height: 51px;
   --shell-review-chip-min-width-back: 131px;
   --shell-review-chip-min-width-progress: 91px;

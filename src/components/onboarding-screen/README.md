@@ -12,7 +12,7 @@ Path: **`/onboarding`**. После регистрации; split через [`b
 
 ### Шаг video (4 из 4)
 
-Только [`VideoPlayerCard`](../video-player-card/README.md) + кнопка **«Начать»** (`onboardingFinish`) **24px** ниже (`--shell-review-advice-footer-gap`).  
+Только [`VideoPlayerCard`](../video-player-card/README.md) (**340×602**) + кнопка **«Начать»** (`onboardingFinish`, **340×76**) **24px** ниже (`--shell-review-advice-footer-gap`).  
 Ответ не собирается и не пишется в `profiles`. На шаге «ожидания» кнопка — **«Далее»** (`onboardingNext`).
 
 ## Shell / visual

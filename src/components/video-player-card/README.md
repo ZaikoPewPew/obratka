@@ -1,6 +1,6 @@
 # `video-player-card` — кастомный видеоплеер
 
-Figma: [VideoPlayerCard](https://www.figma.com/design/KhsEJRKjBaDm6xaj3zJh2s/?node-id=616-1409) (`616:1409`).
+Figma: [VideoPlayerCard](https://www.figma.com/design/KhsEJRKjBaDm6xaj3zJh2s/?node-id=616-1409) (`616:1409`) — **340×602**.
 
 ## API
 

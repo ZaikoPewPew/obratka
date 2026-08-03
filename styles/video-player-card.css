@@ -8,9 +8,9 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  flex: 1 1 auto;
-  min-height: var(--video-player-min-height);
+  width: var(--video-player-width);
+  height: var(--video-player-height);
+  flex: 0 0 auto;
   border-radius: var(--video-player-radius);
   overflow: clip;
   background: var(--video-player-bg);
