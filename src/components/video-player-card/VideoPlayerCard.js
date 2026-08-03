@@ -186,6 +186,8 @@ export function createVideoPlayerCard(opts = {}) {
     pauseIcon.hidden = !playing;
     centerPlayIcon.hidden = playing;
     centerPauseIcon.hidden = !playing;
+    /* Во время playback центр прячем — не мешает смотреть. */
+    centerBtn.hidden = playing;
     playBtn.setAttribute(
       "aria-label",
       playing
