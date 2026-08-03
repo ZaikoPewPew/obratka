@@ -1,4 +1,5 @@
 import { getStrings } from "../../i18n.js";
+import "../../../styles/iframe-shell.css";
 import {
   brandMarkSvg,
   morphBrandMarkToDone,

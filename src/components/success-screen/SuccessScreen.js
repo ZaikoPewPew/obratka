@@ -1,4 +1,5 @@
 import { getStrings } from "../../i18n.js";
+import "../../../styles/success-screen.css";
 import { logoDoneMarkSvg } from "../../assets/brand/brandMarks.js";
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
 import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";

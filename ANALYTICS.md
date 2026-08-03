@@ -19,7 +19,7 @@
 |-----|-----|
 | SDK | `posthog-js` (npm) |
 | Фасад | `src/lib/analytics.js` |
-| Init | `initAnalytics()` в начале `main.js` |
+| Init | `initAnalytics()` в начале `main.js` (SDK `posthog-js` — dynamic import после paint / idle; вызовы до ready в очереди) |
 | Env | `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST` (`.env` / `.env.production`) |
 | Host | US `https://us.i.posthog.com` · EU `https://eu.i.posthog.com` |
 | Без ключа | no-op (local/CI без env) |

@@ -64,21 +64,12 @@ import {
 import { clampReputation } from "./api/reviewComplaints.js";
 import { polishDictationText } from "./api/dictationPolish.js";
 import { createDictationEngine, isWebSpeechSupported } from "./lib/dictation/createDictationEngine.js";
-import { createReviewPanel } from "./components/review-panel/ReviewPanel.js";
-import { createReviewScreen } from "./components/review-screen/ReviewScreen.js";
 import { createAuthScreen } from "./components/auth-screen/AuthScreen.js";
 import { createAuthCodeScreen } from "./components/auth-code-screen/AuthCodeScreen.js";
-import { createHomeScreen } from "./components/home-screen/HomeScreen.js";
-import { createExplainerMediaRay } from "./components/home-screen/explainerMediaRay.js";
 import { createAppModal } from "./components/app-modal/AppModal.js";
-import { createOnboardingScreen } from "./components/onboarding-screen/OnboardingScreen.js";
 import { DEFAULT_ONBOARDING_ROLE } from "./api/onboarding.js";
 import { createReferralScreen } from "./components/referral-screen/ReferralScreen.js";
-import { createSuccessScreen } from "./components/success-screen/SuccessScreen.js";
-import { createReportScreen } from "./components/report-screen/ReportScreen.js";
 import { createBanScreen } from "./components/ban-screen/BanScreen.js";
-import { createUrlScreen } from "./components/url-screen/UrlScreen.js";
-import { createSettingsScreen } from "./components/settings-screen/SettingsScreen.js";
 import { REVIEW_SESSION_SECONDS } from "./config/review.js";
 import {
   probePortfolioEmbed,
@@ -94,11 +85,44 @@ import { normalizePortfolioUrl } from "./utils/portfolioMeta.js";
 import { getMotionFocusDelayMs } from "./utils/motionTokens.js";
 import { startTabAttention } from "./utils/tabAttention.js";
 import { fixHangingPrepositions } from "./utils/hangingPrepositions.js";
-import currencyDuckLeaveUrl from "./assets/home/modal/currency-duck-leave.png";
-import timerEndUrl from "./assets/audio/Timer-end.wav";
-import externalEmbedVideoUrl from "./assets/video/primer_not_iframe.mp4";
 
 initAnalytics();
+
+/** Extended Montserrat subsets — после paint, не блокируют entry. */
+function loadExtendedFonts() {
+  const run = () => {
+    void import("./fonts-ext.css");
+  };
+  if (typeof window.requestIdleCallback === "function") {
+    window.requestIdleCallback(run, { timeout: 4000 });
+  } else {
+    window.setTimeout(run, 1500);
+  }
+}
+loadExtendedFonts();
+
+/** @type {Promise<string> | null} */
+let timerEndUrlPromise = null;
+/** @type {Promise<string> | null} */
+let externalEmbedVideoUrlPromise = null;
+
+function loadTimerEndUrl() {
+  if (!timerEndUrlPromise) {
+    timerEndUrlPromise = import("./assets/audio/Timer-end.wav").then(
+      (m) => m.default,
+    );
+  }
+  return timerEndUrlPromise;
+}
+
+function loadExternalEmbedVideoUrl() {
+  if (!externalEmbedVideoUrlPromise) {
+    externalEmbedVideoUrlPromise = import(
+      "./assets/video/primer_not_iframe.mp4"
+    ).then((m) => m.default);
+  }
+  return externalEmbedVideoUrlPromise;
+}
 
 const SESSION_TOTAL_MS = REVIEW_SESSION_SECONDS * 1000;
 const TAB_ATTENTION_FAVICON = `${String(import.meta.env.BASE_URL || "/").replace(/\/?$/, "/")}assets/svg/favicon_timer.svg`;
@@ -311,125 +335,189 @@ function canonicalizeHomeSearch(view) {
   });
 }
 
-const reviewPanel = createReviewPanel({
-  getPortfolioName: () => portfolioName,
-  onReportReveal: (active, payload) => {
-    setReviewReportReveal(active, payload);
-  },
-  onDictationToggle: () => {
-    if (activeRouteId !== "quiz") return;
-    void toggleDictation("advice");
-  },
-  onComplete: (answers) => {
-    const pid = portfolioId;
-    reviewSubmitPromise = (async () => {
-      try {
-        await stopDictation({ polish: false });
-        const locale = getLocale();
-        const dictation = dictationText.trim().slice(0, DICTATION_MAX_LEN);
-        const adviceRaw =
-          answers && typeof answers.advice === "string"
-            ? answers.advice.trim()
-            : "";
-        const needsDictationPolish =
-          Boolean(dictation) && dictation !== dictationPolishedText;
-        const needsAdvicePolish =
-          Boolean(adviceRaw) && adviceRaw !== advicePolishedText;
+/** @type {ReturnType<typeof import("./components/review-panel/ReviewPanel.js").createReviewPanel> | null} */
+let reviewPanel = null;
+/** @type {ReturnType<typeof import("./components/review-screen/ReviewScreen.js").createReviewScreen> | null} */
+let reviewScreen = null;
+/** @type {Promise<{ reviewPanel: NonNullable<typeof reviewPanel>; reviewScreen: NonNullable<typeof reviewScreen> }> | null} */
+let reviewWorkspacePromise = null;
 
-        const [nextDictation, nextAdvice] = await Promise.all([
-          needsDictationPolish
-            ? polishDictationText(dictation, {
-                maxLen: DICTATION_MAX_LEN,
-                locale,
-              })
-            : Promise.resolve(dictation),
-          needsAdvicePolish
-            ? polishDictationText(adviceRaw, {
-                maxLen: ADVICE_MAX_LEN,
-                locale,
-              })
-            : Promise.resolve(adviceRaw),
-        ]);
-
-        if (nextDictation) {
-          dictationText = nextDictation;
-          dictationPolishedText = nextDictation;
-        }
-        let payload = answers;
-        if (adviceRaw) {
-          payload = { ...answers, advice: nextAdvice };
-          advicePolishedText = nextAdvice;
-          reviewPanel.setAdviceText?.(nextAdvice);
-        }
-        if (payload && nextDictation) {
-          payload = { ...payload, dictation: nextDictation };
-        }
-        if (pid) {
-          await submitPortfolioReview(pid, payload ?? null);
-          reviewSubmitted = true;
-          claimHeld = false;
-          clearPersistedReviewClaim();
-          stopClaimHeartbeat();
-          void awardReviewReward();
-          track("review_submitted", { portfolio_id: pid });
-        }
-      } catch (err) {
-        if (import.meta.env.DEV) {
-          console.warn("[review] submitPortfolioReview", err);
-        }
-      } finally {
-        reviewSubmitPromise = null;
+async function ensureReviewWorkspace() {
+  if (reviewPanel && reviewScreen) {
+    return { reviewPanel, reviewScreen };
+  }
+  if (!reviewWorkspacePromise) {
+    reviewWorkspacePromise = (async () => {
+      const [{ createReviewPanel }, { createReviewScreen }] = await Promise.all([
+        import("./components/review-panel/ReviewPanel.js"),
+        import("./components/review-screen/ReviewScreen.js"),
+      ]);
+      if (reviewPanel && reviewScreen) {
+        return { reviewPanel, reviewScreen };
       }
-    })();
-  },
-  onDoneChange: (done) => {
-    if (done) {
-      if (activeRouteId !== "done") syncRoute("done");
-      void prewarmNextReviewCase();
-      return;
-    }
-    if (activeRouteId === "done") syncRoute("quiz");
-  },
-  onExit: () => {
-    void (async () => {
-      const pending = reviewSubmitPromise;
-      if (pending) {
-        await pending.catch(() => {});
-      }
-      await releaseHeldClaim();
-      go("home", { replace: true });
-    })();
-  },
-  onNextCase: () => {
-    void openNextReviewCase();
-  },
-});
-const reviewScreen = createReviewScreen({
-  content: reviewPanel.root,
-});
-setReviewReportReveal = reviewScreen.setReportReveal;
-document.body.append(reviewScreen.root);
+      const panel = createReviewPanel({
+        getPortfolioName: () => portfolioName,
+        onReportReveal: (active, payload) => {
+          setReviewReportReveal(active, payload);
+        },
+        onDictationToggle: () => {
+          if (activeRouteId !== "quiz") return;
+          void toggleDictation("advice");
+        },
+        onComplete: (answers) => {
+          const pid = portfolioId;
+          reviewSubmitPromise = (async () => {
+            try {
+              await stopDictation({ polish: false });
+              const locale = getLocale();
+              const dictation = dictationText.trim().slice(0, DICTATION_MAX_LEN);
+              const adviceRaw =
+                answers && typeof answers.advice === "string"
+                  ? answers.advice.trim()
+                  : "";
+              const needsDictationPolish =
+                Boolean(dictation) && dictation !== dictationPolishedText;
+              const needsAdvicePolish =
+                Boolean(adviceRaw) && adviceRaw !== advicePolishedText;
 
-const successScreen = createSuccessScreen({
-  onPrimary: () => {
-    pendingSuccessPreset = "generic";
-    go("home", { replace: true });
-  },
-  onSecondary: () => {
-    pendingSuccessPreset = "generic";
-    go("home", { replace: true });
-  },
-});
-document.body.append(successScreen.root);
+              const [nextDictation, nextAdvice] = await Promise.all([
+                needsDictationPolish
+                  ? polishDictationText(dictation, {
+                      maxLen: DICTATION_MAX_LEN,
+                      locale,
+                    })
+                  : Promise.resolve(dictation),
+                needsAdvicePolish
+                  ? polishDictationText(adviceRaw, {
+                      maxLen: ADVICE_MAX_LEN,
+                      locale,
+                    })
+                  : Promise.resolve(adviceRaw),
+              ]);
 
-const reportScreen = createReportScreen({
-  onPrimary: () => {
-    pendingReportPortfolioId = null;
-    pendingReportPortfolioName = "";
-    go("home", { replace: true, search: buildHomeSearch(lastHomeView) });
-  },
-});
-document.body.append(reportScreen.root);
+              if (nextDictation) {
+                dictationText = nextDictation;
+                dictationPolishedText = nextDictation;
+              }
+              let payload = answers;
+              if (adviceRaw) {
+                payload = { ...answers, advice: nextAdvice };
+                advicePolishedText = nextAdvice;
+                reviewPanel?.setAdviceText?.(nextAdvice);
+              }
+              if (payload && nextDictation) {
+                payload = { ...payload, dictation: nextDictation };
+              }
+              if (pid) {
+                await submitPortfolioReview(pid, payload ?? null);
+                reviewSubmitted = true;
+                claimHeld = false;
+                clearPersistedReviewClaim();
+                stopClaimHeartbeat();
+                void awardReviewReward();
+                track("review_submitted", { portfolio_id: pid });
+              }
+            } catch (err) {
+              if (import.meta.env.DEV) {
+                console.warn("[review] submitPortfolioReview", err);
+              }
+            } finally {
+              reviewSubmitPromise = null;
+            }
+          })();
+        },
+        onDoneChange: (done) => {
+          if (done) {
+            if (activeRouteId !== "done") syncRoute("done");
+            void prewarmNextReviewCase();
+            return;
+          }
+          if (activeRouteId === "done") syncRoute("quiz");
+        },
+        onExit: () => {
+          void (async () => {
+            const pending = reviewSubmitPromise;
+            if (pending) {
+              await pending.catch(() => {});
+            }
+            await releaseHeldClaim();
+            go("home", { replace: true });
+          })();
+        },
+        onNextCase: () => {
+          void openNextReviewCase();
+        },
+      });
+      const screen = createReviewScreen({
+        content: panel.root,
+      });
+      reviewPanel = panel;
+      reviewScreen = screen;
+      setReviewReportReveal = screen.setReportReveal;
+      document.body.append(screen.root);
+      return { reviewPanel: panel, reviewScreen: screen };
+    })();
+  }
+  return reviewWorkspacePromise;
+}
+
+/** @type {ReturnType<typeof import("./components/success-screen/SuccessScreen.js").createSuccessScreen> | null} */
+let successScreen = null;
+/** @type {Promise<NonNullable<typeof successScreen>> | null} */
+let successScreenPromise = null;
+
+async function ensureSuccessScreen() {
+  if (successScreen) return successScreen;
+  if (!successScreenPromise) {
+    successScreenPromise = import(
+      "./components/success-screen/SuccessScreen.js"
+    ).then(({ createSuccessScreen }) => {
+      if (successScreen) return successScreen;
+      successScreen = createSuccessScreen({
+        onPrimary: () => {
+          pendingSuccessPreset = "generic";
+          go("home", { replace: true });
+        },
+        onSecondary: () => {
+          pendingSuccessPreset = "generic";
+          go("home", { replace: true });
+        },
+      });
+      document.body.append(successScreen.root);
+      return successScreen;
+    });
+  }
+  return successScreenPromise;
+}
+
+/** @type {ReturnType<typeof import("./components/report-screen/ReportScreen.js").createReportScreen> | null} */
+let reportScreen = null;
+/** @type {Promise<NonNullable<typeof reportScreen>> | null} */
+let reportScreenPromise = null;
+
+async function ensureReportScreen() {
+  if (reportScreen) return reportScreen;
+  if (!reportScreenPromise) {
+    reportScreenPromise = import(
+      "./components/report-screen/ReportScreen.js"
+    ).then(({ createReportScreen }) => {
+      if (reportScreen) return reportScreen;
+      reportScreen = createReportScreen({
+        onPrimary: () => {
+          pendingReportPortfolioId = null;
+          pendingReportPortfolioName = "";
+          go("home", {
+            replace: true,
+            search: buildHomeSearch(lastHomeView),
+          });
+        },
+      });
+      document.body.append(reportScreen.root);
+      return reportScreen;
+    });
+  }
+  return reportScreenPromise;
+}
 
 async function exitAuthenticatedSession() {
   const sessionUserId = getSession()?.userId;
@@ -686,16 +774,16 @@ function nextCaseCandidates(items, excludeId) {
 async function prewarmNextReviewCase() {
   const excludeId = portfolioId;
   const gen = ++nextCasePrewarmGen;
-  reviewPanel.setNextCaseVisible?.(true);
-  reviewPanel.setNextCasePreparing?.(true);
+  reviewPanel?.setNextCaseVisible?.(true);
+  reviewPanel?.setNextCasePreparing?.(true);
   try {
     const items = await listPortfoliosForReview();
     if (gen !== nextCasePrewarmGen) return;
     nextCasePreload = { excludeId, items, at: Date.now() };
     const candidates = nextCaseCandidates(items, excludeId);
-    reviewPanel.setNextCasePreparing?.(false);
-    reviewPanel.setNextCaseVisible?.(true);
-    reviewPanel.setNextCaseEmpty?.(candidates.length === 0);
+    reviewPanel?.setNextCasePreparing?.(false);
+    reviewPanel?.setNextCaseVisible?.(true);
+    reviewPanel?.setNextCaseEmpty?.(candidates.length === 0);
     for (const item of candidates.slice(0, 2)) {
       if (item.url) prefetchPortfolioEmbed(item.url);
     }
@@ -705,9 +793,9 @@ async function prewarmNextReviewCase() {
     }
     if (gen !== nextCasePrewarmGen) return;
     nextCasePreload = null;
-    reviewPanel.setNextCasePreparing?.(false);
-    reviewPanel.setNextCaseVisible?.(true);
-    reviewPanel.setNextCaseEmpty?.(true);
+    reviewPanel?.setNextCasePreparing?.(false);
+    reviewPanel?.setNextCaseVisible?.(true);
+    reviewPanel?.setNextCaseEmpty?.(true);
   }
 }
 
@@ -735,13 +823,13 @@ async function claimAndStartReview(item, opts = {}) {
     track("review_claim_failed", { reason: "client_no_slots" });
     if (showNoSlotsNotice) {
       const t = getStrings();
-      homeScreen.showNotice({
+      homeScreen?.showNotice({
         title: t.homeNoSlotsTitle,
         body: t.homeNoSlotsBody,
         closeLabel: t.homeNoSlotsClose,
         closeAria: t.homeNoSlotsCloseAria,
       });
-      void homeScreen.refresh();
+      void homeScreen?.refresh();
     }
     return false;
   }
@@ -754,19 +842,19 @@ async function claimAndStartReview(item, opts = {}) {
     if (code === "no_slots") {
       if (showNoSlotsNotice) {
         const t = getStrings();
-        homeScreen.showNotice({
+        homeScreen?.showNotice({
           title: t.homeNoSlotsTitle,
           body: t.homeNoSlotsBody,
           closeLabel: t.homeNoSlotsClose,
           closeAria: t.homeNoSlotsCloseAria,
         });
-        void homeScreen.refresh();
+        void homeScreen?.refresh();
       }
       return false;
     }
     if (code === "already_reviewed") {
       if (showNoSlotsNotice) {
-        void homeScreen.refresh();
+        void homeScreen?.refresh();
       }
       return false;
     }
@@ -774,7 +862,7 @@ async function claimAndStartReview(item, opts = {}) {
       console.warn("[review] claimPortfolioReview", err);
     }
     if (showNoSlotsNotice) {
-      void homeScreen.refresh();
+      void homeScreen?.refresh();
     }
     return false;
   }
@@ -803,8 +891,9 @@ async function claimAndStartReview(item, opts = {}) {
   });
   startClaimHeartbeat();
   track("review_claimed", { portfolio_id: id });
+  void ensureReviewWorkspace();
   go("review");
-  void homeScreen.close();
+  void homeScreen?.close();
   if (embedPlan?.mode === "external") {
     armSession();
     return true;
@@ -868,16 +957,16 @@ async function openNextReviewCase() {
       if (import.meta.env.DEV) {
         console.warn("[review] listPortfoliosForReview", err);
       }
-      reviewPanel.setNextCaseBusy?.(false);
-      reviewPanel.setNextCaseVisible?.(false);
+      reviewPanel?.setNextCaseBusy?.(false);
+      reviewPanel?.setNextCaseVisible?.(false);
       go("home", { replace: true });
       return;
     }
 
     if (await tryClaimFromList(items)) return;
 
-    reviewPanel.setNextCaseBusy?.(false);
-    reviewPanel.setNextCaseVisible?.(false);
+    reviewPanel?.setNextCaseBusy?.(false);
+    reviewPanel?.setNextCaseVisible?.(false);
     go("home", { replace: true });
   } finally {
     nextCaseOpening = false;
@@ -966,8 +1055,8 @@ function syncDictationButtonChrome() {
 /** Чип rec на /review + кнопка микрофона в поле «Главный совет». */
 function syncDictationChrome() {
   syncDictationButtonChrome();
-  reviewPanel.setDictationSupported(isWebSpeechSupported());
-  reviewPanel.setDictationRecording(
+  reviewPanel?.setDictationSupported(isWebSpeechSupported());
+  reviewPanel?.setDictationRecording(
     dictationRecording && dictationTarget === "advice",
   );
 }
@@ -988,7 +1077,7 @@ function ensureDictationEngine() {
     if (dictationTarget === "advice") {
       // Пустой flush (stop без речи) не должен затирать уже набранный/надиктованный текст.
       if (!combined) return;
-      reviewPanel.setDictationTranscript(combined);
+      reviewPanel?.setDictationTranscript(combined);
       return;
     }
     if (!combined) return;
@@ -1044,7 +1133,7 @@ async function polishStoppedDictation(target) {
       locale,
     });
     advicePolishedText = polished;
-    reviewPanel.setAdviceText?.(polished);
+    reviewPanel?.setAdviceText?.(polished);
     return;
   }
   const raw = dictationText.trim();
@@ -1165,7 +1254,6 @@ function ensureExternalMediaVideo() {
 
   const video = document.createElement("video");
   video.className = "iframe-shell__external-media-video";
-  video.src = externalEmbedVideoUrl;
   video.muted = true;
   video.defaultMuted = true;
   video.loop = true;
@@ -1181,6 +1269,9 @@ function ensureExternalMediaVideo() {
 
   externalMedia.append(video);
   externalMediaVideo = video;
+  void loadExternalEmbedVideoUrl().then((url) => {
+    if (externalMediaVideo === video) video.src = url;
+  });
   return video;
 }
 
@@ -1517,36 +1608,37 @@ function openReview() {
   }
 
   void (async () => {
+    await ensureReviewWorkspace();
     await stopDictation({ polish: true });
+
+    void homeScreen?.close();
+    void settingsScreen?.close();
+    void urlScreen?.close();
+    void onboardingScreen?.close({ handoff: true });
+    void authScreen.close({ handoff: true });
+    void referralScreen.close({ handoff: true });
+    void successScreen?.close();
+    void reportScreen?.close();
+
+    frameWrap.classList.add("iframe-shell__frame--locked");
+    reviewPanel?.reset();
+    reviewPanel?.open();
+    reviewScreen?.open();
+    syncRoute("quiz");
+
+    window.setTimeout(() => {
+      reviewPanel?.focus();
+    }, getMotionFocusDelayMs());
   })();
-
-  void homeScreen.close();
-  void settingsScreen.close();
-  void urlScreen.close();
-  void onboardingScreen.close({ handoff: true });
-  void authScreen.close({ handoff: true });
-  void referralScreen.close({ handoff: true });
-  void successScreen.close();
-  void reportScreen.close();
-
-  frameWrap.classList.add("iframe-shell__frame--locked");
-  reviewPanel.reset();
-  reviewPanel.open();
-  reviewScreen.open();
-  syncRoute("quiz");
-
-  window.setTimeout(() => {
-    reviewPanel.focus();
-  }, getMotionFocusDelayMs());
 }
 
 async function closeReview() {
   if (!frameWrap) return;
 
   frameWrap.classList.remove("iframe-shell__frame--locked");
-  reviewPanel.close();
-  await reviewScreen.close();
-  reviewPanel.reset();
+  reviewPanel?.close();
+  if (reviewScreen) await reviewScreen.close();
+  reviewPanel?.reset();
 }
 
 function lockFrameAndShowReview() {
@@ -1584,31 +1676,33 @@ function scheduleSessionEndTimeout() {
 }
 
 function playTimerEndSound() {
-  try {
-    if (!timerEndAudio) {
-      timerEndAudio = new Audio(timerEndUrl);
-      timerEndAudio.preload = "auto";
-    }
-    timerEndAudio.currentTime = 0;
-    void timerEndAudio.play().catch(() => {
-      /* autoplay / background tab — молча */
+  void loadTimerEndUrl()
+    .then((url) => {
+      if (!timerEndAudio) {
+        timerEndAudio = new Audio(url);
+        timerEndAudio.preload = "auto";
+      }
+      timerEndAudio.currentTime = 0;
+      return timerEndAudio.play();
+    })
+    .catch(() => {
+      /* autoplay / background tab / load — молча */
     });
-  } catch {
-    /* ignore */
-  }
 }
 
 /** Прогреть Audio после user gesture (кнопка external / старт сессии). */
 function warmTimerEndSound() {
-  try {
-    if (!timerEndAudio) {
-      timerEndAudio = new Audio(timerEndUrl);
-      timerEndAudio.preload = "auto";
-    }
-    timerEndAudio.load();
-  } catch {
-    /* ignore */
-  }
+  void loadTimerEndUrl()
+    .then((url) => {
+      if (!timerEndAudio) {
+        timerEndAudio = new Audio(url);
+        timerEndAudio.preload = "auto";
+      }
+      timerEndAudio.load();
+    })
+    .catch(() => {
+      /* ignore */
+    });
 }
 
 function finishSessionFromTimer() {
@@ -1759,65 +1853,94 @@ function leaveSessionShell() {
   syncExternalMediaPlayback(false);
 }
 
-const abortReviewMedia = document.createElement("div");
-abortReviewMedia.className = "iframe-shell__abort-explainer-media";
+/** @type {ReturnType<typeof createAppModal> | null} */
+let abortReviewModal = null;
+/** @type {{ sync: () => void } | null} */
+let abortReviewRay = null;
+/** @type {Promise<ReturnType<typeof createAppModal>> | null} */
+let abortReviewModalPromise = null;
 
-const abortReviewRay = createExplainerMediaRay();
+async function ensureAbortReviewModal() {
+  if (abortReviewModal) return abortReviewModal;
+  if (abortReviewModalPromise) return abortReviewModalPromise;
 
-const abortReviewPhoto = document.createElement("img");
-abortReviewPhoto.className = "home-screen__explainer-media-photo";
-abortReviewPhoto.src = currencyDuckLeaveUrl;
-abortReviewPhoto.alt = "";
-abortReviewPhoto.width = 1104;
-abortReviewPhoto.height = 536;
-abortReviewPhoto.decoding = "async";
+  abortReviewModalPromise = (async () => {
+    const [{ createExplainerMediaRay }, photoMod] = await Promise.all([
+      import("./components/home-screen/explainerMediaRay.js"),
+      import("./assets/home/modal/currency-duck-leave.png"),
+    ]);
 
-abortReviewMedia.append(abortReviewRay.root, abortReviewPhoto);
+    const abortReviewMedia = document.createElement("div");
+    abortReviewMedia.className = "iframe-shell__abort-explainer-media";
 
-const abortReviewModal = createAppModal({
-  size: "md",
-  primaryTone: "danger",
-  onPrimary: () => {
-    void confirmAbortReview();
-  },
-  onSecondary: () => {
-    void abortReviewModal.close();
-  },
-});
-abortReviewModal.content.append(abortReviewMedia);
-document.body.append(abortReviewModal.root);
+    const ray = createExplainerMediaRay();
+    abortReviewRay = ray;
 
-function openAbortReviewModal() {
+    const abortReviewPhoto = document.createElement("img");
+    abortReviewPhoto.className = "home-screen__explainer-media-photo";
+    abortReviewPhoto.src = photoMod.default;
+    abortReviewPhoto.alt = "";
+    abortReviewPhoto.width = 1104;
+    abortReviewPhoto.height = 536;
+    abortReviewPhoto.decoding = "async";
+
+    abortReviewMedia.append(ray.root, abortReviewPhoto);
+
+    const modal = createAppModal({
+      size: "md",
+      primaryTone: "danger",
+      onPrimary: () => {
+        void confirmAbortReview();
+      },
+      onSecondary: () => {
+        void modal.close();
+      },
+    });
+    modal.content.append(abortReviewMedia);
+    document.body.append(modal.root);
+    abortReviewModal = modal;
+    return modal;
+  })();
+
+  try {
+    return await abortReviewModalPromise;
+  } finally {
+    abortReviewModalPromise = null;
+  }
+}
+
+async function openAbortReviewModal() {
+  const modal = await ensureAbortReviewModal();
   const t = getStrings();
-  abortReviewModal.setTitle(fixHangingPrepositions(t.reviewAbortTitle ?? ""));
-  abortReviewModal.setDescription(
-    fixHangingPrepositions(t.reviewAbortDesc ?? ""),
-  );
-  abortReviewModal.setPrimaryLabel(t.reviewAbortConfirm ?? "");
-  abortReviewModal.setSecondaryLabel(t.reviewAbortCancel ?? "");
-  abortReviewModal.setCloseAriaLabel(
-    t.reviewAbortCloseAria ?? t.modalCloseAria ?? "",
-  );
-  abortReviewModal.setPrimaryTone("danger");
-  abortReviewModal.setActionsVisible({ primary: true, secondary: true });
-  abortReviewModal.open();
+  modal.setTitle(fixHangingPrepositions(t.reviewAbortTitle ?? ""));
+  modal.setDescription(fixHangingPrepositions(t.reviewAbortDesc ?? ""));
+  modal.setPrimaryLabel(t.reviewAbortConfirm ?? "");
+  modal.setSecondaryLabel(t.reviewAbortCancel ?? "");
+  modal.setCloseAriaLabel(t.reviewAbortCloseAria ?? t.modalCloseAria ?? "");
+  modal.setPrimaryTone("danger");
+  modal.setActionsVisible({ primary: true, secondary: true });
+  modal.open();
   requestAnimationFrame(() => {
-    abortReviewRay.sync();
+    abortReviewRay?.sync();
   });
 }
 
 function confirmAbortReview() {
   // Сразу с кейса: не ждать fade модалки и reconcile в applyRoute.
-  abortReviewModal.root.classList.remove("app-modal--open");
-  abortReviewModal.root.hidden = true;
-  abortReviewModal.root.setAttribute("aria-hidden", "true");
+  if (abortReviewModal) {
+    abortReviewModal.root.classList.remove("app-modal--open");
+    abortReviewModal.root.hidden = true;
+    abortReviewModal.root.setAttribute("aria-hidden", "true");
+  }
   track("review_aborted", {
     portfolio_id: portfolioId || undefined,
     route_id: activeRouteId || undefined,
   });
   leaveSessionShell();
   void stopDictation();
-  void homeScreen.open(lastHomeView);
+  void ensureHomeScreen().then((screen) => {
+    void screen.open(lastHomeView);
+  });
   go("home", { search: buildHomeSearch(lastHomeView) });
 }
 
@@ -1826,104 +1949,174 @@ function requestAbortReview() {
     go("home", { search: buildHomeSearch(lastHomeView) });
     return;
   }
-  openAbortReviewModal();
+  void openAbortReviewModal();
 }
 
-const urlScreen = createUrlScreen({
-  onSubmit: async (url) => {
-    if (!canSubmitPortfolio()) {
-      go("home", { replace: true });
-      throw new Error("url.submit_locked");
-    }
-    /* URL сразу; persist в фоне — done-UI на url-screen не ждёт сеть. */
-    syncRoute("success", { replace: true });
-    try {
-      const result = await submitPortfolio(url);
-      if (typeof result?.balance === "number") {
-        applySubmitBalance(result.balance);
-      } else {
-        await refreshSessionFromProfile();
-      }
-      clearHomeListCache(getSession()?.userId);
-      track("portfolio_submitted");
-    } catch {
-      go("home", { replace: true });
-      throw new Error("url.submit_failed");
-    }
-  },
-  onExit: () => {
-    go("home", { replace: true });
-  },
-});
+/** @type {ReturnType<typeof import("./components/url-screen/UrlScreen.js").createUrlScreen> | null} */
+let urlScreen = null;
+/** @type {Promise<NonNullable<typeof urlScreen>> | null} */
+let urlScreenPromise = null;
 
-const settingsScreen = createSettingsScreen({
-  onClose: () => {
-    if (activeRouteId !== "settings") return;
-    go("home", { search: buildHomeSearch(lastHomeView) });
-  },
-  onSaved: async () => {
-    await refreshSessionFromProfile();
-  },
-});
+async function ensureUrlScreen() {
+  if (urlScreen) return urlScreen;
+  if (!urlScreenPromise) {
+    urlScreenPromise = import("./components/url-screen/UrlScreen.js").then(
+      ({ createUrlScreen }) => {
+        if (urlScreen) return urlScreen;
+        urlScreen = createUrlScreen({
+          onSubmit: async (url) => {
+            if (!canSubmitPortfolio()) {
+              go("home", { replace: true });
+              throw new Error("url.submit_locked");
+            }
+            syncRoute("success", { replace: true });
+            try {
+              const result = await submitPortfolio(url);
+              if (typeof result?.balance === "number") {
+                applySubmitBalance(result.balance);
+              } else {
+                await refreshSessionFromProfile();
+              }
+              clearHomeListCache(getSession()?.userId);
+              track("portfolio_submitted");
+            } catch {
+              go("home", { replace: true });
+              throw new Error("url.submit_failed");
+            }
+          },
+          onExit: () => {
+            go("home", { replace: true });
+          },
+        });
+        document.body.append(urlScreen.root);
+        return urlScreen;
+      },
+    );
+  }
+  return urlScreenPromise;
+}
 
-const homeScreen = createHomeScreen({
-  onPreviewPortfolio: (item) => {
-    // Intro открыт — греем Edge/Readymag probe, чтобы `/review` сразу знал mode.
-    if (item?.url) prefetchPortfolioEmbed(item.url);
-  },
-  onOpenPortfolio: async (item) => {
-    // Intro CTA → тот же claimAndStartReview, что и «Следующий кейс» (без intro).
-    await claimAndStartReview(item, { showNoSlotsNotice: true });
-  },
-  onOpenReport: async (item) => {
-    if (!item?.isOwn || !item.id) return;
-    pendingReportPortfolioId = item.id;
-    pendingReportPortfolioName =
-      typeof item.name === "string" && item.name.trim()
-        ? item.name.trim()
-        : "";
-    go("report", { search: { id: item.id } });
-  },
-  onAddPortfolio: () => {
-    // Слот локально на home; авторитетный gate — applyRoute (без лишнего await).
-    if (!canSubmitPortfolio()) return;
-    go("url");
-  },
-  onOpenSettings: () => {
-    go("settings");
-  },
-  onViewChange: ({ tab, filter, reason }) => {
-    lastHomeView = { tab, filter };
-    // Экран уже переключился сам — URL только догоняем, без re-open.
-    if (activeRouteId !== "home") return;
-    appRouter?.navigate("home", {
-      search: buildHomeSearch({ tab, filter }),
-      replace: reason === "filter",
-      silent: true,
-    });
-  },
-  onSignOut: exitAuthenticatedSession,
-});
+/** @type {ReturnType<typeof import("./components/settings-screen/SettingsScreen.js").createSettingsScreen> | null} */
+let settingsScreen = null;
+/** @type {Promise<NonNullable<typeof settingsScreen>> | null} */
+let settingsScreenPromise = null;
 
-const onboardingScreen = createOnboardingScreen({
-  onComplete: async (answers) => {
-    const session = getSession() ?? {};
-    setSession({
-      ...session,
-      onboardingDone: true,
-      role:
-        typeof answers?.role === "string" && answers.role
-          ? answers.role
-          : session.role || DEFAULT_ONBOARDING_ROLE,
-      grade: typeof answers?.grade === "string" ? answers.grade : session.grade,
+async function ensureSettingsScreen() {
+  if (settingsScreen) return settingsScreen;
+  if (!settingsScreenPromise) {
+    settingsScreenPromise = import(
+      "./components/settings-screen/SettingsScreen.js"
+    ).then(({ createSettingsScreen }) => {
+      if (settingsScreen) return settingsScreen;
+      settingsScreen = createSettingsScreen({
+        onClose: () => {
+          if (activeRouteId !== "settings") return;
+          go("home", { search: buildHomeSearch(lastHomeView) });
+        },
+        onSaved: async () => {
+          await refreshSessionFromProfile();
+        },
+      });
+      document.body.append(settingsScreen.root);
+      return settingsScreen;
     });
-    track("onboarding_done", {
-      grade:
-        typeof answers?.grade === "string" ? answers.grade : undefined,
+  }
+  return settingsScreenPromise;
+}
+
+/** @type {ReturnType<typeof import("./components/home-screen/HomeScreen.js").createHomeScreen> | null} */
+let homeScreen = null;
+/** @type {Promise<NonNullable<typeof homeScreen>> | null} */
+let homeScreenPromise = null;
+
+async function ensureHomeScreen() {
+  if (homeScreen) return homeScreen;
+  if (!homeScreenPromise) {
+    homeScreenPromise = import("./components/home-screen/HomeScreen.js").then(
+      ({ createHomeScreen }) => {
+        if (homeScreen) return homeScreen;
+        homeScreen = createHomeScreen({
+          onPreviewPortfolio: (item) => {
+            if (item?.url) prefetchPortfolioEmbed(item.url);
+          },
+          onOpenPortfolio: async (item) => {
+            await claimAndStartReview(item, { showNoSlotsNotice: true });
+          },
+          onOpenReport: async (item) => {
+            if (!item?.isOwn || !item.id) return;
+            pendingReportPortfolioId = item.id;
+            pendingReportPortfolioName =
+              typeof item.name === "string" && item.name.trim()
+                ? item.name.trim()
+                : "";
+            go("report", { search: { id: item.id } });
+          },
+          onAddPortfolio: () => {
+            if (!canSubmitPortfolio()) return;
+            go("url");
+          },
+          onOpenSettings: () => {
+            go("settings");
+          },
+          onViewChange: ({ tab, filter, reason }) => {
+            lastHomeView = { tab, filter };
+            if (activeRouteId !== "home") return;
+            appRouter?.navigate("home", {
+              search: buildHomeSearch({ tab, filter }),
+              replace: reason === "filter",
+              silent: true,
+            });
+          },
+          onSignOut: exitAuthenticatedSession,
+        });
+        document.body.append(homeScreen.root);
+        return homeScreen;
+      },
+    );
+  }
+  return homeScreenPromise;
+}
+
+/** @type {ReturnType<typeof import("./components/onboarding-screen/OnboardingScreen.js").createOnboardingScreen> | null} */
+let onboardingScreen = null;
+/** @type {Promise<NonNullable<typeof onboardingScreen>> | null} */
+let onboardingScreenPromise = null;
+
+async function ensureOnboardingScreen() {
+  if (onboardingScreen) return onboardingScreen;
+  if (!onboardingScreenPromise) {
+    onboardingScreenPromise = import(
+      "./components/onboarding-screen/OnboardingScreen.js"
+    ).then(({ createOnboardingScreen }) => {
+      if (onboardingScreen) return onboardingScreen;
+      onboardingScreen = createOnboardingScreen({
+        onComplete: async (answers) => {
+          const session = getSession() ?? {};
+          setSession({
+            ...session,
+            onboardingDone: true,
+            role:
+              typeof answers?.role === "string" && answers.role
+                ? answers.role
+                : session.role || DEFAULT_ONBOARDING_ROLE,
+            grade:
+              typeof answers?.grade === "string"
+                ? answers.grade
+                : session.grade,
+          });
+          track("onboarding_done", {
+            grade:
+              typeof answers?.grade === "string" ? answers.grade : undefined,
+          });
+          go("home", { replace: true, handoff: true });
+        },
+      });
+      document.body.append(onboardingScreen.root);
+      return onboardingScreen;
     });
-    go("home", { replace: true, handoff: true });
-  },
-});
+  }
+  return onboardingScreenPromise;
+}
 
 /**
  * Persist Supabase user into app session (OAuth return / provider login).
@@ -2127,10 +2320,6 @@ document.body.append(
   referralScreen.root,
   authScreen.root,
   authCodeScreen.root,
-  onboardingScreen.root,
-  homeScreen.root,
-  settingsScreen.root,
-  urlScreen.root,
 );
 
 /**
@@ -2242,14 +2431,15 @@ async function applyRoute(id, opts = {}) {
   const showPendingLimitIfNeeded = () => {
     if (!pendingLimitBlocked) return;
     const t = getStrings();
-    homeScreen.showNotification(t.homeNotifySlotTaken ?? "");
+    homeScreen?.showNotification(t.homeNotifySlotTaken ?? "");
   };
 
   // Back/Forward между вкладками home: экран уже смонтирован, меняем только вид.
   if (id === "home" && prevRouteId === "home" && !handoff) {
     const view = currentHomeView();
     canonicalizeHomeSearch(view);
-    await homeScreen.setView(view);
+    const home = await ensureHomeScreen();
+    await home.setView(view);
     showPendingLimitIfNeeded();
     return;
   }
@@ -2271,7 +2461,7 @@ async function applyRoute(id, opts = {}) {
   /**
    * @param {import("./app/routes.js").AppRouteId} target
    */
-  function openTarget(target) {
+  async function openTarget(target) {
     if (target === "referral") {
       const ref =
         new URLSearchParams(window.location.search).get("ref") ?? "";
@@ -2288,50 +2478,57 @@ async function applyRoute(id, opts = {}) {
       return;
     }
     if (target === "onboarding") {
-      onboardingScreen.open(openOpts);
+      const screen = await ensureOnboardingScreen();
+      screen.open(openOpts);
       return;
     }
     if (target === "home") {
       const view = currentHomeView();
       canonicalizeHomeSearch(view);
+      const home = await ensureHomeScreen();
       // Возврат из side-panel настроек: home не закрывался — только вид,
       // иначе повторный entrance-каскад и скролл ленты в 0.
       if (prevRouteId === "settings") {
-        void homeScreen.setView(view);
+        void home.setView(view);
       } else {
-        void homeScreen.open(view);
+        void home.open(view);
       }
       return;
     }
     if (target === "settings") {
+      const home = await ensureHomeScreen();
+      const settings = await ensureSettingsScreen();
       // Side-panel поверх home (как rules), deep link /settings сохраняем.
       // Не парсить search с /settings — иначе lastHomeView сбросится в feed.
       // Home уже на экране → только setView: иначе повторный entrance-каскад,
       // сброс скролла ленты и лишний refetch списков.
       if (prevRouteId === "home") {
-        void homeScreen.setView(lastHomeView);
+        void home.setView(lastHomeView);
       } else {
-        void homeScreen.open(lastHomeView);
+        void home.open(lastHomeView);
       }
-      settingsScreen.open();
+      settings.open();
       return;
     }
     if (target === "url") {
-      urlScreen.open("", openOpts);
+      const screen = await ensureUrlScreen();
+      screen.open("", openOpts);
       return;
     }
     if (target === "success") {
-      successScreen.open({ preset: pendingSuccessPreset });
+      const screen = await ensureSuccessScreen();
+      screen.open({ preset: pendingSuccessPreset });
       return;
     }
     if (target === "report") {
+      const screen = await ensureReportScreen();
       const fromSearch =
         typeof window !== "undefined"
           ? new URLSearchParams(window.location.search).get("id")
           : null;
-      const id = pendingReportPortfolioId || fromSearch || null;
-      reportScreen.open({
-        portfolioId: id,
+      const reportId = pendingReportPortfolioId || fromSearch || null;
+      screen.open({
+        portfolioId: reportId,
         portfolioName: pendingReportPortfolioName || null,
       });
       return;
@@ -2347,12 +2544,12 @@ async function applyRoute(id, opts = {}) {
     if (id !== "referral") closers.push(referralScreen.close(closeOpts));
     if (id !== "auth") closers.push(authScreen.close(closeOpts));
     if (id !== "authCode") closers.push(authCodeScreen.close(closeOpts));
-    if (id !== "onboarding") closers.push(onboardingScreen.close(closeOpts));
-    if (id !== "home" && id !== "settings") closers.push(homeScreen.close());
-    if (id !== "settings") closers.push(settingsScreen.close());
-    if (id !== "url") closers.push(urlScreen.close(closeOpts));
-    if (id !== "success") closers.push(successScreen.close());
-    if (id !== "report") closers.push(reportScreen.close());
+    if (id !== "onboarding") closers.push(onboardingScreen?.close(closeOpts));
+    if (id !== "home" && id !== "settings") closers.push(homeScreen?.close());
+    if (id !== "settings") closers.push(settingsScreen?.close());
+    if (id !== "url") closers.push(urlScreen?.close(closeOpts));
+    if (id !== "success") closers.push(successScreen?.close());
+    if (id !== "report") closers.push(reportScreen?.close());
     if (id !== "banned") closers.push(banScreen.close());
     await Promise.all(closers);
   }
@@ -2363,27 +2560,28 @@ async function applyRoute(id, opts = {}) {
     clearReviewSessionState();
     await closeReview();
     await closeOthers();
-    openTarget("banned");
+    await openTarget("banned");
     return;
   }
 
   if (isReviewWorkspace) {
     enterSessionShell();
+    await ensureReviewWorkspace();
     await closeOthers();
 
     if (id === "review") return;
 
     frameWrap?.classList.add("iframe-shell__frame--locked");
-    reviewScreen.open();
-    reviewPanel.open();
+    reviewScreen?.open();
+    reviewPanel?.open();
     if (id === "done") {
-      reviewPanel.openDone();
+      reviewPanel?.openDone();
       return;
     }
-    reviewPanel.reset();
-    reviewPanel.open();
+    reviewPanel?.reset();
+    reviewPanel?.open();
     window.setTimeout(() => {
-      reviewPanel.focus();
+      reviewPanel?.focus();
     }, getMotionFocusDelayMs());
     return;
   }
@@ -2395,31 +2593,32 @@ async function applyRoute(id, opts = {}) {
 
   // Handoff: сначала новый экран поверх, потом убрать предыдущий — visual не мигает.
   if (isBrandHandoff) {
-    openTarget(id);
+    await openTarget(id);
     await closeOthers();
     return;
   }
 
   // Onboarding → home: home снизу/поверх с fade-in, brand уходит fade-out.
   if (isHomeReveal) {
-    const opening = homeScreen.open(currentHomeView());
+    const home = await ensureHomeScreen();
+    const opening = home.open(currentHomeView());
     await Promise.all([
       opening,
       referralScreen.close({}),
       authScreen.close({}),
       authCodeScreen.close({}),
-      onboardingScreen.close({}),
-      settingsScreen.close(),
-      urlScreen.close({}),
-      successScreen.close(),
-      reportScreen.close(),
+      onboardingScreen?.close({}),
+      settingsScreen?.close(),
+      urlScreen?.close({}),
+      successScreen?.close(),
+      reportScreen?.close(),
       banScreen.close(),
     ]);
     return;
   }
 
   await closeOthers();
-  openTarget(id);
+  await openTarget(id);
   showPendingLimitIfNeeded();
 }
 

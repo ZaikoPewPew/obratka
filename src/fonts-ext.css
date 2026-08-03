@@ -1,0 +1,7 @@
+/* Montserrat extended subsets — после первого paint (редко нужны на entry). */
+@import "@fontsource/montserrat/latin-ext-400.css";
+@import "@fontsource/montserrat/latin-ext-500.css";
+@import "@fontsource/montserrat/latin-ext-600.css";
+@import "@fontsource/montserrat/cyrillic-ext-400.css";
+@import "@fontsource/montserrat/cyrillic-ext-500.css";
+@import "@fontsource/montserrat/cyrillic-ext-600.css";

@@ -1,4 +1,5 @@
 import { getStrings } from "../../i18n.js";
+import "../../../styles/ban-screen.css";
 import { mountMeshGradientWash } from "../../utils/meshGradientWash.js";
 import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
 import { banBrandMarkSvg } from "../../assets/brand/brandMarks.js";

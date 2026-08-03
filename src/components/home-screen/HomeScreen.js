@@ -1,4 +1,10 @@
 import { formatString, getStrings } from "../../i18n.js";
+import "../../../styles/home-screen.css";
+import "../../../styles/legendary-online-panel.css";
+import "../../../styles/feedback.css";
+import "../../../styles/notification.css";
+import "../../../styles/tabs-panel.css";
+import "../../../styles/account-menu.css";
 import {
   formatPortfolioGrade,
   formatPortfolioRole,
@@ -71,7 +77,6 @@ import currencyGhostUrl from "../../assets/home/modal/currency-ghost.png";
 import currencyP2pUrl from "../../assets/home/modal/currency-p2p.png";
 import currencyEmptyDuckUrl from "../../assets/home/modal/currency-empty-duck.png";
 import currencyReferalUrl from "../../assets/home/modal/currency-referal.png";
-import reviewIntroVideoUrl from "../../assets/video/primer.mp4";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
 import reputationNeutralIconSvg from "../../assets/home/reputation-neutral.svg?raw";
 import reputationPositiveIconSvg from "../../assets/home/reputation-positive.svg?raw";
@@ -245,7 +250,6 @@ function createReviewIntroVideo() {
 
   const video = document.createElement("video");
   video.className = "home-screen__review-intro-video";
-  video.src = reviewIntroVideoUrl;
   video.muted = true;
   video.defaultMuted = true;
   video.loop = true;
@@ -260,14 +264,33 @@ function createReviewIntroVideo() {
 
   root.append(video);
 
-  function play() {
-    video.currentTime = 0;
-    const p = video.play();
-    if (p && typeof p.catch === "function") {
-      p.catch(() => {
-        /* autoplay can be blocked — silent */
-      });
+  /** @type {Promise<void> | null} */
+  let srcPromise = null;
+
+  function ensureSrc() {
+    if (video.src) return Promise.resolve();
+    if (!srcPromise) {
+      srcPromise = import("../../assets/video/primer.mp4")
+        .then((m) => {
+          video.src = m.default;
+        })
+        .catch(() => {
+          srcPromise = null;
+        });
     }
+    return srcPromise;
+  }
+
+  function play() {
+    void ensureSrc().then(() => {
+      video.currentTime = 0;
+      const p = video.play();
+      if (p && typeof p.catch === "function") {
+        p.catch(() => {
+          /* autoplay can be blocked — silent */
+        });
+      }
+    });
   }
 
   function stop() {

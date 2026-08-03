@@ -1,4 +1,5 @@
 import { formatString, getStrings } from "../../i18n.js";
+import "../../../styles/iframe-shell.css";
 import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import onboardingContent from "../../../content/onboarding.json";
 import {

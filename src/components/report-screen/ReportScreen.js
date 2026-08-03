@@ -1,4 +1,5 @@
 import { formatString, getStrings } from "../../i18n.js";
+import "../../../styles/report-screen.css";
 import {
   brandMarkSvg,
   morphBrandMarkToDone,
