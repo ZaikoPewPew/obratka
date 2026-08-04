@@ -88,13 +88,14 @@ const PREVIEW_BROWSER_CONTROLS_URL = `${
   import.meta.env.BASE_URL || "/"
 }assets/svg/home-preview-browser-controls.svg`;
 
-const INVITE_COPY_SVG = `<svg class="home-screen__invite-copy-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path d="M4 7V19C4 20.1046 4.89543 21 6 21H15M10 17H17C18.1046 17 19 16.1046 19 15V5C19 3.89543 18.1046 3 17 3H10C8.89543 3 8 3.89543 8 5V15C8 16.1046 8.89543 17 10 17Z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
-</svg>`;
-
-const INVITE_COPIED_SVG = `<svg class="home-screen__invite-copy-icon home-screen__invite-copy-icon--done" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path d="M22 7L11.5 17.5L7.5 13.5M6 17.5L2 13.5M16.5 7L11.5 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
-</svg>`;
+const INVITE_COPY_ICONS_HTML = `<span class="home-screen__invite-copy-stack" aria-hidden="true">
+  <svg class="home-screen__invite-copy-icon home-screen__invite-copy-icon--copy" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M4 7V19C4 20.1046 4.89543 21 6 21H15M10 17H17C18.1046 17 19 16.1046 19 15V5C19 3.89543 18.1046 3 17 3H10C8.89543 3 8 3.89543 8 5V15C8 16.1046 8.89543 17 10 17Z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>
+  <svg class="home-screen__invite-copy-icon home-screen__invite-copy-icon--done" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 7L11.5 17.5L7.5 13.5M6 17.5L2 13.5M16.5 7L11.5 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>
+</span>`;
 
 /** @typedef {'neutral' | 'positive' | 'negative'} ReputationIconKind */
 
@@ -679,6 +680,7 @@ function isCompletedOwnItem(item) {
  *   onOpenReport?: (item: HomePortfolioItem) => void | Promise<void>;
  *   onAddPortfolio?: () => void | Promise<void>;
  *   onOpenSettings?: () => void | Promise<void>;
+ *   onBeforeOpenRules?: () => void | Promise<void>;
  *   onSignOut?: () => void | Promise<void>;
  *   onViewChange?: (view: { tab: HomeTabId; filter: MineFilterId; reason: 'tab' | 'filter' }) => void;
  * }} opts
@@ -692,6 +694,8 @@ function isCompletedOwnItem(item) {
  *   refresh: () => Promise<void>;
  *   showNotice: (opts: { title: string; body: string; closeLabel?: string; closeAria?: string }) => void;
  *   showNotification: (message: string) => void;
+ *   closeRulesPanel: () => Promise<void>;
+ *   isRulesPanelOpen: () => boolean;
  * }}
  */
 export function createHomeScreen({
@@ -700,6 +704,7 @@ export function createHomeScreen({
   onOpenReport,
   onAddPortfolio,
   onOpenSettings,
+  onBeforeOpenRules,
   onSignOut,
   onViewChange,
 }) {
@@ -854,9 +859,22 @@ export function createHomeScreen({
     rulesPanel.content.replaceChildren(...nodes);
   }
 
-  function openRulesPanel() {
+  /**
+   * @returns {Promise<void>}
+   */
+  async function openRulesPanel() {
+    if (typeof onBeforeOpenRules === "function") {
+      await onBeforeOpenRules();
+    }
     syncRulesPanelContent();
     rulesPanel.open();
+  }
+
+  /**
+   * @returns {Promise<void>}
+   */
+  function closeRulesPanel() {
+    return rulesPanel.close();
   }
 
   /**
@@ -878,7 +896,7 @@ export function createHomeScreen({
     link.className = "app-modal__description-link";
     link.textContent = linkLabel;
     link.addEventListener("click", () => {
-      openRulesPanel();
+      void openRulesPanel();
     });
     frag.append(link);
 
@@ -898,7 +916,7 @@ export function createHomeScreen({
       void openMyReferralInvite();
     },
     onRules: () => {
-      openRulesPanel();
+      void openRulesPanel();
     },
     onSignOut: () => onSignOut?.(),
   });
@@ -1130,22 +1148,52 @@ export function createHomeScreen({
   const inviteCopyBtn = document.createElement("button");
   inviteCopyBtn.type = "button";
   inviteCopyBtn.className = "home-screen__invite-copy";
-  inviteCopyBtn.innerHTML = INVITE_COPY_SVG;
+  inviteCopyBtn.innerHTML = INVITE_COPY_ICONS_HTML;
 
   inviteCodeCell.append(inviteCode, inviteCopyBtn);
   inviteCluster.append(inviteUses, inviteCodeCell);
 
+  const inviteShareWrap = document.createElement("div");
+  inviteShareWrap.className = "home-screen__invite-share-wrap";
+
   const inviteShareBtn = document.createElement("button");
   inviteShareBtn.type = "button";
   inviteShareBtn.className = "home-screen__invite-share";
+  inviteShareBtn.setAttribute("aria-haspopup", "menu");
+  inviteShareBtn.setAttribute("aria-expanded", "false");
 
-  inviteBar.append(inviteCluster, inviteShareBtn);
+  const inviteShareMenu = document.createElement("div");
+  inviteShareMenu.className = "home-screen__invite-share-menu";
+  inviteShareMenu.hidden = true;
+  inviteShareMenu.setAttribute("role", "menu");
+  inviteShareMenu.setAttribute("aria-hidden", "true");
+
+  /** @type {HTMLButtonElement} */
+  const inviteShareTelegramBtn = document.createElement("button");
+  inviteShareTelegramBtn.type = "button";
+  inviteShareTelegramBtn.className = "home-screen__invite-share-item";
+  inviteShareTelegramBtn.setAttribute("role", "menuitem");
+  inviteShareTelegramBtn.dataset.share = "telegram";
+
+  /** @type {HTMLButtonElement} */
+  const inviteShareWhatsAppBtn = document.createElement("button");
+  inviteShareWhatsAppBtn.type = "button";
+  inviteShareWhatsAppBtn.className = "home-screen__invite-share-item";
+  inviteShareWhatsAppBtn.setAttribute("role", "menuitem");
+  inviteShareWhatsAppBtn.dataset.share = "whatsapp";
+
+  inviteShareMenu.append(inviteShareTelegramBtn, inviteShareWhatsAppBtn);
+  inviteShareWrap.append(inviteShareBtn, inviteShareMenu);
+  inviteBar.append(inviteCluster, inviteShareWrap);
   inviteExplainer.append(inviteMedia, inviteBar);
 
   const inviteModal = createAppModal({
     size: "md",
     showPrimary: false,
     showSecondary: false,
+    onClose: () => {
+      cleanupInviteModalUi();
+    },
   });
   inviteModal.content.append(inviteExplainer);
 
@@ -1154,9 +1202,30 @@ export function createHomeScreen({
     void copyInviteCode();
   });
 
-  inviteShareBtn.addEventListener("click", () => {
+  inviteShareBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
     if (!inviteCodeValue || inviteSlotsExhausted) return;
-    void shareInviteLink();
+    if (isInviteShareMenuOpen()) {
+      void closeInviteShareMenu();
+      return;
+    }
+    openInviteShareMenu();
+  });
+
+  inviteShareTelegramBtn.addEventListener("click", () => {
+    void shareInviteVia("telegram");
+  });
+  inviteShareWhatsAppBtn.addEventListener("click", () => {
+    void shareInviteVia("whatsapp");
+  });
+
+  inviteShareMenu.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    event.preventDefault();
+    event.stopPropagation();
+    void closeInviteShareMenu().then(() => {
+      inviteShareBtn.focus();
+    });
   });
 
   const tabbar = document.createElement("div");
@@ -1282,6 +1351,11 @@ export function createHomeScreen({
   let inviteSlotsExhausted = false;
   /** @type {ReturnType<typeof window.setTimeout> | null} */
   let inviteCopyResetId = null;
+  /** @type {number} */
+  let inviteShareOpenFrame = 0;
+  /** @type {ReturnType<typeof window.setTimeout> | null} */
+  let inviteShareCloseTimer = null;
+  let inviteShareClosing = false;
   /** Нет фото → фон + буква; картинку прячем. */
   function showProfileLetter(letter) {
     const initial = letter && letter !== "?" ? letter : "?";
@@ -1671,15 +1745,20 @@ export function createHomeScreen({
     );
   }
 
-  function closeInviteModal() {
+  function cleanupInviteModalUi() {
     if (inviteCopyResetId != null) {
       window.clearTimeout(inviteCopyResetId);
       inviteCopyResetId = null;
     }
     inviteSlotsExhausted = false;
     inviteBar.classList.remove("home-screen__invite-bar--exhausted");
-    inviteShareBtn.hidden = false;
+    inviteShareWrap.hidden = false;
+    void closeInviteShareMenu({ instant: true });
     setInviteCopyIdle();
+  }
+
+  function closeInviteModal() {
+    cleanupInviteModalUi();
     void inviteModal.close();
   }
 
@@ -1695,14 +1774,12 @@ export function createHomeScreen({
       "home-screen__invite-copy--static",
     );
     inviteCopyBtn.disabled = false;
-    inviteCopyBtn.innerHTML = INVITE_COPY_SVG;
     inviteCopyBtn.setAttribute("aria-label", t.homeInviteCopyAria ?? "");
   }
 
   function setInviteCopyDone() {
     const t = getStrings();
     inviteCopyBtn.classList.add("home-screen__invite-copy--done");
-    inviteCopyBtn.innerHTML = INVITE_COPIED_SVG;
     inviteCopyBtn.setAttribute("aria-label", t.homeInviteCopiedAria ?? "");
   }
 
@@ -1715,6 +1792,126 @@ export function createHomeScreen({
       "aria-label",
       getStrings().homeInviteCodeExhausted ?? "",
     );
+  }
+
+  function getInviteShareCloseFallbackMs() {
+    if (typeof document === "undefined") return 220;
+    const raw = getComputedStyle(document.documentElement)
+      .getPropertyValue("--home-screen-invite-share-menu-motion-duration")
+      .trim();
+    const value = Number.parseFloat(raw);
+    if (!Number.isFinite(value)) return 220;
+    const ms = raw.endsWith("s") && !raw.endsWith("ms") ? value * 1000 : value;
+    return Math.max(120, Math.round(ms + 80));
+  }
+
+  function isInviteShareMenuOpen() {
+    return (
+      !inviteShareMenu.hidden &&
+      inviteShareMenu.classList.contains("home-screen__invite-share-menu--open")
+    );
+  }
+
+  function syncInviteShareMenuCopy() {
+    const t = getStrings();
+    inviteShareTelegramBtn.textContent = t.homeInviteShareTelegram ?? "";
+    inviteShareWhatsAppBtn.textContent = t.homeInviteShareWhatsApp ?? "";
+    inviteShareMenu.setAttribute(
+      "aria-label",
+      t.homeInviteShareMenuAria ?? t.homeInviteShare ?? "",
+    );
+  }
+
+  function openInviteShareMenu() {
+    if (isInviteShareMenuOpen() || inviteShareClosing) return;
+    if (inviteShareCloseTimer != null) {
+      window.clearTimeout(inviteShareCloseTimer);
+      inviteShareCloseTimer = null;
+    }
+    syncInviteShareMenuCopy();
+    inviteModal.dialog.style.overflow = "visible";
+    inviteModal.content.style.overflow = "visible";
+    inviteShareMenu.hidden = false;
+    inviteShareMenu.setAttribute("aria-hidden", "false");
+    inviteShareBtn.setAttribute("aria-expanded", "true");
+    inviteShareMenu.classList.remove("home-screen__invite-share-menu--open");
+
+    inviteShareOpenFrame = requestAnimationFrame(() => {
+      inviteShareOpenFrame = requestAnimationFrame(() => {
+        inviteShareOpenFrame = 0;
+        inviteShareMenu.classList.add("home-screen__invite-share-menu--open");
+        inviteShareTelegramBtn.focus();
+      });
+    });
+  }
+
+  function restoreInviteModalOverflow() {
+    inviteModal.dialog.style.overflow = "";
+    inviteModal.content.style.overflow = "";
+  }
+
+  /**
+   * @param {{ instant?: boolean }} [opts]
+   * @returns {Promise<void>}
+   */
+  function closeInviteShareMenu(opts = {}) {
+    const instant = Boolean(opts.instant);
+    inviteShareBtn.setAttribute("aria-expanded", "false");
+    if (inviteShareOpenFrame) {
+      cancelAnimationFrame(inviteShareOpenFrame);
+      inviteShareOpenFrame = 0;
+    }
+    if (inviteShareMenu.hidden && !inviteShareClosing) {
+      restoreInviteModalOverflow();
+      return Promise.resolve();
+    }
+    if (instant) {
+      inviteShareClosing = false;
+      if (inviteShareCloseTimer != null) {
+        window.clearTimeout(inviteShareCloseTimer);
+        inviteShareCloseTimer = null;
+      }
+      inviteShareMenu.classList.remove("home-screen__invite-share-menu--open");
+      inviteShareMenu.hidden = true;
+      inviteShareMenu.setAttribute("aria-hidden", "true");
+      restoreInviteModalOverflow();
+      return Promise.resolve();
+    }
+    if (inviteShareClosing) return Promise.resolve();
+    inviteShareClosing = true;
+    inviteShareMenu.classList.remove("home-screen__invite-share-menu--open");
+    inviteShareMenu.setAttribute("aria-hidden", "true");
+
+    return new Promise((resolve) => {
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        inviteShareMenu.removeEventListener("transitionend", onEnd);
+        if (inviteShareCloseTimer != null) {
+          window.clearTimeout(inviteShareCloseTimer);
+          inviteShareCloseTimer = null;
+        }
+        inviteShareMenu.hidden = true;
+        inviteShareClosing = false;
+        restoreInviteModalOverflow();
+        resolve();
+      };
+      /** @param {TransitionEvent} event */
+      const onEnd = (event) => {
+        if (
+          event.target === inviteShareMenu &&
+          event.propertyName === "opacity"
+        ) {
+          finish();
+        }
+      };
+      inviteShareMenu.addEventListener("transitionend", onEnd);
+      inviteShareCloseTimer = window.setTimeout(
+        finish,
+        getInviteShareCloseFallbackMs(),
+      );
+    });
   }
 
   /**
@@ -1733,11 +1930,12 @@ export function createHomeScreen({
       window.clearTimeout(inviteCopyResetId);
       inviteCopyResetId = null;
     }
+    void closeInviteShareMenu({ instant: true });
     inviteBar.classList.toggle(
       "home-screen__invite-bar--exhausted",
       inviteSlotsExhausted,
     );
-    inviteShareBtn.hidden = inviteSlotsExhausted;
+    inviteShareWrap.hidden = inviteSlotsExhausted;
     if (inviteSlotsExhausted) {
       setInviteCopyStaticDone();
     } else {
@@ -1769,6 +1967,7 @@ export function createHomeScreen({
       "aria-label",
       t.homeInviteShareAria ?? t.homeInviteShare ?? "",
     );
+    syncInviteShareMenuCopy();
     inviteModal.setCloseAriaLabel(t.homeInviteCloseAria ?? "");
     inviteModal.setSecondaryLabel("");
     inviteModal.setActionsVisible({ primary: false, secondary: false });
@@ -1803,26 +2002,26 @@ export function createHomeScreen({
     }
   }
 
-  async function shareInviteLink() {
+  /**
+   * @param {"telegram" | "whatsapp"} method
+   */
+  async function shareInviteVia(method) {
     if (!inviteCodeValue || inviteSlotsExhausted) return;
-    const t = getStrings();
-    const title = t.homeInviteTitle ?? "";
     const text = buildInviteMessage();
-    try {
-      if (typeof navigator.share === "function") {
-        await navigator.share({ title, text });
-        return;
-      }
-    } catch (err) {
-      if (err && typeof err === "object" && "name" in err && err.name === "AbortError") {
-        return;
-      }
+    const url = buildReferralShareUrl(inviteCodeValue);
+    await closeInviteShareMenu();
+
+    if (method === "telegram") {
+      const shareUrl = new URL("https://t.me/share/url");
+      shareUrl.searchParams.set("url", url);
+      shareUrl.searchParams.set("text", text);
+      window.open(shareUrl.href, "_blank", "noopener,noreferrer");
+      return;
     }
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      /* ignore */
-    }
+
+    const shareUrl = new URL("https://wa.me/");
+    shareUrl.searchParams.set("text", text);
+    window.open(shareUrl.href, "_blank", "noopener,noreferrer");
   }
 
   async function openMyReferralInvite() {
@@ -3298,6 +3497,17 @@ export function createHomeScreen({
     void closeAccountMenu();
   });
 
+  document.addEventListener("click", (event) => {
+    if (!isInviteShareMenuOpen()) return;
+    if (
+      event.target instanceof Node &&
+      inviteShareWrap.contains(event.target)
+    ) {
+      return;
+    }
+    void closeInviteShareMenu();
+  });
+
   syncCopy();
   renderList();
 
@@ -3311,5 +3521,7 @@ export function createHomeScreen({
     refresh,
     showNotice,
     showNotification,
+    closeRulesPanel,
+    isRulesPanelOpen: () => rulesPanel.isOpen(),
   };
 }

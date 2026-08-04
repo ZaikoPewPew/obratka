@@ -203,7 +203,7 @@ export function createUrlScreen({ onSubmit, onExit }) {
 
   const exitBtn = document.createElement("button");
   exitBtn.type = "button";
-  exitBtn.className = "iframe-shell__btn url-screen__done-btn";
+  exitBtn.className = "url-screen__done-btn";
 
   doneActions.append(exitBtn);
   done.append(doneTitle, doneActions);

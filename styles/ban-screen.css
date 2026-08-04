@@ -115,11 +115,13 @@
 }
 
 .ban-screen__btn {
+  appearance: none;
   flex: 0 0 auto;
   box-sizing: border-box;
   width: var(--ban-screen-btn-width);
   min-height: var(--shell-review-control-height);
   padding: var(--shell-review-control-padding-y) var(--shell-review-control-padding-x);
+  border: none;
   border-radius: var(--radius-md);
   font-family: var(--font-family);
   font-size: var(--shell-review-control-font-size);
@@ -128,6 +130,7 @@
   text-align: center;
   background: var(--color-surface-muted);
   color: var(--color-text);
+  cursor: pointer;
 }
 
 .ban-screen__btn:hover {

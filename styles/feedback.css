@@ -10,13 +10,13 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: var(--feedback-size);
-  height: var(--feedback-size);
+  width: calc(var(--feedback-size) * 1.25);
+  height: calc(var(--feedback-size) * 1.25);
   margin: 0;
-  padding: var(--feedback-padding-y) var(--feedback-padding-x);
+  padding: 0;
   border: none;
   border-radius: var(--feedback-radius);
-  background: var(--feedback-bg);
+  background: transparent;
   color: var(--feedback-color);
   text-decoration: none;
   cursor: pointer;
@@ -24,12 +24,12 @@
 }
 
 .feedback:hover {
-  background: var(--feedback-bg-hover);
+  background: transparent;
   color: var(--feedback-color-hover);
 }
 
 .feedback:active {
-  background: var(--feedback-bg-active);
+  background: transparent;
   color: var(--feedback-color-active);
 }
 
@@ -38,12 +38,19 @@
   outline-offset: var(--focus-ring-offset);
 }
 
-.feedback__icon {
+.feedback__lottie {
   display: block;
-  width: var(--feedback-icon);
-  height: var(--feedback-icon);
+  width: calc(var(--feedback-size) * 1.25);
+  height: calc(var(--feedback-size) * 1.25);
   flex-shrink: 0;
-  color: inherit;
+  pointer-events: none;
+  transform: translateY(var(--feedback-lottie-nudge-y));
+}
+
+.feedback__lottie svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .feedback__tip {

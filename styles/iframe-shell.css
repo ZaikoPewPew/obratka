@@ -587,49 +587,7 @@ body {
   justify-content: flex-end;
 }
 
-.review-panel__back {
-  appearance: none;
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--shell-review-chip-gap);
-  min-width: var(--shell-review-chip-min-width-back);
-  height: var(--shell-review-chip-height);
-  margin: 0;
-  padding: var(--shell-review-chip-padding-y) var(--shell-review-chip-padding-x);
-  border: 0;
-  border-radius: var(--shell-review-chip-radius);
-  background: var(--shell-review-chip-bg);
-  color: var(--shell-review-chip-text);
-  font-family: var(--font-family);
-  font-size: var(--shell-review-chip-font-size);
-  font-weight: var(--shell-review-chip-font-weight);
-  line-height: var(--shell-review-chip-line-height);
-  text-align: center;
-  cursor: pointer;
-  transition: background-color var(--duration-fast) ease;
-}
-
-.review-panel__back:hover {
-  background: var(--color-surface-muted-hover);
-}
-
-.review-panel__back:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
-}
-
-.review-panel__back-icon {
-  flex-shrink: 0;
-  width: var(--shell-review-back-icon-size);
-  height: var(--shell-review-back-icon-size);
-  color: var(--color-text);
-}
-
-.review-panel__back-label {
-  white-space: nowrap;
-}
+/* `.review-panel__back*` — в brand-screen.css (cold path для url / auth-code). */
 
 .review-panel__progress {
   box-sizing: border-box;
@@ -1373,15 +1331,18 @@ body {
 }
 
 .review-panel__done-btn {
+  appearance: none;
   position: relative;
   flex: 0 0 auto;
   min-height: var(--shell-review-control-height);
   padding: var(--shell-review-control-padding-y) var(--shell-review-done-btn-padding-x);
+  border: none;
   border-radius: var(--radius-md);
   font-size: var(--shell-review-control-font-size);
   font-weight: var(--shell-review-control-font-weight);
   line-height: var(--shell-review-control-line-height);
   text-align: center;
+  cursor: pointer;
 }
 
 .review-panel__done-btn[hidden] {

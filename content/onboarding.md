@@ -46,11 +46,11 @@ UI-кнопки и прогресс: ключи `onboarding*` в `locales.json`.
 | 1 | `grade` | single | да | Грейд (матчинг ревью / лиги) |
 | 2 | `domain` | multi | да | Профиль / домен |
 | 3 | `goal` | multi | да | Ожидания от платформы; кнопка **«Далее»** |
-| 4 | `watch` | video | да | Плеер + **«Начать»**; ответ **не** пишется |
+| 4 | `watch` | video | да | Плеер; **«Начать»** после первого просмотра; ответ **не** пишется |
 
 ## Связь с экраном
 
-Левая панель onboarding-screen читает видимые `steps` по порядку; правая — brand visual без изменений. `single` — radio + auto-advance; `multi` — checkbox + «Далее»; последний `video` — [`VideoPlayerCard`](../src/components/video-player-card/README.md) + «Начать».
+Левая панель onboarding-screen читает видимые `steps` по порядку; правая — brand visual без изменений. `single` — radio + auto-advance; `multi` — checkbox + «Далее»; последний `video` — [`VideoPlayerCard`](../src/components/video-player-card/README.md); **«Начать»** по умолчанию скрыта под плеером и выезжает после первого `ended` (см. [`onboarding-screen/README.md`](../src/components/onboarding-screen/README.md) § video).
 
 Подробнее: [`onboarding-screen/README.md`](../src/components/onboarding-screen/README.md).  
 События воронки (wired + план): [`ANALYTICS.md`](../ANALYTICS.md).

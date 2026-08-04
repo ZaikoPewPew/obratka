@@ -1,6 +1,5 @@
 import { getLocale, getStrings } from "../../i18n.js";
 import "../../../styles/settings-screen.css";
-import "../../../styles/side-panel.css";
 import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
 import {
   fetchMyProfile,

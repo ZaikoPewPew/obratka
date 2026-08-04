@@ -31,7 +31,7 @@ Waitlist-низ из болванки макета (инпут / аватары)
 | [`styles/side-panel.css`](../../../styles/side-panel.css) | разметка + open/close motion |
 | [`styles/tokens.css`](../../../styles/tokens.css) | `--side-panel-*` |
 
-Подключение CSS: `index.html` → рядом с `app-modal.css`.
+Подключение CSS: импорт в `SidePanel.js` (как `app-modal.css` у `AppModal`) — иначе lazy-экраны без своего import оставят панель без стилей.
 
 ## API
 

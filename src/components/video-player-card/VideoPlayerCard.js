@@ -43,6 +43,7 @@ function iconFromRaw(raw, className) {
  * @param {{
  *   src?: string;
  *   ariaLabel?: string;
+ *   onEnded?: () => void;
  * }} [opts]
  * @returns {{
  *   root: HTMLElement;
@@ -56,6 +57,8 @@ export function createVideoPlayerCard(opts = {}) {
   const t = getStrings();
   let rateIndex = 0;
   let seeking = false;
+  /** @type {number} */
+  let progressRaf = 0;
 
   const root = document.createElement("div");
   root.className = "video-player-card";
@@ -228,6 +231,25 @@ export function createVideoPlayerCard(opts = {}) {
     timeTotal.textContent = formatTime(duration);
   }
 
+  function stopProgressLoop() {
+    if (!progressRaf) return;
+    cancelAnimationFrame(progressRaf);
+    progressRaf = 0;
+  }
+
+  function tickProgress() {
+    progressRaf = 0;
+    if (!seeking) syncProgress();
+    if (!video.paused && !video.ended) {
+      progressRaf = requestAnimationFrame(tickProgress);
+    }
+  }
+
+  function startProgressLoop() {
+    if (progressRaf) return;
+    progressRaf = requestAnimationFrame(tickProgress);
+  }
+
   /**
    * @param {number} clientX
    */
@@ -285,14 +307,24 @@ export function createVideoPlayerCard(opts = {}) {
   video.addEventListener("click", () => {
     togglePlay();
   });
-  video.addEventListener("play", syncPlayingUi);
-  video.addEventListener("pause", syncPlayingUi);
-  video.addEventListener("ended", () => {
+  video.addEventListener("play", () => {
     syncPlayingUi();
+    startProgressLoop();
+  });
+  video.addEventListener("pause", () => {
+    syncPlayingUi();
+    stopProgressLoop();
     syncProgress();
   });
+  video.addEventListener("ended", () => {
+    syncPlayingUi();
+    stopProgressLoop();
+    syncProgress();
+    opts.onEnded?.();
+  });
+  /* Fallback, если rAF ещё не крутится (метаданные / scrub на паузе). */
   video.addEventListener("timeupdate", () => {
-    if (!seeking) syncProgress();
+    if (!seeking && (video.paused || video.ended)) syncProgress();
   });
   video.addEventListener("loadedmetadata", syncProgress);
   video.addEventListener("durationchange", syncProgress);
@@ -368,6 +400,7 @@ export function createVideoPlayerCard(opts = {}) {
       video.pause();
     },
     destroy() {
+      stopProgressLoop();
       video.pause();
       video.removeAttribute("src");
       video.load();

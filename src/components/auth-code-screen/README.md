@@ -41,7 +41,7 @@ Path: **`/registration/code`**. Split как `auth-screen` / `url-screen`.
 
 ## Стили
 
-`.auth-code-screen__*` в `iframe-shell.css`; токены `--auth-code-*` (в т.ч. `--auth-code-resend-cooldown`).  
-Back переиспользует `.review-panel__back`.
+`.auth-code-screen__*` в `brand-screen.css`; токены `--auth-code-*` (в т.ч. `--auth-code-resend-cooldown`).  
+Back переиспользует `.review-panel__back*` из того же cold-path файла.
 
 См. [`SCREENS.md`](../../../SCREENS.md), [`auth-screen/README.md`](../auth-screen/README.md).

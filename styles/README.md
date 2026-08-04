@@ -6,10 +6,11 @@
 - `app-modal.css` — универсальная модалка (`createAppModal`, `--app-modal-*`).
 - `side-panel.css` — боковая панель (`createSidePanel`, `--side-panel-*`).
 - `iframe-shell.css` — оболочка `/review` (таймер, **`.iframe-shell__rec`**, external viewer), `.url-screen*` (в т.ч. **`.url-screen__back`**, `__error*`, `__input-wrap--invalid`), `.auth-screen*` / `.auth-code-screen*` (в т.ч. `__cells--invalid`), `.review-screen*` / `.review-panel*` (в т.ч. **`.review-panel__rec`**, **`.review-panel__scale-*` / `__slider-*`** — шкалы [`scale-slider`](../src/components/scale-slider/README.md)). Таймер: iframe pause / external wall-clock; звук конца — `src/assets/audio/Timer-end.wav`.
-- `brand-screen.css` — **заготовка** выноса общих split-стилей из iframe-shell.
+- `brand-screen.css` — split brand-экраны из `index.html` (cold path); в т.ч. общий чип `.review-panel__back*` для url / auth-code; onboarding video CTA (`.onboarding-screen__video-cta*`).
+- `video-player-card.css` — side-effect import из [`VideoPlayerCard`](../src/components/video-player-card/README.md); токены `--video-player-*`.
 - `home-screen.css` — главная `/home` (topbar, лента, вкладка рейтинга `.home-screen__rating-list` / плашка `.home-screen__rating-reputation`, tabbar-dock: glass tabs + submit + tab-dot, `--on-dark`).
 - `legendary-online-panel.css` — fixed-чип «Топы в сети» слева снизу на home.
-- `feedback.css` — fixed FAB feedback (Telegram) на home.
+- `feedback.css` — fixed FAB feedback (Telegram) на home; Lottie-кепка (`--feedback-lottie-nudge-y`).
 - `notification.css` — toast Notification (top-right под аватаром home).
 - `tabs-panel.css` — сегмент feed/mine на home (`createTabsPanel`, `--tabs-panel-*`).
 - `success-screen.css` — `/done` (пресеты успеха).

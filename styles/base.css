@@ -28,6 +28,23 @@ select {
   font: inherit;
 }
 
+/* UA-reset: без этого secondary/CTA с классом iframe-shell__btn
+   на cold path (ban / success / portfolio done без review) —
+   системная обводка + cursor:default. */
+button {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
 /* Число в заголовке и бейдже — одно форматирование из `utils/countTemplate.js` */
 .count-value {
   white-space: nowrap;

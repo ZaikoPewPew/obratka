@@ -476,7 +476,7 @@
     rgba(0, 0, 0, 0) 0.03%,
     rgba(0, 0, 0, 0.4) 99.97%
   );
-  --video-player-chrome-height: 130px;
+  --video-player-chrome-height: 203.125px;
   --video-player-chrome-blur: 12px;
   --video-player-control-color: var(--palette-white);
   --video-player-center-size: 80px;
@@ -502,9 +502,13 @@
   --video-player-time-current: rgba(255, 255, 255, 0.94);
   --video-player-time-total: rgba(238, 238, 251, 0.55);
   --video-player-speed-min-width: 60px;
-  /* Онбординг шаг video: CTA 340×76 под плеером */
+  /* Онбординг шаг video: CTA 340×76 под плеером; выезд после первого просмотра */
   --onboarding-video-cta-width: 340px;
   --onboarding-video-cta-height: 76px;
+  /* Запас под скругление плеера (24), чтобы углы кнопки не торчали */
+  --onboarding-video-cta-tuck: var(--video-player-radius);
+  --onboarding-video-cta-reveal-duration: var(--motion-reveal-duration);
+  --onboarding-video-cta-reveal-ease: var(--motion-reveal-ease);
   --shell-review-chip-height: 51px;
   --shell-review-chip-min-width-back: 131px;
   --shell-review-chip-min-width-progress: 91px;
@@ -1160,6 +1164,29 @@
   --home-screen-invite-bar-share-weight: var(--font-weight-medium);
   --home-screen-invite-copy-size: var(--space-6);
   --home-screen-invite-copy-done-color: var(--palette-copied-green);
+  --home-screen-invite-copy-motion-duration: 180ms;
+  --home-screen-invite-copy-motion-ease: var(--ease-out);
+  --home-screen-invite-copy-scale-from: 0.55;
+  --home-screen-invite-share-menu-offset-y: var(--space-2);
+  --home-screen-invite-share-menu-min-width: var(--home-screen-invite-bar-share-width);
+  --home-screen-invite-share-menu-padding: var(--space-2);
+  --home-screen-invite-share-menu-gap: var(--space-1);
+  --home-screen-invite-share-menu-radius: var(--radius-md);
+  --home-screen-invite-share-menu-bg: var(--color-surface-muted);
+  --home-screen-invite-share-menu-shadow: none;
+  --home-screen-invite-share-menu-z: 2;
+  --home-screen-invite-share-menu-motion-duration: 160ms;
+  --home-screen-invite-share-menu-motion-ease: var(--ease-out);
+  --home-screen-invite-share-menu-motion-shift: 6px;
+  --home-screen-invite-share-menu-motion-scale-from: 0.92;
+  --home-screen-invite-share-item-height: 36px;
+  --home-screen-invite-share-item-padding: var(--space-1) var(--space-3);
+  --home-screen-invite-share-item-radius: 8px;
+  --home-screen-invite-share-item-font-size: var(--font-size-base);
+  --home-screen-invite-share-item-font-weight: var(--font-weight-medium);
+  --home-screen-invite-share-item-color: var(--color-text);
+  --home-screen-invite-share-item-bg-hover: var(--color-surface-muted-active);
+  --home-screen-invite-share-item-bg-active: var(--color-border-subtle);
   --home-screen-invite-actions-gap: var(--space-2);
   --home-screen-card-padding: var(--space-2);
   --home-screen-card-gap: var(--space-2);
@@ -1334,6 +1361,8 @@
 
   /* FAB feedback (Telegram) */
   --feedback-size: 56px;
+  /* Визуальная компенсация: контейнер больше артборда лотти */
+  --feedback-lottie-nudge-y: var(--space-2);
   --feedback-offset: var(--space-4);
   --feedback-padding-x: var(--space-4);
   --feedback-padding-y: var(--space-3);
@@ -1596,7 +1625,6 @@
   --url-screen-avatar-stroke: 4px;
   --url-screen-avatar-overlap: 5px;
   --url-screen-avatar-stack-width: 113px;
-  --url-screen-done-btn-width: var(--auth-screen-provider-width);
   --url-screen-avatar-logo-size: calc(var(--url-screen-avatar-size) * 0.4);
   --url-screen-avatar-logo-size-lg: calc(var(--url-screen-avatar-size) * 0.72);
   --url-screen-avatar-framer-bg: var(--palette-framer-blue);

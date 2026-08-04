@@ -1,23 +1,31 @@
 import { getStrings } from "../../i18n.js";
 import { COMMUNITY_CONTACT_URL } from "../../config/contacts.js";
-import feedbackIconSvg from "../../assets/home/feedback.svg?raw";
 
 /**
- * Иконка feedback — inline SVG, чтобы `currentColor` наследовал цвет кнопки.
- * @returns {SVGElement}
+ * Lottie-кепка вместо SVG-иконки (preview точки входа).
+ * @returns {HTMLElement}
  */
-function createFeedbackIcon() {
-  const wrap = document.createElement("span");
-  wrap.innerHTML = feedbackIconSvg.trim();
-  const svg = wrap.firstElementChild;
-  if (!(svg instanceof SVGElement)) {
-    throw new Error("feedback.svg must be a root <svg>");
-  }
-  svg.classList.add("feedback__icon");
-  svg.setAttribute("aria-hidden", "true");
-  svg.setAttribute("width", "24");
-  svg.setAttribute("height", "24");
-  return svg;
+function createFeedbackLottie() {
+  const root = document.createElement("span");
+  root.className = "feedback__lottie";
+  root.setAttribute("aria-hidden", "true");
+
+  void Promise.all([
+    import("lottie-web"),
+    import("../../assets/lottie/cap-lottie.json"),
+  ])
+    .then(([lottieMod, dataMod]) => {
+      lottieMod.default.loadAnimation({
+        container: root,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData: dataMod.default ?? dataMod,
+      });
+    })
+    .catch(() => {});
+
+  return root;
 }
 
 /**
@@ -40,7 +48,7 @@ export function createFeedback({ href = COMMUNITY_CONTACT_URL } = {}) {
   tip.className = "feedback__tip";
   tip.setAttribute("aria-hidden", "true");
 
-  root.append(createFeedbackIcon(), tip);
+  root.append(createFeedbackLottie(), tip);
 
   function syncCopy() {
     const t = getStrings();

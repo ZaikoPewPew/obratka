@@ -5,10 +5,12 @@ Figma: [VideoPlayerCard](https://www.figma.com/design/KhsEJRKjBaDm6xaj3zJh2s/?no
 ## API
 
 ```js
-createVideoPlayerCard({ src?, ariaLabel? }) → {
+createVideoPlayerCard({ src?, ariaLabel?, onEnded? }) → {
   root, setSrc(url), play(), pause(), destroy()
 }
 ```
+
+- `onEnded` — колбэк на нативный `ended` (один полный просмотр); онбординг открывает CTA «Начать».
 
 ## Возможности
 
@@ -16,7 +18,8 @@ createVideoPlayerCard({ src?, ariaLabel? }) → {
 - mute / unmute
 - scrub по прогресс-бару (pointer + клавиши)
 - скорость: `1x` → `1.5x` → `2x` (цикл)
-- нижний chrome: градиент + `backdrop-filter` blur с мягкой верхней кромкой (mask 0→100%)
+- прогресс во время playback — `requestAnimationFrame` (плавно), не редкий `timeupdate`
+- нижний chrome: градиент + `backdrop-filter` blur с мягкой верхней кромкой (mask 0→100%), высота `--video-player-chrome-height`, прижат к низу карточки
 
 ## Стили
 

@@ -12,8 +12,14 @@ Path: **`/onboarding`**. После регистрации; split через [`b
 
 ### Шаг video (4 из 4)
 
-Только [`VideoPlayerCard`](../video-player-card/README.md) (**340×602**) + кнопка **«Начать»** (`onboardingFinish`, **340×76**) **24px** ниже (`--shell-review-advice-footer-gap`).  
-Ответ не собирается и не пишется в `profiles`. На шаге «ожидания» кнопка — **«Далее»** (`onboardingNext`).
+Только [`VideoPlayerCard`](../video-player-card/README.md) (**340×602**).
+
+- **«Начать»** (`onboardingFinish`, **340×76**) по умолчанию нет: лежит под плеером (`translateY` + tuck `--onboarding-video-cta-tuck` = радиус карточки, чтобы углы кнопки не торчали из скругления).
+- После первого `ended` → класс `--open`: слот растёт по `height`, кнопка целиком выезжает снизу (без `overflow: hidden` — «маска» = сам плеер).
+- Токены: `--onboarding-video-cta-*`, gap `--shell-review-advice-footer-gap`.
+- До unlock submit disabled / `tabIndex=-1`; `finish()` тоже гейтится.
+
+Ответ шага не собирается и не пишется в `profiles`. На шаге «ожидания» кнопка — **«Далее»** (`onboardingNext`).
 
 ## Shell / visual
 

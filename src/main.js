@@ -316,13 +316,44 @@ function syncRoute(id, opts = {}) {
 let lastHomeView = { tab: "feed", filter: "active" };
 
 /**
- * Вкладка / сегмент home из текущего URL.
+ * Вкладка / сегмент home из текущего URL (и запомнить в `lastHomeView`).
  * @returns {{ tab: import("./utils/homeRoute.js").HomeTabId; filter: import("./utils/homeRoute.js").MineFilterId }}
  */
 function currentHomeView() {
   lastHomeView = parseHomeView(
     typeof window !== "undefined" ? window.location.search : "",
   );
+  return lastHomeView;
+}
+
+/**
+ * Вид home после async-паузы в `applyRoute`.
+ *
+ * Пока ждём reconcile, `activeRouteId` ещё старый → клик по вкладке обновляет
+ * `lastHomeView` и UI, но не URL (`onViewChange` рано выходит). Чистый
+ * `currentHomeView()` тогда откатывает таб на значение из URL (~1с спустя).
+ *
+ * - `popstate` (Back/Forward): URL — источник правды.
+ * - Home уже на экране: доверяем `lastHomeView`, URL подтягиваем к нему.
+ * - Иначе (cold open): URL.
+ *
+ * @param {{ reason?: 'start' | 'navigate' | 'popstate' }} [opts]
+ * @returns {{ tab: import("./utils/homeRoute.js").HomeTabId; filter: import("./utils/homeRoute.js").MineFilterId }}
+ */
+function resolveHomeView(opts = {}) {
+  const fromUrl = parseHomeView(
+    typeof window !== "undefined" ? window.location.search : "",
+  );
+  if (opts.reason === "popstate") {
+    lastHomeView = fromUrl;
+    return lastHomeView;
+  }
+  const homeOpen = Boolean(homeScreen && !homeScreen.root.hidden);
+  if (homeOpen) {
+    canonicalizeHomeSearch(lastHomeView);
+    return lastHomeView;
+  }
+  lastHomeView = fromUrl;
   return lastHomeView;
 }
 
@@ -446,7 +477,10 @@ async function ensureReviewWorkspace() {
               await pending.catch(() => {});
             }
             await releaseHeldClaim();
-            go("home", { replace: true });
+            go("home", {
+              replace: true,
+              search: buildHomeSearch(lastHomeView),
+            });
           })();
         },
         onNextCase: () => {
@@ -481,11 +515,17 @@ async function ensureSuccessScreen() {
       successScreen = createSuccessScreen({
         onPrimary: () => {
           pendingSuccessPreset = "generic";
-          go("home", { replace: true });
+          go("home", {
+            replace: true,
+            search: buildHomeSearch(lastHomeView),
+          });
         },
         onSecondary: () => {
           pendingSuccessPreset = "generic";
-          go("home", { replace: true });
+          go("home", {
+            replace: true,
+            search: buildHomeSearch(lastHomeView),
+          });
         },
       });
       document.body.append(successScreen.root);
@@ -973,7 +1013,10 @@ async function openNextReviewCase() {
       }
       reviewPanel?.setNextCaseBusy?.(false);
       reviewPanel?.setNextCaseVisible?.(false);
-      go("home", { replace: true });
+      go("home", {
+        replace: true,
+        search: buildHomeSearch(lastHomeView),
+      });
       return;
     }
 
@@ -981,7 +1024,10 @@ async function openNextReviewCase() {
 
     reviewPanel?.setNextCaseBusy?.(false);
     reviewPanel?.setNextCaseVisible?.(false);
-    go("home", { replace: true });
+    go("home", {
+      replace: true,
+      search: buildHomeSearch(lastHomeView),
+    });
   } finally {
     nextCaseOpening = false;
   }
@@ -1980,7 +2026,10 @@ async function ensureUrlScreen() {
         urlScreen = createUrlScreen({
           onSubmit: async (url) => {
             if (!canSubmitPortfolio()) {
-              go("home", { replace: true });
+              go("home", {
+                replace: true,
+                search: buildHomeSearch(lastHomeView),
+              });
               throw new Error("url.submit_locked");
             }
             syncRoute("success", { replace: true });
@@ -1994,12 +2043,18 @@ async function ensureUrlScreen() {
               clearHomeListCache(getSession()?.userId);
               track("portfolio_submitted");
             } catch {
-              go("home", { replace: true });
+              go("home", {
+                replace: true,
+                search: buildHomeSearch(lastHomeView),
+              });
               throw new Error("url.submit_failed");
             }
           },
           onExit: () => {
-            go("home", { replace: true });
+            go("home", {
+              replace: true,
+              search: buildHomeSearch(lastHomeView),
+            });
           },
         });
         document.body.append(urlScreen.root);
@@ -2072,6 +2127,14 @@ async function ensureHomeScreen() {
           onOpenSettings: () => {
             go("settings");
           },
+          onBeforeOpenRules: async () => {
+            // Правила и /settings — одна side-panel за раз, не стек.
+            if (!settingsScreen?.isOpen()) return;
+            if (activeRouteId === "settings") {
+              syncRoute("home", { search: buildHomeSearch(lastHomeView) });
+            }
+            await settingsScreen.close();
+          },
           onViewChange: ({ tab, filter, reason }) => {
             lastHomeView = { tab, filter };
             if (activeRouteId !== "home") return;
@@ -2122,7 +2185,11 @@ async function ensureOnboardingScreen() {
             grade:
               typeof answers?.grade === "string" ? answers.grade : undefined,
           });
-          go("home", { replace: true, handoff: true });
+          go("home", {
+            replace: true,
+            handoff: true,
+            search: buildHomeSearch(lastHomeView),
+          });
         },
       });
       document.body.append(onboardingScreen.root);
@@ -2342,6 +2409,8 @@ document.body.append(
  */
 async function applyRoute(id, opts = {}) {
   const handoff = Boolean(opts.handoff);
+  /** @type {'start' | 'navigate' | 'popstate' | undefined} */
+  const routeReason = opts.reason;
   const prevRouteId = activeRouteId;
   let session = getSession();
 
@@ -2380,10 +2449,14 @@ async function applyRoute(id, opts = {}) {
       (prevRouteId === "review" ||
         prevRouteId === "quiz" ||
         prevRouteId === "done" ||
-        prevRouteId === "onboarding")
+        prevRouteId === "onboarding" ||
+        // Home уже смонтирован (под settings / тот же /home): не блокировать
+        // таббар на reconcile — иначе клик по вкладке за ~1с откатится.
+        prevRouteId === "settings" ||
+        prevRouteId === "home")
     ) {
-      // Выход с review-workspace / онбординга: не держать shell на сети —
-      // ban/gone догоняют фоном.
+      // Выход с review-workspace / онбординга / settings / home↔home:
+      // не держать UI на сети — ban/gone догоняют фоном.
       void reconcileSessionAccess().then((access) => {
         if (access === "gone") return;
         if (access === "banned" && activeRouteId !== "banned") {
@@ -2426,7 +2499,12 @@ async function applyRoute(id, opts = {}) {
   }
 
   if (accessible !== id) {
-    syncRoute(accessible, { replace: true });
+    syncRoute(accessible, {
+      replace: true,
+      ...(accessible === "home"
+        ? { search: buildHomeSearch(lastHomeView) }
+        : {}),
+    });
     id = accessible;
   }
 
@@ -2448,7 +2526,7 @@ async function applyRoute(id, opts = {}) {
     /** @type {Record<string, unknown>} */
     const pageProps = {};
     if (id === "home") {
-      const view = currentHomeView();
+      const view = resolveHomeView({ reason: routeReason });
       pageProps.tab = view.tab;
       pageProps.filter = view.filter;
     }
@@ -2463,7 +2541,7 @@ async function applyRoute(id, opts = {}) {
 
   // Back/Forward между вкладками home: экран уже смонтирован, меняем только вид.
   if (id === "home" && prevRouteId === "home" && !handoff) {
-    const view = currentHomeView();
+    const view = resolveHomeView({ reason: routeReason });
     canonicalizeHomeSearch(view);
     const home = await ensureHomeScreen();
     await home.setView(view);
@@ -2512,7 +2590,7 @@ async function applyRoute(id, opts = {}) {
       return;
     }
     if (target === "home") {
-      const view = currentHomeView();
+      const view = resolveHomeView({ reason: routeReason });
       canonicalizeHomeSearch(view);
       const home = await ensureHomeScreen();
       // Возврат из side-panel настроек: home не закрывался — только вид,
@@ -2535,6 +2613,10 @@ async function applyRoute(id, opts = {}) {
         void home.setView(lastHomeView);
       } else {
         void home.open(lastHomeView);
+      }
+      // Правила и настройки не стекаются: закрыть rules перед settings.
+      if (home.isRulesPanelOpen()) {
+        await home.closeRulesPanel();
       }
       settings.open();
       return;
@@ -2631,7 +2713,7 @@ async function applyRoute(id, opts = {}) {
   // Не ждать refresh ленты — иначе клик «Начать» зависает на сети.
   if (isHomeReveal) {
     const home = await ensureHomeScreen();
-    void home.open(currentHomeView());
+    void home.open(resolveHomeView({ reason: routeReason }));
     await Promise.all([
       referralScreen.close({}),
       authScreen.close({}),
@@ -2652,7 +2734,7 @@ async function applyRoute(id, opts = {}) {
 }
 
 appRouter = createAppRouter({
-  onChange: (location) => {
+  onChange: (location, meta) => {
     const handoff = pendingHandoff;
     pendingHandoff = false;
 
@@ -2669,7 +2751,7 @@ appRouter = createAppRouter({
       return;
     }
 
-    void applyRoute(location.id, { handoff });
+    void applyRoute(location.id, { handoff, reason: meta.reason });
   },
 });
 

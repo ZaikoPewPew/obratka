@@ -41,5 +41,5 @@ Done: `getMotionReveal` leave/enter + `getReportLaunchMotion` для листа 
 
 ## Стили
 
-`.url-screen*` в `iframe-shell.css`, токены `--url-screen-*` в `tokens.css`.  
-Back-чип: `.url-screen__back` — `position: absolute; top/left: 0` в `__form-pane`; класс `review-panel__back` для визуала чипа (как на auth-code / quiz).
+`.url-screen*` в `brand-screen.css`, токены `--url-screen-*` в `tokens.css`.  
+Back-чип: `.url-screen__back` — позиция; `.review-panel__back*` — визуал чипа (тоже в `brand-screen.css`, cold path; как на auth-code / quiz).

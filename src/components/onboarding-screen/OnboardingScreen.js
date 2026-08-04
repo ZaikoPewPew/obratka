@@ -223,6 +223,11 @@ export function createOnboardingScreen({ onComplete }) {
   const body = document.createElement("div");
   body.className = "review-panel__body";
 
+  /** После первого `ended` на video-шаге — показать «Начать». */
+  let videoCtaUnlocked = false;
+  /** @type {HTMLElement | null} */
+  let videoCtaSlot = null;
+
   /** @type {{
    *   step: HTMLElement;
    *   fieldName: string;
@@ -245,6 +250,9 @@ export function createOnboardingScreen({ onComplete }) {
           : "welcome";
       const player = createVideoPlayerCard({
         ariaLabel: t.videoPlayerAria,
+        onEnded: () => {
+          unlockVideoCta();
+        },
       });
       const loadVideo = ONBOARDING_VIDEO_LOADERS[videoKey];
       if (loadVideo) {
@@ -258,7 +266,14 @@ export function createOnboardingScreen({ onComplete }) {
       }
       const wrap = document.createElement("div");
       wrap.className = "onboarding-screen__video-step";
-      wrap.append(player.root);
+      const cta = document.createElement("div");
+      cta.className = "onboarding-screen__video-cta";
+      cta.setAttribute("aria-hidden", "true");
+      const ctaInner = document.createElement("div");
+      ctaInner.className = "onboarding-screen__video-cta-inner";
+      cta.append(ctaInner);
+      wrap.append(player.root, cta);
+      videoCtaSlot = cta;
       return {
         step: createStep(wrap),
         fieldName,
@@ -323,7 +338,17 @@ export function createOnboardingScreen({ onComplete }) {
   submit.textContent = t.onboardingFinish;
   submit.hidden = true;
 
-  footer.append(nextBtn, submit);
+  footer.append(nextBtn);
+  if (videoCtaSlot) {
+    const inner = videoCtaSlot.querySelector(".onboarding-screen__video-cta-inner");
+    if (inner) {
+      inner.append(submit);
+    } else {
+      footer.append(submit);
+    }
+  } else {
+    footer.append(submit);
+  }
   form.append(stage, stepError, footer);
   panel.append(heading, top, form);
 
@@ -354,6 +379,32 @@ export function createOnboardingScreen({ onComplete }) {
     if (advanceTimer !== null) {
       window.clearTimeout(advanceTimer);
       advanceTimer = null;
+    }
+  }
+
+  function syncVideoCta() {
+    if (!videoCtaSlot) return;
+    const open = videoCtaUnlocked;
+    videoCtaSlot.classList.toggle(
+      "onboarding-screen__video-cta--open",
+      open,
+    );
+    videoCtaSlot.setAttribute("aria-hidden", open ? "false" : "true");
+    /* Не `hidden`: иначе клип 0→1fr не анимирует transform. */
+    submit.hidden = false;
+    if (!finishing) submit.disabled = !open;
+    submit.tabIndex = open ? 0 : -1;
+  }
+
+  function unlockVideoCta() {
+    if (videoCtaUnlocked) return;
+    videoCtaUnlocked = true;
+    syncVideoCta();
+    if (steps[currentStep]?.type === "video") {
+      queueMicrotask(() => {
+        if (!videoCtaUnlocked || finishing) return;
+        submit.focus({ preventScroll: true });
+      });
     }
   }
 
@@ -389,8 +440,13 @@ export function createOnboardingScreen({ onComplete }) {
     top.classList.toggle("review-panel__top--first", isFirst);
     nextBtn.hidden = isLast || auto;
     nextBtn.textContent = t.onboardingNext;
-    submit.hidden = !isLast;
-    footer.hidden = isLast ? false : auto;
+    /* На video CTA живёт под плеером; общий footer только для «Далее». */
+    footer.hidden = isVideo || auto || isLast;
+    if (isVideo) {
+      syncVideoCta();
+    } else {
+      submit.hidden = true;
+    }
     form.classList.toggle("review-panel__form--advice", isLast || isVideo);
     form.classList.toggle("review-panel__form--video", isVideo);
     showStepError(false);
@@ -544,12 +600,14 @@ export function createOnboardingScreen({ onComplete }) {
   function focusActiveStep() {
     const current = steps[currentStep];
     if (current?.type === "video") {
+      if (videoCtaUnlocked) {
+        submit.focus({ preventScroll: true });
+        return;
+      }
       const playBtn = current.step.querySelector(".video-player-card__center");
       if (playBtn instanceof HTMLElement) {
         playBtn.focus({ preventScroll: true });
-        return;
       }
-      submit.focus({ preventScroll: true });
       return;
     }
     const focusable = current?.step?.querySelector("input:not([disabled])");
@@ -614,6 +672,7 @@ export function createOnboardingScreen({ onComplete }) {
 
   async function finish() {
     if (finishing || transitioning) return;
+    if (!videoCtaUnlocked) return;
     finishing = true;
     submit.disabled = true;
     nextBtn.disabled = true;
@@ -643,6 +702,8 @@ export function createOnboardingScreen({ onComplete }) {
     clearAdvanceTimer();
     transitioning = false;
     finishing = false;
+    videoCtaUnlocked = false;
+    syncVideoCta();
     submit.disabled = false;
     nextBtn.disabled = false;
     backBtn.disabled = false;
