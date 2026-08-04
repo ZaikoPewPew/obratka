@@ -6,9 +6,17 @@ const POLISH_TIMEOUT_MS = 14_000;
 const MIN_LEN = 8;
 
 /**
+ * Kill-switch: Edge `polish-dictation` (Z.AI LLM) временно выключен —
+ * иначе submit / «На главную» ждут invoke до ~14 s. Код и Function
+ * сохранены: вернуть `true`, чтобы снова слать текст в LLM.
+ */
+const POLISH_ENABLED = false;
+
+/**
  * Post-edit сырого транскрипта через Edge `polish-dictation` (Z.AI Flash).
  * При любой ошибке / таймауте / soft-fail Edge (`skipped`) возвращает
  * исходный текст — submit не блокируем.
+ * При `POLISH_ENABLED === false` сразу возвращает исходный текст (без сети).
  *
  * @param {string} text
  * @param {{ maxLen?: number, locale?: string, timeoutMs?: number }} [opts]
@@ -22,6 +30,7 @@ export async function polishDictationText(text, opts = {}) {
       : DEFAULT_MAX_LEN;
   const sliced = raw.slice(0, maxLen);
   if (!sliced || sliced.length < MIN_LEN) return sliced;
+  if (!POLISH_ENABLED) return sliced;
   if (!isSupabaseConfigured()) return sliced;
 
   const supabase = getSupabase();

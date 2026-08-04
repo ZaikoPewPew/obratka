@@ -3,6 +3,7 @@
  * Memory + sessionStorage (`obratka.homeLists.<userId>`), чтобы SPA и F5
  * не мигали skeleton при наличии **непустых** данных. Пустой `[]` для UI —
  * miss (skeleton), иначе flash empty до revalidate.
+ * Полный clear — logout; после submit ревью — `removeCachedHomeListItem` из feed.
  */
 
 /** @typedef {'feed' | 'feedReviewed' | 'mine' | 'rating'} HomeListTabId */
@@ -127,6 +128,33 @@ export function setCachedHomeList(userId, tab, items) {
   ensureHydrated(userId);
   const entry = memoryByUser.get(userId) ?? emptyTabs();
   entry[tab] = Array.isArray(items) ? items : [];
+  memoryByUser.set(userId, entry);
+  persist(userId, entry);
+}
+
+/**
+ * Убрать карточку с `id` из кэша вкладки (после успешного submit ревью).
+ * Вкладка `null` (miss) — no-op: не создавать `[]`, чтобы UI не считал
+ * это confirm empty. `feedReviewed` / слоты не сочиняем — чинит refresh.
+ *
+ * @param {string | null | undefined} userId
+ * @param {HomeListTabId} tab
+ * @param {string} id
+ */
+export function removeCachedHomeListItem(userId, tab, id) {
+  if (!userId || !id) return;
+  ensureHydrated(userId);
+  const entry = memoryByUser.get(userId);
+  if (!entry) return;
+  const list = entry[tab];
+  if (!Array.isArray(list)) return;
+  const next = list.filter((item) => {
+    if (!item || typeof item !== "object") return true;
+    const itemId = /** @type {{ id?: unknown }} */ (item).id;
+    return itemId !== id;
+  });
+  if (next.length === list.length) return;
+  entry[tab] = next;
   memoryByUser.set(userId, entry);
   persist(userId, entry);
 }

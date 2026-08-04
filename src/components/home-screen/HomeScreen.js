@@ -334,11 +334,14 @@ function createSubmitIcon() {
   return svg;
 }
 
-/** Сколько skeleton-карточек показывать, пока грузится лента / «Мои завершенные». */
+/**
+ * Skeleton ленты («Ждёт ревью» / «Уже отревьюено») и «Мои → Завершенные».
+ * Одинаковое число, чтобы сегменты не «прыгали» при cold miss / mid-load.
+ */
 const SKELETON_CARD_COUNT = 5;
 
 /**
- * Skeleton на «Мои → Мои на ревью»: всегда ≤ `MAX_MINE_PENDING` слотов
+ * Skeleton на «Мои → Ещё на ревью»: всегда ≤ `MAX_MINE_PENDING` слотов
  * (карточка или free-slot), не имитировать длинную ленту.
  */
 const MINE_ACTIVE_SKELETON_CARD_COUNT = MAX_MINE_PENDING;
@@ -2204,7 +2207,9 @@ export function createHomeScreen({
         acknowledgeMineReady(readyOwnCardIds(items));
       }
       syncCopy();
-      renderList();
+      // Пока грузим — не сбрасывать skeleton в empty (0 карточек).
+      if (loading) renderSkeleton();
+      else renderList();
       if (!opts.silent) emitViewChange("filter");
       return;
     }
@@ -2215,7 +2220,8 @@ export function createHomeScreen({
     body.scrollTop = 0;
     lastScrollTop = 0;
     syncCopy();
-    renderList();
+    if (loading) renderSkeleton();
+    else renderList();
     if (!opts.silent) emitViewChange("filter");
   }
 
@@ -2453,13 +2459,24 @@ export function createHomeScreen({
     return li;
   }
 
+  /**
+   * Число skeleton-карточек для текущего сегмента.
+   * «Ждёт ревью», «Уже отревьюено», «Мои → Завершенные» — `SKELETON_CARD_COUNT`;
+   * «Мои → Ещё на ревью» — `MINE_ACTIVE_SKELETON_CARD_COUNT`.
+   *
+   * @returns {number}
+   */
+  function skeletonCardCount() {
+    if (activeTab === "mine" && mineFilter === "active") {
+      return MINE_ACTIVE_SKELETON_CARD_COUNT;
+    }
+    return SKELETON_CARD_COUNT;
+  }
+
   function renderSkeleton() {
     list.replaceChildren();
     empty.hidden = true;
-    const count =
-      activeTab === "mine" && mineFilter === "active"
-        ? MINE_ACTIVE_SKELETON_CARD_COUNT
-        : SKELETON_CARD_COUNT;
+    const count = skeletonCardCount();
     for (let i = 0; i < count; i += 1) {
       list.append(createSkeletonCard());
     }
@@ -3163,36 +3180,71 @@ export function createHomeScreen({
     });
   }
 
+  /**
+   * Фоновый prefetch «Мои» после успешного feed — без UI.
+   * Skip при непустом hit; guard epoch + userId.
+   *
+   * @param {number} epoch
+   * @param {string | null | undefined} userId
+   */
+  function prefetchMineInBackground(epoch, userId) {
+    if (!userId) return;
+    const cached = getCachedHomeList(userId, "mine");
+    if (cached != null && cached.length > 0) return;
+    void listMyPortfolios()
+      .then((next) => {
+        if (epoch !== refreshEpoch) return;
+        if (getSession()?.userId !== userId) return;
+        setCachedHomeList(userId, "mine", next);
+      })
+      .catch((err) => {
+        if (import.meta.env.DEV) {
+          console.warn("[home] prefetch mine", err);
+        }
+      });
+  }
+
+  /**
+   * @param {number} epoch
+   * @param {Promise<import("../../api/presence.js").OnlineLegendary[]>} onlinePromise
+   * @param {HomeTabId} tab
+   * @param {HomePortfolioItem[]} listForDots
+   */
+  async function finishRefreshTail(epoch, onlinePromise, tab, listForDots) {
+    const [, , online] = await Promise.all([
+      refreshMineReady(epoch, tab, listForDots),
+      refreshFeedUnseen(epoch, tab, listForDots),
+      onlinePromise,
+    ]);
+    if (epoch === refreshEpoch) {
+      legendaryOnlinePanel.setItems(online);
+    }
+  }
+
   async function refresh() {
     const epoch = ++refreshEpoch;
     const tab = activeTab;
-    await refreshWalletFromServer();
-    if (epoch !== refreshEpoch) return;
-    syncCopy();
-
-    const onlineLegendariesPromise = listOnlineLegendaries();
+    const walletPromise = refreshWalletFromServer();
+    const onlinePromise = listOnlineLegendaries();
 
     if (tab === "rating") {
       const top = await listRatingTop();
-      if (epoch === refreshEpoch) {
-        loading = false;
-        root.setAttribute("aria-busy", "false");
-        // null = ошибка RPC — не затираем кэш пустым списком
-        if (top != null) {
-          setCachedHomeList(getSession()?.userId, tab, top);
-          ratingItems = top;
-          renderRatingList();
-        } else if (ratingItems.length === 0) {
-          ratingEmpty.hidden = false;
-          ratingList.hidden = true;
-        }
+      if (epoch !== refreshEpoch) return;
+      await walletPromise;
+      if (epoch !== refreshEpoch) return;
+      syncCopy();
+      loading = false;
+      root.setAttribute("aria-busy", "false");
+      // null = ошибка RPC — не затираем кэш пустым списком
+      if (top != null) {
+        setCachedHomeList(getSession()?.userId, tab, top);
+        ratingItems = top;
+        renderRatingList();
+      } else if (ratingItems.length === 0) {
+        ratingEmpty.hidden = false;
+        ratingList.hidden = true;
       }
-      await refreshMineReady(epoch, tab, []);
-      await refreshFeedUnseen(epoch, tab, []);
-      const online = await onlineLegendariesPromise;
-      if (epoch === refreshEpoch) {
-        legendaryOnlinePanel.setItems(online);
-      }
+      await finishRefreshTail(epoch, onlinePromise, tab, []);
       return;
     }
 
@@ -3202,6 +3254,9 @@ export function createHomeScreen({
         listReviewedPortfolios(),
       ]);
       if (epoch !== refreshEpoch) return;
+      await walletPromise;
+      if (epoch !== refreshEpoch) return;
+      syncCopy();
       const wasLoading = loading;
       revealItems = wasLoading;
       loading = false;
@@ -3234,30 +3289,23 @@ export function createHomeScreen({
           prevIds,
         });
       }
-      await refreshMineReady(epoch, tab, []);
-      await refreshFeedUnseen(epoch, tab, open);
-      const online = await onlineLegendariesPromise;
-      if (epoch === refreshEpoch) {
-        legendaryOnlinePanel.setItems(online);
-      }
+      prefetchMineInBackground(epoch, userId);
+      await finishRefreshTail(epoch, onlinePromise, tab, open);
       return;
     }
 
     const next = await listMyPortfolios();
     if (epoch !== refreshEpoch) return;
+    await walletPromise;
+    if (epoch !== refreshEpoch) return;
+    syncCopy();
     const wasLoading = loading;
     revealItems = wasLoading;
     loading = false;
     root.setAttribute("aria-busy", "false");
     setCachedHomeList(getSession()?.userId, tab, next);
     setItems(next, { silent: !wasLoading });
-    await refreshMineReady(epoch, tab, next);
-    await refreshFeedUnseen(epoch, tab, next);
-
-    const online = await onlineLegendariesPromise;
-    if (epoch === refreshEpoch) {
-      legendaryOnlinePanel.setItems(online);
-    }
+    await finishRefreshTail(epoch, onlinePromise, tab, next);
   }
 
   function stopSlotsPoll() {

@@ -11,6 +11,16 @@ Post-edit сырого Web Speech транскрипта: пунктуация, 
 | `verify_jwt` | `true` ([`config.toml`](../../config.toml)) |
 | Upstream | `https://api.z.ai/api/paas/v4/chat/completions` |
 
+## Статус (клиент)
+
+**Временно выключен** kill-switch’ем `POLISH_ENABLED = false` в [`dictationPolish.js`](../../../src/api/dictationPolish.js): `polishDictationText` сразу возвращает сырой текст **без** `functions.invoke`. Function, секреты и вызовы в `main.js` сохранены.
+
+| | |
+|--|--|
+| Зачем выключили | иначе submit / CTA «На главную» на `/quiz/done` ждут LLM до ~14 s, а home всё равно грузится отдельно |
+| Вернуть | `POLISH_ENABLED = true` в `dictationPolish.js` (redeploy Function не нужен) |
+| Недостаточно | только снять `ZAI_API_KEY` — клиент всё равно ждал бы round-trip invoke |
+
 ## Зачем
 
 Web Speech часто отдаёт кашу без точек. Flash правит уже готовый текст перед показом в поле совета / сохранением в `answers.dictation` / `advice`.
@@ -22,7 +32,7 @@ Web Speech часто отдаёт кашу без точек. Flash прави�
 | Слой | Что происходит при фейле |
 |------|--------------------------|
 | Edge | Цепочка `ZAI_MODEL` → `ZAI_MODEL_FALLBACK`, до 2 попыток на модель. Все исчерпаны → HTTP **200** `{ text: <исходный>, skipped: true, error: "zai_1305" \| … }` |
-| Клиент (`polishDictationText`) | invoke-error / network / timeout ~14 s / пустой `text` / `503 zai_key_missing` → возвращает исходную строку |
+| Клиент (`polishDictationText`) | `POLISH_ENABLED === false` → сразу исходный текст (без invoke). Иначе: invoke-error / network / timeout ~14 s / пустой `text` / `503 zai_key_missing` → исходная строка |
 | Abort / pagehide / logout | polish **не** вызывается (не держим unload) |
 
 Клиент всегда читает поле `data.text` — и при успехе, и при `skipped: true`. Поэтому «все модели молчат» = просто Web Speech без точек, не сломанный флоу.
@@ -101,14 +111,18 @@ Default: **`glm-4.5-flash`**, запасная — `glm-4.7-flash` (обе Free 
 
 ## Когда вызывается (клиент)
 
+Пока `POLISH_ENABLED === true` в [`dictationPolish.js`](../../../src/api/dictationPolish.js):
+
 | Момент | Что полируется |
 |--------|----------------|
 | Toggle stop на `/review` (notes) | `dictationText` |
 | Toggle stop в квизе (advice) | поле `#review-advice` → `setAdviceText` |
 | Конец таймера → `openReview` | notes (`stop` + `polish: true`, async) |
-| `onComplete` перед submit | `dictation` + `advice` ещё раз (страховка) |
+| `onComplete` перед submit | `dictation` + `advice` ещё раз (страховка; ждёт CTA «На главную» / next case) |
 
 Abort / `pagehide` / logout — **без** polish (не держим unload).
+
+При `POLISH_ENABLED === false` эти вызовы остаются в коде, но `polishDictationText` — no-op (сырой текст, без Network).
 
 ## Deploy
 
@@ -119,6 +133,10 @@ supabase functions deploy polish-dictation --project-ref xshfpkefdvhmrwrhhuoo
 Проект: `xshfpkefdvhmrwrhhuoo`. Dashboard: [Functions](https://supabase.com/dashboard/project/xshfpkefdvhmrwrhhuoo/functions).
 
 ## Проверка
+
+**При выключенном клиенте** (`POLISH_ENABLED = false`): DevTools → Network — **нет** запросов к `polish-dictation`; submit / «На главную» не ждут LLM.
+
+**При включённом** (`POLISH_ENABLED = true`):
 
 1. Secret `ZAI_API_KEY` задан.
 2. Залогиненный юзер → `/review` → rec → stop.

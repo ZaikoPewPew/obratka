@@ -23,7 +23,7 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 
 ### Сегмент tabs-panel (`feed` и `mine`)
 
-Над списком — один [`createTabsPanel`](../tabs-panel/README.md) (Figma `476:1762`). Виден на **Чужие посты** и **Мои**; на `rating` скрыт. Лейблы и стейт фильтра раздельные (`feedFilter` / `mineFilter`); переключение сегмента **без** refetch / skeleton (на feed оба списка уже в кэше после `refresh`).
+Над списком — один [`createTabsPanel`](../tabs-panel/README.md) (Figma `476:1762`). Виден на **Чужие посты** и **Мои**; на `rating` скрыт. Лейблы и стейт фильтра раздельные (`feedFilter` / `mineFilter`); переключение сегмента **без** refetch (на feed оба списка уже в кэше после `refresh`); если ещё `loading` — остаётся skeleton с числом карточек сегмента (лента / «Завершенные» = 5, «Ещё на ревью» = 1).
 
 Thumb: `syncListFilterPanel()` переставляет пилл `instant` **только** при рассинхроне (`getActive() !== currentListFilter()`), иначе `syncCopy()` внутри `setListFilter` обрезал бы анимацию своего же переключения. Мгновенный пересчёт после смены вкладки / открытия home — `resyncListFilterThumb()`.
 
@@ -32,7 +32,7 @@ Thumb: `syncListFilterPanel()` переставляет пилл `instant` **т�
 | Сегмент | API / критерий |
 |---------|----------------|
 | **Ждёт ревью** (`active`, default) | `listPortfoliosForReview()` — open queue |
-| **Уже отревьюено** (`completed`) | `listReviewedPortfolios()` — свои сданные отчёты; карточка `--reviewed`: вместо скриншота — серое превью с галочкой + `homeCardReviewedLabel` («Отчёт отправлен») по центру, слоты ревьюеров и зона автора обычные; клик → URL портфолио в новой вкладке (без claim / intro) |
+| **Уже отревьюено** (`completed`) | `listReviewedPortfolios()` — свои сданные отчёты (**pending и done**); RLS `portfolios_select_feed` пускает через `exists` по своему review (без этой ветки 3/3 пропадает из сегмента — см. [`SECURITY.md`](../../../supabase/SECURITY.md) § инцидент 2026-08-04); карточка `--reviewed`: вместо скриншота — серое превью с галочкой + `homeCardReviewedLabel` («Отчёт отправлен») по центру, слоты ревьюеров и зона автора обычные; клик → URL портфолио в новой вкладке (без claim / intro) |
 
 Empty «Уже отревьюено»: `homeEmptyFeedReviewed` (визуал free-slot, `--static`). Кэш: `feed` + `feedReviewed` в [`homeListCache`](../../utils/homeListCache.js). Токены статуса: `--home-screen-card-reviewed-*` (заливка `--color-surface-muted`, галочка `--color-success` из `assets/home/report-sent.svg`). Заливка превью совпадает с фоном карточки, поэтому hover / press ведём и на превью (`-bg-hover` / `-bg-active`) — иначе карточка не реагирует на мышь.
 
@@ -43,7 +43,7 @@ Empty «Уже отревьюено»: `homeEmptyFeedReviewed` (визуал fre
 | **Ещё на ревью** (`active`, default) | `reviewsCount < targetReviews` (ещё собираются ревью, 0…2) |
 | **Завершенные** (`completed`) | `reviewsCount >= targetReviews` (все слоты заполнены, 3/3) |
 
-Empty «Завершенные»: `homeEmptyMineCompleted` (тот же визуал free-slot). На **Ещё на ревью** текстового empty нет: всегда до `MAX_MINE_PENDING` (1) слотов — реальная карточка или dashed placeholder «Свободный слот» (`homeMineSlotFree*`, Figma Type=Queue). Cold-miss skeleton там тоже **1** карточка (`MINE_ACTIVE_SKELETON_CARD_COUNT` = `MAX_MINE_PENDING`), не лента из 5. Клик по свободному слоту / CTA «Закинуть» (с любой вкладки) → если слот занят локально, только flash+buzz submit; если нет монет — buzz submit + чип баланса; иначе сразу `/portfolio` (серверный gate в `applyRoute`). Оба фильтра сбрасываются в `active` на `close()`; при следующем `open()` вид берётся из URL.
+Empty «Завершенные»: `homeEmptyMineCompleted` (тот же визуал free-slot). На **Ещё на ревью** текстового empty нет: всегда до `MAX_MINE_PENDING` (1) слотов — реальная карточка или dashed placeholder «Свободный слот» (`homeMineSlotFree*`, Figma Type=Queue). Cold-miss skeleton там тоже **1** карточка (`MINE_ACTIVE_SKELETON_CARD_COUNT` = `MAX_MINE_PENDING`), не лента из 5. **Завершенные** / feed «Ждёт»·«Уже» — одинаковые `SKELETON_CARD_COUNT` (5); смена сегмента во время `loading` не сбрасывает skeleton в empty. Клик по свободному слоту / CTA «Закинуть» (с любой вкладки) → если слот занят локально, только flash+buzz submit; если нет монет — buzz submit + чип баланса; иначе сразу `/portfolio` (серверный gate в `applyRoute`). Оба фильтра сбрасываются в `active` на `close()`; при следующем `open()` вид берётся из URL.
 
 ### Индикатор на «Чужие посты»
 
@@ -127,7 +127,7 @@ list pending (RLS лига) → filter !reviewedByMe → attachReviewerSlots →
 
 ### Лента и карточки
 
-SWR: при `open` / смене таба / F5 — если есть **непустой** кэш вкладки (`feed` / `mine` / `rating`, memory + `sessionStorage` по `userId`), карточки сразу; иначе skeleton (cold miss или кэш `[]`). Затем тихий `refresh()` поверх кэша → cards | empty. Пустой `[]` **не** показывают как empty до confirm — иначе flash «шаром покати». Кэш сбрасывается на logout (`clearHomeListCache`). Порядок feed в кэше = уже отсортированный ответ `listPortfoliosForReview`.
+SWR: при `open` / смене таба / F5 — если есть **непустой** кэш вкладки (`feed` / `mine` / `rating`, memory + `sessionStorage` по `userId`), карточки сразу; иначе skeleton (cold miss или кэш `[]`). Затем тихий `refresh()` поверх кэша → cards | empty. Пустой `[]` **не** показывают как empty до confirm — иначе flash «шаром покати». Полный сброс кэша — только logout (`clearHomeListCache`); после успешного submit ревью — `removeCachedHomeListItem` из `feed` (без сочинения `feedReviewed`). Порядок feed в кэше = уже отсортированный ответ `listPortfoliosForReview`.
 
 После skeleton данные с `motion-reveal` stagger; после тихого refetch при тех же id — только патч reviewer-слотов (без пересборки DOM / thum.io); новые карточки — full rebuild + reveal только для новых id.
 
@@ -180,7 +180,7 @@ CTA «Закинуть своё» (кнопка в доке у таббара) �
 
 Заполнение слотов слева направо, margin −4px; по умолчанию три плюса. Текста «N из 3» нет (есть в aria).
 
-`refresh()` при `open`, смене вкладки, `visibilitychange` и poll (`HOME_SLOTS_POLL_MS` = 45с), пока home открыт — слоты и новые карточки подтягиваются без skeleton (поверх кэша). Своя карточка (`isOwn`, «Мои») всегда кликабельна (`cursor: pointer`, класс `--own`): готово (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report`; иначе `homeMineNotReady*` (не «сразу report»). Title / aria — `homeCardReport*` / `homeCardReportPending*`, синк при silent-патче.
+`refresh()` при `open`, смене вкладки, `visibilitychange` и poll (`HOME_SLOTS_POLL_MS` = 45с), пока home открыт — слоты и новые карточки подтягиваются без skeleton (поверх кэша). Wallet / списки вкладки / online стартуют параллельно; после отрисовки списка — `syncCopy` из wallet и хвост `mineReady` ∥ `feedUnseen` ∥ online. После успешного feed — фоновый prefetch `mine` в кэш (skip при непустом hit; guard `refreshEpoch` + `userId`). Своя карточка (`isOwn`, «Мои») всегда кликабельна (`cursor: pointer`, класс `--own`): готово (`reviewsCount >= targetReviews`) → `onOpenReport` → `/report`; иначе `homeMineNotReady*` (не «сразу report»). Title / aria — `homeCardReport*` / `homeCardReportPending*`, синк при silent-патче.
 
 Own-карточки: cursor наследуется от `.home-screen__card` (pointer); `not-allowed` только у `:disabled` — правило `.home-screen__card--own { cursor: not-allowed }` снято.
 
@@ -204,7 +204,7 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 `createHomeScreen({ onOpenPortfolio, onPreviewPortfolio?, onOpenReport?, onAddPortfolio?, onOpenSettings?, onSignOut?, onViewChange? })` → `{ root, open(view?), close, setItems, setView, getView, refresh, showNotice, showNotification }`.
 
-Внутреннее: `activeTab` `feed` \| `mine` \| `rating`; `feedFilter` / `mineFilter` `active` \| `completed`; `refresh` на feed тянет open + reviewed параллельно; на mine / rating — `listMyPortfolios` / `listRatingTop`; на чужих вкладках ещё `listFeedPortfolioIds` для точки; кэш — [`homeListCache.js`](../../utils/homeListCache.js) (`feed`/`feedReviewed`/`mine`/`rating`).
+Внутреннее: `activeTab` `feed` \| `mine` \| `rating`; `feedFilter` / `mineFilter` `active` \| `completed`; `refresh` параллелит wallet∥lists∥online, на feed тянет open + reviewed и фоном prefetch `mine`; на mine / rating — `listMyPortfolios` / `listRatingTop`; на чужих вкладках ещё `listFeedPortfolioIds` для точки; кэш — [`homeListCache.js`](../../utils/homeListCache.js) (`feed`/`feedReviewed`/`mine`/`rating`).
 
 ## URL-состояние
 

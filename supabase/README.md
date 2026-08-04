@@ -29,14 +29,14 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 | `functions/telegram-auth/` | Telegram Login Widget → сессия Supabase Auth |
 | `functions/portfolio-preview/` | Прокси/кэш перед thum.io для превью карточек (429-hardening) |
 | `functions/portfolio-embed-probe/` | XFO/CSP frame-ancestors (+ Readymag HTML) → iframe vs external |
-| `functions/polish-dictation/` | Post-edit надиктовки (пунктуация через Z.AI Flash, default `glm-4.5-flash` + fallback); soft-fail → сырой текст; секрет `ZAI_API_KEY`; JWT обязателен — [`functions/polish-dictation/README.md`](functions/polish-dictation/README.md) |
+| `functions/polish-dictation/` | Post-edit надиктовки (пунктуация через Z.AI Flash, default `glm-4.5-flash` + fallback); soft-fail → сырой текст; секрет `ZAI_API_KEY`; JWT обязателен; **клиент сейчас off** (`POLISH_ENABLED = false`) — [`functions/polish-dictation/README.md`](functions/polish-dictation/README.md) |
 
 Подробнее по SQL: [`sql/README.md`](sql/README.md).  
 **Бан юзеров:** [`BAN.md`](BAN.md) ← начинать отсюда.  
 **Доступы / адвайзоры:** [`SECURITY.md`](SECURITY.md).  
 Telegram Edge: [`functions/telegram-auth/README.md`](functions/telegram-auth/README.md).  
 Превью Edge: [`functions/portfolio-preview/README.md`](functions/portfolio-preview/README.md).  
-Polish Edge: [`functions/polish-dictation/README.md`](functions/polish-dictation/README.md).
+Polish Edge: [`functions/polish-dictation/README.md`](functions/polish-dictation/README.md) (клиентский kill-switch: `POLISH_ENABLED` в `src/api/dictationPolish.js`, сейчас `false`).
 
 ## Auth-провайдеры
 

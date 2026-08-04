@@ -24,7 +24,7 @@ alwaysApply: true
 - Конец таймера → звук `src/assets/audio/Timer-end.wav` + авто-стоп надиктовки → quiz; если вкладка скрыта — мигание title/favicon (`tabAttention.js`, `favicon_timer.svg`) до `window` focus.
 - Аудио **не** upload / **не** Storage.
 - Без поддержки SpeechRecognition — обе кнопки скрыты.
-- Post-edit текста (пунктуация): Edge `polish-dictation` + `src/api/dictationPolish.js`; default `glm-4.5-flash` (+ fallback `glm-4.7-flash`); секрет `ZAI_API_KEY` только в Function secrets. Не STT. Если все модели / upstream упали — **сырой текст** (soft-fail), submit не блокируется.
+- Post-edit текста (пунктуация): Edge `polish-dictation` + `src/api/dictationPolish.js`; default `glm-4.5-flash` (+ fallback `glm-4.7-flash`); секрет `ZAI_API_KEY` только в Function secrets. Не STT. Если все модели / upstream упали — **сырой текст** (soft-fail), submit не блокируется. **Сейчас выключен** клиентским `POLISH_ENABLED = false` в `dictationPolish.js` (без invoke; вернуть `true` чтобы снова).
 
 ## Данные
 
@@ -42,7 +42,7 @@ alwaysApply: true
 5. Стили только токены `--control-rec-*`, `--shell-review-rec-*`, `--color-recording`; keyframes мигания — `motion-recording-blink` в `styles/entrance.css`.
 6. Секреты Whisper / STT cloud / Z.AI (`ZAI_API_KEY`) — **не** в клиент; только Edge Function secrets.
 7. External embed → `setKeepAliveInBackground(true)`: не рвать STT при уходе на вкладку портфолио (best-effort; браузер может всё равно ограничить SpeechRecognition в фоне).
-8. Polish после stop / перед submit не должен блокировать abort/pagehide; при ошибке upstream / всех моделях / таймауте — сырой текст (и Edge soft-fail `skipped: true`, и клиентский fallback в `polishDictationText`).
+8. Polish после stop / перед submit не должен блокировать abort/pagehide; при ошибке upstream / всех моделях / таймауте — сырой текст (и Edge soft-fail `skipped: true`, и клиентский fallback в `polishDictationText`). Kill-switch `POLISH_ENABLED` в `dictationPolish.js` (сейчас `false`) — без сети; не путать с удалением Function.
 
 ## План B (позже)
 

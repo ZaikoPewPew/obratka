@@ -4,7 +4,7 @@
 
 **Полная спека пула вопросов, схемы `answers`, L1/L2/L3 отчёта:** [`QUIZ.md`](../../../QUIZ.md).
 
-Надиктовка с `/review` **не** в panel: `main.js` мержит `answers.dictation` в `onComplete` перед `submitPortfolioReview` (после polish). См. [`lib/dictation/README.md`](../../lib/dictation/README.md), [`dictationPolish.js`](../../api/dictationPolish.js).
+Надиктовка с `/review` **не** в panel: `main.js` мержит `answers.dictation` в `onComplete` перед `submitPortfolioReview` (после polish, если `POLISH_ENABLED`). См. [`lib/dictation/README.md`](../../lib/dictation/README.md), [`dictationPolish.js`](../../api/dictationPolish.js).
 
 ## API
 
@@ -45,7 +45,7 @@ Progress считает только **видимые** шаги (6 или 7 в 
 - `setDictationSupported(bool)` — показать / скрыть кнопку (Web Speech);
 - `setDictationRecording(bool)` — мигающий красный индикатор вместо микрофона; на переходе `false → true` запоминает текущий текст поля как базу;
 - `setDictationTranscript(text)` — база + транскрипт в `textarea` (cap 1000), счётчик и reveal листа обновляются как при ручном вводе.
-- `setAdviceText(text)` — абсолютная запись в поле совета (после polish Edge; без живой записи).
+- `setAdviceText(text)` — абсолютная запись в поле совета (после polish Edge, если включён; без живой записи).
 
 Во время записи поле readonly, `reset()` гасит состояние надиктовки.
 
@@ -54,7 +54,7 @@ Progress считает только **видимые** шаги (6 или 7 в 
 1. Шаги single / multi / scale / advice (контент из локалей `review*`).
 2. Шаг advice → `onReportReveal(true)` (лист справа на `review-screen`, `mode: "preview"`).
 3. Submit → `answersFromFormData` → `onComplete(answers)` (награда; снаружи могут добавить `dictation`) + `showDone` + `onReportReveal(false, { submitted: true })` + `onDoneChange(true)` → URL `/quiz/done`.
-4. CTA → `onExit` → home (`setExitBusy`: лоадер на «На главную», пока submit/release); `onNextCase` → claim следующего (лента + embed прогреваются на done через `prewarmNextReviewCase` в `main.js`). На done кнопка «Следующий кейс» сразу с лоадером (`setNextCasePreparing`); нет кандидатов — disabled + `reviewDoneNextCaseEmpty` (`setNextCaseEmpty`). Клик по next — `setNextCaseBusy` (лоадер + блок обеих CTA). Оркестрация в `main.js`.
+4. CTA → `onExit` → home (`setExitBusy`: лоадер на «На главную», пока `reviewSubmitPromise` / release; при `POLISH_ENABLED` туда входит и polish LLM); `onNextCase` → claim следующего (лента + embed прогреваются на done через `prewarmNextReviewCase` в `main.js`). На done кнопка «Следующий кейс» сразу с лоадером (`setNextCasePreparing`); нет кандидатов — disabled + `reviewDoneNextCaseEmpty` (`setNextCaseEmpty`). Клик по next — `setNextCaseBusy` (лоадер + блок обеих CTA). Оркестрация в `main.js`.
 
 Смена шага: leave/enter пачки `stage` + footer на `--motion-reveal-*` (`getMotionReveal`).  
 Переход в done: form/top уходят, затем enter `review-panel__done`.

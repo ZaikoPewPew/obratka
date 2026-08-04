@@ -47,5 +47,5 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `video-player-card/` | — | Кастомный плеер (play/mute/scrub/speed); шаг video онбординга |
 
 Движок диктовки: [`../lib/dictation/README.md`](../lib/dictation/README.md).  
-Post-edit: [`../api/dictationPolish.js`](../api/dictationPolish.js) → [`polish-dictation`](../../supabase/functions/polish-dictation/README.md).  
+Post-edit: [`../api/dictationPolish.js`](../api/dictationPolish.js) → [`polish-dictation`](../../supabase/functions/polish-dictation/README.md) (**`POLISH_ENABLED = false`**).  
 См. [`PROJECT.md`](../../PROJECT.md) — Entrypoint.

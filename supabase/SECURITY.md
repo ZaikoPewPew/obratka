@@ -111,8 +111,19 @@ UI-часть: [`src/components/home-screen/README.md`](../src/components/home-s
 | *(MCP)* | `portfolio_reviewer_slots_purge_expired` | `purge_expired_review_claims` в начале `portfolio_reviewer_slots` (expired anonymous не светятся до следующего claim) |
 | *(MCP)* | `profiles_workplace_and_settings_constraints` | колонка `workplace` + CHECK на длину `display_name` / `workplace`, whitelist `role`, формат `telegram_username` (нужна для `/settings`; без неё `select` профиля → 400) |
 | *(MCP)* | `profiles_identity_guard_and_column_grants` | `protect_profiles_grade` теперь режет только `grade` (role редактируется из `/settings`); новый `protect_profiles_identity` (`email` / `telegram_id` / `auth_provider` / `created_at` + запрет сброса `onboarding_done`); table-level UPDATE → column-level grant |
+| *(execute_sql)* | `portfolios_select_feed_reviewed_exists` | `exists` по своему `reviews` в `portfolios_select_feed` — чужие `done` снова видны ревьюеру в «Уже отревьюено» (клиент уже тянул id через `listReviewedPortfolios`) |
 
 Отражены в `sql/*.sql`, чтобы файлы оставались источником правды при чистом развёртывании.
+
+---
+
+## Инцидент 2026-08-04: done пропадает из «Уже отревьюено»
+
+**Симптом.** Третий ревьюер сдаёт лист → кейс `status = done` → карточка исчезает и из «Ждёт ревью», и из «Уже отревьюено».
+
+**Причина.** На remote жила старая `portfolios_select_feed` без ветки `exists` по своему review: чужой `done` SELECT не отдавал, хотя строка в `reviews` была. Клиент (`listReviewedPortfolios`) тихо дропал id без строки портфолио.
+
+**Решение.** Применить блок `portfolios_select_feed` из [`sql/portfolios.sql`](sql/portfolios.sql) (`or exists (... reviewer_id = auth.uid())`). Re-apply: [`sql/README.md`](sql/README.md) § «Повторный apply».
 
 ---
 
@@ -168,12 +179,14 @@ Apply SQL: [`sql/README.md`](sql/README.md) § «Как применять». П
 
 ## Edge: post-edit надиктовки (`polish-dictation`)
 
-Сырой Web Speech текст после stop / перед submit проходит пунктуацию через Z.AI Flash. Это **не** STT: аудио не принимаем.
+Сырой Web Speech текст после stop / перед submit **может** пройти пунктуацию через Z.AI Flash. Это **не** STT: аудио не принимаем.
+
+**Сейчас клиент выключен:** `POLISH_ENABLED = false` в [`dictationPolish.js`](../src/api/dictationPolish.js) — без invoke (вернуть `true` чтобы снова). Function и секреты на месте. SoT: [`functions/polish-dictation/README.md`](functions/polish-dictation/README.md) § «Статус».
 
 | | |
 |--|--|
 | Function | [`functions/polish-dictation/`](functions/polish-dictation/README.md) |
-| Клиент | [`src/api/dictationPolish.js`](../src/api/dictationPolish.js) |
+| Клиент | [`src/api/dictationPolish.js`](../src/api/dictationPolish.js) (`POLISH_ENABLED`) |
 | JWT | `verify_jwt = true` |
 | Secret | `ZAI_API_KEY` (опц. `ZAI_MODEL`, `ZAI_MODEL_FALLBACK`) — **не** в клиентском бандле |
 | Default model | `glm-4.5-flash` (Free); запасная `glm-4.7-flash` |

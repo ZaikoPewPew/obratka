@@ -13,22 +13,25 @@ MVP: **Web Speech API** (браузер) → текст в памяти сесс
 
 ## Post-edit (пунктуация)
 
-После stop / перед submit сырой текст проходит **post-edit** через Edge [`polish-dictation`](../../../supabase/functions/polish-dictation/README.md) + [`dictationPolish.js`](../../api/dictationPolish.js).
+После stop / перед submit сырой текст **может** пройти post-edit через Edge [`polish-dictation`](../../../supabase/functions/polish-dictation/README.md) + [`dictationPolish.js`](../../api/dictationPolish.js).
+
+**Сейчас выключен:** `POLISH_ENABLED = false` в `dictationPolish.js` — без invoke, сразу сырой текст. Function и проводка в `main.js` на месте; вернуть → `true`. SoT статуса: [`polish-dictation/README.md`](../../../supabase/functions/polish-dictation/README.md) § «Статус».
 
 | | |
 |--|--|
-| Что делает | пунктуация, пробелы, регистр |
+| Что делает | пунктуация, пробелы, регистр (Z.AI Flash LLM) |
 | Что **не** делает | STT, смена смысла, перевод, саммари, «улучшение» ревью |
 | Модель | `glm-4.5-flash` (Free); запасная `glm-4.7-flash` |
 | Секреты | `ZAI_API_KEY` (+ опц. `ZAI_MODEL`, `ZAI_MODEL_FALLBACK`) только в Function secrets |
 | Soft-fail | любая ошибка / все модели упали / таймаут / нет ключа → **сырой текст как есть**; submit **не** блокируется |
+| Kill-switch | `POLISH_ENABLED` в `dictationPolish.js` (сейчас `false`) |
 
 ### Soft-fail (двойной)
 
 1. **Edge:** цепочка моделей (primary → fallback) с ретраями на `1305`/429/5xx. Если все попытки исчерпаны → HTTP 200 `{ text: <исходный>, skipped: true, error: "zai_1305" | … }`.
-2. **Клиент:** `polishDictationText` при invoke-error, таймауте (~14 s), пустом `text` или network → возвращает исходную строку. Abort / pagehide polish **не** ждут.
+2. **Клиент:** `polishDictationText` при invoke-error, таймауте (~14 s), пустом `text` или network → возвращает исходную строку. Abort / pagehide polish **не** ждут. При `POLISH_ENABLED === false` сеть не трогаем.
 
-Итог: поле совета, `answers.dictation` и PDF всегда получают хоть какой-то текст юзера — отполированный или сырой Web Speech.
+Итог при включённом polish: поле совета, `answers.dictation` и PDF всегда получают хоть какой-то текст юзера — отполированный или сырой Web Speech. При выключенном — всегда сырой.
 
 ### Когда в `main.js`
 
@@ -36,10 +39,10 @@ MVP: **Web Speech API** (браузер) → текст в памяти сесс
 |---------|--------------------------------------|
 | Toggle stop (notes / advice) | `polish: true` → notes в `dictationText`, advice через `setAdviceText` |
 | Конец таймера → quiz (`openReview`) | `polish: true` на notes (async) |
-| Submit квиза (`onComplete`) | `polishDictationText` на `dictation` + `advice` |
+| Submit квиза (`onComplete`) | `polishDictationText` на `dictation` + `advice` (ждёт «На главную» / next case) |
 | Abort / pagehide / reset | stop **без** polish |
 
-Клиент: `polishDictationText(text, { maxLen, locale })` — `functions.invoke("polish-dictation")`, timeout ~14 s. SoT Function: [`polish-dictation/README.md`](../../../supabase/functions/polish-dictation/README.md).
+Клиент: `polishDictationText(text, { maxLen, locale })` — при `POLISH_ENABLED` → `functions.invoke("polish-dictation")`, timeout ~14 s; иначе no-op. SoT Function: [`polish-dictation/README.md`](../../../supabase/functions/polish-dictation/README.md).
 
 ## Контракт `DictationEngine`
 
@@ -113,6 +116,6 @@ MVP: **Web Speech API** (браузер) → текст в памяти сесс
 
 `MediaRecorder` → Edge Function → Whisper; тот же `DictationEngine`. Секрет API — только Function secrets ([`security.mdc`](../../../.cursor/rules/security.mdc)).
 
-Post-edit текста уже на проде: подробности — [`supabase/functions/polish-dictation/README.md`](../../../supabase/functions/polish-dictation/README.md).
+Post-edit текста: код на проде, **клиентский kill-switch выключен** (`POLISH_ENABLED = false`); подробности — [`supabase/functions/polish-dictation/README.md`](../../../supabase/functions/polish-dictation/README.md) § «Статус».
 
 См. правило [`.cursor/rules/dictation.mdc`](../../../.cursor/rules/dictation.mdc), [`SCREENS.md`](../../../SCREENS.md).

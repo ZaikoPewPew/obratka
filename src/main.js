@@ -32,7 +32,10 @@ import {
   listPortfoliosForReview,
   isPortfolioOpenForReview,
 } from "./api/portfolios.js";
-import { clearHomeListCache } from "./utils/homeListCache.js";
+import {
+  clearHomeListCache,
+  removeCachedHomeListItem,
+} from "./utils/homeListCache.js";
 import { clearFeedSeen } from "./utils/feedSeen.js";
 import { clearMineReadySeen } from "./utils/mineReadySeen.js";
 import {
@@ -451,6 +454,7 @@ async function ensureReviewWorkspace() {
                 clearPersistedReviewClaim();
                 stopClaimHeartbeat();
                 void awardReviewReward();
+                removeCachedHomeListItem(getSession()?.userId, "feed", pid);
                 track("review_submitted", { portfolio_id: pid });
               }
             } catch (err) {
@@ -986,7 +990,6 @@ async function openNextReviewCase() {
           showNoSlotsNotice: false,
         });
         if (started) {
-          clearHomeListCache(getSession()?.userId);
           nextCasePreload = null;
           return true;
         }
@@ -2040,7 +2043,6 @@ async function ensureUrlScreen() {
               } else {
                 await refreshSessionFromProfile();
               }
-              clearHomeListCache(getSession()?.userId);
               track("portfolio_submitted");
             } catch {
               go("home", {

@@ -76,7 +76,7 @@ PDF / секции: [`src/utils/reviewReport.js`](../../utils/reviewReport.js), 
 Данные: [`actionCards.json`](../../data/actionCards.json) (триггеры) + [`actionResources.json`](../../data/actionResources.json) (URL / `covers`).  
 Спека квиза и трактовок: [`QUIZ.md`](../../../QUIZ.md).  
 Надиктовка: [`src/lib/dictation/README.md`](../../lib/dictation/README.md).  
-Post-edit пунктуации (перед сохранением в лист): [`supabase/functions/polish-dictation/README.md`](../../../supabase/functions/polish-dictation/README.md).
+Post-edit пунктуации (перед сохранением в лист; **сейчас клиент off**): [`supabase/functions/polish-dictation/README.md`](../../../supabase/functions/polish-dictation/README.md).
 
 ## Стили
 

@@ -39,6 +39,7 @@
 | Окно жалобы от done + старт reputation 0 | [`portfolios.sql`](portfolios.sql) (колонка `completed_at`) → [`review_claims.sql`](review_claims.sql) (триггер) → весь [`review_complaints.sql`](review_complaints.sql); ONE-SHOT `100/20 → 0` на prod уже прогнан и в файле закомментирован — не раскомментировать при re-apply |
 | Топ-50: метрика `balance` → `reputation` | весь [`rating_leaderboard.sql`](rating_leaderboard.sql) (rename колонки + RPC + `DELETE` снапшота; следующий `list_rating_top` пересоберёт) |
 | Профиль `/settings`: `workplace` + identity guards + column UPDATE + grade-only lock | блок `workplace` / CHECK / `protect_profiles_grade` / `protect_profiles_identity` / grants в конце [`profiles.sql`](profiles.sql) (или весь файл) |
+| Сегмент «Уже отревьюено» / done-карточки после своего ревью | блок `portfolios_select_feed` из [`portfolios.sql`](portfolios.sql) (`exists` по своей строке в `reviews`) |
 
 Клиентский фикс залипающих «Аноним»-слотов (keepalive `pagehide` + `sessionStorage` `obratka.reviewClaim`) **не** требует SQL — достаточно деплоя фронта. SQL-purge в `portfolio_reviewer_slots` — доп. hardening, чтобы expired не светились до следующего claim/heartbeat.
 

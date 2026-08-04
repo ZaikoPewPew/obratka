@@ -21,7 +21,7 @@
 | Home: free-slot «Мои» + max 1 pending | wired (`MAX_MINE_PENDING`, `submit_portfolio`) |
 | Home tabbar dock: glass + «Закинуть своё» справа | wired (`tabbar-dock`, `--on-dark`, entrance `motion-reveal-dock`) |
 | Review claim / heartbeat / release | wired (награда только после submit; unload = keepalive + `sessionStorage` reconcile; **overshoot** — см. § Claims) |
-| Review: iframe/external + таймер 45 s + **надиктовка** | wired (embed-hosts + probe/fallback; rec + mic в совете; post-edit пунктуации через Edge `polish-dictation`; SoT [`embed-hosts.md`](content/embed-hosts.md)) |
+| Review: iframe/external + таймер 45 s + **надиктовка** | wired (embed-hosts + probe/fallback; rec + mic в совете; post-edit `polish-dictation` **клиент off** — `POLISH_ENABLED = false`; SoT [`embed-hosts.md`](content/embed-hosts.md), [`polish-dictation/README`](supabase/functions/polish-dictation/README.md)) |
 | Подача URL + back-chip + done на url-screen | wired |
 | Report: листы (+ `dictation`) + жалоба + PDF | wired (сводный PDF + action cards — [`ACTION_CARDS.md`](ACTION_CARDS.md)) |
 | Referrals validate/redeem / share | wired (1 код / 2 слота, seed `YTHWKPDWAK`, без наград) |
@@ -47,7 +47,7 @@
 - **Вкладка «Рейтинг»:** третий tab `rating`; топ-50 по `reputation` (`listRatingTop` / `rating_leaderboard.sql`, снапшот раз в сутки); карточки в `.home-screen__rating-list` (aside `rating/` **не** монтируется); плашка репутации `min-width`/`height` 52px, padding-x 16px (иконки positive/neutral/negative).
 - **«Топы в сети»:** fixed-чип слева снизу (`legendary-online-panel` + heartbeat/list RPC); скрыт, если никого нет.
 - **Deep links home:** `/home`, `?filter=completed` (Чужие / уже отревьюено), `?tab=mine`, `?tab=mine&filter=completed`, `?tab=rating`; query канонизирует `homeRoute.js`, Back/Forward переключает вид без remount.
-- **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 45` (review shell + intro copy). iframe — пауза при скрытой вкладке; external — wall-clock без паузы; конец → `src/assets/audio/Timer-end.wav` + стоп надиктовки (+ polish notes) → quiz.
+- **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 45` (review shell + intro copy). iframe — пауза при скрытой вкладке; external — wall-clock без паузы; конец → `src/assets/audio/Timer-end.wav` + стоп надиктовки (+ polish notes, если `POLISH_ENABLED`) → quiz.
 - **Tabbar dock:** glass-таббар + кнопка «Закинуть своё» справа (56×56, Google blue, gap 8px); hide при скролле уезжает весь док. Светлый трек — gray-900 10% + blur 20; тёмный превью → `--on-dark` — white 20%.
 - **Чипы шапки:** репутация → баланс → аватар. Submit и уведомления из topbar убраны.
 - **Точка на «Чужие посты»:** красная 6px в углу вкладки при **новом** кейсе в open-ленте; открытие «Чужие посты» гасит (`feedSeen`), новый id снова зажигает.
@@ -221,7 +221,7 @@ SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `p
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
 | Side panel | [`side-panel`](src/components/side-panel/README.md) — панель справа (слот); home → «Правила» |
 | Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `feedback`; feed/mine/rating (`listRatingTop`, топ-50 по репутации); URL-query; лента SWR (`feed`/`feedReviewed`/`mine`/`rating`); Ждёт/Уже + Ещё/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` / entrance cascade |
-| Review | `index.html` `.iframe-shell` + таймер + чип **rec** (заметки → `answers.dictation` + polish) в `main.js`; embed: `resolvePortfolioEmbed` / external UI |
+| Review | `index.html` `.iframe-shell` + таймер + чип **rec** (заметки → `answers.dictation`; polish off/`POLISH_ENABLED`) в `main.js`; embed: `resolvePortfolioEmbed` / external UI |
 | Quiz | `review-screen` + `review-panel` + [`scale-slider`](src/components/scale-slider/README.md) (context/visual **1–5**; условный `pain`; рыночный `tier`) + mic → `advice`. SoT: [`QUIZ.md`](QUIZ.md) |
 | Success | `success-screen` (`/done`) |
 | Ban | `ban-screen` — статичный красный mesh + `banBrandMarkSvg` |
@@ -242,7 +242,7 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 - `pain[]` показывается только при `visual ≤ 2` (composition / contrast / components / overloaded).
 - Вердикт рынка — поле **`tier`** (`early` · `mid` · `strong` · `top`), не `hire`.
 - Отчёт: `buildReportSections` в [`reviewReport.js`](src/utils/reviewReport.js); preview без кросс-сигналов; full — L2 + матрица `tier × gradeZone` + `reportSummaryLead`.
-- `advice` / `dictation` — текст юзера; перед submit опционально post-edit пунктуации ([`polish-dictation`](supabase/functions/polish-dictation/README.md); soft-fail → сырой текст). L1/L2/L3 по-прежнему детерминированные, без LLM.
+- `advice` / `dictation` — текст юзера; post-edit пунктуации через Edge [`polish-dictation`](supabase/functions/polish-dictation/README.md) **сейчас выключен** клиентским `POLISH_ENABLED = false` в [`dictationPolish.js`](src/api/dictationPolish.js) (вернуть `true` чтобы снова; soft-fail → сырой текст). L1/L2/L3 по-прежнему детерминированные, без LLM.
 - Старые answers с `hire` / visual 1–10 не парсятся.
 
 ## Дизайн и i18n
@@ -267,7 +267,7 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 - Home state: `src/utils/homeRoute.js` (query) + `homeListCache.js` + `feedSeen.js` + `mineReadySeen.js` (кэши сбрасываются в `exitAuthenticatedSession`)
 - Review timer: `src/config/review.js` (`REVIEW_SESSION_SECONDS`); iframe pause / external wall-clock; end sound `src/assets/audio/Timer-end.wav`
 - Portfolio embed: `src/utils/embedHosts.js` + `portfolioEmbed.js` + Edge `portfolio-embed-probe` (XFO/CSP; Figma/YouTube rewrite; blocklist → external; optimistic iframe + Readymag probe + frame-block fallback). Каталог: [`content/embed-hosts.md`](content/embed-hosts.md)
-- Dictation: `src/lib/dictation/` (Web Speech MVP; external `setKeepAliveInBackground`); post-edit текста — Edge [`polish-dictation`](supabase/functions/polish-dictation/README.md) + [`dictationPolish.js`](src/api/dictationPolish.js) (`ZAI_API_KEY` только в secrets; soft-fail → сырой текст)
+- Dictation: `src/lib/dictation/` (Web Speech MVP; external `setKeepAliveInBackground`); post-edit — Edge [`polish-dictation`](supabase/functions/polish-dictation/README.md) + [`dictationPolish.js`](src/api/dictationPolish.js) (`ZAI_API_KEY` только в secrets; soft-fail → сырой текст; **сейчас `POLISH_ENABLED = false`**)
 - Url-screen: чип «На главную» (`.url-screen__back`, скрыт на done) → `onExit` → home
 - Desktop-only: [`mobile.md`](mobile.md) + [`desktop-only-screen`](src/components/desktop-only-screen/README.md) + [`viewport.js`](src/utils/viewport.js)
 - Report consensus PDF: [`ACTION_CARDS.md`](ACTION_CARDS.md) — `actionCards.json` (триггеры) + `actionResources.json` (URL / covers) → `resolveActionCards` → `shareConsensusPdf`
@@ -281,7 +281,7 @@ Waitlist dual-layout удалён; историческая спека — [`mob
 |-----|-----|
 | `.env` | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `TELEGRAM_BOT_ID` (+ optional username), `VITE_BASE_PATH`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST` |
 | Dashboard Auth | Email OTP, Google OAuth, Redirect URLs |
-| Edge secrets | `TELEGRAM_BOT_TOKEN`, `ZAI_API_KEY` (опц. `ZAI_MODEL` / `ZAI_MODEL_FALLBACK` для polish-dictation; default `glm-4.5-flash`) |
+| Edge secrets | `TELEGRAM_BOT_TOKEN`, `ZAI_API_KEY` (опц. `ZAI_MODEL` / `ZAI_MODEL_FALLBACK` для polish-dictation; default `glm-4.5-flash`; клиентский invoke сейчас off — `POLISH_ENABLED`) |
 
 ## Аналитика (PostHog)
 
@@ -295,7 +295,7 @@ SoT имён и чеклист «новая фича = аналитика»: [`A
    Email↔Google закрывается **Automatic linking** в Supabase Auth (verified email = один user); см. [`auth-screen/README.md`](src/components/auth-screen/README.md).
 3. Троттлинг злоупотреблений жалобой / тег `misleading` / очередь модерации.
 4. Редизайн жалоб / списка листов на `report-screen` (PDF-сводка уже есть).
-5. Диктовка план B: Whisper через Edge (контракт `DictationEngine` уже есть; MVP = Web Speech). Post-edit пунктуации уже wired — [`polish-dictation`](supabase/functions/polish-dictation/README.md).
+5. Диктовка план B: Whisper через Edge (контракт `DictationEngine` уже есть; MVP = Web Speech). Post-edit пунктуации wired, но **клиент off** (`POLISH_ENABLED = false`) — [`polish-dictation`](supabase/functions/polish-dictation/README.md).
 6. Добить step-events онбординга и ревью-воронки (intro / timer / quiz) — имена в [`ANALYTICS.md`](ANALYTICS.md) § планируемые.
 
 ## Команды

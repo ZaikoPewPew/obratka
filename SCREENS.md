@@ -98,7 +98,7 @@ Handoff соседних brand-экранов: `handoff: true` (`brandScreenTran
 На `/review` в шапке — опциональная надиктовка (`.iframe-shell__rec`), в квизе — микрофон в поле «Главный совет» (`.review-panel__rec`); таймер `REVIEW_SESSION_SECONDS` из [`src/config/review.js`](src/config/review.js).  
 Embed: [`content/embed-hosts.md`](content/embed-hosts.md) — спец-embed / blocklist / optimistic + Readymag probe + iframe→external fallback (`embedBlocked*`).  
 iframe: пауза при скрытой вкладке; external (портфолио в другой вкладке): wall-clock без паузы + best-effort keep-alive STT; конец → `Timer-end.wav` + стоп записи → quiz.  
-После stop / перед submit — post-edit пунктуации (Edge `polish-dictation`, не STT). См. [`src/lib/dictation/README.md`](src/lib/dictation/README.md), [`supabase/functions/polish-dictation/README.md`](supabase/functions/polish-dictation/README.md).
+После stop / перед submit — post-edit пунктуации (Edge `polish-dictation`, не STT; **сейчас клиент off** — `POLISH_ENABLED = false`). См. [`src/lib/dictation/README.md`](src/lib/dictation/README.md), [`supabase/functions/polish-dictation/README.md`](supabase/functions/polish-dictation/README.md).
 
 ## Дерево файлов
 
@@ -170,7 +170,7 @@ src/api/
   auth.js / profiles.js / onboarding.js / wallet.js
   portfolios.js / leagues.js / referrals.js / reviewComplaints.js
   presence.js / rating.js
-  dictationPolish.js      ← Edge polish-dictation (пунктуация; не STT)
+  dictationPolish.js      ← Edge polish-dictation (пунктуация; не STT; POLISH_ENABLED=false)
   telegramWidget.js / subscribers.js
   portfolioEmbedProbe.js
 
@@ -270,7 +270,7 @@ iframe — пауза при `visibility hidden`; external — wall-clock + де
 2. Manual identity linking (`linkIdentity`) + UNIQUE `profiles.email` + Telegram↔email — вне текущего скоупа.
 3. Троттлинг злоупотреблений жалобой / тег `misleading` / очередь модерации.
 4. Редизайн жалоб / списка листов на `report-screen` (PDF уже есть).
-5. Диктовка: post-edit пунктуации wired (`polish-dictation`); план B Whisper Edge — контракт готов, MVP = Web Speech.
+5. Диктовка: post-edit пунктуации wired (`polish-dictation`), **клиент off** (`POLISH_ENABLED = false`); план B Whisper Edge — контракт готов, MVP = Web Speech.
 
 ## Связанные документы
 
@@ -290,7 +290,7 @@ iframe — пауза при `visibility hidden`; external — wall-clock + де
 - [`src/utils/mineReadySeen.js`](src/utils/mineReadySeen.js) — seen 3/3 → точка на «Мои» / «Завершенные»
 - [`QUIZ.md`](QUIZ.md) — пул вопросов, схема `answers`, L1/L2/L3 PDF
 - [`src/components/scale-slider/README.md`](src/components/scale-slider/README.md) — шкалы квиза 1–5 (canvas, ступени, приписки)
-- [`src/lib/dictation/README.md`](src/lib/dictation/README.md) — надиктовка: `/review` + поле совета в квизе; iframe pause / external keep-alive; конец → [`Timer-end.wav`](src/assets/audio/Timer-end.wav); post-edit → [`polish-dictation`](supabase/functions/polish-dictation/README.md)
+- [`src/lib/dictation/README.md`](src/lib/dictation/README.md) — надиктовка: `/review` + поле совета в квизе; iframe pause / external keep-alive; конец → [`Timer-end.wav`](src/assets/audio/Timer-end.wav); post-edit → [`polish-dictation`](supabase/functions/polish-dictation/README.md) (клиентский kill-switch)
 - [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) — правый visual + variants
 - [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) — split-каркас
 - [`src/components/app-modal/README.md`](src/components/app-modal/README.md) — универсальная модалка

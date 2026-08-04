@@ -28,7 +28,7 @@ Path: **`/quiz`**, финал **`/quiz/done`**. Split: слева слот по�
 Токены `--shell-review-*`, `--motion-report-launch-*`. Классы в `iframe-shell.css`.  
 Launch стартует с `readSheetTranslateY` (вычисленный Y после clamp), не с сырых `22%`.  
 PDF-тексты: `src/utils/reviewReport.js` (`buildReportSections` — preview без L2/L3; full на report/PDF; `dictation` → `reportDictationTitle`).  
-Надиктовка / polish: [`lib/dictation/README.md`](../../lib/dictation/README.md), [`polish-dictation`](../../../supabase/functions/polish-dictation/README.md).
+Надиктовка / polish: [`lib/dictation/README.md`](../../lib/dictation/README.md), [`polish-dictation`](../../../supabase/functions/polish-dictation/README.md) (клиентский kill-switch сейчас off).
 Шкалы в panel: [`scale-slider`](../scale-slider/README.md) (context/visual **1–5**).  
 Пул и трактовки: [`QUIZ.md`](../../../QUIZ.md).
 
