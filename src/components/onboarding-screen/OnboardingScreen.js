@@ -343,6 +343,7 @@ export function createOnboardingScreen({ onComplete }) {
 
   let currentStep = 0;
   let transitioning = false;
+  let finishing = false;
   /** @type {ReturnType<typeof setTimeout> | null} */
   let advanceTimer = null;
   const totalSteps = steps.length;
@@ -612,6 +613,11 @@ export function createOnboardingScreen({ onComplete }) {
   }
 
   async function finish() {
+    if (finishing || transitioning) return;
+    finishing = true;
+    submit.disabled = true;
+    nextBtn.disabled = true;
+    backBtn.disabled = true;
     const answers = normalizeOnboardingAnswers(collectAnswers());
     try {
       await saveOnboardingAnswers(answers);
@@ -619,9 +625,16 @@ export function createOnboardingScreen({ onComplete }) {
       if (import.meta.env.DEV) {
         console.warn("[onboarding] saveOnboardingAnswers failed", err);
       }
+      finishing = false;
+      submit.disabled = false;
+      nextBtn.disabled = false;
+      backBtn.disabled = false;
       showStepError(true, t.onboardingSaveFailed);
       focusActiveStep();
       return;
+    }
+    for (const step of steps) {
+      step.videoPlayer?.pause();
     }
     await onComplete(answers);
   }
@@ -629,6 +642,10 @@ export function createOnboardingScreen({ onComplete }) {
   function reset() {
     clearAdvanceTimer();
     transitioning = false;
+    finishing = false;
+    submit.disabled = false;
+    nextBtn.disabled = false;
+    backBtn.disabled = false;
     body.classList.remove("review-panel__body--animating");
     footer.style.animation = "";
     form.reset();
@@ -655,7 +672,7 @@ export function createOnboardingScreen({ onComplete }) {
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    if (transitioning) return;
+    if (transitioning || finishing) return;
     const invalid = findFirstInvalidStep();
     if (invalid >= 0) {
       const reveal = () => {

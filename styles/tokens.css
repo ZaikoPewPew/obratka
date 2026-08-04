@@ -476,7 +476,7 @@
     rgba(0, 0, 0, 0) 0.03%,
     rgba(0, 0, 0, 0.4) 99.97%
   );
-  --video-player-chrome-height: 104px;
+  --video-player-chrome-height: 130px;
   --video-player-chrome-blur: 12px;
   --video-player-control-color: var(--palette-white);
   --video-player-center-size: 80px;

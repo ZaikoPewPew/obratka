@@ -2379,10 +2379,11 @@ async function applyRoute(id, opts = {}) {
       id === "home" &&
       (prevRouteId === "review" ||
         prevRouteId === "quiz" ||
-        prevRouteId === "done")
+        prevRouteId === "done" ||
+        prevRouteId === "onboarding")
     ) {
-      // Выход с review-workspace (abort / «На главную»): не держать shell
-      // на сети — ban/gone догоняют фоном.
+      // Выход с review-workspace / онбординга: не держать shell на сети —
+      // ban/gone догоняют фоном.
       void reconcileSessionAccess().then((access) => {
         if (access === "gone") return;
         if (access === "banned" && activeRouteId !== "banned") {
@@ -2506,6 +2507,8 @@ async function applyRoute(id, opts = {}) {
     if (target === "onboarding") {
       const screen = await ensureOnboardingScreen();
       screen.open(openOpts);
+      // К «Начать» home уже в бандле — без гэпа на dynamic import.
+      void ensureHomeScreen();
       return;
     }
     if (target === "home") {
@@ -2625,11 +2628,11 @@ async function applyRoute(id, opts = {}) {
   }
 
   // Onboarding → home: home снизу/поверх с fade-in, brand уходит fade-out.
+  // Не ждать refresh ленты — иначе клик «Начать» зависает на сети.
   if (isHomeReveal) {
     const home = await ensureHomeScreen();
-    const opening = home.open(currentHomeView());
+    void home.open(currentHomeView());
     await Promise.all([
-      opening,
       referralScreen.close({}),
       authScreen.close({}),
       authCodeScreen.close({}),
