@@ -2423,6 +2423,8 @@ async function applyRoute(id, opts = {}) {
   if (session?.userId) {
     if (id === "url") {
       // Session + pending-слот параллельно — меньше лаг CTA «Закинуть».
+      // Ошибка count (сеть / RLS) ≠ «слот занят»: fail-open, лимит жёстко
+      // в submit_portfolio (too_many_pending). Иначе ложный toast при outage.
       const [access, slotResult] = await Promise.all([
         reconcileSessionAccess(),
         hasFreeMineSlot()
@@ -2431,12 +2433,12 @@ async function applyRoute(id, opts = {}) {
             if (import.meta.env.DEV) {
               console.warn("[route] hasFreeMineSlot", err);
             }
-            return /** @type {const} */ ({ ok: false, free: false });
+            return /** @type {const} */ ({ ok: false, free: true });
           }),
       ]);
       if (access === "gone") return;
       session = getSession();
-      urlSlotFree = slotResult.ok ? slotResult.free : false;
+      urlSlotFree = slotResult.free;
     } else if (id === "report" || id === "settings") {
       // Open по кэшу — settle+profile не блокируют первый paint /report
       // и side-panel настроек. Ban/gone догоняют фоном (exit уже внутри reconcile).
@@ -2485,6 +2487,7 @@ async function applyRoute(id, opts = {}) {
 
   if (accessible === "url") {
     // Иерархия: слот → монеты (как tryAddPortfolio / onAddPortfolio).
+    // Count error → не блокируем как «слот занят» (см. fail-open выше).
     try {
       const slotFree =
         urlSlotFree != null ? urlSlotFree : await hasFreeMineSlot();
@@ -2494,9 +2497,13 @@ async function applyRoute(id, opts = {}) {
       } else if (!canSubmitPortfolio()) {
         accessible = "home";
       }
-    } catch {
-      accessible = "home";
-      pendingLimitBlocked = true;
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.warn("[route] url slot gate", err);
+      }
+      if (!canSubmitPortfolio()) {
+        accessible = "home";
+      }
     }
   }
 
