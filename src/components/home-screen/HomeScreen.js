@@ -165,14 +165,17 @@ const CHIP_ICON_BOOST_ANIMATIONS = new Set([
 ]);
 
 /**
- * Hover/focus: один цикл без idle-паузы; класс держится до animationend,
- * чтобы уход курсора не обрывал взгляд/волны.
+ * Hover/focus: denser loop без idle-паузы.
+ * Уход курсора не рвёт цикл — доигрываем до конца, потом idle.
+ * Повторный hover во время доигрывания не рестартит: после конца цикла
+ * продолжаем denser infinite, пока курсор снова на чипе.
  *
  * @param {HTMLElement} chip
  * @param {string} animatedSelector
  */
 function bindChipIconBoost(chip, animatedSelector) {
-  let playing = false;
+  /** Пользователь хочет boost (hover / focus-visible). */
+  let wantBoost = false;
 
   function getAnimated() {
     return chip.querySelector(animatedSelector);
@@ -187,34 +190,30 @@ function bindChipIconBoost(chip, animatedSelector) {
   }
 
   function isInteracting() {
-    return chip.matches(":hover") || chip.matches(":focus-visible");
+    return (
+      (canHoverBoost() && chip.matches(":hover")) ||
+      chip.matches(":focus-visible")
+    );
   }
 
-  function clearBoostIfIdle() {
-    if (isInteracting()) return;
-    chip.classList.remove(CHIP_ICON_BOOST_CLASS);
-    playing = false;
+  function syncWantBoost() {
+    wantBoost = !prefersReducedMotion() && isInteracting();
   }
 
-  function startBoost() {
+  function armBoost() {
     if (prefersReducedMotion()) return;
-    const el = getAnimated();
-    if (!el) return;
-    chip.classList.remove(CHIP_ICON_BOOST_CLASS);
-    // Restart one-shot if already mid-boost (re-enter / re-focus).
-    void el.getBoundingClientRect();
+    wantBoost = true;
+    // Уже в boost — не трогаем class (иначе animation рестартится).
+    if (chip.classList.contains(CHIP_ICON_BOOST_CLASS)) return;
     chip.classList.add(CHIP_ICON_BOOST_CLASS);
-    playing = true;
   }
 
   chip.addEventListener("pointerenter", () => {
     if (!canHoverBoost()) return;
-    startBoost();
+    armBoost();
   });
-  chip.addEventListener("focusin", startBoost);
-  chip.addEventListener("pointerleave", () => {
-    if (!playing) clearBoostIfIdle();
-  });
+  chip.addEventListener("focusin", armBoost);
+  chip.addEventListener("pointerleave", syncWantBoost);
   chip.addEventListener("focusout", (event) => {
     if (
       event.relatedTarget instanceof Node &&
@@ -222,15 +221,17 @@ function bindChipIconBoost(chip, animatedSelector) {
     ) {
       return;
     }
-    if (!playing) clearBoostIfIdle();
+    syncWantBoost();
   });
-  chip.addEventListener("animationend", (event) => {
+  chip.addEventListener("animationiteration", (event) => {
     const el = getAnimated();
     if (!el || event.target !== el) return;
     if (!CHIP_ICON_BOOST_ANIMATIONS.has(event.animationName)) return;
     if (!chip.classList.contains(CHIP_ICON_BOOST_CLASS)) return;
-    playing = false;
-    clearBoostIfIdle();
+    syncWantBoost();
+    if (wantBoost) return;
+    // Цикл denser закончился и курсора нет → обратно в idle.
+    chip.classList.remove(CHIP_ICON_BOOST_CLASS);
   });
 }
 

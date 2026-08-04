@@ -996,7 +996,7 @@
   --legendary-online-height: 52px;
   --legendary-online-padding-y: 10px;
   --legendary-online-padding-left: 10px;
-  --legendary-online-padding-right: var(--space-4);
+  --legendary-online-padding-right: var(--space-5);
   --legendary-online-gap: var(--space-2);
   --legendary-online-radius: var(--radius-pill);
   --legendary-online-bg: var(--color-surface-muted);

@@ -53,7 +53,7 @@ alwaysApply: true
 
 ## Motion / docs
 
-Open/close — `--motion-*` / `entrance.css` (`motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock` / `motion-control-error-buzz` / idle `motion-balance-duck-float` / `motion-reputation-eyes-look`) / `motionTokens.js`. 
+Open/close — `--motion-*` / `entrance.css` (`motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock` / `motion-control-error-buzz` / idle `motion-balance-duck-float` / `motion-reputation-eyes-look`; hover denser `*-once` infinite, уход — доиграть цикл → idle) / `motionTokens.js`. 
 Home dock: только translate (без `opacity` на предке glass) — иначе ломается `backdrop-filter`. 
 Home CTA «Закинуть своё»: сначала занятый слот → toast `homeNotifySlotTaken`; иначе без монет → toast `homeNotifyNoDucks` + buzz submit + чип баланса (без модалки).
 Новый экран: README в папке + таблица path в `SCREENS.md` и `src/app/README.md`. 

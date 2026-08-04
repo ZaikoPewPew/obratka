@@ -281,21 +281,23 @@
 }
 
 /*
- * Hover/focus boost: класс вешает JS и держит до animationend,
- * чтобы цикл не обрывался при уходе курсора (см. bindChipIconBoost).
+ * Hover/focus boost: denser infinite без idle-паузы.
+ * Снятие класса — на animationiteration, если курсор уже ушёл
+ * (доигрываем цикл → idle). Повторный hover mid-cycle не рестартит
+ * (см. bindChipIconBoost).
  */
 .home-screen__chip--reputation.home-screen__chip--icon-boost
   .home-screen__reputation-eyes {
   animation: motion-reputation-eyes-look-once
     var(--motion-reputation-eyes-hover-duration)
-    var(--motion-reputation-eyes-ease) 1 forwards;
+    var(--motion-reputation-eyes-ease) infinite;
 }
 
 .home-screen__chip--balance.home-screen__chip--icon-boost
   .home-screen__balance-duck {
   animation: motion-balance-duck-float-once
-    var(--motion-balance-duck-hover-duration) var(--motion-balance-duck-ease) 1
-    forwards;
+    var(--motion-balance-duck-hover-duration) var(--motion-balance-duck-ease)
+    infinite;
 }
 
 .home-screen__chip-value {
