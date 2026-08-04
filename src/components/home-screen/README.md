@@ -32,7 +32,7 @@ Thumb: `syncListFilterPanel()` переставляет пилл `instant` **т�
 | Сегмент | API / критерий |
 |---------|----------------|
 | **Ждёт ревью** (`active`, default) | `listPortfoliosForReview()` — open queue |
-| **Уже отревьюено** (`completed`) | `listReviewedPortfolios()` — свои сданные отчёты (**pending и done**); RLS `portfolios_select_feed` пускает через `exists` по своему review (без этой ветки 3/3 пропадает из сегмента — см. [`SECURITY.md`](../../../supabase/SECURITY.md) § инцидент 2026-08-04); карточка `--reviewed`: вместо скриншота — серое превью с галочкой + `homeCardReviewedLabel` («Отчёт отправлен») по центру, слоты ревьюеров и зона автора обычные; клик → URL портфолио в новой вкладке (без claim / intro) |
+| **Уже отревьюено** (`completed`) | `listReviewedPortfolios()` — свои сданные отчёты (**pending и done**); RLS `portfolios_select_feed` пускает через `has_reviewed_portfolio` (security definer; сырой exists по reviews даёт circular RLS — см. [`SECURITY.md`](../../../supabase/SECURITY.md) § инцидент 2026-08-04); карточка `--reviewed`: вместо скриншота — серое превью с галочкой + `homeCardReviewedLabel` («Отчёт отправлен») по центру, слоты ревьюеров и зона автора обычные; клик → URL портфолио в новой вкладке (без claim / intro) |
 
 Empty «Уже отревьюено»: `homeEmptyFeedReviewed` (визуал free-slot, `--static`). Кэш: `feed` + `feedReviewed` в [`homeListCache`](../../utils/homeListCache.js). Токены статуса: `--home-screen-card-reviewed-*` (заливка `--color-surface-muted`, галочка `--color-success` из `assets/home/report-sent.svg`). Заливка превью совпадает с фоном карточки, поэтому hover / press ведём и на превью (`-bg-hover` / `-bg-active`) — иначе карточка не реагирует на мышь.
 

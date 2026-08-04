@@ -563,7 +563,8 @@ export async function listPortfoliosForReview() {
 /**
  * Кейсы, по которым текущий пользователь уже сдал отчёт (сегмент
  * «Уже отревьюено»). Включает pending и done — RLS пускает через
- * `exists` по своей строке в `reviews`. Порядок = свежесть ревью.
+ * `has_reviewed_portfolio` (security definer; сырой exists по reviews
+ * даёт circular RLS с политикой reviews). Порядок = свежесть ревью.
  *
  * @returns {Promise<PortfolioQueueItem[]>}
  */

@@ -196,6 +196,24 @@ create trigger reviews_after_insert
 alter table public.portfolios enable row level security;
 alter table public.reviews enable row level security;
 
+-- «Уже отревьюено»: чужой done после своего review.
+-- Security definer — иначе circular RLS с reviews_select_reviewer_or_owner
+-- (portfolios → exists reviews → exists portfolios → …).
+create or replace function public.has_reviewed_portfolio(p_portfolio_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.reviews r
+    where r.portfolio_id = p_portfolio_id
+      and r.reviewer_id = (select auth.uid())
+  );
+$$;
+
 -- Лента: свои всегда; чужие pending — только в лиге ревьюера;
 -- уже отревьюенные (в т.ч. done) — для сегмента «Уже отревьюено».
 drop policy if exists "portfolios_select_feed" on public.portfolios;
@@ -208,12 +226,7 @@ create policy "portfolios_select_feed"
       status = 'pending'
       and public.can_review_portfolio(owner_id, (select auth.uid()))
     )
-    or exists (
-      select 1
-      from public.reviews r
-      where r.portfolio_id = portfolios.id
-        and r.reviewer_id = (select auth.uid())
-    )
+    or public.has_reviewed_portfolio(id)
   );
 
 -- INSERT только через RPC submit_portfolio (portfolio_submit.sql) — не напрямую.
@@ -270,6 +283,10 @@ grant execute on function public.can_review_grades(text, text) to authenticated;
 revoke all on function public.can_review_portfolio(uuid, uuid) from public;
 revoke all on function public.can_review_portfolio(uuid, uuid) from anon;
 grant execute on function public.can_review_portfolio(uuid, uuid) to authenticated;
+
+revoke all on function public.has_reviewed_portfolio(uuid) from public;
+revoke all on function public.has_reviewed_portfolio(uuid) from anon;
+grant execute on function public.has_reviewed_portfolio(uuid) to authenticated;
 
 -- Trigger-only: не вызывать через PostgREST RPC.
 revoke all on function public.set_portfolios_updated_at() from public;
