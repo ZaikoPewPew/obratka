@@ -21,7 +21,6 @@ FAB feedback — Lottie [`lottie/cap-lottie.json`](lottie/cap-lottie.json), не
 | `currency-duck-leave.png` | фото в confirm «Прервать ревью?» на `/review` (поверх Lottie, 552×268) |
 | `currency-referal.png` | фото в invite-explainer (поверх Lottie на `#F3F4F7`) |
 | `currency-empty-duck.png` | фото в mine not-ready explainer (поверх Lottie на `#F3F4F7`) |
-| `balance-card-ducks.svg` | legacy-декор (не используется) |
 | `currency-ghost.png` | фото в explainer «Репутация» (поверх Lottie, 552×268) |
 | `currency-p2p.png` | фото в explainer «p4p в сети» (поверх Lottie, 552×268) |
 | `rotating-ray.json` | Lottie-лучи под PNG в explainer-медиа |
@@ -30,11 +29,10 @@ FAB feedback — Lottie [`lottie/cap-lottie.json`](lottie/cap-lottie.json), не
 
 | Файл | Роль |
 |------|------|
-| `logo.svg` | полный логотип (компонент logo / legacy) |
-| `mark.svg` | default blob **44×43** — правый visual brand-экранов |
-| `mark-ban.svg` | evil: flame + blob **44×52** (ban-screen; путь flame для морфа) |
-| `logo-done.svg` | success / done: blob + корона + крылья |
-| `logoDonePaths.js` | path-строки для in-place morph → done |
+| `logo-default.svg` | default blob **44×49** — правый visual brand-экранов / landing header |
+| `logo-devil.svg` | evil: horns + accents + blob **44×53** (ban-screen; horns для морфа) |
+| `logo-angel.svg` | success / done: body + halo + accents **52×59** |
+| `logoDonePaths.js` | path-строки для in-place morph → done (angel) |
 | `brandMarks.js` | фабрики SVG + morph API |
 
 ## `audio/`
@@ -63,11 +61,11 @@ FAB feedback — Lottie [`lottie/cap-lottie.json`](lottie/cap-lottie.json), не
 | Функция | Когда |
 |---------|--------|
 | `brandMarkSvg(className)` | default mark (data-brand-mark=`default`) |
-| `banBrandMarkSvg(className?)` | статичный evil для ban-screen (полный 44×52) |
-| `logoDoneMarkSvg(className)` | статичный done |
+| `banBrandMarkSvg(className?)` | статичный evil для ban-screen (полный 44×53) |
+| `logoDoneMarkSvg(className)` | статичный done (angel) |
 | `morphBrandMarkToEvil(svg, opts?)` | рожки fade-in **без** смены width/height/viewBox |
 | `morphBrandMarkToDefault(svg, opts?)` | рожки fade-out |
-| `morphBrandMarkToDone(svg, opts?)` | default → logo-done (размеры меняются) |
+| `morphBrandMarkToDone(svg, opts?)` | default → logo-angel / logo-done class (размеры меняются) |
 | `resetBrandMarkToDefault(svg)` | мгновенный snap к default |
 
 Обычный путь на brand-экранах: не вызывать morph вручную, а  
@@ -76,5 +74,5 @@ FAB feedback — Lottie [`lottie/cap-lottie.json`](lottie/cap-lottie.json), не
 
 ### Evil без resize
 
-Flame из ban-ассета кладётся поверх default blob с `translate(0, −9)` (разница canvas 52 vs 43).  
+Horns из `logo-devil.svg` кладутся поверх default blob с `translate(0, −4)` (разница canvas 53 vs 49).  
 CSS mark остаётся `--url-screen-brand-width/height`. Overflow: `visible` на mark/brand.

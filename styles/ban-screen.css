@@ -206,7 +206,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  /* Bottom + right align with previous 44×30 mark; flame extends upward */
+  /* Bottom-align with default 44×49 mark; horns extend upward */
   transform: translate(-50%, calc(-50% + var(--ban-screen-brand-align-y)));
 }
 

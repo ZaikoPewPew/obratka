@@ -68,7 +68,7 @@ Home idle / haptic: уточка баланса (`motion-balance-duck-float`), �
 | `getMotionAdvanceDelayMs` / `getMotionFocusDelayMs` | квиз |
 | `getReportLaunchMotion` | уход PDF/preview-листа |
 | `readSheetTranslateY` | вычисленный translateY листа (после CSS-clamp на короткой visual) |
-| `getReviewMeshDoneMotion` / `getBrandMarkMorphMotion` | зелёный done + logo-done |
+| `getReviewMeshDoneMotion` / `getBrandMarkMorphMotion` | зелёный done + logo-angel |
 
 ## Brand visual
 

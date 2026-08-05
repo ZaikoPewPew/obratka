@@ -150,7 +150,7 @@ CTA «Закинуть своё» (кнопка в доке у таббара) �
 ### Профиль и баланс
 
 - Есть `session.avatarUrl` → только фото (круг), буква скрыта; нет URL / ошибка загрузки → тёмный круг + буква имени (картинка скрыта).
-- Логотип в шапке — blob-марка (`mark.svg` / `brandMarkSvg`), кнопка → вкладка «Чужие посты» (`feed`); уже на `feed` — скролл вверх. Тот же клик на settings → `/home` на `feed` (`homeMarkAria`).
+- Логотип в шапке — blob-марка (`logo-default.svg` / `brandMarkSvg`), кнопка → вкладка «Чужие посты» (`feed`); уже на `feed` — скролл вверх. Тот же клик на settings → `/home` на `feed` (`homeMarkAria`).
 - Empty state ленты и «Завершенные» (`homeEmpty` / `homeEmptyMineCompleted`) — тот же визуал, что у свободного слота (`--home-screen-slot-empty-*`: dashed-рамка, превью с текстом по центру, два meta-пилла), но некликабельный (`home-screen__card--static`); разметка из общей `createSlotEmptyVisual`.
 - Если в `profiles.avatar_url` пусто — при refresh подтягиваем picture из Auth и пишем в профиль.
 - При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.

@@ -77,9 +77,9 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 
 | Variant | Когда | Mesh | Марка |
 |---------|--------|------|-------|
-| `default` | обычное состояние | `--url-screen-mesh-*` | blob 44×43 |
+| `default` | обычное состояние | `--url-screen-mesh-*` | blob 44×49 |
 | `invalid` | ошибка поля / OTP / provider | `--url-screen-error-mesh-*` (ban) | рожки fade-in, **без** resize SVG |
-| `done` | submit URL (url-screen) | `--shell-review-mesh-done-*` | logo-done |
+| `done` | submit URL (url-screen) | `--shell-review-mesh-done-*` | logo-angel (52×59) |
 
 Ошибка поля (текст + обводка): [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md)  
 (`setUrlScreenFieldInvalid` / `setUrlScreenOtpInvalid` + `setVariant("invalid")`).
@@ -164,7 +164,8 @@ src/lib/
   dictation/              ← DictationEngine (Web Speech MVP; закладка Whisper)
 
 src/assets/brand/
-  brandMarks.js           ← SVG + morph (evil без resize / done)
+  logo-default.svg / logo-devil.svg / logo-angel.svg
+  brandMarks.js / logoDonePaths.js  ← SVG + morph (evil без resize / angel done)
 
 src/api/
   auth.js / profiles.js / onboarding.js / wallet.js

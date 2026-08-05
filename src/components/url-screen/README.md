@@ -21,7 +21,7 @@ Referral / auth / auth-code / onboarding — тот же shell и классы `
 |-----------|------|--------|
 | Обычное | — | `setVariant("default")` |
 | Невалидный URL / ошибка | `setUrlScreenFieldInvalid` | `setVariant("invalid")` |
-| После submit | форма → done copy | `setVariant("done")` (зелёный mesh + logo-done) |
+| После submit | форма → done copy | `setVariant("done")` (зелёный mesh + logo-angel) |
 
 Ошибки: [`FIELD_ERROR.md`](../../utils/FIELD_ERROR.md). Variants: [`brand-screen-visual`](../brand-screen-visual/README.md).
 

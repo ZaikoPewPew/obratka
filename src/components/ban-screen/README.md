@@ -10,7 +10,7 @@ Path: **`/banned`** (`banned`).
 
 ## Layout
 
-Split как у `success-screen`: слева тайтл + подтайтл + кнопки (**Выйти** серая → **Связаться** тёмная), справа красный mesh (`--shell-ban-mesh-*`) + **статичный** `banBrandMarkSvg` (полный evil **44×52**).
+Split как у `success-screen`: слева тайтл + подтайтл + кнопки (**Выйти** серая → **Связаться** тёмная), справа красный mesh (`--shell-ban-mesh-*`) + **статичный** `banBrandMarkSvg` (полный evil **44×53**).
 
 **Не** использует `createBrandScreenVisual` / `setVariant("invalid")` — это отдельный экран-ловушка, не brand-gate с полем.  
 Морф рожек без resize — только на referral/auth/auth-code/url; см. [`brand-screen-visual`](../brand-screen-visual/README.md), [`assets/README.md`](../../assets/README.md).

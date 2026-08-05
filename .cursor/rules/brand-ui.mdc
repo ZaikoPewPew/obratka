@@ -11,9 +11,9 @@ alwaysApply: true
 
 | Variant | Когда | Марка |
 |---------|-------|-------|
-| `default` | обычное | blob 44×43 |
+| `default` | обычное | blob 44×49 |
 | `invalid` | ошибка поля / OTP / provider | рожки fade-in, **без** resize SVG |
-| `done` | submit URL (url-screen) | logo-done (размеры меняются) |
+| `done` | submit URL (url-screen) | logo-angel (размеры меняются; CSS-класс `logo-done`) |
 
 - Классы `--invalid` / `--done` вешать на **screen section** через `bindScreenRoot`, не на `visual.root`.
 - Ban-screen: статичный `banBrandMarkSvg`, не morph / не `setVariant`.

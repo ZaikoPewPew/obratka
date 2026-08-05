@@ -15,8 +15,8 @@ npm run dev
 
 ## Блоки
 
-1. **Шапка** — лого + CTA инвайт  
-2. **Hero** — бренд, крупный заголовок, lead, CTA + mesh (`createBrandScreenVisual`)  
+1. **Шапка** — `logo-default.svg` + «Обратка» + CTA инвайт  
+2. **Hero** — бренд, крупный заголовок, lead, CTA + mesh (`createBrandScreenVisual`, mark 44×49)  
 3. **Боль** — зачем нужна обратка  
 4. **Преимущества** — 4 пункта (лига, лист, таймер, репутация)  
 5. **Закрытие** — invite-only + CTA  

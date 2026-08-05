@@ -10,7 +10,7 @@ SoT политики и QA: [`mobile.md`](../../../mobile.md). Карта: [`SCR
 
 Mobile-first (гейт виден только на узком):
 
-1. Full-bleed visual — mesh (`--url-screen-mesh-*`, не ban) + noise + обычный blob `brandMarkSvg` (44×43).
+1. Full-bleed visual — mesh (`--url-screen-mesh-*`, не ban) + noise + обычный blob `brandMarkSvg` (44×49).
 2. Карточка снизу — тайтл + body на `--color-bg`.
 
 **Не** использует `createBrandScreenVisual` / `setVariant` — статичный wash через `mountMeshGradientWash`, как у ban/success, но с дефолтным mesh.

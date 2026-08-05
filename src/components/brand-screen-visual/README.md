@@ -66,17 +66,17 @@ CSS читает их и подменяет `--url-screen-mesh-*` на glow; JS 
 
 | Variant | Класс на screen | Марка | Mesh tokens | Motion |
 |---------|-----------------|-------|-------------|--------|
-| `default` | снять `--invalid` / `--done` | default blob **44×43** | `--url-screen-mesh-1…4` | refresh / morph from evil |
+| `default` | снять `--invalid` / `--done` | default blob **44×49** | `--url-screen-mesh-1…4` | refresh / morph from evil |
 | `invalid` | `url-screen--invalid` | **те же размеры**; рожки fade-in поверх blob | `--url-screen-error-mesh-*` (= ban) | `--motion-field-error-visual-*` |
-| `done` | `url-screen--done` | logo-done (корона + крылья; **размеры меняются**) | `--shell-review-mesh-done-*` | brand-mark morph + mesh-done |
+| `done` | `url-screen--done` | logo-angel (halo + accents; **размеры меняются** → 52×59) | `--shell-review-mesh-done-*` | brand-mark morph + mesh-done |
 
 ### `invalid` — без resize SVG
 
 `morphBrandMarkToEvil` **не** меняет `width` / `height` / `viewBox`.  
-Flame из `mark-ban.svg` сдвигается `translate(0, −9)` на canvas default (43), opacity 0→1.  
-Обратно: `morphBrandMarkToDefault` гасит flame и удаляет path.
+Horns из `logo-devil.svg` сдвигаются `translate(0, −4)` на canvas default (49), opacity 0→1.  
+Обратно: `morphBrandMarkToDefault` гасит horns и удаляет path.
 
-Ban-screen по-прежнему использует статичный полный `banBrandMarkSvg` (44×52) — там не морф.
+Ban-screen по-прежнему использует статичный полный `banBrandMarkSvg` (44×53) — там не морф.
 
 ### `done`
 

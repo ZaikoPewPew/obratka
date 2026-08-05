@@ -230,7 +230,7 @@ SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `p
 
 Handoff соседних brand-экранов: `go(id, { handoff: true })` — правый visual без повторной анимации.
 
-Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo-done). Подробно — README `brand-screen-visual`.
+Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo-angel). Подробно — README `brand-screen-visual`.
 
 ## Квиз и отчёт
 
