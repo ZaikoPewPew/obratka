@@ -15,13 +15,24 @@ npm run dev
 
 ## Блоки
 
-1. **Шапка** — `logo.svg` (wordmark) + CTA «Войти»  
-2. **Hero** — бренд, крупный заголовок, lead, CTA + mesh (`createBrandScreenVisual`, mark 44×49)  
-3. **Showcase** — боль (title / lead / «Войти») + ряд из трёх `VideoPlayerCard` (без подложки)  
-4. **Преимущества** — 4 пункта (лига, лист, таймер, репутация)  
-5. **Закрытие** — invite-only + CTA  
+Пять полноэкранных панелей (`scroll-snap`, по центру экрана):
 
-Между блоками: `--landing-block-gap` (**128px**, как в Figma `/landing`).
+1. **Intro** — title/body  
+2. **Pain** — title / body / «Войти»  
+3. **Demo** — одно видео **833×478** (`VideoPlayerCard`, `primer.mp4`)  
+4. **Benefits** — grid 2×2 карточек (stagger при reveal панели)  
+5. **Closing** — invite-only + CTA  
+
+Шапка sticky; footer после панелей.  
+Типографика: title `32 / semibold`, body `16 / 1.7`.
+
+## Motion
+
+- `scroll-snap-type: y mandatory` + `scroll-snap-stop: always` на панелях.  
+- Reveal панели через `IntersectionObserver` (`landing-reveal--in`); первая — сразу.  
+- Demo — `motion-reveal-scale`; остальное — `motion-reveal`.  
+- Падающие уточки: **far** (blur, за контентом) — просто летят, без collide/grab; **mid** (в фокусе) — отскок от блоков и друг от друга + grab/throw.  
+- `prefers-reduced-motion: reduce` — без snap/анимаций/уточек.
 
 ## CTA
 
@@ -39,21 +50,21 @@ npm run dev
 
 | Можно | Нельзя |
 |-------|--------|
-| Токены `--landing-*`, `createBrandScreenVisual`, `createVideoPlayerCard`, `fixHangingPrepositions` | `src/api/*`, `src/main.js`, `src/app/session.js` |
+| Токены `--landing-*`, `createVideoPlayerCard`, `fixHangingPrepositions` | `src/api/*`, `src/main.js`, `src/app/session.js` |
 | Читать `inviteGatePassed`; CTA → `/referral` или `/registration` | Писать в `obratka.session` / invite gate |
-| Свои строки в HTML (не `locales.json`); демо-ролики из `src/assets/video/` | Монтировать продуктовые экраны |
+| Свои строки в HTML (не `locales.json`); демо из `src/assets/video/` | Монтировать продуктовые экраны |
 
-Копирайт лендоса **не** в `content/locales.json` — статичный HTML + `data-fix-hanging` для висячих предлогов.
+Копирайт лендоса **не** в `content/locales.json` — статичный HTML + `data-fix-hanging`.
 
 ## Файлы
 
 | Путь | Роль |
 |------|------|
 | `landing/index.html` | Разметка |
-| `landing/src/main.js` | CTA href (invite gate), hanging prepositions, mesh visual, video cards |
-| `landing/styles/landing.css` | Стили (только `var(--landing-*)` / семантика из `tokens.css`) |
-| `styles/tokens.css` | `--landing-*` (в т.ч. block-gap 128) |
-| `src/components/video-player-card/` | Плеер в карусели showcase |
+| `landing/src/main.js` | CTA, hanging, demo video, panel reveal |
+| `landing/styles/landing.css` | Стили (только `var(--landing-*)` / семантика) |
+| `styles/tokens.css` | `--landing-*` (demo 833×478, cards, reveal delays) |
+| `src/components/video-player-card/` | Плеер showcase |
 
 ## SEO (фаза 1)
 

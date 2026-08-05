@@ -20,6 +20,7 @@ createVideoPlayerCard({ src?, ariaLabel?, onEnded? }) → {
 - скорость: `1x` → `1.5x` → `2x` (цикл)
 - прогресс во время playback — `requestAnimationFrame` (плавно), не редкий `timeupdate`
 - нижний chrome: градиент + `backdrop-filter` blur с мягкой верхней кромкой (mask 0→100%), высота `--video-player-chrome-height`, прижат к низу карточки
+- idle-hide: уход мыши → scrim fade + нижнее меню (chrome / scrub / кнопки) уезжает вниз (`--video-player-chrome-shift`); hover — въезд снизу вверх; idle `--video-player-chrome-idle` (0s); центр play — scale+fade по `--playing`
 
 ## Стили
 

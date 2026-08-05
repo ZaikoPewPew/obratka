@@ -13,6 +13,7 @@ import playCompactIconSvg from "../../assets/video/icon-play-compact.svg?raw";
 import pauseCompactIconSvg from "../../assets/video/icon-pause-compact.svg?raw";
 
 const PLAYBACK_RATES = [1, 1.5, 2];
+const CHROME_IDLE_FALLBACK_MS = 0;
 
 /**
  * @param {number} seconds
@@ -24,6 +25,22 @@ function formatTime(seconds) {
   const m = Math.floor(total / 60);
   const s = total % 60;
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+/**
+ * @param {HTMLElement} el
+ * @returns {number}
+ */
+function readChromeIdleMs(el) {
+  const raw = getComputedStyle(el)
+    .getPropertyValue("--video-player-chrome-idle")
+    .trim();
+  if (!raw) return CHROME_IDLE_FALLBACK_MS;
+  const value = Number.parseFloat(raw);
+  if (!Number.isFinite(value)) return CHROME_IDLE_FALLBACK_MS;
+  if (raw.endsWith("ms")) return value;
+  if (raw.endsWith("s")) return value * 1000;
+  return value;
 }
 
 /**
@@ -59,6 +76,9 @@ export function createVideoPlayerCard(opts = {}) {
   let seeking = false;
   /** @type {number} */
   let progressRaf = 0;
+  /** @type {ReturnType<typeof setTimeout> | 0} */
+  let chromeIdleTimer = 0;
+  let pointerInside = false;
 
   const root = document.createElement("div");
   root.className = "video-player-card";
@@ -182,6 +202,43 @@ export function createVideoPlayerCard(opts = {}) {
 
   root.append(video, scrim, chrome, centerBtn, progress, controls);
 
+  function clearChromeIdle() {
+    if (!chromeIdleTimer) return;
+    clearTimeout(chromeIdleTimer);
+    chromeIdleTimer = 0;
+  }
+
+  /**
+   * @param {boolean} visible
+   */
+  function setChromeVisible(visible) {
+    root.classList.toggle("video-player-card--chrome-hidden", !visible);
+  }
+
+  function scheduleChromeHide() {
+    clearChromeIdle();
+    if (video.paused || video.ended || seeking || pointerInside) {
+      setChromeVisible(true);
+      return;
+    }
+    const idleMs = readChromeIdleMs(root);
+    if (idleMs <= 0) {
+      setChromeVisible(false);
+      return;
+    }
+    chromeIdleTimer = setTimeout(() => {
+      chromeIdleTimer = 0;
+      if (!video.paused && !video.ended && !seeking && !pointerInside) {
+        setChromeVisible(false);
+      }
+    }, idleMs);
+  }
+
+  function revealChrome() {
+    setChromeVisible(true);
+    if (!pointerInside) scheduleChromeHide();
+  }
+
   function syncPlayingUi() {
     const playing = !video.paused && !video.ended;
     root.classList.toggle("video-player-card--playing", playing);
@@ -189,8 +246,14 @@ export function createVideoPlayerCard(opts = {}) {
     pauseIcon.hidden = !playing;
     centerPlayIcon.hidden = playing;
     centerPauseIcon.hidden = !playing;
-    /* Во время playback центр прячем — не мешает смотреть. */
-    centerBtn.hidden = playing;
+    /* Центр прячется CSS по --playing (scale+fade), не [hidden]. */
+    if (playing) {
+      centerBtn.tabIndex = -1;
+      centerBtn.setAttribute("aria-hidden", "true");
+    } else {
+      centerBtn.removeAttribute("tabindex");
+      centerBtn.removeAttribute("aria-hidden");
+    }
     playBtn.setAttribute(
       "aria-label",
       playing
@@ -298,10 +361,12 @@ export function createVideoPlayerCard(opts = {}) {
     event.stopPropagation();
     video.muted = !video.muted;
     syncMuteUi();
+    revealChrome();
   });
   speedBtn.addEventListener("click", (event) => {
     event.stopPropagation();
     cycleSpeed();
+    revealChrome();
   });
 
   video.addEventListener("click", () => {
@@ -310,16 +375,21 @@ export function createVideoPlayerCard(opts = {}) {
   video.addEventListener("play", () => {
     syncPlayingUi();
     startProgressLoop();
+    revealChrome();
   });
   video.addEventListener("pause", () => {
     syncPlayingUi();
     stopProgressLoop();
     syncProgress();
+    clearChromeIdle();
+    setChromeVisible(true);
   });
   video.addEventListener("ended", () => {
     syncPlayingUi();
     stopProgressLoop();
     syncProgress();
+    clearChromeIdle();
+    setChromeVisible(true);
     opts.onEnded?.();
   });
   /* Fallback, если rAF ещё не крутится (метаданные / scrub на паузе). */
@@ -330,9 +400,29 @@ export function createVideoPlayerCard(opts = {}) {
   video.addEventListener("durationchange", syncProgress);
   video.addEventListener("volumechange", syncMuteUi);
 
+  root.addEventListener("pointerenter", () => {
+    pointerInside = true;
+    if (!video.paused && !video.ended) setChromeVisible(true);
+  });
+  root.addEventListener("pointermove", () => {
+    if (video.paused || video.ended) return;
+    pointerInside = true;
+    setChromeVisible(true);
+  });
+  root.addEventListener("pointerleave", () => {
+    pointerInside = false;
+    if (video.paused || video.ended || seeking) return;
+    scheduleChromeHide();
+  });
+  root.addEventListener("focusin", () => {
+    revealChrome();
+  });
+
   progress.addEventListener("pointerdown", (event) => {
     event.preventDefault();
     seeking = true;
+    clearChromeIdle();
+    setChromeVisible(true);
     progress.setPointerCapture(event.pointerId);
     seekFromClientX(event.clientX);
   });
@@ -348,6 +438,7 @@ export function createVideoPlayerCard(opts = {}) {
       progress.releasePointerCapture(event.pointerId);
     }
     syncProgress();
+    scheduleChromeHide();
   }
   progress.addEventListener("pointerup", endSeek);
   progress.addEventListener("pointercancel", endSeek);
@@ -400,6 +491,7 @@ export function createVideoPlayerCard(opts = {}) {
       video.pause();
     },
     destroy() {
+      clearChromeIdle();
       stopProgressLoop();
       video.pause();
       video.removeAttribute("src");

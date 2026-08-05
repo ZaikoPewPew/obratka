@@ -502,6 +502,14 @@
   --video-player-time-current: rgba(255, 255, 255, 0.94);
   --video-player-time-total: rgba(238, 238, 251, 0.55);
   --video-player-speed-min-width: 60px;
+  /* Idle-hide chrome: 0 = сразу при уходе мыши; motion — slide вниз/вверх */
+  --video-player-chrome-idle: 0s;
+  --video-player-chrome-shift: 14px;
+  --video-player-chrome-fade-duration: 400ms;
+  --video-player-chrome-fade-ease: var(--ease-reveal);
+  --video-player-center-fade-duration: 320ms;
+  --video-player-center-fade-ease: var(--ease-reveal);
+  --video-player-center-scale-from: 0.9;
   /* Онбординг шаг video: CTA 340×76 под плеером; выезд после первого просмотра */
   --onboarding-video-cta-width: 340px;
   --onboarding-video-cta-height: 76px;
@@ -1682,55 +1690,83 @@
   --url-screen-mesh-speed: 0.25;
   --url-screen-visual-wash: var(--palette-glow-mist);
 
-  /* Промо-лендос (`landing/`) */
+  /* Промо-лендос (`landing/`) — centered, единая типографика title/body */
   --landing-page-max: 1120px;
   --landing-page-padding-x: var(--space-6);
+  --landing-copy-max: 833px;
   --landing-header-height: var(--space-16);
   --landing-header-padding-y: var(--space-4);
-  --landing-hero-min-height: calc(100dvh - var(--landing-header-height));
-  --landing-hero-gap: var(--space-10);
-  --landing-hero-copy-gap: var(--space-5);
-  --landing-hero-brand-size: 64px;
-  --landing-hero-brand-weight: var(--font-weight-semibold);
-  --landing-hero-brand-line: 1;
-  --landing-hero-title-size: var(--font-size-3xl);
-  --landing-hero-title-weight: var(--font-weight-semibold);
-  --landing-hero-title-line: var(--line-height-tight);
-  --landing-hero-lead-size: var(--font-size-xl);
-  --landing-hero-lead-line: var(--line-height-normal);
-  --landing-section-padding-y: 128px;
   --landing-block-gap: 128px;
+  --landing-panel-min-height: 100dvh;
+  --landing-panel-padding-y: var(--space-16);
   --landing-section-gap: var(--space-10);
   --landing-section-title-size: var(--font-size-3xl);
   --landing-section-title-weight: var(--font-weight-semibold);
-  --landing-section-copy-gap: 28px;
-  --landing-pain-bg: var(--color-surface-muted);
+  --landing-section-body-size: var(--font-size-base);
+  --landing-section-body-line: 1.7;
+  --landing-section-body-max: 36rem;
+  --landing-section-copy-gap: var(--space-4);
   --landing-pain-radius: var(--radius-xl);
   --landing-pain-padding: var(--space-10);
-  --landing-media-width: 833px;
   --landing-media-copy-gap: 56px;
-  --landing-media-card-gap: var(--space-4);
-  --landing-benefit-gap: var(--space-8);
+  /* Demo video frame 833×478 */
+  --landing-demo-width: 833px;
+  --landing-demo-height: 478px;
+  --landing-demo-radius: var(--radius-md);
+  --landing-demo-outline: 0 0 0 var(--border-width) var(--palette-gray-100);
+  /* Benefit cards */
+  --landing-benefit-gap: var(--space-4);
+  --landing-benefit-padding: var(--space-8);
+  --landing-benefit-radius: var(--radius-2xl);
+  --landing-benefit-bg: var(--color-surface-muted);
   --landing-benefit-index-size: var(--font-size-sm);
   --landing-benefit-index-weight: var(--font-weight-semibold);
   --landing-benefit-index-color: var(--color-text-muted);
+  --landing-benefit-index-bg: var(--color-bg);
+  --landing-benefit-index-padding-y: var(--space-1);
+  --landing-benefit-index-padding-x: var(--space-3);
+  --landing-benefit-index-radius: var(--radius-pill);
   --landing-benefit-title-size: var(--font-size-xl);
-  --landing-benefit-title-weight: var(--font-weight-semibold);
-  --landing-benefit-body-size: var(--font-size-base);
-  --landing-benefit-body-color: var(--color-text-muted);
-  --landing-benefit-divider: var(--border-width) solid var(--color-border);
-  --landing-cta-band-gap: var(--space-6);
   --landing-footer-padding-y: var(--space-8);
   --landing-footer-color: var(--color-text-muted);
   --landing-reveal-delay-header: var(--motion-delay-1);
   --landing-reveal-delay-copy: var(--motion-delay-2);
   --landing-reveal-delay-visual: var(--motion-delay-3);
   --landing-reveal-delay-section: var(--motion-delay-2);
+  --landing-reveal-delay-card-1: var(--motion-delay-1);
+  --landing-reveal-delay-card-2: var(--motion-delay-2);
+  --landing-reveal-delay-card-3: var(--motion-delay-3);
+  --landing-reveal-delay-card-4: var(--motion-delay-4);
   --landing-visual-radius: var(--url-screen-visual-radius);
-  --landing-visual-min-height: 420px;
+  --landing-visual-min-height: 360px;
   --landing-brand-width: var(--url-screen-brand-width);
   --landing-brand-height: var(--url-screen-brand-height);
   --landing-logo-height: var(--space-6);
+  /* Падающие уточки (far = фон; mid = интерактив) */
+  --landing-ducks-back-z: 0;
+  --landing-ducks-front-z: calc(var(--z-base) + 2);
+  --landing-ducks-content-z: var(--z-base);
+  --landing-duck-far-size: 34px;
+  --landing-duck-far-blur: 10px;
+  --landing-duck-far-opacity: 0.38;
+  --landing-duck-far-gravity: 32;
+  --landing-duck-mid-size: 58px;
+  --landing-duck-mid-blur: 0px;
+  --landing-duck-mid-opacity: 0.92;
+  --landing-duck-mid-gravity: 52;
+  --landing-duck-drag: 0.16;
+  --landing-duck-spin-min: 28;
+  --landing-duck-spin-max: 95;
+  --landing-duck-vx-max: 48;
+  --landing-duck-vy0-max: 28;
+  --landing-duck-restitution: 1.08;
+  --landing-duck-bounce-boost: 1.4;
+  --landing-duck-bounce-spin: 220;
+  --landing-duck-collide-pad: var(--space-2);
+  --landing-duck-pair-restitution: 0.88;
+  --landing-duck-throw-gain: 1.15;
+  --landing-duck-throw-max: 1600;
+  --landing-duck-held-scale: 1.08;
 
   /* Совместимость со старыми стилями */
   --desktop-component-padding: var(--space-4);
