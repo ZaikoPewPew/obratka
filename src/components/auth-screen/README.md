@@ -12,7 +12,10 @@ Path: **`/registration`**. Split как `url-screen`; форма — email → d
 
 ## Файл
 
-- `AuthScreen.js` — `createAuthScreen({ onSuccess, mode? })` → `{ root, open, close, setMode }`.
+- `AuthScreen.js` — `createAuthScreen({ onSuccess, onAuthStarted?, onAuthFailed?, mode? })` → `{ root, open, close, setMode }`.
+  - `onAuthStarted({ provider })` — клик Telegram / Google (до сети).
+  - `onAuthFailed({ provider, code })` — ошибка провайдера; **не** вызывается на `telegram_cancelled` / `google_cancelled` / `access_denied`.
+  - Аналитика: колбэки → `track` в `main.js` (`auth_started` / `auth_failed`); SoT — [`ANALYTICS.md`](../../../ANALYTICS.md).
 
 ## Visual и ошибки
 

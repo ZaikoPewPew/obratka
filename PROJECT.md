@@ -296,7 +296,7 @@ SoT имён и чеклист «новая фича = аналитика»: [`A
 3. Троттлинг злоупотреблений жалобой / тег `misleading` / очередь модерации.
 4. Редизайн жалоб / списка листов на `report-screen` (PDF-сводка уже есть).
 5. Диктовка план B: Whisper через Edge (контракт `DictationEngine` уже есть; MVP = Web Speech). Post-edit пунктуации wired, но **клиент off** (`POLISH_ENABLED = false`) — [`polish-dictation`](supabase/functions/polish-dictation/README.md).
-6. Добить step-events онбординга и ревью-воронки (intro / timer / quiz) — имена в [`ANALYTICS.md`](ANALYTICS.md) § планируемые.
+6. Добить step-events онбординга и квиза (`onboarding_step_*`, `quiz_step_completed`) — имена в [`ANALYTICS.md`](ANALYTICS.md) § планируемые. Intro / timer / next case / home submit / auth start·fail уже wired.
 
 ## Команды
 

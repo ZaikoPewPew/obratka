@@ -687,6 +687,14 @@ function isCompletedOwnItem(item) {
  *   onBeforeOpenRules?: () => void | Promise<void>;
  *   onSignOut?: () => void | Promise<void>;
  *   onViewChange?: (view: { tab: HomeTabId; filter: MineFilterId; reason: 'tab' | 'filter' }) => void;
+ *   onReviewIntroOpened?: (payload: { portfolioId: string }) => void;
+ *   onReviewIntroCta?: (payload: {
+ *     portfolioId: string;
+ *     action: 'start' | 'dismiss';
+ *   }) => void;
+ *   onHomeSubmitClicked?: (payload: {
+ *     blocked?: 'no_ducks' | 'slot_taken';
+ *   }) => void;
  * }} opts
  * @returns {{
  *   root: HTMLElement;
@@ -711,6 +719,9 @@ export function createHomeScreen({
   onBeforeOpenRules,
   onSignOut,
   onViewChange,
+  onReviewIntroOpened,
+  onReviewIntroCta,
+  onHomeSubmitClicked,
 }) {
   const root = document.createElement("section");
   root.className = "home-screen";
@@ -1070,10 +1081,25 @@ export function createHomeScreen({
 
   const reviewIntroVideo = createReviewIntroVideo();
 
+  /** Один dismiss/start на закрытие intro (primary/secondary + onClose). */
+  let reviewIntroCtaEmitted = false;
+
+  /**
+   * @param {'start' | 'dismiss'} action
+   */
+  function emitReviewIntroCta(action) {
+    if (reviewIntroCtaEmitted) return;
+    const portfolioId = reviewIntroItem?.id;
+    if (!portfolioId) return;
+    reviewIntroCtaEmitted = true;
+    onReviewIntroCta?.({ portfolioId, action });
+  }
+
   const reviewIntroModal = createAppModal({
     size: "md",
     onPrimary: () => {
       const item = reviewIntroItem;
+      emitReviewIntroCta("start");
       reviewIntroVideo.stop();
       void reviewIntroModal.close();
       if (item) {
@@ -1081,12 +1107,15 @@ export function createHomeScreen({
       }
     },
     onSecondary: () => {
+      emitReviewIntroCta("dismiss");
       reviewIntroVideo.stop();
       void reviewIntroModal.close();
     },
     onClose: () => {
+      emitReviewIntroCta("dismiss");
       reviewIntroVideo.stop();
       reviewIntroItem = null;
+      reviewIntroCtaEmitted = false;
     },
   });
   reviewIntroModal.content.append(reviewIntroVideo.root);
@@ -1545,14 +1574,17 @@ export function createHomeScreen({
     if (pending != null && pending >= MAX_MINE_PENDING) {
       flashSubmitError();
       notification.show(t.homeNotifySlotTaken ?? "");
+      onHomeSubmitClicked?.({ blocked: "slot_taken" });
       return;
     }
 
     if (!canSubmitPortfolio()) {
       buzzSubmitLocked();
       notification.show(t.homeNotifyNoDucks ?? "");
+      onHomeSubmitClicked?.({ blocked: "no_ducks" });
       return;
     }
+    onHomeSubmitClicked?.({});
     void onAddPortfolio?.();
   }
 
@@ -1669,6 +1701,7 @@ export function createHomeScreen({
     }
     const t = getStrings();
     reviewIntroVideo.stop();
+    reviewIntroCtaEmitted = false;
     reviewIntroItem = item;
     reviewIntroVideo.setAriaLabel(t.homeReviewIntroVideoAria ?? "");
     reviewIntroModal.setTitle(
@@ -1683,10 +1716,12 @@ export function createHomeScreen({
     reviewIntroModal.setActionsVisible({ primary: true, secondary: true });
     reviewIntroModal.open();
     reviewIntroVideo.play();
+    if (item?.id) onReviewIntroOpened?.({ portfolioId: item.id });
     onPreviewPortfolio?.(item);
   }
 
   function closeReviewIntroModal() {
+    reviewIntroCtaEmitted = true;
     reviewIntroVideo.stop();
     reviewIntroItem = null;
     void reviewIntroModal.close();

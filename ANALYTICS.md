@@ -95,12 +95,19 @@ resetAnalytics(); // logout
 |-------|-----|-------|--------|
 | `$pageview` | `applyRoute` | `route_id`, `path`, home `tab`/`filter` | Посещаемость |
 | `referral_validated` | referral submit ok | — | Старт воронки invite |
+| `auth_started` | клик Telegram / Google | `provider`: `telegram` \| `google` | Старт логина |
+| `auth_failed` | fail Telegram / Google (не cancel) | `provider`, `code` | Отвал логина |
 | `auth_success` | `applyProviderUser` | `provider`: `email` \| `telegram` \| `google` | Логин |
 | `onboarding_done` | onboarding complete | `grade?` | Конец онбординга |
+| `review_intro_opened` | intro-модалка home | `portfolio_id` | Открытие intro |
+| `review_intro_cta` | CTA / «Не сейчас» / close | `portfolio_id`, `action`: `start` \| `dismiss` | Решение до claim |
 | `review_claimed` | после успешного claim | `portfolio_id` | Вход в ревью |
 | `review_claim_failed` | client/RPC fail | `reason` | Отвал до `/review` |
+| `review_timer_completed` | 45s → quiz panel | `portfolio_id`, `embed_mode`: `iframe` \| `external` | Дошли до квиза |
 | `review_submitted` | после INSERT review | `portfolio_id` | Успех ревью (+монеты) |
 | `review_aborted` | confirm abort / desktop-only gate | `portfolio_id?`, `route_id?`, `reason?` (`desktop_only_gate`) | Уход без награды |
+| `review_next_case_clicked` | «Следующий кейс» | `ok` | Цикл следующего кейса |
+| `home_submit_clicked` | «Закинуть» / gate `/portfolio` | `blocked?`: `no_ducks` \| `slot_taken` | CTA подачи / блок |
 | `portfolio_submitted` | после `submit_portfolio` | — | Подача своего URL |
 | `desktop_only_gate_shown` | первый показ гейта &lt;768px за загрузку | — | Мобильный / узкий вход |
 
@@ -111,7 +118,8 @@ Identify traits: `grade`, `tier`, `onboarding_done` (без email).
 ### A. Онбординг (acquisition)
 
 ```text
-referral_validated → auth_success → $pageview(onboarding) → onboarding_done → $pageview(home)
+referral_validated → auth_started → auth_success | auth_failed
+  → $pageview(onboarding) → onboarding_done → $pageview(home)
 ```
 
 **Планируемые** (навесить при переделке онбординга):
@@ -121,9 +129,7 @@ referral_validated → auth_success → $pageview(onboarding) → onboarding_don
 | `onboarding_step_viewed` | показ шага | `step_id` (`grade` / `domain` / `goal` / `watch`) |
 | `onboarding_step_completed` | ответ / Далее | `step_id`, опц. `values` (enum, не free text; для `watch` — без values) |
 | `onboarding_back` | назад | `from_step_id` |
-| `auth_started` | клик Email / Telegram / Google | `provider` |
 | `auth_otp_requested` | OTP ушёл | — |
-| `auth_failed` | ошибка входа | `provider`, `code` (i18n-код) |
 
 Шаги контента: [`content/onboarding.md`](content/onboarding.md).
 
@@ -131,28 +137,23 @@ referral_validated → auth_success → $pageview(onboarding) → onboarding_don
 
 ```text
 $pageview(home)
-  → review_intro_opened          # план
-  → review_intro_cta             # план («Сюдаа его!» / dismiss)
+  → review_intro_opened
+  → review_intro_cta (start | dismiss)
   → review_claimed | review_claim_failed
   → $pageview(review)
-  → review_timer_completed       # план
+  → review_timer_completed
   → $pageview(quiz)
-  → quiz_step_completed          # план
   → review_submitted | review_aborted
-  → $pageview(done) / next_case  # план
+  → $pageview(done)
+  → review_next_case_clicked
 ```
 
 **Планируемые** (навесить при переделке воронки ревью):
 
 | Event | Когда | Props |
 |-------|--------|-------|
-| `review_intro_opened` | intro-модалка | `portfolio_id` |
-| `review_intro_cta` | CTA / «Не сейчас» | `portfolio_id`, `action`: `start` \| `dismiss` |
-| `review_timer_completed` | 45s → quiz | `portfolio_id`, `embed_mode`: `iframe` \| `external` |
 | `quiz_step_completed` | шаг квиза | `step` (id вопроса) |
-| `review_next_case_clicked` | «Следующий кейс» | `ok` / empty |
 | `review_dictation_started` | rec / mic | `source`: `notes` \| `advice` |
-| `home_submit_clicked` | «Закинуть своё» | `blocked?`: `no_ducks` \| `slot_taken` |
 
 Claims / abort: [`.cursor/rules/review-claims.mdc`](.cursor/rules/review-claims.mdc).
 

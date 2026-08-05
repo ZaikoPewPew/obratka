@@ -95,10 +95,26 @@ const GOOGLE_LOADER_SVG = `
 `;
 
 /**
+ * @param {unknown} err
+ * @param {string} fallback
+ * @returns {string}
+ */
+function authAnalyticsCode(err, fallback) {
+  const raw = err instanceof Error ? err.message : String(err || "");
+  if (/^[a-z][a-z0-9_]{0,80}$/i.test(raw)) return raw;
+  return fallback;
+}
+
+/**
  * Экран регистрации: email → (далее auth-code) / Telegram / Google.
  *
  * @param {{
  *   onSuccess: (result: AuthResult) => void | Promise<void>;
+ *   onAuthStarted?: (payload: { provider: 'telegram' | 'google' }) => void;
+ *   onAuthFailed?: (payload: {
+ *     provider: 'telegram' | 'google';
+ *     code: string;
+ *   }) => void;
  *   mode?: AuthMode;
  * }} opts
  * @returns {{
@@ -108,7 +124,12 @@ const GOOGLE_LOADER_SVG = `
  *   setMode: (mode: AuthMode) => void;
  * }}
  */
-export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
+export function createAuthScreen({
+  onSuccess,
+  onAuthStarted,
+  onAuthFailed,
+  mode: initialMode = "sign-up",
+}) {
   const t = getStrings();
   /** @type {AuthMode} */
   let mode = initialMode;
@@ -458,6 +479,7 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
     if (telegramBusy || googleBusy || emailBusy) return;
     setProviderError(null);
     setTelegramBusy(true);
+    onAuthStarted?.({ provider: "telegram" });
     try {
       const session = await signInWithTelegram();
       await Promise.resolve(
@@ -476,6 +498,10 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
         setProviderError(null);
       } else {
         setProviderError(telegramErrorMessage(err));
+        onAuthFailed?.({
+          provider: "telegram",
+          code: authAnalyticsCode(err, "telegram_error"),
+        });
       }
       if (import.meta.env.DEV) {
         console.warn("[auth] telegram sign-in failed", err);
@@ -489,10 +515,21 @@ export function createAuthScreen({ onSuccess, mode: initialMode = "sign-up" }) {
     if (googleBusy || telegramBusy || emailBusy) return;
     setProviderError(null);
     setGoogleBusy(true);
+    onAuthStarted?.({ provider: "google" });
     try {
       await signInWithGoogle();
     } catch (err) {
-      setProviderError(googleErrorMessage(err));
+      const code =
+        err instanceof Error ? err.message : String(err || "google_error");
+      if (code === "google_cancelled" || code === "access_denied") {
+        setProviderError(null);
+      } else {
+        setProviderError(googleErrorMessage(err));
+        onAuthFailed?.({
+          provider: "google",
+          code: authAnalyticsCode(err, "google_error"),
+        });
+      }
       if (import.meta.env.DEV) {
         console.warn("[auth] google sign-in failed", err);
       }

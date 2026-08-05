@@ -968,6 +968,7 @@ async function claimAndStartReview(item, opts = {}) {
 async function openNextReviewCase() {
   if (nextCaseOpening) return;
   nextCaseOpening = true;
+  let claimedOk = false;
   try {
     const pending = reviewSubmitPromise;
     if (pending) {
@@ -1004,7 +1005,10 @@ async function openNextReviewCase() {
       Date.now() - preload.at < NEXT_CASE_PRELOAD_TTL_MS;
 
     if (preloadFresh) {
-      if (await tryClaimFromList(preload.items)) return;
+      if (await tryClaimFromList(preload.items)) {
+        claimedOk = true;
+        return;
+      }
     }
 
     let items;
@@ -1023,7 +1027,10 @@ async function openNextReviewCase() {
       return;
     }
 
-    if (await tryClaimFromList(items)) return;
+    if (await tryClaimFromList(items)) {
+      claimedOk = true;
+      return;
+    }
 
     reviewPanel?.setNextCaseBusy?.(false);
     reviewPanel?.setNextCaseVisible?.(false);
@@ -1032,6 +1039,7 @@ async function openNextReviewCase() {
       search: buildHomeSearch(lastHomeView),
     });
   } finally {
+    track("review_next_case_clicked", { ok: claimedOk });
     nextCaseOpening = false;
   }
 }
@@ -1710,6 +1718,12 @@ function lockFrameAndShowReview() {
   sessionEnded = true;
   syncDictationChrome();
   playTimerEndSound();
+  if (portfolioId) {
+    track("review_timer_completed", {
+      portfolio_id: portfolioId,
+      embed_mode: isExternalEmbedSession() ? "external" : "iframe",
+    });
+  }
   startTabAttention({
     alertTitle: getStrings().metaTitleAttention,
     alertFaviconHref: TAB_ATTENTION_FAVICON,
@@ -2110,6 +2124,21 @@ async function ensureHomeScreen() {
           onOpenPortfolio: async (item) => {
             await claimAndStartReview(item, { showNoSlotsNotice: true });
           },
+          onReviewIntroOpened: ({ portfolioId }) => {
+            track("review_intro_opened", { portfolio_id: portfolioId });
+          },
+          onReviewIntroCta: ({ portfolioId, action }) => {
+            track("review_intro_cta", {
+              portfolio_id: portfolioId,
+              action,
+            });
+          },
+          onHomeSubmitClicked: ({ blocked } = {}) => {
+            /** @type {Record<string, unknown>} */
+            const props = {};
+            if (blocked) props.blocked = blocked;
+            track("home_submit_clicked", props);
+          },
           onOpenReport: async (item) => {
             if (!item?.isOwn || !item.id) return;
             pendingReportPortfolioId = item.id;
@@ -2339,6 +2368,12 @@ function getPendingAuthEmail() {
 }
 
 const authScreen = createAuthScreen({
+  onAuthStarted: ({ provider }) => {
+    track("auth_started", { provider });
+  },
+  onAuthFailed: ({ provider, code }) => {
+    track("auth_failed", { provider, code });
+  },
   onSuccess: async (result) => {
     if (result.type === "email-otp-sent") {
       setPendingAuthEmail(result.email);
@@ -2491,8 +2526,10 @@ async function applyRoute(id, opts = {}) {
       if (!slotFree) {
         accessible = "home";
         pendingLimitBlocked = true;
+        track("home_submit_clicked", { blocked: "slot_taken" });
       } else if (!canSubmitPortfolio()) {
         accessible = "home";
+        track("home_submit_clicked", { blocked: "no_ducks" });
       }
     } catch (err) {
       if (import.meta.env.DEV) {
@@ -2500,6 +2537,7 @@ async function applyRoute(id, opts = {}) {
       }
       if (!canSubmitPortfolio()) {
         accessible = "home";
+        track("home_submit_clicked", { blocked: "no_ducks" });
       }
     }
   }
@@ -2921,6 +2959,14 @@ void (async () => {
   } catch (err) {
     if (import.meta.env.DEV) {
       console.warn("[auth] oauth callback failed", err);
+    }
+    const code =
+      err instanceof Error ? err.message : String(err || "google_oauth_failed");
+    if (code !== "google_cancelled" && code !== "access_denied") {
+      const safeCode = /^[a-z][a-z0-9_]{0,80}$/i.test(code)
+        ? code
+        : "google_oauth_failed";
+      track("auth_failed", { provider: "google", code: safeCode });
     }
     try {
       window.sessionStorage.setItem(
