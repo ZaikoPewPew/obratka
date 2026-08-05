@@ -23,7 +23,7 @@ Path: **`/quiz`**, финал **`/quiz/done`**. Split: слева слот по�
 
 Снизу вверх (`--shell-review-z-*`): glow → noise → report → brand.
 
-На шаге advice лист выезжает (`getReportLaunchMotion`); на короткой visual — clamp ≥ `--shell-review-report-gap-below-brand` под лого (`--shell-review-report-shift-shown-effective`); после submit — уезд + `.review-screen--done` (`getReviewMeshDoneMotion`). Марка: in-place morph `morphBrandMarkToDone` (нимб + fade короны), без `innerHTML`-swap. Слева одновременно входит `review-panel__done`.
+На шаге advice лист выезжает (CSS `--report`); на короткой visual — clamp ≥ `--shell-review-report-gap-below-brand` под лого (`--shell-review-report-shift-shown-effective`); после submit — уезд (`getReportLaunchMotion`) + `.review-screen--done` (`getReviewMeshDoneMotion`). `setReportReveal(true)` / hide без `submitted` не прерывают уже запущенный submitted-launch (гонка с polish/`setAdviceText`). Марка: in-place morph `morphBrandMarkToDone` (нимб + fade короны), без `innerHTML`-swap. Слева одновременно входит `review-panel__done`.
 
 Токены `--shell-review-*`, `--motion-report-launch-*`. Классы в `iframe-shell.css`.  
 Launch стартует с `readSheetTranslateY` (вычисленный Y после clamp), не с сырых `22%`.  

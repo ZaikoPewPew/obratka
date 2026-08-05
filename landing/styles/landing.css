@@ -48,7 +48,6 @@
 .landing-header__brand {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-3);
   text-decoration: none;
 }
 
@@ -56,12 +55,6 @@
   display: block;
   height: var(--landing-logo-height);
   width: auto;
-}
-
-.landing-header__name {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.02em;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -137,7 +130,7 @@
   max-width: var(--landing-page-max);
   min-height: var(--landing-hero-min-height);
   margin: 0 auto;
-  padding: var(--space-10) var(--landing-page-padding-x) var(--space-12);
+  padding: var(--space-10) var(--landing-page-padding-x) 0;
 }
 
 .landing-hero__copy {
@@ -256,31 +249,65 @@
   color: var(--color-text);
 }
 
-.landing-pain {
-  padding: 0 var(--landing-page-padding-x) var(--landing-section-padding-y);
+.landing-section__title--center {
+  text-align: center;
 }
 
-.landing-pain__inner {
-  max-width: var(--landing-page-max);
-  margin: 0 auto;
-  padding: var(--landing-pain-padding);
-  border-radius: var(--landing-pain-radius);
-  background: var(--landing-pain-bg);
+.landing-showcase {
+  padding: var(--landing-block-gap) var(--landing-page-padding-x) 0;
+}
+
+.landing-showcase__inner {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  align-items: center;
+  gap: var(--landing-media-copy-gap);
+  max-width: var(--landing-page-max);
+  margin: 0 auto;
 }
 
-.landing-pain__body {
+.landing-showcase__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--landing-section-copy-gap);
+  max-width: var(--landing-media-width);
+  text-align: center;
+}
+
+.landing-showcase__body {
   margin: 0;
-  max-width: 40rem;
-  font-size: var(--font-size-xl);
-  line-height: var(--line-height-normal);
+  max-width: 36rem;
+  font-size: var(--font-size-base);
+  line-height: 1.7;
   color: var(--color-text-muted);
+  text-align: center;
+}
+
+.landing-showcase__media {
+  width: 100%;
+  max-width: var(--landing-page-max);
+}
+
+.landing-showcase__carousel {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--landing-media-card-gap);
+}
+
+.landing-showcase__slide {
+  flex: 0 0 auto;
+}
+
+.landing-showcase__slide .video-player-card {
+  width: var(--video-player-width);
+  height: var(--video-player-height);
 }
 
 .landing-benefits {
-  padding: 0 var(--landing-page-padding-x) var(--landing-section-padding-y);
+  padding: var(--landing-block-gap) var(--landing-page-padding-x) 0;
 }
 
 .landing-benefits__inner {
@@ -342,7 +369,8 @@
 }
 
 .landing-closing {
-  padding: 0 var(--landing-page-padding-x) var(--landing-section-padding-y);
+  padding: var(--landing-block-gap) var(--landing-page-padding-x)
+    var(--landing-block-gap);
 }
 
 .landing-closing__inner {
@@ -411,7 +439,7 @@
 .landing-page--ready .landing-header,
 .landing-page--ready .landing-hero__copy,
 .landing-page--ready .landing-hero__visual-slot,
-.landing-page--ready .landing-pain__inner,
+.landing-page--ready .landing-showcase__inner,
 .landing-page--ready .landing-benefits__inner,
 .landing-page--ready .landing-closing__inner {
   animation-duration: var(--motion-reveal-duration);
@@ -434,7 +462,7 @@
   animation-delay: var(--landing-reveal-delay-visual);
 }
 
-.landing-page--ready .landing-pain__inner,
+.landing-page--ready .landing-showcase__inner,
 .landing-page--ready .landing-benefits__inner,
 .landing-page--ready .landing-closing__inner {
   animation-name: motion-reveal;
@@ -445,7 +473,7 @@
   .landing-page--ready .landing-header,
   .landing-page--ready .landing-hero__copy,
   .landing-page--ready .landing-hero__visual-slot,
-  .landing-page--ready .landing-pain__inner,
+  .landing-page--ready .landing-showcase__inner,
   .landing-page--ready .landing-benefits__inner,
   .landing-page--ready .landing-closing__inner {
     animation: none;
@@ -485,21 +513,13 @@
     gap: var(--space-4);
   }
 
-  .landing-pain__body,
+  .landing-showcase__body,
   .landing-closing__body {
     font-size: var(--font-size-base);
   }
 }
 
 @media (max-width: 520px) {
-  .landing-header__name {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-  }
-
   .landing-cta--header {
     font-size: var(--font-size-sm);
   }

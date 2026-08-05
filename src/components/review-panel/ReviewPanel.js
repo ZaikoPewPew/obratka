@@ -878,8 +878,18 @@ export function createReviewPanel(options = {}) {
   }
 
   function syncReportReveal() {
+    // После submit / leave→done не трогаем лист: иначе setAdviceText
+    // (polish в onComplete) или syncChrome отменят launch с submitted.
+    if (
+      !done.hidden ||
+      transitioning ||
+      root.classList.contains("review-panel--to-done")
+    ) {
+      return;
+    }
+
     const onAdvice =
-      done.hidden && !form.hidden && steps[currentStep]?.id === "advice";
+      !form.hidden && steps[currentStep]?.id === "advice";
 
     if (!onAdvice) {
       onReportReveal?.(false);

@@ -53,7 +53,7 @@ Progress считает только **видимые** шаги (6 или 7 в 
 
 1. Шаги single / multi / scale / advice (контент из локалей `review*`).
 2. Шаг advice → `onReportReveal(true)` (лист справа на `review-screen`, `mode: "preview"`).
-3. Submit → `answersFromFormData` → `onComplete(answers)` (награда; снаружи могут добавить `dictation`) + `showDone` + `onReportReveal(false, { submitted: true })` + `onDoneChange(true)` → URL `/quiz/done`.
+3. Submit → `answersFromFormData` → `onComplete(answers)` (награда; снаружи могут добавить `dictation`) + `showDone` + `onReportReveal(false, { submitted: true })` + `onDoneChange(true)` → URL `/quiz/done`. Пока leave→done / done виден, `syncReportReveal` no-op — иначе `setAdviceText` после polish отменяет улёт листа.
 4. CTA → `onExit` → home (`setExitBusy`: лоадер на «На главную», пока `reviewSubmitPromise` / release; при `POLISH_ENABLED` туда входит и polish LLM); `onNextCase` → claim следующего (лента + embed прогреваются на done через `prewarmNextReviewCase` в `main.js`). На done кнопка «Следующий кейс» сразу с лоадером (`setNextCasePreparing`); нет кандидатов — disabled + `reviewDoneNextCaseEmpty` (`setNextCaseEmpty`). Клик по next — `setNextCaseBusy` (лоадер + блок обеих CTA). Оркестрация в `main.js`.
 
 Смена шага: leave/enter пачки `stage` + footer на `--motion-reveal-*` (`getMotionReveal`).  

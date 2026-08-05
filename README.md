@@ -91,6 +91,7 @@ API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](
 | [`STRUCTURE.md`](STRUCTURE.md) | Папки и env |
 | [`ACTION_CARDS.md`](ACTION_CARDS.md) | Сводный PDF: majority → action cards + `actionResources` |
 | [`ANALYTICS.md`](ANALYTICS.md) | PostHog: pageviews, воронки, чеклист новой фичи |
+| [`RELEASE.md`](RELEASE.md) | Чеклист релиза v1: полиш, инфра, QA, go/no-go |
 | [`mobile.md`](mobile.md) | **Desktop-only** (&lt;768px → заглушка) + архив waitlist |
 | [`landing/README.md`](landing/README.md) | Промо-лендос (MPA entry, CTA → `/referral`) |
 | [`src/components/desktop-only-screen/README.md`](src/components/desktop-only-screen/README.md) | Оверлей «только с компьютера» |

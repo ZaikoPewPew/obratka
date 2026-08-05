@@ -15,19 +15,33 @@ npm run dev
 
 ## Блоки
 
-1. **Шапка** — `logo-default.svg` + «Обратка» + CTA инвайт  
+1. **Шапка** — `logo.svg` (wordmark) + CTA «Войти»  
 2. **Hero** — бренд, крупный заголовок, lead, CTA + mesh (`createBrandScreenVisual`, mark 44×49)  
-3. **Боль** — зачем нужна обратка  
+3. **Showcase** — боль (title / lead / «Войти») + ряд из трёх `VideoPlayerCard` (без подложки)  
 4. **Преимущества** — 4 пункта (лига, лист, таймер, репутация)  
 5. **Закрытие** — invite-only + CTA  
+
+Между блоками: `--landing-block-gap` (**128px**, как в Figma `/landing`).
+
+## CTA
+
+`data-landing-cta` → href через `import.meta.env.BASE_URL`:
+
+| Условие | Куда |
+|---------|------|
+| `?ref=` в URL лендоса | `/referral?ref=…` |
+| `obratka.inviteGatePassed` (уже вводили код на этом устройстве) | `/registration` |
+| иначе | `/referral` |
+
+Читаем `getInviteGatePassed` — не пишем в gate / session.
 
 ## Изоляция
 
 | Можно | Нельзя |
 |-------|--------|
-| Токены `--landing-*`, `createBrandScreenVisual`, `fixHangingPrepositions` | `src/api/*`, `src/main.js`, `src/app/session.js` |
-| CTA → `/referral` (+ `?ref=` через `import.meta.env.BASE_URL`) | Писать в `obratka.session` / invite gate |
-| Свои строки в HTML (не `locales.json`) | Монтировать продуктовые экраны |
+| Токены `--landing-*`, `createBrandScreenVisual`, `createVideoPlayerCard`, `fixHangingPrepositions` | `src/api/*`, `src/main.js`, `src/app/session.js` |
+| Читать `inviteGatePassed`; CTA → `/referral` или `/registration` | Писать в `obratka.session` / invite gate |
+| Свои строки в HTML (не `locales.json`); демо-ролики из `src/assets/video/` | Монтировать продуктовые экраны |
 
 Копирайт лендоса **не** в `content/locales.json` — статичный HTML + `data-fix-hanging` для висячих предлогов.
 
@@ -36,9 +50,10 @@ npm run dev
 | Путь | Роль |
 |------|------|
 | `landing/index.html` | Разметка |
-| `landing/src/main.js` | CTA href, hanging prepositions, mesh visual |
+| `landing/src/main.js` | CTA href (invite gate), hanging prepositions, mesh visual, video cards |
 | `landing/styles/landing.css` | Стили (только `var(--landing-*)` / семантика из `tokens.css`) |
-| `styles/tokens.css` | `--landing-*` |
+| `styles/tokens.css` | `--landing-*` (в т.ч. block-gap 128) |
+| `src/components/video-player-card/` | Плеер в карусели showcase |
 
 ## SEO (фаза 1)
 

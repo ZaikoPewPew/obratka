@@ -305,7 +305,8 @@ export function createReviewScreen({ content }) {
    */
   function setReportReveal(active, payload = {}) {
     if (active) {
-      pendingDoneMesh = false;
+      // Не срывать улёт после submit (гонка с setAdviceText / syncReportReveal).
+      if (pendingDoneMesh || reportLaunchAnim) return;
       cancelReportLaunch();
       fillReportSheet(payload.answers, payload.portfolioName);
       root.classList.add("review-screen--report");
@@ -314,7 +315,12 @@ export function createReviewScreen({ content }) {
 
     if (payload.submitted) {
       pendingDoneMesh = true;
+      void launchReportAway();
+      return;
     }
+
+    // Hide без submit: не прерывать уже запущенный submitted-launch.
+    if (pendingDoneMesh || reportLaunchAnim) return;
 
     void launchReportAway();
   }
