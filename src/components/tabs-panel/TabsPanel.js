@@ -163,9 +163,11 @@ export function createTabsPanel({
     dot.hidden = !visible;
   }
 
+  // Как home tabbar: без instant — иначе layout после renderList (scrollbar /
+  // ширина) прыгает пилл в конец и съедает анимацию смены таба.
   if (typeof ResizeObserver === "function") {
     const resize = new ResizeObserver(() => {
-      syncThumb(true);
+      syncThumb();
     });
     resize.observe(root);
     for (const btn of buttons.values()) {
@@ -174,7 +176,7 @@ export function createTabsPanel({
   }
 
   window.addEventListener("resize", () => {
-    scheduleThumbSync(true);
+    scheduleThumbSync();
   });
 
   setActive(currentId, { instant: true });

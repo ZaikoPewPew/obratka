@@ -29,6 +29,7 @@ FAB feedback — Lottie [`lottie/cap-lottie.json`](lottie/cap-lottie.json), не
 
 | Файл | Роль |
 |------|------|
+| `logo.svg` | wordmark **100×24** — шапка home (`HomeScreen`) |
 | `logo-default.svg` | default blob **44×49** — правый visual brand-экранов / landing header |
 | `logo-devil.svg` | evil: horns + accents + blob **44×53** (ban-screen; horns для морфа) |
 | `logo-angel.svg` | success / done: body + halo + accents **52×59** |

@@ -59,7 +59,7 @@
 | `--home-screen-review-intro-*` | видео-слот intro-модалки (max 552, aspect 1256/720) |
 | `--home-screen-tabbar-*` | glass track (gray-900 10% / white on-dark 20% / blur 20), hide/thumb/label/contrast; dock-gap + submit (56×56 Google blue) + tab-dot (6px Google red) |
 | `--home-screen-reveal-delay-*` | entrance stagger на `/home` (topbar → body → dock → fab); dock = `motion-reveal-dock` **без** opacity (glass `backdrop-filter`) |
-| `--tabs-panel-*` | сегмент feed/mine (track / tab / thumb / tab-dot) |
+| `--tabs-panel-*` | сегмент feed/mine: track **48** / tab **40** / padding 4 / thumb; tab-dot 7px right **16px**; RO без `instant` |
 | `--app-modal-*` | универсальная модалка (Figma Modal) |
 | `--desktop-only-screen-*` | оверлей &lt;768px (z / padding / card / brand) |
 | `--landing-*` | промо MPA (`landing/styles/landing.css`) |

@@ -64,7 +64,7 @@ Empty «Завершенные»: `homeEmptyMineCompleted` (тот же визу
 Красная точка:
 
 - на вкладке «Мои посты» — 6×6 (`--home-screen-tabbar-tab-dot-*`, Google red), правый верхний угол, отступ **8px**;
-- на сегменте «Завершенные» — 7×7 (`--tabs-panel-tab-dot-*`), справа по центру, отступ **22px** от правого края кнопки.
+- на сегменте «Завершенные» — 7×7 (`--tabs-panel-tab-dot-*`), справа по центру, отступ **16px** от правого края кнопки.
 
 Видна, когда есть **непросмотренный** готовый отчёт: своё портфолио набрало все ревью (`reviewsCount >= targetReviews`), и пользователь ещё не открывал сегмент «Завершенные» после появления этих id.
 
@@ -150,7 +150,7 @@ CTA «Закинуть своё» (кнопка в доке у таббара) �
 ### Профиль и баланс
 
 - Есть `session.avatarUrl` → только фото (круг), буква скрыта; нет URL / ошибка загрузки → тёмный круг + буква имени (картинка скрыта).
-- Логотип в шапке — blob-марка (`logo-default.svg` / `brandMarkSvg`), кнопка → вкладка «Чужие посты» (`feed`); уже на `feed` — скролл вверх. Тот же клик на settings → `/home` на `feed` (`homeMarkAria`).
+- Логотип в шапке — wordmark (`logo.svg` **100×24**, `?raw` + `currentColor`), кнопка → вкладка «Чужие посты» (`feed`); уже на `feed` — скролл вверх. Тот же клик на settings → `/home` на `feed` (`homeMarkAria`).
 - Empty state ленты и «Завершенные» (`homeEmpty` / `homeEmptyMineCompleted`) — тот же визуал, что у свободного слота (`--home-screen-slot-empty-*`: dashed-рамка, превью с текстом по центру, два meta-пилла), но некликабельный (`home-screen__card--static`); разметка из общей `createSlotEmptyVisual`.
 - Если в `profiles.avatar_url` пусто — при refresh подтягиваем picture из Auth и пишем в профиль.
 - При `open` / `refresh` — `refreshWalletFromServer` → `refreshSessionFromProfile`.
@@ -225,7 +225,7 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 ## Стили / i18n / a11y
 
-Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, translucent track / on-dark track+label, motion hide/thumb/label/contrast) + `--home-screen-tabbar-dock-gap` / `--home-screen-tabbar-submit-*` (кнопка 56×56, r16, Google blue, hover/active через color-mix; error-flash Google red + `bg-duration`/`bg-ease` для transition синий↔красный; плюс 24) + `--home-screen-tabbar-tab-dot-*` (точка 6px, offset 8px, Google red). Точка на сегменте «Завершенные»: `--tabs-panel-tab-dot-*` (7px, right 22px). Статус «Отчёт отправлен» в превью: `--home-screen-card-reviewed-*`.
+Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, translucent track / on-dark track+label, motion hide/thumb/label/contrast) + `--home-screen-tabbar-dock-gap` / `--home-screen-tabbar-submit-*` (кнопка 56×56, r16, Google blue, hover/active через color-mix; error-flash Google red + `bg-duration`/`bg-ease` для transition синий↔красный; плюс 24) + `--home-screen-tabbar-tab-dot-*` (точка 6px, offset 8px, Google red). Точка на сегменте «Завершенные»: `--tabs-panel-tab-dot-*` (7px, right 16px). Статус «Отчёт отправлен» в превью: `--home-screen-card-reviewed-*`.
 
 Glass track: `background` + `backdrop-filter: blur(var(--home-screen-tabbar-blur))` на **`.home-screen__tabbar`** (не на dock). Свап темы: `backdropLuminance` → `home-screen__tabbar--on-dark` (track / label). Не анимировать `opacity` на предке dock — иначе blur пропадает.
 

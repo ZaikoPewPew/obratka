@@ -839,8 +839,9 @@
   --home-screen-bg: var(--color-bg);
   --home-screen-topbar-height: 80px;
   --home-screen-topbar-padding: var(--space-4);
-  --home-screen-mark-width: var(--url-screen-brand-width);
-  --home-screen-mark-height: var(--url-screen-brand-height);
+  /* Wordmark logo.svg (100×24) in home topbar */
+  --home-screen-mark-width: 100px;
+  --home-screen-mark-height: 24px;
   --home-screen-chip-height: var(--space-12);
   --home-screen-chip-gap: var(--space-2);
   --home-screen-chip-padding-x: var(--space-4);
@@ -898,13 +899,14 @@
   --account-menu-action-motion-duration: var(--duration-fast);
   --account-menu-action-motion-ease: var(--ease-out);
   /* tabs-panel (Figma tabspanel 476:1762) — сегмент над списком «Мои» */
-  --tabs-panel-height: 59px;
+  --tabs-panel-height: 48px;
   --tabs-panel-padding: var(--space-1);
   --tabs-panel-radius: var(--radius-pill);
   --tabs-panel-bg: var(--color-surface-muted);
-  --tabs-panel-tab-height: 51px;
+  --tabs-panel-tab-height: 40px;
   --tabs-panel-tab-padding-x: var(--space-4);
-  --tabs-panel-tab-padding-y: var(--space-3);
+  /* 40px tab: space-3 (12×2) не влезает под line-height 1.7 */
+  --tabs-panel-tab-padding-y: var(--space-1);
   --tabs-panel-tab-radius: var(--radius-pill);
   --tabs-panel-tab-font-size: var(--font-size-base);
   --tabs-panel-tab-font-weight: var(--font-weight-regular);
@@ -917,7 +919,7 @@
   --tabs-panel-thumb-duration: var(--motion-screen-duration);
   --tabs-panel-thumb-ease: var(--motion-screen-ease);
   --tabs-panel-tab-dot-size: 7px;
-  --tabs-panel-tab-dot-offset-right: 22px;
+  --tabs-panel-tab-dot-offset-right: var(--space-4);
   --tabs-panel-tab-dot-radius: var(--radius-pill);
   --tabs-panel-tab-dot-color: var(--palette-google-red);
 

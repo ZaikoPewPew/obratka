@@ -9,15 +9,16 @@ Shared UI: не экран флоу — не пишет `history`, не вызы
 
 | Figma | Код |
 |-------|-----|
-| Track 500×59, radius pill, `#f3f4f7` | `.tabs-panel` → `--tabs-panel-height` / `--tabs-panel-radius` / `--tabs-panel-bg` |
+| Track 500×48, radius pill, `#f3f4f7` | `.tabs-panel` → `--tabs-panel-height` / `--tabs-panel-radius` / `--tabs-panel-bg` |
 | Padding 4 | `--tabs-panel-padding` = `--space-1` |
-| Tab ~244×51, radius pill | `.tabs-panel__tab` → `--tabs-panel-tab-*` |
+| Tab ~244×40, radius pill | `.tabs-panel__tab` → `--tabs-panel-tab-*` |
+| Tab padding-y 4 | `--tabs-panel-tab-padding-y` = `--space-1` (под высоту 40) |
 | Active `#242426` + white | `--tabs-panel-tab-active-bg` / `--tabs-panel-tab-active-color` |
 | Inactive transparent + `#242426` | `--tabs-panel-tab-color` |
 | Montserrat 16 regular | `--font-size-base` / `--font-weight-regular` |
-| Dot 7×7, Google red, right 22px centered | `.tabs-panel__tab-dot` → `--tabs-panel-tab-dot-*` |
+| Dot 7×7, Google red, right 16px centered | `.tabs-panel__tab-dot` → `--tabs-panel-tab-dot-*` |
 
-В макете фон активного таба статичен; в коде — скользящий `.tabs-panel__thumb` (`transform` + `width`, `--tabs-panel-thumb-*`), у кнопок меняется только `color`.
+В макете фон активного таба статичен; в коде — скользящий `.tabs-panel__thumb` (`transform` + `width`, `--tabs-panel-thumb-*`), у кнопок меняется только `color`. `ResizeObserver` / `window.resize` синчат thumb **без** `instant` (как home tabbar) — иначе layout после смены сегмента съедает анимацию.
 
 Подпись таба — в `.tabs-panel__tab-label`, чтобы `setLabels` не затирал точку.
 

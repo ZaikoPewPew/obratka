@@ -40,6 +40,13 @@ npm run dev
 | `landing/styles/landing.css` | Стили (только `var(--landing-*)` / семантика из `tokens.css`) |
 | `styles/tokens.css` | `--landing-*` |
 
+## SEO (фаза 1)
+
+- `index, follow` + `canonical` + OG/Twitter в [`landing/index.html`](index.html).
+- Абсолютные URL: плейсхолдеры `%SITE_ORIGIN%` / `%SITE_BASE%` → `vite.config.js` (`transformIndexHtml`).
+- Картинка шаринга: [`public/assets/og/og-share.png`](../public/assets/og/og-share.png).
+- Crawl: [`public/robots.txt`](../public/robots.txt) + [`public/sitemap.xml`](../public/sitemap.xml) (только лендос). SPA — `noindex` в корневом `index.html`.
+
 ## Сборка / Pages
 
 `vite.config.js` → MPA input `landing` → `dist/landing/index.html`.  

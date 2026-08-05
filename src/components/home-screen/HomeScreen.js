@@ -62,7 +62,6 @@ import {
 import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
 import { getCommunityRules } from "../../utils/communityRules.js";
 import { getMotionControlErrorBuzz } from "../../utils/motionTokens.js";
-import { brandMarkSvg } from "../../assets/brand/brandMarks.js";
 import { createAppModal } from "../app-modal/AppModal.js";
 import { createSidePanel } from "../side-panel/SidePanel.js";
 import { createAccountMenu } from "../account-menu/AccountMenu.js";
@@ -77,6 +76,7 @@ import currencyGhostUrl from "../../assets/home/modal/currency-ghost.png";
 import currencyP2pUrl from "../../assets/home/modal/currency-p2p.png";
 import currencyEmptyDuckUrl from "../../assets/home/modal/currency-empty-duck.png";
 import currencyReferalUrl from "../../assets/home/modal/currency-referal.png";
+import logoWordmarkSvg from "../../assets/brand/logo.svg?raw";
 import plusIconSvg from "../../assets/home/plus.svg?raw";
 import reputationNeutralIconSvg from "../../assets/home/reputation-neutral.svg?raw";
 import reputationPositiveIconSvg from "../../assets/home/reputation-positive.svg?raw";
@@ -738,7 +738,18 @@ export function createHomeScreen({
   const mark = document.createElement("button");
   mark.type = "button";
   mark.className = "home-screen__mark";
-  mark.innerHTML = brandMarkSvg("home-screen__mark-img");
+  {
+    const wrap = document.createElement("span");
+    wrap.innerHTML = logoWordmarkSvg.trim();
+    const svg = wrap.firstElementChild;
+    if (!(svg instanceof SVGElement)) {
+      throw new Error("logo.svg must be a root <svg>");
+    }
+    svg.classList.add("home-screen__mark-img");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("focusable", "false");
+    mark.append(svg);
+  }
 
   const topActions = document.createElement("div");
   topActions.className = "home-screen__top-actions";

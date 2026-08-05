@@ -1,0 +1,18 @@
+# GitHub Pages project site. Crawlers see paths under /obratka/.
+# SPA shell is also noindex via <meta robots> in index.html.
+User-agent: *
+Allow: /obratka/landing/
+
+Disallow: /obratka/home
+Disallow: /obratka/referral
+Disallow: /obratka/registration
+Disallow: /obratka/onboarding
+Disallow: /obratka/settings
+Disallow: /obratka/portfolio
+Disallow: /obratka/review
+Disallow: /obratka/quiz
+Disallow: /obratka/done
+Disallow: /obratka/banned
+Disallow: /obratka/report
+
+Sitemap: https://zaikopewpew.github.io/obratka/sitemap.xml
