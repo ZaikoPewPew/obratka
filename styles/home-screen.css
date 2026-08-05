@@ -715,6 +715,17 @@
   cursor: default;
 }
 
+/* «Уже отревьюено»: без клика, hover и смены курсора */
+.home-screen__card--reviewed {
+  cursor: default;
+  pointer-events: none;
+}
+
+.home-screen__card--reviewed:hover,
+.home-screen__card--reviewed:active {
+  --home-screen-card-surface: var(--home-screen-card-bg);
+}
+
 .home-screen__slot-empty-preview {
   box-sizing: border-box;
   display: grid;
@@ -1013,14 +1024,6 @@
 /* Сегмент «Уже отревьюено»: вместо скриншота — серая заливка со статусом */
 .home-screen__preview--reviewed {
   background: var(--home-screen-card-reviewed-bg);
-}
-
-.home-screen__card:hover .home-screen__preview--reviewed {
-  background: var(--home-screen-card-reviewed-bg-hover);
-}
-
-.home-screen__card:active .home-screen__preview--reviewed {
-  background: var(--home-screen-card-reviewed-bg-active);
 }
 
 .home-screen__card-reviewed {

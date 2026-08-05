@@ -226,7 +226,7 @@ SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `p
 | Success | `success-screen` (`/done`) |
 | Ban | `ban-screen` — статичный красный mesh + `banBrandMarkSvg` |
 | Report | `report-screen` — листы (+ надиктовка) → просмотр в side-panel → жалоба + PDF |
-| Settings | `settings-screen` (`/settings`, side-panel поверх home) |
+| Settings | `settings-screen` (`/settings`, side-panel поверх home, view-only) |
 
 Handoff соседних brand-экранов: `go(id, { handoff: true })` — правый visual без повторной анимации.
 

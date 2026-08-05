@@ -42,7 +42,7 @@ alwaysApply: true
 | `reviewTier*` / `reviewPain*` / `reviewGrade*` / `reviewStructure*` / `reviewMetrics*` | шаги квиза (tier = рыночный уровень, не `profiles.tier`) |
 | `reportTier*` / `reportSummary*` / `reportCross*` / `reportPain*` / `reportGrade*` / `reportContext*` / `reportStructure*` / `reportMetrics*` / `reportVisual*` / `reportAdviceTitle` | тексты PDF-листа |
 | `reviewContextShort` / `reviewVisualShort` / `reviewContextValue*` / `reviewVisualValue*` / `reviewContextHint*` / `reviewVisualHint*` | idle-заголовок шкал + ступени + приписки 1–5 ([`scale-slider`](../../src/components/scale-slider/README.md)) |
-| `settings*` | `/settings` (side-panel профиля: имя / Telegram / роль / workplace) |
+| `settings*` | `/settings` (side-panel профиля view-only: имя / Telegram / email / специальность / грейд / workplace; дата в description) |
 
 ## Добавление ключа
 

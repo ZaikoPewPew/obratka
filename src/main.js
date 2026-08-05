@@ -2084,9 +2084,6 @@ async function ensureSettingsScreen() {
           if (activeRouteId !== "settings") return;
           go("home", { search: buildHomeSearch(lastHomeView) });
         },
-        onSaved: async () => {
-          await refreshSessionFromProfile();
-        },
       });
       document.body.append(settingsScreen.root);
       return settingsScreen;

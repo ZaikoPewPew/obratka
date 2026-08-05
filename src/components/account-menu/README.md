@@ -6,9 +6,9 @@
 - Первая строка: `session.displayName`, синхронизированный из `profiles.display_name`.
 - Вторая строка: `session.email`.
 - Имя и email не интерактивны.
-- Интерактивны «Настройки», «Пригласить», «Правила» и «Выйти».
+- Интерактивны «Профиль», «Пригласить», «Правила» и «Выйти».
 - Ключи UI: `homeAccount*` (плюс `homeInvite*` для шаринга, `homeRules*` для side-panel).
-- «Настройки» → колбэк → `/settings` (заглушка).
+- «Профиль» → колбэк → `/settings` (side-panel, view-only).
 - «Пригласить» открывает `homeInvite*`-модалку; copy и share кладут полный текст `homeInviteMessage` (`{url}`, `{code}`), не только код или ссылку.
 - «Правила» → `createSidePanel` с текстом из `content/rules.json` (`getCommunityRules`).
 - Связь с админом — через FAB (`feedback`), не пункт меню.

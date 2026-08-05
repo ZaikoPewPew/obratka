@@ -1,4 +1,4 @@
-/* Форма профиля внутри side-panel (sticky header/footer — у side-panel). */
+/* Форма профиля внутри side-panel (sticky header — у side-panel). */
 
 .settings-screen__loading {
   display: flex;
@@ -31,6 +31,12 @@
   gap: var(--settings-screen-form-gap);
 }
 
+.settings-screen__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--settings-screen-row-gap);
+}
+
 .settings-screen__field {
   display: flex;
   flex-direction: column;
@@ -46,137 +52,59 @@
   line-height: var(--line-height-tight);
 }
 
-.settings-screen__control,
-.settings-screen__select,
 .settings-screen__readonly {
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
   width: 100%;
   min-height: var(--settings-screen-input-height);
   margin: 0;
   padding: 0 var(--settings-screen-input-padding-x);
   border: none;
   border-radius: var(--settings-screen-input-radius);
-  background: var(--settings-screen-input-bg);
-  color: var(--settings-screen-input-color);
+  background: var(--settings-screen-readonly-bg);
+  color: var(--settings-screen-readonly-color);
+  box-shadow: inset 0 0 0 1px var(--settings-screen-readonly-border);
   font-family: var(--font-family);
   font-size: var(--settings-screen-input-size);
   font-weight: var(--settings-screen-input-weight);
   line-height: var(--line-height-tight);
+  cursor: not-allowed;
+  user-select: none;
 }
 
-.settings-screen__control::placeholder {
-  color: var(--settings-screen-input-placeholder);
+.settings-screen__readonly--select {
+  gap: var(--settings-screen-select-icon-gap);
+  padding-right: var(--settings-screen-select-icon-inset);
 }
 
-.settings-screen__control:focus-visible,
-.settings-screen__select:focus-visible {
-  outline: var(--focus-ring-width) solid var(--color-focus-ring);
-  outline-offset: var(--focus-ring-offset);
+.settings-screen__readonly-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.settings-screen__field--invalid .settings-screen__control,
-.settings-screen__field--invalid .settings-screen__select {
-  box-shadow: inset 0 0 0 1px var(--settings-screen-input-border-invalid);
-}
-
-.settings-screen__select {
-  appearance: none;
-  background-image: linear-gradient(
-      45deg,
-      transparent 50%,
-      var(--color-text-muted) 50%
-    ),
-    linear-gradient(135deg, var(--color-text-muted) 50%, transparent 50%);
-  background-position:
-    calc(100% - var(--space-5)) calc(50% - var(--space-1)),
-    calc(100% - var(--space-4)) calc(50% - var(--space-1));
-  background-size: var(--space-2) var(--space-2), var(--space-2) var(--space-2);
-  background-repeat: no-repeat;
-  padding-right: var(--space-10);
-  cursor: pointer;
-}
-
-.settings-screen__readonly {
-  display: flex;
-  align-items: center;
-  background: var(--settings-screen-readonly-bg);
-  color: var(--settings-screen-readonly-color);
-}
-
-.settings-screen__hint,
-.settings-screen__error {
-  margin: 0;
-  font-size: var(--settings-screen-hint-size);
-  line-height: var(--line-height-relaxed);
-}
-
-.settings-screen__hint {
-  color: var(--settings-screen-hint-color);
-}
-
-.settings-screen__error {
-  color: var(--settings-screen-error-color);
-}
-
-.settings-screen__error[hidden] {
-  display: none !important;
-}
-
-.settings-screen__save {
+.settings-screen__select-icon {
   box-sizing: border-box;
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: var(--settings-screen-save-height);
-  margin: 0;
-  padding: 0 var(--settings-screen-save-padding-x);
-  border: none;
-  border-radius: var(--settings-screen-save-radius);
-  background: var(--settings-screen-save-bg);
-  color: var(--settings-screen-save-color);
-  font-family: var(--font-family);
-  font-size: var(--settings-screen-save-size);
-  font-weight: var(--settings-screen-save-weight);
-  cursor: pointer;
+  width: var(--settings-screen-select-icon-size);
+  height: var(--settings-screen-select-icon-size);
+  color: var(--settings-screen-select-icon-color);
 }
 
-.settings-screen__save:hover:not(:disabled) {
-  background: var(--settings-screen-save-bg-hover);
-}
-
-.settings-screen__save:active:not(:disabled) {
-  background: var(--settings-screen-save-bg-active);
-}
-
-.settings-screen__save:focus-visible {
-  outline: var(--focus-ring-width) solid var(--color-focus-ring-on-accent);
-  outline-offset: var(--focus-ring-offset);
-}
-
-.settings-screen__save:disabled {
-  cursor: default;
-  opacity: var(--opacity-disabled);
-}
-
-.settings-screen__status {
-  margin: 0;
-  flex: 1 1 auto;
-  min-width: 0;
-  color: var(--settings-screen-status-color);
-  font-size: var(--settings-screen-status-size);
-  line-height: var(--line-height-relaxed);
-}
-
-.settings-screen__status--success {
-  color: var(--settings-screen-status-success-color);
-}
-
-.settings-screen__status--error {
-  color: var(--settings-screen-status-error-color);
+.settings-screen__select-icon svg {
+  display: block;
+  width: var(--settings-screen-select-icon-size);
+  height: var(--settings-screen-select-icon-size);
 }
 
 @media (max-width: 640px) {
-  .settings-screen__save {
-    width: 100%;
+  .settings-screen__row {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -17,7 +17,7 @@
 - `ban-screen.css` — `/banned` (блок аккаунта, красный mesh).
 - `report-screen.css` — `/report` (листы + жалоба).
 - `desktop-only-screen.css` — оверлей &lt;768px; импорт из фабрики JS (как `ban-screen.css`). Токены `--desktop-only-screen-*`.
-- `account-menu.css` / `settings-screen.css` — меню профиля / settings.
+- `account-menu.css` / `settings-screen.css` — меню профиля / settings (view-only профиль, select-шеврон специальности).
 - `rating-panel.css` — **не в entry**; оболочка неиспользуемого aside `src/components/rating/`.
 - `landing/styles/landing.css` — промо MPA; токены `--landing-*` в `tokens.css`.
 
@@ -51,7 +51,7 @@
 | `--auth-screen-*` | divider / providers / OTP hint / links |
 | `--auth-code-*` | ячейки OTP / caret / `--auth-code-resend-cooldown` |
 | `--shell-review-*` | квиз / report / done (в т.ч. `--shell-review-done-btn-padding-x`, `--shell-review-done-loader-*`) |
-| `--home-screen-card-reviewed-*` | превью-статус «Отчёт отправлен» на «Уже отревьюено»: заливка (`-bg` / `-bg-hover` / `-bg-active`), gap, галочка (`report-sent.svg` + `--color-success`), текст |
+| `--home-screen-card-reviewed-*` | превью-статус «Отчёт отправлен» на «Уже отревьюено»: заливка (`-bg`), gap, галочка (`report-sent.svg` + `--color-success`), текст; карточка без hover/click |
 | `--shell-review-slider-*` | шкалы context/visual (readout / hint / track / canvas / thumb / stops / title motion) |
 | `--control-rec-*` / `--color-recording` | чип надиктовки в шапке `/review` |
 | `--shell-review-rec-*` | кнопка надиктовки в поле «Главный совет» |

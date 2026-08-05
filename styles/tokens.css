@@ -755,11 +755,8 @@
   --home-screen-progress-padding: 10px;
   --home-screen-progress-bg: var(--color-surface);
   --home-screen-progress-radius: var(--radius-pill);
-  /* Статус «Отчёт отправлен» вместо превью (сегмент «Уже отревьюено») */
+  /* Статус «Отчёт отправлен» вместо превью (сегмент «Уже отревьюено»; без hover) */
   --home-screen-card-reviewed-bg: var(--color-surface-muted);
-  /* Заливка превью = фон карточки → ховер/press ведём теми же ступенями */
-  --home-screen-card-reviewed-bg-hover: var(--color-surface-muted-hover);
-  --home-screen-card-reviewed-bg-active: var(--color-surface-muted-active);
   --home-screen-card-reviewed-gap: var(--space-2);
   --home-screen-card-reviewed-icon-size: var(--space-6);
   --home-screen-card-reviewed-icon-color: var(--color-success);
@@ -996,7 +993,7 @@
   --legendary-online-height: 52px;
   --legendary-online-padding-y: 10px;
   --legendary-online-padding-left: 10px;
-  --legendary-online-padding-right: var(--space-5);
+  --legendary-online-padding-right: 18px;
   --legendary-online-gap: var(--space-2);
   --legendary-online-radius: var(--radius-pill);
   --legendary-online-bg: var(--color-surface-muted);
@@ -1413,13 +1410,14 @@
   --notification-hold: var(--motion-notification-hold);
 
   /* Форма профиля в side-panel (/settings поверх home) */
-  --settings-screen-form-gap: var(--space-5);
+  --settings-screen-form-gap: var(--space-6);
+  --settings-screen-row-gap: var(--space-4);
   --settings-screen-field-gap: var(--space-2);
   --settings-screen-label-size: var(--font-size-sm);
   --settings-screen-label-weight: var(--font-weight-medium);
   --settings-screen-label-color: var(--color-text-muted);
-  --settings-screen-input-height: var(--space-12);
-  --settings-screen-input-padding-x: var(--space-4);
+  --settings-screen-input-height: 75px;
+  --settings-screen-input-padding-x: var(--space-6);
   --settings-screen-input-radius: var(--radius-md);
   --settings-screen-input-bg: var(--color-surface-muted);
   --settings-screen-input-color: var(--color-text);
@@ -1429,12 +1427,19 @@
   --settings-screen-input-border-invalid: var(--color-error-border-strong);
   --settings-screen-readonly-bg: color-mix(
     in srgb,
-    var(--color-surface-muted) 72%,
+    var(--color-surface-muted) 42%,
     var(--color-surface-muted-active)
   );
-  --settings-screen-readonly-color: var(--color-text);
-  --settings-screen-hint-size: var(--font-size-xs);
-  --settings-screen-hint-color: var(--color-text-subtle);
+  --settings-screen-readonly-color: var(--color-text-muted);
+  --settings-screen-readonly-border: color-mix(
+    in srgb,
+    var(--color-text-subtle) 28%,
+    transparent
+  );
+  --settings-screen-select-icon-size: 24px;
+  --settings-screen-select-icon-inset: var(--space-6);
+  --settings-screen-select-icon-gap: var(--space-3);
+  --settings-screen-select-icon-color: var(--settings-screen-readonly-color);
   --settings-screen-error-size: var(--font-size-xs);
   --settings-screen-error-color: var(--color-error);
   --settings-screen-status-size: var(--font-size-sm);
@@ -1450,7 +1455,7 @@
   --settings-screen-save-color: var(--color-on-accent);
   --settings-screen-save-size: var(--font-size-base);
   --settings-screen-save-weight: var(--font-weight-medium);
-  --settings-screen-skeleton-height: var(--space-12);
+  --settings-screen-skeleton-height: 75px;
   --settings-screen-skeleton-radius: var(--radius-md);
   --settings-screen-skeleton-bg: var(--color-surface-muted-active);
 

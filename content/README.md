@@ -21,7 +21,7 @@
 | `modalCloseAria` | общая модалка (`app-modal`) |
 | `url*` / `urlModal*` / `urlScreen*` / `urlScreenBack*` | `/portfolio` (в т.ч. чип «На главную») |
 | `success*` | `/done` |
-| `settings*` | `/settings` (side-panel профиля) |
+| `settings*` | `/settings` (side-panel профиля, view-only) |
 | `ban*` | `/banned` |
 | `reportScreen*` / `reportSheet*` / `reportComplaint*` / `complaintTag*` | `/report` (листы → «Посмотреть» в side-panel → жалоба: ровно 1 тег, окно 6ч от done — `reportComplaintWindowClosed`; вне окна кнопку жалобы скрывать; теги v1: `low_effort` · `spam` · `harassment` · `offensive` · `ai_slop`) |
 | `reportConsensus*` / `reportAction*` | сводный PDF + action cards ([`ACTION_CARDS.md`](../ACTION_CARDS.md)); подписи ссылок — в `actionResources.json` |

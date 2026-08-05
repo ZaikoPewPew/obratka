@@ -23,7 +23,7 @@ referral → auth → authCode → onboarding → home
 | 2b | `auth-code-screen` | `/registration/code` | 6 ячеек кода из письма |
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |
 | 4 | `home-screen` | `/home` + query | Хаб: feed/mine/rating; SWR + intro до claim + mine report gate + tabbar-dock (entrance / glass / `--on-dark`); query хранит активный вид |
-| 4a | `settings-screen` | `/settings` | Профиль в side-panel поверх home (sticky header/footer) |
+| 4a | `settings-screen` | `/settings` | Профиль (view-only) в side-panel поверх home; sticky header, без Save |
 | 5a | iframe-shell | `/review` | Ревью: iframe + таймер **45 s** (pause / external wall-clock + `Timer-end.wav`) + чип **rec** + «Прервать ревью» |
 | 5b | `url-screen` | `/portfolio` | Подача URL (баланс); чип «На главную»; done на том же экране |
 | 6 | `review-screen` + `review-panel` + `scale-slider` | `/quiz` → `/quiz/done` | Квиз: grade → context/structure/metrics → visual 1–5 (+ pain если ≤2) → **tier** → advice; финал + улет отчёта. SoT: [`QUIZ.md`](QUIZ.md) |
@@ -89,7 +89,7 @@ Handoff соседних brand-экранов: `handoff: true` (`brandScreenTran
 `home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки Чужие/Мои/Рейтинг (`feed`/`mine`/`rating`, топ-50 по репутации, `listRatingTop`); SWR `homeListCache` (`feed`/`feedReviewed`/`mine`/`rating`); fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB feedback (`feedback`, Telegram); toast `notification` (нет уток / слот занят); intro до claim (`homeReviewIntro*`); на feed — сегмент «Ждёт ревью / Уже отревьюено» (`tabs-panel`; reviewed → `listReviewedPortfolios`, серое превью + `homeCardReviewedLabel` / `report-sent.svg`, слоты ревьюеров обычные); open-лента без `reviewedByMe`; mine report gate (`homeMineNotReady*`); на mine — «Ещё на ревью / Завершенные»; free-slot «Ещё на ревью» до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / toast `homeNotifySlotTaken`); нет монет → toast `homeNotifyNoDucks` + buzz submit + чип баланса; точка на «Чужие посты» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`); entrance cascade на `--open` (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
 `account-menu` — поповер под аватаром; identity read-only; settings / invite (`homeInviteMessage` на copy/share) / contacts / rules / sign out.
 `side-panel` — боковая панель справа (home → «Правила», Figma `517:4740`); слот контента; без `history` / `go()`.  
-`settings-screen` — side-panel поверх home на `/settings` (editable name/Telegram/role/workplace; email/grade/created_at read-only; sticky Save).
+`settings-screen` — side-panel поверх home на `/settings` (все поля view-only; двухколоночный лейаут; дата создания в description; без Save).
 `url-screen` — split; чип «На главную» (`.url-screen__back` / `urlScreenBack*`, скрыт на done); при URL справа заглушка «Портфолио»; submit → done на том же экране (`setVariant("done")`).  
 `success-screen` — запасной `/done` (deep link); основной submit больше не прыгает сюда (`pendingSuccessPreset` = `generic`).  
 `review-screen` — split для квиза (слева panel, справа visual + PDF-лист).  
@@ -216,7 +216,7 @@ Shared (не экраны флоу):
 | `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` (shell) |
 | `createOnboardingScreen` | `/onboarding` | UI → profiles (shell) |
 | `createHomeScreen` | `/home` + query | UI (Чужие/Мои/Рейтинг топ-50 + SWR + intro + mine gate + Ждёт/Уже + Ещё/Завершенные + free-slot + feedSeen/3/3 + «Топы в сети» + feedback + tabbar-dock + entrance cascade) |
-| `createSettingsScreen` | `/settings` | Side-panel профиля (sticky Save) |
+| `createSettingsScreen` | `/settings` | Side-panel профиля (view-only) |
 | `createUrlScreen` | `/portfolio` | UI (back-chip → home; submit + done via `setVariant`; shell) |
 | iframe-shell + timer + rec | `/review` | UI (заметки → `answers.dictation`) |
 | `createReviewScreen` + `createReviewPanel` (+ `createScaleSlider`) | `/quiz` | UI: visual 1–5, условный pain, `tier`; mic → `advice`. См. [`QUIZ.md`](QUIZ.md) |

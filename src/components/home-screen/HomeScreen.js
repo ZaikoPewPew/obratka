@@ -2794,11 +2794,15 @@ export function createHomeScreen({
     const li = document.createElement("li");
     li.className = "home-screen__item";
 
-    const button = document.createElement("button");
-    button.type = "button";
+    const isReviewed = Boolean(item.reviewedByMe);
+    // «Уже отревьюено» — только статус, без клика / hover / pointer.
+    const button = isReviewed
+      ? document.createElement("div")
+      : document.createElement("button");
+    if (!isReviewed) button.type = "button";
     button.className = "home-screen__card";
 
-    const preview = item.reviewedByMe
+    const preview = isReviewed
       ? createReviewedPreview(t.homeCardReviewedLabel ?? "")
       : createScreenshotPreview(item);
 
@@ -2898,17 +2902,11 @@ export function createHomeScreen({
     meta.append(person, progress);
     button.append(preview, meta);
 
-    if (item.reviewedByMe) {
+    if (isReviewed) {
       button.classList.add("home-screen__card--reviewed");
       const label = t.homeCardReviewedLabel ?? "";
       button.title = label;
       button.setAttribute("aria-label", label);
-      button.addEventListener("click", () => {
-        const latest = latestItem(item.id) ?? item;
-        const url = typeof latest.url === "string" ? latest.url.trim() : "";
-        if (!url) return;
-        window.open(url, "_blank", "noopener,noreferrer");
-      });
     } else if (item.isOwn) {
       button.classList.add("home-screen__card--own");
       syncOwnCardCopy(button, item);

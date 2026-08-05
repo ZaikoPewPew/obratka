@@ -97,7 +97,7 @@ Account-menu → «Правила» → текст из [`content/rules.json`](.
 
 ### Settings — профиль
 
-`/settings` → `createSettingsScreen` монтирует форму в `content` + sticky Save в `footer` поверх home. См. [`../settings-screen/README.md`](../settings-screen/README.md).
+`/settings` → `createSettingsScreen` монтирует view-only форму в `content` (footer пустой) поверх home. См. [`../settings-screen/README.md`](../settings-screen/README.md).
 
 ## Связанные доки
 
