@@ -122,13 +122,11 @@ export function createReportScreen(opts = {}) {
 
   const homeBtn = document.createElement("button");
   homeBtn.type = "button";
-  homeBtn.className =
-    "iframe-shell__btn report-screen__btn report-screen__btn--exit";
+  homeBtn.className = "report-screen__btn report-screen__btn--exit";
 
   const downloadBtn = document.createElement("button");
   downloadBtn.type = "button";
-  downloadBtn.className =
-    "iframe-shell__btn report-screen__btn report-screen__btn--download";
+  downloadBtn.className = "report-screen__btn report-screen__btn--download";
 
   const downloadLabel = document.createElement("span");
   downloadLabel.className = "report-screen__btn-label";

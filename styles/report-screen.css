@@ -437,19 +437,24 @@
 }
 
 .report-screen__btn {
+  appearance: none;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--report-screen-btn-icon-gap);
   flex: 1 1 0;
   min-height: var(--shell-review-control-height);
+  margin: 0;
   padding: var(--shell-review-control-padding-y) var(--shell-review-control-padding-x);
+  border: none;
   border-radius: var(--radius-md);
   font-family: var(--font-family);
   font-size: var(--shell-review-control-font-size);
   font-weight: var(--shell-review-control-font-weight);
   line-height: var(--shell-review-control-line-height);
   text-align: center;
+  cursor: pointer;
 }
 
 .report-screen__btn-icon {
