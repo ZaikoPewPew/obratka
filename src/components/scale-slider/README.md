@@ -27,14 +27,16 @@ createScaleSlider({
 | Состояние | Заголовок | Приписка |
 |-----------|-----------|----------|
 | До touch | `title` (idle, напр. «Понятность») | сразу `description` (полный вопрос) — **без** `hidden` |
-| Drag / pointer | `valueTitles[n]` для сегмента `[n, n+1)` (floor) | `valueHints[n]` (меняется со ступенью) |
+| Hover (без клика) | `valueTitles[n]` ближайшего стопа — **превью**, без commit | `valueHints[n]` (превью) |
+| Drag / pointer | `valueTitles[n]` ближайшего стопа + commit в `input` | `valueHints[n]` |
 | Отпускание | nearest-стоп + тот же текст сразу | hint снапнутой ступени |
+| Уход курсора (без drag) | снова idle / committed | снова idle / committed |
 | Клавиатура | короткий кроссфейд заголовка | `valueHints[value]` |
 | `reset-visual` | снова idle `title` | снова `description` |
 
 Приписка видна с первого кадра, чтобы не появлялась при дёрге ползунка. До касания — дополнение к вопросу; после — контекст ступени.
 
-Стопы — все целые от `from` до `to` (step 1). На **drag** подпись и `input.value` — зона floor `[n, n+1)` → ступень `n` (не midpoint); на **отпускании** — nearest к ближайшему стопу + тот же текст сразу. Стрелки / Home/End/PageUp/PageDown — по индексу стопов.
+Стопы — все целые от `from` до `to` (step 1). **Drag**, **release** и **hover-превью** используют одну формулу — nearest к ближайшему стопу (текст совпадает с тем, что будет после отпускания). Hover не ставит `touched` и не пишет `input.value`. Стрелки / Home/End/PageUp/PageDown — по индексу стопов. Стоп под курсором — класс `--hot`.
 
 ### Разметка
 
@@ -76,7 +78,7 @@ createScaleSlider({
 | `--shell-review-slider-hint-*` | приписка под заголовком |
 | `--shell-review-slider-track-*` / `cell` / `fill-color` | трек и сетка |
 | `--shell-review-slider-thumb-*` | прямоугольный ползунок |
-| `--shell-review-slider-stop-*` | точки-стопы |
+| `--shell-review-slider-stop-*` | точки-стопы (`--hot-size` — подсветка под курсором) |
 | `--shell-review-slider-title-*` | duration/shift/blur/ease кроссфейда (клавиатура) |
 | `--shell-review-slider-lerp*` | сглаживание позиции thumb |
 

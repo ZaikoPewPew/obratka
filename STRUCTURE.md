@@ -71,7 +71,7 @@
 | Split-каркас | [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) |
 | App modal | [`src/components/app-modal/README.md`](src/components/app-modal/README.md) |
 | Tabs panel | [`src/components/tabs-panel/README.md`](src/components/tabs-panel/README.md) |
-| Scale slider (квиз 1–5) | [`src/components/scale-slider/README.md`](src/components/scale-slider/README.md) |
+| Scale slider (квиз 1–5) | [`src/components/scale-slider/README.md`](src/components/scale-slider/README.md) — nearest + hover-превью |
 | Desktop-only gate | [`src/components/desktop-only-screen/README.md`](src/components/desktop-only-screen/README.md) · [`mobile.md`](mobile.md) |
 | Landing (промо) | [`landing/README.md`](landing/README.md) |
 | Action cards / сводный PDF | [`ACTION_CARDS.md`](ACTION_CARDS.md) |

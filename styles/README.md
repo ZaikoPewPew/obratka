@@ -52,7 +52,7 @@
 | `--auth-code-*` | ячейки OTP / caret / `--auth-code-resend-cooldown` |
 | `--shell-review-*` | квиз / report / done (в т.ч. `--shell-review-done-btn-padding-x`, `--shell-review-done-loader-*`) |
 | `--home-screen-card-reviewed-*` | превью-статус «Отчёт отправлен» на «Уже отревьюено»: заливка (`-bg`), gap, галочка (`report-sent.svg` + `--color-success`), текст; карточка без hover/click |
-| `--shell-review-slider-*` | шкалы context/visual (readout / hint / track / canvas / thumb / stops / title motion) |
+| `--shell-review-slider-*` | шкалы context/visual (readout / hint / track / canvas / thumb / stops + `--hot` / title motion) |
 | `--control-rec-*` / `--color-recording` | чип надиктовки в шапке `/review` |
 | `--shell-review-rec-*` | кнопка надиктовки в поле «Главный совет» |
 | `--home-screen-*` | topbar / feed / avatar / locked-modal |

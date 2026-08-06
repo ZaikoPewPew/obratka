@@ -171,7 +171,7 @@ commit;
 | Файл | Роль |
 |------|------|
 | [`ReviewPanel.js`](src/components/review-panel/ReviewPanel.js) | шаги, conditional pain, FormData |
-| [`ScaleSlider.js`](src/components/scale-slider/ScaleSlider.js) | шкалы 1–5 |
+| [`ScaleSlider.js`](src/components/scale-slider/ScaleSlider.js) | шкалы 1–5: nearest на drag/release, hover-превью текста ступени без commit — [`README`](src/components/scale-slider/README.md) |
 | [`reviewReport.js`](src/utils/reviewReport.js) | parse + L1/L2/L3 |
 | [`reviewReport.dictation.test.js`](src/utils/reviewReport.dictation.test.js) | smoke tier/dictation |
 | [`dictationPolish.js`](src/api/dictationPolish.js) | Edge post-edit пунктуации `advice` / `dictation`; soft-fail → сырой текст; **сейчас `POLISH_ENABLED = false`** |

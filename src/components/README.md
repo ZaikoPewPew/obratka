@@ -43,7 +43,7 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | iframe-shell (`index.html` + `main.js`) | `/review` | Просмотр + таймер 60 s (iframe pause / external wall-clock + `Timer-end.wav`) + чип **rec** |
 | `review-screen/` | `/quiz` | Оболочка квиза + PDF reveal |
 | `review-panel/` | `/quiz` → `/quiz/done` | Шаги опроса + шкалы 1–5 + условный pain + `tier` + mic в advice + локальный done. SoT: [`QUIZ.md`](../../QUIZ.md) |
-| `scale-slider/` | — | Шкалы оценки context/visual: canvas-сетка, ступени + приписки, min/max — [`README`](scale-slider/README.md) |
+| `scale-slider/` | — | Шкалы context/visual: canvas-сетка, nearest + hover-превью ступеней, min/max — [`README`](scale-slider/README.md) |
 | `video-player-card/` | — | Кастомный плеер (play/mute/scrub/speed); шаг video онбординга |
 
 Движок диктовки: [`../lib/dictation/README.md`](../lib/dictation/README.md).  

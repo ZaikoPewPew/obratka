@@ -146,12 +146,12 @@
   color: var(--ban-screen-btn-contact-color);
 }
 
-.ban-screen__btn--contact:hover {
+.iframe-shell__btn.ban-screen__btn--contact:hover:not(:disabled) {
   background: var(--ban-screen-btn-contact-bg-hover);
   color: var(--ban-screen-btn-contact-color-hover);
 }
 
-.ban-screen__btn--contact:active {
+.iframe-shell__btn.ban-screen__btn--contact:active:not(:disabled) {
   background: var(--ban-screen-btn-contact-bg-active);
   color: var(--ban-screen-btn-contact-color-active);
 }

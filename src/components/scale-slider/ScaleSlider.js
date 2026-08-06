@@ -147,6 +147,9 @@ export function createScaleSlider({
   let titleGen = 0;
   /** @type {Animation | null} */
   let titleAnim = null;
+  /** Hover-превью ступени без commit; null = нет превью. */
+  /** @type {number | null} */
+  let previewValue = null;
 
   const reducedMotionMq = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -155,13 +158,22 @@ export function createScaleSlider({
   }
 
   /**
+   * Заголовок ступени (для commit и hover-превью).
+   * @param {number} value
+   * @returns {string}
+   */
+  function stepTitleForValue(value) {
+    const mapped = valueTitles[value] ?? valueTitles[String(value)];
+    return typeof mapped === "string" && mapped ? mapped : title;
+  }
+
+  /**
    * @param {number} value
    * @returns {string}
    */
   function titleForValue(value) {
     if (input.dataset.touched !== "1") return title;
-    const mapped = valueTitles[value] ?? valueTitles[String(value)];
-    return typeof mapped === "string" && mapped ? mapped : title;
+    return stepTitleForValue(value);
   }
 
   /**
@@ -190,6 +202,82 @@ export function createScaleSlider({
     }
     readoutHint.textContent = fixHangingPrepositions(text);
     readoutHint.hidden = false;
+  }
+
+  /**
+   * Подсветка стопа под курсором (hover / drag).
+   * @param {number | null} hotValue
+   */
+  function syncStopHighlight(hotValue) {
+    for (const dot of stopNodes) {
+      const v = Number(dot.dataset.value);
+      dot.classList.toggle(
+        "review-panel__slider-stop--hot",
+        hotValue != null && v === hotValue,
+      );
+    }
+  }
+
+  /**
+   * Вернуть readout к committed / idle (после ухода курсора).
+   */
+  function restoreCommittedReadout() {
+    const committed = Number(input.value);
+    if (input.dataset.touched === "1") {
+      syncReadoutTitle(committed, { immediate: true });
+      syncReadoutAria(committed);
+      return;
+    }
+    lastValue = committed;
+    setReadoutTitle(title, { immediate: true });
+    syncReadoutHint(committed);
+    syncReadoutAria(committed);
+  }
+
+  /**
+   * Hover-превью текста ступени без записи в input / touched.
+   * @param {number | null} value
+   */
+  function syncReadoutPreview(value) {
+    if (value == null) {
+      if (previewValue == null) {
+        syncStopHighlight(null);
+        return;
+      }
+      previewValue = null;
+      syncStopHighlight(null);
+      restoreCommittedReadout();
+      return;
+    }
+
+    syncStopHighlight(value);
+    if (previewValue === value) return;
+    previewValue = value;
+
+    const nextTitle = stepTitleForValue(value);
+    lastValue = value;
+    setReadoutTitle(nextTitle, { immediate: true });
+
+    const stepHint = hintForValue(value);
+    if (stepHint) {
+      readoutHint.textContent = fixHangingPrepositions(stepHint);
+      readoutHint.hidden = false;
+    } else if (idleDescription) {
+      readoutHint.textContent = idleDescription;
+      readoutHint.hidden = false;
+    } else {
+      readoutHint.textContent = "";
+      readoutHint.hidden = true;
+    }
+  }
+
+  function clearPreview() {
+    if (previewValue == null) {
+      syncStopHighlight(null);
+      return;
+    }
+    previewValue = null;
+    syncStopHighlight(null);
   }
 
   function readTitleMotion() {
@@ -351,13 +439,7 @@ export function createScaleSlider({
     return min + clampProgress(progress) * (max - min);
   }
 
-  /** Drag: сегмент [n, n+1) → ступень n (не midpoint). */
-  function valueFromProgressFloor(progress) {
-    const raw = rawFromProgress(progress);
-    return Math.min(max, Math.max(min, Math.floor(raw)));
-  }
-
-  /** Release: ближайший стоп. */
+  /** Drag / release / hover: ближайший стоп. */
   function valueFromProgressNearest(progress) {
     return snapToStop(rawFromProgress(progress));
   }
@@ -606,6 +688,7 @@ export function createScaleSlider({
   }
 
   function syncFromInputValue({ immediate = false } = {}) {
+    clearPreview();
     const value = Number(input.value);
     setTargetProgress(progressFromValue(value), { immediate });
     syncStops(value);
@@ -618,15 +701,17 @@ export function createScaleSlider({
   }
 
   function setFromClientX(clientX) {
+    clearPreview();
     const progress = progressFromClientX(clientX);
-    const value = valueFromProgressFloor(progress);
+    const value = valueFromProgressNearest(progress);
     const prev = Number(input.value);
     const wasIdle = input.dataset.touched !== "1";
     input.dataset.touched = "1";
     input.value = String(value);
     setTargetProgress(progress);
     syncStops(value);
-    // Drag: текст = левая ступень сегмента (floor), без очереди анимаций.
+    syncStopHighlight(value);
+    // Drag: текст = ближайший стоп (как на release), без очереди анимаций.
     if (value !== prev || wasIdle || displayedTitle === idleTitle) {
       syncReadoutTitle(value, { immediate: true });
     }
@@ -639,6 +724,7 @@ export function createScaleSlider({
     input.value = String(snapped);
     setTargetProgress(progressFromValue(snapped));
     syncStops(snapped);
+    syncStopHighlight(snapped);
     syncReadoutTitle(snapped, { immediate: true });
     syncReadoutAria(snapped);
   }
@@ -655,8 +741,17 @@ export function createScaleSlider({
   });
 
   input.addEventListener("pointermove", (event) => {
-    if (!dragging) return;
-    setFromClientX(event.clientX);
+    if (dragging) {
+      setFromClientX(event.clientX);
+      return;
+    }
+    const progress = progressFromClientX(event.clientX);
+    syncReadoutPreview(valueFromProgressNearest(progress));
+  });
+
+  input.addEventListener("pointerleave", () => {
+    if (dragging) return;
+    syncReadoutPreview(null);
   });
 
   const endPointer = () => {
@@ -715,6 +810,7 @@ export function createScaleSlider({
   input.addEventListener("reset-visual", () => {
     dragging = false;
     slider.classList.remove("review-panel__slider--dragging");
+    clearPreview();
     input.dataset.touched = "0";
     input.value = String(min);
     lastValue = min;

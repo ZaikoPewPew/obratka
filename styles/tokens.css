@@ -425,6 +425,7 @@
   --shell-review-slider-track-color: var(--color-surface-muted);
   --shell-review-slider-fill-color: var(--color-accent);
   --shell-review-slider-stop-size: 4px;
+  --shell-review-slider-stop-hot-size: 6px;
   --shell-review-slider-stop-color: var(--color-text);
   --shell-review-slider-stop-muted: color-mix(
     in srgb,

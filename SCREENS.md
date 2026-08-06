@@ -290,7 +290,7 @@ iframe — пауза при `visibility hidden`; external — wall-clock + де
 - [`src/utils/feedSeen.js`](src/utils/feedSeen.js) — seen кейсов open-ленты → точка на «Чужие посты»
 - [`src/utils/mineReadySeen.js`](src/utils/mineReadySeen.js) — seen 3/3 → точка на «Мои» / «Завершенные»
 - [`QUIZ.md`](QUIZ.md) — пул вопросов, схема `answers`, L1/L2/L3 PDF
-- [`src/components/scale-slider/README.md`](src/components/scale-slider/README.md) — шкалы квиза 1–5 (canvas, ступени, приписки)
+- [`src/components/scale-slider/README.md`](src/components/scale-slider/README.md) — шкалы квиза 1–5 (canvas, nearest, hover-превью ступеней)
 - [`src/lib/dictation/README.md`](src/lib/dictation/README.md) — надиктовка: `/review` + поле совета в квизе; iframe pause / external keep-alive; конец → [`Timer-end.wav`](src/assets/audio/Timer-end.wav); post-edit → [`polish-dictation`](supabase/functions/polish-dictation/README.md) (клиентский kill-switch)
 - [`src/components/brand-screen-visual/README.md`](src/components/brand-screen-visual/README.md) — правый visual + variants
 - [`src/components/brand-screen-shell/README.md`](src/components/brand-screen-shell/README.md) — split-каркас

@@ -107,7 +107,7 @@ API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](
 | [`src/components/home-screen/README.md`](src/components/home-screen/README.md) | Лента/мои/рейтинг, URL-query, SWR, review intro, mine report gate, feedSeen + 3/3, legendary aside, tabbar-dock + submit, entrance cascade |
 | [`QUIZ.md`](QUIZ.md) | Пул вопросов квиза, схема answers, трактовки PDF |
 | [`src/components/review-panel/README.md`](src/components/review-panel/README.md) | Шаги квиза + conditional pain + tier + done |
-| [`src/components/scale-slider/README.md`](src/components/scale-slider/README.md) | Шкалы context/visual 1–5 (canvas, ступени, приписки) |
+| [`src/components/scale-slider/README.md`](src/components/scale-slider/README.md) | Шкалы context/visual 1–5 (canvas, nearest, hover-превью ступеней) |
 | [`src/components/url-screen/README.md`](src/components/url-screen/README.md) | Подача URL: back-chip + done |
 | [`src/components/report-screen/README.md`](src/components/report-screen/README.md) | Листы ревью + жалоба |
 | [`src/config/README.md`](src/config/README.md) | `REVIEW_SESSION_SECONDS`, contacts |
