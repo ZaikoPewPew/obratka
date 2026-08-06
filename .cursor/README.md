@@ -54,7 +54,7 @@
 | `/home` | Hub: SWR feed/feedReviewed/mine/rating + intro до claim + mine gate + Ждёт/Уже + Ещё/Завершенные + feedSeen / 3/3 + «Топы в сети» + tabbar-dock (entrance cascade + glass/`--on-dark`) |
 | `/settings` | Профиль в side-panel (из account-menu) |
 | `/portfolio` | Подача URL; back-chip «На главную»; done через `setVariant("done")` |
-| `/review` | iframe + таймер 45 s + **rec** (заметки; нужен claim); в квизе — микрофон в поле совета |
+| `/review` | iframe + таймер 60 s + **rec** (заметки; нужен claim); в квизе — микрофон в поле совета |
 | `/quiz` | Квиз: visual 1–5, условный pain, `tier` (не hire); advice + mic — [`QUIZ.md`](../QUIZ.md) |
 | `/quiz/done` | Финал квиза |
 | `/done` | Запасной success (deep link) |

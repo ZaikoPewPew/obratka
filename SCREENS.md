@@ -24,7 +24,7 @@ referral → auth → authCode → onboarding → home
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |
 | 4 | `home-screen` | `/home` + query | Хаб: feed/mine/rating; SWR + intro до claim + mine report gate + tabbar-dock (entrance / glass / `--on-dark`); query хранит активный вид |
 | 4a | `settings-screen` | `/settings` | Профиль (view-only) в side-panel поверх home; sticky header, без Save |
-| 5a | iframe-shell | `/review` | Ревью: iframe + таймер **45 s** (pause / external wall-clock + `Timer-end.wav`) + чип **rec** + «Прервать ревью» |
+| 5a | iframe-shell | `/review` | Ревью: iframe + таймер **60 s** (pause / external wall-clock + `Timer-end.wav`) + чип **rec** + «Прервать ревью» |
 | 5b | `url-screen` | `/portfolio` | Подача URL (баланс); чип «На главную»; done на том же экране |
 | 6 | `review-screen` + `review-panel` + `scale-slider` | `/quiz` → `/quiz/done` | Квиз: grade → context/structure/metrics → visual 1–5 (+ pain если ≤2) → **tier** → advice; финал + улет отчёта. SoT: [`QUIZ.md`](QUIZ.md) |
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |

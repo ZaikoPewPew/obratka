@@ -240,6 +240,23 @@ let embedPlan = null;
  * }>}
  */
 const embedPrefetchByUrl = new Map();
+/**
+ * Локальный стек chrome «назад/вперёд» для portfolio-iframe.
+ * Cross-origin: history.length недоступен → считаем load + наши клики.
+ * External UI: стека нет (портфолио в другой вкладке).
+ * @type {number}
+ */
+let frameHistoryBackDepth = 0;
+/** @type {number} */
+let frameHistoryForwardDepth = 0;
+/** @type {"back" | "forward" | "reload" | null} */
+let frameNavPending = null;
+/** Первый осмысленный load текущего frame.src уже был. */
+let frameHistoryPrimed = false;
+/** До этого ms load'ы после prime считаем редиректами, не user-nav. */
+let frameHistorySettleUntilMs = 0;
+/** Окно settle после первого load / цепочки редиректов. */
+const FRAME_HISTORY_SETTLE_MS = 800;
 /** @type {string} */
 let portfolioName = getStrings().brandName;
 
@@ -1065,6 +1082,8 @@ function clearReviewSessionState() {
   nextCasePreload = null;
   nextCasePrewarmGen += 1;
   portfolioName = getStrings().brandName;
+  resetFrameHistory();
+  syncFrameNavButtons();
   // После снятия claimHeld — иначе sync снова покажет Rec.
   resetDictationSession();
 }
@@ -1584,6 +1603,7 @@ function applyEmbedPlan(plan) {
 
   embedPlan = plan;
   syncDictationBackgroundPolicy();
+  resetFrameHistory();
 
   if (!frame || !frameWrap || !externalViewer) return;
 
@@ -1601,6 +1621,7 @@ function applyEmbedPlan(plan) {
     frame.removeAttribute("allowfullscreen");
     frame.src = "about:blank";
     syncLocaleDependentAttrs();
+    syncFrameNavButtons();
     return;
   }
 
@@ -1613,6 +1634,7 @@ function applyEmbedPlan(plan) {
   }
 
   frame.src = plan.frameSrc || "about:blank";
+  syncFrameNavButtons();
   watchOptimisticFrame(plan, generation);
   // Спец-embed (Figma/YouTube) не трогаем probe'ом; кастомные домены — да.
   if (plan.frameSrc && plan.openUrl && !plan.allowFullscreen) {
@@ -1891,18 +1913,94 @@ function startExternalSession() {
   }
 }
 
-function navigateFrame(action) {
-  if (!frame || !portfolioUrl || !embedPlan) return;
+/**
+ * Сброс chrome-истории iframe (новый src / external / конец сессии).
+ */
+function resetFrameHistory() {
+  frameHistoryBackDepth = 0;
+  frameHistoryForwardDepth = 0;
+  frameNavPending = null;
+  frameHistoryPrimed = false;
+  frameHistorySettleUntilMs = 0;
+}
 
-  if (embedPlan.mode === "external") {
-    openPortfolioExternally();
+/**
+ * Disabled state кнопок «назад / вперёд / обновить» как у браузерного chrome.
+ */
+function syncFrameNavButtons() {
+  const hasPortfolio = Boolean(portfolioUrl && embedPlan);
+  const isIframe = embedPlan?.mode === "iframe";
+  const canTraverse = hasPortfolio && isIframe;
+  if (frameBackBtn) {
+    frameBackBtn.disabled = !(canTraverse && frameHistoryBackDepth > 0);
+  }
+  if (frameForwardBtn) {
+    frameForwardBtn.disabled = !(canTraverse && frameHistoryForwardDepth > 0);
+  }
+  if (frameReloadBtn) {
+    frameReloadBtn.disabled = !hasPortfolio;
+  }
+}
+
+/**
+ * load iframe → обновить can-go-back/forward (без history.length: cross-origin).
+ */
+function onFrameHistoryLoad() {
+  if (!embedPlan || embedPlan.mode !== "iframe") {
+    resetFrameHistory();
+    syncFrameNavButtons();
     return;
   }
 
+  const src = String(frame?.getAttribute("src") || "");
+  if (!src || src === "about:blank") {
+    resetFrameHistory();
+    syncFrameNavButtons();
+    return;
+  }
+
+  const pending = frameNavPending;
+  frameNavPending = null;
+
+  if (pending === "back") {
+    frameHistoryBackDepth = Math.max(0, frameHistoryBackDepth - 1);
+    frameHistoryForwardDepth += 1;
+  } else if (pending === "forward") {
+    frameHistoryForwardDepth = Math.max(0, frameHistoryForwardDepth - 1);
+    frameHistoryBackDepth += 1;
+  } else if (pending === "reload") {
+    /* тот же документ — глубины не трогаем */
+  } else if (!frameHistoryPrimed || Date.now() < frameHistorySettleUntilMs) {
+    frameHistoryPrimed = true;
+    frameHistorySettleUntilMs = Date.now() + FRAME_HISTORY_SETTLE_MS;
+  } else {
+    // Навигация внутри портфолио (ссылка / SPA с full load) — как новый entry.
+    frameHistoryBackDepth += 1;
+    frameHistoryForwardDepth = 0;
+  }
+
+  syncFrameNavButtons();
+}
+
+/**
+ * @param {(win: Window | null) => void} action
+ * @param {"back" | "forward" | "reload"} kind
+ */
+function navigateFrame(action, kind) {
+  if (!frame || !portfolioUrl || !embedPlan) return;
+  // External: портфолио не в iframe — back/forward no-op (кнопки disabled).
+  if (embedPlan.mode !== "iframe") return;
+  if (kind === "back" && frameHistoryBackDepth <= 0) return;
+  if (kind === "forward" && frameHistoryForwardDepth <= 0) return;
+
+  frameNavPending = kind;
   try {
     action(frame.contentWindow);
   } catch {
+    frameNavPending = null;
+    resetFrameHistory();
     frame.src = embedPlan.frameSrc || portfolioUrl;
+    syncFrameNavButtons();
   }
 }
 
@@ -2803,20 +2901,26 @@ openExternalBtn?.addEventListener("click", () => {
   startExternalSession();
 });
 
+frame?.addEventListener("load", onFrameHistoryLoad);
+syncFrameNavButtons();
+
 frameReloadBtn?.addEventListener("click", () => {
+  if (frameReloadBtn.disabled) return;
   if (embedPlan?.mode === "external") {
     openPortfolioExternally();
     return;
   }
-  navigateFrame((win) => win?.location.reload());
+  navigateFrame((win) => win?.location.reload(), "reload");
 });
 
 frameBackBtn?.addEventListener("click", () => {
-  navigateFrame((win) => win?.history.back());
+  if (frameBackBtn.disabled) return;
+  navigateFrame((win) => win?.history.back(), "back");
 });
 
 frameForwardBtn?.addEventListener("click", () => {
-  navigateFrame((win) => win?.history.forward());
+  if (frameForwardBtn.disabled) return;
+  navigateFrame((win) => win?.history.forward(), "forward");
 });
 
 dictationBtn?.addEventListener("click", () => {

@@ -21,7 +21,7 @@
 | Home: free-slot «Мои» + max 1 pending | wired (`MAX_MINE_PENDING`, `submit_portfolio`) |
 | Home tabbar dock: glass + «Закинуть своё» справа | wired (`tabbar-dock`, `--on-dark`, entrance `motion-reveal-dock`) |
 | Review claim / heartbeat / release | wired (награда только после submit; unload = keepalive + `sessionStorage` reconcile; **overshoot** — см. § Claims) |
-| Review: iframe/external + таймер 45 s + **надиктовка** | wired (embed-hosts + probe/fallback; rec + mic в совете; post-edit `polish-dictation` **клиент off** — `POLISH_ENABLED = false`; SoT [`embed-hosts.md`](content/embed-hosts.md), [`polish-dictation/README`](supabase/functions/polish-dictation/README.md)) |
+| Review: iframe/external + таймер 60 s + **надиктовка** | wired (embed-hosts + probe/fallback; rec + mic в совете; post-edit `polish-dictation` **клиент off** — `POLISH_ENABLED = false`; SoT [`embed-hosts.md`](content/embed-hosts.md), [`polish-dictation/README`](supabase/functions/polish-dictation/README.md)) |
 | Подача URL + back-chip + done на url-screen | wired |
 | Report: листы (+ `dictation`) + жалоба + PDF | wired (сводный PDF + action cards — [`ACTION_CARDS.md`](ACTION_CARDS.md)) |
 | Referrals validate/redeem / share | wired (1 код / 2 слота, seed `YTHWKPDWAK`, без наград) |
@@ -47,7 +47,7 @@
 - **Вкладка «Рейтинг»:** третий tab `rating`; топ-50 по `reputation` (`listRatingTop` / `rating_leaderboard.sql`, снапшот раз в сутки); карточки в `.home-screen__rating-list` (aside `rating/` **не** монтируется); плашка репутации `min-width`/`height` 52px, padding-x 16px (иконки positive/neutral/negative).
 - **«Топы в сети»:** fixed-чип слева снизу (`legendary-online-panel` + heartbeat/list RPC); скрыт, если никого нет.
 - **Deep links home:** `/home`, `?filter=completed` (Чужие / уже отревьюено), `?tab=mine`, `?tab=mine&filter=completed`, `?tab=rating`; query канонизирует `homeRoute.js`, Back/Forward переключает вид без remount.
-- **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 45` (review shell + intro copy). iframe — пауза при скрытой вкладке; external — wall-clock без паузы; конец → `src/assets/audio/Timer-end.wav` + стоп надиктовки (+ polish notes, если `POLISH_ENABLED`) → quiz.
+- **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 60` (review shell + intro copy). iframe — пауза при скрытой вкладке; external — wall-clock без паузы; конец → `src/assets/audio/Timer-end.wav` + стоп надиктовки (+ polish notes, если `POLISH_ENABLED`) → quiz.
 - **Tabbar dock:** glass-таббар + кнопка «Закинуть своё» справа (56×56, Google blue, gap 8px); hide при скролле уезжает весь док. Светлый трек — gray-900 10% + blur 20; тёмный превью → `--on-dark` — white 20%.
 - **Чипы шапки:** репутация → баланс → аватар. Submit и уведомления из topbar убраны.
 - **Точка на «Чужие посты»:** красная 6px в углу вкладки при **новом** кейсе в open-ленте; открытие «Чужие посты» гасит (`feedSeen`), новый id снова зажигает.

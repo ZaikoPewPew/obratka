@@ -15,7 +15,7 @@ SoT продукта: [`PROJECT.md`](PROJECT.md) · экраны: [`SCREENS.md`]
 
 - Invite-only: referral → auth (Email OTP / Telegram / Google) → onboarding → home
 - Лента ревью (лиги) + claim / heartbeat / release + награда только после submit
-- `/review` (iframe/external, 45 s) → `/quiz` → `/quiz/done`
+- `/review` (iframe/external, 60 s) → `/quiz` → `/quiz/done`
 - Подача URL (`/portfolio`, −30) + отчёт автору (`/report`, жалобы, PDF)
 - Репутация / рейтинг топ-50 / бан
 - Промо `/landing/` + desktop-only заглушка на телефоне
@@ -170,7 +170,7 @@ SoT: [`mobile.md`](mobile.md)
 
 | # | Сценарий | Ожидание |
 |---|----------|----------|
-| 1 | Таймер 45 s | конец → звук + quiz; rec стопается |
+| 1 | Таймер 60 s | конец → звук + quiz; rec стопается |
 | 2 | iframe: скрыть вкладку | таймер на паузе |
 | 3 | external: другая вкладка | wall-clock без паузы |
 | 4 | Figma / YouTube | спец-embed |

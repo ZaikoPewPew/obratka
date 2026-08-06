@@ -74,7 +74,7 @@ MVP: **Web Speech API** (браузер) → текст в памяти сесс
 5. Перед `submitPortfolioReview` — ещё раз polish `dictation` + `advice`, затем мерж `dictation` в payload.
 6. Новая сессия → `resetDictationSession()`.
 
-Таймер просмотра: `REVIEW_SESSION_SECONDS = 45` в [`src/config/review.js`](../../config/review.js) — отдельно от claim TTL 20 min; ту же величину показывает intro-модалка home.
+Таймер просмотра: `REVIEW_SESSION_SECONDS = 60` в [`src/config/review.js`](../../config/review.js) — отдельно от claim TTL 20 min; ту же величину показывает intro-модалка home.
 
 Поведение при смене вкладки:
 

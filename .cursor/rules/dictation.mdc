@@ -19,7 +19,7 @@ alwaysApply: true
 - Движок: Web Speech API + AnalyserNode для волны.
 - Контракт: `DictationEngine` в `src/lib/dictation/` (`createDictationEngine` → Web Speech), включая `resetTranscript()`.
 - UI: `.iframe-shell__rec` после reload (Figma `rec` 470:1374) и `.review-panel__rec` (34×34, mic 18, красный индикатор 10 с миганием).
-- Таймер просмотра: **45 s** (`REVIEW_SESSION_SECONDS` в `src/config/review.js`); claim TTL по-прежнему 20 min.
+- Таймер просмотра: **60 s** (`REVIEW_SESSION_SECONDS` в `src/config/review.js`); claim TTL по-прежнему 20 min.
 - iframe: таймер **паузится**, пока вкладка скрыта; external (портфолио в другой вкладке): таймер идёт по wall-clock **без** паузы.
 - Конец таймера → звук `src/assets/audio/Timer-end.wav` + авто-стоп надиктовки → quiz; если вкладка скрыта — мигание title/favicon (`tabAttention.js`, `favicon_timer.svg`) до `window` focus.
 - Аудио **не** upload / **не** Storage.

@@ -120,7 +120,7 @@
 | `/home` | Чужие/Мои/Рейтинг, query, SWR, tabbar-dock, intro до claim, сегменты, free-slot, mine gate, feedSeen + 3/3, баланс / репутация |
 | `/settings` | side-panel профиля; «На главную» |
 | `/portfolio` | ввод URL, back-chip, баланс, done |
-| `/review` | iframe / external, таймер 45 s, rec, abort |
+| `/review` | iframe / external, таймер 60 s, rec, abort |
 | `/quiz` → done | шкалы, mic в совете, PDF reveal |
 | `/report` | листы, жалоба (1 тег, окно 6ч), PDF |
 | `/banned` | mesh, «Выйти» / «Связаться» |
