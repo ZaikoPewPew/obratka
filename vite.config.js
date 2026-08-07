@@ -1,8 +1,8 @@
 import { resolve } from "node:path";
 import { defineConfig } from "vite";
 
-/** Prod origin for absolute OG / canonical / sitemap URLs (GitHub Pages). */
-const SITE_ORIGIN = "https://zaikopewpew.github.io";
+/** Prod origin for absolute OG / canonical / sitemap URLs. */
+const SITE_ORIGIN = process.env.VITE_SITE_ORIGIN || "https://obratka.net";
 
 /**
  * Normalize Vite base to always end with `/` (except empty → `/`).
