@@ -69,7 +69,7 @@
   animation-delay: var(--url-screen-reveal-delay-title);
 }
 
-.url-screen--open .url-screen__field {
+.url-screen--open .url-screen__field:not([hidden]) {
   animation-name: motion-reveal;
   animation-delay: var(--url-screen-reveal-delay-field);
 }
@@ -401,6 +401,14 @@
 
 .auth-screen__form {
   gap: var(--shell-review-done-gap);
+}
+
+/* `display: flex` ниже перебивает UA `[hidden]` — без !important поле/divider остаются видимы. */
+.url-screen__field[hidden],
+.auth-screen__divider[hidden],
+.auth-screen__form--providers-only .url-screen__field,
+.auth-screen__form--providers-only .auth-screen__divider {
+  display: none !important;
 }
 
 .auth-screen__divider {
@@ -788,7 +796,7 @@
   animation-delay: var(--url-screen-reveal-delay-platforms);
 }
 
-.url-screen--open .auth-screen__divider,
+.url-screen--open .auth-screen__divider:not([hidden]),
 .url-screen--open .auth-screen__actions {
   animation-name: motion-reveal;
   animation-duration: var(--motion-reveal-duration);

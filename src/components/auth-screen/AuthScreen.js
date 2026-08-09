@@ -222,15 +222,16 @@ export function createAuthScreen({
   googleBtn.innerHTML = `${GOOGLE_ICON_SVG}${GOOGLE_LOADER_SVG}<span class="auth-screen__provider-label">${t.authGoogle}</span>`;
 
   actions.append(telegramBtn, googleBtn);
-  form.append(field, divider, actions, providerError);
-  block.append(title, form);
-
-  if (!EMAIL_AUTH_ENABLED) {
-    field.hidden = true;
-    divider.hidden = true;
+  if (EMAIL_AUTH_ENABLED) {
+    form.append(field, divider, actions, providerError);
+  } else {
+    // Не монтируем email/divider: `display: flex` в brand-screen.css
+    // перебивает HTML `hidden` без `[hidden] { display: none !important }`.
     input.required = false;
     form.classList.add("auth-screen__form--providers-only");
+    form.append(actions, providerError);
   }
+  block.append(title, form);
 
   const shell = createBrandScreenShell({
     labelledById: "auth-screen-title",
