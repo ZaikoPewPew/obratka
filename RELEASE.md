@@ -13,7 +13,7 @@ SoT продукта: [`PROJECT.md`](PROJECT.md) · экраны: [`SCREENS.md`]
 
 ### Входит
 
-- Invite-only: referral → auth (Email OTP / Telegram / Google) → onboarding → home
+- Invite-only: referral → auth (**Telegram / Google**) → onboarding → home
 - Лента ревью (лиги) + claim / heartbeat / release + награда только после submit
 - `/review` (iframe/external, 60 s) → `/quiz` → `/quiz/done`
 - Подача URL (`/portfolio`, −30) + отчёт автору (`/report`, жалобы, PDF)
@@ -23,6 +23,7 @@ SoT продукта: [`PROJECT.md`](PROJECT.md) · экраны: [`SCREENS.md`]
 
 ### Не входит (не тестировать как продукт)
 
+- **Email OTP** — UI скрыт (`EMAIL_AUTH_ENABLED = false` в [`src/config/auth.js`](src/config/auth.js)), пока нет стабильного custom SMTP (Unisender и т.п.). Код/экран `/registration/code` остаются, deep link → `/registration`. Вернуть: флаг `true` + SMTP + шаблоны с `{{ .Token }}`
 - Мобильный UX ревью / home / quiz
 - Waitlist / dual-layout (удалён)
 - Manual linking Telegram↔email
@@ -46,13 +47,15 @@ SoT продукта: [`PROJECT.md`](PROJECT.md) · экраны: [`SCREENS.md`]
 
 SoT: [`landing/README.md`](landing/README.md)
 
-### 0.2 Мобильная заглушка (не мобильный продукт)
+### 0.2 Мобильная заглушка (не мобильный продукт) — сделано
 
 Заглушка = [`desktop-only-screen`](src/components/desktop-only-screen/README.md), не адаптив приложения.
 
-- [ ] Кастом визуала / копирайта (RU + EN: `desktopOnly*`, `metaTitleDesktopOnly`)
-- [ ] Brand mark + mesh выглядят «готово», не черновик
-- [ ] Без CTA «продолжить на телефоне» (политика v1)
+Решение v1: **не** mesh/brand-card — чисто белый экран + одна фраза. Без CTA «продолжить на телефоне».
+
+- [x] Кастом копирайта (RU + EN: `desktopOnlyTitle`, `metaTitleDesktopOnly`; body убран)
+- [x] Визуал: белый bg, 14px / regular / gray-900; без mesh и марки
+- [x] Без CTA «продолжить на телефоне»
 - [ ] Smoke: &lt;768 → оверлей; ≥768 → продукт; ресайз mid-review → abort без монет
 
 SoT: [`mobile.md`](mobile.md)
@@ -83,11 +86,13 @@ SoT: [`mobile.md`](mobile.md)
 
 ### 1.2 Supabase Auth (Dashboard)
 
-- [ ] Email OTP: в шаблонах **Magic Link** и **Confirm signup** есть `{{ .Token }}` (иначе `/registration/code` мёртв)
+**Email OTP — вне скоупа v1-ката** (`EMAIL_AUTH_ENABLED = false`). Пункты про SMTP/токен ниже — только когда вернём почту.
+
+- [ ] ~~Email OTP: шаблоны Magic Link / Confirm signup с `{{ .Token }}`~~ — отложено (SMTP + флаг)
 - [ ] Site URL + Additional Redirect URLs: localhost + `https://zaikopewpew.github.io/obratka/`
 - [ ] Google OAuth: Client ID/Secret в Dashboard; redirect URI = Supabase callback
 - [ ] Telegram: bot id в клиенте, token в Edge `telegram-auth`
-- [ ] Automatic linking Email↔Google включён (из коробки)
+- [ ] Automatic linking Email↔Google включён (из коробки; актуально для Google; Email UI скрыт)
 
 Чеклист: [`auth-screen/README.md`](src/components/auth-screen/README.md)
 
@@ -124,15 +129,17 @@ SoT: [`mobile.md`](mobile.md)
 | 1 | Чистый device → `/` или `/referral` | Invite gate |
 | 2 | Seed `YTHWKPDWAK` | validate ok → auth; `inviteGatePassed` |
 | 3 | Битый / exhausted код | ошибка поля + visual `invalid` |
-| 4 | Email OTP happy path | письмо → 6 ячеек → сессия → onboarding |
-| 5 | Resend OTP | cooldown ~60s; rate-limit → i18n |
+| 4 | ~~Email OTP happy path~~ | **skip v1** — email UI скрыт |
+| 5 | ~~Resend OTP~~ | **skip v1** |
 | 6 | Telegram Login | сессия → onboarding/home |
 | 7 | Google OAuth | return на Pages → onboarding/home |
-| 8 | Email ↔ Google same address | один аккаунт (automatic linking) |
+| 8 | ~~Email ↔ Google same address~~ | **skip v1** (пока нет Email UI); automatic linking остаётся в Dashboard |
 | 9 | Onboarding | пишет `profiles`, → `/home` |
 | 10 | Logout при пройденном gate | → `/registration`, не снова referral |
 | 11 | Deep link `/home` без сессии | → referral/auth |
 | 12 | Сессия без онбординга | любой gated path → `/onboarding` |
+| 13 | `/registration` | только Telegram + Google (без инпута email и «или») |
+| 14 | Deep `/registration/code` | → `/registration` (пока email off) |
 
 ### 2.2 Home / экономика / лента
 
@@ -218,7 +225,7 @@ Ops: [`supabase/BAN.md`](supabase/BAN.md)
 
 | # | Сценарий | Ожидание |
 |---|----------|----------|
-| 1 | DevTools &lt; 768 | оверлей; title desktop-only |
+| 1 | DevTools &lt; 768 | белый оверлей + `desktopOnlyTitle`; title desktop-only |
 | 2 | ≥ 768 | обычный флоу |
 | 3 | 1200 → 375 mid-review | abort, release, без +10 |
 | 4 | Deep `/review` на узком | redirect home + оверлей |
@@ -258,11 +265,11 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 
 ### Must (блокеры)
 
-- [ ] Auth: Email OTP + Google + Telegram на **prod** URL
+- [ ] Auth: **Google + Telegram** на **prod** URL (Email OTP — вне скоупа до SMTP)
 - [ ] Полный цикл: invite → onboarding → 1 ревью (+10) → 3 ревью → подача (−30) → 3 листа → report/PDF
 - [ ] Claim abort / pagehide **без** ложных монет
 - [ ] Ban escape-proof
-- [ ] Desktop-only заглушка на телефоне (после полиша) выглядит ок
+- [ ] Desktop-only заглушка на телефоне (белый + короткая фраза) ок
 - [ ] Лендинг + CTA на referral
 - [ ] SQL claims/complaints/referrals/wallet на prod актуальны
 - [ ] PostHog пишет события с Pages
@@ -274,6 +281,7 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 - [ ] Safari smoke
 - [ ] Legendary online с 2+ аккаунтами
 - [ ] Overshoot 4-го ревьюера вручную
+- [ ] Вернуть Email OTP (SMTP Unisender/аналог + `EMAIL_AUTH_ENABLED = true` + шаблоны `{{ .Token }}`)
 
 ### Ops на старте
 
@@ -285,11 +293,12 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 
 ## 5. Порядок работ (практика)
 
-1. **Полиш:** лендинг → desktop-only stub → 404/not-found (как решим)  
-2. **Инфра:** Auth Dashboard + SQL/Edge + `.env.production`  
-3. **Build + deploy** на Pages  
-4. **QA** по §2 на prod URL (не только localhost)  
-5. **Аналитика / OG** §3  
-6. **Go/no-go** §4 → открыть инвайты юзерам  
+1. **Полиш:** лендинг → ~~desktop-only stub~~ (готово) → 404/not-found (как решим)
+2. **Инфра:** Auth Dashboard (Google + Telegram; Email — later) + SQL/Edge + `.env.production`
+3. **Build + deploy** на Pages
+4. **QA** по §2 на prod URL (не только localhost); Email-сценарии skip
+5. **Аналитика / OG** §3
+6. **Go/no-go** §4 → открыть инвайты юзерам
 
-Мобильный продукт не планируем в этом релизе — только заглушка.
+Мобильный продукт не планируем в этом релизе — только заглушка.  
+Email OTP — post-launch, когда SMTP стабилен.
