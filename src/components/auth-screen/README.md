@@ -1,13 +1,13 @@
 # `auth-screen` — регистрация
 
-Path: **`/registration`**. Split как `url-screen`; форма — email → divider → провайдеры.  
-Код из письма — отдельный экран [`auth-code-screen`](../auth-code-screen/README.md) (`/registration/code`).
+Path: **`/registration`**. Split как `url-screen`; форма — провайдеры (Telegram / Google).  
+Email OTP сейчас **выключен** (`EMAIL_AUTH_ENABLED` в [`src/config/auth.js`](../../config/auth.js)); код из письма — [`auth-code-screen`](../auth-code-screen/README.md) (`/registration/code`), deep link без флага → `/registration`.
 
 ## Левая панель
 
 1. Заголовок (`authWelcomeTitle`)
-2. Email + стрелка submit
-3. Разделитель (`authDividerOr`)
+2. ~~Email + стрелка submit~~ (скрыто, пока `EMAIL_AUTH_ENABLED === false`)
+3. ~~Разделитель (`authDividerOr`)~~ (скрыт вместе с email)
 4. Кнопки: Telegram / Google
 
 ## Файл
@@ -21,7 +21,7 @@ Path: **`/registration`**. Split как `url-screen`; форма — email → d
 
 | Источник ошибки | Outline инпута | Текст | Visual `invalid` |
 |-----------------|----------------|-------|------------------|
-| Email (валидация / OTP send) | да — `setUrlScreenFieldInvalid` | да | да (OR) |
+| Email (валидация / OTP send) | да — `setUrlScreenFieldInvalid` | да | да (OR); только если email включён |
 | Provider (Telegram / Google) | нет | да — `setFieldErrorVisible` на providerError | да (OR) |
 
 Правый visual: [`brand-screen-visual`](../brand-screen-visual/README.md).  
@@ -30,7 +30,7 @@ Visual `invalid`, пока видна **любая** ошибка (email **ил�
 
 ## Поведение
 
-- **Email** → `requestEmailOtp` → `onSuccess({ type: 'email-otp-sent', email })` → `main.js` открывает `authCode`.
+- **Email** (если `EMAIL_AUTH_ENABLED`) → `requestEmailOtp` → `onSuccess({ type: 'email-otp-sent', email })` → `main.js` открывает `authCode`.
 - **Telegram** → Login Widget → Edge Function `telegram-auth` →  
   `onSuccess({ type: 'telegram', userId, … })`.
 - **Google** → `signInWithGoogle()` → редирект → `completeOAuthFromUrl()` в `main.js`.
@@ -48,18 +48,15 @@ Visual `invalid`, пока видна **любая** ошибка (email **ил�
 node --env-file=.env scripts/verify-email-otp-setup.mjs
 ```
 
-См. `.env.example` и `supabase/functions/telegram-auth/README.md`:
-
-- `SUPABASE_URL`, `SUPABASE_ANON_KEY`
-- `TELEGRAM_BOT_ID` (число до `:` в токене BotFather)
-- секрет `TELEGRAM_BOT_TOKEN` только в Edge Function secrets
-
 ### Email (Supabase Auth → Providers → Email)
 
-1. Включить Email provider (проверка: `GET /auth/v1/settings` → `external.email: true`).
-2. **Сначала custom SMTP** (Dashboard → Authentication → Emails → SMTP Settings).  
-   Без SMTP на Free **нельзя править** шаблоны («Set up custom SMTP to edit templates») — уходят дефолты. Для UI `/registration/code` дефолт Confirm signup = только ссылка (проверено: link-only). SMTP: Resend / Postmark / SendGrid — креды только в Dashboard, см. [`SECURITY.md`](../../../supabase/SECURITY.md).
-3. **Критично для `/registration/code`:** в письме должен быть **`{{ .Token }}`** (6 цифр).  
+Сейчас UI скрыт. Чтобы вернуть:
+
+1. `EMAIL_AUTH_ENABLED = true` в `src/config/auth.js`.
+2. Включить Email provider (проверка: `GET /auth/v1/settings` → `external.email: true`).
+3. **Сначала custom SMTP** (Dashboard → Authentication → Emails → SMTP Settings).
+   Без SMTP на Free **нельзя править** шаблоны («Set up custom SMTP to edit templates») — уходят дефолты. Для UI `/registration/code` дефолт Confirm signup = только ссылка (проверено: link-only). SMTP: Unisender Go / Resend / Postmark — креды только в Dashboard, см. [`SECURITY.md`](../../../supabase/SECURITY.md).
+4. **Критично для `/registration/code`:** в письме должен быть **`{{ .Token }}`** (6 цифр).
    При `mailer_autoconfirm: false` (Confirm email включён) первый `signInWithOtp` для **нового** юзера часто шлёт **Confirm sign up**. Дефолт без `{{ .Token }}` — ячейки кода не сработают.
 
    После SMTP → **Emails → Templates**, правь оба:
@@ -67,23 +64,26 @@ node --env-file=.env scripts/verify-email-otp-setup.mjs
    - **Magic link or OTP**
    - **Confirm sign up**
 
-   В теле обязательно код (ссылку можно оставить вторым способом):
+   Минимум в body:
 
    ```text
    Ваш код для входа: {{ .Token }}
    ```
 
    Альтернатива: Providers → Email → выключить **Confirm email** (`mailer_autoconfirm`), тогда уходит Magic link or OTP; всё равно добавь `{{ .Token }}` в этот шаблон.
-4. Redirect URLs (Authentication → URL Configuration):
+5. Redirect URLs (Authentication → URL Configuration):
    - `http://localhost:5173/`
-   - `http://127.0.0.1:5173/` (если гоняешь Vite так)
    - `https://zaikopewpew.github.io/obratka/`
 
-### Google (Supabase Auth → Providers → Google)
+### Telegram
 
-1. [Google Cloud Console](https://console.cloud.google.com/) → OAuth client (Web):
-   - Authorized JavaScript origins: `http://localhost:5173`, `https://zaikopewpew.github.io`
-   - Authorized redirect URI: `https://<project-ref>.supabase.co/auth/v1/callback`
+1. BotFather → bot; `TELEGRAM_BOT_ID` / `TELEGRAM_BOT_USERNAME` в `.env`.
+2. `TELEGRAM_BOT_TOKEN` → Edge Function secrets (`telegram-auth`).
+3. секрет `TELEGRAM_BOT_TOKEN` только в Edge Function secrets
+
+### Google
+
+1. Google Cloud Console → OAuth client (Web).
 2. Client ID + Secret → Supabase Dashboard → Authentication → Providers → Google.
 
 ### Identity linking (Email ↔ Google)
@@ -101,12 +101,6 @@ node --env-file=.env scripts/verify-email-otp-setup.mjs
 
 ## i18n
 
-`authWelcomeTitle`, `authEmail*`, `authDividerOr`, `authTelegram`, `authGoogle`,  
-`authProviderConnecting`, provider errors, `authOtpSendError` / `authOtpRateLimit` /  
+`authWelcomeTitle`, `authEmail*`, `authDividerOr`, `authTelegram`, `authGoogle`,
+`authProviderConnecting`, provider errors, `authOtpSendError` / `authOtpRateLimit` /
 `authOtpNotConfigured` / `authIdentityConflict`.
-
-## Стили
-
-`.auth-screen__*` + `.url-screen*` в `iframe-shell.css`; токены `--auth-screen-*`.
-
-См. [`SCREENS.md`](../../../SCREENS.md).

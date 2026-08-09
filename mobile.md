@@ -38,8 +38,7 @@
 
 | Ключ | RU | EN |
 |------|----|----|
-| `desktopOnlyTitle` | Пока только с компьютера | Desktop only for now |
-| `desktopOnlyBody` | Ревью портфолио рассчитано на большой экран — открой Обратку с ноутбука или десктопа | Portfolio review is built for a large screen — open Obratka on a laptop or desktop |
+| `desktopOnlyTitle` | Ревьюим только с компа | Reviews only from a computer |
 | `metaTitleDesktopOnly` | Обратка — только с компьютера | Obratka — desktop only |
 
 Источник: [`content/locales.json`](content/locales.json). Висячие предлоги — `fixHangingPrepositions` в фабрике экрана.

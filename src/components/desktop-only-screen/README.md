@@ -8,12 +8,7 @@ SoT политики и QA: [`mobile.md`](../../../mobile.md). Карта: [`SCR
 
 ## Layout
 
-Mobile-first (гейт виден только на узком):
-
-1. Full-bleed visual — mesh (`--url-screen-mesh-*`, не ban) + noise + обычный blob `brandMarkSvg` (44×49).
-2. Карточка снизу — тайтл + body на `--color-bg`.
-
-**Не** использует `createBrandScreenVisual` / `setVariant` — статичный wash через `mountMeshGradientWash`, как у ban/success, но с дефолтным mesh.
+Чисто белый экран + одна короткая фраза по центру (`14px` / regular / `--color-text`). Без mesh, бренда и карточки.
 
 ## Поведение (оркестрация в `main.js`)
 
@@ -29,8 +24,7 @@ Mobile-first (гейт виден только на узком):
 
 | Ключ | RU | EN |
 |------|----|----|
-| `desktopOnlyTitle` | Пока только с компьютера | Desktop only for now |
-| `desktopOnlyBody` | Ревью портфолио рассчитано на большой экран — открой Обратку с ноутбука или десктопа | Portfolio review is built for a large screen — open Obratka on a laptop or desktop |
+| `desktopOnlyTitle` | Ревьюим только с компа | Reviews only from a computer |
 | `metaTitleDesktopOnly` | Обратка — только с компьютера | Obratka — desktop only |
 
 На `open()` — `document.title = metaTitleDesktopOnly`. Висячие предлоги — `fixHangingPrepositions`.
@@ -49,5 +43,5 @@ Viewport helpers: [`src/utils/viewport.js`](../../utils/viewport.js).
 ## Стили / токены
 
 - CSS: [`styles/desktop-only-screen.css`](../../../styles/desktop-only-screen.css)
-- Токены: `--desktop-only-screen-*` (z выше toast, padding, card, brand size)
-- Motion: `motion-reveal` / `motion-reveal-scale` + `prefers-reduced-motion`
+- Токены: `--desktop-only-screen-*` (z выше toast, белый bg, 14px / 400 / gray-900)
+- Motion: fade `opacity` + `prefers-reduced-motion`

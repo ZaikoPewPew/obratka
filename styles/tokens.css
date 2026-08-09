@@ -828,20 +828,12 @@
 
   /* Desktop-only gate (viewport < --breakpoint-min-desktop) */
   --desktop-only-screen-z: calc(var(--z-toast) + 100);
+  --desktop-only-screen-bg: var(--palette-white);
   --desktop-only-screen-padding: var(--url-screen-padding);
-  --desktop-only-screen-inner-padding: var(--space-4);
-  --desktop-only-screen-gap: var(--space-6);
   --desktop-only-screen-width: var(--shell-review-done-width);
-  --desktop-only-screen-card-gap: var(--space-3);
-  --desktop-only-screen-card-padding: var(--space-6) var(--space-5);
-  --desktop-only-screen-card-radius: var(--radius-xl);
-  --desktop-only-screen-visual-radius: var(--url-screen-visual-radius);
-  --desktop-only-screen-title-size: var(--shell-review-done-title-size);
-  --desktop-only-screen-title-weight: var(--shell-review-done-title-weight);
-  --desktop-only-screen-body-size: var(--font-size-base);
-  --desktop-only-screen-noise-opacity: var(--url-screen-noise-opacity);
-  --desktop-only-screen-brand-width: var(--url-screen-brand-width);
-  --desktop-only-screen-brand-height: var(--url-screen-brand-height);
+  --desktop-only-screen-color: var(--color-text);
+  --desktop-only-screen-font-size: var(--font-size-md);
+  --desktop-only-screen-font-weight: var(--font-weight-regular);
 
   /* Home hub (лента карточек + шапка) */
   --home-screen-z: var(--z-modal);

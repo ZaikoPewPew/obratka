@@ -3,6 +3,7 @@ import {
   signInWithGoogle,
   signInWithTelegram,
 } from "../../api/auth.js";
+import { EMAIL_AUTH_ENABLED } from "../../config/auth.js";
 import { getStrings } from "../../i18n.js";
 import { createBrandScreenShell } from "../brand-screen-shell/BrandScreenShell.js";
 import { isValidEmail } from "../../utils/emailValidation.js";
@@ -106,7 +107,7 @@ function authAnalyticsCode(err, fallback) {
 }
 
 /**
- * Экран регистрации: email → (далее auth-code) / Telegram / Google.
+ * Экран регистрации: Telegram / Google (+ опц. Email OTP, см. `EMAIL_AUTH_ENABLED`).
  *
  * @param {{
  *   onSuccess: (result: AuthResult) => void | Promise<void>;
@@ -223,6 +224,13 @@ export function createAuthScreen({
   actions.append(telegramBtn, googleBtn);
   form.append(field, divider, actions, providerError);
   block.append(title, form);
+
+  if (!EMAIL_AUTH_ENABLED) {
+    field.hidden = true;
+    divider.hidden = true;
+    input.required = false;
+    form.classList.add("auth-screen__form--providers-only");
+  }
 
   const shell = createBrandScreenShell({
     labelledById: "auth-screen-title",
@@ -446,6 +454,7 @@ export function createAuthScreen({
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (!EMAIL_AUTH_ENABLED) return;
     if (emailBusy || telegramBusy || googleBusy) return;
 
     const email = input.value.trim().toLowerCase();

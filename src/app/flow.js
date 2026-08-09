@@ -4,6 +4,7 @@
  * @typedef {import("./routes.js").AppRouteId} AppScreenId
  */
 
+import { EMAIL_AUTH_ENABLED } from "../config/auth.js";
 import { ROUTE_PATHS } from "./routes.js";
 
 /** @type {readonly AppScreenId[]} */
@@ -127,6 +128,8 @@ export function resolveAccessibleRoute(id, state = {}) {
   }
 
   if (id === "authCode") {
+    // Email OTP выключен — экран кода недоступен.
+    if (!EMAIL_AUTH_ENABLED) return "auth";
     // Без pending email код-экран недоступен — назад на регистрацию.
     try {
       const pending = window.sessionStorage.getItem("obratka.pendingAuthEmail");
