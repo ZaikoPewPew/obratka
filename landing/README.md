@@ -15,34 +15,38 @@ npm run dev
 
 ## Блоки
 
-Пять полноэкранных панелей (`scroll-snap`, по центру экрана):
+Шесть+ полноэкранных панелей (`scroll-snap`):
 
-1. **Intro** — title/body  
-2. **Pain** — title / body / «Войти»  
-3. **Demo** — одно видео **833×478** (`VideoPlayerCard`, `primer.mp4`)  
-4. **Benefits** — grid 2×2 карточек (stagger при reveal панели)  
-5. **Closing** — invite-only + CTA  
+1. **Hook** — «нанимающие / 30 секунд» (акцент `--landing-section-accent`)  
+2. **Question** — готово ли портфолио  
+3. **Pain** — часы на исправления  
+4. **Bridge** — «А что, если это можно было бы замерить?»  
+5. **Demo** — только видео **833×478**  
+6. **Community** — закрытое сообщество / честная обратная связь  
+7. **Outcome** — 3 ревью + рекомендации  
+8. **Closing** — финальный оффер + CTA  
+9. **FAQ** — последний блок страницы  
 
-Шапка sticky; footer после панелей.  
+Шапка sticky; footer: © + «Сообщество» (Telegram) + «Правила» (side-panel из `rules.json`).  
 Типографика: title `32 / semibold`, body `16 / 1.7`.
 
 ## Motion
 
-- `scroll-snap-type: y mandatory` + `scroll-snap-stop: always` на панелях.  
-- Reveal панели через `IntersectionObserver` (`landing-reveal--in`); первая — сразу.  
-- Demo — `motion-reveal-scale`; остальное — `motion-reveal`.  
-- Падающие уточки: **far** (blur, за контентом) — просто летят, без collide/grab; **mid** (в фокусе) — отскок от блоков и друг от друга + grab/throw.  
-- `prefers-reduced-motion: reduce` — без snap/анимаций/уточек.
+- `scroll-snap-type: y mandatory` + `scroll-snap-stop: always` на панелях (FAQ — `snap-align: start`).  
+- Demo — `IntersectionObserver` + `motion-reveal-scale`.  
+- Заголовки / copy — word reveal (GSAP play/reverse при входе/уходе): `data-landing-scroll-reveal` → [`landing/src/scrollReveal.js`](src/scrollReveal.js).  
+- Intro — peel-стикер ([`landing/src/stickerPeel.js`](src/stickerPeel.js), GSAP Draggable): hover отклеивает край, можно таскать в пределах панели.  
+- `prefers-reduced-motion: reduce` — без snap / CSS reveal / GSAP / peel-transition / drag.
 
 ## CTA
 
-`data-landing-cta` → href через `import.meta.env.BASE_URL`:
+Подпись: **«За кодом в Telegram»**. Href через `import.meta.env.BASE_URL` / канал:
 
 | Условие | Куда |
 |---------|------|
-| `?ref=` в URL лендоса | `/referral?ref=…` |
+| `?ref=` в URL лендоса | `/referral?ref=…` (внутри app) |
 | `obratka.inviteGatePassed` (уже вводили код на этом устройстве) | `/registration` |
-| иначе | `/referral` |
+| иначе | [t.me/obratka_dsgn](https://t.me/obratka_dsgn) (`target=_blank`) — коды дропаются в канале |
 
 Читаем `getInviteGatePassed` — не пишем в gate / session.
 
@@ -50,8 +54,8 @@ npm run dev
 
 | Можно | Нельзя |
 |-------|--------|
-| Токены `--landing-*`, `createVideoPlayerCard`, `fixHangingPrepositions` | `src/api/*`, `src/main.js`, `src/app/session.js` |
-| Читать `inviteGatePassed`; CTA → `/referral` или `/registration` | Писать в `obratka.session` / invite gate |
+| Токены `--landing-*`, `createVideoPlayerCard`, `createSidePanel`, `getCommunityRules`, `fixHangingPrepositions`, `gsap` (только лендос) | `src/api/*`, `src/main.js`, `src/app/session.js` |
+| Читать `inviteGatePassed`; CTA → Telegram / `/referral` / `/registration` | Писать в `obratka.session` / invite gate |
 | Свои строки в HTML (не `locales.json`); демо из `src/assets/video/` | Монтировать продуктовые экраны |
 
 Копирайт лендоса **не** в `content/locales.json` — статичный HTML + `data-fix-hanging`.
@@ -61,9 +65,13 @@ npm run dev
 | Путь | Роль |
 |------|------|
 | `landing/index.html` | Разметка |
-| `landing/src/main.js` | CTA, hanging, demo video, panel reveal |
+| `landing/src/main.js` | CTA, hanging, demo, FAQ, rules side-panel, intro sticker, reveal |
+| `landing/src/scrollReveal.js` | Word-by-word GSAP ScrollTrigger |
+| `landing/src/stickerPeel.js` | Peel / drag стикер (vanilla) |
+| `landing/assets/stickers/` | PNG/SVG стикеров + [формат выноса](assets/stickers/README.md) |
 | `landing/styles/landing.css` | Стили (только `var(--landing-*)` / семантика) |
-| `styles/tokens.css` | `--landing-*` (demo 833×478, cards, reveal delays) |
+| `landing/styles/sticker-peel.css` | Clip-path peel + lighting |
+| `styles/tokens.css` | `--landing-*` (demo, FAQ, scroll-reveal, sticker) |
 | `src/components/video-player-card/` | Плеер showcase |
 
 ## SEO (фаза 1)

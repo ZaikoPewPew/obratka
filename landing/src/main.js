@@ -1,24 +1,19 @@
 /**
  * Entry лендоса. Без api / session / Supabase.
- * Snap-панели; CTA → /referral|/registration; scroll-reveal по панели;
- * падающие уточки (far = фон; mid = collide + grab/throw).
+ * Snap-панели; CTA → Telegram (код) /referral|/registration; panel reveal + word scroll-reveal.
  */
 
 import { createVideoPlayerCard } from "../../src/components/video-player-card/VideoPlayerCard.js";
+import { createSidePanel } from "../../src/components/side-panel/SidePanel.js";
 import { fixHangingPrepositions } from "../../src/utils/hangingPrepositions.js";
+import { getCommunityRules } from "../../src/utils/communityRules.js";
 import { getInviteGatePassed } from "../../src/utils/inviteGate.js";
 import primerVideo from "../../src/assets/video/primer.mp4";
-import logoDefault from "../../src/assets/brand/logo-default.svg";
-import logoAngel from "../../src/assets/brand/logo-angel.svg";
-import logoDevil from "../../src/assets/brand/logo-devil.svg";
+import stickerSrc from "../assets/stickers/hero.svg";
+import { initLandingScrollReveal } from "./scrollReveal.js";
+import { createStickerPeel } from "./stickerPeel.js";
 
-const DUCK_VARIANTS = [logoDefault, logoAngel, logoDevil];
-
-/** far = только фон; mid = collide + grab. */
-const DUCK_LAYERS = [
-  { depth: "far", layer: "back", count: 9, interactive: false },
-  { depth: "mid", layer: "front", count: 6, interactive: true },
-];
+const TELEGRAM_COMMUNITY_URL = "https://t.me/obratka_dsgn";
 
 function appPath(segment, search = "") {
   const base = String(import.meta.env.BASE_URL || "/");
@@ -40,22 +35,48 @@ function registrationHref() {
 function initCtas() {
   const params = new URLSearchParams(window.location.search);
   const ref = params.get("ref");
-  let href;
+  /** @type {{ href: string, external: boolean }} */
+  let target;
   if (ref) {
-    href = referralHref(`?ref=${encodeURIComponent(ref)}`);
+    target = {
+      href: referralHref(`?ref=${encodeURIComponent(ref)}`),
+      external: false,
+    };
   } else if (getInviteGatePassed()) {
-    href = registrationHref();
+    target = { href: registrationHref(), external: false };
   } else {
-    href = referralHref();
+    target = { href: TELEGRAM_COMMUNITY_URL, external: true };
   }
 
   document.querySelectorAll("[data-landing-cta]").forEach((el) => {
-    el.setAttribute("href", href);
+    el.setAttribute("href", target.href);
+    if (target.external) {
+      el.setAttribute("target", "_blank");
+      el.setAttribute("rel", "noopener noreferrer");
+    } else {
+      el.removeAttribute("target");
+      el.removeAttribute("rel");
+    }
   });
 }
 
 function initHanging() {
   document.querySelectorAll("[data-fix-hanging]").forEach((el) => {
+    // Не затираем <br> принудительных переносов — правим только текстовые узлы.
+    if (el.querySelector("br")) {
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      /** @type {Text[]} */
+      const nodes = [];
+      let node = walker.nextNode();
+      while (node) {
+        nodes.push(/** @type {Text} */ (node));
+        node = walker.nextNode();
+      }
+      for (const textNode of nodes) {
+        textNode.textContent = fixHangingPrepositions(textNode.textContent ?? "");
+      }
+      return;
+    }
     el.textContent = fixHangingPrepositions(el.textContent ?? "");
   });
 }
@@ -82,10 +103,10 @@ function initDemoVideo() {
 
 /**
  * Reveal панели, когда она в центре viewport (scroll-snap).
- * Первая панель — сразу при load.
+ * Сейчас — demo (`data-landing-reveal`); copy / FAQ — GSAP word reveal.
  */
 function initPanelReveal() {
-  const panels = [...document.querySelectorAll("[data-landing-panel]")];
+  const panels = [...document.querySelectorAll("[data-landing-reveal]")];
   if (!panels.length) return null;
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -93,12 +114,6 @@ function initPanelReveal() {
     panels.forEach((el) => el.classList.add("landing-reveal--in"));
     return null;
   }
-
-  const first = panels[0];
-  if (first) first.classList.add("landing-reveal--in");
-
-  const rest = panels.slice(1);
-  if (!rest.length) return null;
 
   const observer = new IntersectionObserver(
     (entries) => {
@@ -115,469 +130,201 @@ function initPanelReveal() {
     },
   );
 
-  rest.forEach((el) => observer.observe(el));
+  panels.forEach((el) => observer.observe(el));
   return observer;
 }
 
-function rand(min, max) {
-  return min + Math.random() * (max - min);
+const FAQ_CHEVRON_ICON = `
+<span class="landing-faq__icon" aria-hidden="true">
+  <svg class="landing-faq__chevron landing-faq__chevron--down" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M6 9L11.2929 14.2929C11.6834 14.6834 12.3166 14.6834 12.7071 14.2929L18 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>
+  <svg class="landing-faq__chevron landing-faq__chevron--up" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M6 15L11.2929 9.70711C11.6834 9.31658 12.3166 9.31658 12.7071 9.70711L18 15" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>
+</span>
+`.trim();
+
+/**
+ * FAQ на button + CSS grid (0fr → 1fr). Без <details> — иначе закрытие рвёт анимацию.
+ */
+function initFaqAccordion() {
+  const root = document.querySelector("[data-landing-faq]");
+  if (!root) return null;
+
+  /** @type {HTMLElement[]} */
+  const items = [...root.querySelectorAll(".landing-faq__item")];
+
+  /**
+   * @param {HTMLElement} item
+   * @param {boolean} open
+   */
+  function setItemOpen(item, open) {
+    const btn = item.querySelector(".landing-faq__q");
+    item.classList.toggle("is-open", open);
+    if (btn instanceof HTMLButtonElement) {
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+  }
+
+  for (const item of items) {
+    const btn = item.querySelector(".landing-faq__q");
+    if (!(btn instanceof HTMLButtonElement)) continue;
+
+    if (!btn.querySelector(".landing-faq__icon")) {
+      btn.insertAdjacentHTML("beforeend", FAQ_CHEVRON_ICON);
+    }
+
+    btn.addEventListener("click", () => {
+      const willOpen = !item.classList.contains("is-open");
+      for (const other of items) {
+        if (other === item) continue;
+        setItemOpen(other, false);
+      }
+      setItemOpen(item, willOpen);
+    });
+  }
+
+  return root;
 }
 
-function pick(list) {
-  return list[Math.floor(Math.random() * list.length)];
-}
+function initRulesPanel() {
+  const triggers = [
+    ...document.querySelectorAll("[data-landing-rules]"),
+  ];
+  if (!triggers.length) return null;
 
-function readTokenNumber(styles, name, fallback = 0) {
-  const n = Number.parseFloat(styles.getPropertyValue(name));
-  return Number.isFinite(n) ? n : fallback;
+  const rulesPanel = createSidePanel({
+    closeAriaLabel: "Закрыть правила",
+  });
+  document.body.append(rulesPanel.root);
+
+  /**
+   * @param {string} text
+   * @param {string} className
+   * @param {string} [tagName="p"]
+   */
+  function createRulesText(text, className, tagName = "p") {
+    const el = document.createElement(tagName);
+    el.className = className;
+    el.textContent = fixHangingPrepositions(text ?? "");
+    return el;
+  }
+
+  /**
+   * @param {string} body
+   */
+  function createRulesList(body) {
+    const items = String(body ?? "")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    if (items.length === 0) return null;
+    if (items.length === 1) {
+      return createRulesText(items[0], "side-panel__section-body");
+    }
+    const list = document.createElement("ul");
+    list.className = "side-panel__section-list";
+    for (const item of items) {
+      const li = document.createElement("li");
+      li.className = "side-panel__section-item";
+      li.textContent = fixHangingPrepositions(item);
+      list.append(li);
+    }
+    return list;
+  }
+
+  function syncRulesPanelContent() {
+    const rules = getCommunityRules("ru");
+    rulesPanel.setTitle(rules.title);
+    rulesPanel.setDescription(fixHangingPrepositions(rules.updated));
+
+    /** @type {HTMLElement[]} */
+    const nodes = [];
+    if (rules.intro) {
+      nodes.push(createRulesText(rules.intro, "side-panel__intro"));
+    }
+    for (const section of rules.sections) {
+      const wrap = document.createElement("section");
+      wrap.className = "side-panel__section";
+      if (section.title) {
+        wrap.append(
+          createRulesText(section.title, "side-panel__section-title", "h3"),
+        );
+      }
+      if (section.body) {
+        const bodyNode = createRulesList(section.body);
+        if (bodyNode) wrap.append(bodyNode);
+      }
+      nodes.push(wrap);
+    }
+    rulesPanel.content.replaceChildren(...nodes);
+  }
+
+  function openRulesPanel() {
+    syncRulesPanelContent();
+    rulesPanel.open();
+  }
+
+  for (const trigger of triggers) {
+    trigger.addEventListener("click", (event) => {
+      event.preventDefault();
+      openRulesPanel();
+    });
+  }
+
+  return rulesPanel;
 }
 
 /**
- * Мягкая «невесомость»:
- * far — только фон (без collide / grab);
- * mid — отскок от блоков и друг от друга + grab/throw.
+ * Peel-стикер на intro.
+ * Ассет: `landing/assets/stickers/` (см. README там). Сейчас `hero.svg`.
  */
-function initDucksRain() {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return null;
-
-  const layers = {
-    back: document.querySelector('[data-landing-ducks="back"]'),
-    front: document.querySelector('[data-landing-ducks="front"]'),
-  };
-  if (!layers.back || !layers.front) return null;
+function initIntroSticker() {
+  const host = document.querySelector("[data-landing-sticker]");
+  if (!(host instanceof HTMLElement)) return null;
 
   const styles = getComputedStyle(document.documentElement);
-  const drag = readTokenNumber(styles, "--landing-duck-drag", 0.16);
-  const spinMin = readTokenNumber(styles, "--landing-duck-spin-min", 28);
-  const spinMax = readTokenNumber(styles, "--landing-duck-spin-max", 95);
-  const vxMax = readTokenNumber(styles, "--landing-duck-vx-max", 48);
-  const vy0Max = readTokenNumber(styles, "--landing-duck-vy0-max", 28);
-  const restitution = readTokenNumber(styles, "--landing-duck-restitution", 1.08);
-  const bounceBoost = readTokenNumber(styles, "--landing-duck-bounce-boost", 1.4);
-  const bounceSpin = readTokenNumber(styles, "--landing-duck-bounce-spin", 220);
-  const collidePad = readTokenNumber(styles, "--landing-duck-collide-pad", 8);
-  const pairRestitution = readTokenNumber(
-    styles,
-    "--landing-duck-pair-restitution",
-    0.88,
-  );
-  const throwGain = readTokenNumber(styles, "--landing-duck-throw-gain", 1.15);
-  const throwMax = readTokenNumber(styles, "--landing-duck-throw-max", 1600);
-  const gravity = {
-    far: readTokenNumber(styles, "--landing-duck-far-gravity", 32),
-    mid: readTokenNumber(styles, "--landing-duck-mid-gravity", 52),
-  };
+  const width = Number.parseFloat(styles.getPropertyValue("--landing-sticker-width")) || 160;
+  const rotateDeg =
+    Number.parseFloat(styles.getPropertyValue("--landing-sticker-rotate")) || 0;
+  const anchorX =
+    Number.parseFloat(styles.getPropertyValue("--landing-sticker-anchor-x")) || 0.88;
+  const anchorY =
+    Number.parseFloat(styles.getPropertyValue("--landing-sticker-anchor-y")) || 0.28;
+  const offsetX =
+    Number.parseFloat(styles.getPropertyValue("--landing-sticker-offset-x")) || 0;
+  const offsetY =
+    Number.parseFloat(styles.getPropertyValue("--landing-sticker-offset-y")) || 0;
+  const shadowIntensity =
+    Number.parseFloat(styles.getPropertyValue("--landing-sticker-shadow-opacity")) ||
+    0.5;
+  const lightingIntensity =
+    Number.parseFloat(styles.getPropertyValue("--landing-sticker-lighting")) || 0.1;
+  const peelHover =
+    Number.parseFloat(styles.getPropertyValue("--landing-sticker-peel-hover")) || 30;
+  const peelActive =
+    Number.parseFloat(styles.getPropertyValue("--landing-sticker-peel-active")) || 40;
 
-  const collideEls = [
-    ...document.querySelectorAll("[data-landing-duck-collide]"),
-  ];
+  const maxX = Math.max(0, host.clientWidth - width);
+  const maxY = Math.max(0, host.clientHeight - width);
+  const x = Math.min(maxX, Math.max(0, host.clientWidth * anchorX - width / 2 + offsetX));
+  const y = Math.min(maxY, Math.max(0, host.clientHeight * anchorY - width / 2 + offsetY));
 
-  /** @type {{ el: HTMLElement, depth: string, interactive: boolean, x: number, y: number, vx: number, vy: number, rot: number, omega: number, w: number, h: number, r: number, mass: number, coolUntil: number, held: boolean }[]} */
-  const ducks = [];
-  /** @type {(typeof ducks)[number][]} */
-  const interactiveDucks = [];
-  const frag = {
-    back: document.createDocumentFragment(),
-    front: document.createDocumentFragment(),
-  };
+  const sticker = createStickerPeel({
+    imageSrc: stickerSrc,
+    width,
+    rotate: rotateDeg,
+    peelBackHoverPct: peelHover,
+    peelBackActivePct: peelActive,
+    shadowIntensity,
+    lightingIntensity,
+    initialPosition: { x, y },
+    peelDirection: 0,
+  });
 
-  /** @type {null | (typeof ducks)[number]} */
-  let held = null;
-  let grabOffX = 0;
-  let grabOffY = 0;
-  /** @type {{ x: number, y: number, t: number }[]} */
-  let trail = [];
-
-  function viewport() {
-    return { w: window.innerWidth, h: window.innerHeight };
-  }
-
-  function paintDuck(duck) {
-    duck.el.style.setProperty("--duck-x", `${duck.x.toFixed(1)}px`);
-    duck.el.style.setProperty("--duck-y", `${duck.y.toFixed(1)}px`);
-    duck.el.style.setProperty("--duck-rot", `${duck.rot.toFixed(1)}deg`);
-  }
-
-  function syncSize(duck) {
-    const rect = duck.el.getBoundingClientRect();
-    if (rect.width > 0) {
-      duck.w = rect.width;
-      duck.h = rect.height || rect.width * 1.12;
-    }
-    duck.r = Math.max(duck.w, duck.h) * 0.42;
-    duck.mass = Math.max(duck.w * duck.h, 1);
-  }
-
-  function resetDuck(duck, { scatter = false } = {}) {
-    if (duck.held) return;
-    const { w, h } = viewport();
-    const margin = duck.w * 1.2;
-    duck.x = rand(-margin, w - duck.w + margin);
-    duck.y = scatter
-      ? rand(-h * 0.2, h * 0.7)
-      : rand(-margin * 3, -margin);
-    duck.vx = rand(-vxMax, vxMax);
-    duck.vy = rand(8, vy0Max);
-    duck.rot = rand(0, 360);
-    const spinDir = duck.vx >= 0 ? 1 : -1;
-    duck.omega = spinDir * rand(spinMin, spinMax);
-    duck.coolUntil = 0;
-    paintDuck(duck);
-  }
-
-  function collectObstacles(viewH) {
-    /** @type {{ left: number, top: number, right: number, bottom: number }[]} */
-    const boxes = [];
-    for (const el of collideEls) {
-      const r = el.getBoundingClientRect();
-      if (r.width < 2 || r.height < 2) continue;
-      if (r.bottom < -48 || r.top > viewH + 48) continue;
-      boxes.push({
-        left: r.left - collidePad,
-        top: r.top - collidePad,
-        right: r.right + collidePad,
-        bottom: r.bottom + collidePad,
-      });
-    }
-    return boxes;
-  }
-
-  function bounceOff(duck, box, now) {
-    const duckRight = duck.x + duck.w;
-    const duckBottom = duck.y + duck.h;
-
-    if (
-      duckRight <= box.left ||
-      duck.x >= box.right ||
-      duckBottom <= box.top ||
-      duck.y >= box.bottom
-    ) {
-      return false;
-    }
-
-    const overlapL = duckRight - box.left;
-    const overlapR = box.right - duck.x;
-    const overlapT = duckBottom - box.top;
-    const overlapB = box.bottom - duck.y;
-    const minX = Math.min(overlapL, overlapR);
-    const minY = Math.min(overlapT, overlapB);
-
-    const speed = Math.hypot(duck.vx, duck.vy);
-    const kick = Math.max(speed, 90) * bounceBoost;
-
-    if (minX < minY) {
-      if (overlapL < overlapR) {
-        duck.x -= overlapL;
-        duck.vx = -Math.abs(kick) * restitution;
-      } else {
-        duck.x += overlapR;
-        duck.vx = Math.abs(kick) * restitution;
-      }
-      duck.vy += rand(-0.35, 0.35) * kick;
-    } else {
-      if (overlapT < overlapB) {
-        duck.y -= overlapT;
-        duck.vy = -Math.abs(kick) * restitution;
-      } else {
-        duck.y += overlapB;
-        duck.vy = Math.abs(kick) * restitution;
-      }
-      duck.vx += rand(-0.35, 0.35) * kick;
-    }
-
-    duck.omega += (duck.vx >= 0 ? 1 : -1) * bounceSpin * rand(0.7, 1.3);
-    duck.coolUntil = now + 140;
-    return true;
-  }
-
-  function collidePair(a, b) {
-    const ax = a.x + a.w * 0.5;
-    const ay = a.y + a.h * 0.5;
-    const bx = b.x + b.w * 0.5;
-    const by = b.y + b.h * 0.5;
-    let dx = bx - ax;
-    let dy = by - ay;
-    let dist = Math.hypot(dx, dy);
-    const minDist = a.r + b.r;
-    if (dist >= minDist) return;
-
-    if (dist < 0.0001) {
-      dx = rand(-1, 1) || 1;
-      dy = rand(-1, 1);
-      dist = Math.hypot(dx, dy);
-    }
-
-    const nx = dx / dist;
-    const ny = dy / dist;
-    const overlap = minDist - dist;
-    const invMassA = a.held ? 0 : 1 / a.mass;
-    const invMassB = b.held ? 0 : 1 / b.mass;
-    const invSum = invMassA + invMassB;
-    if (invSum <= 0) return;
-
-    const sepA = (overlap * invMassA) / invSum;
-    const sepB = (overlap * invMassB) / invSum;
-    if (!a.held) {
-      a.x -= nx * sepA;
-      a.y -= ny * sepA;
-    }
-    if (!b.held) {
-      b.x += nx * sepB;
-      b.y += ny * sepB;
-    }
-
-    const rvx = a.vx - b.vx;
-    const rvy = a.vy - b.vy;
-    const velN = rvx * nx + rvy * ny;
-    if (velN > 0) return;
-
-    const j = (-(1 + pairRestitution) * velN) / invSum;
-    const ix = j * nx;
-    const iy = j * ny;
-    if (!a.held) {
-      a.vx += ix * invMassA;
-      a.vy += iy * invMassA;
-      a.omega += (nx * rvy - ny * rvx) * 0.02;
-    }
-    if (!b.held) {
-      b.vx -= ix * invMassB;
-      b.vy -= iy * invMassB;
-      b.omega -= (nx * rvy - ny * rvx) * 0.02;
-    }
-  }
-
-  function releaseHeld(now) {
-    if (!held) return;
-    const duck = held;
-    let vx = 0;
-    let vy = 0;
-
-    if (trail.length >= 2) {
-      const newest = trail[trail.length - 1];
-      let oldest = trail[0];
-      for (let i = trail.length - 2; i >= 0; i -= 1) {
-        if (newest.t - trail[i].t >= 40) {
-          oldest = trail[i];
-          break;
-        }
-      }
-      const dtMs = Math.max(newest.t - oldest.t, 16);
-      vx = ((newest.x - oldest.x) / dtMs) * 1000 * throwGain;
-      vy = ((newest.y - oldest.y) / dtMs) * 1000 * throwGain;
-    }
-
-    const speed = Math.hypot(vx, vy);
-    if (speed > throwMax) {
-      const s = throwMax / speed;
-      vx *= s;
-      vy *= s;
-    }
-
-    duck.vx = vx;
-    duck.vy = vy;
-    duck.omega += (vx >= 0 ? 1 : -1) * rand(spinMin, spinMax) * 0.6;
-    duck.held = false;
-    duck.coolUntil = now + 80;
-    duck.el.classList.remove("landing-duck--held");
-    held = null;
-    trail = [];
-  }
-
-  function onPointerDown(e, duck) {
-    if (!duck.interactive) return;
-    if (e.button != null && e.button !== 0) return;
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (held && held !== duck) releaseHeld(performance.now());
-
-    held = duck;
-    duck.held = true;
-    duck.vx = 0;
-    duck.vy = 0;
-    duck.omega *= 0.2;
-    grabOffX = e.clientX - duck.x;
-    grabOffY = e.clientY - duck.y;
-    trail = [{ x: e.clientX, y: e.clientY, t: performance.now() }];
-    duck.el.classList.add("landing-duck--held");
-    duck.el.setPointerCapture?.(e.pointerId);
-  }
-
-  function onPointerMove(e) {
-    if (!held) return;
-    e.preventDefault();
-    held.x = e.clientX - grabOffX;
-    held.y = e.clientY - grabOffY;
-    const t = performance.now();
-    trail.push({ x: e.clientX, y: e.clientY, t });
-    while (trail.length > 8 || (trail.length > 2 && t - trail[0].t > 120)) {
-      trail.shift();
-    }
-    paintDuck(held);
-  }
-
-  function onPointerUp(e) {
-    if (!held) return;
-    try {
-      held.el.releasePointerCapture?.(e.pointerId);
-    } catch {
-      /* already released */
-    }
-    releaseHeld(performance.now());
-  }
-
-  for (const { depth, layer, count, interactive } of DUCK_LAYERS) {
-    for (let i = 0; i < count; i += 1) {
-      const el = document.createElement("div");
-      el.className = `landing-duck landing-duck--${depth}`;
-
-      const img = document.createElement("img");
-      img.src = pick(DUCK_VARIANTS);
-      img.alt = "";
-      img.decoding = "async";
-      img.draggable = false;
-      el.append(img);
-
-      const sizeScale = depth === "far" ? rand(0.8, 1.15) : rand(0.88, 1.18);
-      el.style.setProperty(
-        "--duck-size",
-        `calc(var(--landing-duck-${depth}-size) * ${sizeScale.toFixed(3)})`,
-      );
-
-      const sizeGuess = depth === "far" ? 34 * sizeScale : 58 * sizeScale;
-      const duck = {
-        el,
-        depth,
-        interactive,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        rot: 0,
-        omega: 0,
-        w: sizeGuess,
-        h: sizeGuess * 1.12,
-        r: sizeGuess * 0.42,
-        mass: sizeGuess * sizeGuess,
-        coolUntil: 0,
-        held: false,
-      };
-
-      if (interactive) {
-        el.addEventListener("pointerdown", (e) => onPointerDown(e, duck));
-        interactiveDucks.push(duck);
-      }
-
-      ducks.push(duck);
-      resetDuck(duck, { scatter: true });
-      frag[layer].append(el);
-    }
-  }
-
-  layers.back.append(frag.back);
-  layers.front.append(frag.front);
-
-  for (const duck of ducks) syncSize(duck);
-
-  let raf = 0;
-  let last = performance.now();
-  let running = true;
-  let obstacleCache = [];
-  let obstacleAge = 0;
-
-  function tick(now) {
-    if (!running) return;
-    const rawDt = (now - last) / 1000;
-    last = now;
-    const dt = Math.min(rawDt, 0.048);
-    const { w, h } = viewport();
-
-    obstacleAge += dt;
-    if (obstacleAge > 0.08 || obstacleCache.length === 0) {
-      obstacleCache = collectObstacles(h);
-      obstacleAge = 0;
-    }
-
-    for (const duck of ducks) {
-      if (duck.held) {
-        paintDuck(duck);
-        continue;
-      }
-
-      const g = gravity[duck.depth] ?? gravity.mid;
-      duck.vy += g * dt;
-      duck.vy *= Math.max(0, 1 - drag * dt);
-      duck.vx *= Math.max(0, 1 - drag * 0.25 * dt);
-
-      duck.x += duck.vx * dt;
-      duck.y += duck.vy * dt;
-      duck.rot += duck.omega * dt;
-      duck.omega *= Math.max(0, 1 - drag * 0.08 * dt);
-
-      if (duck.interactive && now >= duck.coolUntil) {
-        for (const box of obstacleCache) {
-          if (bounceOff(duck, box, now)) break;
-        }
-      }
-    }
-
-    for (let i = 0; i < interactiveDucks.length; i += 1) {
-      for (let j = i + 1; j < interactiveDucks.length; j += 1) {
-        collidePair(interactiveDucks[i], interactiveDucks[j]);
-      }
-    }
-
-    for (const duck of ducks) {
-      if (duck.held) continue;
-      paintDuck(duck);
-
-      const gone =
-        duck.y > h + duck.h * 1.8 ||
-        duck.y < -duck.h * 3.5 ||
-        duck.x < -duck.w * 2.8 ||
-        duck.x > w + duck.w * 2.8;
-      if (gone) resetDuck(duck);
-    }
-
-    raf = requestAnimationFrame(tick);
-  }
-
-  const onVisibility = () => {
-    if (document.hidden) {
-      running = false;
-      cancelAnimationFrame(raf);
-      if (held) releaseHeld(performance.now());
-      return;
-    }
-    if (!running) {
-      running = true;
-      last = performance.now();
-      obstacleCache = [];
-      raf = requestAnimationFrame(tick);
-    }
-  };
-
-  const onScroll = () => {
-    obstacleCache = [];
-    obstacleAge = 1;
-  };
-
-  window.addEventListener("pointermove", onPointerMove, { passive: false });
-  window.addEventListener("pointerup", onPointerUp);
-  window.addEventListener("pointercancel", onPointerUp);
-  document.addEventListener("visibilitychange", onVisibility);
-  window.addEventListener("scroll", onScroll, { passive: true });
-  raf = requestAnimationFrame(tick);
-
-  return () => {
-    running = false;
-    cancelAnimationFrame(raf);
-    window.removeEventListener("pointermove", onPointerMove);
-    window.removeEventListener("pointerup", onPointerUp);
-    window.removeEventListener("pointercancel", onPointerUp);
-    document.removeEventListener("visibilitychange", onVisibility);
-    window.removeEventListener("scroll", onScroll);
-  };
+  host.append(sticker.root);
+  return sticker;
 }
 
 function init() {
@@ -585,7 +332,11 @@ function init() {
   initCtas();
   initDemoVideo();
   initPanelReveal();
-  initDucksRain();
+  initFaqAccordion();
+  initRulesPanel();
+  initIntroSticker();
+  // После hanging: NBSP уже в тексте, split не рвёт предлоги.
+  initLandingScrollReveal();
   document.body.classList.add("landing-page--ready");
 }
 

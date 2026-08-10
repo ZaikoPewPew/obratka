@@ -8,16 +8,19 @@
     />
     <meta
       name="description"
-      content="Обратка — закрытое сообщество взаимных ревью портфолио. Живые листы от дизайнеров твоего уровня."
+      content="Обратка — взаимные ревью портфолио от дизайнеров твоего грейда. Три листа и PDF: что чинить."
     />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="%SITE_ORIGIN%%SITE_BASE%landing/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Обратка" />
-    <meta property="og:title" content="Обратка — живые ревью портфолио" />
+    <meta
+      property="og:title"
+      content="Обратка — ревью портфолио своего грейда"
+    />
     <meta
       property="og:description"
-      content="Обратка — закрытое сообщество взаимных ревью портфолио. Живые листы от дизайнеров твоего уровня."
+      content="Три живых ревью и PDF с тем, что чинить. Не «норм» из чата."
     />
     <meta property="og:url" content="%SITE_ORIGIN%%SITE_BASE%landing/" />
     <meta
@@ -27,30 +30,28 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Обратка — живые ревью портфолио" />
+    <meta
+      name="twitter:title"
+      content="Обратка — ревью портфолио своего грейда"
+    />
     <meta
       name="twitter:description"
-      content="Обратка — закрытое сообщество взаимных ревью портфолио. Живые листы от дизайнеров твоего уровня."
+      content="Три живых ревью и PDF с тем, что чинить. Не «норм» из чата."
     />
     <meta
       name="twitter:image"
       content="%SITE_ORIGIN%%SITE_BASE%assets/og/og-share.png"
     />
-    <title>Обратка — живые ревью портфолио</title>
+    <title>Обратка — ревью портфолио своего грейда</title>
     <link rel="icon" href="/assets/svg/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/src/fonts.css" />
     <link rel="stylesheet" href="/styles/tokens.css" />
     <link rel="stylesheet" href="/styles/base.css" />
     <link rel="stylesheet" href="/styles/entrance.css" />
     <link rel="stylesheet" href="./styles/landing.css" />
+    <link rel="stylesheet" href="./styles/sticker-peel.css" />
   </head>
   <body class="landing-page">
-    <div
-      class="landing-ducks landing-ducks--back"
-      data-landing-ducks="back"
-      aria-hidden="true"
-    ></div>
-
     <header class="landing-header">
       <div class="landing-header__inner">
         <a class="landing-header__brand" href="./" aria-label="Обратка">
@@ -65,75 +66,96 @@
         <a
           class="landing-cta"
           data-landing-cta
-          href="../referral"
-          >Войти</a
+          href="https://t.me/obratka_dsgn"
+          target="_blank"
+          rel="noopener noreferrer"
+          >За кодом в Telegram</a
         >
       </div>
     </header>
 
     <main class="landing-main">
-      <!-- 1. Intro copy -->
+      <!-- 1. Hook: hiring attention -->
       <section
         class="landing-panel landing-panel--intro"
         aria-labelledby="landing-hero-title"
-        data-landing-reveal
         data-landing-panel
       >
+        <div
+          class="landing-panel__sticker"
+          data-landing-sticker
+          aria-hidden="true"
+        ></div>
         <div class="landing-panel__inner landing-panel__inner--copy">
           <h1
             id="landing-hero-title"
             class="landing-section__title"
             data-fix-hanging
-            data-landing-duck-collide
+            data-landing-scroll-reveal
           >
-            Живые ревью портфолио
+            Нанимающие тратят всего
+            <span class="landing-section__accent">30&nbsp;секунд</span><br />на&nbsp;просмотр
+            одного портфолио
           </h1>
-          <p
-            class="landing-section__body"
-            data-fix-hanging
-            data-landing-duck-collide
-          >
-            Не лайки и не нейросеть — честные листы от дизайнеров твоего уровня.
-            Смотришь чужие кейсы, собираешь обратку по своим.
-          </p>
         </div>
       </section>
 
-      <!-- 2. Pain copy -->
+      <!-- 2. Question -->
       <section
-        class="landing-panel landing-panel--pain"
-        aria-labelledby="landing-showcase-title"
-        data-landing-reveal
+        class="landing-panel landing-panel--question"
+        aria-labelledby="landing-question-title"
         data-landing-panel
       >
         <div class="landing-panel__inner landing-panel__inner--copy">
           <h2
-            id="landing-showcase-title"
+            id="landing-question-title"
             class="landing-section__title"
             data-fix-hanging
-            data-landing-duck-collide
+            data-landing-scroll-reveal
           >
-            Друзья скажут «норм». Этого мало
+            Как понять, что твоё портфолио<br />готово к&nbsp;поиску работы?
           </h2>
-          <p
-            class="landing-section__body"
-            data-fix-hanging
-            data-landing-duck-collide
-          >
-            Нужны люди своего грейда — которые реально смотрят кейс и пишут,
-            что чинить.
-          </p>
-          <a
-            class="landing-cta"
-            data-landing-cta
-            data-landing-duck-collide
-            href="../referral"
-            >Войти</a
-          >
         </div>
       </section>
 
-      <!-- 3. Demo video -->
+      <!-- 3. Pain -->
+      <section
+        class="landing-panel landing-panel--pain"
+        aria-labelledby="landing-pain-title"
+        data-landing-panel
+      >
+        <div class="landing-panel__inner landing-panel__inner--copy">
+          <h2
+            id="landing-pain-title"
+            class="landing-section__title"
+            data-fix-hanging
+            data-landing-scroll-reveal
+          >
+            Ты тратишь часы на исправления<br />и всё равно непонятно, стало ли
+            лучше
+          </h2>
+        </div>
+      </section>
+
+      <!-- 4. Bridge before video -->
+      <section
+        class="landing-panel landing-panel--bridge"
+        aria-labelledby="landing-bridge-title"
+        data-landing-panel
+      >
+        <div class="landing-panel__inner landing-panel__inner--copy">
+          <h2
+            id="landing-bridge-title"
+            class="landing-section__title"
+            data-fix-hanging
+            data-landing-scroll-reveal
+          >
+            А что, если это можно было бы замерить?
+          </h2>
+        </div>
+      </section>
+
+      <!-- 5. Demo -->
       <section
         class="landing-panel landing-panel--demo"
         aria-label="Демо ревью"
@@ -143,116 +165,260 @@
         <div
           class="landing-panel__inner landing-panel__inner--media"
           data-landing-media
-          data-landing-duck-collide
         ></div>
       </section>
 
-      <!-- 4. Benefits -->
+      <!-- 6. Community -->
       <section
-        class="landing-panel landing-panel--benefits"
-        aria-labelledby="landing-benefits-title"
-        data-landing-reveal
+        class="landing-panel landing-panel--community"
+        aria-labelledby="landing-community-title"
         data-landing-panel
       >
-        <div class="landing-panel__inner landing-panel__inner--benefits">
+        <div class="landing-panel__inner landing-panel__inner--copy">
           <h2
-            id="landing-benefits-title"
+            id="landing-community-title"
             class="landing-section__title"
             data-fix-hanging
-            data-landing-duck-collide
+            data-landing-scroll-reveal
           >
-            Зачем платформа
+            Закрытое сообщество продуктовых дизайнеров<br />про честную обратную
+            связь по портфолио
           </h2>
-          <ol class="landing-benefits__list" data-landing-duck-collide>
-            <li class="landing-benefit">
-              <span class="landing-benefit__index" aria-hidden="true">01</span>
-              <div class="landing-benefit__text">
-                <h3 class="landing-benefit__title" data-fix-hanging>
-                  Ревьюеры своего уровня
-                </h3>
-                <p class="landing-section__body" data-fix-hanging>
-                  Матчинг по грейду: junior и middle смотрят junior, senior — не
-                  разносит джуна «свысока». Обратка от тех, кто в той же лиге.
-                </p>
-              </div>
-            </li>
-            <li class="landing-benefit">
-              <span class="landing-benefit__index" aria-hidden="true">02</span>
-              <div class="landing-benefit__text">
-                <h3 class="landing-benefit__title" data-fix-hanging>
-                  Лист, а не «ну красиво»
-                </h3>
-                <p class="landing-section__body" data-fix-hanging>
-                  Структурированный разбор: грейд, структура кейса, метрики,
-                  визуал и главный совет. Можно скачать PDF и сравнить мнения.
-                </p>
-              </div>
-            </li>
-            <li class="landing-benefit">
-              <span class="landing-benefit__index" aria-hidden="true">03</span>
-              <div class="landing-benefit__text">
-                <h3 class="landing-benefit__title" data-fix-hanging>
-                  Внимание по таймеру
-                </h3>
-                <p class="landing-section__body" data-fix-hanging>
-                  На просмотр — 60 секунд. Не скролл мимо: ревьюер реально
-                  смотрит портфолио, потом отвечает на вопросы.
-                </p>
-              </div>
-            </li>
-            <li class="landing-benefit">
-              <span class="landing-benefit__index" aria-hidden="true">04</span>
-              <div class="landing-benefit__text">
-                <h3 class="landing-benefit__title" data-fix-hanging>
-                  Качество держит репутация
-                </h3>
-                <p class="landing-section__body" data-fix-hanging>
-                  Сначала помогаешь другим — потом закидываешь своё. Слабые листы
-                  можно пожаловать; репутация отсекает шлак.
-                </p>
-              </div>
-            </li>
-          </ol>
         </div>
       </section>
 
-      <!-- 5. Closing -->
+      <!-- 7. Outcome -->
+      <section
+        class="landing-panel landing-panel--outcome"
+        aria-labelledby="landing-outcome-title"
+        data-landing-panel
+      >
+        <div class="landing-panel__inner landing-panel__inner--copy">
+          <h2
+            id="landing-outcome-title"
+            class="landing-section__title"
+            data-fix-hanging
+            data-landing-scroll-reveal
+          >
+            Ты получишь 3 независимых ревью<br />и рекомендации по улучшению
+          </h2>
+        </div>
+      </section>
+
+      <!-- 8. Closing -->
       <section
         class="landing-panel landing-panel--closing"
         aria-labelledby="landing-closing-title"
-        data-landing-reveal
         data-landing-panel
       >
-        <div
-          class="landing-panel__inner landing-panel__inner--closing"
-          data-landing-duck-collide
-        >
-          <h2 id="landing-closing-title" class="landing-section__title" data-fix-hanging>
-            Закрытое сообщество
-          </h2>
-          <p class="landing-section__body" data-fix-hanging>
-            Вход по приглашению. Код даёт друг, который уже внутри — так мы
-            держим круг небольшим и ответственным.
-          </p>
-          <a
-            class="landing-cta landing-cta--on-dark"
-            data-landing-cta
-            href="../referral"
-            >Войти</a
+        <div class="landing-panel__inner landing-panel__inner--copy">
+          <h2
+            id="landing-closing-title"
+            class="landing-section__title"
+            data-fix-hanging
+            data-landing-scroll-reveal
           >
+            Хватит править портфолио вслепую
+          </h2>
+          <a
+            class="landing-cta landing-cta--solid"
+            data-landing-cta
+            href="https://t.me/obratka_dsgn"
+            target="_blank"
+            rel="noopener noreferrer"
+            >За кодом в Telegram</a
+          >
+        </div>
+      </section>
+
+      <!-- 9. FAQ — последний блок -->
+      <section
+        class="landing-panel landing-panel--faq"
+        aria-labelledby="landing-faq-title"
+        data-landing-panel
+      >
+        <div class="landing-panel__inner landing-panel__inner--faq">
+          <h2
+            id="landing-faq-title"
+            class="landing-section__title"
+            data-fix-hanging
+            data-landing-scroll-reveal
+          >
+            Частые вопросы
+          </h2>
+          <div class="landing-faq" data-landing-faq>
+            <div class="landing-faq__item">
+              <button
+                type="button"
+                class="landing-faq__q"
+                aria-expanded="false"
+                id="landing-faq-q-1"
+                aria-controls="landing-faq-a-1"
+              >
+                <span class="landing-faq__q-text">Это платно?</span>
+              </button>
+              <div
+                class="landing-faq__panel"
+                id="landing-faq-a-1"
+                role="region"
+                aria-labelledby="landing-faq-q-1"
+              >
+                <div class="landing-faq__panel-inner">
+                  <p class="landing-faq__a" data-fix-hanging>
+                    Нет подписки. Экономика простая: сделал три ревью чужих
+                    портфолио — открылся слот, чтобы закинуть своё.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="landing-faq__item">
+              <button
+                type="button"
+                class="landing-faq__q"
+                aria-expanded="false"
+                id="landing-faq-q-2"
+                aria-controls="landing-faq-a-2"
+              >
+                <span class="landing-faq__q-text">Кто меня ревьюит?</span>
+              </button>
+              <div
+                class="landing-faq__panel"
+                id="landing-faq-a-2"
+                role="region"
+                aria-labelledby="landing-faq-q-2"
+              >
+                <div class="landing-faq__panel-inner">
+                  <p class="landing-faq__a" data-fix-hanging>
+                    Дизайнеры близкого грейда. Junior и middle смотрят junior,
+                    senior+ — не разбирает джуна «свысока».
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="landing-faq__item">
+              <button
+                type="button"
+                class="landing-faq__q"
+                aria-expanded="false"
+                id="landing-faq-q-3"
+                aria-controls="landing-faq-a-3"
+              >
+                <span class="landing-faq__q-text">А если лист слабый?</span>
+              </button>
+              <div
+                class="landing-faq__panel"
+                id="landing-faq-a-3"
+                role="region"
+                aria-labelledby="landing-faq-q-3"
+              >
+                <div class="landing-faq__panel-inner">
+                  <p class="landing-faq__a" data-fix-hanging>
+                    На лист можно пожаловаться в коротком окне после сбора ревью.
+                    Репутация падает за шлак; при сильном минусе — бан.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="landing-faq__item">
+              <button
+                type="button"
+                class="landing-faq__q"
+                aria-expanded="false"
+                id="landing-faq-q-4"
+                aria-controls="landing-faq-a-4"
+              >
+                <span class="landing-faq__q-text">Какой URL можно кидать?</span>
+              </button>
+              <div
+                class="landing-faq__panel"
+                id="landing-faq-a-4"
+                role="region"
+                aria-labelledby="landing-faq-q-4"
+              >
+                <div class="landing-faq__panel-inner">
+                  <p class="landing-faq__a" data-fix-hanging>
+                    Любой публичный: свой сайт, Notion, Framer, Behance и другие
+                    площадки с кейсами.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="landing-faq__item">
+              <button
+                type="button"
+                class="landing-faq__q"
+                aria-expanded="false"
+                id="landing-faq-q-5"
+                aria-controls="landing-faq-a-5"
+              >
+                <span class="landing-faq__q-text"
+                  >Почему вход по приглашению?</span
+                >
+              </button>
+              <div
+                class="landing-faq__panel"
+                id="landing-faq-a-5"
+                role="region"
+                aria-labelledby="landing-faq-q-5"
+              >
+                <div class="landing-faq__panel-inner">
+                  <p class="landing-faq__a" data-fix-hanging>
+                    Чтобы круг оставался небольшим и ответственным. Код даёт тот,
+                    кто уже внутри.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="landing-faq__item">
+              <button
+                type="button"
+                class="landing-faq__q"
+                aria-expanded="false"
+                id="landing-faq-q-6"
+                aria-controls="landing-faq-a-6"
+              >
+                <span class="landing-faq__q-text">Когда будет отчёт?</span>
+              </button>
+              <div
+                class="landing-faq__panel"
+                id="landing-faq-a-6"
+                role="region"
+                aria-labelledby="landing-faq-q-6"
+              >
+                <div class="landing-faq__panel-inner">
+                  <p class="landing-faq__a" data-fix-hanging>
+                    Когда наберётся целевое число ревью (обычно три). Листы и
+                    PDF — во вкладке «Мои».
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </main>
 
     <footer class="landing-footer">
-      <p class="landing-footer__copy">© Обратка</p>
+      <div class="landing-footer__inner">
+        <p class="landing-footer__copy">© Обратка</p>
+        <nav class="landing-footer__nav" aria-label="Ссылки">
+          <a
+            class="landing-footer__link"
+            href="https://t.me/obratka_dsgn"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Сообщество</a
+          >
+          <button
+            type="button"
+            class="landing-footer__link"
+            data-landing-rules
+          >
+            Правила
+          </button>
+        </nav>
+      </div>
     </footer>
-
-    <div
-      class="landing-ducks landing-ducks--front"
-      data-landing-ducks="front"
-      aria-hidden="true"
-    ></div>
 
     <script type="module" src="./src/main.js"></script>
   </body>
