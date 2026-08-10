@@ -1700,7 +1700,15 @@
   --landing-section-body-line: 1.7;
   --landing-section-body-max: 36rem;
   --landing-section-copy-gap: var(--space-4);
+  --landing-closing-gap: var(--space-6);
   --landing-section-accent: var(--palette-brand-blue);
+  /* Небрежное «кисточное» подчёркивание акцента */
+  --landing-accent-brush-color: var(--landing-section-accent);
+  --landing-accent-brush-opacity: 0.38;
+  --landing-accent-brush-height: 0.34em;
+  --landing-accent-brush-inset-x: 0.06em;
+  --landing-accent-brush-offset-y: -0.02em;
+  --landing-accent-brush-rotate: -1.2deg;
   --landing-cta-solid-bg: var(--palette-gray-900);
   --landing-cta-solid-bg-hover: var(--palette-gray-800);
   --landing-cta-solid-bg-active: var(--palette-gray-950);
@@ -1747,24 +1755,6 @@
   --landing-scroll-reveal-blur-enabled: 1;
   --landing-scroll-reveal-stagger: 0.08;
   --landing-scroll-reveal-duration: 1.05;
-  /* Peel sticker (intro) */
-  --landing-sticker-width: 160px;
-  --landing-sticker-padding: 10px;
-  --landing-sticker-rotate: -8deg;
-  --landing-sticker-peel-direction: 0deg;
-  --landing-sticker-peel-hover: 30%;
-  --landing-sticker-peel-active: 40%;
-  --landing-sticker-shadow-opacity: 0.5;
-  --landing-sticker-lighting: 0.1;
-  --landing-sticker-peel-duration: 0.6s;
-  --landing-sticker-peel-ease: var(--ease-out);
-  --landing-sticker-back-flood: #b3b3b3;
-  --landing-sticker-z: 2;
-  /* Доля панели (0–1) + px-оффсет; справа сверху, рядом с заголовком */
-  --landing-sticker-anchor-x: 0.88;
-  --landing-sticker-anchor-y: 0.28;
-  --landing-sticker-offset-x: 0px;
-  --landing-sticker-offset-y: 0px;
 
   /* Совместимость со старыми стилями */
   --desktop-component-padding: var(--space-4);

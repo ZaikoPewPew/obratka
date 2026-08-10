@@ -62,6 +62,8 @@
   box-shadow: var(--side-panel-shadow);
   color: var(--color-text);
   font-family: var(--font-family);
+  /* Не наследовать text-align родителя (на лендосе body — center). */
+  text-align: left;
   opacity: 1;
   transform: translateX(var(--side-panel-panel-shift));
   transition: transform var(--side-panel-panel-duration)

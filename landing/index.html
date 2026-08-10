@@ -49,7 +49,6 @@
     <link rel="stylesheet" href="/styles/base.css" />
     <link rel="stylesheet" href="/styles/entrance.css" />
     <link rel="stylesheet" href="./styles/landing.css" />
-    <link rel="stylesheet" href="./styles/sticker-peel.css" />
   </head>
   <body class="landing-page">
     <header class="landing-header">
@@ -69,7 +68,7 @@
           href="https://t.me/obratka_dsgn"
           target="_blank"
           rel="noopener noreferrer"
-          >За кодом в Telegram</a
+          >Сообщество</a
         >
       </div>
     </header>
@@ -81,11 +80,6 @@
         aria-labelledby="landing-hero-title"
         data-landing-panel
       >
-        <div
-          class="landing-panel__sticker"
-          data-landing-sticker
-          aria-hidden="true"
-        ></div>
         <div class="landing-panel__inner landing-panel__inner--copy">
           <h1
             id="landing-hero-title"
@@ -113,7 +107,11 @@
             data-fix-hanging
             data-landing-scroll-reveal
           >
-            Как понять, что твоё портфолио<br />готово к&nbsp;поиску работы?
+            Как понять, что твоё портфолио<br /><span
+              class="landing-section__accent"
+              >готово</span
+            >
+            к&nbsp;поиску работы?
           </h2>
         </div>
       </section>
@@ -131,13 +129,14 @@
             data-fix-hanging
             data-landing-scroll-reveal
           >
-            Ты тратишь часы на исправления<br />и всё равно непонятно, стало ли
+            <span class="landing-section__accent">Ты&nbsp;тратишь часы</span>
+            на&nbsp;исправления<br />и&nbsp;всё равно непонятно, стало ли
             лучше
           </h2>
         </div>
       </section>
 
-      <!-- 4. Bridge before video -->
+      <!-- 4. Bridge before community -->
       <section
         class="landing-panel landing-panel--bridge"
         aria-labelledby="landing-bridge-title"
@@ -150,25 +149,13 @@
             data-fix-hanging
             data-landing-scroll-reveal
           >
-            А что, если это можно было бы замерить?
+            А&nbsp;что, если это можно было бы
+            <span class="landing-section__accent">замерить</span>?
           </h2>
         </div>
       </section>
 
-      <!-- 5. Demo -->
-      <section
-        class="landing-panel landing-panel--demo"
-        aria-label="Демо ревью"
-        data-landing-reveal
-        data-landing-panel
-      >
-        <div
-          class="landing-panel__inner landing-panel__inner--media"
-          data-landing-media
-        ></div>
-      </section>
-
-      <!-- 6. Community -->
+      <!-- 5. Community -->
       <section
         class="landing-panel landing-panel--community"
         aria-labelledby="landing-community-title"
@@ -181,10 +168,26 @@
             data-fix-hanging
             data-landing-scroll-reveal
           >
-            Закрытое сообщество продуктовых дизайнеров<br />про честную обратную
-            связь по портфолио
+            Обратка — это сообщество продуктовых дизов<br />про
+            <span class="landing-section__accent"
+              >честную обратную связь</span
+            >
+            по&nbsp;портфолио
           </h2>
         </div>
+      </section>
+
+      <!-- 6. Demo -->
+      <section
+        class="landing-panel landing-panel--demo"
+        aria-label="Демо ревью"
+        data-landing-reveal
+        data-landing-panel
+      >
+        <div
+          class="landing-panel__inner landing-panel__inner--media"
+          data-landing-media
+        ></div>
       </section>
 
       <!-- 7. Outcome -->
@@ -200,7 +203,10 @@
             data-fix-hanging
             data-landing-scroll-reveal
           >
-            Ты получишь 3 независимых ревью<br />и рекомендации по улучшению
+            Ты получишь
+            <span class="landing-section__accent"
+              >3&nbsp;независимых ревью</span
+            ><br />и&nbsp;рекомендации по&nbsp;улучшению
           </h2>
         </div>
       </section>
@@ -211,22 +217,22 @@
         aria-labelledby="landing-closing-title"
         data-landing-panel
       >
-        <div class="landing-panel__inner landing-panel__inner--copy">
+        <div class="landing-panel__inner landing-panel__inner--copy landing-panel__inner--closing">
           <h2
             id="landing-closing-title"
             class="landing-section__title"
             data-fix-hanging
             data-landing-scroll-reveal
           >
-            Хватит править портфолио вслепую
+            Хватит править портфолио вслепую<br />Забирай реферальный код
           </h2>
           <a
-            class="landing-cta landing-cta--solid"
+            class="landing-cta"
             data-landing-cta
             href="https://t.me/obratka_dsgn"
             target="_blank"
             rel="noopener noreferrer"
-            >За кодом в Telegram</a
+            >В сообщество</a
           >
         </div>
       </section>

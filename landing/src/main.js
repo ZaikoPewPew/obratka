@@ -9,9 +9,7 @@ import { fixHangingPrepositions } from "../../src/utils/hangingPrepositions.js";
 import { getCommunityRules } from "../../src/utils/communityRules.js";
 import { getInviteGatePassed } from "../../src/utils/inviteGate.js";
 import primerVideo from "../../src/assets/video/primer.mp4";
-import stickerSrc from "../assets/stickers/hero.svg";
 import { initLandingScrollReveal } from "./scrollReveal.js";
-import { createStickerPeel } from "./stickerPeel.js";
 
 const TELEGRAM_COMMUNITY_URL = "https://t.me/obratka_dsgn";
 
@@ -276,57 +274,6 @@ function initRulesPanel() {
   return rulesPanel;
 }
 
-/**
- * Peel-стикер на intro.
- * Ассет: `landing/assets/stickers/` (см. README там). Сейчас `hero.svg`.
- */
-function initIntroSticker() {
-  const host = document.querySelector("[data-landing-sticker]");
-  if (!(host instanceof HTMLElement)) return null;
-
-  const styles = getComputedStyle(document.documentElement);
-  const width = Number.parseFloat(styles.getPropertyValue("--landing-sticker-width")) || 160;
-  const rotateDeg =
-    Number.parseFloat(styles.getPropertyValue("--landing-sticker-rotate")) || 0;
-  const anchorX =
-    Number.parseFloat(styles.getPropertyValue("--landing-sticker-anchor-x")) || 0.88;
-  const anchorY =
-    Number.parseFloat(styles.getPropertyValue("--landing-sticker-anchor-y")) || 0.28;
-  const offsetX =
-    Number.parseFloat(styles.getPropertyValue("--landing-sticker-offset-x")) || 0;
-  const offsetY =
-    Number.parseFloat(styles.getPropertyValue("--landing-sticker-offset-y")) || 0;
-  const shadowIntensity =
-    Number.parseFloat(styles.getPropertyValue("--landing-sticker-shadow-opacity")) ||
-    0.5;
-  const lightingIntensity =
-    Number.parseFloat(styles.getPropertyValue("--landing-sticker-lighting")) || 0.1;
-  const peelHover =
-    Number.parseFloat(styles.getPropertyValue("--landing-sticker-peel-hover")) || 30;
-  const peelActive =
-    Number.parseFloat(styles.getPropertyValue("--landing-sticker-peel-active")) || 40;
-
-  const maxX = Math.max(0, host.clientWidth - width);
-  const maxY = Math.max(0, host.clientHeight - width);
-  const x = Math.min(maxX, Math.max(0, host.clientWidth * anchorX - width / 2 + offsetX));
-  const y = Math.min(maxY, Math.max(0, host.clientHeight * anchorY - width / 2 + offsetY));
-
-  const sticker = createStickerPeel({
-    imageSrc: stickerSrc,
-    width,
-    rotate: rotateDeg,
-    peelBackHoverPct: peelHover,
-    peelBackActivePct: peelActive,
-    shadowIntensity,
-    lightingIntensity,
-    initialPosition: { x, y },
-    peelDirection: 0,
-  });
-
-  host.append(sticker.root);
-  return sticker;
-}
-
 function init() {
   initHanging();
   initCtas();
@@ -334,7 +281,6 @@ function init() {
   initPanelReveal();
   initFaqAccordion();
   initRulesPanel();
-  initIntroSticker();
   // После hanging: NBSP уже в тексте, split не рвёт предлоги.
   initLandingScrollReveal();
   document.body.classList.add("landing-page--ready");
