@@ -7,7 +7,6 @@
 
 - `main.js` — точка входа: OAuth/boot-проверка Auth, роутер (`go` / `applyRoute`), home query, монтаж экранов, **desktop-only gate** (`viewport.js` + `desktop-only-screen`), iframe-таймер (iframe pause / external wall-clock + `Timer-end.wav`), **надиктовка** (чип rec + микрофон в поле совета) + post-edit через `dictationPolish` (**сейчас off** — `POLISH_ENABLED`), квиз; email/Telegram завершаются через `AuthScreen` → `applyProviderUser`.
 - `i18n.js` — локали из `content/locales.json` (+ founder-avatars); реэкспорт `formatPlural`.
-- `config.js` — legacy waitlist count (не продуктовый флоу).
 - `config/review.js` — `REVIEW_SESSION_SECONDS` (таймер `/review` + intro copy на home) — [`config/README.md`](config/README.md).
 - `config/contacts.js` — community Telegram URL.
 - `lib/supabaseClient.js` — клиент Supabase (URL + anon) — [`lib/README.md`](lib/README.md).

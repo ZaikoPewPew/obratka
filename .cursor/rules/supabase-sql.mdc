@@ -18,7 +18,6 @@ alwaysApply: false
 6. `portfolio_submit.sql` (после portfolios; atomic submit + revoke INSERT)
 7. `review_claims.sql` (после portfolios; award balance в триггере)
 8. `review_complaints.sql` / `referrals.sql` (зависят от profiles)
-9. `subscribers_rls.sql` — если есть legacy `subscribers`
 
 Не ломать зависимости: `is_profile_banned`, `can_review_portfolio`, claim BEFORE INSERT.
 
@@ -36,7 +35,6 @@ alwaysApply: false
 |------|------|
 | `BAN.md`, `ban-templates.sql` | бан / разбан руками |
 | `delete-account-templates.sql` | полное удаление тестового аккаунта |
-| `subscribers_count.sql` / `subscribers_rls.sql` | legacy waitlist |
 
 Не путать операторские шаблоны с app-schema. Документация рядом с SQL.
 

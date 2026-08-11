@@ -1,7 +1,6 @@
 import { getSession, setSession } from "../app/session.js";
 import { getAuthUserAvatarUrl } from "./auth.js";
 import { fetchMyProfile, updateMyProfile } from "./profiles.js";
-import { getSupabase } from "../lib/supabaseClient.js";
 import {
   clampReputation,
   settleReviewReputationRewards,
@@ -14,7 +13,7 @@ export const REVIEW_REWARD = 10;
 export const SUBMIT_COST = 30;
 
 /**
- * Инкремент при локальной мутации баланса (credit/spend), чтобы in-flight
+ * Инкремент при локальной мутации баланса (submit), чтобы in-flight
  * refreshSessionFromProfile не затирал свежее значение устаревшим ответом.
  */
 let walletMutationGen = 0;
@@ -159,31 +158,6 @@ export async function awardReviewReward() {
 }
 
 /**
- * Клик по чипу баланса на home: только DEV localStorage (без серверного mint).
- * Раньше был RPC `temp_credit_balance` — удалён.
- */
-export const TEMP_BALANCE_CHIP_CREDIT = false;
-
-/** Сколько костей даёт один клик по чипу (DEV local-only). */
-export const TEMP_BALANCE_CHIP_AMOUNT = 10;
-
-/**
- * DEV: начислить кости только в localStorage (сотрётся на следующем sync).
- * @param {number} amount
- * @returns {Promise<number>} новый баланс
- */
-export async function creditBalance(amount) {
-  if (!import.meta.env.DEV) {
-    return getBalance();
-  }
-  const n = typeof amount === "number" && Number.isFinite(amount) ? amount : 0;
-  if (n <= 0) return getBalance();
-
-  walletMutationGen += 1;
-  return writeBalanceLocal(getBalance() + n);
-}
-
-/**
  * Записать баланс после atomic submit (RPC уже списал).
  * @param {number} next
  * @returns {number}
@@ -195,35 +169,4 @@ export function applySubmitBalance(next) {
       : getBalance();
   walletMutationGen += 1;
   return writeBalanceLocal(value);
-}
-
-/**
- * Legacy: отдельное списание без insert. Новая подача — submit_portfolio.
- * @returns {Promise<number>} новый баланс
- * @throws {Error} если недостаточно средств / не авторизован
- */
-export async function spendSubmitCost() {
-  if (!canSubmitPortfolio()) {
-    throw new Error("wallet.spendSubmitCost: insufficient balance");
-  }
-
-  const supabase = getSupabase();
-  if (!supabase) {
-    throw new Error("supabase_not_configured");
-  }
-
-  const { data, error } = await supabase.rpc("spend_submit_cost");
-  if (error) {
-    const msg = String(error.message || "");
-    if (/insufficient_balance/i.test(msg)) {
-      throw new Error("wallet.spendSubmitCost: insufficient balance");
-    }
-    throw new Error(msg || "wallet.spend_failed");
-  }
-
-  const next =
-    typeof data === "number" && Number.isFinite(data)
-      ? Math.max(0, Math.floor(data))
-      : getBalance() - SUBMIT_COST;
-  return applySubmitBalance(next);
 }

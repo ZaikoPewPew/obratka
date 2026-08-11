@@ -68,7 +68,7 @@ order by 1;
 | `review_claims` | только `select` | mutations — исключительно через RPC |
 | `review_complaints` | insert только RPC | `reporter_id` ревьюеру не виден |
 | `referral_seed_codes` | нет доступа | seed `YTHWKPDWAK` только через RPC |
-| `subscribers` | нет доступа | legacy waitlist |
+| `subscribers` | нет доступа | legacy waitlist; клиент удалён — drop таблицы отдельно |
 | Storage `portfolio-previews` | select (публичный CDN, `public = true`) | insert/update/delete — только Edge `portfolio-preview` через `service_role`; политик на `storage.objects` нет — default-deny для anon/authenticated |
 
 ---
@@ -78,10 +78,9 @@ order by 1;
 Клиент **не может** начислять монеты:
 
 - подача портфолио — `submit_portfolio()` (atomic: лимит 1 pending + spend 30 + INSERT);
-- legacy `spend_submit_cost()` без insert — не использовать с клиента (тоже 30);
+- legacy `spend_submit_cost()` без insert — RPC может остаться в БД; клиентской обёртки нет (подача только через `submit_portfolio`);
 - награда за ревью (+10) — внутри `handle_review_inserted` через `set_config('app.bypass_profile_guards', ...)`;
-- RPC `temp_credit_balance` **удалён** 2026-07-26 (был временный, позволял любому залогиненному накрутить себе баланс);
-- клик по чипу баланса на home теперь DEV-only и пишет только в localStorage.
+- RPC `temp_credit_balance` **удалён** 2026-07-26 (был временный, позволял любому залогиненному накрутить себе баланс).
 
 ---
 

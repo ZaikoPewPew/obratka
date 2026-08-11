@@ -173,7 +173,7 @@ src/api/
   portfolios.js / leagues.js / referrals.js / reviewComplaints.js
   presence.js / rating.js
   dictationPolish.js      ← Edge polish-dictation (пунктуация; не STT; POLISH_ENABLED=false)
-  telegramWidget.js / subscribers.js
+  telegramWidget.js
   portfolioEmbedProbe.js
 
 styles/

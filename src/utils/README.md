@@ -8,9 +8,7 @@
 |------|------|
 | `plural.js` | склонение по числу (`one`/`few`/`many`/`other`) для i18n-шаблонов; реэкспорт из `src/i18n.js` |
 | `hangingPrepositions.js` | висячие предлоги → `\u00A0` перед `textContent` (см. `typography.mdc`) |
-| `countTemplate.js` | вставка отформатированного числа в шаблон (`{count}`) |
 | `emailValidation.js` | валидация и нормализация email |
-| `foundersCountDisplay.js` | число подписчиков/основателей |
 | `motionTokens.js` | чтение `--motion-*` / cooldowns из CSS для WAAPI / таймеров |
 | `brandScreenTransition.js` | open/close split-экранов; `handoff` без повторной анимации visual |
 | `fieldError.js` | плавный выезд `.url-screen__error` (opacity/blur/высота) |

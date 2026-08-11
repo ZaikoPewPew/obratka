@@ -18,7 +18,6 @@
 - `report-screen.css` — `/report` (листы + жалоба).
 - `desktop-only-screen.css` — оверлей &lt;768px; импорт из фабрики JS (как `ban-screen.css`). Токены `--desktop-only-screen-*`.
 - `account-menu.css` / `settings-screen.css` — меню профиля / settings (view-only профиль, select-шеврон специальности).
-- `rating-panel.css` — **не в entry**; оболочка неиспользуемого aside `src/components/rating/`.
 - `landing/styles/landing.css` — промо MPA; токены `--landing-*` в `tokens.css`.
 
 ## Что подключено из `index.html`

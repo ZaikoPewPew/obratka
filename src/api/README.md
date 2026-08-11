@@ -13,7 +13,6 @@
 | `presence.js` | legendary online: `heartbeatLegendaryPresence` / `listOnlineLegendaries` (RPC; только `tier=legendary`) |
 | `rating.js` | `listRatingTop` — топ-50 по `reputation` для вкладки «Рейтинг» (RPC `list_rating_top`; серверный снапшот раз в сутки) |
 | `onboarding.js` | `saveOnboardingAnswers` → колонки + `onboarding` jsonb в профиле |
-| `subscribers.js` | waitlist: POST email + RPC/HEAD count |
 
 ### Провайдеры
 
@@ -49,7 +48,7 @@ Env / Dashboard: `.env.example`, `src/components/auth-screen/README.md`, `supaba
 
 | Файл | Роль |
 |------|------|
-| `wallet.js` | `getBalance` / `applySubmitBalance` / `spendSubmitCost` (legacy RPC) / `awardReviewReward` (= refresh) / `creditBalance` (DEV local-only) / `REVIEW_REWARD = 10` / `SUBMIT_COST = 30` (3 ревью → подача); `refreshSessionFromProfile` (перед fetch — `settleReviewReputationRewards`; `reputation` через `clampReputation`) |
+| `wallet.js` | `getBalance` / `applySubmitBalance` / `awardReviewReward` (= refresh) / `REVIEW_REWARD = 10` / `SUBMIT_COST = 30` (3 ревью → подача); `refreshSessionFromProfile` (перед fetch — `settleReviewReputationRewards`; `reputation` через `clampReputation`) |
 | `leagues.js` | матчинг лиг по `grade` (зеркало SQL): `gradeToLeague` / `canReviewGrades`; null/unknown → лига 1 |
 | `portfolios.js` | `listPortfoliosForReview` (чужие pending в лиге + слоты; без `reviewedByMe`; порядок `sortFeedForSlotClosure`: closer to target → FIFO; дверь claim = reviewsCount < target (late overshoot ок); запрос ограничен `FEED_QUERY_LIMIT` = 300 по `created_at` DESC — защита от неограниченного select при наплыве регистраций) / `listReviewedPortfolios` (свои сданные отчёты для сегмента «Уже отревьюено»; pending+done через RLS `has_reviewed_portfolio` / `portfolios_select_feed`; порядок по `reviews.created_at` DESC) / `listMyPortfolios` (`created_at` DESC) / `listFeedPortfolioIds` для точки «новый кейс» на «Чужие посты» (тот же `FEED_QUERY_LIMIT` + exclude reviewed) / `listReadyOwnReportIds` (+ `hasReadyOwnReport`) для точки на «Мои» / claim·heartbeat·release / `releasePortfolioClaimKeepalive` (unload) / `isPortfolioOpenForReview` (`reviewsCount < target`, home gate до intro) / `submitPortfolio` (RPC `submit_portfolio`) / `countMyPendingPortfolios` / `hasFreeMineSlot` / `MAX_MINE_PENDING` (=1) / `submitPortfolioReview` (answers + опционально `dictation`) + `formatPortfolioRole` / `formatPortfolioGrade` (без известного grade → `gradeUndefined`); active-слоты на карточке **анонимны** (`homeCardReviewerAnonymous` — без PII до завершения ревью); abort без залипания — см. `review-claims.mdc` |
 | `reviewComplaints.js` | жалобы на листы: `listPortfolioReviewSheets` (с `answers` / `canComplain` от `completed_at`, fallback на N-е ревью) / `submitReviewComplaint` / `getReputation` / `formatReputation`; теги v1 без весов на клиенте; окно 6ч от done; RPC `submit_review_complaint` + `settle_review_reputation_rewards` |

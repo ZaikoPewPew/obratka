@@ -1,8 +1,9 @@
 /**
- * Пресеты экрана успеха (подача портфолио / generic).
+ * Пресеты экрана успеха (deep link `/done`).
  * Финал квиза — в `review-panel` (`/quiz/done`), не здесь.
+ * Submit портфолио остаётся на url-screen (`setVariant("done")`).
  *
- * @typedef {'portfolioSubmitted' | 'generic'} SuccessPresetId
+ * @typedef {'generic'} SuccessPresetId
  *
  * @typedef {{
  *   id: SuccessPresetId;
@@ -15,11 +16,6 @@
 
 /** @type {Readonly<Record<SuccessPresetId, SuccessPreset>>} */
 export const SUCCESS_PRESETS = Object.freeze({
-  portfolioSubmitted: Object.freeze({
-    id: "portfolioSubmitted",
-    titleKey: "successPortfolioTitle",
-    primaryKey: "successGenericPrimary",
-  }),
   generic: Object.freeze({
     id: "generic",
     titleKey: "successGenericTitle",

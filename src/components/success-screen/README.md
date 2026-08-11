@@ -11,9 +11,8 @@ Split: слева тайтл + кнопка «На главную», справ�
 | Id | Когда | CTA |
 |----|--------|-----|
 | `generic` | deep link `/done`, `applyRoute("success")` | На главную (`successGenericPrimary`) |
-| `portfolioSubmitted` | в `successPresets.js` (legacy); рантайм сейчас всегда `generic` | На главную |
 
-Конфиг: `successPresets.js`. Копирайт: `success*` в `locales.json`.
+Конфиг: `successPresets.js`. Копирайт: `successGeneric*` в `locales.json`.
 
 ## API
 

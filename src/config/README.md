@@ -1,7 +1,5 @@
 # `src/config/` — константы приложения
 
-Не путать с корневым `src/config.js` (legacy waitlist count, не продуктовый флоу).
-
 | Файл | Экспорт | Назначение |
 |------|---------|------------|
 | `auth.js` | `EMAIL_AUTH_ENABLED` (= **false**) | Показывать Email OTP на `/registration` (+ `/registration/code`). Выключено, пока нет стабильного custom SMTP. |

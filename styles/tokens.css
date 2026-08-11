@@ -995,13 +995,6 @@
   --home-screen-rating-skeleton-line-name-width: 119px;
   --home-screen-rating-skeleton-line-role-width: 206px;
   --home-screen-rating-skeleton-reputation-width: 94px;
-  /* Aside (rating-panel stub / legacy); legendary online — fixed-чип */
-  --home-screen-aside-width: 278px;
-  --home-screen-aside-min-height: 462px;
-  --home-screen-aside-radius: var(--radius-xl);
-  --home-screen-aside-bg: var(--color-surface-muted);
-  --home-screen-aside-gap: var(--space-4);
-  --home-screen-aside-sticky-top: 0px;
   /* «Топы в сети» — fixed-чип слева снизу (Figma 489:3318) */
   --legendary-online-offset: var(--space-4);
   --legendary-online-z: var(--home-screen-tabbar-z);

@@ -44,7 +44,7 @@
 - **Сегменты tabs-panel:** на «Чужие посты» — Ждёт ревью / Уже отревьюено; на «Мои» — Ещё на ревью / Завершенные (`reviewsCount >= targetReviews`).
 - **Free-slot «Ещё на ревью»:** до `MAX_MINE_PENDING` (=1) — реальная карточка или dashed «Свободный слот» (`homeMineSlotFree*`). CTA «Закинуть»: сначала занятый слот → toast `homeNotifySlotTaken`, потом нет монет → toast `homeNotifyNoDucks` + buzz на submit + чипе баланса. Подача — RPC `submit_portfolio` (atomic spend+insert).
 - **Экономика:** `REVIEW_REWARD = 10`, `SUBMIT_COST = 30` (старт `balance = 0` → 3 чужих ревью до своей подачи). Награда только после submit отчёта; abort/release claim — без монет. Свободный слот + нет монет на «Закинуть своё» → error-buzz на submit + чипе баланса (без модалки). Правило: `.cursor/rules/wallet.mdc`.
-- **Вкладка «Рейтинг»:** третий tab `rating`; топ-50 по `reputation` (`listRatingTop` / `rating_leaderboard.sql`, снапшот раз в сутки); карточки в `.home-screen__rating-list` (aside `rating/` **не** монтируется); плашка репутации `min-width`/`height` 52px, padding-x 16px (иконки positive/neutral/negative).
+- **Вкладка «Рейтинг»:** третий tab `rating`; топ-50 по `reputation` (`listRatingTop` / `rating_leaderboard.sql`, снапшот раз в сутки); карточки в `.home-screen__rating-list`; плашка репутации `min-width`/`height` 52px, padding-x 16px (иконки positive/neutral/negative).
 - **«Топы в сети»:** fixed-чип слева снизу (`legendary-online-panel` + heartbeat/list RPC); скрыт, если никого нет.
 - **Deep links home:** `/home`, `?filter=completed` (Чужие / уже отревьюено), `?tab=mine`, `?tab=mine&filter=completed`, `?tab=rating`; query канонизирует `homeRoute.js`, Back/Forward переключает вид без remount.
 - **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 60` (review shell + intro copy). iframe — пауза при скрытой вкладке; external — wall-clock без паузы; конец → `src/assets/audio/Timer-end.wav` + стоп надиктовки (+ polish notes, если `POLISH_ENABLED`) → quiz.
@@ -116,7 +116,7 @@
 | `public.referral_seed_codes` | bootstrap-коды (seed `YTHWKPDWAK`); только через RPC |
 | `public.portfolios` / `reviews` | очередь ревью с матчингом по лиге грейда; `portfolios.completed_at` — старт окна жалобы / settle |
 | `public.review_complaints` | жалобы автора (1 тег, окно 6ч от done) → −20 / +10 settle → автобан при `reputation <= -100` |
-| `public.subscribers` | legacy waitlist API (`subscribers.js`), не entry UX |
+| `public.subscribers` | legacy waitlist; клиент удалён — таблица в БД может остаться до операторского drop |
 | Edge `telegram-auth` | проверка Telegram hash → сессия |
 
 SQL: [`supabase/sql/`](supabase/sql/), обзор [`supabase/README.md`](supabase/README.md).

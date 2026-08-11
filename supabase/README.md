@@ -20,11 +20,9 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 | `sql/portfolio_submit.sql` | RPC `submit_portfolio` (atomic spend 30 + insert, max 1 pending); revoke client INSERT |
 | `sql/review_claims.sql` | claims + award (+10); `portfolio_reviewer_slots` + purge expired; apply — [`sql/README.md`](sql/README.md) § «Как применять» |
 | `sql/review_complaints.sql` | жалобы на листы → reputation (старт 0 / бан −100 / +10 settle от done) → автобан |
-| `sql/subscribers_rls.sql` | RLS на legacy `subscribers` (если таблица есть) |
 | `sql/ban-templates.sql` | Copy-paste SQL: бан / разбан / поиск |
 | `sql/delete-account-templates.sql` | полное удаление тестового аккаунта |
 | `sql/portfolio-role-backfill.sql` | одноразовый backfill `portfolios.role` |
-| `sql/subscribers_count.sql` | RPC `subscribers_count()` (legacy waitlist) |
 | `sql/portfolio_preview_cache.sql` | Storage-бакет `portfolio-previews` для кэша превью-скриншотов (Edge `portfolio-preview`) |
 | `functions/telegram-auth/` | Telegram Login Widget → сессия Supabase Auth |
 | `functions/portfolio-preview/` | Прокси/кэш перед thum.io для превью карточек (429-hardening) |
@@ -74,7 +72,6 @@ Google Authorized redirect URI в Cloud Console: `https://<project-ref>.supabase
 | `referral_seed_codes` | только через RPC (bootstrap `YTHWKPDWAK`) |
 | `portfolios` / `reviews` | `portfolios.js` (очередь по лигам; INSERT blocked if banned / league mismatch) |
 | `review_complaints` | `reviewComplaints.js` (insert только RPC; select своих жалоб автором) |
-| `subscribers` | `subscribers.js` (не entry UX) |
 | Storage `portfolio-previews` | `portfolios.js` (`portfolioPreviewUrl` → Edge `portfolio-preview`); публичный read, пишет только Edge Function |
 
 ## Бан пользователя (оператор)

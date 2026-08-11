@@ -13,8 +13,6 @@
 | `portfolios.sql` | portfolios/reviews, лиги; SELECT only (INSERT через `submit_portfolio`) |
 | `review_claims.sql` | claims + award balance (+10) в `handle_review_inserted`; `portfolio_reviewer_slots` / claim / heartbeat зовут `purge_expired_review_claims` + `settle_review_reputation_rewards` |
 | `review_complaints.sql` | reputation (старт 0, бан −100, 1 тег, окно 6ч от done / fallback N-е ревью, +10 settle) + RPC complaint. ONE-SHOT `100/20 → 0` уже применён на prod — в файле закомментирован |
-| `subscribers_count.sql` | RPC count (legacy) |
-| `subscribers_rls.sql` | RLS + revoke на live `subscribers`, если таблица есть |
 | `ban-templates.sql` | операторский бан / разбан |
 | `delete-account-templates.sql` | удаление тестового аккаунта |
 | `portfolio-role-backfill.sql` | одноразовый backfill `portfolios.role` (Lead/Head naming) |
@@ -26,7 +24,7 @@
 2. Вставь содержимое нужного `.sql` (или точечный блок) → **Run**.
 3. Альтернатива: MCP `apply_migration` / CLI `supabase db` — тот же SQL.
 
-Порядок первого деплоя: `profiles` → `legendary_presence` → `rating_leaderboard` → `wallet` → `portfolios` → `portfolio_submit` → `review_claims` → `review_complaints` / `referrals`; при legacy — `subscribers_rls`.
+Порядок первого деплоя: `profiles` → `legendary_presence` → `rating_leaderboard` → `wallet` → `portfolios` → `portfolio_submit` → `review_claims` → `review_complaints` / `referrals`.
 
 ### Повторный apply (уже живая БД)
 

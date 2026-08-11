@@ -37,30 +37,6 @@ export const FULL_FLOW = Object.freeze([...APP_FLOW, ...SESSION_FLOW]);
 export { ROUTE_PATHS };
 
 /**
- * Следующий экран в `FULL_FLOW` (не используется оркестрацией; left for debug/tests).
- * @deprecated Навигация только через `go` в `main.js`.
- * @param {AppScreenId} id
- * @returns {AppScreenId | null}
- */
-export function getNextScreen(id) {
-  const index = FULL_FLOW.indexOf(id);
-  if (index < 0 || index >= FULL_FLOW.length - 1) return null;
-  return FULL_FLOW[index + 1];
-}
-
-/**
- * Предыдущий экран в `FULL_FLOW`.
- * @deprecated Навигация только через `go` в `main.js`.
- * @param {AppScreenId} id
- * @returns {AppScreenId | null}
- */
-export function getPreviousScreen(id) {
-  const index = FULL_FLOW.indexOf(id);
-  if (index <= 0) return null;
-  return FULL_FLOW[index - 1];
-}
-
-/**
  * Стартовый экран по состоянию сессии (без учёта path).
  * @param {{
  *   hasSession?: boolean;

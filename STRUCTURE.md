@@ -35,7 +35,7 @@
 
 | Переменная | Назначение |
 |------------|------------|
-| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | Auth, profiles, referrals, portfolios, review_complaints RPC, (legacy) subscribers |
+| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | Auth, profiles, referrals, portfolios, review_complaints RPC |
 | `TELEGRAM_BOT_ID` / `TELEGRAM_BOT_USERNAME` | Telegram Login Widget (публичные) |
 | `VITE_BASE_PATH` | Vite `base` (CI prod: `/` для `obratka.net`) |
 | `VITE_POSTHOG_KEY` / `VITE_POSTHOG_HOST` | PostHog project token + host (`us` / `eu`); без key — analytics no-op |

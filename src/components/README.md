@@ -33,8 +33,6 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | `report-screen/` | `/report` | листы ревью + жалоба + сводный PDF (action cards) |
 | `ban-screen/` | `/banned` | блок аккаунта; статичный evil mark |
 | `desktop-only-screen/` | *(оверлей)* | viewport &lt; 768px — «только с компьютера»; не path — [`README`](desktop-only-screen/README.md), [`mobile.md`](../../mobile.md) |
-| `rating/` | — | неиспользуемый aside; вкладка рейтинга — в `home-screen` |
-| `locale-toggle/` | — | legacy waitlist/lang UI; **не в entry**, стили не подключены — [`README`](locale-toggle/README.md) |
 
 ## Ревью и квиз
 
