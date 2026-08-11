@@ -127,7 +127,7 @@ SoT: [`mobile.md`](mobile.md)
 
 - [x] `npm test` — зелёный (аудит: 118/118)
 - [x] `npm run build` — `dist/index.html`, `dist/landing/index.html`, `dist/404.html` (аудит после fix)
-- [ ] Preview / Pages deploy успешен (Actions)
+- [x] Preview / Pages deploy успешен (Actions)
 
 ---
 
