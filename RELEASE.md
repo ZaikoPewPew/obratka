@@ -3,8 +3,9 @@
 Цель: катнуть **desktop-only** продукт на реальных пользователей.  
 Мобильного приложения / адаптивного UI **нет** — на &lt;768px только заглушка.
 
-Prod: https://zaikopewpew.github.io/obratka/  
-Лендос: https://zaikopewpew.github.io/obratka/landing/  
+Prod: https://obratka.net/  
+Лендос: https://obratka.net/landing/  
+(Pages + custom domain; CI `VITE_BASE_PATH=/`. Старый project URL github.io/obratka — не SoT.)  
 SoT продукта: [`PROJECT.md`](PROJECT.md) · экраны: [`SCREENS.md`](SCREENS.md)
 
 ---
@@ -40,10 +41,10 @@ SoT продукта: [`PROJECT.md`](PROJECT.md) · экраны: [`SCREENS.md`]
 
 - [ ] Пройти все блоки: шапка → hero → боль → преимущества → закрытие
 - [ ] Копирайт / визуал под финальный месседж invite-only
-- [ ] CTA ведут на `/referral` (с `BASE_URL`; `?ref=` если нужен)
-- [ ] OG/canonical/robots/sitemap ок на prod (`og-share.png`, absolute URLs)
+- [ ] CTA: `?ref=` → `/referral?ref=…`; invite gate → `/registration`; иначе Telegram-сообщество (см. [`landing/README.md`](landing/README.md))
+- [ ] OG/canonical/robots/sitemap ок на prod (`og-share.png`, absolute URLs на `obratka.net`)
 - [ ] Desktop + узкий viewport лендоса читаются (лендос **не** desktop-only гейт SPA)
-- [ ] Токены `--landing-*`, без сырых цветов
+- [x] Токены `--landing-*`, без сырых цветов (аудит CSS)
 
 SoT: [`landing/README.md`](landing/README.md)
 
@@ -69,7 +70,15 @@ SoT: [`mobile.md`](mobile.md)
 - [x] SPA not-found для неизвестных path; Pages `404.html` = entry как есть
 - [ ] Smoke: deep link известного path на Pages (`/home`, `/referral`, …) не ломается
 - [x] Мусорный path → `/404` (not-found-screen)
-- [ ] Smoke: `VITE_BASE_PATH` на prod (Pages) не ломает entry / `/404`
+- [ ] Smoke: `VITE_BASE_PATH=/` на prod (`obratka.net`) не ломает entry / `/404`
+
+### 0.4 Видео: онбординг + лендинг
+
+- [ ] Снять короткий рилс-приветствие и заменить `src/assets/video/welcome-reels.MOV` (онбординг, шаг video `welcome` — см. `OnboardingScreen.js` / `content/onboarding.md`)
+- [ ] Записать краткий видеообзор продукта **с озвучкой** для лендинга; **отдельный ассет** под `/landing/` (не подменять `primer.mp4` у home intro — тот же файл сейчас в intro-модалке muted)
+- [ ] Подключить новый ролик в `landing/src/main.js` (сейчас `primer.mp4`)
+- [ ] Формат/вес ок для web (предпочтительно `.mp4`; `.MOV` только если сознательно оставляем)
+- [ ] Smoke: онбординг video-step играет; лендос demo со звуком / CTA не ломается
 
 ---
 
@@ -79,19 +88,19 @@ SoT: [`mobile.md`](mobile.md)
 
 | Где | Что проверить |
 |-----|----------------|
-| `.env.production` / CI | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `TELEGRAM_BOT_ID`, `VITE_BASE_PATH=/obratka/`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST` |
+| `.env.production` / CI | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `TELEGRAM_BOT_ID`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST`; CI: `VITE_BASE_PATH=/` (не в `.env.production`) |
 | Edge secrets | `TELEGRAM_BOT_TOKEN`; `ZAI_API_KEY` только если снова включим polish |
 | Не в git / клиенте | `service_role`, bot token, Google Client Secret, `ZAI_API_KEY` |
 
-- [ ] `git check-ignore -v .env` — локальные секреты не коммитятся
-- [ ] Remote = только `ZaikoPewPew/obratka`
+- [x] `git check-ignore -v .env` — локальные секреты не коммитятся (аудит)
+- [x] Remote = только `ZaikoPewPew/obratka` (аудит)
 
 ### 1.2 Supabase Auth (Dashboard)
 
 **Email OTP — вне скоупа v1-ката** (`EMAIL_AUTH_ENABLED = false`). Пункты про SMTP/токен ниже — только когда вернём почту.
 
 - [ ] ~~Email OTP: шаблоны Magic Link / Confirm signup с `{{ .Token }}`~~ — отложено (SMTP + флаг)
-- [ ] Site URL + Additional Redirect URLs: localhost + `https://zaikopewpew.github.io/obratka/`
+- [ ] Site URL + Additional Redirect URLs: localhost + `https://obratka.net/`
 - [ ] Google OAuth: Client ID/Secret в Dashboard; redirect URI = Supabase callback
 - [ ] Telegram: bot id в клиенте, token в Edge `telegram-auth`
 - [ ] Automatic linking Email↔Google включён (из коробки; актуально для Google; Email UI скрыт)
@@ -113,8 +122,8 @@ SoT: [`mobile.md`](mobile.md)
 
 ### 1.4 Сборка
 
-- [ ] `npm test` — зелёный
-- [ ] `npm run build` — `dist/index.html`, `dist/landing/index.html`, `dist/404.html`
+- [x] `npm test` — зелёный (аудит: 118/118)
+- [x] `npm run build` — `dist/index.html`, `dist/landing/index.html`, `dist/404.html` (аудит после fix)
 - [ ] Preview / Pages deploy успешен (Actions)
 
 ---
@@ -258,7 +267,7 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 ### SEO / шаринг (лендос)
 
 - [ ] `/landing/` indexable; SPA `noindex`
-- [ ] `robots.txt` / `sitemap.xml` только лендос
+- [x] `robots.txt` / `sitemap.xml` только лендос (выровнены под `obratka.net` root; smoke crawl — отдельно)
 - [ ] OG preview (Telegram / Twitter card) с `og-share.png`
 
 ---
@@ -272,10 +281,10 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 - [ ] Claim abort / pagehide **без** ложных монет
 - [ ] Ban escape-proof
 - [ ] Desktop-only заглушка на телефоне (белый + короткая фраза) ок
-- [ ] Лендинг + CTA на referral
+- [ ] Лендинг + CTA (Telegram / `?ref=` → referral / gate → registration) ок на prod
 - [ ] SQL claims/complaints/referrals/wallet на prod актуальны
 - [ ] PostHog пишет события с Pages
-- [ ] Нет `service_role` / bot token в бандле
+- [ ] Нет `service_role` / bot token в бандле (vite allowlist; smoke бандла на prod)
 
 ### Nice (можно добить сразу после ката)
 
@@ -295,7 +304,7 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 
 ## 5. Порядок работ (практика)
 
-1. **Полиш:** лендинг → ~~desktop-only stub~~ → ~~404/not-found~~ (готово) → smoke deep links / BASE_PATH на Pages
+1. **Полиш:** лендинг → ~~desktop-only stub~~ → ~~404/not-found~~ (готово) → видео онбординг (`welcome-reels`) + обзор с озвучкой на лендос → smoke deep links / BASE_PATH на Pages
 2. **Инфра:** Auth Dashboard (Google + Telegram; Email — later) + SQL/Edge + `.env.production`
 3. **Build + deploy** на Pages
 4. **QA** по §2 на prod URL (не только localhost); Email-сценарии skip

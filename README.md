@@ -3,7 +3,7 @@
 Продукт взаимного ревью портфолио дизайнеров: регистрация → онбординг → очередь ревью / подача URL → квиз → отчёт.
 
 **Стек:** Vite, vanilla JS, Supabase (Auth + Postgres + Edge Function), i18n `ru`/`en`.  
-**Деплой:** GitHub Pages — https://zaikopewpew.github.io/obratka/  
+**Деплой:** GitHub Pages + custom domain — https://obratka.net/  
 **Репозиторий:** https://github.com/ZaikoPewPew/obratka
 
 Карта экранов и URL: [`SCREENS.md`](SCREENS.md). Аналитика: [`ANALYTICS.md`](ANALYTICS.md).  
@@ -46,7 +46,7 @@ npm run dev
 | `SUPABASE_ANON_KEY` | публичный anon key |
 | `TELEGRAM_BOT_ID` | число до `:` в токене BotFather (Login Widget) |
 | `TELEGRAM_BOT_USERNAME` | username бота (опционально) |
-| `VITE_BASE_PATH` | base для GitHub Pages (CI: `/obratka/`) |
+| `VITE_BASE_PATH` | Vite `base` (CI prod: `/` для `obratka.net`) |
 | `VITE_POSTHOG_KEY` | PostHog project token (публичный) |
 | `VITE_POSTHOG_HOST` | `https://us.i.posthog.com` или `https://eu.i.posthog.com` |
 
@@ -120,6 +120,6 @@ API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](
 ## Деплой
 
 Статика в `dist/` (`index.html` + `landing/index.html`). На GitHub Pages `404.html` = копия `index.html` для SPA deep link’ов.  
-Prod: https://zaikopewpew.github.io/obratka/ · лендос: https://zaikopewpew.github.io/obratka/landing/  
-`SUPABASE_*` и `TELEGRAM_*` нужны на этапе `npm run build` (CI).  
+Prod: https://obratka.net/ · лендос: https://obratka.net/landing/ (CI: `VITE_BASE_PATH=/`)  
+Клиентский бандл: только `VITE_*` + allowlist `SUPABASE_URL` / `SUPABASE_ANON_KEY` / `TELEGRAM_BOT_ID|USERNAME` (`vite.config.js`).  
 Remote только `ZaikoPewPew/obratka` — см. `.cursor/rules/git-remote.mdc`.

@@ -73,7 +73,7 @@ node --env-file=.env scripts/verify-email-otp-setup.mjs
    Альтернатива: Providers → Email → выключить **Confirm email** (`mailer_autoconfirm`), тогда уходит Magic link or OTP; всё равно добавь `{{ .Token }}` в этот шаблон.
 5. Redirect URLs (Authentication → URL Configuration):
    - `http://localhost:5173/`
-   - `https://zaikopewpew.github.io/obratka/`
+   - `https://obratka.net/`
 
 ### Telegram
 

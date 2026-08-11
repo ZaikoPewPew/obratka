@@ -2,7 +2,7 @@
 
 Отдельный Vite entry: свой HTML/CSS/JS. Без `src/api/*`, session, Supabase, claims.
 
-Prod: https://zaikopewpew.github.io/obratka/landing/  
+Prod: https://obratka.net/landing/  
 Карта продукта: [`SCREENS.md`](../SCREENS.md). Структура: [`STRUCTURE.md`](../STRUCTURE.md).
 
 ## Локально
@@ -80,4 +80,4 @@ npm run dev
 ## Сборка / Pages
 
 `vite.config.js` → MPA input `landing` → `dist/landing/index.html`.  
-`npm run build` (CI с `VITE_BASE_PATH=/obratka/`) кладёт лендос рядом с SPA.
+`npm run build` (CI с `VITE_BASE_PATH=/` для `obratka.net`) кладёт лендос рядом с SPA.

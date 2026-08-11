@@ -187,7 +187,7 @@ home → report_opened → complaint_submitted   # план
 
 **PostHog:** Activity / Live events → `$pageview`, `auth_success`, …
 
-**Prod:** после Pages deploy то же на https://zaikopewpew.github.io/obratka/ (ключ в `.env.production`).
+**Prod:** после Pages deploy то же на https://obratka.net/ (ключ в `.env.production`).
 
 Консоль: `posthog.get_distinct_id()` — SDK инициализирован.
 

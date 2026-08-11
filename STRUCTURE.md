@@ -17,7 +17,7 @@
 | `mobile.md` | **Desktop-only** гейт (&lt;768px) + архив waitlist / старого adaptive QA |
 | `index.html` | Каркас `.iframe-shell` (`/review`) + CSS entry |
 | `landing/` | Промо-лендос (отдельный Vite entry, без api/session) — [`landing/README.md`](landing/README.md) |
-| `vite.config.js` | Vite, MPA (`index` + `landing`), `VITE_BASE_PATH`, префиксы `VITE_` / `SUPABASE_` / `TELEGRAM_`; `%SITE_ORIGIN%` / `%SITE_BASE%` → absolute OG/canonical |
+| `vite.config.js` | Vite, MPA (`index` + `landing`), `VITE_BASE_PATH`, `envPrefix: VITE_*` + allowlist `SUPABASE_URL`/`ANON_KEY`/`TELEGRAM_BOT_*` через `define`; `%SITE_ORIGIN%` / `%SITE_BASE%` → absolute OG/canonical |
 | `package.json` | Скрипты (`build` → ещё `404.html` для SPA) |
 | `.env.example` | Шаблон клиентских env |
 
@@ -37,7 +37,7 @@
 |------------|------------|
 | `SUPABASE_URL` / `SUPABASE_ANON_KEY` | Auth, profiles, referrals, portfolios, review_complaints RPC, (legacy) subscribers |
 | `TELEGRAM_BOT_ID` / `TELEGRAM_BOT_USERNAME` | Telegram Login Widget (публичные) |
-| `VITE_BASE_PATH` | base для GitHub Pages (`/obratka/`) |
+| `VITE_BASE_PATH` | Vite `base` (CI prod: `/` для `obratka.net`) |
 | `VITE_POSTHOG_KEY` / `VITE_POSTHOG_HOST` | PostHog project token + host (`us` / `eu`); без key — analytics no-op |
 
 ### Только Dashboard / Edge
@@ -48,7 +48,7 @@
 | Email OTP | Supabase Auth → Providers → Email |
 | `TELEGRAM_BOT_TOKEN` | Edge Function secrets (`telegram-auth`) |
 | `ZAI_API_KEY` (опц. `ZAI_MODEL`, `ZAI_MODEL_FALLBACK`) | Edge Function secrets (`polish-dictation`; default `glm-4.5-flash`; клиентский invoke сейчас off — `POLISH_ENABLED`) |
-| Redirect URLs | `http://localhost:5173/`, `https://zaikopewpew.github.io/obratka/` |
+| Redirect URLs | `http://localhost:5173/`, `https://obratka.net/` |
 
 См. `.env.example` и `src/components/auth-screen/README.md`.
 

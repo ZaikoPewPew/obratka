@@ -1,8 +1,20 @@
 import { resolve } from "node:path";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 
 /** Prod origin for absolute OG / canonical / sitemap URLs. */
-const SITE_ORIGIN = process.env.VITE_SITE_ORIGIN || "https://obratka.net";
+const SITE_ORIGIN_DEFAULT = "https://obratka.net";
+
+/**
+ * Publishable client env only — never service_role / bot token / ZAI.
+ * Vite `envPrefix` is prefix-based; we inject these by exact name via `define`
+ * so a stray `SUPABASE_SERVICE_ROLE_KEY` in build env cannot enter the bundle.
+ */
+const CLIENT_ENV_ALLOWLIST = [
+  "SUPABASE_URL",
+  "SUPABASE_ANON_KEY",
+  "TELEGRAM_BOT_ID",
+  "TELEGRAM_BOT_USERNAME",
+];
 
 /**
  * Normalize Vite base to always end with `/` (except empty → `/`).
@@ -14,14 +26,26 @@ function normalizeBase(raw) {
   return value.endsWith("/") ? value : `${value}/`;
 }
 
-export default defineConfig(() => {
-  // GitHub Pages project site: /obratka/ (см. workflow). Локально — /.
-  const base = normalizeBase(process.env.VITE_BASE_PATH || "/");
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  // Custom domain obratka.net: CI sets `/`. Project-site `/obratka/` only if needed.
+  const base = normalizeBase(
+    process.env.VITE_BASE_PATH || env.VITE_BASE_PATH || "/",
+  );
+  const siteOrigin =
+    process.env.VITE_SITE_ORIGIN || env.VITE_SITE_ORIGIN || SITE_ORIGIN_DEFAULT;
+
+  /** @type {Record<string, string>} */
+  const defineEnv = {};
+  for (const key of CLIENT_ENV_ALLOWLIST) {
+    defineEnv[`import.meta.env.${key}`] = JSON.stringify(env[key] ?? "");
+  }
 
   return {
     base,
-    // Разрешаем использовать переменные Supabase без префикса VITE_.
-    envPrefix: ["VITE_", "SUPABASE_", "TELEGRAM_"],
+    // Only `VITE_*` auto-expose; allowlisted SUPABASE_/TELEGRAM_ via `define` above.
+    envPrefix: ["VITE_"],
+    define: defineEnv,
     build: {
       rollupOptions: {
         input: {
@@ -40,9 +64,9 @@ export default defineConfig(() => {
       {
         name: "obratka-site-url-placeholders",
         transformIndexHtml(html) {
-          // Build with VITE_BASE_PATH=/obratka/ → absolute Pages URLs for OG/canonical.
+          // Build with VITE_BASE_PATH=/ → absolute URLs for OG/canonical on obratka.net.
           return html
-            .replaceAll("%SITE_ORIGIN%", SITE_ORIGIN)
+            .replaceAll("%SITE_ORIGIN%", siteOrigin)
             .replaceAll("%SITE_BASE%", base);
         },
       },

@@ -57,7 +57,7 @@ Polish Edge: [`functions/polish-dictation/README.md`](functions/polish-dictation
 Redirect URLs (Site URL / Additional Redirect URLs):
 
 - `http://localhost:5173/`
-- `https://zaikopewpew.github.io/obratka/`
+- `https://obratka.net/`
 
 Google Authorized redirect URI в Cloud Console: `https://<project-ref>.supabase.co/auth/v1/callback`.
 
