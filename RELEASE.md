@@ -92,6 +92,9 @@ SoT: [`mobile.md`](mobile.md)
 | Edge secrets | `TELEGRAM_BOT_TOKEN`; `ZAI_API_KEY` только если снова включим polish |
 | Не в git / клиенте | `service_role`, bot token, Google Client Secret, `ZAI_API_KEY` |
 
+- [x] `.env.production` / publishable keys на месте (проверено)
+- [x] Edge secrets: `TELEGRAM_BOT_TOKEN` (+ smoke Telegram login на prod); `ZAI_API_KEY` лежит, polish off — не блокер
+- [x] Нет `service_role` / bot token / Google Client Secret в клиенте/бандле (аудит allowlist + `.env.production`)
 - [x] `git check-ignore -v .env` — локальные секреты не коммитятся (аудит)
 - [x] Remote = только `ZaikoPewPew/obratka` (аудит)
 
@@ -100,10 +103,10 @@ SoT: [`mobile.md`](mobile.md)
 **Email OTP — вне скоупа v1-ката** (`EMAIL_AUTH_ENABLED = false`). Пункты про SMTP/токен ниже — только когда вернём почту.
 
 - [ ] ~~Email OTP: шаблоны Magic Link / Confirm signup с `{{ .Token }}`~~ — отложено (SMTP + флаг)
-- [ ] Site URL + Additional Redirect URLs: localhost + `https://obratka.net/`
-- [ ] Google OAuth: Client ID/Secret в Dashboard; redirect URI = Supabase callback
-- [ ] Telegram: bot id в клиенте, token в Edge `telegram-auth`
-- [ ] Automatic linking Email↔Google включён (из коробки; актуально для Google; Email UI скрыт)
+- [x] Site URL + Additional Redirect URLs: localhost + `https://obratka.net/`
+- [x] Google OAuth: Client ID/Secret в Dashboard; redirect URI = Supabase callback
+- [x] Telegram: bot id в клиенте, token в Edge `telegram-auth`
+- [x] Automatic linking Email↔Google включён (из коробки; актуально для Google; Email UI скрыт)
 
 Чеклист: [`auth-screen/README.md`](src/components/auth-screen/README.md)
 
@@ -111,14 +114,14 @@ SoT: [`mobile.md`](mobile.md)
 
 Порядок / re-apply: [`supabase/sql/README.md`](supabase/sql/README.md)
 
-- [ ] `profiles` (+ reputation, ban, referral, protect_*)
-- [ ] `legendary_presence`, `rating_leaderboard`
-- [ ] `wallet`, `portfolios`, `portfolio_submit`
-- [ ] `review_claims` (VOLATILE `portfolio_reviewer_slots`, overshoot, award +10)
-- [ ] `review_complaints` (окно от `completed_at`, −20 / +10 settle)
-- [ ] `referrals` + seed `YTHWKPDWAK`
-- [ ] Edge: `telegram-auth`, `portfolio-preview`, `portfolio-embed-probe` задеплоены
-- [ ] Адвайзоры / матрица RPC: [`supabase/SECURITY.md`](supabase/SECURITY.md) — нет лишнего `EXECUTE` у `anon`
+- [x] `profiles` (+ reputation, ban, referral, protect_*)
+- [x] `legendary_presence`, `rating_leaderboard`
+- [x] `wallet`, `portfolios`, `portfolio_submit`
+- [x] `review_claims` (VOLATILE `portfolio_reviewer_slots`, overshoot, award +10)
+- [x] `review_complaints` (окно от `completed_at`, −20 / +10 settle)
+- [x] `referrals` + seed `YTHWKPDWAK` (prod: `uses` 6 / `max_uses` 600)
+- [x] Edge: `telegram-auth`, `portfolio-preview`, `portfolio-embed-probe` задеплоены
+- [x] Адвайзоры / матрица RPC: [`supabase/SECURITY.md`](supabase/SECURITY.md) — нет лишнего `EXECUTE` у `anon` (только `validate_referral`; Advisors Errors = 0)
 
 ### 1.4 Сборка
 
