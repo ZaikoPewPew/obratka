@@ -9,6 +9,7 @@ import {
   resolveEntryScreen,
 } from "./app/flow.js";
 import { createAppRouter } from "./app/router.js";
+import { normalizePathname } from "./app/routes.js";
 import { getSession, setSession, clearSession } from "./app/session.js";
 import { completeOAuthFromUrl, signOut } from "./api/auth.js";
 import { getSupabase, refreshCachedAccessToken } from "./lib/supabaseClient.js";
@@ -74,6 +75,7 @@ import { DEFAULT_ONBOARDING_ROLE } from "./api/onboarding.js";
 import { createReferralScreen } from "./components/referral-screen/ReferralScreen.js";
 import { createBanScreen } from "./components/ban-screen/BanScreen.js";
 import { createDesktopOnlyScreen } from "./components/desktop-only-screen/DesktopOnlyScreen.js";
+import { createNotFoundScreen } from "./components/not-found-screen/NotFoundScreen.js";
 import { REVIEW_SESSION_SECONDS } from "./config/review.js";
 import {
   probePortfolioEmbed,
@@ -684,6 +686,18 @@ const banScreen = createBanScreen({
   onExit: exitAuthenticatedSession,
 });
 document.body.append(banScreen.root);
+
+const notFoundScreen = createNotFoundScreen({
+  onHome: () => {
+    const session = getSession();
+    if (session?.userId) {
+      go("home");
+      return;
+    }
+    go("auth");
+  },
+});
+document.body.append(notFoundScreen.root);
 
 const desktopOnlyScreen = createDesktopOnlyScreen();
 document.body.append(desktopOnlyScreen.root);
@@ -2788,6 +2802,10 @@ async function applyRoute(id, opts = {}) {
     }
     if (target === "banned") {
       banScreen.open();
+      return;
+    }
+    if (target === "notFound") {
+      notFoundScreen.open();
     }
   }
 
@@ -2804,6 +2822,7 @@ async function applyRoute(id, opts = {}) {
     if (id !== "success") closers.push(successScreen?.close());
     if (id !== "report") closers.push(reportScreen?.close());
     if (id !== "banned") closers.push(banScreen.close());
+    if (id !== "notFound") closers.push(notFoundScreen.close());
     await Promise.all(closers);
   }
 
@@ -2866,6 +2885,7 @@ async function applyRoute(id, opts = {}) {
       successScreen?.close(),
       reportScreen?.close(),
       banScreen.close(),
+      notFoundScreen.close(),
     ]);
     return;
   }
@@ -2881,6 +2901,12 @@ appRouter = createAppRouter({
     pendingHandoff = false;
 
     if (!location.id) {
+      const baseUrl = import.meta.env.BASE_URL || "/";
+      const path = normalizePathname(location.pathname, baseUrl);
+      if (path !== "/") {
+        go("notFound", { replace: true });
+        return;
+      }
       const session = getSession();
       const entry = resolveEntryScreen({
         hasSession: Boolean(session?.userId),

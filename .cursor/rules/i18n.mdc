@@ -26,8 +26,9 @@ alwaysApply: true
 
 | Префикс | Область |
 |---------|---------|
-| `metaTitle` / `metaTitleAttention` / `metaTitleDesktopOnly` | `document.title` / мигание вкладки при конце таймера / desktop-only гейт |
+| `metaTitle` / `metaTitleAttention` / `metaTitleDesktopOnly` / `metaTitleNotFound` | `document.title` / мигание вкладки при конце таймера / desktop-only гейт / SPA 404 |
 | `desktopOnly*` | оверлей «только с компьютера» (&lt;768px) |
+| `notFound*` / `metaTitleNotFound` | SPA `/404` (not-found-screen) |
 | `referral*` | invite gate |
 | `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict` | регистрация / OTP |
 | `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeCardReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeFeedFilter*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeEmptyFeedReviewed` / `homeMineSlotFree*` / `homePendingLimit*` / `homeNotify*` / `notificationCloseAria` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeBalance*` / `homeAccount*` / `homeContacts*` / `homeRulesCloseAria` / `homeFeedback*` / `homeLegendaryOnline*` / `homeRating*` | home + notices / intro / mine gate / Ждёт·Уже отревьюено / Ещё·Завершенные / free-slot / toast notify / seen-dot / слоты ревьюеров / репутация / уточки / invite-текст (`homeInviteMessage`) / меню профиля / контакты / правила (текст в `content/rules.json`) / FAB связи / «Топы в сети» / рейтинг топ-50 по репутации |

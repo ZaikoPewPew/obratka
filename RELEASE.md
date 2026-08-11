@@ -62,11 +62,13 @@ SoT: [`mobile.md`](mobile.md)
 
 ### 0.3 «404» / неизвестный URL
 
-Сейчас `npm run build` копирует `index.html` → `404.html` — это **SPA-fallback для GitHub Pages** (deep links), а не красивая страница «не найдено».
+`npm run build` копирует `index.html` → `404.html` — это **SPA-fallback для GitHub Pages** (deep links), не UI «не найдено».
 
-- [ ] Решить UX: оставить SPA-fallback как есть **или** добавить брендированный not-found внутри SPA для неизвестных path
+Продуктовый not-found: экран `notFound` на `/404` ([`not-found-screen`](src/components/not-found-screen/)) — тайтл + «На главную» (`session` → `/home`, иначе `/registration`). Мусорный path → `go("notFound", { replace: true })`; корень `/` по-прежнему `resolveEntryScreen`.
+
+- [x] SPA not-found для неизвестных path; Pages `404.html` = entry как есть
 - [ ] Deep link известного path на Pages (`/home`, `/referral`, …) не ломается (404.html = entry)
-- [ ] Мусорный path ведёт предсказуемо (referral / home по сессии / явный 404-экран — как решим в полише)
+- [x] Мусорный path → `/404` (not-found-screen)
 - [ ] Не сломать `VITE_BASE_PATH=/obratka/`
 
 ---
@@ -277,7 +279,7 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 
 ### Nice (можно добить сразу после ката)
 
-- [ ] Полиш 404/not-found UX
+- [x] Полиш 404/not-found UX
 - [ ] Safari smoke
 - [ ] Legendary online с 2+ аккаунтами
 - [ ] Overshoot 4-го ревьюера вручную

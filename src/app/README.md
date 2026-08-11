@@ -35,14 +35,16 @@ Auth-gated deep link (`home` / `settings` / `onboarding` / `report` / `url` / `s
 | `success` | `/done` | Успех подачи портфолио (success-screen) |
 | `report` | `/report` | Отчёт автору (листы → side-panel → жалоба) |
 | `banned` | `/banned` | Аккаунт заблокирован (ban-screen); escape-proof |
+| `notFound` | `/404` | Неизвестный path (not-found-screen); CTA → home / registration |
 
 **Не path:** `desktop-only-screen` — оверлей при viewport &lt; 768px (`mobile.md`); review/claim не стартуют.
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query вроде `?ref=` / `?lang=` сохраняются.  
+Неизвестный path (не `/`, не в `ROUTE_PATHS`) → `go("notFound")` → `/404`.  
 Google OAuth return обрабатывается в `main.js` до роутинга (`completeOAuthFromUrl`); ошибка → `obratka.authProviderError` → показ на `auth`.  
 `session.banned` синкается из `profiles.banned_at` (`applyProviderUser` / `refreshSessionFromProfile` / `reconcileSessionAccess`); при `true` любой маршрут → `banned` (JWT жив, пока сам не «Выйти»).
 
-На GitHub Pages SPA-fallback: `dist/404.html` (= копия `index.html`) из `npm run build`.
+На GitHub Pages SPA-fallback: `dist/404.html` (= копия `index.html`) из `npm run build` — entry для deep links, не продуктовый not-found UI.
 
 ## Порядок экранов
 

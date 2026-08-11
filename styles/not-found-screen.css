@@ -1,0 +1,93 @@
+/* SPA not-found: white + centered title + CTA. */
+
+.not-found-screen {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  z-index: var(--not-found-screen-z);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
+  padding: var(--not-found-screen-padding);
+  background: var(--not-found-screen-bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-reveal-duration) var(--motion-reveal-ease);
+}
+
+.not-found-screen--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.not-found-screen[hidden] {
+  display: none !important;
+  pointer-events: none;
+}
+
+.not-found-screen__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--not-found-screen-gap);
+  max-width: var(--not-found-screen-width);
+  width: 100%;
+}
+
+.not-found-screen__title {
+  margin: 0;
+  color: var(--not-found-screen-color);
+  font-family: var(--font-family);
+  font-size: var(--not-found-screen-font-size);
+  font-weight: var(--not-found-screen-font-weight);
+  line-height: var(--line-height-normal);
+  text-align: center;
+}
+
+/* Самодостаточно: не зависеть от lazy iframe-shell__btn. */
+.not-found-screen__btn {
+  appearance: none;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: var(--not-found-screen-btn-min-width);
+  min-height: var(--shell-review-control-height);
+  margin: 0;
+  padding: var(--shell-review-control-padding-y) var(--shell-review-control-padding-x);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-family);
+  font-size: var(--shell-review-control-font-size);
+  font-weight: var(--shell-review-control-font-weight);
+  line-height: var(--shell-review-control-line-height);
+  text-align: center;
+  white-space: nowrap;
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) ease;
+}
+
+.not-found-screen__btn:hover {
+  background: var(--color-surface-muted-hover);
+}
+
+.not-found-screen__btn:active {
+  background: var(--color-surface-muted-active);
+}
+
+.not-found-screen__btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .not-found-screen {
+    transition: none;
+  }
+}

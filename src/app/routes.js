@@ -2,7 +2,7 @@
  * Path-карта экранов. Источник правды для URL ↔ id.
  * Base (`import.meta.env.BASE_URL`) учитывается в router.js.
  *
- * @typedef {'referral' | 'auth' | 'authCode' | 'onboarding' | 'home' | 'settings' | 'url' | 'review' | 'quiz' | 'done' | 'success' | 'report' | 'banned'} AppRouteId
+ * @typedef {'referral' | 'auth' | 'authCode' | 'onboarding' | 'home' | 'settings' | 'url' | 'review' | 'quiz' | 'done' | 'success' | 'report' | 'banned' | 'notFound'} AppRouteId
  */
 
 /** @type {Readonly<Record<AppRouteId, string>>} */
@@ -26,6 +26,8 @@ export const ROUTE_PATHS = Object.freeze({
   report: "/report",
   /** Аккаунт заблокирован (ban-screen) */
   banned: "/banned",
+  /** Неизвестный path (SPA not-found); Pages `404.html` — отдельный SPA-fallback */
+  notFound: "/404",
 });
 
 /** @type {readonly AppRouteId[]} */

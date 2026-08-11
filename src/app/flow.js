@@ -29,7 +29,7 @@ export const SESSION_FLOW = Object.freeze([
 
 /**
  * Линейный порядок онбординга + сессии ревью.
- * Side-routes (`settings`, `success`, `report`, `banned`) сюда не входят — ими управляет `go` / access.
+ * Side-routes (`settings`, `success`, `report`, `banned`, `notFound`) сюда не входят — ими управляет `go` / access.
  * @type {readonly AppScreenId[]}
  */
 export const FULL_FLOW = Object.freeze([...APP_FLOW, ...SESSION_FLOW]);

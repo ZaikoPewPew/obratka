@@ -836,6 +836,17 @@
   --desktop-only-screen-font-size: var(--font-size-md);
   --desktop-only-screen-font-weight: var(--font-weight-regular);
 
+  /* SPA not-found (/404) — минимальный текст + CTA */
+  --not-found-screen-z: var(--z-modal);
+  --not-found-screen-bg: var(--palette-white);
+  --not-found-screen-padding: var(--url-screen-padding);
+  --not-found-screen-width: var(--shell-review-done-width);
+  --not-found-screen-gap: var(--space-6);
+  --not-found-screen-color: var(--color-text);
+  --not-found-screen-font-size: var(--font-size-md);
+  --not-found-screen-font-weight: var(--font-weight-regular);
+  --not-found-screen-btn-min-width: 160px;
+
   /* Home hub (лента карточек + шапка) */
   --home-screen-z: var(--z-modal);
   --home-screen-bg: var(--color-bg);

@@ -26,6 +26,7 @@ alwaysApply: true
 | `success` | `/done` (deep link / запасной; submit URL остаётся на url-screen) |
 | `report` | `/report` (листы → просмотр в side-panel → жалоба; только «Мои») |
 | `banned` | `/banned` (escape-proof при `session.banned`) |
+| `notFound` | `/404` (неизвестный path; CTA → `/home` или `/registration`) |
 
 `session.js` — login-сессия пользователя, не экран `/review`.
 

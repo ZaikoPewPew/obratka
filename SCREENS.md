@@ -30,9 +30,10 @@ referral → auth → authCode → onboarding → home
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
 | 8 | `report-screen` | `/report` | Отчёт автору: листы → «Посмотреть» (side-panel) → жалоба (1 тег, окно 6ч от done; вне окна кнопку скрывать) + PDF (мокап листа → done после скачивания) |
 | — | `ban-screen` | `/banned` | Аккаунт заблокирован; «Выйти» + «Связаться» (242px); красный mesh; deep link escape-proof |
+| — | `not-found-screen` | `/404` | Неизвестный path; тайтл + «На главную» → `/home` или `/registration` |
 | — | `desktop-only-screen` | *(оверлей)* | Viewport &lt; 768px: «только с компьютера»; не маршрут; см. [`mobile.md`](mobile.md) |
 
-Корень `/` → `resolveEntryScreen(getSession())`. Query (`?ref=`, `?lang=`) сохраняются.
+Корень `/` → `resolveEntryScreen(getSession())`. Query (`?ref=`, `?lang=`) сохраняются. Неизвестный path (не `/` и не в карте) → `/404` (`notFound`), не entry.
 
 - **Google return:** hash/query → `completeOAuthFromUrl()` в `main.js` → onboarding / home.
 - **Email OTP / Telegram:** остаются на `/registration` до `onSuccess` → `applyProviderUser`.
@@ -42,7 +43,7 @@ referral → auth → authCode → onboarding → home
   Операторская шпаргалка: [`supabase/BAN.md`](supabase/BAN.md), шаблоны SQL: [`supabase/sql/ban-templates.sql`](supabase/sql/ban-templates.sql).
 - **Desktop-only:** viewport &lt; 768px → оверлей `desktop-only-screen` (не path); ревью/claim не стартуют. Спека: [`mobile.md`](mobile.md).
 
-SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.html` → `dist/404.html`.
+SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.html` → `dist/404.html` (entry для deep links). Продуктовый «не найдено» — экран `notFound` на `/404`, не статическая замена `404.html`.
 
 ## Auth на `/registration`
 

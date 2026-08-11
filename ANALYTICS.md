@@ -82,8 +82,8 @@ resetAnalytics(); // logout
 
 | Prop | Смысл |
 |------|--------|
-| `route_id` | id экрана (`home`, `review`, …) |
-| `path` | path из `ROUTE_PATHS` (`/home`, …) |
+| `route_id` | id экрана (`home`, `review`, `notFound`, …) |
+| `path` | path из `ROUTE_PATHS` (`/home`, `/404`, …) |
 | `$current_url` | полный URL |
 | `tab` / `filter` | только для `home` |
 

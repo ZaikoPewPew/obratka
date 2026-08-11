@@ -28,6 +28,7 @@ alwaysApply: true
 - Recording indicator: `--color-recording` (алиас на `--palette-google-red`); пульс — `--motion-recording-blink-*` + `motion-recording-blink` в `entrance.css`.
 - Ban: `--shell-ban-mesh-*`, `--ban-screen-*`.
 - Desktop-only gate: `--desktop-only-screen-*`, `--breakpoint-min-desktop` (768; в `@media` — литералы).
+- SPA not-found: `--not-found-screen-*` (`/404`).
 - Landing (MPA): `--landing-*` (`landing/styles/landing.css`).
 - Home tabbar: `--home-screen-tabbar-*` (hide / thumb / contrast / glass track).
   - Светлый фон: `--home-screen-tabbar-track-bg` = gray-900 **10%** + `--home-screen-tabbar-blur` (20); неактивный `--home-screen-tabbar-tab-color`.
