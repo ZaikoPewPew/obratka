@@ -15,7 +15,7 @@ import { createVideoPlayerCard } from "../video-player-card/VideoPlayerCard.js";
 
 /** @type {Record<string, () => Promise<{ default: string }>>} */
 const ONBOARDING_VIDEO_LOADERS = {
-  welcome: () => import("../../assets/video/welcome.mp4"),
+  welcome: () => import("../../assets/video/welcome-reels.MOV"),
 };
 
 const CHECKBOX_IDLE_PATH =

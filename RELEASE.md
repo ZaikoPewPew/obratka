@@ -60,16 +60,16 @@ SoT: [`landing/README.md`](landing/README.md)
 
 SoT: [`mobile.md`](mobile.md)
 
-### 0.3 «404» / неизвестный URL
+### 0.3 «404» / неизвестный URL — сделано
 
 `npm run build` копирует `index.html` → `404.html` — это **SPA-fallback для GitHub Pages** (deep links), не UI «не найдено».
 
 Продуктовый not-found: экран `notFound` на `/404` ([`not-found-screen`](src/components/not-found-screen/)) — тайтл + «На главную» (`session` → `/home`, иначе `/registration`). Мусорный path → `go("notFound", { replace: true })`; корень `/` по-прежнему `resolveEntryScreen`.
 
 - [x] SPA not-found для неизвестных path; Pages `404.html` = entry как есть
-- [ ] Deep link известного path на Pages (`/home`, `/referral`, …) не ломается (404.html = entry)
+- [ ] Smoke: deep link известного path на Pages (`/home`, `/referral`, …) не ломается
 - [x] Мусорный path → `/404` (not-found-screen)
-- [ ] Не сломать `VITE_BASE_PATH=/obratka/`
+- [ ] Smoke: `VITE_BASE_PATH` на prod (Pages) не ломает entry / `/404`
 
 ---
 
@@ -295,7 +295,7 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 
 ## 5. Порядок работ (практика)
 
-1. **Полиш:** лендинг → ~~desktop-only stub~~ (готово) → 404/not-found (как решим)
+1. **Полиш:** лендинг → ~~desktop-only stub~~ → ~~404/not-found~~ (готово) → smoke deep links / BASE_PATH на Pages
 2. **Инфра:** Auth Dashboard (Google + Telegram; Email — later) + SQL/Edge + `.env.production`
 3. **Build + deploy** на Pages
 4. **QA** по §2 на prod URL (не только localhost); Email-сценарии skip

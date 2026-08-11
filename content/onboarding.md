@@ -32,7 +32,7 @@ UI-кнопки и прогресс: ключи `onboarding*` в `locales.json`.
 | `steps[].options` | array? | Для single/multi: `value` + `labelKey` |
 | `steps[].required` | boolean? | Default `true` |
 | `steps[].hidden` | boolean? | Не показывать в UI; ответ всё равно пишется в профиль |
-| `steps[].video` | string? | Ключ ролика для `type: "video"` (`welcome` → `src/assets/video/welcome.mp4`) |
+| `steps[].video` | string? | Ключ ролика для `type: "video"` (`welcome` → `src/assets/video/welcome-reels.MOV`) |
 
 Тексты вариантов и лейблов — **только** через `labelKey` → `locales.json` (ru/en), не строки в JSON.
 
