@@ -18,13 +18,14 @@ SoT продукта: [`PROJECT.md`](PROJECT.md) · экраны: [`SCREENS.md`]
 - Лента ревью (лиги) + claim / heartbeat / release + награда только после submit
 - `/review` (iframe/external, 60 s) → `/quiz` → `/quiz/done`
 - Подача URL (`/portfolio`, −30) + отчёт автору (`/report`, жалобы, PDF)
-- Репутация / рейтинг топ-50 / бан
+- Репутация / жалобы / бан (учёт на сервере); вкладка «Рейтинг» на home — **off** (`RATING_TAB_ENABLED`)
 - Промо `/landing/` + desktop-only заглушка на телефоне
 - PostHog воронки
 
 ### Не входит (не тестировать как продукт)
 
 - **Email OTP** — UI скрыт (`EMAIL_AUTH_ENABLED = false` в [`src/config/auth.js`](src/config/auth.js)), пока нет стабильного custom SMTP (Unisender и т.п.). Код/экран `/registration/code` остаются, deep link → `/registration`. Вернуть: флаг `true` + SMTP + шаблоны с `{{ .Token }}`
+- **Вкладка «Рейтинг»** (топ-50 на `/home`) — UI скрыт (`RATING_TAB_ENABLED = false` в [`src/config/home.js`](src/config/home.js)). Учёт reputation / жалобы / settle / бан и чип репутации **работают**. Deep link `?tab=rating` → лента. Вернуть: флаг `true`
 - Мобильный UX ревью / home / quiz
 - Waitlist / dual-layout (удалён)
 - Manual linking Telegram↔email
@@ -300,6 +301,7 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 - [ ] Legendary online с 2+ аккаунтами
 - [ ] Overshoot 4-го ревьюера вручную
 - [ ] Вернуть Email OTP (SMTP Unisender/аналог + `EMAIL_AUTH_ENABLED = true` + шаблоны `{{ .Token }}`)
+- [ ] Вернуть вкладку «Рейтинг» (`RATING_TAB_ENABLED = true` в [`src/config/home.js`](src/config/home.js))
 
 ### Ops на старте
 

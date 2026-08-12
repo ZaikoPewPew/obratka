@@ -5,10 +5,14 @@
  * Экран один (`ROUTE_PATHS.home`), вкладка и сегмент — параметры, как `?id=`
  * у `/report`. Дефолты (`feed` / `active`) в URL не пишем.
  *
+ * При `RATING_TAB_ENABLED === false` `?tab=rating` → `feed`.
+ *
  * @typedef {import("../components/home-screen/HomeScreen.js").HomeTabId} HomeTabId
  * @typedef {import("../components/home-screen/HomeScreen.js").MineFilterId} MineFilterId
  * @typedef {{ tab: HomeTabId; filter: MineFilterId }} HomeView
  */
+
+import { RATING_TAB_ENABLED } from "../config/home.js";
 
 /** @type {readonly HomeTabId[]} */
 export const HOME_TAB_IDS = Object.freeze(["feed", "mine", "rating"]);
@@ -59,6 +63,10 @@ export function parseHomeView(search) {
       ? rawTab
       : DEFAULT_HOME_TAB
   );
+  // Kill-switch: вкладка рейтинга → чистый feed (filter с rating-URL не переносим).
+  if (tab === "rating" && !RATING_TAB_ENABLED) {
+    return { tab: DEFAULT_HOME_TAB, filter: DEFAULT_MINE_FILTER };
+  }
 
   if (!tabSupportsFilter(tab)) {
     return { tab, filter: DEFAULT_MINE_FILTER };

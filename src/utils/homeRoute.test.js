@@ -18,7 +18,9 @@ describe("parseHomeView", () => {
 
   it("reads known tabs", () => {
     assert.equal(parseHomeView("?tab=mine").tab, "mine");
-    assert.equal(parseHomeView("?tab=rating").tab, "rating");
+    // RATING_TAB_ENABLED = false → rating remaps to feed.
+    // When enabled, expect tab === "rating" again.
+    assert.equal(parseHomeView("?tab=rating").tab, "feed");
     assert.equal(parseHomeView("?tab=MINE").tab, "mine");
   });
 
@@ -35,8 +37,9 @@ describe("parseHomeView", () => {
       tab: "feed",
       filter: "completed",
     });
+    // RATING_TAB_ENABLED = false → rating → feed; filter ignored on rating remap.
     assert.deepEqual(parseHomeView("?tab=rating&filter=completed"), {
-      tab: "rating",
+      tab: "feed",
       filter: "active",
     });
   });
@@ -73,13 +76,15 @@ describe("buildHomeSearch", () => {
     assert.deepEqual(buildHomeSearch({ tab: "feed", filter: "completed" }), {
       filter: "completed",
     });
-    assert.deepEqual(buildHomeSearch({ tab: "rating" }), { tab: "rating" });
+    // RATING_TAB_ENABLED = false → rating remaps to feed → omit from search.
+    // When enabled, expect { tab: "rating" }.
+    assert.deepEqual(buildHomeSearch({ tab: "rating" }), {});
   });
 
   it("drops filter outside feed/mine", () => {
-    assert.deepEqual(buildHomeSearch({ tab: "rating", filter: "completed" }), {
-      tab: "rating",
-    });
+    // RATING_TAB_ENABLED = false → rating → feed; filter dropped with remap.
+    // When enabled, expect { tab: "rating" } (filter still dropped on rating).
+    assert.deepEqual(buildHomeSearch({ tab: "rating", filter: "completed" }), {});
   });
 });
 

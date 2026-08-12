@@ -18,6 +18,7 @@ import {
   portfolioPreviewUrl,
 } from "../../api/portfolios.js";
 import { listRatingTop } from "../../api/rating.js";
+import { RATING_TAB_ENABLED } from "../../config/home.js";
 import {
   buildReferralShareUrl,
   REFERRAL_MAX_USES,
@@ -1322,6 +1323,7 @@ export function createHomeScreen({
   ratingTab.setAttribute("role", "tab");
   ratingTab.setAttribute("aria-selected", "false");
   ratingTab.dataset.tab = "rating";
+  ratingTab.hidden = !RATING_TAB_ENABLED;
 
   tabbar.append(tabThumb, feedTab, mineTab, ratingTab);
 
@@ -2341,10 +2343,12 @@ export function createHomeScreen({
    * @param {{ silent?: boolean }} [opts]
    */
   async function setActiveTab(tab, opts = {}) {
-    if (activeTab === tab) return;
-    activeTab = tab;
+    const next =
+      tab === "rating" && !RATING_TAB_ENABLED ? "feed" : tab;
+    if (activeTab === next) return;
+    activeTab = next;
     refreshEpoch += 1;
-    syncTabButtons(tab);
+    syncTabButtons(next);
     syncListFilterCopy();
     syncListFilterPanel();
     syncActiveView();
@@ -2354,7 +2358,7 @@ export function createHomeScreen({
     syncCopy();
     resyncListFilterThumb();
     if (!opts.silent) emitViewChange("tab");
-    if (showTabFromCache(tab)) {
+    if (showTabFromCache(next)) {
       void refresh();
       return;
     }
@@ -2383,9 +2387,11 @@ export function createHomeScreen({
    * @returns {HomeTabId}
    */
   function normalizeTab(value, fallback) {
-    return HOME_TAB_IDS.includes(/** @type {HomeTabId} */ (value))
+    const tab = HOME_TAB_IDS.includes(/** @type {HomeTabId} */ (value))
       ? /** @type {HomeTabId} */ (value)
       : fallback;
+    if (tab === "rating" && !RATING_TAB_ENABLED) return "feed";
+    return tab;
   }
 
   /**
