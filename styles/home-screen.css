@@ -2065,6 +2065,11 @@
   color: var(--home-screen-tabbar-tab-active-color);
 }
 
+/* Kill-switch: `hidden` иначе перебивается display: inline-flex выше. */
+.home-screen__tab[hidden] {
+  display: none !important;
+}
+
 /* Точка «есть собранный отчёт 3/3» на вкладке «Мои посты» */
 .home-screen__tab-dot {
   position: absolute;
