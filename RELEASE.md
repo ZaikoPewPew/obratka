@@ -46,6 +46,10 @@ SoT продукта: [`PROJECT.md`](PROJECT.md) · экраны: [`SCREENS.md`]
 - [ ] Desktop + узкий viewport лендоса читаются (лендос **не** desktop-only гейт SPA)
 - [x] Токены `--landing-*`, без сырых цветов (аудит CSS)
 
+### 0.1b Referral placeholder (invite-only)
+
+- [x] Placeholder инпута — формат `XXXXXXXXXX`, **не** seed `YTHWKPDWAK` (seed только ops / инвайты)
+
 SoT: [`landing/README.md`](landing/README.md)
 
 ### 0.2 Мобильная заглушка (не мобильный продукт) — сделано
