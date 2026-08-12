@@ -48,7 +48,7 @@ SoT продукта: [`PROJECT.md`](PROJECT.md) · экраны: [`SCREENS.md`]
 
 ### 0.1b Referral placeholder (invite-only)
 
-- [x] Placeholder инпута — формат `XXXXXXXXXX`, **не** seed `YTHWKPDWAK` (seed только ops / инвайты)
+- [x] Placeholder инпута — пример формата `K7NMPQ3WRA`, **не** seed `YTHWKPDWAK` (seed только ops / инвайты)
 
 SoT: [`landing/README.md`](landing/README.md)
 

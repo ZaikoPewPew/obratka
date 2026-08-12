@@ -9,7 +9,7 @@ Invite-only gate: код проверяется через RPC `validate_referra
 | Элемент | Значение |
 |---------|----------|
 | Заголовок | `referralTitle` — «Введи реферальный код» |
-| Placeholder | `referralPlaceholder` — формат-заглушка `XXXXXXXXXX` (не seed; seed только в ops / инвайтах) |
+| Placeholder | `referralPlaceholder` — пример формата `K7NMPQ3WRA` (не seed; seed только в ops / инвайтах) |
 | Аватары | 4 рандомных фото из `founder-avatars.json` через unavatar (`getFounderAvatarSourcesForPage`) |
 | Текст под полем | `referralColleagues` — «140 твоих коллег уже внутри» |
 
