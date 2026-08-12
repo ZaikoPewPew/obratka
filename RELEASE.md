@@ -42,7 +42,7 @@ SoT продукта: [`PROJECT.md`](PROJECT.md) · экраны: [`SCREENS.md`]
 - [ ] Пройти все блоки: шапка → hero → боль → преимущества → закрытие
 - [ ] Копирайт / визуал под финальный месседж invite-only
 - [ ] CTA: `?ref=` → `/referral?ref=…`; invite gate → `/registration`; иначе Telegram-сообщество (см. [`landing/README.md`](landing/README.md))
-- [ ] OG/canonical/robots/sitemap ок на prod (`og-share.png`, absolute URLs на `obratka.net`)
+- [x] OG/canonical/robots/sitemap ок на prod (`og-share.png`, absolute URLs на `obratka.net`)
 - [ ] Desktop + узкий viewport лендоса читаются (лендос **не** desktop-only гейт SPA)
 - [x] Токены `--landing-*`, без сырых цветов (аудит CSS)
 
@@ -57,7 +57,7 @@ SoT: [`landing/README.md`](landing/README.md)
 - [x] Кастом копирайта (RU + EN: `desktopOnlyTitle`, `metaTitleDesktopOnly`; body убран)
 - [x] Визуал: белый bg, 14px / regular / gray-900; без mesh и марки
 - [x] Без CTA «продолжить на телефоне»
-- [ ] Smoke: &lt;768 → оверлей; ≥768 → продукт; ресайз mid-review → abort без монет
+- [x] Smoke: &lt;768 → оверлей; ≥768 → продукт (prod DevTools: 768 продукт / 767 заглушка); mid-review abort — в §2.8
 
 SoT: [`mobile.md`](mobile.md)
 
@@ -68,9 +68,9 @@ SoT: [`mobile.md`](mobile.md)
 Продуктовый not-found: экран `notFound` на `/404` ([`not-found-screen`](src/components/not-found-screen/)) — тайтл + «На главную» (`session` → `/home`, иначе `/registration`). Мусорный path → `go("notFound", { replace: true })`; корень `/` по-прежнему `resolveEntryScreen`.
 
 - [x] SPA not-found для неизвестных path; Pages `404.html` = entry как есть
-- [ ] Smoke: deep link известного path на Pages (`/home`, `/referral`, …) не ломается
+- [x] Smoke: deep link известного path на Pages (`/home`, `/referral` incognito, `/landing/`, …) не ломается
 - [x] Мусорный path → `/404` (not-found-screen)
-- [ ] Smoke: `VITE_BASE_PATH=/` на prod (`obratka.net`) не ломает entry / `/404`
+- [x] Smoke: `VITE_BASE_PATH=/` на prod (`obratka.net`) не ломает entry / `/404`
 
 ### 0.4 Видео: онбординг + лендинг
 
@@ -269,9 +269,9 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 
 ### SEO / шаринг (лендос)
 
-- [ ] `/landing/` indexable; SPA `noindex`
-- [x] `robots.txt` / `sitemap.xml` только лендос (выровнены под `obratka.net` root; smoke crawl — отдельно)
-- [ ] OG preview (Telegram / Twitter card) с `og-share.png`
+- [x] `/landing/` indexable; SPA `noindex` (robots Allow `/landing/` + Disallow SPA; meta noindex в `index.html`)
+- [x] `robots.txt` / `sitemap.xml` только лендос (smoke prod: sitemap = один `…/landing/`)
+- [x] OG preview meta на prod (`og:image` → `og-share.png?v=3`, canonical `/landing/`)
 
 ---
 
