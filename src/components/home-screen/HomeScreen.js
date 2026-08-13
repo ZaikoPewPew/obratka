@@ -98,6 +98,15 @@ const INVITE_COPY_ICONS_HTML = `<span class="home-screen__invite-copy-stack" ari
   </svg>
 </span>`;
 
+/** @typedef {"copy" | "telegram" | "x" | "threads" | "linkedin"} InviteShareMethod */
+
+const INVITE_SHARE_METHODS = [
+  { id: "telegram", labelKey: "homeInviteShareTelegram" },
+  { id: "x", labelKey: "homeInviteShareX" },
+  { id: "threads", labelKey: "homeInviteShareThreads" },
+  { id: "linkedin", labelKey: "homeInviteShareLinkedIn" },
+];
+
 /** @typedef {'neutral' | 'positive' | 'negative'} ReputationIconKind */
 
 /** @type {Record<ReputationIconKind, string>} */
@@ -467,14 +476,17 @@ function bindImageFallbacks(img, candidates) {
 }
 
 /**
- * Hover/focus tip над хостом (слоты ревьюеров, бейджи автора).
+ * Hover/focus tip над хостом (слоты ревьюеров, бейджи автора, чипы, плюс).
  * @param {HTMLElement} host
  * @param {string} label
+ * @param {{ setAriaLabel?: boolean }} [opts]
  */
-function attachHomeTooltip(host, label) {
+function attachHomeTooltip(host, label, opts = {}) {
   const text = typeof label === "string" ? label.trim() : "";
   if (!text) return;
-  host.setAttribute("aria-label", text);
+  if (opts.setAriaLabel !== false) {
+    host.setAttribute("aria-label", text);
+  }
   const tooltip = document.createElement("span");
   tooltip.className = "home-screen__tip";
   tooltip.setAttribute("role", "tooltip");
@@ -685,6 +697,7 @@ function isCompletedOwnItem(item) {
  *   onOpenReport?: (item: HomePortfolioItem) => void | Promise<void>;
  *   onAddPortfolio?: () => void | Promise<void>;
  *   onOpenSettings?: () => void | Promise<void>;
+ *   onAccountCommunity?: () => void;
  *   onBeforeOpenRules?: () => void | Promise<void>;
  *   onSignOut?: () => void | Promise<void>;
  *   onViewChange?: (view: { tab: HomeTabId; filter: MineFilterId; reason: 'tab' | 'filter' }) => void;
@@ -696,6 +709,7 @@ function isCompletedOwnItem(item) {
  *   onHomeSubmitClicked?: (payload: {
  *     blocked?: 'no_ducks' | 'slot_taken';
  *   }) => void;
+ *   onInviteShared?: (payload: { method: InviteShareMethod }) => void;
  * }} opts
  * @returns {{
  *   root: HTMLElement;
@@ -717,12 +731,14 @@ export function createHomeScreen({
   onOpenReport,
   onAddPortfolio,
   onOpenSettings,
+  onAccountCommunity,
   onBeforeOpenRules,
   onSignOut,
   onViewChange,
   onReviewIntroOpened,
   onReviewIntroCta,
   onHomeSubmitClicked,
+  onInviteShared,
 }) {
   const root = document.createElement("section");
   root.className = "home-screen";
@@ -760,6 +776,9 @@ export function createHomeScreen({
   addBtn.type = "button";
   addBtn.className = "home-screen__tabbar-submit";
   addBtn.append(createSubmitIcon());
+  attachHomeTooltip(addBtn, getStrings().homeAddPortfolioTooltip ?? "", {
+    setAriaLabel: false,
+  });
   /** @type {number} */
   let submitErrorFlashTimer = 0;
 
@@ -779,6 +798,9 @@ export function createHomeScreen({
   balanceValue.className = "home-screen__chip-value";
 
   balanceChip.append(boneImg, balanceValue);
+  attachHomeTooltip(balanceChip, getStrings().homeBalanceTitle ?? "", {
+    setAriaLabel: false,
+  });
 
   const reputationChip = document.createElement("button");
   reputationChip.type = "button";
@@ -792,6 +814,9 @@ export function createHomeScreen({
   reputationValue.className = "home-screen__chip-value";
 
   reputationChip.append(reputationIcon, reputationValue);
+  attachHomeTooltip(reputationChip, getStrings().homeReputationTitle ?? "", {
+    setAriaLabel: false,
+  });
   bindChipIconBoost(reputationChip, ".home-screen__reputation-eyes");
   bindChipIconBoost(balanceChip, ".home-screen__balance-duck");
 
@@ -820,6 +845,7 @@ export function createHomeScreen({
   profileMenuAnchor.className = "home-screen__profile-menu-anchor";
 
   const rulesPanel = createSidePanel();
+  rulesPanel.root.classList.add("side-panel--over-modal");
 
   /**
    * @param {string} text
@@ -923,6 +949,7 @@ export function createHomeScreen({
     link.className = "app-modal__description-link";
     link.textContent = linkLabel;
     link.addEventListener("click", () => {
+      void reputationModal.close();
       void openRulesPanel();
     });
     frag.append(link);
@@ -942,6 +969,7 @@ export function createHomeScreen({
     onInvite: () => {
       void openMyReferralInvite();
     },
+    onCommunity: () => onAccountCommunity?.(),
     onRules: () => {
       void openRulesPanel();
     },
@@ -1213,21 +1241,19 @@ export function createHomeScreen({
   inviteShareMenu.setAttribute("role", "menu");
   inviteShareMenu.setAttribute("aria-hidden", "true");
 
-  /** @type {HTMLButtonElement} */
-  const inviteShareTelegramBtn = document.createElement("button");
-  inviteShareTelegramBtn.type = "button";
-  inviteShareTelegramBtn.className = "home-screen__invite-share-item";
-  inviteShareTelegramBtn.setAttribute("role", "menuitem");
-  inviteShareTelegramBtn.dataset.share = "telegram";
-
-  /** @type {HTMLButtonElement} */
-  const inviteShareWhatsAppBtn = document.createElement("button");
-  inviteShareWhatsAppBtn.type = "button";
-  inviteShareWhatsAppBtn.className = "home-screen__invite-share-item";
-  inviteShareWhatsAppBtn.setAttribute("role", "menuitem");
-  inviteShareWhatsAppBtn.dataset.share = "whatsapp";
-
-  inviteShareMenu.append(inviteShareTelegramBtn, inviteShareWhatsAppBtn);
+  /** @type {HTMLButtonElement[]} */
+  const inviteShareItems = INVITE_SHARE_METHODS.map((method) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "home-screen__invite-share-item";
+    btn.setAttribute("role", "menuitem");
+    btn.dataset.share = method.id;
+    btn.addEventListener("click", () => {
+      void shareInviteVia(method.id);
+    });
+    return btn;
+  });
+  inviteShareMenu.append(...inviteShareItems);
   inviteShareWrap.append(inviteShareBtn, inviteShareMenu);
   inviteBar.append(inviteCluster, inviteShareWrap);
   inviteExplainer.append(inviteMedia, inviteBar);
@@ -1255,13 +1281,6 @@ export function createHomeScreen({
       return;
     }
     openInviteShareMenu();
-  });
-
-  inviteShareTelegramBtn.addEventListener("click", () => {
-    void shareInviteVia("telegram");
-  });
-  inviteShareWhatsAppBtn.addEventListener("click", () => {
-    void shareInviteVia("whatsapp");
   });
 
   inviteShareMenu.addEventListener("keydown", (event) => {
@@ -1492,7 +1511,6 @@ export function createHomeScreen({
     syncListFilterCopy();
     syncListFilterPanel();
     addBtn.setAttribute("aria-label", t.homeAddPortfolio);
-    addBtn.title = t.homeAddPortfolio;
 
     const balance = getBalance();
     balanceValue.textContent = String(balance);
@@ -1866,8 +1884,10 @@ export function createHomeScreen({
 
   function syncInviteShareMenuCopy() {
     const t = getStrings();
-    inviteShareTelegramBtn.textContent = t.homeInviteShareTelegram ?? "";
-    inviteShareWhatsAppBtn.textContent = t.homeInviteShareWhatsApp ?? "";
+    inviteShareItems.forEach((btn, index) => {
+      const key = INVITE_SHARE_METHODS[index]?.labelKey;
+      btn.textContent = key ? (t[key] ?? "") : "";
+    });
     inviteShareMenu.setAttribute(
       "aria-label",
       t.homeInviteShareMenuAria ?? t.homeInviteShare ?? "",
@@ -1883,6 +1903,7 @@ export function createHomeScreen({
     syncInviteShareMenuCopy();
     inviteModal.dialog.style.overflow = "visible";
     inviteModal.content.style.overflow = "visible";
+    inviteModal.dialog.style.filter = "none";
     inviteShareMenu.hidden = false;
     inviteShareMenu.setAttribute("aria-hidden", "false");
     inviteShareBtn.setAttribute("aria-expanded", "true");
@@ -1892,7 +1913,7 @@ export function createHomeScreen({
       inviteShareOpenFrame = requestAnimationFrame(() => {
         inviteShareOpenFrame = 0;
         inviteShareMenu.classList.add("home-screen__invite-share-menu--open");
-        inviteShareTelegramBtn.focus();
+        inviteShareItems[0]?.focus();
       });
     });
   }
@@ -1900,6 +1921,7 @@ export function createHomeScreen({
   function restoreInviteModalOverflow() {
     inviteModal.dialog.style.overflow = "";
     inviteModal.content.style.overflow = "";
+    inviteModal.dialog.style.filter = "";
   }
 
   /**
@@ -2044,6 +2066,7 @@ export function createHomeScreen({
     try {
       await navigator.clipboard.writeText(buildInviteMessage());
       setInviteCopyDone();
+      onInviteShared?.({ method: "copy" });
       if (inviteCopyResetId != null) window.clearTimeout(inviteCopyResetId);
       inviteCopyResetId = window.setTimeout(() => {
         setInviteCopyIdle();
@@ -2055,7 +2078,7 @@ export function createHomeScreen({
   }
 
   /**
-   * @param {"telegram" | "whatsapp"} method
+   * @param {Exclude<InviteShareMethod, "copy">} method
    */
   async function shareInviteVia(method) {
     if (!inviteCodeValue || inviteSlotsExhausted) return;
@@ -2068,12 +2091,21 @@ export function createHomeScreen({
       shareUrl.searchParams.set("url", url);
       shareUrl.searchParams.set("text", text);
       window.open(shareUrl.href, "_blank", "noopener,noreferrer");
-      return;
+    } else if (method === "x") {
+      const shareUrl = new URL("https://x.com/intent/tweet");
+      shareUrl.searchParams.set("text", text);
+      window.open(shareUrl.href, "_blank", "noopener,noreferrer");
+    } else if (method === "threads") {
+      const shareUrl = new URL("https://www.threads.net/intent/post");
+      shareUrl.searchParams.set("text", text);
+      window.open(shareUrl.href, "_blank", "noopener,noreferrer");
+    } else if (method === "linkedin") {
+      const shareUrl = new URL("https://www.linkedin.com/feed/");
+      shareUrl.searchParams.set("shareActive", "true");
+      shareUrl.searchParams.set("text", text);
+      window.open(shareUrl.href, "_blank", "noopener,noreferrer");
     }
-
-    const shareUrl = new URL("https://wa.me/");
-    shareUrl.searchParams.set("text", text);
-    window.open(shareUrl.href, "_blank", "noopener,noreferrer");
+    onInviteShared?.({ method });
   }
 
   async function openMyReferralInvite() {

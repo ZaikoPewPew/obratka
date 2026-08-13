@@ -95,6 +95,7 @@
   font-weight: var(--account-menu-font-weight);
   line-height: var(--line-height-normal);
   text-align: left;
+  text-decoration: none;
   cursor: pointer;
   transition: background-color var(--account-menu-action-motion-duration)
     var(--account-menu-action-motion-ease);

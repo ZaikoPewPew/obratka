@@ -1,5 +1,6 @@
 import { getSession } from "../../app/session.js";
 import { getStrings } from "../../i18n.js";
+import { TELEGRAM_COMMUNITY_URL } from "../../config/contacts.js";
 
 /**
  * Fallback закрытия меню ≈ CSS-duration + небольшой запас.
@@ -22,6 +23,7 @@ function getAccountMenuCloseFallbackMs() {
  * @param {{
  *   onSettings?: () => void | Promise<void>;
  *   onInvite?: () => void | Promise<void>;
+ *   onCommunity?: () => void;
  *   onRules?: () => void | Promise<void>;
  *   onSignOut?: () => void | Promise<void>;
  *   onClose?: () => void;
@@ -65,12 +67,19 @@ export function createAccountMenu(opts = {}) {
   inviteBtn.className = "account-menu__action";
   inviteBtn.setAttribute("role", "menuitem");
 
+  const communityLink = document.createElement("a");
+  communityLink.className = "account-menu__action";
+  communityLink.setAttribute("role", "menuitem");
+  communityLink.href = TELEGRAM_COMMUNITY_URL;
+  communityLink.target = "_blank";
+  communityLink.rel = "noopener noreferrer";
+
   const rulesBtn = document.createElement("button");
   rulesBtn.type = "button";
   rulesBtn.className = "account-menu__action";
   rulesBtn.setAttribute("role", "menuitem");
 
-  actions.append(settingsBtn, inviteBtn, rulesBtn);
+  actions.append(settingsBtn, inviteBtn, communityLink, rulesBtn);
 
   const secondDivider = document.createElement("div");
   secondDivider.className = "account-menu__divider";
@@ -97,6 +106,7 @@ export function createAccountMenu(opts = {}) {
     email.textContent = accountEmail || t.homeAccountEmailFallback || "";
     settingsBtn.textContent = t.homeAccountSettings ?? "";
     inviteBtn.textContent = t.homeAccountInvite ?? "";
+    communityLink.textContent = t.homeAccountCommunity ?? "";
     rulesBtn.textContent = t.homeAccountRules ?? "";
     signOutBtn.textContent = t.homeAccountSignOut ?? "";
     signOutBtn.disabled = false;
@@ -167,6 +177,10 @@ export function createAccountMenu(opts = {}) {
 
   inviteBtn.addEventListener("click", () => {
     void close().then(() => opts.onInvite?.());
+  });
+
+  communityLink.addEventListener("click", () => {
+    void close().then(() => opts.onCommunity?.());
   });
 
   rulesBtn.addEventListener("click", () => {

@@ -141,24 +141,73 @@ SoT: [`mobile.md`](mobile.md)
 Браузер: Chrome (основной) + один Safari/Firefox smoke.  
 Языки: RU по умолчанию + точечно EN (`?lang=en`).
 
+### QA log (prod)
+
+**Отложено на потом (не блокер ядра):** лендинг §0.1, видео §0.4.
+
+**Аккаунты (раскладка готова):**
+
+| | Вход | Реферал | Заметки |
+|---|------|---------|---------|
+| **A** | Telegram | seed `YTHWKPDWAK` | инвайты **2/2** («Твои друзья уже в обратке») |
+| **B** | Google | код A | middle; портфолио закинуто (ops +утки) |
+| **C** | Google | код A | портфолио закинуто (ops +утки) |
+| **D** | Google | (цепочка после A) | ок |
+| **E** | Google | код D | ок |
+
+Gate: обычный браузер с `inviteGatePassed` → logout на `/registration`; чистый / incognito → `/referral`. Новый код без инкогнито: напрямую `/referral` или `?ref=` (после logout `referralCode` в session сброшен).
+
+**Сессия 1 — done (2026-08-12):**
+
+- [x] Чистый device / incognito → invite gate
+- [x] Битый код → ошибка поля + `invalid`
+- [x] Валидный код / seed → auth
+- [x] Telegram login + onboarding с нуля
+- [x] Logout при gate → `/registration`; повторный TG login ок
+- [x] Google OAuth ×4 (B–E) + onboarding
+- [x] Redeem чужих кодов (A→B/C, D→E); лимит A **2/2**
+- [x] Подача портфолио B и C (баланс ops ~90, не «с нуля 0→30»)
+
+**Сессия 2 — done (2026-08-13):** лиги / 3/3 / report / жалобы / бан / desktop-only.
+
+- [x] Лиги: с middle видны junior + middle; с junior — только junior (senior→junior mismatch не смоукали)
+- [x] Несколько ревью с разных аккаунтов → квиз → submit → +10
+- [x] Junior-кейс до **3/3** (листы: middle, middle, junior) → `/report`
+- [x] Отчёт на экране: советы, надиктовка, листы на месте
+- [x] Жалобы на **3 листа / 3 тега** (в т.ч. `ai_slop`, `harassment`); кнопка закрывается; повтор → «Жалоба отправлена»
+- [x] Репутация ревьюера **−20** за жалобу
+- [x] Ops: `reputation = -99` / `-100` **без** `banned_at` → бан не ставится (автобан только из RPC жалобы)
+- [x] Ops-бан (`banned_at` + `ban_reason = reputation`) → `/banned`, «Связаться» / «Выйти», reason в UI нет
+- [x] Desktop-only: &lt;768 заглушка, ≥768 продукт
+- [x] PostHog Web analytics на prod: `$pageview` / пути `/referral` `/home` `/review`… (ключ живой)
+
+**Далее — Сессия 3** (хвост must §4):
+
+1. Abort / «На главную» / pagehide mid-review **без** ложных +10 (§2.3.2–3)
+2. PostHog **Live**: кастомные события воронки + identify / reset (§3) — Web analytics ≠ Live
+3. По желанию: RPC-автобан (снять жалобу + ещё один клик при `reputation = -80/−99`); deep `/home` с бана; logout→login снова бан
+4. Лендинг / видео — когда вернёмся к полишу §0
+
+Учитывать лиги: junior ← junior+middle; middle ← middle+senior+; senior ← только senior+.
+
 ### 2.1 Entry / referral / auth / onboarding
 
-| # | Сценарий | Ожидание |
-|---|----------|----------|
-| 1 | Чистый device → `/` или `/referral` | Invite gate |
-| 2 | Seed `YTHWKPDWAK` | validate ok → auth; `inviteGatePassed` |
-| 3 | Битый / exhausted код | ошибка поля + visual `invalid` |
-| 4 | ~~Email OTP happy path~~ | **skip v1** — email UI скрыт |
-| 5 | ~~Resend OTP~~ | **skip v1** |
-| 6 | Telegram Login | сессия → onboarding/home |
-| 7 | Google OAuth | return на Pages → onboarding/home |
-| 8 | ~~Email ↔ Google same address~~ | **skip v1** (пока нет Email UI); automatic linking остаётся в Dashboard |
-| 9 | Onboarding | пишет `profiles`, → `/home` |
-| 10 | Logout при пройденном gate | → `/registration`, не снова referral |
-| 11 | Deep link `/home` без сессии | → referral/auth |
-| 12 | Сессия без онбординга | любой gated path → `/onboarding` |
-| 13 | `/registration` | только Telegram + Google (без инпута email и «или») |
-| 14 | Deep `/registration/code` | → `/registration` (пока email off) |
+| # | Сценарий | Ожидание | QA |
+|---|----------|----------|-----|
+| 1 | Чистый device → `/` или `/referral` | Invite gate | [x] |
+| 2 | Seed `YTHWKPDWAK` | validate ok → auth; `inviteGatePassed` | [x] |
+| 3 | Битый / exhausted код | ошибка поля + visual `invalid` | [x] битый; exhausted — позже |
+| 4 | ~~Email OTP happy path~~ | **skip v1** — email UI скрыт | skip |
+| 5 | ~~Resend OTP~~ | **skip v1** | skip |
+| 6 | Telegram Login | сессия → onboarding/home | [x] |
+| 7 | Google OAuth | return на Pages → onboarding/home | [x] |
+| 8 | ~~Email ↔ Google same address~~ | **skip v1** (пока нет Email UI); automatic linking остаётся в Dashboard | skip |
+| 9 | Onboarding | пишет `profiles`, → `/home` | [x] |
+| 10 | Logout при пройденном gate | → `/registration`, не снова referral | [x] |
+| 11 | Deep link `/home` без сессии | → referral/auth | |
+| 12 | Сессия без онбординга | любой gated path → `/onboarding` | |
+| 13 | `/registration` | только Telegram + Google (без инпута email и «или») | [x] |
+| 14 | Deep `/registration/code` | → `/registration` (пока email off) | |
 
 ### 2.2 Home / экономика / лента
 
@@ -182,73 +231,73 @@ SoT: [`mobile.md`](mobile.md)
 
 ### 2.3 Review claim / abort / overshoot
 
-| # | Сценарий | Ожидание |
-|---|----------|----------|
-| 1 | Claim → `/review` | без claim `/review` не открывается |
-| 2 | Abort / «На главную» | `release` → **без** +10 |
-| 3 | Закрытие вкладки mid-review | keepalive / reconcile; слот «Аноним» не залипает |
-| 4 | Heartbeat | claim живёт ~20 min TTL |
-| 5 | Late overshoot (уже done, живой claim) | submit ок, **та же** +10 |
-| 6 | `already_reviewed` | silent refresh, без модалки |
-| 7 | Лига mismatch | senior не видит/не клеймит junior |
+| # | Сценарий | Ожидание | QA |
+|---|----------|----------|-----|
+| 1 | Claim → `/review` | без claim `/review` не открывается | [x] claim→review с нескольких аккаунтов |
+| 2 | Abort / «На главную» | `release` → **без** +10 | |
+| 3 | Закрытие вкладки mid-review | keepalive / reconcile; слот «Аноним» не залипает | |
+| 4 | Heartbeat | claim живёт ~20 min TTL | |
+| 5 | Late overshoot (уже done, живой claim) | submit ок, **та же** +10 | |
+| 6 | `already_reviewed` | silent refresh, без модалки | |
+| 7 | Лига mismatch | senior не видит/не клеймит junior | [~] middle видит junior+middle; junior — только junior; senior mismatch — нет |
 
 ### 2.4 `/review` + dictation + embed
 
-| # | Сценарий | Ожидание |
-|---|----------|----------|
-| 1 | Таймер 60 s | конец → звук + quiz; rec стопается |
-| 2 | iframe: скрыть вкладку | таймер на паузе |
-| 3 | external: другая вкладка | wall-clock без паузы |
-| 4 | Figma / YouTube | спец-embed |
-| 5 | Behance / Notion / blocklist | external UI (`embedBlocked*`) |
-| 6 | Optimistic → XFO/CSP fail | fallback external + сброс до CTA |
-| 7 | Rec (если SpeechRecognition есть) | текст в `answers.dictation`; без поддержки — кнопки скрыты |
-| 8 | Mic в совете | пишет в `advice`, не ломает claim |
+| # | Сценарий | Ожидание | QA |
+|---|----------|----------|-----|
+| 1 | Таймер 60 s | конец → звук + quiz; rec стопается | |
+| 2 | iframe: скрыть вкладку | таймер на паузе | |
+| 3 | external: другая вкладка | wall-clock без паузы | |
+| 4 | Figma / YouTube | спец-embed | |
+| 5 | Behance / Notion / blocklist | external UI (`embedBlocked*`) | |
+| 6 | Optimistic → XFO/CSP fail | fallback external + сброс до CTA | |
+| 7 | Rec (если SpeechRecognition есть) | текст в `answers.dictation`; без поддержки — кнопки скрыты | [x] надиктовка доехала в отчёт |
+| 8 | Mic в совете | пишет в `advice`, не ломает claim | [x] советы в отчёте |
 
 ### 2.5 Quiz → done → награда
 
-| # | Сценарий | Ожидание |
-|---|----------|----------|
-| 1 | Полный квиз | grade → … → visual 1–5 → (pain если ≤2) → tier → advice |
-| 2 | Submit | INSERT review → +10; claim снят |
-| 3 | `/quiz/done` | «Следующий кейс» / «На главную»; empty → disabled |
-| 4 | Ghost-quiz | без `claimHeld` quiz не открывается |
+| # | Сценарий | Ожидание | QA |
+|---|----------|----------|-----|
+| 1 | Полный квиз | grade → … → visual 1–5 → (pain если ≤2) → tier → advice | [x] несколько листов с разных аккаунтов |
+| 2 | Submit | INSERT review → +10; claim снят | [x] |
+| 3 | `/quiz/done` | «Следующий кейс» / «На главную»; empty → disabled | |
+| 4 | Ghost-quiz | без `claimHeld` quiz не открывается | |
 
 ### 2.6 Подача портфолио + report + жалобы
 
-| # | Сценарий | Ожидание |
-|---|----------|----------|
-| 1 | `/portfolio` с балансом ≥30 | spend 30 + insert; done на url-screen; angel mark |
-| 2 | Back-chip | → home; на done скрыт |
-| 3 | Max 1 pending | второй submit → ошибка/тост слота |
-| 4 | Mine &lt; 3/3 | модалка `homeMineNotReady*` |
-| 5 | Mine 3/3 → `/report` | все листы (и overshoot) |
-| 6 | Side-panel листа | PDF + «Пожаловаться» в окне 6ч от `completed_at` |
-| 7 | Вне окна жалобы | кнопку **скрыть** (не «истекло») |
-| 8 | Жалоба 1 тег | −20 ревьюеру; 2-я на тот же лист — нельзя |
-| 9 | Settle без жалобы | +10 после окна (SQL/ops проверить точечно) |
-| 10 | Сводный PDF + action cards | скачивается, не пустой |
+| # | Сценарий | Ожидание | QA |
+|---|----------|----------|-----|
+| 1 | `/portfolio` с балансом ≥30 | spend 30 + insert; done на url-screen; angel mark | [~] B+C закинули (баланс ops; angel/back-chip — добить глазами) |
+| 2 | Back-chip | → home; на done скрыт | |
+| 3 | Max 1 pending | второй submit → ошибка/тост слота | |
+| 4 | Mine &lt; 3/3 | модалка `homeMineNotReady*` | |
+| 5 | Mine 3/3 → `/report` | все листы (и overshoot) | [x] junior 3/3, три листа в отчёте |
+| 6 | Side-panel листа | PDF + «Пожаловаться» в окне 6ч от `completed_at` | [x] жалоба с панели; PDF файла — глазами не качали |
+| 7 | Вне окна жалобы | кнопку **скрыть** (не «истекло») | |
+| 8 | Жалоба 1 тег | −20 ревьюеру; 2-я на тот же лист — нельзя | [x] 3 листа × 3 тега; повтор закрыт («Жалоба отправлена») |
+| 9 | Settle без жалобы | +10 после окна (SQL/ops проверить точечно) | |
+| 10 | Сводный PDF + action cards | скачивается, не пустой | [~] экран отчёта топ (советы / rec / листы); файл PDF — не качали |
 
 ### 2.7 Ban / репутация
 
-| # | Сценарий | Ожидание |
-|---|----------|----------|
-| 1 | Операторский бан | всегда `/banned`; deep link escape-proof; JWT не рвём |
-| 2 | «Выйти» с ban | → registration/referral; повторный логин снова ban |
-| 3 | Автобан `reputation <= -100` | `ban_reason = reputation`; UI без reason |
-| 4 | Чип репутации | абсолют без `+`; explainer **без** весов тегов |
+| # | Сценарий | Ожидание | QA |
+|---|----------|----------|-----|
+| 1 | Операторский бан | всегда `/banned`; deep link escape-proof; JWT не рвём | [~] `/banned` ок; deep `/home` / Back — не смоукали |
+| 2 | «Выйти» с ban | → registration/referral; повторный логин снова ban | [~] кнопки «Связаться» / «Выйти» есть; logout→login — не смоукали |
+| 3 | Автобан `reputation <= -100` | `ban_reason = reputation`; UI без reason | [~] голый `reputation = -100` бан **не** ставит; RPC-автобан не гоняли (нужна новая жалоба). Экран бана смоукали ops-полем `banned_at` |
+| 4 | Чип репутации | абсолют без `+`; explainer **без** весов тегов | [x] −20 после жалобы |
 
 Ops: [`supabase/BAN.md`](supabase/BAN.md)
 
 ### 2.8 Desktop-only gate (smoke, не мобильный продукт)
 
-| # | Сценарий | Ожидание |
-|---|----------|----------|
-| 1 | DevTools &lt; 768 | белый оверлей + `desktopOnlyTitle`; title desktop-only |
-| 2 | ≥ 768 | обычный флоу |
-| 3 | 1200 → 375 mid-review | abort, release, без +10 |
-| 4 | Deep `/review` на узком | redirect home + оверлей |
-| 5 | `?lang=en` на узком | EN на заглушке |
+| # | Сценарий | Ожидание | QA |
+|---|----------|----------|-----|
+| 1 | DevTools &lt; 768 | белый оверлей + `desktopOnlyTitle`; title desktop-only | [x] |
+| 2 | ≥ 768 | обычный флоу | [x] |
+| 3 | 1200 → 375 mid-review | abort, release, без +10 | |
+| 4 | Deep `/review` на узком | redirect home + оверлей | |
+| 5 | `?lang=en` на узком | EN на заглушке | |
 
 Полный список: [`mobile.md`](mobile.md) § QA.
 
@@ -264,11 +313,13 @@ Ops: [`supabase/BAN.md`](supabase/BAN.md)
 
 ### PostHog
 
-- [ ] Prod: Network `…/e/` → 200; Live events в кабинете
+- [~] Prod Web analytics живой (`$pageview`, пути `/referral` `/registration` `/home` `/onboarding` `/portfolio` `/review` `/report` `/404`); **Live / кастомные события не смоукали**
 - [ ] Identify = `profiles.id` после логина; logout → reset
-- [ ] Воронка: `referral_validated` → `auth_success` → onboarding → `review_claimed` → `review_submitted`
+- [ ] Воронка в Live: `referral_validated` → `auth_success` → onboarding → `review_claimed` → `review_submitted`
 - [ ] `desktop_only_gate_shown` при узком viewport
 - [ ] Нет PII в props (email, Telegram, JWT, тексты advice)
+
+Кабинет: смотреть **Live**, не только Web analytics. Installation Health (!) — открыть; если Live пишет, не блокер. `Filter test accounts` сейчас off (ок для QA; перед катом юзерам — включить). Старые пути `/obratka/…` — легаси base path, не SoT.
 
 SoT: [`ANALYTICS.md`](ANALYTICS.md)
 
@@ -284,15 +335,15 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 
 ### Must (блокеры)
 
-- [ ] Auth: **Google + Telegram** на **prod** URL (Email OTP — вне скоупа до SMTP)
-- [ ] Полный цикл: invite → onboarding → 1 ревью (+10) → 3 ревью → подача (−30) → 3 листа → report/PDF
+- [x] Auth: **Google + Telegram** на **prod** URL (Email OTP — вне скоупа до SMTP) — Сессия 1
+- [x] Полный цикл: invite → onboarding → ревью (+10) → 3/3 → `/report` + жалобы — Сессия 2 (junior-кейс; подача B+C была в Сессии 1; файл PDF не качали)
 - [ ] Claim abort / pagehide **без** ложных монет
-- [ ] Ban escape-proof
-- [ ] Desktop-only заглушка на телефоне (белый + короткая фраза) ок
-- [ ] Лендинг + CTA (Telegram / `?ref=` → referral / gate → registration) ок на prod
-- [ ] SQL claims/complaints/referrals/wallet на prod актуальны
-- [ ] PostHog пишет события с Pages
-- [ ] Нет `service_role` / bot token в бандле (vite allowlist; smoke бандла на prod)
+- [~] Ban: экран `/banned` + Связаться/Выйти ок (ops `banned_at`); deep `/home` и logout→login — не смоукали; RPC-автобан — не гоняли
+- [x] Desktop-only заглушка на телефоне (белый + короткая фраза) ок
+- [ ] Лендинг + CTA (Telegram / `?ref=` → referral / gate → registration) ок на prod — **отложено** (полиш §0.1)
+- [x] SQL claims/complaints/referrals/wallet на prod актуальны
+- [~] PostHog: Web analytics / `$pageview` с Pages ок; Live-события воронки — Сессия 3
+- [x] Нет `service_role` / bot token в бандле (vite allowlist; smoke бандла на prod)
 
 ### Nice (можно добить сразу после ката)
 
@@ -305,7 +356,7 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 
 ### Ops на старте
 
-- [ ] Раздать / опубликовать seed или первые referral-коды (лимит 2 на юзера)
+- [~] Раздать / опубликовать seed или первые referral-коды (лимит 2 на юзера) — smoke на 5 своих аккаунтах ок; публичный раздач — перед катом юзерам
 - [ ] Мониторить PostHog Live + Supabase Auth errors / Edge logs первые сутки
 - [ ] Шпаргалка бана под рукой: [`supabase/BAN.md`](supabase/BAN.md)
 
@@ -313,11 +364,11 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 
 ## 5. Порядок работ (практика)
 
-1. **Полиш:** лендинг → ~~desktop-only stub~~ → ~~404/not-found~~ (готово) → видео онбординг (`welcome-reels`) + обзор с озвучкой на лендос → smoke deep links / BASE_PATH на Pages
-2. **Инфра:** Auth Dashboard (Google + Telegram; Email — later) + SQL/Edge + `.env.production`
-3. **Build + deploy** на Pages
-4. **QA** по §2 на prod URL (не только localhost); Email-сценарии skip
-5. **Аналитика / OG** §3
+1. **Полиш:** лендинг → ~~desktop-only stub~~ → ~~404/not-found~~ (готово) → видео онбординг (`welcome-reels`) + обзор с озвучкой на лендос → smoke deep links / BASE_PATH на Pages — **лендос/видео отложены**
+2. **Инфра:** Auth Dashboard (Google + Telegram; Email — later) + SQL/Edge + `.env.production` — done
+3. **Build + deploy** на Pages — done
+4. **QA** по §2 на prod URL — **Сессия 1+2 done** (см. QA log); далее Сессия 3 (abort без монет + PostHog Live)
+5. **Аналитика / OG** §3 — Web analytics [x]; Live-воронка ещё; OG лендоса [x]
 6. **Go/no-go** §4 → открыть инвайты юзерам
 
 Мобильный продукт не планируем в этом релизе — только заглушка.  

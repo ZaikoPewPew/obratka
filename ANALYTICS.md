@@ -108,6 +108,8 @@ resetAnalytics(); // logout
 | `review_aborted` | confirm abort / desktop-only gate | `portfolio_id?`, `route_id?`, `reason?` (`desktop_only_gate`) | Уход без награды |
 | `review_next_case_clicked` | «Следующий кейс» | `ok` | Цикл следующего кейса |
 | `home_submit_clicked` | «Закинуть» / gate `/portfolio` | `blocked?`: `no_ducks` \| `slot_taken` | CTA подачи / блок |
+| `account_community_clicked` | account-menu «Сообщество» | — | Открытие TG-канала |
+| `invite_shared` | copy / share invite | `method`: `copy` \| `telegram` \| `x` \| `threads` \| `linkedin` | Рефералка |
 | `portfolio_submitted` | после `submit_portfolio` | — | Подача своего URL |
 | `desktop_only_gate_shown` | первый показ гейта &lt;768px за загрузку | — | Мобильный / узкий вход |
 
@@ -168,7 +170,6 @@ home → report_opened → complaint_submitted   # план
 |--------------|--------|-------|
 | `report_opened` | `/report` | `portfolio_id` |
 | `complaint_submitted` | жалоба ок | `tag` (`low_effort`…) — без `reporter_id` |
-| `invite_shared` | copy/share invite | `method`: `copy` \| `share` |
 
 ## Новая фича — чеклист
 

@@ -14,6 +14,7 @@
   margin: 0;
   padding: var(--legendary-online-padding-y) var(--legendary-online-padding-right)
     var(--legendary-online-padding-y) var(--legendary-online-padding-left);
+  overflow: visible;
   border-radius: var(--legendary-online-radius);
   background: var(--legendary-online-bg);
   font-family: var(--font-family);
@@ -83,7 +84,7 @@
   bottom: calc(100% + var(--legendary-online-tooltip-offset));
   left: 50%;
   z-index: var(--legendary-online-tooltip-z);
-  display: none;
+  display: block;
   padding: var(--legendary-online-tooltip-padding-y)
     var(--legendary-online-tooltip-padding-x);
   border-radius: var(--legendary-online-tooltip-radius);
@@ -94,13 +95,43 @@
   font-weight: var(--legendary-online-tooltip-font-weight);
   line-height: 1;
   white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
   pointer-events: none;
+  transform: translateX(-50%) translateY(var(--legendary-online-tooltip-shift));
+  transition:
+    opacity var(--legendary-online-tooltip-duration)
+      var(--legendary-online-tooltip-ease),
+    transform var(--legendary-online-tooltip-duration)
+      var(--legendary-online-tooltip-ease),
+    visibility 0s linear var(--legendary-online-tooltip-duration);
+}
+
+.legendary-online-panel__tip::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 0;
+  height: 0;
+  border-left: var(--legendary-online-tooltip-tail-size) solid transparent;
+  border-right: var(--legendary-online-tooltip-tail-size) solid transparent;
+  border-top: var(--legendary-online-tooltip-tail-size) solid
+    var(--legendary-online-tooltip-bg);
   transform: translateX(-50%);
 }
 
 .legendary-online-panel__avatar:hover .legendary-online-panel__tip,
 .legendary-online-panel__avatar:focus-visible .legendary-online-panel__tip {
-  display: block;
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  transition:
+    opacity var(--legendary-online-tooltip-duration)
+      var(--legendary-online-tooltip-ease),
+    transform var(--legendary-online-tooltip-duration)
+      var(--legendary-online-tooltip-ease),
+    visibility 0s;
 }
 
 .legendary-online-panel__avatar-img {
@@ -148,5 +179,12 @@
 @media (prefers-reduced-motion: reduce) {
   .legendary-online-panel--enter {
     animation: none;
+  }
+
+  .legendary-online-panel__tip,
+  .legendary-online-panel__avatar:hover .legendary-online-panel__tip,
+  .legendary-online-panel__avatar:focus-visible .legendary-online-panel__tip {
+    transform: translateX(-50%);
+    transition: none;
   }
 }

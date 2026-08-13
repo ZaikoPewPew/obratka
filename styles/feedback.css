@@ -10,8 +10,8 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: calc(var(--feedback-size) * 1.25);
-  height: calc(var(--feedback-size) * 1.25);
+  width: var(--feedback-hit-size);
+  height: var(--feedback-hit-size);
   margin: 0;
   padding: 0;
   border: none;
@@ -40,8 +40,8 @@
 
 .feedback__lottie {
   display: block;
-  width: calc(var(--feedback-size) * 1.25);
-  height: calc(var(--feedback-size) * 1.25);
+  width: var(--feedback-hit-size);
+  height: var(--feedback-hit-size);
   flex-shrink: 0;
   pointer-events: none;
   transform: translateY(var(--feedback-lottie-nudge-y));
@@ -59,7 +59,7 @@
   bottom: calc(100% + var(--feedback-tooltip-offset));
   right: 0;
   z-index: var(--feedback-tooltip-z);
-  display: none;
+  display: block;
   padding: var(--feedback-tooltip-padding-y) var(--feedback-tooltip-padding-x);
   border-radius: var(--feedback-tooltip-radius);
   background: var(--feedback-tooltip-bg);
@@ -69,10 +69,49 @@
   font-weight: var(--feedback-tooltip-font-weight);
   line-height: 1;
   white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
   pointer-events: none;
+  transform: translateY(var(--feedback-tooltip-shift));
+  transition:
+    opacity var(--feedback-tooltip-duration) var(--feedback-tooltip-ease),
+    transform var(--feedback-tooltip-duration) var(--feedback-tooltip-ease),
+    visibility 0s linear var(--feedback-tooltip-duration);
+}
+
+.feedback__tip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: calc(var(--feedback-hit-size) / 2);
+  width: 0;
+  height: 0;
+  border-left: var(--feedback-tooltip-tail-size) solid transparent;
+  border-right: var(--feedback-tooltip-tail-size) solid transparent;
+  border-top: var(--feedback-tooltip-tail-size) solid var(--feedback-tooltip-bg);
+  transform: translateX(50%);
 }
 
 .feedback:hover .feedback__tip,
 .feedback:focus-visible .feedback__tip {
-  display: block;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition:
+    opacity var(--feedback-tooltip-duration) var(--feedback-tooltip-ease),
+    transform var(--feedback-tooltip-duration) var(--feedback-tooltip-ease),
+    visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feedback__tip,
+  .feedback:hover .feedback__tip,
+  .feedback:focus-visible .feedback__tip {
+    transform: none;
+    transition: none;
+  }
+
+  .feedback__tip::after {
+    transform: translateX(50%);
+  }
 }

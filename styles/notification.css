@@ -7,6 +7,7 @@
   right: var(--notification-inset-right);
   z-index: var(--notification-z);
   display: flex;
+  width: var(--notification-width);
   max-width: var(--notification-max-width);
   margin: 0;
   padding: 0;
@@ -45,8 +46,9 @@
 
 .notification__body {
   box-sizing: border-box;
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  width: 100%;
   gap: var(--notification-gap);
   min-height: var(--notification-min-height);
   padding: var(--notification-padding);
@@ -69,7 +71,7 @@
   font-size: var(--notification-font-size);
   font-weight: var(--notification-font-weight);
   line-height: var(--notification-line-height);
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .notification__close {
@@ -103,12 +105,6 @@
   width: var(--notification-icon-size);
   height: var(--notification-icon-size);
   color: inherit;
-}
-
-@media (max-width: 480px) {
-  .notification__message {
-    white-space: normal;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

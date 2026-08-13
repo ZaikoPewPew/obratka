@@ -77,6 +77,7 @@ await panel.close();
 | Open | `hidden=false` → rAF → класс `side-panel--open` |
 | Close | снять `--open` → `transitionend` на `transform` панели / fallback |
 | Reduced motion | без сдвига, почти мгновенный transition |
+| Over modal | класс `side-panel--over-modal` → `--side-panel-z-over-modal` (home rules поверх app-modal). Report sheet **не** ставит класс: жалоба должна остаться выше листа. |
 
 ## Поведение
 
@@ -89,7 +90,7 @@ await panel.close();
 
 ### Home — правила
 
-Account-menu → «Правила» → текст из [`content/rules.json`](../../../content/rules.json) через `getCommunityRules()` (`homeRulesCloseAria` — только aria крестика в locales). Строки `body` (через `\n`) рендерятся как маркированный список (`.side-panel__section-list`).
+Account-menu → «Правила» (и ссылка из explainer репутации) → текст из [`content/rules.json`](../../../content/rules.json) через `getCommunityRules()` (`homeRulesCloseAria` — только aria крестика в locales). Home вешает `side-panel--over-modal`, чтобы панель была выше app-modal. Строки `body` (через `\n`) рендерятся как маркированный список (`.side-panel__section-list`).
 
 ### Report — просмотр листа
 

@@ -2251,6 +2251,9 @@ async function ensureHomeScreen() {
             if (blocked) props.blocked = blocked;
             track("home_submit_clicked", props);
           },
+          onInviteShared: ({ method }) => {
+            track("invite_shared", { method });
+          },
           onOpenReport: async (item) => {
             if (!item?.isOwn || !item.id) return;
             pendingReportPortfolioId = item.id;
@@ -2266,6 +2269,9 @@ async function ensureHomeScreen() {
           },
           onOpenSettings: () => {
             go("settings");
+          },
+          onAccountCommunity: () => {
+            track("account_community_clicked");
           },
           onBeforeOpenRules: async () => {
             // Правила и /settings — одна side-panel за раз, не стек.

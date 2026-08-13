@@ -19,6 +19,10 @@
   pointer-events: auto;
 }
 
+.side-panel--over-modal {
+  z-index: var(--side-panel-z-over-modal);
+}
+
 .side-panel[hidden] {
   display: none !important;
 }

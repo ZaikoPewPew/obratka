@@ -1080,12 +1080,13 @@
 }
 
 .home-screen__tip {
+  --_tip-shift: var(--home-screen-reviewer-slot-tooltip-shift);
   box-sizing: border-box;
   position: absolute;
   bottom: calc(100% + var(--home-screen-reviewer-slot-tooltip-offset));
   left: 50%;
   z-index: var(--home-screen-reviewer-slot-tooltip-z);
-  display: none;
+  display: block;
   padding: var(--home-screen-reviewer-slot-tooltip-padding-y)
     var(--home-screen-reviewer-slot-tooltip-padding-x);
   border-radius: var(--home-screen-reviewer-slot-tooltip-radius);
@@ -1096,7 +1097,31 @@
   font-weight: var(--home-screen-reviewer-slot-tooltip-font-weight);
   line-height: 1;
   white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
   pointer-events: none;
+  transform: translateX(-50%) translateY(var(--_tip-shift));
+  transition:
+    opacity var(--home-screen-reviewer-slot-tooltip-duration)
+      var(--home-screen-reviewer-slot-tooltip-ease),
+    transform var(--home-screen-reviewer-slot-tooltip-duration)
+      var(--home-screen-reviewer-slot-tooltip-ease),
+    visibility 0s linear var(--home-screen-reviewer-slot-tooltip-duration);
+}
+
+.home-screen__tip::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 0;
+  height: 0;
+  border-left: var(--home-screen-reviewer-slot-tooltip-tail-size) solid
+    transparent;
+  border-right: var(--home-screen-reviewer-slot-tooltip-tail-size) solid
+    transparent;
+  border-top: var(--home-screen-reviewer-slot-tooltip-tail-size) solid
+    var(--home-screen-reviewer-slot-tooltip-bg);
   transform: translateX(-50%);
 }
 
@@ -1105,14 +1130,33 @@
 .home-screen__badge:hover .home-screen__tip,
 .home-screen__badge:focus-visible .home-screen__tip,
 .home-screen__chip:hover .home-screen__tip,
-.home-screen__chip:focus-visible .home-screen__tip {
-  display: block;
+.home-screen__chip:focus-visible .home-screen__tip,
+.home-screen__tabbar-submit:hover .home-screen__tip,
+.home-screen__tabbar-submit:focus-visible .home-screen__tip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  transition:
+    opacity var(--home-screen-reviewer-slot-tooltip-duration)
+      var(--home-screen-reviewer-slot-tooltip-ease),
+    transform var(--home-screen-reviewer-slot-tooltip-duration)
+      var(--home-screen-reviewer-slot-tooltip-ease),
+    visibility 0s;
 }
 
 /* Чипы в шапке — tip снизу, иначе уезжает за верх экрана */
 .home-screen__chip .home-screen__tip {
+  --_tip-shift: calc(var(--home-screen-reviewer-slot-tooltip-shift) * -1);
   top: calc(100% + var(--home-screen-reviewer-slot-tooltip-offset));
   bottom: auto;
+}
+
+.home-screen__chip .home-screen__tip::after {
+  top: auto;
+  bottom: 100%;
+  border-top: none;
+  border-bottom: var(--home-screen-reviewer-slot-tooltip-tail-size) solid
+    var(--home-screen-reviewer-slot-tooltip-bg);
 }
 
 .home-screen__reviewer-slot:nth-child(1) {
@@ -1589,7 +1633,7 @@
   box-sizing: border-box;
   position: absolute;
   right: 0;
-  bottom: calc(100% + var(--home-screen-invite-share-menu-offset-y));
+  top: calc(100% + var(--home-screen-invite-share-menu-offset-y));
   z-index: var(--home-screen-invite-share-menu-z);
   display: flex;
   flex-direction: column;
@@ -1600,9 +1644,11 @@
   background: var(--home-screen-invite-share-menu-bg);
   box-shadow: var(--home-screen-invite-share-menu-shadow);
   opacity: 0;
-  transform: translateY(var(--home-screen-invite-share-menu-motion-shift))
+  transform: translateY(
+      calc(-1 * var(--home-screen-invite-share-menu-motion-shift))
+    )
     scale(var(--home-screen-invite-share-menu-motion-scale-from));
-  transform-origin: bottom right;
+  transform-origin: top right;
   pointer-events: none;
   transition:
     opacity var(--home-screen-invite-share-menu-motion-duration)
@@ -1715,7 +1761,7 @@
     right: 0;
     min-width: 0;
     width: 100%;
-    transform-origin: bottom center;
+    transform-origin: top center;
   }
 }
 
@@ -1955,6 +2001,7 @@
 
 .home-screen__tabbar-submit {
   box-sizing: border-box;
+  position: relative;
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
@@ -2102,5 +2149,18 @@
 
   .home-screen__tabbar-dock {
     transform: translateX(-50%);
+  }
+
+  .home-screen__tip,
+  .home-screen__reviewer-slot:hover .home-screen__tip,
+  .home-screen__reviewer-slot:focus-visible .home-screen__tip,
+  .home-screen__badge:hover .home-screen__tip,
+  .home-screen__badge:focus-visible .home-screen__tip,
+  .home-screen__chip:hover .home-screen__tip,
+  .home-screen__chip:focus-visible .home-screen__tip,
+  .home-screen__tabbar-submit:hover .home-screen__tip,
+  .home-screen__tabbar-submit:focus-visible .home-screen__tip {
+    transform: translateX(-50%);
+    transition: none;
   }
 }

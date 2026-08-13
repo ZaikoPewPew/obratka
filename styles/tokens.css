@@ -183,6 +183,12 @@
   --duration-normal: 320ms;
   --duration-slow: 450ms;
 
+  /* Shared hover-tooltip (home slots, chips, feedback, legendary) */
+  --tooltip-tail-size: 6px;
+  --tooltip-motion-duration: 140ms;
+  --tooltip-motion-ease: var(--ease-out);
+  --tooltip-motion-shift: 4px;
+
   /*
    * Общий motion-язык (экраны, stagger, шаги опроса, PDF).
    * Экранные токены (--url-screen-*, --shell-*) — алиасы на эти значения.
@@ -712,6 +718,8 @@
    * Справа, inset 16; ширина 500; высота = экран − insets.
    */
   --side-panel-z: calc(var(--z-modal) + 20);
+  /* Home rules поверх app-modal (репутация); report sheet остаётся на --side-panel-z */
+  --side-panel-z-over-modal: calc(var(--app-modal-z) + 10);
   --side-panel-inset: var(--space-4);
   --side-panel-width: 650px;
   --side-panel-padding: var(--space-6);
@@ -789,14 +797,20 @@
   --home-screen-reviewer-slot-anonymous-opacity: 0.25;
   --home-screen-reviewer-slot-anonymous-icon-size: 18px;
   --home-screen-reviewer-slot-tooltip-padding-x: var(--space-2);
-  --home-screen-reviewer-slot-tooltip-padding-y: var(--space-1);
+  --home-screen-reviewer-slot-tooltip-padding-y: var(--space-2);
   --home-screen-reviewer-slot-tooltip-radius: var(--radius-xs);
   --home-screen-reviewer-slot-tooltip-bg: var(--color-text);
   --home-screen-reviewer-slot-tooltip-color: var(--color-surface);
   --home-screen-reviewer-slot-tooltip-font-size: var(--font-size-xs);
   --home-screen-reviewer-slot-tooltip-font-weight: var(--font-weight-medium);
-  --home-screen-reviewer-slot-tooltip-offset: var(--space-2);
+  --home-screen-reviewer-slot-tooltip-offset: calc(
+    var(--home-screen-reviewer-slot-tooltip-tail-size) + var(--space-2)
+  );
   --home-screen-reviewer-slot-tooltip-z: 100;
+  --home-screen-reviewer-slot-tooltip-tail-size: var(--tooltip-tail-size);
+  --home-screen-reviewer-slot-tooltip-duration: var(--tooltip-motion-duration);
+  --home-screen-reviewer-slot-tooltip-ease: var(--tooltip-motion-ease);
+  --home-screen-reviewer-slot-tooltip-shift: var(--tooltip-motion-shift);
 
   /* Ban screen (locked account — same layout as success, red mesh) */
   --ban-screen-z: var(--z-modal);
@@ -1021,14 +1035,20 @@
   --legendary-online-dot-border-color: var(--legendary-online-bg);
   --legendary-online-dot-bg: var(--color-online);
   --legendary-online-tooltip-padding-x: var(--space-2);
-  --legendary-online-tooltip-padding-y: var(--space-1);
+  --legendary-online-tooltip-padding-y: var(--space-2);
   --legendary-online-tooltip-radius: var(--radius-xs);
   --legendary-online-tooltip-bg: var(--color-text);
   --legendary-online-tooltip-color: var(--color-surface);
   --legendary-online-tooltip-font-size: var(--font-size-xs);
   --legendary-online-tooltip-font-weight: var(--font-weight-medium);
-  --legendary-online-tooltip-offset: var(--space-2);
+  --legendary-online-tooltip-offset: calc(
+    var(--legendary-online-tooltip-tail-size) + var(--space-2)
+  );
   --legendary-online-tooltip-z: 10;
+  --legendary-online-tooltip-tail-size: var(--tooltip-tail-size);
+  --legendary-online-tooltip-duration: var(--tooltip-motion-duration);
+  --legendary-online-tooltip-ease: var(--tooltip-motion-ease);
+  --legendary-online-tooltip-shift: var(--tooltip-motion-shift);
   --home-screen-locked-modal-max-width: 360px;
   --home-screen-locked-modal-padding: var(--space-6);
   --home-screen-locked-modal-gap: var(--space-4);
@@ -1367,6 +1387,7 @@
   /* FAB feedback (Telegram) */
   --feedback-size: 56px;
   /* Визуальная компенсация: контейнер больше артборда лотти */
+  --feedback-hit-size: calc(var(--feedback-size) * 1.25);
   --feedback-lottie-nudge-y: var(--space-2);
   --feedback-offset: var(--space-4);
   --feedback-padding-x: var(--space-4);
@@ -1381,14 +1402,20 @@
   --feedback-color-hover: var(--color-on-accent-hover);
   --feedback-color-active: var(--color-on-accent-active);
   --feedback-tooltip-padding-x: var(--space-2);
-  --feedback-tooltip-padding-y: var(--space-1);
+  --feedback-tooltip-padding-y: var(--space-2);
   --feedback-tooltip-radius: var(--radius-xs);
   --feedback-tooltip-bg: var(--color-text);
   --feedback-tooltip-color: var(--color-surface);
   --feedback-tooltip-font-size: var(--font-size-xs);
   --feedback-tooltip-font-weight: var(--font-weight-medium);
-  --feedback-tooltip-offset: var(--space-2);
+  --feedback-tooltip-offset: calc(
+    var(--feedback-tooltip-tail-size) + var(--space-2)
+  );
   --feedback-tooltip-z: 1;
+  --feedback-tooltip-tail-size: var(--tooltip-tail-size);
+  --feedback-tooltip-duration: var(--tooltip-motion-duration);
+  --feedback-tooltip-ease: var(--tooltip-motion-ease);
+  --feedback-tooltip-shift: var(--tooltip-motion-shift);
 
   /* Toast Notification (Figma 542:1153) — top-right под аватаром home */
   --notification-z: calc(var(--home-screen-tabbar-z) + 2);
@@ -1398,6 +1425,7 @@
       var(--space-4)
   );
   --notification-slide-extra: var(--space-2);
+  --notification-width: 300px;
   --notification-max-width: calc(100vw - (2 * var(--notification-inset-right)));
   --notification-min-height: 56px;
   --notification-padding: var(--space-4);
