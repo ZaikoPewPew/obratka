@@ -13,7 +13,7 @@
 
 Баланс и профиль дополнительно синкаются с `public.profiles` через `src/api/wallet.js` (`refreshSessionFromProfile`).
 
-`resolveAccessibleRoute`: `/registration` без `referralDone` (нет `referralCode` и нет device `inviteGatePassed`) и без `userId` → обратно на `/referral`.  
+`resolveAccessibleRoute`: `/registration` и `/registration/code` без `referralDone` (нет `referralCode` и нет device `inviteGatePassed`) и без `userId` → обратно на `/referral`. При email off `/registration/code` с гейтом → `/registration` (экран OTP недоступен).  
 Auth-gated deep link (`home` / `settings` / `onboarding` / `report` / `url` / `success` / `review` / `quiz` / `done`) без `userId` → `resolveEntryScreen` (referral или auth по state); с `userId` и без онбординга → `onboarding`.
 После логина `main.js` вызывает `redeemReferral` (идемпотентно).
 На boot / route / visibility: localStorage `userId` без живой Supabase Auth → `exitAuthenticatedSession` → `/registration` при `inviteGatePassed`, иначе `/referral` (`reconcileSessionAccess` в `main.js`).
@@ -24,7 +24,7 @@ Auth-gated deep link (`home` / `settings` / `onboarding` / `report` / `url` / `s
 |----|------|--------|
 | `referral` | `/referral` | Invite gate: `validate_referral` → session.referralCode + `obratka.inviteGatePassed` |
 | `auth` | `/registration` | Telegram / Google (Email OTP скрыт: `EMAIL_AUTH_ENABLED`) |
-| `authCode` | `/registration/code` | 6-digit Email OTP + resend cooldown; без флага → `/registration` |
+| `authCode` | `/registration/code` | 6-digit Email OTP + resend cooldown; без гейта → `/referral`; с гейтом и без флага → `/registration` |
 | `onboarding` | `/onboarding` | Онбординг → profiles |
 | `home` | `/home` | Хаб: SWR feed/mine (рейтинг UI off, `RATING_TAB_ENABLED`) + feedSeen/3/3 + «Топы в сети» + tabbar-dock (entrance / glass / `--on-dark`) + меню профиля |
 | `settings` | `/settings` | Профиль в side-panel поверх home (view-only, без Save) |

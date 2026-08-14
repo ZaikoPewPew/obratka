@@ -32,7 +32,7 @@ Path: **`/registration/code`**. Split как `auth-screen` / `url-screen`.
 - **Cooldown:** сразу после `open` и после успешного resend — `--auth-code-resend-cooldown` (по умолчанию `60s`), чтение в JS через `getAuthCodeResendCooldownMs()`; кнопка disabled, текст `authCodeResendWait` (`{seconds}`).
 - Ошибки: `email_otp_invalid` / `email_otp_rate_limit` / `auth_identity_conflict` / `supabase_not_configured`.
 - Назад → `onBack()` → `/registration` (handoff); cooldown сбрасывается в `close`.
-- Deep link без pending email → `resolveAccessibleRoute` → `auth`.
+- Deep link без гейта (`referralDone`) → `resolveAccessibleRoute` → `referral`. С гейтом и без pending email / при email off → `auth`.
 
 ## i18n
 

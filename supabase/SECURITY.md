@@ -67,7 +67,7 @@ order by 1;
 | `portfolios` / `reviews` | по RLS (лиги, own); portfolios **без** client INSERT | insert портфолио только RPC `submit_portfolio`; INSERT review требует живой claim |
 | `review_claims` | только `select` | mutations — исключительно через RPC |
 | `review_complaints` | insert только RPC | `reporter_id` ревьюеру не виден |
-| `referral_seed_codes` | нет доступа | seed `YTHWKPDWAK` только через RPC |
+| `referral_seed_codes` | нет доступа | seed только через RPC (`YTHWKPDWAK` + пачки ×100; коды не в git) |
 | `subscribers` | нет доступа | legacy waitlist; клиент удалён — drop таблицы отдельно |
 | Storage `portfolio-previews` | select (публичный CDN, `public = true`) | insert/update/delete — только Edge `portfolio-preview` через `service_role`; политик на `storage.objects` нет — default-deny для anon/authenticated |
 

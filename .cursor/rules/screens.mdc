@@ -15,7 +15,7 @@ alwaysApply: true
 |----|------|
 | `referral` | `/referral` |
 | `auth` | `/registration` (Telegram / Google; Email OTP скрыт: `EMAIL_AUTH_ENABLED`) |
-| `authCode` | `/registration/code` (без флага → `/registration`) |
+| `authCode` | `/registration/code` (без гейта → `/referral`; с гейтом и без флага → `/registration`) |
 | `onboarding` | `/onboarding` |
 | `home` | `/home` (+ `?tab=mine`, `?filter=completed`, `?tab=mine&filter=completed`; `?tab=rating` → feed пока `RATING_TAB_ENABLED = false`) |
 | `settings` | `/settings` (view-only side-panel из account-menu) |

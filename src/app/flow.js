@@ -104,14 +104,17 @@ export function resolveAccessibleRoute(id, state = {}) {
   }
 
   if (id === "authCode") {
-    // Email OTP выключен — экран кода недоступен.
-    if (!EMAIL_AUTH_ENABLED) return "auth";
-    // Без pending email код-экран недоступен — назад на регистрацию.
-    try {
-      const pending = window.sessionStorage.getItem("obratka.pendingAuthEmail");
-      if (!pending) return "auth";
-    } catch {
-      return "auth";
+    // Email OTP выключен — экран кода недоступен. Не return: ниже ещё invite-gate.
+    if (!EMAIL_AUTH_ENABLED) {
+      id = "auth";
+    } else {
+      // Без pending email код-экран недоступен — назад на регистрацию.
+      try {
+        const pending = window.sessionStorage.getItem("obratka.pendingAuthEmail");
+        if (!pending) id = "auth";
+      } catch {
+        id = "auth";
+      }
     }
   }
 

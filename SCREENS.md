@@ -20,7 +20,7 @@ referral → auth → (authCode) → onboarding → home
 |-----|--------|------|--------|
 | 1 | `referral-screen` | `/referral` | Реферальный код (validate RPC; seed `YTHWKPDWAK`); стек аватаров — random из `founder-avatars.json` |
 | 2 | `auth-screen` | `/registration` | Telegram / Google (Email OTP скрыт: `EMAIL_AUTH_ENABLED = false`) |
-| 2b | `auth-code-screen` | `/registration/code` | 6 ячеек кода из письма; без флага deep link → `/registration` |
+| 2b | `auth-code-screen` | `/registration/code` | 6 ячеек кода из письма; без гейта → `/referral`; с гейтом и email off → `/registration` |
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |
 | 4 | `home-screen` | `/home` + query | Хаб: feed/mine (рейтинг UI off, `?tab=rating` → feed); SWR + intro до claim + mine report gate + tabbar-dock (entrance / glass / `--on-dark`); query хранит активный вид |
 | 4a | `settings-screen` | `/settings` | Профиль (view-only) в side-panel поверх home; sticky header, без Save |
@@ -216,7 +216,7 @@ Shared (не экраны флоу):
 |---------|------|--------|
 | `createReferralScreen` | `/referral` | UI + validate; field invalid + visual (shell) |
 | `createAuthScreen` | `/registration` | UI + Telegram / Google (Email OTP скрыт флагом; shell) |
-| `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` (shell); без флага → `/registration` |
+| `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` (shell); без гейта → `/referral`; email off → `/registration` |
 | `createOnboardingScreen` | `/onboarding` | UI → profiles (shell) |
 | `createHomeScreen` | `/home` + query | UI (Чужие/Мои; рейтинг UI off + SWR + intro + mine gate + Ждёт/Уже + Ещё/Завершенные + free-slot + feedSeen/3/3 + «Топы в сети» + feedback + tabbar-dock + entrance cascade) |
 | `createSettingsScreen` | `/settings` | Side-panel профиля (view-only) |

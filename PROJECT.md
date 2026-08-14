@@ -103,7 +103,7 @@
 | Gate | `/referral` → RPC `validate_referral` (anon) до auth; после успеха — `obratka.inviteGatePassed` (раз на устройство) |
 | Redeem | после логина `redeem_referral` (один раз на аккаунт) |
 | Код юзера | `profiles.referral_code`, max **2** активации |
-| Seed | `YTHWKPDWAK` в `referral_seed_codes` (холодный старт) |
+| Seed | `YTHWKPDWAK` в `referral_seed_codes` (ops / холодный старт, не публиковать). Публичные пачки: отдельные seed × 100, порционно; живые коды не в git — [`referral-seed-templates.sql`](supabase/sql/referral-seed-templates.sql) |
 | Logout | при gate → `/registration`; иначе → `/referral`. Deep link `/referral` / `?ref=` не ломаем |
 | Шаринг | home → аватар → account-menu → «Пригласить» (`homeInvite*`): copy + кастомное меню Telegram / X / Threads / LinkedIn (полный `homeInviteMessage`: `{url}`, `{code}`). «Сообщество» → [`t.me/obratka_dsgn`](https://t.me/obratka_dsgn) (`TELEGRAM_COMMUNITY_URL`) |
 | SQL / API | [`supabase/sql/referrals.sql`](supabase/sql/referrals.sql), [`src/api/referrals.js`](src/api/referrals.js), [`src/utils/inviteGate.js`](src/utils/inviteGate.js) |
@@ -114,7 +114,7 @@
 |----------|-------------|
 | `auth.users` | Supabase Auth |
 | `public.profiles` | 1:1 с user; онбординг, баланс, `reputation`, tier, ban, `referral_code` (лимит 2), `workplace`; триггер `handle_new_user` |
-| `public.referral_seed_codes` | bootstrap-коды (seed `YTHWKPDWAK`); только через RPC |
+| `public.referral_seed_codes` | bootstrap-коды (`YTHWKPDWAK` + публичные пачки ×100); только через RPC |
 | `public.portfolios` / `reviews` | очередь ревью с матчингом по лиге грейда; `portfolios.completed_at` — старт окна жалобы / settle |
 | `public.review_complaints` | жалобы автора (1 тег, окно 6ч от done) → −20 / +10 settle → автобан при `reputation <= -100` |
 | `public.subscribers` | legacy waitlist; клиент удалён — таблица в БД может остаться до операторского drop |

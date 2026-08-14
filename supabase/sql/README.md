@@ -10,6 +10,7 @@
 | `wallet.sql` | `protect_profiles_balance` + RPC `spend_submit_cost` (legacy, cost 30) |
 | `portfolio_submit.sql` | RPC `submit_portfolio` (atomic spend 30 + insert, max 1 pending); revoke client INSERT |
 | `referrals.sql` | персональный `referral_code` (max 2 uses), seed `YTHWKPDWAK`, RPC validate/redeem; без наград |
+| `referral-seed-templates.sql` | оператор: список пачек / insert / закрыть exhausted; живые коды не коммитить |
 | `portfolios.sql` | portfolios/reviews, лиги; SELECT only (INSERT через `submit_portfolio`) |
 | `review_claims.sql` | claims + award balance (+10) в `handle_review_inserted`; `portfolio_reviewer_slots` / claim / heartbeat зовут `purge_expired_review_claims` + `settle_review_reputation_rewards` |
 | `review_complaints.sql` | reputation (старт 0, бан −100, 1 тег, окно 6ч от done / fallback N-е ревью, +10 settle) + RPC complaint. ONE-SHOT `100/20 → 0` уже применён на prod — в файле закомментирован |
