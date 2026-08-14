@@ -13,10 +13,10 @@ import {
 
 const geom = getFeedbackEyeGeom();
 const EPS = 1e-9;
-const REST_Y = 13;
+const REST_Y = 21;
 
 describe("getFeedbackEyeGeom", () => {
-  it("rests the pair 8px from the top with an 8px inner gap", () => {
+  it("rests the pair 16px from the top with an 8px inner gap", () => {
     assert.equal(geom.rest.left.x, 19.5);
     assert.equal(geom.rest.right.x, 36.5);
     assert.equal(geom.rest.left.y, REST_Y);

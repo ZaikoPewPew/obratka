@@ -1428,8 +1428,9 @@
   --feedback-eye-pad: var(--space-2);
   --feedback-eye-fill: var(--color-on-accent);
   --feedback-eye-look-range: 96px;
+  --feedback-eye-rest-inset: var(--space-4);
   --feedback-eye-rest-y: calc(
-    var(--feedback-eye-pad) + (var(--feedback-eye-height) / 2)
+    var(--feedback-eye-rest-inset) + (var(--feedback-eye-height) / 2)
   );
   --feedback-eye-rest-left-x: calc(
     (var(--feedback-size) / 2) - (var(--feedback-eye-width) / 2) -

@@ -9,6 +9,7 @@
 export const FEEDBACK_EYE_DEFAULTS = {
   size: 56,
   pad: 8,
+  restInset: 16,
   eyeWidth: 9,
   eyeHeight: 10,
   gap: 8,
@@ -22,6 +23,7 @@ export const FEEDBACK_EYE_DEFAULTS = {
 export function getFeedbackEyeGeom(partial = {}) {
   const size = partial.size ?? FEEDBACK_EYE_DEFAULTS.size;
   const pad = partial.pad ?? FEEDBACK_EYE_DEFAULTS.pad;
+  const restInset = partial.restInset ?? FEEDBACK_EYE_DEFAULTS.restInset;
   const eyeWidth = partial.eyeWidth ?? FEEDBACK_EYE_DEFAULTS.eyeWidth;
   const eyeHeight = partial.eyeHeight ?? FEEDBACK_EYE_DEFAULTS.eyeHeight;
   const gap = partial.gap ?? FEEDBACK_EYE_DEFAULTS.gap;
@@ -29,13 +31,14 @@ export function getFeedbackEyeGeom(partial = {}) {
   const lookRange = partial.lookRange ?? FEEDBACK_EYE_DEFAULTS.lookRange;
   const rx = eyeWidth / 2;
   const ry = eyeHeight / 2;
-  const restY = pad + ry;
+  const restY = restInset + ry;
   const pairHalf = rx + gap / 2;
   const midX = size / 2;
 
   return {
     size,
     pad,
+    restInset,
     eyeWidth,
     eyeHeight,
     gap,
@@ -318,6 +321,7 @@ export function readFeedbackEyeGeom(el) {
   return getFeedbackEyeGeom({
     size: px("--feedback-size", FEEDBACK_EYE_DEFAULTS.size),
     pad: px("--feedback-eye-pad", FEEDBACK_EYE_DEFAULTS.pad),
+    restInset: px("--feedback-eye-rest-inset", FEEDBACK_EYE_DEFAULTS.restInset),
     eyeWidth: px("--feedback-eye-width", FEEDBACK_EYE_DEFAULTS.eyeWidth),
     eyeHeight: px("--feedback-eye-height", FEEDBACK_EYE_DEFAULTS.eyeHeight),
     gap: px("--feedback-eye-gap", FEEDBACK_EYE_DEFAULTS.gap),
