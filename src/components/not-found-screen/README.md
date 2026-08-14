@@ -27,7 +27,7 @@
 | `notFoundCta` | На главную | Go home |
 | `metaTitleNotFound` | Обратка — страница не найдена | Obratka — page not found |
 
-На `open()` — `document.title = metaTitleNotFound`. Висячие предлоги — `fixHangingPrepositions`. На `close()` — `applyDocumentI18n()`.
+`document.title` — `applyDocumentTitle("notFound")` из `applyRoute` (`src/utils/documentTitle.js`), не из экрана. Висячие предлоги в UI-тайтле — `fixHangingPrepositions`.
 
 ## API
 

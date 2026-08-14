@@ -13,10 +13,12 @@
 | Префикс | Экраны |
 |---------|--------|
 | `referral*` | `/referral` (validate errors: `referralExhausted`, …) |
+| `metaTitle*` | `document.title` по роуту (`src/utils/documentTitle.js`); fallback `metaTitle`; `metaTitleAttention` / `metaTitleDesktopOnly` — оверлеи |
 | `desktopOnly*` / `metaTitleDesktopOnly` | оверлей «только с компьютера» (&lt;768px) — [`mobile.md`](../mobile.md) |
-| `auth*` / `authEmail*` / `authCode*` / `authOtp*` / `authIdentityConflict` | `/registration`, `/registration/code` |
+| `notFound*` / `metaTitleNotFound` | SPA `/404` (`not-found-screen`) |
+| `auth*` / `authEmail*` / `authCode*` / `authOtp*` / `authIdentityConflict` | `/registration`, `/registration/code` (Email UI off) |
 | `onboarding*` / `videoPlayer*` | `/onboarding` (+ VideoPlayerCard) |
-| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeCardReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeFeedFilter*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeEmptyFeedReviewed` / `homeMineSlotFree*` / `homePendingLimit*` / `homeNotify*` / `notificationCloseAria` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeBalance*` / `homeAccount*` / `homeContacts*` / `homeRulesCloseAria` / `homeFeedback*` / `homeLegendaryOnline*` / `homeRating*` | `/home` (Чужие/Мои/Рейтинг топ-50, SWR feed+feedReviewed, Ждёт/Уже + Ещё/Завершенные, intro, mine gate, free-slot / toast, feedSeen + 3/3, слоты, invite `homeInviteMessage`, репутация / уточки, контакты / правила / FAB, «Топы в сети», меню профиля) |
+| `home*` / `homeInvite*` / `homeInviteShare*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeCardReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeFeedFilter*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeEmptyFeedReviewed` / `homeMineSlotFree*` / `homePendingLimit*` / `homeNotify*` / `notificationCloseAria` / `homeCardReport*` / `homeCardReportPending*` / `homeCardMinePendingRole` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeBalance*` / `homeAccount*` / `homeContacts*` / `homeRulesCloseAria` / `homeFeedback*` / `homeLegendaryOnline*` / `homeRating*` | `/home` (Чужие/Мои; рейтинг UI off `RATING_TAB_ENABLED`; SWR feed+feedReviewed, Ждёт/Уже + Ещё/Завершенные, intro, mine gate, free-slot / toast, feedSeen + 3/3, слоты, invite `homeInviteMessage` + share Telegram/X/Threads/LinkedIn, репутация / уточки, контакты / правила / FAB, «Топы в сети», меню профиля) |
 | `gradeUndefined` | подпись без известного `profiles.grade` (карточки / рейтинг / report) |
 | `modalCloseAria` | общая модалка (`app-modal`) |
 | `url*` / `urlModal*` / `urlScreen*` / `urlScreenBack*` | `/portfolio` (в т.ч. чип «На главную») |

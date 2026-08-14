@@ -16,7 +16,7 @@ alwaysApply: true
 - **Не** добавлять теги «не согласен с грейдом» / useful-useless.
 - Веса и порог — **только SQL**; в UI и explainer репутации весов нет.
 - Чип: абсолют без плюса (`100` / `0` / `-20`); иконка `>0` positive · `=0` neutral · `<0` negative.
-- Публичный топ-50 на `/home?tab=rating` — по `profiles.reputation` (`listRatingTop` / `rating_leaderboard.sql`); в карточке те же 3 иконки глазок.
+- Публичный топ-50 (`listRatingTop` / `rating_leaderboard.sql`) — **вкладка UI off** (`RATING_TAB_ENABLED = false`); `?tab=rating` → лента. Чип репутации и иконки positive/neutral/negative работают.
 
 ## Сервер
 
@@ -29,7 +29,7 @@ alwaysApply: true
 ## Клиент
 
 - API: `src/api/reviewComplaints.js`
-- UI: `report-screen` (просмотр листа в side-panel → жалоба radio 1 тег, окно 6ч от done, skeleton листов, PDF через `shareReviewPdf` — не ломать / не redesign без задачи), home чип репутации (explainer по клику), вкладка «Рейтинг» (плашка + иконки positive/neutral/negative)
+- UI: `report-screen` (просмотр листа в side-panel → жалоба radio 1 тег, окно 6ч от done, skeleton листов, PDF через `shareReviewPdf` — не ломать / не redesign без задачи), home чип репутации (explainer по клику); вкладка «Рейтинг» — код жив, **UI off** (`RATING_TAB_ENABLED`)
 - Апелляция: ban-screen «Связаться» (вручную)
 
 ## Вне v1

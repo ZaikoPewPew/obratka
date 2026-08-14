@@ -5,6 +5,10 @@ import {
   getStrings,
 } from "./i18n.js";
 import {
+  applyDocumentTitle,
+  setDocumentTitleOverride,
+} from "./utils/documentTitle.js";
+import {
   resolveAccessibleRoute,
   resolveEntryScreen,
 } from "./app/flow.js";
@@ -177,6 +181,7 @@ const frameReloadBtn = document.querySelector('[data-action="reload-frame"]');
 const frameBackBtn = document.querySelector('[data-action="frame-back"]');
 const frameForwardBtn = document.querySelector('[data-action="frame-forward"]');
 const dictationBtn = document.querySelector('[data-action="toggle-dictation"]');
+const dictationTip = dictationBtn?.querySelector(".iframe-shell__tip");
 const dictationBars = Array.from(
   document.querySelectorAll(".iframe-shell__rec-bar"),
 );
@@ -327,6 +332,7 @@ function go(id, opts = {}) {
  */
 function syncRoute(id, opts = {}) {
   activeRouteId = id;
+  applyDocumentTitle(id, getStrings());
   appRouter?.sync(id, opts);
 }
 
@@ -1130,6 +1136,15 @@ function setDictationWaveform(levels = []) {
   }
 }
 
+/**
+ * @param {string} text
+ */
+function setDictationBtnTip(text) {
+  if (!dictationBtn) return;
+  dictationBtn.removeAttribute("title");
+  if (dictationTip) dictationTip.textContent = text;
+}
+
 function syncDictationButtonChrome() {
   if (!dictationBtn) return;
   const t = getStrings();
@@ -1139,7 +1154,7 @@ function syncDictationButtonChrome() {
   if (!isWebSpeechSupported() || !onLiveReview) {
     dictationBtn.hidden = true;
     if (!isWebSpeechSupported()) {
-      dictationBtn.title = t.reviewRecUnsupportedTitle;
+      setDictationBtnTip(t.reviewRecUnsupportedTitle);
     }
     return;
   }
@@ -1151,9 +1166,7 @@ function syncDictationButtonChrome() {
     "aria-label",
     recording ? t.reviewRecStopAria : t.reviewRecStartAria,
   );
-  dictationBtn.title = recording
-    ? t.reviewRecStopTitle
-    : t.reviewRecStartTitle;
+  setDictationBtnTip(t.reviewRecStartTitle);
 }
 
 /** Чип rec на /review + кнопка микрофона в поле «Главный совет». */
@@ -1760,11 +1773,11 @@ function lockFrameAndShowReview() {
       embed_mode: isExternalEmbedSession() ? "external" : "iframe",
     });
   }
+  openReview();
   startTabAttention({
     alertTitle: getStrings().metaTitleAttention,
     alertFaviconHref: TAB_ATTENTION_FAVICON,
   });
-  openReview();
 }
 
 function isExternalEmbedSession() {
@@ -2684,6 +2697,7 @@ async function applyRoute(id, opts = {}) {
 
   activeRouteId = id;
   syncDictationChrome();
+  applyDocumentTitle(id, getStrings());
   {
     /** @type {Record<string, unknown>} */
     const pageProps = {};
@@ -2965,6 +2979,7 @@ abortReviewBtn?.addEventListener("click", () => {
 });
 
 applyDocumentI18n();
+applyDocumentTitle(null, getStrings());
 syncPortfolioName(getStrings().brandName);
 renderTimer();
 syncDictationChrome();
@@ -3013,6 +3028,7 @@ function syncDesktopOnlyGate(isDesktop) {
 
   if (shouldGate) {
     desktopOnlyScreen.open();
+    setDocumentTitleOverride("metaTitleDesktopOnly", getStrings());
     if (!desktopOnlyGateTracked) {
       desktopOnlyGateTracked = true;
       track("desktop_only_gate_shown");
@@ -3022,7 +3038,7 @@ function syncDesktopOnlyGate(isDesktop) {
   }
 
   void desktopOnlyScreen.close().then(() => {
-    applyDocumentI18n();
+    setDocumentTitleOverride(null, getStrings());
   });
 }
 

@@ -11,9 +11,9 @@
 | Область | Статус |
 |---------|--------|
 | Path-роутинг + entry по сессии | wired |
-| Auth: Email OTP, Telegram, Google | wired → `auth.users` + `profiles` |
+| Auth: Telegram, Google | wired → `auth.users` + `profiles`. Email OTP — UI off (`EMAIL_AUTH_ENABLED = false`); код/экран `/registration/code` остаются |
 | Онбординг → `profiles` | wired |
-| Home: лента/мои/рейтинг, URL-query, баланс, репутация, account-menu | wired (рейтинг — `listRatingTop` / топ-50 по `reputation`) |
+| Home: лента/мои, URL-query, баланс, репутация, account-menu | wired. Вкладка «Рейтинг» (топ-50 / `listRatingTop`) — **UI off** (`RATING_TAB_ENABLED = false`); `?tab=rating` → feed; чип репутации живой |
 | Home: SWR-кэш вкладок + silent slot patch | wired (`homeListCache.js`: feed/feedReviewed/mine/rating) |
 | Home: точка «новый кейс» на «Чужие посты» | wired (`feedSeen.js` + `listFeedPortfolioIds`) |
 | Home: сегмент «Ждёт / Уже отревьюено» | wired (`listReviewedPortfolios` + `tabs-panel` на feed; RLS exists review) |
@@ -27,8 +27,9 @@
 | Referrals validate/redeem / share | wired (1 код / 2 слота, seed `YTHWKPDWAK`, без наград) |
 | Analytics (PostHog) | wired — pageviews + core funnel; SoT [`ANALYTICS.md`](ANALYTICS.md) |
 | App modal (shared overlays) | wired |
-| Settings `/settings` | wired (профиль) |
-| Landing `/landing/` | wired (MPA entry, без session; [`landing/README.md`](landing/README.md)) |
+| Settings `/settings` | wired (view-only side-panel, без Save) |
+| SPA not-found `/404` | wired (`not-found-screen`; мусорный path → `/404`) |
+| Landing `/landing/` | wired (MPA entry, без session; CTA Telegram-first; [`landing/README.md`](landing/README.md)) |
 | Legacy waitlist UI | **удалён** (спека в `mobile.md` § Архив) |
 | Mobile | **desktop-only** (&lt;768px → `desktop-only-screen`; см. `mobile.md`) |
 
@@ -44,9 +45,9 @@
 - **Сегменты tabs-panel:** на «Чужие посты» — Ждёт ревью / Уже отревьюено; на «Мои» — Ещё на ревью / Завершенные (`reviewsCount >= targetReviews`).
 - **Free-slot «Ещё на ревью»:** до `MAX_MINE_PENDING` (=1) — реальная карточка или dashed «Свободный слот» (`homeMineSlotFree*`). CTA «Закинуть»: сначала занятый слот → toast `homeNotifySlotTaken`, потом нет монет → toast `homeNotifyNoDucks` + buzz на submit + чипе баланса. Подача — RPC `submit_portfolio` (atomic spend+insert).
 - **Экономика:** `REVIEW_REWARD = 10`, `SUBMIT_COST = 30` (старт `balance = 0` → 3 чужих ревью до своей подачи). Награда только после submit отчёта; abort/release claim — без монет. Свободный слот + нет монет на «Закинуть своё» → error-buzz на submit + чипе баланса (без модалки). Правило: `.cursor/rules/wallet.mdc`.
-- **Вкладка «Рейтинг»:** третий tab `rating`; топ-50 по `reputation` (`listRatingTop` / `rating_leaderboard.sql`, снапшот раз в сутки); карточки в `.home-screen__rating-list`; плашка репутации `min-width`/`height` 52px, padding-x 16px (иконки positive/neutral/negative).
+- **Вкладка «Рейтинг»:** код и кэш `rating` есть (топ-50 по `reputation`, `listRatingTop` / `rating_leaderboard.sql`); **сейчас UI off** — `RATING_TAB_ENABLED = false` в [`src/config/home.js`](src/config/home.js) (таб скрыт, `?tab=rating` → feed). Учёт reputation / чип не зависят от флага. Вернуть → `true`.
 - **«Топы в сети»:** fixed-чип слева снизу (`legendary-online-panel` + heartbeat/list RPC); скрыт, если никого нет.
-- **Deep links home:** `/home`, `?filter=completed` (Чужие / уже отревьюено), `?tab=mine`, `?tab=mine&filter=completed`, `?tab=rating`; query канонизирует `homeRoute.js`, Back/Forward переключает вид без remount.
+- **Deep links home:** `/home`, `?filter=completed` (Чужие / уже отревьюено), `?tab=mine`, `?tab=mine&filter=completed`; `?tab=rating` при выключенном флаге ремапится в feed. Query канонизирует `homeRoute.js`, Back/Forward переключает вид без remount.
 - **Таймер:** `src/config/review.js` → `REVIEW_SESSION_SECONDS = 60` (review shell + intro copy). iframe — пауза при скрытой вкладке; external — wall-clock без паузы; конец → `src/assets/audio/Timer-end.wav` + стоп надиктовки (+ polish notes, если `POLISH_ENABLED`) → quiz.
 - **Tabbar dock:** glass-таббар + кнопка «Закинуть своё» справа (56×56, Google blue, gap 8px); hide при скролле уезжает весь док. Светлый трек — gray-900 10% + blur 20; тёмный превью → `--on-dark` — white 20%.
 - **Чипы шапки:** репутация → баланс → аватар. Submit и уведомления из topbar убраны.
@@ -72,9 +73,9 @@
 
 | Провайдер | Клиент | Бэкенд |
 |-----------|--------|--------|
-| **Email OTP** | `requestEmailOtp` → `/registration/code` → `verifyEmailOtp` | Supabase Auth Email (OTP в Dashboard) |
 | **Telegram** | Login Widget → `signInWithTelegram` | Edge Function `telegram-auth` → `verifyOtp` |
 | **Google** | `signInWithGoogle` (OAuth PKCE) | Callback URL → `completeOAuthFromUrl` в `main.js` |
+| **Email OTP** | UI **скрыт** (`EMAIL_AUTH_ENABLED = false`). API `requestEmailOtp` / `verifyEmailOtp` + `/registration/code` остаются; deep link без флага → `/registration` | Supabase Auth Email (вернуть: флаг `true` + SMTP + шаблоны `{{ .Token }}`) |
 
 После успеха провайдера: `applyProviderUser` → `fetchMyProfile` → `obratka.session` → `onboarding` или `home`.
 
@@ -104,7 +105,7 @@
 | Код юзера | `profiles.referral_code`, max **2** активации |
 | Seed | `YTHWKPDWAK` в `referral_seed_codes` (холодный старт) |
 | Logout | при gate → `/registration`; иначе → `/referral`. Deep link `/referral` / `?ref=` не ломаем |
-| Шаринг | home → аватар → account-menu → «Пригласить» (`homeInvite*`); copy/share = полный `homeInviteMessage` (`{url}`, `{code}`) |
+| Шаринг | home → аватар → account-menu → «Пригласить» (`homeInvite*`): copy + кастомное меню Telegram / X / Threads / LinkedIn (полный `homeInviteMessage`: `{url}`, `{code}`). «Сообщество» → [`t.me/obratka_dsgn`](https://t.me/obratka_dsgn) (`TELEGRAM_COMMUNITY_URL`) |
 | SQL / API | [`supabase/sql/referrals.sql`](supabase/sql/referrals.sql), [`src/api/referrals.js`](src/api/referrals.js), [`src/utils/inviteGate.js`](src/utils/inviteGate.js) |
 
 ## Данные (Supabase)
@@ -206,7 +207,7 @@ SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `p
 | Теги v1 | `low_effort`, `spam`, `harassment`, `offensive`, `ai_slop` (веса только в SQL) |
 | Штраф / плюс | жалоба = −20 (1 тег); старт `0`; бан при `<= -100`; +10 после окна без жалобы (settle тоже от done) |
 | Ревьюер | чип = абсолют без плюса (`100` / `0` / `-20`) + explainer **без** таблицы весов |
-| Публичный топ | `/home?tab=rating` — топ-50 по `reputation` (`listRatingTop` / `rating_leaderboard.sql`); в карточке иконки positive/neutral/negative |
+| Публичный топ | API `listRatingTop` / `rating_leaderboard.sql` живы; **вкладка UI off** (`RATING_TAB_ENABLED = false`); `?tab=rating` → лента. Чип репутации и иконки positive/neutral/negative работают |
 | Апелляция | вручную («Связаться» на `/banned`) |
 | SQL / API | [`review_complaints.sql`](supabase/sql/review_complaints.sql), [`reviewComplaints.js`](src/api/reviewComplaints.js) |
 
@@ -220,7 +221,7 @@ SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `p
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
 | Side panel | [`side-panel`](src/components/side-panel/README.md) — панель справа (слот); home → «Правила» |
-| Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `feedback`; feed/mine/rating (`listRatingTop`, топ-50 по репутации); URL-query; лента SWR (`feed`/`feedReviewed`/`mine`/`rating`); Ждёт/Уже + Ещё/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` / entrance cascade |
+| Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `feedback`; feed/mine (+ кэш `rating`, таб UI off); URL-query; лента SWR (`feed`/`feedReviewed`/`mine`/`rating`); Ждёт/Уже + Ещё/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` / entrance cascade |
 | Review | `index.html` `.iframe-shell` + таймер + чип **rec** (заметки → `answers.dictation`; polish off/`POLISH_ENABLED`) в `main.js`; embed: `resolvePortfolioEmbed` / external UI |
 | Quiz | `review-screen` + `review-panel` + [`scale-slider`](src/components/scale-slider/README.md) (context/visual **1–5**; условный `pain`; рыночный `tier`) + mic → `advice`. SoT: [`QUIZ.md`](QUIZ.md) |
 | Success | `success-screen` (`/done`) |
@@ -262,7 +263,7 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 **Подключено** (`index.html` + `main.js`):
 
 - CSS: `tokens`, `base`, `entrance`, `app-modal`, `side-panel`, `iframe-shell`, `success-screen`, `home-screen`, `legendary-online-panel`, `feedback`, `tabs-panel`, `account-menu`, `settings-screen`, `ban-screen`, `report-screen` (+ `desktop-only-screen` через импорт фабрики)
-- Экраны: referral, auth, auth-code, onboarding, home, settings, url, review-shell (+ rec), quiz, success, report, ban
+- Экраны: referral, auth, auth-code, onboarding, home, settings, url, review-shell (+ rec), quiz, success, report, ban, not-found
 - Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `side-panel`, `account-menu`, `tabs-panel`, `legendary-online-panel`, `feedback`, `scale-slider`, `desktop-only-screen` (гейт &lt;768px)
 - Home state: `src/utils/homeRoute.js` (query) + `homeListCache.js` + `feedSeen.js` + `mineReadySeen.js` (кэши сбрасываются в `exitAuthenticatedSession`)
 - Review timer: `src/config/review.js` (`REVIEW_SESSION_SECONDS`); iframe pause / external wall-clock; end sound `src/assets/audio/Timer-end.wav`
@@ -271,7 +272,7 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 - Url-screen: чип «На главную» (`.url-screen__back`, скрыт на done) → `onExit` → home
 - Desktop-only: [`mobile.md`](mobile.md) + [`desktop-only-screen`](src/components/desktop-only-screen/README.md) + [`viewport.js`](src/utils/viewport.js)
 - Report consensus PDF: [`ACTION_CARDS.md`](ACTION_CARDS.md) — `actionCards.json` (триггеры) + `actionResources.json` (URL / covers) → `resolveActionCards` → `shareConsensusPdf`
-- Landing: отдельный Vite entry [`landing/`](landing/README.md) (`dist/landing/`); CTA → `/referral` (+ `?ref=`); без api/session
+- Landing: отдельный Vite entry [`landing/`](landing/README.md) (`dist/landing/`); CTA Telegram-first (`t.me/obratka_dsgn`); `?ref=` → `/referral`; после gate → `/registration`; без api/session
 
 Waitlist dual-layout удалён; историческая спека — [`mobile.md`](mobile.md) § Архив.
 
@@ -280,7 +281,7 @@ Waitlist dual-layout удалён; историческая спека — [`mob
 | Где | Что |
 |-----|-----|
 | `.env` | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `TELEGRAM_BOT_ID` (+ optional username), `VITE_BASE_PATH`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST` |
-| Dashboard Auth | Email OTP, Google OAuth, Redirect URLs |
+| Dashboard Auth | Google OAuth, Redirect URLs (Email OTP — когда вернём UI) |
 | Edge secrets | `TELEGRAM_BOT_TOKEN`, `ZAI_API_KEY` (опц. `ZAI_MODEL` / `ZAI_MODEL_FALLBACK` для polish-dictation; default `glm-4.5-flash`; клиентский invoke сейчас off — `POLISH_ENABLED`) |
 
 ## Аналитика (PostHog)

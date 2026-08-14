@@ -181,12 +181,19 @@ Gate: обычный браузер с `inviteGatePassed` → logout на `/regi
 - [x] Desktop-only: &lt;768 заглушка, ≥768 продукт
 - [x] PostHog Web analytics на prod: `$pageview` / пути `/referral` `/home` `/review`… (ключ живой)
 
-**Далее — Сессия 3** (хвост must §4):
+**Сессия 3 — done (2026-08-14):** abort без уток + PostHog воронки.
 
-1. Abort / «На главную» / pagehide mid-review **без** ложных +10 (§2.3.2–3)
-2. PostHog **Live**: кастомные события воронки + identify / reset (§3) — Web analytics ≠ Live
-3. По желанию: RPC-автобан (снять жалобу + ещё один клик при `reputation = -80/−99`); deep `/home` с бана; logout→login снова бан
-4. Лендинг / видео — когда вернёмся к полишу §0
+- [x] Ушёл с `/review` до квиза → баланс **не** вырос
+- [x] Кастомные события на prod есть (`review_claimed` / `review_timer_completed` / `review_submitted` / `review_aborted` / `onboarding_done` / `desktop_only_gate_shown`…)
+- [x] Дашборды: [воронки](https://us.posthog.com/project/539651/dashboard/1994791) (CR / Activation / Drop-off) и [здоровье старта](https://us.posthog.com/project/539651/dashboard/1994800) (DAU / PV / Sessions / Retention / NSM)
+- [x] CR3 без `$pageview` `/quiz`: квиз идёт через `syncRoute` (URL без `applyRoute` / pageview); «дошли до квиза» = `review_timer_completed`
+
+**Хвост (не блокер ядра):**
+
+- pagehide mid-review / keepalive слота — не смоукали отдельно
+- Identify / reset на logout, PII в props — не смоукали глазами
+- RPC-автобан; deep `/home` с бана; logout→login снова бан
+- Лендинг / видео — полиш §0
 
 Учитывать лиги: junior ← junior+middle; middle ← middle+senior+; senior ← только senior+.
 
@@ -213,7 +220,7 @@ Gate: обычный браузер с `inviteGatePassed` → logout на `/regi
 
 | # | Сценарий | Ожидание |
 |---|----------|----------|
-| 1 | Вкладки Чужие / Мои / Рейтинг | query `?tab=` / `?filter=`; Back/Forward без remount |
+| 1 | Вкладки Чужие / Мои | query `?tab=` / `?filter=`; Back/Forward без remount. **Рейтинг skip** (`RATING_TAB_ENABLED = false`) |
 | 2 | SWR | повторный open / F5 без лишнего skeleton при кэше |
 | 3 | Сегмент Ждёт / Уже отревьюено | reviewed уходит из open-ленты |
 | 4 | Мои: Ещё / Завершенные + free-slot | max 1 pending; dashed слот |
@@ -223,7 +230,7 @@ Gate: обычный браузер с `inviteGatePassed` → logout на `/regi
 | 8 | Intro → CTA | claim только после «Сюдаа его!»; «Не сейчас» без claim |
 | 9 | Карточка уже 3/3 | `homeNoSlots*` / без claim |
 | 10 | Точки feedSeen / mineReadySeen | гаснут при открытии нужного сегмента |
-| 11 | Рейтинг | топ-50, иконки +/−/0 репутации |
+| 11 | ~~Рейтинг~~ | **skip v1** — таб UI off (`RATING_TAB_ENABLED`); чип репутации живой |
 | 12 | «Топы в сети» | чип есть только если кто-то online |
 | 13 | Account-menu | settings / invite (полный `homeInviteMessage`) / contacts / rules / logout |
 | 14 | Settings | view-only side-panel; close → home |
@@ -234,7 +241,7 @@ Gate: обычный браузер с `inviteGatePassed` → logout на `/regi
 | # | Сценарий | Ожидание | QA |
 |---|----------|----------|-----|
 | 1 | Claim → `/review` | без claim `/review` не открывается | [x] claim→review с нескольких аккаунтов |
-| 2 | Abort / «На главную» | `release` → **без** +10 | |
+| 2 | Abort / «На главную» | `release` → **без** +10 | [x] ушёл до квиза, утки не капнули |
 | 3 | Закрытие вкладки mid-review | keepalive / reconcile; слот «Аноним» не залипает | |
 | 4 | Heartbeat | claim живёт ~20 min TTL | |
 | 5 | Late overshoot (уже done, живой claim) | submit ок, **та же** +10 | |
@@ -313,13 +320,14 @@ Ops: [`supabase/BAN.md`](supabase/BAN.md)
 
 ### PostHog
 
-- [~] Prod Web analytics живой (`$pageview`, пути `/referral` `/registration` `/home` `/onboarding` `/portfolio` `/review` `/report` `/404`); **Live / кастомные события не смоукали**
+- [x] Prod: `$pageview` + кастомные события воронки на Pages (HogQL 30д: `review_submitted` 24 / 9 людей, `review_claimed` 33, `review_aborted` 3)
+- [x] Дашборды в кабинете: [воронки CR](https://us.posthog.com/project/539651/dashboard/1994791) · [здоровье старта](https://us.posthog.com/project/539651/dashboard/1994800)
 - [ ] Identify = `profiles.id` после логина; logout → reset
-- [ ] Воронка в Live: `referral_validated` → `auth_success` → onboarding → `review_claimed` → `review_submitted`
-- [ ] `desktop_only_gate_shown` при узком viewport
+- [x] Воронка ревью: intro → claim → `/review` → `review_timer_completed` → `review_submitted` (не `$pageview` `/quiz` — `syncRoute` без pageview)
+- [x] `desktop_only_gate_shown` есть в событиях (узкий viewport)
 - [ ] Нет PII в props (email, Telegram, JWT, тексты advice)
 
-Кабинет: смотреть **Live**, не только Web analytics. Installation Health (!) — открыть; если Live пишет, не блокер. `Filter test accounts` сейчас off (ок для QA; перед катом юзерам — включить). Старые пути `/obratka/…` — легаси base path, не SoT.
+Виджет Web analytics «Waiting for events…» ждёт **новое** событие, пока панель открыта — не значит, что трека нет. Installation Health (!) при живых событиях не блокер. `Filter test accounts` off (ок для QA; перед катом юзерам — включить). Старые пути `/obratka/…` — легаси base path, не SoT. `/quiz` и `/quiz/done` в pageviews **нет** (намеренно, silent `syncRoute`).
 
 SoT: [`ANALYTICS.md`](ANALYTICS.md)
 
@@ -337,12 +345,12 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 
 - [x] Auth: **Google + Telegram** на **prod** URL (Email OTP — вне скоупа до SMTP) — Сессия 1
 - [x] Полный цикл: invite → onboarding → ревью (+10) → 3/3 → `/report` + жалобы — Сессия 2 (junior-кейс; подача B+C была в Сессии 1; файл PDF не качали)
-- [ ] Claim abort / pagehide **без** ложных монет
+- [x] Claim abort без ложных монет — Сессия 3 (ушёл до квиза; pagehide отдельно не смоукали)
 - [~] Ban: экран `/banned` + Связаться/Выйти ок (ops `banned_at`); deep `/home` и logout→login — не смоукали; RPC-автобан — не гоняли
 - [x] Desktop-only заглушка на телефоне (белый + короткая фраза) ок
 - [ ] Лендинг + CTA (Telegram / `?ref=` → referral / gate → registration) ок на prod — **отложено** (полиш §0.1)
 - [x] SQL claims/complaints/referrals/wallet на prod актуальны
-- [~] PostHog: Web analytics / `$pageview` с Pages ок; Live-события воронки — Сессия 3
+- [x] PostHog пишет с Pages; воронки CR / здоровье старта собраны — Сессия 3 (identify/PII не смоукали)
 - [x] Нет `service_role` / bot token в бандле (vite allowlist; smoke бандла на prod)
 
 ### Nice (можно добить сразу после ката)
@@ -367,9 +375,9 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 1. **Полиш:** лендинг → ~~desktop-only stub~~ → ~~404/not-found~~ (готово) → видео онбординг (`welcome-reels`) + обзор с озвучкой на лендос → smoke deep links / BASE_PATH на Pages — **лендос/видео отложены**
 2. **Инфра:** Auth Dashboard (Google + Telegram; Email — later) + SQL/Edge + `.env.production` — done
 3. **Build + deploy** на Pages — done
-4. **QA** по §2 на prod URL — **Сессия 1+2 done** (см. QA log); далее Сессия 3 (abort без монет + PostHog Live)
-5. **Аналитика / OG** §3 — Web analytics [x]; Live-воронка ещё; OG лендоса [x]
-6. **Go/no-go** §4 → открыть инвайты юзерам
+4. **QA** по §2 на prod URL — **Сессия 1–3 done** (см. QA log)
+5. **Аналитика / OG** §3 — события + дашборды [x]; identify/PII ещё; OG лендоса [x]
+6. **Go/no-go** §4 → открыть инвайты юзерам (блокер must: только лендинг, и он отложен)
 
 Мобильный продукт не планируем в этом релизе — только заглушка.  
 Email OTP — post-launch, когда SMTP стабилен.

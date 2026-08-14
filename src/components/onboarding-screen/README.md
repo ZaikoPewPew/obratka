@@ -12,7 +12,7 @@ Path: **`/onboarding`**. После регистрации; split через [`b
 
 ### Шаг video (4 из 4)
 
-Только [`VideoPlayerCard`](../video-player-card/README.md) (**340×602**).
+Только [`VideoPlayerCard`](../video-player-card/README.md) (**340×602**). Ролик: [`welcome-reels.MOV`](../../assets/video/welcome-reels.MOV) (ключ `welcome` в `onboarding.json`).
 
 - **«Начать»** (`onboardingFinish`, **340×76**) по умолчанию нет: лежит под плеером (`translateY` + tuck `--onboarding-video-cta-tuck` = радиус карточки, чтобы углы кнопки не торчали из скругления).
 - После первого `ended` → класс `--open`: слот растёт по `height`, кнопка целиком выезжает снизу (без `overflow: hidden` — «маска» = сам плеер).

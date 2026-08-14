@@ -33,6 +33,8 @@ body {
 
 .iframe-shell__controls {
   box-sizing: border-box;
+  position: relative;
+  z-index: var(--control-bar-z);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
@@ -40,6 +42,7 @@ body {
   width: 100%;
   height: var(--control-bar-height);
   padding: 0 var(--control-bar-padding-x);
+  overflow: visible;
   border-radius: var(--radius-md);
   background: var(--color-surface-muted);
 }
@@ -167,13 +170,16 @@ body {
   justify-content: flex-start;
   gap: var(--space-2);
   justify-self: start;
+  overflow: visible;
 }
 
 .iframe-shell__btn {
   appearance: none;
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  overflow: visible;
   height: var(--control-btn-height);
   padding: 0 var(--control-btn-padding-x);
   border: none;
@@ -219,12 +225,86 @@ body {
   color: var(--color-text);
 }
 
+.iframe-shell__tip {
+  --_tip-shift: calc(var(--control-tooltip-shift) * -1);
+  box-sizing: border-box;
+  position: absolute;
+  top: calc(100% + var(--control-tooltip-offset));
+  left: 50%;
+  z-index: var(--control-tooltip-z);
+  display: block;
+  padding: var(--control-tooltip-padding-y) var(--control-tooltip-padding-x);
+  border-radius: var(--control-tooltip-radius);
+  background: var(--control-tooltip-bg);
+  color: var(--control-tooltip-color);
+  font-family: var(--font-family);
+  font-size: var(--control-tooltip-font-size);
+  font-weight: var(--control-tooltip-font-weight);
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(var(--_tip-shift));
+  transition:
+    opacity var(--control-tooltip-duration) var(--control-tooltip-ease),
+    transform var(--control-tooltip-duration) var(--control-tooltip-ease),
+    visibility 0s linear var(--control-tooltip-duration);
+}
+
+.iframe-shell__tip::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 0;
+  height: 0;
+  border-left: var(--control-tooltip-tail-size) solid transparent;
+  border-right: var(--control-tooltip-tail-size) solid transparent;
+  border-bottom: var(--control-tooltip-tail-size) solid
+    var(--control-tooltip-bg);
+  transform: translateX(-50%);
+}
+
+.iframe-shell__btn:hover,
+.iframe-shell__btn:focus-visible,
+.iframe-shell__rec:hover,
+.iframe-shell__rec:focus-visible {
+  z-index: 1;
+}
+
+.iframe-shell__btn:hover .iframe-shell__tip,
+.iframe-shell__btn:focus-visible .iframe-shell__tip,
+.iframe-shell__rec:hover .iframe-shell__tip,
+.iframe-shell__rec:focus-visible .iframe-shell__tip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  transition:
+    opacity var(--control-tooltip-duration) var(--control-tooltip-ease),
+    transform var(--control-tooltip-duration) var(--control-tooltip-ease),
+    visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iframe-shell__tip,
+  .iframe-shell__btn:hover .iframe-shell__tip,
+  .iframe-shell__btn:focus-visible .iframe-shell__tip,
+  .iframe-shell__rec:hover .iframe-shell__tip,
+  .iframe-shell__rec:focus-visible .iframe-shell__tip {
+    transform: translateX(-50%);
+    transition: none;
+  }
+}
+
 .iframe-shell__rec {
   appearance: none;
   box-sizing: border-box;
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  overflow: visible;
   gap: var(--control-rec-gap);
   width: var(--control-rec-width);
   height: var(--control-rec-height);
@@ -351,6 +431,8 @@ body {
 }
 
 .iframe-shell__workspace {
+  position: relative;
+  z-index: 0;
   display: flex;
   flex: 1 1 auto;
   min-height: 0;

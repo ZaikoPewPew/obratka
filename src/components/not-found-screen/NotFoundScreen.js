@@ -1,4 +1,4 @@
-import { applyDocumentI18n, getStrings } from "../../i18n.js";
+import { getStrings } from "../../i18n.js";
 import "../../../styles/not-found-screen.css";
 import { getScreenCloseFallbackMs } from "../../utils/motionTokens.js";
 import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
@@ -42,9 +42,6 @@ export function createNotFoundScreen(opts = {}) {
     const t = getStrings();
     title.textContent = fixHangingPrepositions(t.notFoundTitle ?? "");
     cta.textContent = t.notFoundCta ?? "";
-    if (t.metaTitleNotFound) {
-      document.title = t.metaTitleNotFound;
-    }
   }
 
   function open() {
@@ -70,7 +67,6 @@ export function createNotFoundScreen(opts = {}) {
 
     if (!root.classList.contains("not-found-screen--open")) {
       root.hidden = true;
-      applyDocumentI18n();
       return Promise.resolve();
     }
 
@@ -86,7 +82,6 @@ export function createNotFoundScreen(opts = {}) {
         window.clearTimeout(fallbackId);
         root.hidden = true;
         closing = false;
-        applyDocumentI18n();
         resolve();
       };
       const onEnd = (event) => {

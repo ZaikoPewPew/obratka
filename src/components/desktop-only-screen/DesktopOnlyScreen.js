@@ -31,9 +31,6 @@ export function createDesktopOnlyScreen() {
   function applyCopy() {
     const t = getStrings();
     title.textContent = fixHangingPrepositions(t.desktopOnlyTitle ?? "");
-    if (t.metaTitleDesktopOnly) {
-      document.title = t.metaTitleDesktopOnly;
-    }
   }
 
   function open() {

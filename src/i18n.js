@@ -106,15 +106,13 @@ export function formatString(template, vars = {}) {
 export { formatPlural, pluralCategory } from "./utils/plural.js";
 
 /**
- * Применяет строки ко всему UI: data-i18n, data-i18n-aria, data-i18n-title, document.title/lang.
+ * Применяет строки ко всему UI: data-i18n, data-i18n-aria, data-i18n-title, lang.
+ * `document.title` — `applyDocumentTitle` (`src/utils/documentTitle.js`).
  * @param {string} [locale]
  */
 export function applyDocumentI18n(locale = getLocale()) {
   const t = getStrings(locale);
   document.documentElement.lang = locale;
-  if (t.metaTitle) {
-    document.title = t.metaTitle;
-  }
 
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     const key = el.getAttribute("data-i18n");

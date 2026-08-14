@@ -183,7 +183,7 @@
   --duration-normal: 320ms;
   --duration-slow: 450ms;
 
-  /* Shared hover-tooltip (home slots, chips, feedback, legendary) */
+  /* Shared hover-tooltip (home slots, chips, feedback, legendary, review chrome) */
   --tooltip-tail-size: 6px;
   --tooltip-motion-duration: 140ms;
   --tooltip-motion-ease: var(--ease-out);
@@ -307,6 +307,23 @@
   --control-icon-btn-size: 32px;
   --control-icon-btn-padding: 7px;
   --control-icon-size: 18px;
+  /* Шапка /review выше iframe (нативный слой фрейма перекрывает z-base) */
+  --control-bar-z: var(--z-sticky);
+  --control-tooltip-padding-x: var(--space-2);
+  --control-tooltip-padding-y: var(--space-2);
+  --control-tooltip-radius: var(--radius-xs);
+  --control-tooltip-bg: var(--color-text);
+  --control-tooltip-color: var(--color-surface);
+  --control-tooltip-font-size: var(--font-size-xs);
+  --control-tooltip-font-weight: var(--font-weight-medium);
+  --control-tooltip-offset: calc(
+    var(--control-tooltip-tail-size) + var(--space-2)
+  );
+  --control-tooltip-z: 10;
+  --control-tooltip-tail-size: var(--tooltip-tail-size);
+  --control-tooltip-duration: var(--tooltip-motion-duration);
+  --control-tooltip-ease: var(--tooltip-motion-ease);
+  --control-tooltip-shift: var(--tooltip-motion-shift);
   /* Figma rec 470:1374 — рядом с reload в шапке /review */
   --control-rec-width: 93px;
   --control-rec-height: 32px;
@@ -925,7 +942,10 @@
   --account-menu-motion-scale-from: 0.98;
   --account-menu-action-motion-duration: var(--duration-fast);
   --account-menu-action-motion-ease: var(--ease-out);
-  /* tabs-panel (Figma tabspanel 476:1762) — сегмент над списком «Мои» */
+  /* tabs-panel — сегмент feed/mine; hug к подписям, по центру колонки */
+  --tabs-panel-width: fit-content;
+  --tabs-panel-max-width: 100%;
+  --tabs-panel-align-self: center;
   --tabs-panel-height: 48px;
   --tabs-panel-padding: var(--space-1);
   --tabs-panel-radius: var(--radius-pill);
@@ -946,7 +966,7 @@
   --tabs-panel-thumb-duration: var(--motion-screen-duration);
   --tabs-panel-thumb-ease: var(--motion-screen-ease);
   --tabs-panel-tab-dot-size: 7px;
-  --tabs-panel-tab-dot-offset-right: var(--space-4);
+  --tabs-panel-tab-dot-gap: var(--space-2);
   --tabs-panel-tab-dot-radius: var(--radius-pill);
   --tabs-panel-tab-dot-color: var(--palette-google-red);
 

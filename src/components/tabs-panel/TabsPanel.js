@@ -1,5 +1,11 @@
 /**
- * Сегментированный tabs-panel (Figma `tabspanel` 476:1762).
+ * Красная точка на табе (`setTabDot`). Сейчас UI off — логика хоста жива.
+ * Включить → `true`.
+ */
+const TAB_DOT_ENABLED = false;
+
+/**
+ * Сегментированный tabs-panel (трек hug к подписям).
  * Shared UI: не пишет history / go(), только onChange наверх.
  * Активный фон — скользящий thumb (как home tabbar).
  *
@@ -154,13 +160,14 @@ export function createTabsPanel({
 
   /**
    * Красная точка-индикатор на табе (декоративная, aria-hidden).
+   * При `TAB_DOT_ENABLED = false` показ игнорируется — точка остаётся hidden.
    * @param {string} id
    * @param {boolean} visible
    */
   function setTabDot(id, visible) {
     const dot = dots.get(id);
     if (!dot) return;
-    dot.hidden = !visible;
+    dot.hidden = !TAB_DOT_ENABLED || !visible;
   }
 
   // Как home tabbar: без instant — иначе layout после renderList (scrollbar /

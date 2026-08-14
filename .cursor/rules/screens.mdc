@@ -14,11 +14,11 @@ alwaysApply: true
 | Id | Path |
 |----|------|
 | `referral` | `/referral` |
-| `auth` | `/registration` (Email → OTP / Telegram / Google) |
-| `authCode` | `/registration/code` |
+| `auth` | `/registration` (Telegram / Google; Email OTP скрыт: `EMAIL_AUTH_ENABLED`) |
+| `authCode` | `/registration/code` (без флага → `/registration`) |
 | `onboarding` | `/onboarding` |
-| `home` | `/home` (+ `?tab=mine\|rating`, `?filter=completed`, `?tab=mine&filter=completed`) |
-| `settings` | `/settings` (stub из account-menu) |
+| `home` | `/home` (+ `?tab=mine`, `?filter=completed`, `?tab=mine&filter=completed`; `?tab=rating` → feed пока `RATING_TAB_ENABLED = false`) |
+| `settings` | `/settings` (view-only side-panel из account-menu) |
 | `url` | `/portfolio` |
 | `review` | `/review` (iframe/external по `embed-hosts.md` + таймер 60 s + rec; iframe pause / external wall-clock + `Timer-end.wav`; нужен claim) |
 | `quiz` | `/quiz` (шкалы context/visual 1–5 через `scale-slider`; условный pain; `tier`; микрофон в поле «Главный совет») |
@@ -38,17 +38,17 @@ alwaysApply: true
 - Ban: любой route → `banned` (`flow.js`); см. `ban.mdc`.
 - **Desktop-only:** viewport &lt; 768px → оверлей `desktop-only-screen` (не path); claim/review/quiz не стартуют; mid-review сужение → silent abort. Спека: `mobile.md`.
 - Auth gate: deep link на auth-gated экраны (`home`, `settings`, `onboarding`, `report`, `url`, `success`, `review`, `quiz`, `done`) без `session.userId` → `resolveEntryScreen` (referral / auth); с сессией без онбординга → `onboarding`. Управляется в `flow.js`, не в экранах.
-- Auth: `src/api/auth.js`; UI — `auth-screen` + `auth-code-screen`. Automatic linking Email↔Google; OTP cooldown; Manual `linkIdentity` — вне скоупа.
+- Auth: `src/api/auth.js`; UI — `auth-screen` + `auth-code-screen`. Automatic linking Email↔Google; OTP cooldown; Manual `linkIdentity` — вне скоупа. Email OTP **UI off** (`EMAIL_AUTH_ENABLED`).
 
 ## Жёсткие правила
 
 1. **Экран = модуль** в `src/components/<name>-screen/` (фабрика → `{ root, open, close, … }`). Не шить следующий шаг внутрь текущего.
 2. **Порядок и URL снаружи** — колбэк наверх → `go(id)` в `main.js`. Компонент не пишет `history`.
 3. **Split-экраны** (referral / auth / auth-code / onboarding / url): visual — `brand-screen-visual` через `brand-screen-shell`. Детали — `brand-ui.mdc`.
-4. **Общие оверлеи / сегменты** — `createAppModal` (`app-modal/`); слот `content` + CTA; без `history` / `go()`. Боковая панель — `createSidePanel` (`side-panel/`); слот `content`; справа с inset. Сегмент feed/mine (Ждёт·Уже / Ещё·Завершенные) — `createTabsPanel` (`tabs-panel/`); не экран флоу. **Desktop-only gate** — `desktop-only-screen/` (не path, media &lt;768); не путать с экраном флоу / ban.
+4. **Общие оверлеи / сегменты** — `createAppModal` (`app-modal/`); слот `content` + CTA; без `history` / `go()`. Боковая панель — `createSidePanel` (`side-panel/`); слот `content`; справа с inset. Сегмент feed/mine (Разбор·Разобрано) — `createTabsPanel` (`tabs-panel/`); не экран флоу. **Desktop-only gate** — `desktop-only-screen/` (не path, media &lt;768); не путать с экраном флоу / ban.
 5. **Handoff** соседних brand: `go(id, { handoff: true })` — правый visual без повторной анимации.
 6. **Ошибки полей** + `setVariant("invalid")` — `brand-ui.mdc` / `FIELD_ERROR.md`.
-7. **home-screen** — другой лейаут; вкладки Чужие / Мои / Рейтинг (`listPortfoliosForReview`+`listReviewedPortfolios` / `listMyPortfolios` / `listRatingTop` топ-50 по репутации); вид в query (`homeRoute.js`: `?tab=` push, `?filter=` replace на feed|mine, дефолты не пишем) — экран шлёт `onViewChange` наверх, URL пишет `main.js`, обратно `setView` без remount; SWR-кэш `homeListCache` (`feed`/`feedReviewed`/`mine`/`rating`, без skeleton на hit); silent slot patch + `sortFeedForSlotClosure`; glass-tabbar + tabbar-dock submit + `--on-dark` (`backdropLuminance`; track/blur на `.home-screen__tabbar`); entrance cascade на `--open` (`--home-screen-reveal-delay-*`: topbar → body → dock `motion-reveal-dock` без opacity → fab); intro до claim; mine report gate; на feed — **Ждёт ревью / Уже отревьюено** (`tabs-panel`; «Уже» — серое превью + `homeCardReviewedLabel` / `report-sent.svg`, слоты ревьюеров обычные); на «Мои» — **Ещё на ревью / Завершенные**; завершённые mine = `reviewsCount >= targetReviews`; free-slot до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / toast `homeNotifySlotTaken`); seen-dot ленты (`feedSeen`) гаснет при открытии «Чужие посты»; seen-dot 3/3 (`mineReadySeen`) гаснет при открытии сегмента «Завершенные» (и на табе «Мои», и на сегменте); fixed-чип «Топы в сети» слева снизу (`legendary-online-panel`, скрыт если никого нет); FAB feedback (`feedback`); toast `notification` (нет уток / слот занят); own (`--own`) всегда pointer; `reviewedByMe` → уходит из open-ленты в «Уже отревьюено», без notice; лиги — `leagues.mdc`. Подробно: `home-screen/README.md`, `tabs-panel/README.md`.
+7. **home-screen** — другой лейаут; вкладки Лента / Мои (`listPortfoliosForReview`+`listReviewedPortfolios` / `listMyPortfolios`); вкладка «Рейтинг» (`listRatingTop` топ-50) — **UI off** (`RATING_TAB_ENABLED = false` в `src/config/home.js`; таб скрыт, `?tab=rating` → feed; чип репутации живой); вид в query (`homeRoute.js`: `?tab=` push, `?filter=` replace на feed|mine, дефолты не пишем) — экран шлёт `onViewChange` наверх, URL пишет `main.js`, обратно `setView` без remount; SWR-кэш `homeListCache` (`feed`/`feedReviewed`/`mine`/`rating`, без skeleton на hit); silent slot patch + `sortFeedForSlotClosure`; glass-tabbar + tabbar-dock submit + `--on-dark` (`backdropLuminance`; track/blur на `.home-screen__tabbar`); entrance cascade на `--open` (`--home-screen-reveal-delay-*`: topbar → body → dock `motion-reveal-dock` без opacity → fab); intro до claim; mine report gate; на feed — **Разбор / Разобрано** (`tabs-panel`; «Разобрано» — серое превью + `homeCardReviewedLabel` / `report-sent.svg`, слоты ревьюеров обычные); на «Мои» — **Разбор / Разобрано**; завершённые mine = `reviewsCount >= targetReviews`; free-slot до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / toast `homeNotifySlotTaken`); seen-dot ленты (`feedSeen`) гаснет при открытии «Лента»; seen-dot 3/3 (`mineReadySeen`) гаснет при открытии сегмента «Разобрано» (и на табе «Мои», и на сегменте); fixed-чип «Топы в сети» слева снизу (`legendary-online-panel`, скрыт если никого нет); FAB feedback (`feedback`); toast `notification` (нет уток / слот занят); own (`--own`) всегда pointer; `reviewedByMe` → уходит из open-ленты в «Разобрано», без notice; лиги — `leagues.mdc`. Подробно: `home-screen/README.md`, `tabs-panel/README.md`.
 8. **settings-screen** — `/settings` как side-panel поверх home (view-only: имя / Telegram / email / специальность / грейд / workplace; дата создания в description; без Save); close → home. Открытие без лага: reconcile фоном (как `report`), `homeScreen.setView` вместо `open()` при живом home (в обе стороны), форма из SWR-кэша `getCachedMyProfile` + тихая ревалидация.
 9. **Монтаж** — из `main.js`, не из HTML-слотов. Waitlist dual-layout удалён (не восстанавливать без явной задачи). Logout чистит `clearHomeListCache` + `clearMineReadySeen` + `clearFeedSeen` + `clearMyProfileCache`.
 
@@ -57,7 +57,8 @@ alwaysApply: true
 Open/close — `--motion-*` / `entrance.css` (`motion-reveal` / `motion-reveal-scale` / `motion-reveal-topbar` / `motion-reveal-dock` / `motion-control-error-buzz` / idle `motion-balance-duck-float` / `motion-reputation-eyes-look`; hover denser `*-once` infinite, уход — доиграть цикл → idle) / `motionTokens.js`. 
 Home dock: только translate (без `opacity` на предке glass) — иначе ломается `backdrop-filter`. 
 Home CTA «Закинуть своё»: сначала занятый слот → toast `homeNotifySlotTaken`; иначе без монет → toast `homeNotifyNoDucks` + buzz submit + чип баланса (без модалки).
-Новый экран: README в папке + таблица path в `SCREENS.md` и `src/app/README.md`. 
+Новый экран: README в папке + таблица path в `SCREENS.md` и `src/app/README.md` + ключ `metaTitle*` (ru/en) в `ROUTE_META_TITLE_KEYS`.
+`document.title` — только `applyDocumentTitle` из `applyRoute` / `syncRoute` (`src/utils/documentTitle.js`); не в экранах. Desktop-only — override `metaTitleDesktopOnly`. 
 Shared UI (`app-modal`, `side-panel`, brand-shell, `tabs-panel`, `legendary-online-panel`, `feedback`, `notification`): README в папке + упоминание в `SCREENS.md` / `PROJECT.md` § Слои UI.
 
 ```js

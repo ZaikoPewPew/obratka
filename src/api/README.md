@@ -6,12 +6,12 @@
 
 | Файл | Роль |
 |------|------|
-| `auth.js` | Email OTP (`requestEmailOtp` / `verifyEmailOtp`); Telegram Login → Edge Function; Google OAuth (`signInWithGoogle` / `completeOAuthFromUrl`); `mapSupabaseAuthErrorCode`; `signOut` |
+| `auth.js` | Telegram Login → Edge Function; Google OAuth (`signInWithGoogle` / `completeOAuthFromUrl`); Email OTP API (`requestEmailOtp` / `verifyEmailOtp`) — UI off (`EMAIL_AUTH_ENABLED`); `mapSupabaseAuthErrorCode`; `signOut` |
 | `telegramWidget.js` | загрузка Login Widget / `Telegram.Login.auth` |
-| `profiles.js` | `fetchMyProfile` / `updateMyProfile` / `updateMySettings` / `isProfileBanned` (`public.profiles`; клиентский allowlist writable-колонок; `tier`, `banned_*`, `reputation`, `last_seen_at`, identity — только чтение / guards) |
-| `profileSettings.js` | нормализация payload `/settings` (`display_name`, контактный `telegram_username`, `role`, `workplace`) |
+| `profiles.js` | `fetchMyProfile` / `updateMyProfile` / `updateMySettings` / `isProfileBanned` (`public.profiles`; клиентский allowlist writable-колонок; `tier`, `banned_*`, `reputation`, `last_seen_at`, identity — только чтение / guards). `/settings` **не** вызывает `updateMySettings` (view-only) |
+| `profileSettings.js` | нормализация payload `/settings` (`display_name`, контактный `telegram_username`, `role`, `workplace`) — UI не пишет |
 | `presence.js` | legendary online: `heartbeatLegendaryPresence` / `listOnlineLegendaries` (RPC; только `tier=legendary`) |
-| `rating.js` | `listRatingTop` — топ-50 по `reputation` для вкладки «Рейтинг» (RPC `list_rating_top`; серверный снапшот раз в сутки) |
+| `rating.js` | `listRatingTop` — топ-50 по `reputation` (RPC `list_rating_top`; снапшот раз в сутки). Вкладка UI off (`RATING_TAB_ENABLED`); API жив |
 | `onboarding.js` | `saveOnboardingAnswers` → колонки + `onboarding` jsonb в профиле |
 
 ### Провайдеры
@@ -20,7 +20,7 @@
 |-----------|-----|
 | Telegram | Widget → `telegram-auth` Edge Function → `verifyOtp` / сессия |
 | Google | `signInWithOAuth` (PKCE) → redirect → `completeOAuthFromUrl` при старте |
-| Email | `signInWithOtp` → код на почту → `verifyOtp` (`type: "email"`) |
+| Email | API `signInWithOtp` / `verifyOtp` жив; **UI off** (`EMAIL_AUTH_ENABLED = false`). Dashboard — когда вернём почту |
 
 ### Стабильные коды ошибок (`mapSupabaseAuthErrorCode`)
 
@@ -42,7 +42,7 @@ OAuth callback с ошибкой: `main.js` кладёт код в `sessionStora
 
 Env / Dashboard: `.env.example`, `src/components/auth-screen/README.md`, `supabase/README.md`.
 
-**Dashboard (обязательно для email):** Authentication → Providers → Email → OTP включён; шаблон Magic Link содержит `{{ .Token }}`. Без этого код на `/registration/code` не придёт.
+**Dashboard (когда вернём Email OTP):** Authentication → Providers → Email → OTP включён; шаблон Magic Link содержит `{{ .Token }}`. Без этого код на `/registration/code` не придёт. Сейчас UI скрыт (`EMAIL_AUTH_ENABLED`).
 
 ## Кошелёк и портфолио
 

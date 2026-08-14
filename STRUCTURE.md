@@ -45,7 +45,7 @@
 | Что | Где |
 |-----|-----|
 | Google Client ID/Secret | Supabase Auth → Providers → Google |
-| Email OTP | Supabase Auth → Providers → Email |
+| Email OTP | Supabase Auth → Providers → Email (UI сейчас off — `EMAIL_AUTH_ENABLED`) |
 | `TELEGRAM_BOT_TOKEN` | Edge Function secrets (`telegram-auth`) |
 | `ZAI_API_KEY` (опц. `ZAI_MODEL`, `ZAI_MODEL_FALLBACK`) | Edge Function secrets (`polish-dictation`; default `glm-4.5-flash`; клиентский invoke сейчас off — `POLISH_ENABLED`) |
 | Redirect URLs | `http://localhost:5173/`, `https://obratka.net/` |
@@ -89,8 +89,8 @@
   → mine → gate → /report | /portfolio → /done | /banned
 ```
 
-`/referral` — invite-only gate (`validate_referral`); после входа у юзера свой код (лимит 2), шаринг с home.  
-`/home` — feed/mine/rating; активный вид хранится в query через `homeRoute` (`?filter=completed` на feed и mine); SWR-кэш `homeListCache` (`feed`/`feedReviewed`/`mine`/`rating`); рейтинг — топ-50 по репутации (`listRatingTop`); aside «Легенды онлайн»; FAB feedback (`feedback`). Intro до claim; отправленный отчёт → сегмент «Уже отревьюено» (`listReviewedPortfolios`); mine report gate; сегменты Ждёт/Уже + Ещё/Завершенные (`tabs-panel`); free-slot «Ещё на ревью» до `MAX_MINE_PENDING` (=1); точка на «Чужие посты» (`feedSeen`); точка на «Мои» и «Завершенные» (`mineReadySeen`); tabbar-dock (glass tabs + «Закинуть своё») с контрастом над превью (`--on-dark`); на open/reload — entrance cascade (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
+`/referral` — invite-only gate (`validate_referral`); после входа у юзера свой код (лимит 2), шаринг с home (copy + Telegram / X / Threads / LinkedIn).  
+`/home` — feed/mine (рейтинг UI off, `RATING_TAB_ENABLED = false`; `?tab=rating` → feed); активный вид хранится в query через `homeRoute` (`?filter=completed` на feed и mine); SWR-кэш `homeListCache` (`feed`/`feedReviewed`/`mine`/`rating`); aside «Топы в сети»; FAB feedback (`feedback`). Intro до claim; отправленный отчёт → сегмент «Уже отревьюено» (`listReviewedPortfolios`); mine report gate; сегменты Ждёт/Уже + Ещё/Завершенные (`tabs-panel`); free-slot «Ещё на ревью» до `MAX_MINE_PENDING` (=1); точка на «Чужие посты» (`feedSeen`); точка на «Мои» и «Завершенные» (`mineReadySeen`); tabbar-dock (glass tabs + «Закинуть своё») с контрастом над превью (`--on-dark`); на open/reload — entrance cascade (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
 `/portfolio` — подача URL; чип «На главную» (скрыт на done); done на том же экране.  
 `/review` = просмотр портфолио + таймер **60 s** (`REVIEW_SESSION_SECONDS` в `src/config/review.js`) + опциональная надиктовка (чип rec → `answers.dictation`) + post-edit пунктуации (Edge `polish-dictation`; **клиент сейчас off** — `POLISH_ENABLED = false` в `dictationPolish.js`; soft-fail → сырой текст).  
 iframe / external: каталог [`content/embed-hosts.md`](content/embed-hosts.md) (`embedHosts` / `portfolioEmbed` + Edge `portfolio-embed-probe` XFO/CSP; Readymag probe + frame-block → external UI).  
@@ -98,7 +98,8 @@ iframe: таймер паузится при уходе со вкладки; ext
 `/quiz` = опрос (`review-panel` + [`scale-slider`](src/components/scale-slider/README.md) на шагах понятность/визуал **1–5**; условный pain; рыночный `tier`); в поле «Главный совет» — микрофон (тот же polish-путь, сейчас off). Спека: [`QUIZ.md`](QUIZ.md). Не путать с login-`session.js` (`obratka.session`).  
 `/report` = листы ревью автора (+ секция надиктовки) + жалоба (1 тег, окно 6ч от done) → reputation (старт 0 / бан −100 / +10 settle). Сводный PDF — majority + action cards из `actionCards`/`actionResources` ([`ACTION_CARDS.md`](ACTION_CARDS.md)). Вход только когда собраны все ревью.  
 `/banned` = бан (в т.ч. автобан при `reputation <= -100`).  
-`/landing/` = промо MPA (без api/session); CTA → `/referral`.  
+`/404` = неизвестный path (`not-found-screen`); CTA → `/home` или `/registration`.  
+`/landing/` = промо MPA (без api/session); CTA Telegram-first (`t.me/obratka_dsgn`); `?ref=` → `/referral`; после gate → `/registration`.  
 Viewport &lt; 768px → оверлей `desktop-only-screen` ([`mobile.md`](mobile.md)).
 
 Клиентский кэш ленты: `sessionStorage` ключ `obratka.homeLists.<userId>`; seen готовых отчётов: `localStorage` `obratka.mineReadySeen.<userId>`; seen кейсов ленты: `localStorage` `obratka.feedSeen.<userId>` (все сбрасываются на logout).  
@@ -110,9 +111,9 @@ Polish: [`supabase/functions/polish-dictation/README.md`](supabase/functions/pol
 
 | Провайдер | Модуль |
 |-----------|--------|
-| Email OTP | `src/api/auth.js` (`requestEmailOtp` / `verifyEmailOtp`) + `auth-code-screen` |
 | Telegram | `auth.js` + `telegramWidget.js` + `supabase/functions/telegram-auth/` |
 | Google | `signInWithGoogle` / `completeOAuthFromUrl` |
+| Email OTP | UI off (`EMAIL_AUTH_ENABLED`). API `requestEmailOtp` / `verifyEmailOtp` + `auth-code-screen` |
 | Ошибки Auth | `mapSupabaseAuthErrorCode` → UI (`authIdentityConflict`, rate-limit, …) |
 
 **Защита:** Automatic linking Email↔Google (Dashboard/GoTrue); cooldown resend OTP (`--auth-code-resend-cooldown`); Telegram изолирован.  

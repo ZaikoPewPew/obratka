@@ -27,6 +27,7 @@
 | `homeListCache.js` | SWR-кэш ленты home (`feed`/`feedReviewed`/`mine`/`rating`, memory + `sessionStorage` `obratka.homeLists.<userId>`); UI-hit только непустой массив (`[]` → skeleton); `removeCachedHomeListItem` после успешного submit ревью (id из `feed`); полный `clearHomeListCache` только на logout |
 | `feedSeen.js` | seen id кейсов open-ленты для точки на «Чужие посты» (`localStorage` `obratka.feedSeen.<userId>`); открытие feed гасит; seed baseline; `clearFeedSeen` на logout |
 | `mineReadySeen.js` | seen id готовых отчётов для точки на «Мои» / «Завершенные» (`localStorage` `obratka.mineReadySeen.<userId>`); открытие «Завершенные» гасит; `clearMineReadySeen` на logout |
+| `documentTitle.js` | `document.title` по `AppRouteId` (`metaTitle*`); `applyRoute` / `syncRoute`; desktop-only — override |
 | `tabAttention.js` | мигание `document.title` + favicon при конце таймера ревью (если вкладка скрыта); стоп по `window` focus; ассет `/assets/svg/favicon_timer.svg` |
 | `viewport.js` | desktop-only: `DESKTOP_MIN_WIDTH_PX` (=768), `isDesktopViewport`, `subscribeDesktopViewport` (`matchMedia`) — [`mobile.md`](../../mobile.md) |
 | `aggregatePortfolioReviews.js` | агрегаты листов (counts / min–max / `adviceList`) для сводного PDF |
@@ -37,7 +38,7 @@
 
 Данные карточек: [`src/data/actionCards.json`](../data/actionCards.json) + [`actionResources.json`](../data/actionResources.json). SoT: [`ACTION_CARDS.md`](../../ACTION_CARDS.md).
 
-Тесты: `*.test.js` рядом (в т.ч. `homeRoute.test.js`, `plural.test.js`, `hangingPrepositions.test.js`, `reviewReport.dictation.test.js`, `consensusActionCards.test.js`, `complaintWindow.test.js`) + `src/app/routes.test.js` (`npm test`).
+Тесты: `*.test.js` рядом (в т.ч. `homeRoute.test.js`, `documentTitle.test.js`, `plural.test.js`, `hangingPrepositions.test.js`, `reviewReport.dictation.test.js`, `consensusActionCards.test.js`, `complaintWindow.test.js`) + `src/app/routes.test.js` (`npm test`).
 
 Движок надиктовки (не utils): [`src/lib/dictation/README.md`](../lib/dictation/README.md).  
 Post-edit пунктуации: [`src/api/dictationPolish.js`](../api/dictationPolish.js) → [`polish-dictation`](../../supabase/functions/polish-dictation/README.md) (**`POLISH_ENABLED = false`**).

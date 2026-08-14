@@ -18,6 +18,7 @@ alwaysApply: true
 Весь **видимый интерфейс** (кнопки, aria-label, title, модалки, `document.title`) — только через локали:
 
 - разметка: `data-i18n`, `data-i18n-aria`, `data-i18n-title` + `applyDocumentI18n()`;
+- `document.title`: `applyDocumentTitle` (`src/utils/documentTitle.js`), не хардкод и не из экрана;
 - динамика: `getStrings()` / `formatString()`;
 - запрещён хардкод UI-строк без ключа (имена людей / URL портфолио — данные, не UI-copy).
 - `formatPortfolioRole` — всегда EN Title Case (не UI-локаль); исключение без грейда — `gradeUndefined`.
@@ -26,12 +27,12 @@ alwaysApply: true
 
 | Префикс | Область |
 |---------|---------|
-| `metaTitle` / `metaTitleAttention` / `metaTitleDesktopOnly` / `metaTitleNotFound` | `document.title` / мигание вкладки при конце таймера / desktop-only гейт / SPA 404 |
+| `metaTitle` / `metaTitleAttention` / `metaTitleDesktopOnly` / `metaTitleNotFound` / `metaTitleReferral` · `Auth` · `AuthCode` · `Onboarding` · `Home` · `Settings` · `Url` · `Review` · `Quiz` · `Done` · `Success` · `Report` · `Banned` | `document.title` по роуту (`applyDocumentTitle` в `applyRoute` / `syncRoute`); fallback `metaTitle`; мигание вкладки при конце таймера; desktop-only гейт; SPA 404 |
 | `desktopOnly*` | оверлей «только с компьютера» (&lt;768px) |
 | `notFound*` / `metaTitleNotFound` | SPA `/404` (not-found-screen) |
 | `referral*` | invite gate |
 | `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict` | регистрация / OTP |
-| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeCardReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeFeedFilter*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeEmptyFeedReviewed` / `homeMineSlotFree*` / `homePendingLimit*` / `homeNotify*` / `notificationCloseAria` / `homeCardReport*` / `homeCardReportPending*` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeBalance*` / `homeAccount*` / `homeContacts*` / `homeRulesCloseAria` / `homeFeedback*` / `homeLegendaryOnline*` / `homeRating*` | home + notices / intro / mine gate / Ждёт·Уже отревьюено / Ещё·Завершенные / free-slot / toast notify / seen-dot / слоты ревьюеров / репутация / уточки / invite-текст (`homeInviteMessage`) / меню профиля / контакты / правила (текст в `content/rules.json`) / FAB связи / «Топы в сети» / рейтинг топ-50 по репутации |
+| `home*` / `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeCardReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeFeedFilter*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeEmptyFeedReviewed` / `homeMineSlotFree*` / `homePendingLimit*` / `homeNotify*` / `notificationCloseAria` / `homeCardReport*` / `homeCardReportPending*` / `homeCardMinePendingRole` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeBalance*` / `homeAccount*` / `homeContacts*` / `homeRulesCloseAria` / `homeFeedback*` / `homeLegendaryOnline*` / `homeRating*` | home + notices / intro / mine gate / Разбор·Разобрано (feed и mine) / free-slot / toast notify / seen-dot / слоты ревьюеров / репутация / уточки / invite-текст (`homeInviteMessage`) / меню профиля / контакты / правила (текст в `content/rules.json`) / FAB связи / «Топы в сети» / рейтинг топ-50 по репутации |
 | `gradeUndefined` | подпись без известного `profiles.grade` (карточки / рейтинг / report / submit `portfolios.role`) |
 | `modalCloseAria` | общая модалка (`app-modal`) |
 | `onboarding*` | `/onboarding` (в т.ч. `onboardingSaveFailed`) |

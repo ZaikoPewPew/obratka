@@ -65,8 +65,6 @@
             class="iframe-shell__btn iframe-shell__btn--icon"
             data-action="frame-back"
             data-i18n-aria="frameBackButton"
-            data-i18n-title="frameBackButtonTitle"
-            title="Назад"
             disabled
           >
             <svg
@@ -85,14 +83,17 @@
                 stroke-linejoin="round"
               />
             </svg>
+            <span
+              class="iframe-shell__tip"
+              role="tooltip"
+              data-i18n="frameBackButtonTitle"
+            >Вернуться</span>
           </button>
           <button
             type="button"
             class="iframe-shell__btn iframe-shell__btn--icon"
             data-action="frame-forward"
             data-i18n-aria="frameForwardButton"
-            data-i18n-title="frameForwardButtonTitle"
-            title="Вперёд"
             disabled
           >
             <svg
@@ -111,14 +112,17 @@
                 stroke-linejoin="round"
               />
             </svg>
+            <span
+              class="iframe-shell__tip"
+              role="tooltip"
+              data-i18n="frameForwardButtonTitle"
+            >Вперёд</span>
           </button>
           <button
             type="button"
             class="iframe-shell__btn iframe-shell__btn--icon"
             data-action="reload-frame"
             data-i18n-aria="reloadFrameButton"
-            data-i18n-title="reloadFrameButtonTitle"
-            title="Обновить фрейм"
             disabled
           >
             <svg
@@ -137,12 +141,16 @@
                 stroke-linejoin="round"
               />
             </svg>
+            <span
+              class="iframe-shell__tip"
+              role="tooltip"
+              data-i18n="reloadFrameButtonTitle"
+            >Обновить</span>
           </button>
           <button
             type="button"
             class="iframe-shell__rec"
             data-action="toggle-dictation"
-            title="Надиктовать заметки"
             hidden
             aria-pressed="false"
           >
@@ -183,6 +191,11 @@
               <span class="iframe-shell__rec-bar"></span>
             </span>
             <span class="iframe-shell__rec-dot" aria-hidden="true"></span>
+            <span
+              class="iframe-shell__tip"
+              role="tooltip"
+              data-i18n="reviewRecStartTitle"
+            >Голосовые заметки</span>
           </button>
         </div>
 

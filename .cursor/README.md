@@ -48,19 +48,20 @@
 | Path | Экран |
 |------|--------|
 | `/referral` | Invite-only код (`validate_referral`; seed `YTHWKPDWAK`) |
-| `/registration` | Email → `/registration/code` / Telegram / Google |
-| `/registration/code` | 6 ячеек OTP |
+| `/registration` | Telegram / Google (Email OTP скрыт: `EMAIL_AUTH_ENABLED`) |
+| `/registration/code` | 6 ячеек OTP; без флага → `/registration` |
 | `/onboarding` | Онбординг → `profiles` |
-| `/home` | Hub: SWR feed/feedReviewed/mine/rating + intro до claim + mine gate + Ждёт/Уже + Ещё/Завершенные + feedSeen / 3/3 + «Топы в сети» + tabbar-dock (entrance cascade + glass/`--on-dark`) |
-| `/settings` | Профиль в side-panel (из account-menu) |
+| `/home` | Hub: SWR feed/feedReviewed/mine (+ кэш rating, таб UI off) + intro до claim + mine gate + Ждёт/Уже + Ещё/Завершенные + feedSeen / 3/3 + «Топы в сети» + tabbar-dock (entrance cascade + glass/`--on-dark`) |
+| `/settings` | Профиль в side-panel (view-only, без Save) |
 | `/portfolio` | Подача URL; back-chip «На главную»; done через `setVariant("done")` |
 | `/review` | iframe + таймер 60 s + **rec** (заметки; нужен claim); в квизе — микрофон в поле совета |
 | `/quiz` | Квиз: visual 1–5, условный pain, `tier` (не hire); advice + mic — [`QUIZ.md`](../QUIZ.md) |
-| `/quiz/done` | Финал квиза |
+| `/quiz/done` | Финал квиза (silent `syncRoute`, без `$pageview`) |
 | `/done` | Запасной success (deep link) |
 | `/report` | Листы + жалоба → reputation; сводный PDF + action cards — [`ACTION_CARDS.md`](../ACTION_CARDS.md) |
 | `/banned` | Аккаунт заблокирован (escape-proof; в т.ч. автобан) |
-| `/landing/` | Промо MPA (не SPA-route; без session) — [`landing/README.md`](../landing/README.md) |
+| `/404` | Неизвестный path (`not-found-screen`); CTA → `/home` или `/registration` |
+| `/landing/` | Промо MPA (не SPA-route; без session; CTA Telegram-first) — [`landing/README.md`](../landing/README.md) |
 
 **Не path:** `desktop-only-screen` — оверлей &lt;768px ([`mobile.md`](../mobile.md)).
 
@@ -76,7 +77,7 @@
 
 Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-screen`, `legendary-online-panel`, `feedback`, `tabs-panel`, `account-menu`, `settings-screen`, `success-screen`, `ban-screen`, `report-screen` (+ `desktop-only-screen` через import фабрики).
 
-**Home:** вкладки Чужие/Мои/Рейтинг (топ-50 по репутации, `listRatingTop`, кэш `homeListCache`); query через `homeRoute` (`?filter=completed`, `?tab=mine&filter=completed`, Back/Forward без remount); SWR memory + `obratka.homeLists.<userId>` (`feed`/`feedReviewed`/`mine`/`rating`); silent slot patch; feed sort `sortFeedForSlotClosure`; на feed — Ждёт/Уже отревьюено (`tabs-panel`; `listReviewedPortfolios`); `reviewedByMe` → уходит из open-ленты; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); на mine — Ещё/Завершенные (`tabs-panel`; 3/3 → Завершенные); на «Ещё на ревью» — free-slot до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / `homePendingLimit*`); точка на «Чужие посты» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`; гаснет при открытии feed); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`; гаснет при открытии «Завершенные»); fixed-чип «Топы в сети» (`legendary-online-panel`); FAB feedback (`feedback`); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) + `--on-dark` через `backdropLuminance`; на `open`/reload — entrance cascade `--home-screen-reveal-delay-*` (topbar → body → dock `motion-reveal-dock` **без** opacity на предке glass → fab). Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache` + `clearMineReadySeen` + `clearFeedSeen`.
+**Home:** вкладки Чужие/Мои (Рейтинг **UI off** — `RATING_TAB_ENABLED = false`; `?tab=rating` → feed; кэш `rating` / `listRatingTop` живы); query через `homeRoute` (`?filter=completed`, `?tab=mine&filter=completed`, Back/Forward без remount); SWR memory + `obratka.homeLists.<userId>` (`feed`/`feedReviewed`/`mine`/`rating`); silent slot patch; feed sort `sortFeedForSlotClosure`; на feed — Ждёт/Уже отревьюено (`tabs-panel`; `listReviewedPortfolios`); `reviewedByMe` → уходит из open-ленты; intro-модалка до claim (`homeReviewIntro*`); mine report gate (`homeMineNotReady*` пока `reviewsCount < targetReviews`); на mine — Ещё/Завершенные (`tabs-panel`; 3/3 → Завершенные); на «Ещё на ревью» — free-slot до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / `homePendingLimit*`); точка на «Чужие посты» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`; гаснет при открытии feed); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`; гаснет при открытии «Завершенные»); fixed-чип «Топы в сети» (`legendary-online-panel`); FAB feedback (`feedback`); own-карточки с `cursor: pointer`; tabbar-dock (glass tabs + «Закинуть своё» справа) + `--on-dark` через `backdropLuminance`; на `open`/reload — entrance cascade `--home-screen-reveal-delay-*` (topbar → body → dock `motion-reveal-dock` **без** opacity на предке glass → fab). Таймер `/review` + intro copy: `src/config/review.js` (`REVIEW_SESSION_SECONDS`). Logout → `clearHomeListCache` + `clearMineReadySeen` + `clearFeedSeen`.
 **Url-screen:** чип `.url-screen__back` (`urlScreenBack*`) → home; на done скрыт.  
 Подробно: [`home-screen/README.md`](../src/components/home-screen/README.md), [`url-screen/README.md`](../src/components/url-screen/README.md).
 
@@ -111,7 +112,7 @@ Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-scre
 
 ## Referrals (шпаргалка)
 
-Validate **до** auth → redeem **после** login; 1 код / 2 слота; seed `YTHWKPDWAK`; **без наград**; шаринг с home (аватар → «Пригласить»): copy/share = полный `homeInviteMessage`.  
+Validate **до** auth → redeem **после** login; 1 код / 2 слота; seed `YTHWKPDWAK`; **без наград**; шаринг с home (аватар → «Пригласить»): copy + меню Telegram / X / Threads / LinkedIn = полный `homeInviteMessage`. «Сообщество» → `TELEGRAM_COMMUNITY_URL`.  
 SQL / API: `supabase/sql/referrals.sql`, `src/api/referrals.js`.
 
 ## Ban (шпаргалка)
@@ -124,7 +125,7 @@ SQL / API: `supabase/sql/referrals.sql`, `src/api/referrals.js`.
 
 | Провайдер | Не делать |
 |-----------|-----------|
-| Email OTP | password-форму; спам resend без cooldown |
+| Email OTP | password-форму; спам resend без cooldown. **Сейчас UI off** (`EMAIL_AUTH_ENABLED`) — не включать без SMTP |
 | Telegram | дублировать verify вне Edge Function |
 | Google | класть Client Secret в клиентский `.env` |
 

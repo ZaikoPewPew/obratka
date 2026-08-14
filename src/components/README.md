@@ -19,19 +19,20 @@ Vanilla DOM-фабрики. Карта экранов и URL: [`SCREENS.md`](../
 | Модуль | Path | Статус |
 |--------|------|--------|
 | `referral-screen/` | `/referral` | Invite gate + validate RPC (shell) |
-| `auth-screen/` | `/registration` | Email → auth-code / Telegram / Google (shell) |
-| `auth-code-screen/` | `/registration/code` | OTP verify + resend cooldown (shell) |
+| `auth-screen/` | `/registration` | Telegram / Google (Email OTP скрыт: `EMAIL_AUTH_ENABLED`; shell) |
+| `auth-code-screen/` | `/registration/code` | OTP verify + resend cooldown (shell); без флага → `/registration` |
 | `onboarding-screen/` | `/onboarding` | UI → `profiles` (shell) |
-| `home-screen/` | `/home` | хаб + SWR feed/feedReviewed/mine/rating + Ждёт/Уже + Ещё/Завершенные + intro + mine gate + feedSeen / 3/3 + tabbar-dock (glass / `--on-dark` / entrance) + wallet + репутация + invite + «Топы в сети» + feedback FAB |
+| `home-screen/` | `/home` | хаб + SWR feed/feedReviewed/mine (рейтинг UI off) + Ждёт/Уже + Ещё/Завершенные + intro + mine gate + feedSeen / 3/3 + tabbar-dock (glass / `--on-dark` / entrance) + wallet + репутация + invite + «Топы в сети» + feedback FAB |
 | `legendary-online-panel/` | — | fixed-чип «Топы в сети» слева снизу на home |
 | `feedback/` | — | fixed FAB feedback (Telegram) справа снизу на home |
-| `account-menu/` | — | поповер профиля (settings / invite / contacts / rules / sign out) |
-| `settings-screen/` | `/settings` | профиль в side-panel поверх home |
+| `account-menu/` | — | поповер профиля (settings / invite share / «Сообщество» / rules / sign out) |
+| `settings-screen/` | `/settings` | профиль в side-panel поверх home (view-only, без Save) |
 | `url-screen/` | `/portfolio` | back-chip → home; submit + done (`setVariant("done")`; shell) |
 | `review-screen/` | `/quiz` | квиз + PDF-лист |
 | `success-screen/` | `/done` | пресеты успеха (deep link) |
 | `report-screen/` | `/report` | листы ревью + жалоба + сводный PDF (action cards) |
 | `ban-screen/` | `/banned` | блок аккаунта; статичный evil mark |
+| `not-found-screen/` | `/404` | неизвестный path; CTA → `/home` или `/registration` |
 | `desktop-only-screen/` | *(оверлей)* | viewport &lt; 768px — «только с компьютера»; не path — [`README`](desktop-only-screen/README.md), [`mobile.md`](../../mobile.md) |
 
 ## Ревью и квиз

@@ -477,9 +477,10 @@ function bindImageFallbacks(img, candidates) {
 
 /**
  * Hover/focus tip над хостом (слоты ревьюеров, бейджи автора, чипы, плюс).
+ * `below: true` — под хостом (своя pending-карточка).
  * @param {HTMLElement} host
  * @param {string} label
- * @param {{ setAriaLabel?: boolean }} [opts]
+ * @param {{ setAriaLabel?: boolean; below?: boolean }} [opts]
  */
 function attachHomeTooltip(host, label, opts = {}) {
   const text = typeof label === "string" ? label.trim() : "";
@@ -488,7 +489,9 @@ function attachHomeTooltip(host, label, opts = {}) {
     host.setAttribute("aria-label", text);
   }
   const tooltip = document.createElement("span");
-  tooltip.className = "home-screen__tip";
+  tooltip.className = opts.below
+    ? "home-screen__tip home-screen__tip--below"
+    : "home-screen__tip";
   tooltip.setAttribute("role", "tooltip");
   tooltip.textContent = text;
   host.append(tooltip);
@@ -1808,7 +1811,11 @@ export function createHomeScreen({
   function syncOwnCardCopy(button, item) {
     const t = getStrings();
     const { ready } = reportProgress(item);
-    button.title = ready ? t.homeCardReportTitle : t.homeCardReportPendingTitle;
+    if (ready) {
+      button.title = t.homeCardReportTitle;
+    } else {
+      button.removeAttribute("title");
+    }
     button.setAttribute(
       "aria-label",
       ready ? t.homeCardReportAria : t.homeCardReportPendingAria,
@@ -2968,10 +2975,13 @@ export function createHomeScreen({
 
     badges.append(platform, avatar);
 
+    const pendingOwn = Boolean(item.isOwn) && !reportProgress(item).ready;
+
     const grade = document.createElement("p");
     grade.className = "home-screen__card-grade";
-    grade.textContent =
-      (typeof item.role === "string" && item.role.trim()) || t.homeDefaultRole;
+    grade.textContent = pendingOwn
+      ? (t.homeCardMinePendingRole ?? "")
+      : (typeof item.role === "string" && item.role.trim()) || t.homeDefaultRole;
 
     person.append(badges, grade);
 
@@ -2994,6 +3004,12 @@ export function createHomeScreen({
     } else if (item.isOwn) {
       button.classList.add("home-screen__card--own");
       syncOwnCardCopy(button, item);
+      if (pendingOwn) {
+        attachHomeTooltip(button, t.homeMineNotReadyTitle ?? "", {
+          setAriaLabel: false,
+          below: true,
+        });
+      }
       button.addEventListener("click", () => {
         openOwnCard(latestItem(item.id) ?? item);
       });

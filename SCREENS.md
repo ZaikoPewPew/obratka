@@ -2,13 +2,13 @@
 
 Карта экранов «Обратки», path-роутинг и ветки с Home.
 
-Статус: **продуктовый флоу wired**. Auth: **Email OTP + Telegram + Google** → `profiles`. Onboarding пишет в Supabase. Home — очередь `portfolios`/`reviews` по лиге грейда + баланс из `profiles`. Submit URL — done на url-screen; success — пресеты / deep link.
+Статус: **продуктовый флоу wired**. Auth: **Telegram + Google** → `profiles` (Email OTP — UI off, `EMAIL_AUTH_ENABLED = false`). Onboarding пишет в Supabase. Home — очередь `portfolios`/`reviews` по лиге грейда + баланс из `profiles`. Вкладка «Рейтинг» **скрыта** (`RATING_TAB_ENABLED = false`). Submit URL — done на url-screen; success — пресеты / deep link.
 
 ## Продуктовый флоу
 
 ```text
-referral → auth → authCode → onboarding → home
-                              ├─ tabs → feed / mine / rating
+referral → auth → (authCode) → onboarding → home
+                              ├─ tabs → feed / mine  (rating UI off)
                               ├─ profile → settings
                               ├─ pick → intro-модалка → claim → review → quiz → /quiz/done
                               │         («На главную» → home; «Следующий кейс» → claim следующего → review)
@@ -19,10 +19,10 @@ referral → auth → authCode → onboarding → home
 | Шаг | Экран | Path | Смысл |
 |-----|--------|------|--------|
 | 1 | `referral-screen` | `/referral` | Реферальный код (validate RPC; seed `YTHWKPDWAK`); стек аватаров — random из `founder-avatars.json` |
-| 2 | `auth-screen` | `/registration` | Email → OTP screen / Telegram / Google |
-| 2b | `auth-code-screen` | `/registration/code` | 6 ячеек кода из письма |
+| 2 | `auth-screen` | `/registration` | Telegram / Google (Email OTP скрыт: `EMAIL_AUTH_ENABLED = false`) |
+| 2b | `auth-code-screen` | `/registration/code` | 6 ячеек кода из письма; без флага deep link → `/registration` |
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |
-| 4 | `home-screen` | `/home` + query | Хаб: feed/mine/rating; SWR + intro до claim + mine report gate + tabbar-dock (entrance / glass / `--on-dark`); query хранит активный вид |
+| 4 | `home-screen` | `/home` + query | Хаб: feed/mine (рейтинг UI off, `?tab=rating` → feed); SWR + intro до claim + mine report gate + tabbar-dock (entrance / glass / `--on-dark`); query хранит активный вид |
 | 4a | `settings-screen` | `/settings` | Профиль (view-only) в side-panel поверх home; sticky header, без Save |
 | 5a | iframe-shell | `/review` | Ревью: iframe + таймер **60 s** (pause / external wall-clock + `Timer-end.wav`) + чип **rec** + «Прервать ревью» |
 | 5b | `url-screen` | `/portfolio` | Подача URL (баланс); чип «На главную»; done на том же экране |
@@ -36,7 +36,7 @@ referral → auth → authCode → onboarding → home
 Корень `/` → `resolveEntryScreen(getSession())`. Query (`?ref=`, `?lang=`) сохраняются. Неизвестный path (не `/` и не в карте) → `/404` (`notFound`), не entry.
 
 - **Google return:** hash/query → `completeOAuthFromUrl()` в `main.js` → onboarding / home.
-- **Email OTP / Telegram:** остаются на `/registration` до `onSuccess` → `applyProviderUser`.
+- **Telegram / Google:** остаются на `/registration` до `onSuccess` → `applyProviderUser`. Email OTP UI скрыт; экран кода жив при `EMAIL_AUTH_ENABLED`.
 - **Auth gate:** `home/settings/onboarding/report/url/success/review/quiz/done` без сессии → referral/auth; с сессией без завершённого онбординга → `/onboarding`.
 - **Stale session:** cached `userId` на boot сверяется с Supabase Auth; без живого user очищается UX-кэш с сохранением referral-кода.
 - **Ban:** `profiles.banned_at` → всегда `/banned` (login, boot, любой deep link).
@@ -49,9 +49,9 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 
 | Способ | UX | API |
 |--------|-----|-----|
-| Email | email → `/registration/code` (6 ячеек) → сессия; resend с cooldown 60s | `requestEmailOtp` / `verifyEmailOtp` |
 | Telegram | виджет → сессия | `signInWithTelegram` |
 | Google | редирект OAuth | `signInWithGoogle` |
+| Email | **скрыт** (`EMAIL_AUTH_ENABLED = false`). При флаге: email → `/registration/code` (6 ячеек) → сессия; resend cooldown 60s | `requestEmailOtp` / `verifyEmailOtp` |
 
 Пароль и обязательный magic-link в UI **не** используются. Setup Dashboard: `src/components/auth-screen/README.md`.
 
@@ -87,8 +87,8 @@ SPA-fallback для GitHub Pages: `npm run build` копирует `dist/index.h
 
 Handoff соседних brand-экранов: `handoff: true` (`brandScreenTransition.js`) — правый visual не переигрывается.
 
-`home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки Чужие/Мои/Рейтинг (`feed`/`mine`/`rating`, топ-50 по репутации, `listRatingTop`); SWR `homeListCache` (`feed`/`feedReviewed`/`mine`/`rating`); fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB feedback (`feedback`, Telegram); toast `notification` (нет уток / слот занят); intro до claim (`homeReviewIntro*`); на feed — сегмент «Ждёт ревью / Уже отревьюено» (`tabs-panel`; reviewed → `listReviewedPortfolios`, серое превью + `homeCardReviewedLabel` / `report-sent.svg`, слоты ревьюеров обычные); open-лента без `reviewedByMe`; mine report gate (`homeMineNotReady*`); на mine — «Ещё на ревью / Завершенные»; free-slot «Ещё на ревью» до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / toast `homeNotifySlotTaken`); нет монет → toast `homeNotifyNoDucks` + buzz submit + чип баланса; точка на «Чужие посты» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`); entrance cascade на `--open` (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
-`account-menu` — поповер под аватаром; identity read-only; settings / invite (`homeInviteMessage` на copy/share) / contacts / rules / sign out.
+`home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки Чужие/Мои (рейтинг — код/кэш есть, **UI off** `RATING_TAB_ENABLED = false`, `?tab=rating` → feed); SWR `homeListCache` (`feed`/`feedReviewed`/`mine`/`rating`); fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB feedback (`feedback`, Telegram); toast `notification` (нет уток / слот занят); intro до claim (`homeReviewIntro*`); на feed — сегмент «Ждёт ревью / Уже отревьюено» (`tabs-panel`; reviewed → `listReviewedPortfolios`, серое превью + `homeCardReviewedLabel` / `report-sent.svg`, слоты ревьюеров обычные); open-лента без `reviewedByMe`; mine report gate (`homeMineNotReady*`); на mine — «Ещё на ревью / Завершенные»; free-slot «Ещё на ревью» до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / toast `homeNotifySlotTaken`); нет монет → toast `homeNotifyNoDucks` + buzz submit + чип баланса; точка на «Чужие посты» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`); entrance cascade на `--open` (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
+`account-menu` — поповер под аватаром; identity read-only; «Профиль» / «Пригласить» (copy + меню Telegram / X / Threads / LinkedIn, полный `homeInviteMessage`) / «Сообщество» (`TELEGRAM_COMMUNITY_URL`) / «Правила» / «Выйти».
 `side-panel` — боковая панель справа (home → «Правила», Figma `517:4740`); слот контента; без `history` / `go()`.  
 `settings-screen` — side-panel поверх home на `/settings` (все поля view-only; двухколоночный лейаут; дата создания в description; без Save).
 `url-screen` — split; чип «На главную» (`.url-screen__back` / `urlScreenBack*`, скрыт на done); при URL справа заглушка «Портфолио»; submit → done на том же экране (`setVariant("done")`).  
@@ -133,8 +133,9 @@ src/components/
   success-screen/         ← /done (подача портфолио)
   report-screen/          ← /report (листы → side-panel → жалоба; сводный PDF)
   ban-screen/             ← /banned (аккаунт заблокирован)
+  not-found-screen/       ← /404 (неизвестный path)
   desktop-only-screen/    ← оверлей <768px (не path; см. mobile.md)
-  rating/                 ← неиспользуемый aside (вкладка рейтинга — в home-screen)
+  rating/                 ← неиспользуемый aside (вкладка рейтинга — в home-screen; UI off)
 
 landing/                  ← промо MPA entry (без api/session)
 
@@ -214,10 +215,10 @@ Shared (не экраны флоу):
 | Фабрика | Path | Статус |
 |---------|------|--------|
 | `createReferralScreen` | `/referral` | UI + validate; field invalid + visual (shell) |
-| `createAuthScreen` | `/registration` | UI + Email → authCode / Telegram / Google (shell) |
-| `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` (shell) |
+| `createAuthScreen` | `/registration` | UI + Telegram / Google (Email OTP скрыт флагом; shell) |
+| `createAuthCodeScreen` | `/registration/code` | UI + OTP; `setUrlScreenOtpInvalid` (shell); без флага → `/registration` |
 | `createOnboardingScreen` | `/onboarding` | UI → profiles (shell) |
-| `createHomeScreen` | `/home` + query | UI (Чужие/Мои/Рейтинг топ-50 + SWR + intro + mine gate + Ждёт/Уже + Ещё/Завершенные + free-slot + feedSeen/3/3 + «Топы в сети» + feedback + tabbar-dock + entrance cascade) |
+| `createHomeScreen` | `/home` + query | UI (Чужие/Мои; рейтинг UI off + SWR + intro + mine gate + Ждёт/Уже + Ещё/Завершенные + free-slot + feedSeen/3/3 + «Топы в сети» + feedback + tabbar-dock + entrance cascade) |
 | `createSettingsScreen` | `/settings` | Side-panel профиля (view-only) |
 | `createUrlScreen` | `/portfolio` | UI (back-chip → home; submit + done via `setVariant`; shell) |
 | iframe-shell + timer + rec | `/review` | UI (заметки → `answers.dictation`) |
@@ -225,6 +226,7 @@ Shared (не экраны флоу):
 | `createSuccessScreen` | `/done` | UI (deep link / generic; submit остаётся на url-screen) |
 | `createReportScreen` | `/report` | UI (листы → просмотр → жалоба на лист) |
 | `createBanScreen` | `/banned` | UI (блок аккаунта; static evil mark) |
+| `createNotFoundScreen` | `/404` | UI (мусорный path; CTA → home / registration) |
 
 ### Handoff
 
@@ -246,7 +248,7 @@ Home entrance: `--home-screen-reveal-delay-*` + `motion-reveal-dock` (тольк
 
 ## i18n
 
-Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeFeedFilter*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeEmptyFeedReviewed` / `homeCardReviewedLabel` / `homeCardReport*` / `homeCardReportPending*` / `homeTabMineReadyAria` / `homeReputation*` / `homeBalance*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*`, `modalCloseAria`, `url*` / `urlScreenBack*`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `reviewRec*` / `reviewAdviceRec*` / `reviewContextShort`·`Value*`·`Hint*` / `reviewVisualShort`·`Value*`·`Hint*` / `report*` / `reportDictationTitle`, `frame*` / `controls*`).
+Все UI-строки — `content/locales.json` (`referral*`, `homeInvite*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeFeedFilter*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeEmptyFeedReviewed` / `homeCardReviewedLabel` / `homeCardReport*` / `homeCardReportPending*` / `homeCardMinePendingRole` / `homeTabMineReadyAria` / `homeReputation*` / `homeBalance*`, `auth*` / `authCode*` / `authOtp*` / `authIdentityConflict`, `onboarding*`, `home*`, `modalCloseAria`, `url*` / `urlScreenBack*`, `success*`, `reportScreen*` / `reportComplaint*` / `complaintTag*`, `review*` / `reviewRec*` / `reviewAdviceRec*` / `reviewContextShort`·`Value*`·`Hint*` / `reviewVisualShort`·`Value*`·`Hint*` / `report*` / `reportDictationTitle`, `frame*` / `controls*`).
 Правило: `.cursor/rules/i18n.mdc`.
 
 Таймер `/review` и intro copy: `REVIEW_SESSION_SECONDS` в [`src/config/review.js`](src/config/review.js).  
@@ -264,7 +266,7 @@ iframe — пауза при `visibility hidden`; external — wall-clock + де
 
 ## API
 
-`src/api/` — Auth (Email OTP / Telegram / Google + `mapSupabaseAuthErrorCode`), profiles, referrals (validate/redeem), onboarding, wallet sync, shared portfolios queue. См. `src/api/README.md`.
+`src/api/` — Auth (Telegram / Google + Email OTP API при флаге + `mapSupabaseAuthErrorCode`), profiles, referrals (validate/redeem), onboarding, wallet sync, shared portfolios queue. См. `src/api/README.md`.
 
 ## Дальше
 
@@ -279,7 +281,7 @@ iframe — пауза при `visibility hidden`; external — wall-clock + де
 - [`STRUCTURE.md`](STRUCTURE.md)
 - [`PROJECT.md`](PROJECT.md)
 - [`src/app/README.md`](src/app/README.md)
-- [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — feed/mine/rating, URL-query, SWR, intro до claim, mine gate, feedSeen/3/3, «Топы в сети», contact FAB, tabbar-dock, entrance cascade / glass / `--on-dark`
+- [`src/components/home-screen/README.md`](src/components/home-screen/README.md) — feed/mine (рейтинг UI off), URL-query, SWR, intro до claim, mine gate, feedSeen/3/3, «Топы в сети», contact FAB, tabbar-dock, entrance cascade / glass / `--on-dark`
 - [`src/components/legendary-online-panel/README.md`](src/components/legendary-online-panel/README.md) — fixed-чип «Топы в сети»
 - [`src/components/feedback/README.md`](src/components/feedback/README.md) — fixed FAB feedback (Telegram)
 - [`src/components/notification/README.md`](src/components/notification/README.md) — toast (нет уток / слот занят)
@@ -299,8 +301,9 @@ iframe — пауза при `visibility hidden`; external — wall-clock + де
 - [`src/components/side-panel/README.md`](src/components/side-panel/README.md) — боковая панель
 - [`src/components/tabs-panel/README.md`](src/components/tabs-panel/README.md) — сегмент табов
 - [`src/components/desktop-only-screen/README.md`](src/components/desktop-only-screen/README.md) — гейт &lt;768px («только с компьютера»)
+- [`src/components/not-found-screen/README.md`](src/components/not-found-screen/README.md) — SPA `/404`
 - [`mobile.md`](mobile.md) — политика desktop-only + QA + архив waitlist
-- [`landing/README.md`](landing/README.md) — промо MPA
+- [`landing/README.md`](landing/README.md) — промо MPA (CTA Telegram-first)
 - [`ACTION_CARDS.md`](ACTION_CARDS.md) — сводный PDF + action cards / resources
 - [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — ошибки полей
 - [`src/assets/README.md`](src/assets/README.md) — марки / morph

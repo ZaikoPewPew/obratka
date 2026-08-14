@@ -22,7 +22,7 @@ SoT: [`ANALYTICS.md`](../../ANALYTICS.md). Фасад: [`src/lib/analytics.js`](
 
 | Что | Где |
 |-----|-----|
-| Route settle | `applyRoute` → `trackPage` |
+| Route settle | `applyRoute` → `applyDocumentTitle` + `trackPage` |
 | Auth / onboarding / claim / submit / abort | `main.js` после успеха/фейла |
 | UI CTA | колбэк наверх → `track` в `main` (экран сам PostHog не знает) |
 

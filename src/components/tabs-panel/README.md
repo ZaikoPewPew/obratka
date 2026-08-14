@@ -1,22 +1,21 @@
 # `tabs-panel`
 
-Сегментированный переключатель табов по Figma **tabspanel**  
-([node `476:1762`](https://www.figma.com/design/KhsEJRKjBaDm6xaj3zJh2s/%D0%9E%D0%B1%D1%80%D0%B0%D1%82%D0%BA%D0%B0?node-id=476-1762)).
+Сегментированный переключатель табов. Трек **hug** к подписям (`width: fit-content`), по центру колонки карточек.
 
 Shared UI: не экран флоу — не пишет `history`, не вызывает `go()`. Монтаж и оркестрация снаружи (экран / `main.js`).
 
 ## Макет → код
 
-| Figma | Код |
+| Макет | Код |
 |-------|-----|
-| Track 500×48, radius pill, `#f3f4f7` | `.tabs-panel` → `--tabs-panel-height` / `--tabs-panel-radius` / `--tabs-panel-bg` |
+| Track hug ×48, radius pill, центр колонки | `.tabs-panel` → `--tabs-panel-width` (`fit-content`) / `--tabs-panel-align-self` (`center`) / `--tabs-panel-height` / `--tabs-panel-radius` / `--tabs-panel-bg` |
 | Padding 4 | `--tabs-panel-padding` = `--space-1` |
-| Tab ~244×40, radius pill | `.tabs-panel__tab` → `--tabs-panel-tab-*` |
+| Tab hug ×40, radius pill | `.tabs-panel__tab` → `--tabs-panel-tab-*` (`flex: 0 0 auto`) |
 | Tab padding-y 4 | `--tabs-panel-tab-padding-y` = `--space-1` (под высоту 40) |
 | Active `#242426` + white | `--tabs-panel-tab-active-bg` / `--tabs-panel-tab-active-color` |
 | Inactive transparent + `#242426` | `--tabs-panel-tab-color` |
 | Montserrat 16 regular | `--font-size-base` / `--font-weight-regular` |
-| Dot 7×7, Google red, right 16px centered | `.tabs-panel__tab-dot` → `--tabs-panel-tab-dot-*` |
+| Dot 7×7, Google red, после подписи, gap 8px | `.tabs-panel__tab-dot` → `--tabs-panel-tab-dot-*` |
 
 В макете фон активного таба статичен; в коде — скользящий `.tabs-panel__thumb` (`transform` + `width`, `--tabs-panel-thumb-*`), у кнопок меняется только `color`. `ResizeObserver` / `window.resize` синчат thumb **без** `instant` (как home tabbar) — иначе layout после смены сегмента съедает анимацию.
 
@@ -39,8 +38,8 @@ import { createTabsPanel } from "../tabs-panel/TabsPanel.js";
 
 const panel = createTabsPanel({
   tabs: [
-    { id: "active", label: "Активные" },
-    { id: "completed", label: "Завершенные" },
+    { id: "active", label: "Разбор" },
+    { id: "completed", label: "Разобрано" },
   ],
   activeId: "active",
   ariaLabel: "Фильтр моих постов",
@@ -49,11 +48,11 @@ const panel = createTabsPanel({
   },
 });
 
-panel.setLabels({ active: "Active", completed: "Completed" });
+panel.setLabels({ active: "Review", completed: "Reviewed" });
 panel.setAriaLabel("My posts filter");
 panel.setActive("completed"); // с анимацией thumb
 panel.setActive("active", { instant: true }); // без анимации
-panel.setTabDot("completed", true); // красная точка справа
+panel.setTabDot("completed", true); // красная точка справа (сейчас UI off: `TAB_DOT_ENABLED`)
 panel.syncThumb(true); // после unhide / layout
 panel.getActive(); // "active"
 ```
@@ -64,4 +63,4 @@ sync-функции хоста должны сначала сверяться с
 
 ## Где используется
 
-- [`home-screen`](../home-screen/README.md) — один сегмент над списком на вкладках **Чужие посты** («Ждёт ревью / Уже отревьюено») и **Мои посты** («Ещё на ревью / Завершенные»); точка на `completed` только на «Мои» при непросмотренном 3/3.
+- [`home-screen`](../home-screen/README.md) — один сегмент над списком на вкладках **Лента** («Разбор / Разобрано») и **Мои посты** («Разбор / Разобрано»); точка на `completed` только на «Мои» при непросмотренном 3/3. **Сейчас UI off** — `TAB_DOT_ENABLED = false` в [`TabsPanel.js`](TabsPanel.js) (`setTabDot` no-op на показ). Трек hug к подписям, по центру колонки карточек.

@@ -31,7 +31,7 @@
    - `review_aborted` с `reason: "desktop_only_gate"`;
    - `leaveSessionShell` + stop dictation + `releaseHeldClaim` (**без** монет);
    - `go("home")` под оверлеем.
-4. **Ресайз ≥ 768** → `desktopOnlyScreen.close()` + `applyDocumentI18n()` (восстановление `document.title`).
+4. **Ресайз ≥ 768** → `desktopOnlyScreen.close()` + снять override `document.title` (тайтл текущего роута).
 5. Auth / OAuth / session под оверлеем могут жить — после расширения окна UI продолжается с текущей сессией.
 
 ### Копирайт (i18n)

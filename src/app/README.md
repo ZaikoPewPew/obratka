@@ -23,11 +23,11 @@ Auth-gated deep link (`home` / `settings` / `onboarding` / `report` / `url` / `s
 | Id | Path | Смысл |
 |----|------|--------|
 | `referral` | `/referral` | Invite gate: `validate_referral` → session.referralCode + `obratka.inviteGatePassed` |
-| `auth` | `/registration` | Email → code screen / Telegram / Google |
-| `authCode` | `/registration/code` | 6-digit Email OTP + resend cooldown |
+| `auth` | `/registration` | Telegram / Google (Email OTP скрыт: `EMAIL_AUTH_ENABLED`) |
+| `authCode` | `/registration/code` | 6-digit Email OTP + resend cooldown; без флага → `/registration` |
 | `onboarding` | `/onboarding` | Онбординг → profiles |
-| `home` | `/home` | Хаб: SWR feed/mine/rating + feedSeen/3/3 + «Топы в сети» + tabbar-dock (entrance / glass / `--on-dark`) + меню профиля |
-| `settings` | `/settings` | Профиль в side-panel поверх home |
+| `home` | `/home` | Хаб: SWR feed/mine (рейтинг UI off, `RATING_TAB_ENABLED`) + feedSeen/3/3 + «Топы в сети» + tabbar-dock (entrance / glass / `--on-dark`) + меню профиля |
+| `settings` | `/settings` | Профиль в side-panel поверх home (view-only, без Save) |
 | `url` | `/portfolio` | Подача URL; back-chip → home; done на том же экране |
 | `review` | `/review` | Ревью: iframe + таймер 60 s (pause / external wall-clock + `Timer-end.wav`) + чип rec |
 | `quiz` | `/quiz` | Квиз после таймера; шкалы context/visual 1–5 ([`scale-slider`](../components/scale-slider/README.md)); условный pain; рыночный `tier`; микрофон в поле «Главный совет» |
@@ -38,6 +38,8 @@ Auth-gated deep link (`home` / `settings` / `onboarding` / `report` / `url` / `s
 | `notFound` | `/404` | Неизвестный path (not-found-screen); CTA → home / registration |
 
 **Не path:** `desktop-only-screen` — оверлей при viewport &lt; 768px (`mobile.md`); review/claim не стартуют.
+
+`document.title` по id: [`documentTitle.js`](../utils/documentTitle.js) (`applyDocumentTitle` из `applyRoute` / `syncRoute`; ключи `metaTitle*` в `locales.json`). Desktop-only — override, не роут.
 
 Корень `/` → `resolveEntryScreen(getSession())`. Query вроде `?ref=` / `?lang=` сохраняются.  
 Неизвестный path (не `/`, не в `ROUTE_PATHS`) → `go("notFound")` → `/404`.  
@@ -59,7 +61,7 @@ referral → auth → (authCode) → onboarding → home
 
 Auth-защита и Dashboard: [`auth-screen/README.md`](../components/auth-screen/README.md).  
 Brand visual / field errors: [`brand-screen-visual`](../components/brand-screen-visual/README.md), [`FIELD_ERROR.md`](../utils/FIELD_ERROR.md).  
-Home: [`home-screen/README.md`](../components/home-screen/README.md) (`homeRoute` query feed/mine/rating + filter на feed|mine, топ-50 по репутации, SWR `homeListCache` feed/feedReviewed/mine/rating, Ждёт/Уже + Ещё/Завершенные, intro до claim, mine report gate, feedSeen/3/3, «Топы в сети», tabbar-dock + submit, entrance cascade).
+Home: [`home-screen/README.md`](../components/home-screen/README.md) (`homeRoute` query feed/mine + `RATING_TAB_ENABLED` remap `?tab=rating` → feed, SWR `homeListCache` feed/feedReviewed/mine/rating, Ждёт/Уже + Ещё/Завершенные, intro до claim, mine report gate, feedSeen/3/3, «Топы в сети», tabbar-dock + submit, entrance cascade).
 Url: [`url-screen/README.md`](../components/url-screen/README.md) (back-chip + done).  
 Надиктовка (`/review` + поле совета): [`lib/dictation/README.md`](../lib/dictation/README.md).  
 Post-edit пунктуации: [`dictationPolish.js`](../api/dictationPolish.js) → Edge [`polish-dictation`](../../supabase/functions/polish-dictation/README.md) (**сейчас off** — `POLISH_ENABLED = false`).  

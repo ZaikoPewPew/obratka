@@ -18,7 +18,7 @@ SoT политики и QA: [`mobile.md`](../../../mobile.md). Карта: [`SCR
 | Mid-review сужение | silent abort: release claim, без монет, `go("home")` |
 | Deep link review/quiz/done | redirect `/home` под оверлеем |
 | `claimAndStartReview` | `return false` пока гейт / узкий viewport |
-| Ресайз ≥ 768 | `close()` → `applyDocumentI18n()` |
+| Ресайз ≥ 768 | `close()` → снять override `document.title` |
 
 ## Копирайт
 
@@ -27,7 +27,7 @@ SoT политики и QA: [`mobile.md`](../../../mobile.md). Карта: [`SCR
 | `desktopOnlyTitle` | Ревьюим только с компа | Reviews only from a computer |
 | `metaTitleDesktopOnly` | Обратка — только с компьютера | Obratka — desktop only |
 
-На `open()` — `document.title = metaTitleDesktopOnly`. Висячие предлоги — `fixHangingPrepositions`.
+`document.title` на `open()` — override `metaTitleDesktopOnly` из `syncDesktopOnlyGate` в `main.js` (`setDocumentTitleOverride`); на `close()` override снимается, возвращается тайтл текущего роута. Висячие предлоги в UI-фразе — `fixHangingPrepositions`.
 
 Кнопок CTA нет (нет «продолжить на мобилке»).
 

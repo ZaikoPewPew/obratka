@@ -78,7 +78,7 @@ resetAnalytics(); // logout
 
 ## Pageviews (`$pageview`)
 
-Шлётся после `activeRouteId = id` в `applyRoute`.
+Шлётся после `activeRouteId = id` в `applyRoute`. Перед `$pageview` выставляется `document.title` (`applyDocumentTitle`) — `$title` совпадает с вкладкой.
 
 | Prop | Смысл |
 |------|--------|
@@ -88,6 +88,8 @@ resetAnalytics(); // logout
 | `tab` / `filter` | только для `home` |
 
 Смена `?tab=` / `?filter=` на home тоже даёт pageview (тот же `route_id`, другие props).
+
+`/quiz` и `/quiz/done` идут через `syncRoute` **без** `applyRoute` — `$pageview` на них **нет**. «Дошли до квиза» = `review_timer_completed`.
 
 ## События сейчас (wired)
 
@@ -103,7 +105,7 @@ resetAnalytics(); // logout
 | `review_intro_cta` | CTA / «Не сейчас» / close | `portfolio_id`, `action`: `start` \| `dismiss` | Решение до claim |
 | `review_claimed` | после успешного claim | `portfolio_id` | Вход в ревью |
 | `review_claim_failed` | client/RPC fail | `reason` | Отвал до `/review` |
-| `review_timer_completed` | 45s → quiz panel | `portfolio_id`, `embed_mode`: `iframe` \| `external` | Дошли до квиза |
+| `review_timer_completed` | 60s → quiz panel | `portfolio_id`, `embed_mode`: `iframe` \| `external` | Дошли до квиза (не `$pageview` `/quiz`) |
 | `review_submitted` | после INSERT review | `portfolio_id` | Успех ревью (+монеты) |
 | `review_aborted` | confirm abort / desktop-only gate | `portfolio_id?`, `route_id?`, `reason?` (`desktop_only_gate`) | Уход без награды |
 | `review_next_case_clicked` | «Следующий кейс» | `ok` | Цикл следующего кейса |
@@ -144,11 +146,11 @@ $pageview(home)
   → review_claimed | review_claim_failed
   → $pageview(review)
   → review_timer_completed
-  → $pageview(quiz)
   → review_submitted | review_aborted
-  → $pageview(done)
   → review_next_case_clicked
 ```
+
+Квиз и `/quiz/done` — silent `syncRoute`, без `$pageview`.
 
 **Планируемые** (навесить при переделке воронки ревью):
 
