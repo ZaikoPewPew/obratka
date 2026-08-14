@@ -8,7 +8,7 @@
 `reputation-*.svg` — inline через `?raw` (группа `.home-screen__reputation-eyes` для анимации взгляда на чипе; в топ-50 на вкладке «Рейтинг» — те же SVG статично, без idle-loop).
 `plus.svg` / `report-sent.svg` — inline через `?raw` (`currentColor`).
 `report-sent.svg` — галочка в сером превью карточки сегмента «Уже отревьюено» (`--home-screen-card-reviewed-icon-color` → `--color-success`).
-FAB feedback — Lottie [`lottie/cap-lottie.json`](lottie/cap-lottie.json), не `feedback.svg`.
+FAB feedback — глаза в [`feedback`](../components/feedback/README.md) (не Lottie и не `feedback.svg`; `cap-lottie.json` пока не используется).
 
 ### `home/modal/`
 
@@ -46,7 +46,7 @@ FAB feedback — Lottie [`lottie/cap-lottie.json`](lottie/cap-lottie.json), не
 
 | Файл | Роль |
 |------|------|
-| `cap-lottie.json` | FAB feedback на home ([`feedback`](../components/feedback/README.md)) |
+| `cap-lottie.json` | бывшая Lottie-кепка FAB; сейчас не подключается ([`feedback`](../components/feedback/README.md) — глаза) |
 
 ## `video/`
 

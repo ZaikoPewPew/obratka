@@ -257,6 +257,15 @@
   --motion-control-error-buzz-x: 3px;
   --motion-control-error-buzz-duration: 420ms;
   --motion-control-error-buzz-ease: cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  /* FAB feedback: живой морг + lerp слежения / idle-взгляд по сторонам */
+  --motion-feedback-blink-duration: 180ms;
+  --motion-feedback-blink-ease: cubic-bezier(0.33, 0, 0.2, 1);
+  --motion-feedback-blink-scale: 0.08;
+  --motion-feedback-blink-delay-min: 3200ms;
+  --motion-feedback-blink-delay-max: 6200ms;
+  --motion-feedback-look-lerp: 0.045;
+  --motion-feedback-idle-lerp: 0.04;
+  --motion-feedback-idle-duration: 9000ms;
   /* Toast Notification: выезд справа → hold → уезд вправо */
   --motion-notification-duration: var(--motion-screen-duration);
   --motion-notification-ease: var(--motion-screen-ease);
@@ -1404,23 +1413,32 @@
   --home-screen-reveal-delay-tabbar: var(--motion-delay-4);
   --home-screen-reveal-delay-fab: var(--motion-delay-5);
 
-  /* FAB feedback (Telegram) */
+  /* FAB feedback (Telegram) — глаза 9×10, pad/gap 8 */
   --feedback-size: 56px;
-  /* Визуальная компенсация: контейнер больше артборда лотти */
-  --feedback-hit-size: calc(var(--feedback-size) * 1.25);
-  --feedback-lottie-nudge-y: var(--space-2);
   --feedback-offset: var(--space-4);
-  --feedback-padding-x: var(--space-4);
-  --feedback-padding-y: var(--space-3);
   --feedback-radius: var(--radius-md);
-  --feedback-icon: 24px;
   --feedback-z: var(--home-screen-tabbar-z);
   --feedback-bg: var(--color-accent);
   --feedback-bg-hover: var(--color-accent-hover);
   --feedback-bg-active: var(--color-accent-active);
-  --feedback-color: var(--color-on-accent);
-  --feedback-color-hover: var(--color-on-accent-hover);
-  --feedback-color-active: var(--color-on-accent-active);
+  --feedback-eye-width: 9px;
+  --feedback-eye-height: 10px;
+  --feedback-eye-gap: var(--space-2);
+  --feedback-eye-gap-min: calc(var(--space-2) / 2);
+  --feedback-eye-pad: var(--space-2);
+  --feedback-eye-fill: var(--color-on-accent);
+  --feedback-eye-look-range: 96px;
+  --feedback-eye-rest-y: calc(
+    var(--feedback-eye-pad) + (var(--feedback-eye-height) / 2)
+  );
+  --feedback-eye-rest-left-x: calc(
+    (var(--feedback-size) / 2) - (var(--feedback-eye-width) / 2) -
+      (var(--feedback-eye-gap) / 2)
+  );
+  --feedback-eye-rest-right-x: calc(
+    (var(--feedback-size) / 2) + (var(--feedback-eye-width) / 2) +
+      (var(--feedback-eye-gap) / 2)
+  );
   --feedback-tooltip-padding-x: var(--space-2);
   --feedback-tooltip-padding-y: var(--space-2);
   --feedback-tooltip-radius: var(--radius-xs);

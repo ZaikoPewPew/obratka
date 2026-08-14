@@ -1,4 +1,4 @@
-/* Fixed FAB feedback на home. */
+/* Fixed FAB feedback на home: 56×56, глаза следят за курсором. */
 
 .feedback {
   box-sizing: border-box;
@@ -10,27 +10,16 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: var(--feedback-hit-size);
-  height: var(--feedback-hit-size);
+  width: var(--feedback-size);
+  height: var(--feedback-size);
   margin: 0;
   padding: 0;
   border: none;
   border-radius: var(--feedback-radius);
-  background: transparent;
-  color: var(--feedback-color);
+  background: var(--feedback-bg);
   text-decoration: none;
   cursor: pointer;
   pointer-events: auto;
-}
-
-.feedback:hover {
-  background: transparent;
-  color: var(--feedback-color-hover);
-}
-
-.feedback:active {
-  background: transparent;
-  color: var(--feedback-color-active);
 }
 
 .feedback:focus-visible {
@@ -38,19 +27,48 @@
   outline-offset: var(--focus-ring-offset);
 }
 
-.feedback__lottie {
-  display: block;
-  width: var(--feedback-hit-size);
-  height: var(--feedback-hit-size);
-  flex-shrink: 0;
-  pointer-events: none;
-  transform: translateY(var(--feedback-lottie-nudge-y));
-}
-
-.feedback__lottie svg {
+.feedback__eyes {
+  position: relative;
   display: block;
   width: 100%;
   height: 100%;
+  pointer-events: none;
+}
+
+.feedback__eye {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--feedback-eye-width);
+  height: var(--feedback-eye-height);
+  transform: translate(
+    calc(var(--feedback-eye-x) - (var(--feedback-eye-width) / 2)),
+    calc(var(--feedback-eye-y) - (var(--feedback-eye-height) / 2))
+  );
+}
+
+.feedback__eye--left {
+  --feedback-eye-x: var(--feedback-eye-rest-left-x);
+  --feedback-eye-y: var(--feedback-eye-rest-y);
+}
+
+.feedback__eye--right {
+  --feedback-eye-x: var(--feedback-eye-rest-right-x);
+  --feedback-eye-y: var(--feedback-eye-rest-y);
+}
+
+.feedback__eye-ball {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--feedback-eye-fill);
+  transform-origin: center;
+}
+
+.feedback--blink .feedback__eye-ball {
+  animation: motion-feedback-blink var(--motion-feedback-blink-duration)
+    var(--motion-feedback-blink-ease) both;
 }
 
 .feedback__tip {
@@ -83,7 +101,7 @@
   content: "";
   position: absolute;
   top: 100%;
-  right: calc(var(--feedback-hit-size) / 2);
+  right: calc(var(--feedback-size) / 2);
   width: 0;
   height: 0;
   border-left: var(--feedback-tooltip-tail-size) solid transparent;
@@ -113,5 +131,9 @@
 
   .feedback__tip::after {
     transform: translateX(50%);
+  }
+
+  .feedback--blink .feedback__eye-ball {
+    animation: none;
   }
 }

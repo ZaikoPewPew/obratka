@@ -77,6 +77,22 @@
   }
 }
 
+/** Морг глаз FAB: быстрое закрытие, короткая пауза, более медленное открытие. */
+@keyframes motion-feedback-blink {
+  0% {
+    transform: scaleY(1);
+  }
+
+  18%,
+  32% {
+    transform: scaleY(var(--motion-feedback-blink-scale));
+  }
+
+  100% {
+    transform: scaleY(1);
+  }
+}
+
 /** Пульс красного индикатора во время записи. */
 @keyframes motion-recording-blink {
   0%,
@@ -342,6 +358,10 @@
   }
 
   .motion-control-error-buzz {
+    animation: none;
+  }
+
+  .feedback--blink .feedback__eye-ball {
     animation: none;
   }
 }

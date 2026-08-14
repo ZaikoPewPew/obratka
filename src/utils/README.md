@@ -28,6 +28,7 @@
 | `feedSeen.js` | seen id кейсов open-ленты для точки на «Чужие посты» (`localStorage` `obratka.feedSeen.<userId>`); открытие feed гасит; seed baseline; `clearFeedSeen` на logout |
 | `mineReadySeen.js` | seen id готовых отчётов для точки на «Мои» / «Завершенные» (`localStorage` `obratka.mineReadySeen.<userId>`); открытие «Завершенные» гасит; `clearMineReadySeen` на logout |
 | `documentTitle.js` | `document.title` по `AppRouteId` (`metaTitle*`); `applyRoute` / `syncRoute`; desktop-only — override |
+| `feedbackEyes.js` | позиции глаз FAB feedback (покой 8px сверху, зазор 8 / squeeze до 4 / clamp pad 8 / idle-взгляд) |
 | `tabAttention.js` | мигание `document.title` + favicon при конце таймера ревью (если вкладка скрыта); стоп по `window` focus; ассет `/assets/svg/favicon_timer.svg` |
 | `viewport.js` | desktop-only: `DESKTOP_MIN_WIDTH_PX` (=768), `isDesktopViewport`, `subscribeDesktopViewport` (`matchMedia`) — [`mobile.md`](../../mobile.md) |
 | `aggregatePortfolioReviews.js` | агрегаты листов (counts / min–max / `adviceList`) для сводного PDF |

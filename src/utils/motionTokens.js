@@ -107,6 +107,56 @@ export function getMotionControlErrorBuzz() {
 }
 
 /**
+ * FAB feedback: морг, lerp слежения и idle-взгляд по сторонам.
+ * @returns {{
+ *   blinkDurationMs: number;
+ *   blinkDelayMinMs: number;
+ *   blinkDelayMaxMs: number;
+ *   lookLerp: number;
+ *   idleLerp: number;
+ *   idleDurationMs: number;
+ *   lookRangePx: number;
+ * }}
+ */
+export function getFeedbackEyeMotion() {
+  const lerpRaw = Number.parseFloat(readCssVar("--motion-feedback-look-lerp"));
+  const lookLerp =
+    Number.isFinite(lerpRaw) && lerpRaw > 0 && lerpRaw <= 1 ? lerpRaw : 0.045;
+  const idleLerpRaw = Number.parseFloat(
+    readCssVar("--motion-feedback-idle-lerp"),
+  );
+  const idleLerp =
+    Number.isFinite(idleLerpRaw) && idleLerpRaw > 0 && idleLerpRaw <= 1
+      ? idleLerpRaw
+      : 0.04;
+
+  return {
+    blinkDurationMs: parseCssTimeMs(
+      readCssVar("--motion-feedback-blink-duration"),
+      180,
+    ),
+    blinkDelayMinMs: parseCssTimeMs(
+      readCssVar("--motion-feedback-blink-delay-min"),
+      3200,
+    ),
+    blinkDelayMaxMs: parseCssTimeMs(
+      readCssVar("--motion-feedback-blink-delay-max"),
+      6200,
+    ),
+    lookLerp,
+    idleLerp,
+    idleDurationMs: parseCssTimeMs(
+      readCssVar("--motion-feedback-idle-duration"),
+      9000,
+    ),
+    lookRangePx: parseCssLengthPx(
+      readCssVar("--feedback-eye-look-range"),
+      96,
+    ),
+  };
+}
+
+/**
  * Toast Notification: длительность slide + авто-hide.
  * @returns {{ durationMs: number; holdMs: number; easing: string }}
  */
