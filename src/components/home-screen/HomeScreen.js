@@ -477,10 +477,9 @@ function bindImageFallbacks(img, candidates) {
 
 /**
  * Hover/focus tip над хостом (слоты ревьюеров, бейджи автора, чипы, плюс).
- * `below: true` — под хостом (своя pending-карточка).
  * @param {HTMLElement} host
  * @param {string} label
- * @param {{ setAriaLabel?: boolean; below?: boolean }} [opts]
+ * @param {{ setAriaLabel?: boolean }} [opts]
  */
 function attachHomeTooltip(host, label, opts = {}) {
   const text = typeof label === "string" ? label.trim() : "";
@@ -489,9 +488,7 @@ function attachHomeTooltip(host, label, opts = {}) {
     host.setAttribute("aria-label", text);
   }
   const tooltip = document.createElement("span");
-  tooltip.className = opts.below
-    ? "home-screen__tip home-screen__tip--below"
-    : "home-screen__tip";
+  tooltip.className = "home-screen__tip";
   tooltip.setAttribute("role", "tooltip");
   tooltip.textContent = text;
   host.append(tooltip);
@@ -2948,12 +2945,6 @@ export function createHomeScreen({
     } else if (item.isOwn) {
       button.classList.add("home-screen__card--own");
       syncOwnCardCopy(button, item);
-      if (pendingOwn) {
-        attachHomeTooltip(button, t.homeMineNotReadyTitle ?? "", {
-          setAriaLabel: false,
-          below: true,
-        });
-      }
       button.addEventListener("click", () => {
         openOwnCard(latestItem(item.id) ?? item);
       });

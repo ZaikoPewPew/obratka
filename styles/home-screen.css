@@ -1143,9 +1143,7 @@
 .home-screen__chip:hover .home-screen__tip,
 .home-screen__chip:focus-visible .home-screen__tip,
 .home-screen__tabbar-submit:hover .home-screen__tip,
-.home-screen__tabbar-submit:focus-visible .home-screen__tip,
-.home-screen__card:hover > .home-screen__tip--below,
-.home-screen__card:focus-visible > .home-screen__tip--below {
+.home-screen__tabbar-submit:focus-visible .home-screen__tip {
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
@@ -1157,16 +1155,14 @@
     visibility 0s;
 }
 
-/* Чипы в шапке и pending own-карточка — tip снизу */
-.home-screen__chip .home-screen__tip,
-.home-screen__tip--below {
+/* Чипы в шапке — tip снизу */
+.home-screen__chip .home-screen__tip {
   --_tip-shift: calc(var(--home-screen-reviewer-slot-tooltip-shift) * -1);
   top: calc(100% + var(--home-screen-reviewer-slot-tooltip-offset));
   bottom: auto;
 }
 
-.home-screen__chip .home-screen__tip::after,
-.home-screen__tip--below::after {
+.home-screen__chip .home-screen__tip::after {
   top: auto;
   bottom: 100%;
   border-top: none;
@@ -2174,9 +2170,7 @@
   .home-screen__chip:hover .home-screen__tip,
   .home-screen__chip:focus-visible .home-screen__tip,
   .home-screen__tabbar-submit:hover .home-screen__tip,
-  .home-screen__tabbar-submit:focus-visible .home-screen__tip,
-  .home-screen__card:hover > .home-screen__tip--below,
-  .home-screen__card:focus-visible > .home-screen__tip--below {
+  .home-screen__tabbar-submit:focus-visible .home-screen__tip {
     transform: translateX(-50%);
     transition: none;
   }
