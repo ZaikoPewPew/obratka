@@ -78,7 +78,7 @@ resetAnalytics(); // logout
 
 ## Pageviews (`$pageview`)
 
-Шлётся после `activeRouteId = id` в `applyRoute`. Перед `$pageview` выставляется `document.title` (`applyDocumentTitle`) — `$title` совпадает с вкладкой.
+Шлётся после `activeRouteId = id` в `applyRoute`. Перед `$pageview` выставляется `document.title` (`applyDocumentTitle`) — `$title` совпадает с вкладкой. Лендос (MPA) шлёт `$pageview` из `landing/src/main.js` (`route_id`: `landing`).
 
 | Prop | Смысл |
 |------|--------|
@@ -95,7 +95,9 @@ resetAnalytics(); // logout
 
 | Event | Где | Props | Зачем |
 |-------|-----|-------|--------|
-| `$pageview` | `applyRoute` | `route_id`, `path`, home `tab`/`filter` | Посещаемость |
+| `$pageview` | `applyRoute` / лендос `init` | `route_id`, `path`, home `tab`/`filter` | Посещаемость |
+| `landing_cta_clicked` | лендос «Войти» / «Попробовать сервис» | `placement`: `header` \| `hero`, `dest`: `referral` \| `registration` | Вход в продукт с лендоса |
+| `landing_nav_clicked` | якоря шапки лендоса | `target`: `how` \| `price` \| `faq` | Скролл к блоку |
 | `referral_validated` | referral submit ok | — | Старт воронки invite |
 | `auth_started` | клик Telegram / Google | `provider`: `telegram` \| `google` | Старт логина |
 | `auth_legal_opened` | клик ссылки согласия на `/registration` | `doc`: `privacy` \| `terms` | Открытие политики / соглашения |
@@ -123,7 +125,8 @@ Identify traits: `grade`, `tier`, `onboarding_done` (без email).
 ### A. Онбординг (acquisition)
 
 ```text
-referral_validated → auth_started → auth_success | auth_failed
+$pageview(landing) → landing_cta_clicked
+  → referral_validated → auth_started → auth_success | auth_failed
   → $pageview(onboarding) → onboarding_done → $pageview(home)
 ```
 

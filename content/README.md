@@ -7,7 +7,7 @@
 - Рендер в панель: `fillSidePanelDoc()` в [`src/utils/legalDoc.js`](../src/utils/legalDoc.js) (home, landing, `/registration`).
 - `onboarding.json` / `onboarding.md` — шаги онбординга (`/onboarding`).
 - `embed-hosts.md` — площадки портфолио: спец-embed / `EXTERNAL_EMBED_HOSTS` / optimistic + Readymag probe + iframe fallback. Код: `src/utils/embedHosts.js`, `portfolioEmbed.js`.
-- `founder-avatars.json` — пул GitHub-источников для стека аватаров (`pickCount` + `sources`). Shuffle: `getFounderAvatarSourcesForPage()` в `src/i18n.js` → unavatar.io. Сейчас: `/referral` ([`referral-screen`](../src/components/referral-screen/README.md)).
+- `founder-avatars.json` — пул GitHub-источников для стека аватаров (`pickCount` + `sources`). Shuffle: `getFounderAvatarSourcesForPage()` в `src/i18n.js` → unavatar.io. Сейчас: `/referral` и hero лендоса (`landing/src/proofAvatars.js`).
 
 Новый язык: `supportedLocales` + полный блок ключей + `LOCALE_NATIVE_NAMES` в `src/i18n.js`.
 

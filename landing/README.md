@@ -15,19 +15,20 @@ npm run dev
 
 ## Блоки
 
-Шесть+ полноэкранных панелей (`scroll-snap`):
+Полноэкранные панели (`scroll-snap`):
 
-1. **Hook** — «нанимающие / 30 секунд» (акцент + кисточное подчёркивание)  
+1. **Hero** — польза («готово ли портфолио») + описание + CTA «Попробовать сервис» + стек аватаров  
 2. **Question** — готово ли портфолио (акцент «готово»)  
 3. **Pain** — часы на исправления (акцент «Ты тратишь часы»)  
 4. **Bridge** — «замерить?» (акцент)  
 5. **Community** — «Обратка — это сообщество…» (акцент «честную обратную связь»)  
-6. **Demo** — только видео **833×478**  
-7. **Outcome** — 3 ревью + рекомендации (акцент «3 независимых ревью»)  
-8. **Closing** — «Хватит править портфолио вслепую» / «Забирай реферальный код» + CTA «В сообщество»  
-9. **FAQ** — последний блок страницы  
+6. **Demo** — только видео **833×478** (`#how`, меню «Как это работает»)  
+7. **Price** — «Это бесплатно» / три чужих ревью → слот (`#price`, меню «Цена»)  
+8. **Closing** — «Хватит править портфолио вслепую» / «Забирай реферальный код» + CTA «В сообщество» (Telegram)  
+9. **FAQ** — последний блок (`#faq`)  
 
-Шапка sticky; footer: © + «Сообщество» (Telegram) + «Правила» / «Политика» / «Соглашение» (один side-panel из `rules.json` / `privacy.json` / `terms.json`).  
+Шапка sticky: логотип + якоря (Как это работает / Цена / FAQ) + «Войти».  
+Footer: © + «Сообщество» (Telegram) + «Правила» / «Политика» / «Соглашение» (один side-panel из `rules.json` / `privacy.json` / `terms.json`).  
 Типографика: title `32 / semibold`, body `16 / 1.7`.
 
 ## Motion
@@ -39,22 +40,23 @@ npm run dev
 
 ## CTA
 
-В шапке — **«Сообщество»**; в closing — **«В сообщество»** (`data-landing-cta`). Href через `import.meta.env.BASE_URL` / канал:
+В шапке — **«Войти»**; в hero — **«Попробовать сервис»** (`data-landing-cta`). Href через `import.meta.env.BASE_URL` / invite gate:
 
 | Условие | Куда |
 |---------|------|
-| `?ref=` в URL лендоса | `/referral?ref=…` (внутри app) |
+| `?ref=` в URL лендоса | `/referral?ref=…` |
 | `obratka.inviteGatePassed` (уже вводили код на этом устройстве) | `/registration` |
-| иначе | [t.me/obratka_dsgn](https://t.me/obratka_dsgn) (`target=_blank`) — коды дропаются в канале |
+| иначе | `/referral` |
 
+Closing «В сообщество» и футер «Сообщество» — [t.me/obratka_dsgn](https://t.me/obratka_dsgn), без перезаписи.  
 Читаем `getInviteGatePassed` — не пишем в gate / session.
 
 ## Изоляция
 
 | Можно | Нельзя |
 |-------|--------|
-| Токены `--landing-*`, `createVideoPlayerCard`, `createSidePanel`, `getLegalDoc` / `fillSidePanelDoc`, `fixHangingPrepositions`, `gsap` (только лендос) | `src/api/*`, `src/main.js`, `src/app/session.js` |
-| Читать `inviteGatePassed`; CTA → Telegram / `/referral` / `/registration` | Писать в `obratka.session` / invite gate |
+| Токены `--landing-*`, `createVideoPlayerCard`, `createSidePanel`, `getLegalDoc` / `fillSidePanelDoc`, `fixHangingPrepositions`, `gsap` (только лендос), фасад аналитики, `founder-avatars.json` | `src/api/*`, `src/main.js`, `src/app/session.js` |
+| Читать `inviteGatePassed`; CTA → `/referral` / `/registration` | Писать в `obratka.session` / invite gate |
 | Свои строки в HTML (не `locales.json`); демо из `src/assets/video/` | Монтировать продуктовые экраны |
 
 Копирайт лендоса **не** в `content/locales.json` — статичный HTML + `data-fix-hanging`.
@@ -64,10 +66,11 @@ npm run dev
 | Путь | Роль |
 |------|------|
 | `landing/index.html` | Разметка |
-| `landing/src/main.js` | CTA, hanging, demo, FAQ, rules side-panel, reveal |
+| `landing/src/main.js` | CTA, hanging, demo, FAQ, rules side-panel, reveal, analytics |
+| `landing/src/proofAvatars.js` | Стек аватаров hero (unavatar + `founder-avatars.json`) |
 | `landing/src/scrollReveal.js` | Word-by-word GSAP ScrollTrigger |
 | `landing/styles/landing.css` | Стили (только `var(--landing-*)` / семантика) |
-| `styles/tokens.css` | `--landing-*` (demo, FAQ, scroll-reveal) |
+| `styles/tokens.css` | `--landing-*` (demo, FAQ, nav, proof, scroll-reveal) |
 | `src/components/video-player-card/` | Плеер showcase |
 
 ## SEO (фаза 1)

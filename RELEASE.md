@@ -42,7 +42,7 @@ SoT продукта: [`PROJECT.md`](PROJECT.md) · экраны: [`SCREENS.md`]
 
 - [ ] Пройти все блоки: шапка → hero → боль → преимущества → закрытие
 - [ ] Копирайт / визуал под финальный месседж invite-only
-- [ ] CTA: `?ref=` → `/referral?ref=…`; invite gate → `/registration`; иначе Telegram-сообщество (см. [`landing/README.md`](landing/README.md))
+- [ ] CTA: `?ref=` → `/referral?ref=…`; invite gate → `/registration`; иначе `/referral`. Шапка «Войти» / hero «Попробовать сервис». Closing и футер — Telegram (см. [`landing/README.md`](landing/README.md))
 - [x] OG/canonical/robots/sitemap ок на prod (`og-share.png`, absolute URLs на `obratka.net`)
 - [ ] Desktop + узкий viewport лендоса читаются (лендос **не** desktop-only гейт SPA)
 - [x] Токены `--landing-*`, без сырых цветов (аудит CSS)

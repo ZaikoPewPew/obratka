@@ -1,6 +1,6 @@
 /**
  * Entry лендоса. Без api / session / Supabase.
- * Snap-панели; CTA → Telegram (код) /referral|/registration; panel reveal + word scroll-reveal.
+ * Snap-панели; CTA → /referral|/registration; panel reveal + word scroll-reveal.
  */
 
 import { createVideoPlayerCard } from "../../src/components/video-player-card/VideoPlayerCard.js";
@@ -8,10 +8,10 @@ import { createSidePanel } from "../../src/components/side-panel/SidePanel.js";
 import { fixHangingPrepositions } from "../../src/utils/hangingPrepositions.js";
 import { fillSidePanelDoc, getLegalDoc } from "../../src/utils/legalDoc.js";
 import { getInviteGatePassed } from "../../src/utils/inviteGate.js";
+import { initAnalytics, track, trackPage } from "../../src/lib/analytics.js";
 import primerVideo from "../../src/assets/video/primer.mp4";
+import { mountLandingProof } from "./proofAvatars.js";
 import { initLandingScrollReveal } from "./scrollReveal.js";
-
-const TELEGRAM_COMMUNITY_URL = "https://t.me/obratka_dsgn";
 
 function appPath(segment, search = "") {
   const base = String(import.meta.env.BASE_URL || "/");
@@ -30,31 +30,46 @@ function registrationHref() {
   return appPath("registration");
 }
 
-function initCtas() {
+/**
+ * @returns {{ href: string, dest: "referral" | "registration" }}
+ */
+function resolveAppEntry() {
   const params = new URLSearchParams(window.location.search);
   const ref = params.get("ref");
-  /** @type {{ href: string, external: boolean }} */
-  let target;
   if (ref) {
-    target = {
+    return {
       href: referralHref(`?ref=${encodeURIComponent(ref)}`),
-      external: false,
+      dest: "referral",
     };
-  } else if (getInviteGatePassed()) {
-    target = { href: registrationHref(), external: false };
-  } else {
-    target = { href: TELEGRAM_COMMUNITY_URL, external: true };
   }
+  if (getInviteGatePassed()) {
+    return { href: registrationHref(), dest: "registration" };
+  }
+  return { href: referralHref(), dest: "referral" };
+}
+
+function initCtas() {
+  const target = resolveAppEntry();
 
   document.querySelectorAll("[data-landing-cta]").forEach((el) => {
+    if (!(el instanceof HTMLAnchorElement)) return;
+    const placement = el.getAttribute("data-landing-cta") || "hero";
     el.setAttribute("href", target.href);
-    if (target.external) {
-      el.setAttribute("target", "_blank");
-      el.setAttribute("rel", "noopener noreferrer");
-    } else {
-      el.removeAttribute("target");
-      el.removeAttribute("rel");
-    }
+    el.removeAttribute("target");
+    el.removeAttribute("rel");
+    el.addEventListener("click", () => {
+      track("landing_cta_clicked", { placement, dest: target.dest });
+    });
+  });
+}
+
+function initNav() {
+  document.querySelectorAll("[data-landing-nav]").forEach((el) => {
+    if (!(el instanceof HTMLAnchorElement)) return;
+    el.addEventListener("click", () => {
+      const target = el.getAttribute("data-landing-nav") || "";
+      if (target) track("landing_nav_clicked", { target });
+    });
   });
 }
 
@@ -237,8 +252,12 @@ function initLegalPanel() {
 }
 
 function init() {
+  initAnalytics();
+  trackPage("landing");
   initHanging();
   initCtas();
+  initNav();
+  mountLandingProof(document.querySelector("[data-landing-proof]"));
   initDemoVideo();
   initPanelReveal();
   initFaqAccordion();

@@ -29,7 +29,7 @@
 | App modal (shared overlays) | wired |
 | Settings `/settings` | wired (view-only side-panel, без Save) |
 | SPA not-found `/404` | wired (`not-found-screen`; мусорный path → `/404`) |
-| Landing `/landing/` | wired (MPA entry, без session; CTA Telegram-first; [`landing/README.md`](landing/README.md)) |
+| Landing `/landing/` | wired (MPA entry, без session; шапка «Войти» / hero → `/referral` или `/registration`; [`landing/README.md`](landing/README.md)) |
 | Legacy waitlist UI | **удалён** (спека в `mobile.md` § Архив) |
 | Mobile | **desktop-only** (&lt;768px → `desktop-only-screen`; см. `mobile.md`) |
 
@@ -272,7 +272,7 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 - Url-screen: чип «На главную» (`.url-screen__back`, скрыт на done) → `onExit` → home
 - Desktop-only: [`mobile.md`](mobile.md) + [`desktop-only-screen`](src/components/desktop-only-screen/README.md) + [`viewport.js`](src/utils/viewport.js)
 - Report consensus PDF: [`ACTION_CARDS.md`](ACTION_CARDS.md) — `actionCards.json` (триггеры) + `actionResources.json` (URL / covers) → `resolveActionCards` → `shareConsensusPdf`
-- Landing: отдельный Vite entry [`landing/`](landing/README.md) (`dist/landing/`); CTA Telegram-first (`t.me/obratka_dsgn`); `?ref=` → `/referral`; после gate → `/registration`; без api/session
+- Landing: отдельный Vite entry [`landing/`](landing/README.md) (`dist/landing/`); «Войти» / «Попробовать» → `/referral` или `/registration` по invite gate; `?ref=` → `/referral`; closing/футер — Telegram; без api/session
 
 Waitlist dual-layout удалён; историческая спека — [`mobile.md`](mobile.md) § Архив.
 

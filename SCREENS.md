@@ -303,7 +303,7 @@ iframe — пауза при `visibility hidden`; external — wall-clock + де
 - [`src/components/desktop-only-screen/README.md`](src/components/desktop-only-screen/README.md) — гейт &lt;768px («только с компьютера»)
 - [`src/components/not-found-screen/README.md`](src/components/not-found-screen/README.md) — SPA `/404`
 - [`mobile.md`](mobile.md) — политика desktop-only + QA + архив waitlist
-- [`landing/README.md`](landing/README.md) — промо MPA (CTA Telegram-first)
+- [`landing/README.md`](landing/README.md) — промо MPA (вход через рефералку / регистрацию)
 - [`ACTION_CARDS.md`](ACTION_CARDS.md) — сводный PDF + action cards / resources
 - [`src/utils/FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — ошибки полей
 - [`src/assets/README.md`](src/assets/README.md) — марки / morph

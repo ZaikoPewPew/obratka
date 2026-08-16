@@ -8,7 +8,7 @@
     />
     <meta
       name="description"
-      content="Закрытое сообщество продуктовых дизайнеров: живые ревью от людей твоего грейда и выше"
+      content="Три дизайнера твоего грейда смотрят кейсы и пишут, что слабо и что менять"
     />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="%SITE_ORIGIN%%SITE_BASE%landing/" />
@@ -19,11 +19,11 @@
     />
     <meta
       property="og:title"
-      content="Получи 3 ревью своего портфолио"
+      content="Пойми, готово ли портфолио к поиску работы"
     />
     <meta
       property="og:description"
-      content="Закрытое сообщество продуктовых дизайнеров: живые ревью от людей твоего грейда и выше"
+      content="Три дизайнера твоего грейда смотрят кейсы и пишут, что слабо и что менять"
     />
     <meta property="og:url" content="%SITE_ORIGIN%%SITE_BASE%landing/" />
     <meta
@@ -35,11 +35,11 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="Получи 3 ревью своего портфолио"
+      content="Пойми, готово ли портфолио к поиску работы"
     />
     <meta
       name="twitter:description"
-      content="Закрытое сообщество продуктовых дизайнеров: живые ревью от людей твоего грейда и выше"
+      content="Три дизайнера твоего грейда смотрят кейсы и пишут, что слабо и что менять"
     />
     <meta
       name="twitter:image"
@@ -65,35 +65,66 @@
             height="24"
           />
         </a>
-        <a
-          class="landing-cta"
-          data-landing-cta
-          href="https://t.me/obratka_dsgn"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Сообщество</a
-        >
+        <div class="landing-header__end">
+          <nav class="landing-header__nav" aria-label="Разделы">
+            <a class="landing-header__link" href="#how" data-landing-nav="how"
+              >Как это работает</a
+            >
+            <a class="landing-header__link" href="#price" data-landing-nav="price"
+              >Цена</a
+            >
+            <a class="landing-header__link" href="#faq" data-landing-nav="faq"
+              >FAQ</a
+            >
+          </nav>
+          <a class="landing-cta" data-landing-cta="header" href="../referral"
+            >Войти</a
+          >
+        </div>
       </div>
     </header>
 
     <main class="landing-main">
-      <!-- 1. Hook: hiring attention -->
+      <!-- 1. Hero: benefit + CTA -->
       <section
         class="landing-panel landing-panel--intro"
         aria-labelledby="landing-hero-title"
         data-landing-panel
       >
-        <div class="landing-panel__inner landing-panel__inner--copy">
-          <h1
-            id="landing-hero-title"
-            class="landing-section__title"
-            data-fix-hanging
-            data-landing-scroll-reveal
-          >
-            Нанимающие тратят всего
-            <span class="landing-section__accent">30&nbsp;секунд</span><br />на&nbsp;просмотр
-            одного портфолио
-          </h1>
+        <div
+          class="landing-panel__inner landing-panel__inner--copy landing-panel__inner--hero"
+        >
+          <div class="landing-hero__copy">
+            <h1
+              id="landing-hero-title"
+              class="landing-section__title"
+              data-fix-hanging
+              data-landing-scroll-reveal
+            >
+              Пойми, готово ли портфолио к поиску работы
+            </h1>
+            <p
+              class="landing-section__body"
+              data-fix-hanging
+              data-landing-scroll-reveal
+            >
+              Три дизайнера твоего грейда смотрят кейсы и пишут, что слабо и что
+              менять
+            </p>
+          </div>
+          <div class="landing-hero__cta">
+            <a
+              class="landing-cta landing-cta--solid"
+              data-landing-cta="hero"
+              href="../referral"
+              >Попробовать сервис</a
+            >
+            <div class="landing-proof" data-landing-proof>
+              <p class="landing-proof__text" data-fix-hanging>
+                140 коллег уже шпионят изнутри
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -180,10 +211,11 @@
         </div>
       </section>
 
-      <!-- 6. Demo -->
+      <!-- 6. Demo — «Как это работает» -->
       <section
+        id="how"
         class="landing-panel landing-panel--demo"
-        aria-label="Демо ревью"
+        aria-label="Как это работает"
         data-landing-reveal
         data-landing-panel
       >
@@ -193,8 +225,9 @@
         ></div>
       </section>
 
-      <!-- 7. Outcome -->
+      <!-- 7. Price — «Бесплатно» -->
       <section
+        id="price"
         class="landing-panel landing-panel--outcome"
         aria-labelledby="landing-outcome-title"
         data-landing-panel
@@ -206,10 +239,9 @@
             data-fix-hanging
             data-landing-scroll-reveal
           >
-            Ты получишь
-            <span class="landing-section__accent"
-              >3&nbsp;независимых ревью</span
-            ><br />и&nbsp;рекомендации по&nbsp;улучшению
+            Это
+            <span class="landing-section__accent">бесплатно</span><br />Три
+            чужих ревью — и&nbsp;слот на&nbsp;своё
           </h2>
         </div>
       </section>
@@ -231,7 +263,6 @@
           </h2>
           <a
             class="landing-cta"
-            data-landing-cta
             href="https://t.me/obratka_dsgn"
             target="_blank"
             rel="noopener noreferrer"
@@ -242,6 +273,7 @@
 
       <!-- 9. FAQ — последний блок -->
       <section
+        id="faq"
         class="landing-panel landing-panel--faq"
         aria-labelledby="landing-faq-title"
         data-landing-panel

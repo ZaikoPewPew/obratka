@@ -99,7 +99,7 @@ iframe: таймер паузится при уходе со вкладки; ext
 `/report` = листы ревью автора (+ секция надиктовки) + жалоба (1 тег, окно 6ч от done) → reputation (старт 0 / бан −100 / +10 settle). Сводный PDF — majority + action cards из `actionCards`/`actionResources` ([`ACTION_CARDS.md`](ACTION_CARDS.md)). Вход только когда собраны все ревью.  
 `/banned` = бан (в т.ч. автобан при `reputation <= -100`).  
 `/404` = неизвестный path (`not-found-screen`); CTA → `/home` или `/registration`.  
-`/landing/` = промо MPA (без api/session); CTA Telegram-first (`t.me/obratka_dsgn`); `?ref=` → `/referral`; после gate → `/registration`.  
+`/landing/` = промо MPA (без api/session); «Войти» / «Попробовать» → `/referral` или `/registration` по invite gate; `?ref=` → `/referral`; closing/футер — Telegram.  
 Viewport &lt; 768px → оверлей `desktop-only-screen` ([`mobile.md`](mobile.md)).
 
 Клиентский кэш ленты: `sessionStorage` ключ `obratka.homeLists.<userId>`; seen готовых отчётов: `localStorage` `obratka.mineReadySeen.<userId>`; seen кейсов ленты: `localStorage` `obratka.feedSeen.<userId>` (все сбрасываются на logout).  
