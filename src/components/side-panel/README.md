@@ -88,9 +88,15 @@ await panel.close();
 
 ## Кейсы
 
-### Home — правила
+### Home / landing / auth — документы
 
-Account-menu → «Правила» (и ссылка из explainer репутации) → текст из [`content/rules.json`](../../../content/rules.json) через `getCommunityRules()` (`homeRulesCloseAria` — только aria крестика в locales). Home вешает `side-panel--over-modal`, чтобы панель была выше app-modal. Строки `body` (через `\n`) рендерятся как маркированный список (`.side-panel__section-list`).
+Один `createSidePanel` на поверхность, контент свапается: правила (`rules.json`), политика (`privacy.json`), соглашение (`terms.json`) через `getLegalDoc()` + `fillSidePanelDoc()` в [`src/utils/legalDoc.js`](../../utils/legalDoc.js).
+
+- Home: account-menu «Правила» (и ссылка из explainer репутации). Aria крестика: `homeRulesCloseAria`. Класс `side-panel--over-modal`.
+- Landing: футер «Правила» / «Политика» / «Соглашение».
+- `/registration`: consent-ссылки под кнопками входа (`authConsent*`, `authLegalCloseAria`). Панель вешается в `document.body`.
+
+Строки `body` (через `\n`) рендерятся как маркированный список (`.side-panel__section-list`).
 
 ### Report — просмотр листа
 

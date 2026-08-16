@@ -2505,6 +2505,9 @@ const authScreen = createAuthScreen({
   onAuthFailed: ({ provider, code }) => {
     track("auth_failed", { provider, code });
   },
+  onLegalOpen: ({ doc }) => {
+    track("auth_legal_opened", { doc });
+  },
   onSuccess: async (result) => {
     if (result.type === "email-otp-sent") {
       setPendingAuthEmail(result.email);

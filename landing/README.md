@@ -27,7 +27,7 @@ npm run dev
 8. **Closing** — «Хватит править портфолио вслепую» / «Забирай реферальный код» + CTA «В сообщество»  
 9. **FAQ** — последний блок страницы  
 
-Шапка sticky; footer: © + «Сообщество» (Telegram) + «Правила» (side-panel из `rules.json`).  
+Шапка sticky; footer: © + «Сообщество» (Telegram) + «Правила» / «Политика» / «Соглашение» (один side-panel из `rules.json` / `privacy.json` / `terms.json`).  
 Типографика: title `32 / semibold`, body `16 / 1.7`.
 
 ## Motion
@@ -53,7 +53,7 @@ npm run dev
 
 | Можно | Нельзя |
 |-------|--------|
-| Токены `--landing-*`, `createVideoPlayerCard`, `createSidePanel`, `getCommunityRules`, `fixHangingPrepositions`, `gsap` (только лендос) | `src/api/*`, `src/main.js`, `src/app/session.js` |
+| Токены `--landing-*`, `createVideoPlayerCard`, `createSidePanel`, `getLegalDoc` / `fillSidePanelDoc`, `fixHangingPrepositions`, `gsap` (только лендос) | `src/api/*`, `src/main.js`, `src/app/session.js` |
 | Читать `inviteGatePassed`; CTA → Telegram / `/referral` / `/registration` | Писать в `obratka.session` / invite gate |
 | Свои строки в HTML (не `locales.json`); демо из `src/assets/video/` | Монтировать продуктовые экраны |
 

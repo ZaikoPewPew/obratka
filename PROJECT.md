@@ -220,7 +220,7 @@ SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `p
 | Brand split (referral / auth / auth-code / onboarding / url) | `.url-screen*` + [`brand-screen-visual`](src/components/brand-screen-visual/README.md) + [`brand-screen-shell`](src/components/brand-screen-shell/README.md); на `/portfolio` — back-chip top-left |
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
-| Side panel | [`side-panel`](src/components/side-panel/README.md) — панель справа (слот); home → «Правила» |
+| Side panel | [`side-panel`](src/components/side-panel/README.md) — панель справа (слот); правила / политика ПДн / соглашение; consent на `/registration` |
 | Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `feedback`; feed/mine (+ кэш `rating`, таб UI off); URL-query; лента SWR (`feed`/`feedReviewed`/`mine`/`rating`); Ждёт/Уже + Ещё/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` / entrance cascade |
 | Review | `index.html` `.iframe-shell` + таймер + чип **rec** (заметки → `answers.dictation`; polish off/`POLISH_ENABLED`) в `main.js`; embed: `resolvePortfolioEmbed` / external UI |
 | Quiz | `review-screen` + `review-panel` + [`scale-slider`](src/components/scale-slider/README.md) (context/visual **1–5**; условный `pain`; рыночный `tier`) + mic → `advice`. SoT: [`QUIZ.md`](QUIZ.md) |

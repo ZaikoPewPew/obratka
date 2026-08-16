@@ -22,6 +22,8 @@
 | `shareReviewPdf.js` | печать PDF-отчёта (1 ревьюер = 1 страница; `onComplete`) |
 | `referralCode.js` | нормализация referral-кода / URL |
 | `inviteGate.js` | device flag `obratka.inviteGatePassed` после validate; переживает logout / `clearSession` |
+| `legalDoc.js` | документы side-panel: `getLocalizedDoc` / `getCommunityRules` / `getPrivacyPolicy` / `getTermsOfService` / `getLegalDoc` / `fillSidePanelDoc` (`rules.json` + `privacy.json` + `terms.json`) |
+| `communityRules.js` | реэкспорт `getCommunityRules()` из `legalDoc.js` |
 | `backdropLuminance.js` | яркость фона под элементом (home tabbar → `--on-dark`; не ломать glass blur / entrance dock) |
 | `homeRoute.js` | parse/build/canonical query для `/home`: `feed` / `mine` / `rating`; `filter` (`active`/`completed`) на `feed` и `mine` (`?filter=completed` = «Уже отревьюено») |
 | `homeListCache.js` | SWR-кэш ленты home (`feed`/`feedReviewed`/`mine`/`rating`, memory + `sessionStorage` `obratka.homeLists.<userId>`); UI-hit только непустой массив (`[]` → skeleton); `removeCachedHomeListItem` после успешного submit ревью (id из `feed`); полный `clearHomeListCache` только на logout |

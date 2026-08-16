@@ -6,7 +6,10 @@ import {
 import { EMAIL_AUTH_ENABLED } from "../../config/auth.js";
 import { getStrings } from "../../i18n.js";
 import { createBrandScreenShell } from "../brand-screen-shell/BrandScreenShell.js";
+import { createSidePanel } from "../side-panel/SidePanel.js";
 import { isValidEmail } from "../../utils/emailValidation.js";
+import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
+import { fillSidePanelDoc, getLegalDoc } from "../../utils/legalDoc.js";
 import {
   ensureFieldErrorInner,
   setFieldErrorVisible,
@@ -116,6 +119,7 @@ function authAnalyticsCode(err, fallback) {
  *     provider: 'telegram' | 'google';
  *     code: string;
  *   }) => void;
+ *   onLegalOpen?: (payload: { doc: 'privacy' | 'terms' }) => void;
  *   mode?: AuthMode;
  * }} opts
  * @returns {{
@@ -129,6 +133,7 @@ export function createAuthScreen({
   onSuccess,
   onAuthStarted,
   onAuthFailed,
+  onLegalOpen,
   mode: initialMode = "sign-up",
 }) {
   const t = getStrings();
@@ -222,14 +227,64 @@ export function createAuthScreen({
   googleBtn.innerHTML = `${GOOGLE_ICON_SVG}${GOOGLE_LOADER_SVG}<span class="auth-screen__provider-label">${t.authGoogle}</span>`;
 
   actions.append(telegramBtn, googleBtn);
+
+  const consent = document.createElement("p");
+  consent.className = "auth-screen__consent";
+
+  const legalPanel = createSidePanel({
+    closeAriaLabel: t.authLegalCloseAria ?? "",
+  });
+  document.body.append(legalPanel.root);
+
+  /**
+   * @param {'privacy' | 'terms'} id
+   */
+  function openLegalDoc(id) {
+    fillSidePanelDoc(legalPanel, getLegalDoc(id), t.authLegalCloseAria ?? "");
+    legalPanel.open();
+  }
+
+  function buildConsentCopy() {
+    const labels = {
+      "{terms}": t.authConsentTermsLink ?? "",
+      "{privacy}": t.authConsentPrivacyLink ?? "",
+    };
+    const template = String(t.authConsent ?? "").replace(
+      /(^|[\s\u00A0])(\p{L}{1,3})(\s+)(?=\{)/gu,
+      (_match, before, word) => `${before}${word}\u00A0`,
+    );
+    consent.replaceChildren();
+    const parts = template.split(/(\{terms\}|\{privacy\})/g);
+    for (const part of parts) {
+      if (part === "{terms}" || part === "{privacy}") {
+        const doc = part === "{terms}" ? "terms" : "privacy";
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "auth-screen__consent-link";
+        btn.textContent = fixHangingPrepositions(labels[part]);
+        btn.addEventListener("click", () => {
+          openLegalDoc(doc);
+          onLegalOpen?.({ doc });
+        });
+        consent.append(btn);
+      } else if (part) {
+        consent.append(
+          document.createTextNode(fixHangingPrepositions(part)),
+        );
+      }
+    }
+  }
+
+  buildConsentCopy();
+
   if (EMAIL_AUTH_ENABLED) {
-    form.append(field, divider, actions, providerError);
+    form.append(field, divider, actions, consent, providerError);
   } else {
     // Не монтируем email/divider: `display: flex` в brand-screen.css
     // перебивает HTML `hidden` без `[hidden] { display: none !important }`.
     input.required = false;
     form.classList.add("auth-screen__form--providers-only");
-    form.append(actions, providerError);
+    form.append(actions, consent, providerError);
   }
   block.append(title, form);
 
@@ -450,6 +505,7 @@ export function createAuthScreen({
    * @returns {Promise<void>}
    */
   function close(opts = {}) {
+    void legalPanel.close();
     return shell.close(opts);
   }
 

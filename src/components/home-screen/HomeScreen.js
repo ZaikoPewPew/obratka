@@ -61,7 +61,7 @@ import {
   parseHomeView,
 } from "../../utils/homeRoute.js";
 import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
-import { getCommunityRules } from "../../utils/communityRules.js";
+import { fillSidePanelDoc, getLegalDoc } from "../../utils/legalDoc.js";
 import { getMotionControlErrorBuzz } from "../../utils/motionTokens.js";
 import { createAppModal } from "../app-modal/AppModal.js";
 import { createSidePanel } from "../side-panel/SidePanel.js";
@@ -847,90 +847,34 @@ export function createHomeScreen({
   const profileMenuAnchor = document.createElement("div");
   profileMenuAnchor.className = "home-screen__profile-menu-anchor";
 
-  const rulesPanel = createSidePanel();
-  rulesPanel.root.classList.add("side-panel--over-modal");
+  const legalPanel = createSidePanel();
+  legalPanel.root.classList.add("side-panel--over-modal");
 
   /**
-   * @param {string} text
-   * @param {string} className
-   * @param {string} [tagName="p"]
+   * @param {import("../../utils/legalDoc.js").LegalDocId} id
+   * @returns {Promise<void>}
    */
-  function createRulesText(text, className, tagName = "p") {
-    const el = document.createElement(tagName);
-    el.className = className;
-    el.textContent = fixHangingPrepositions(text ?? "");
-    return el;
-  }
-
-  /**
-   * Строки `body` (через `\n`) → маркированный список.
-   * @param {string} body
-   */
-  function createRulesList(body) {
-    const items = String(body ?? "")
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
-    if (items.length === 0) return null;
-    if (items.length === 1) {
-      return createRulesText(items[0], "side-panel__section-body");
+  async function openDocPanel(id) {
+    if (typeof onBeforeOpenRules === "function") {
+      await onBeforeOpenRules();
     }
-    const list = document.createElement("ul");
-    list.className = "side-panel__section-list";
-    for (const item of items) {
-      const li = document.createElement("li");
-      li.className = "side-panel__section-item";
-      li.textContent = fixHangingPrepositions(item);
-      list.append(li);
-    }
-    return list;
-  }
-
-  function syncRulesPanelContent() {
     const t = getStrings();
-    const rules = getCommunityRules();
-    rulesPanel.setTitle(rules.title);
-    rulesPanel.setDescription(fixHangingPrepositions(rules.updated));
-    rulesPanel.setCloseAriaLabel(t.homeRulesCloseAria ?? "");
-
-    /** @type {HTMLElement[]} */
-    const nodes = [];
-    if (rules.intro) {
-      nodes.push(createRulesText(rules.intro, "side-panel__intro"));
-    }
-    for (const section of rules.sections) {
-      const wrap = document.createElement("section");
-      wrap.className = "side-panel__section";
-      if (section.title) {
-        wrap.append(
-          createRulesText(section.title, "side-panel__section-title", "h3"),
-        );
-      }
-      if (section.body) {
-        const bodyNode = createRulesList(section.body);
-        if (bodyNode) wrap.append(bodyNode);
-      }
-      nodes.push(wrap);
-    }
-    rulesPanel.content.replaceChildren(...nodes);
+    fillSidePanelDoc(legalPanel, getLegalDoc(id), t.homeRulesCloseAria ?? "");
+    legalPanel.open();
   }
 
   /**
    * @returns {Promise<void>}
    */
-  async function openRulesPanel() {
-    if (typeof onBeforeOpenRules === "function") {
-      await onBeforeOpenRules();
-    }
-    syncRulesPanelContent();
-    rulesPanel.open();
+  function openRulesPanel() {
+    return openDocPanel("rules");
   }
 
   /**
    * @returns {Promise<void>}
    */
   function closeRulesPanel() {
-    return rulesPanel.close();
+    return legalPanel.close();
   }
 
   /**
@@ -974,7 +918,7 @@ export function createHomeScreen({
     },
     onCommunity: () => onAccountCommunity?.(),
     onRules: () => {
-      void openRulesPanel();
+      void openDocPanel("rules");
     },
     onSignOut: () => onSignOut?.(),
   });
@@ -1371,7 +1315,7 @@ export function createHomeScreen({
     reviewIntroModal.root,
     mineNotReadyModal.root,
     inviteModal.root,
-    rulesPanel.root,
+    legalPanel.root,
   );
 
   /** @type {HomePortfolioItem[]} */
@@ -3504,7 +3448,7 @@ export function createHomeScreen({
     closeInviteModal();
     void notification.hide();
     void closeAccountMenu();
-    void rulesPanel.close();
+    void legalPanel.close();
     root.setAttribute("aria-busy", "false");
     root.hidden = true;
     return Promise.resolve();
@@ -3669,6 +3613,6 @@ export function createHomeScreen({
     showNotice,
     showNotification,
     closeRulesPanel,
-    isRulesPanelOpen: () => rulesPanel.isOpen(),
+    isRulesPanelOpen: () => legalPanel.isOpen(),
   };
 }

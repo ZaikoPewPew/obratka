@@ -98,6 +98,7 @@ resetAnalytics(); // logout
 | `$pageview` | `applyRoute` | `route_id`, `path`, home `tab`/`filter` | Посещаемость |
 | `referral_validated` | referral submit ok | — | Старт воронки invite |
 | `auth_started` | клик Telegram / Google | `provider`: `telegram` \| `google` | Старт логина |
+| `auth_legal_opened` | клик ссылки согласия на `/registration` | `doc`: `privacy` \| `terms` | Открытие политики / соглашения |
 | `auth_failed` | fail Telegram / Google (не cancel) | `provider`, `code` | Отвал логина |
 | `auth_success` | `applyProviderUser` | `provider`: `email` \| `telegram` \| `google` | Логин |
 | `onboarding_done` | onboarding complete | `grade?` | Конец онбординга |

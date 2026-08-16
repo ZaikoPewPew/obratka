@@ -1,7 +1,10 @@
 # `content/` — контент и данные
 
 - `locales.json` — **UI-строки** (`ru` / `en`, `supportedLocales`). Правило: `.cursor/rules/i18n.mdc`.
-- `rules.json` — текст правил сообщества (`title` / `updated` / `intro` / `sections` по локалям). Строки `body` через `\n` → буллеты в side-panel. Загрузка: `getCommunityRules()` → home side-panel.
+- `rules.json` — текст правил сообщества (`title` / `updated` / `intro` / `sections` по локалям). Строки `body` через `\n` → буллеты в side-panel. Загрузка: `getCommunityRules()` / `getLegalDoc("rules")`.
+- `privacy.json` — политика обработки ПДн (та же схема). `getPrivacyPolicy()` / `getLegalDoc("privacy")`.
+- `terms.json` — пользовательское соглашение (та же схема). `getTermsOfService()` / `getLegalDoc("terms")`.
+- Рендер в панель: `fillSidePanelDoc()` в [`src/utils/legalDoc.js`](../src/utils/legalDoc.js) (home, landing, `/registration`).
 - `onboarding.json` / `onboarding.md` — шаги онбординга (`/onboarding`).
 - `embed-hosts.md` — площадки портфолио: спец-embed / `EXTERNAL_EMBED_HOSTS` / optimistic + Readymag probe + iframe fallback. Код: `src/utils/embedHosts.js`, `portfolioEmbed.js`.
 - `founder-avatars.json` — пул GitHub-источников для стека аватаров (`pickCount` + `sources`). Shuffle: `getFounderAvatarSourcesForPage()` в `src/i18n.js` → unavatar.io. Сейчас: `/referral` ([`referral-screen`](../src/components/referral-screen/README.md)).
@@ -16,7 +19,7 @@
 | `metaTitle*` | `document.title` по роуту (`src/utils/documentTitle.js`); fallback `metaTitle`; `metaTitleAttention` / `metaTitleDesktopOnly` — оверлеи |
 | `desktopOnly*` / `metaTitleDesktopOnly` | оверлей «только с компьютера» (&lt;768px) — [`mobile.md`](../mobile.md) |
 | `notFound*` / `metaTitleNotFound` | SPA `/404` (`not-found-screen`) |
-| `auth*` / `authEmail*` / `authCode*` / `authOtp*` / `authIdentityConflict` | `/registration`, `/registration/code` (Email UI off) |
+| `auth*` / `authEmail*` / `authCode*` / `authOtp*` / `authIdentityConflict` / `authConsent*` / `authLegalCloseAria` | `/registration`, `/registration/code` (Email UI off; consent под кнопками провайдеров) |
 | `onboarding*` / `videoPlayer*` | `/onboarding` (+ VideoPlayerCard) |
 | `home*` / `homeInvite*` / `homeInviteShare*` / `homeNoSlots*` / `homeAlreadyReviewed*` / `homeCardReviewed*` / `homeReviewIntro*` / `homeMineNotReady*` / `homeFeedFilter*` / `homeMineFilter*` / `homeEmptyMineActive` / `homeEmptyMineCompleted` / `homeEmptyFeedReviewed` / `homeMineSlotFree*` / `homePendingLimit*` / `homeNotify*` / `notificationCloseAria` / `homeCardReport*` / `homeCardReportPending*` / `homeCardMinePendingRole` / `homeCardReviewer*` / `homeTabMineReadyAria` / `homeTabFeedNewAria` / `homeReputation*` / `homeBalance*` / `homeAccount*` / `homeContacts*` / `homeRulesCloseAria` / `homeFeedback*` / `homeLegendaryOnline*` / `homeRating*` | `/home` (Чужие/Мои; рейтинг UI off `RATING_TAB_ENABLED`; SWR feed+feedReviewed, Ждёт/Уже + Ещё/Завершенные, intro, mine gate, free-slot / toast, feedSeen + 3/3, слоты, invite `homeInviteMessage` + share Telegram/X/Threads/LinkedIn, репутация / уточки, контакты / правила / FAB, «Топы в сети», меню профиля) |
 | `gradeUndefined` | подпись без известного `profiles.grade` (карточки / рейтинг / report) |

@@ -6,7 +6,7 @@
 import { createVideoPlayerCard } from "../../src/components/video-player-card/VideoPlayerCard.js";
 import { createSidePanel } from "../../src/components/side-panel/SidePanel.js";
 import { fixHangingPrepositions } from "../../src/utils/hangingPrepositions.js";
-import { getCommunityRules } from "../../src/utils/communityRules.js";
+import { fillSidePanelDoc, getLegalDoc } from "../../src/utils/legalDoc.js";
 import { getInviteGatePassed } from "../../src/utils/inviteGate.js";
 import primerVideo from "../../src/assets/video/primer.mp4";
 import { initLandingScrollReveal } from "./scrollReveal.js";
@@ -186,92 +186,54 @@ function initFaqAccordion() {
   return root;
 }
 
-function initRulesPanel() {
-  const triggers = [
-    ...document.querySelectorAll("[data-landing-rules]"),
+function initLegalPanel() {
+  /** @type {Array<{ selector: string, id: import("../../src/utils/legalDoc.js").LegalDocId, closeAria: string }>} */
+  const bindings = [
+    {
+      selector: "[data-landing-rules]",
+      id: "rules",
+      closeAria: "Закрыть правила",
+    },
+    {
+      selector: "[data-landing-privacy]",
+      id: "privacy",
+      closeAria: "Закрыть политику",
+    },
+    {
+      selector: "[data-landing-terms]",
+      id: "terms",
+      closeAria: "Закрыть соглашение",
+    },
   ];
-  if (!triggers.length) return null;
+  const hasTrigger = bindings.some(
+    (binding) => document.querySelectorAll(binding.selector).length > 0,
+  );
+  if (!hasTrigger) return null;
 
-  const rulesPanel = createSidePanel({
+  const legalPanel = createSidePanel({
     closeAriaLabel: "Закрыть правила",
   });
-  document.body.append(rulesPanel.root);
+  document.body.append(legalPanel.root);
 
   /**
-   * @param {string} text
-   * @param {string} className
-   * @param {string} [tagName="p"]
+   * @param {import("../../src/utils/legalDoc.js").LegalDocId} id
+   * @param {string} closeAria
    */
-  function createRulesText(text, className, tagName = "p") {
-    const el = document.createElement(tagName);
-    el.className = className;
-    el.textContent = fixHangingPrepositions(text ?? "");
-    return el;
+  function openDoc(id, closeAria) {
+    fillSidePanelDoc(legalPanel, getLegalDoc(id, "ru"), closeAria);
+    legalPanel.open();
   }
 
-  /**
-   * @param {string} body
-   */
-  function createRulesList(body) {
-    const items = String(body ?? "")
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
-    if (items.length === 0) return null;
-    if (items.length === 1) {
-      return createRulesText(items[0], "side-panel__section-body");
-    }
-    const list = document.createElement("ul");
-    list.className = "side-panel__section-list";
-    for (const item of items) {
-      const li = document.createElement("li");
-      li.className = "side-panel__section-item";
-      li.textContent = fixHangingPrepositions(item);
-      list.append(li);
-    }
-    return list;
-  }
-
-  function syncRulesPanelContent() {
-    const rules = getCommunityRules("ru");
-    rulesPanel.setTitle(rules.title);
-    rulesPanel.setDescription(fixHangingPrepositions(rules.updated));
-
-    /** @type {HTMLElement[]} */
-    const nodes = [];
-    if (rules.intro) {
-      nodes.push(createRulesText(rules.intro, "side-panel__intro"));
-    }
-    for (const section of rules.sections) {
-      const wrap = document.createElement("section");
-      wrap.className = "side-panel__section";
-      if (section.title) {
-        wrap.append(
-          createRulesText(section.title, "side-panel__section-title", "h3"),
-        );
-      }
-      if (section.body) {
-        const bodyNode = createRulesList(section.body);
-        if (bodyNode) wrap.append(bodyNode);
-      }
-      nodes.push(wrap);
-    }
-    rulesPanel.content.replaceChildren(...nodes);
-  }
-
-  function openRulesPanel() {
-    syncRulesPanelContent();
-    rulesPanel.open();
-  }
-
-  for (const trigger of triggers) {
-    trigger.addEventListener("click", (event) => {
-      event.preventDefault();
-      openRulesPanel();
+  for (const binding of bindings) {
+    document.querySelectorAll(binding.selector).forEach((trigger) => {
+      trigger.addEventListener("click", (event) => {
+        event.preventDefault();
+        openDoc(binding.id, binding.closeAria);
+      });
     });
   }
 
-  return rulesPanel;
+  return legalPanel;
 }
 
 function init() {
@@ -280,7 +242,7 @@ function init() {
   initDemoVideo();
   initPanelReveal();
   initFaqAccordion();
-  initRulesPanel();
+  initLegalPanel();
   // После hanging: NBSP уже в тексте, split не рвёт предлоги.
   initLandingScrollReveal();
   document.body.classList.add("landing-page--ready");

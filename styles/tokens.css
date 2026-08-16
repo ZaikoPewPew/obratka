@@ -1585,6 +1585,14 @@
   --auth-screen-link-size: var(--font-size-sm);
   --auth-screen-link-weight: var(--font-weight-medium);
   --auth-screen-link-color: var(--color-text);
+  --auth-screen-consent-inset-bottom: var(--space-4);
+  --auth-screen-consent-inset-x: var(--space-4);
+  --auth-screen-consent-max-width: var(--url-screen-form-width);
+  --auth-screen-consent-color: var(--color-text-subtle);
+  --auth-screen-consent-link-hover: var(--palette-google-blue);
+  --auth-screen-consent-link-underline-offset: 0.18em;
+  --auth-screen-consent-link-underline-thickness: var(--border-width);
+  --auth-screen-consent-link-duration: var(--duration-fast);
   --auth-screen-submit-busy-opacity: 0.6;
   --auth-code-cell-radius: var(--radius-xs);
   --auth-code-cell-gap: var(--space-3);

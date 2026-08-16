@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "defaultLocale": "ru",
+  "updatedAt": "2026-08-16",
+  "locales": {
+    "ru": {
+      "title": "Пользовательское соглашение",
+      "updated": "Последнее обновление 16 августа 2026",
+      "intro": "Соглашение про то, как пользоваться Обраткой. Выбирая способ входа, ты принимаешь условия. Правила сообщества — отдельный документ и тоже обязательны.",
+      "sections": [
+        {
+          "title": "1. О сервисе",
+          "body": "Обратка — закрытое сообщество, где дизайнеры разбирают портфолио и получают живые ревью.\nМы даём доступ к ленте, ревью, отчётам и связанным функциям «как есть»."
+        },
+        {
+          "title": "2. Invite-only",
+          "body": "Вход по приглашению.\nКод можно делить с теми, кому доверяешь. Продавать инвайты и спамить ими нельзя."
+        },
+        {
+          "title": "3. Возраст",
+          "body": "Сервис для людей 18 лет и старше.\nРегистрируясь, ты подтверждаешь, что тебе уже есть 18."
+        },
+        {
+          "title": "4. Аккаунт",
+          "body": "Один человек — один аккаунт.\nИмя, грейд и ссылка на портфолио должны быть своими и правдивыми.\nМы можем ограничить доступ, если данные вводят других в заблуждение или ломают матчинг."
+        },
+        {
+          "title": "5. Ревью и награды",
+          "body": "Чтобы разобрать чужое портфолио, нужен живой claim. Награда начисляется только после отправки отчёта.\nУход без отправки — без уточек.\nПодать своё портфолио можно за уточек; одновременно в ожидании — один кейс."
+        },
+        {
+          "title": "6. Честная игра",
+          "body": "Нельзя накручивать уточек, репутацию, инвайты или слоты.\nНельзя слать низкоусилие, спам и оскорбления вместо ревью.\nНарушения могут привести к бану."
+        },
+        {
+          "title": "7. Жалобы, репутация и бан",
+          "body": "Автор может пожаловаться на конкретный лист в отведённое окно.\nПовторные нарушения снижают репутацию и могут заблокировать аккаунт.\nНесогласие с грейдом — не основание для жалобы."
+        },
+        {
+          "title": "8. Правила сообщества",
+          "body": "Правила сообщества — часть этих условий.\nИх можно открыть в меню профиля, на лендинге и из этого экрана, если ссылка есть рядом."
+        },
+        {
+          "title": "9. Ответственность",
+          "body": "Сервис предоставляется «как есть». Мы не гарантируем найм, оффер или конкретный рост грейда.\nРевью — мнение участников, не официальная сертификация."
+        },
+        {
+          "title": "10. Изменение условий",
+          "body": "Мы можем обновить соглашение. Актуальная версия — в этом документе с датой обновления.\nПродолжая пользоваться сервисом после обновления, ты принимаешь новую редакцию."
+        },
+        {
+          "title": "11. Контакты",
+          "body": "Вопросы по сервису — через «Контакты» в меню профиля или администратору сообщества в Telegram."
+        }
+      ]
+    },
+    "en": {
+      "title": "Terms of use",
+      "updated": "Last updated August 16, 2026",
+      "intro": "These terms explain how to use Obratka. By choosing a sign-in method you accept them. Community rules are a separate document and are also binding.",
+      "sections": [
+        {
+          "title": "1. The service",
+          "body": "Obratka is an invite-only community where designers review portfolios and get live feedback.\nWe provide access to the feed, reviews, reports, and related features as is."
+        },
+        {
+          "title": "2. Invite-only",
+          "body": "Access is by invitation.\nShare your code with people you trust. Do not sell invites or spam them."
+        },
+        {
+          "title": "3. Age",
+          "body": "The service is for people 18 and older.\nBy signing in you confirm that you are at least 18."
+        },
+        {
+          "title": "4. Account",
+          "body": "One person, one account.\nYour name, grade, and portfolio URL should be yours and truthful.\nWe may limit access if the data misleads others or breaks matching."
+        },
+        {
+          "title": "5. Reviews and rewards",
+          "body": "A live claim is required to review someone else’s portfolio. Rewards are granted only after you submit a report.\nLeaving without submit means no ducks.\nSubmitting your own portfolio costs ducks; you may have one pending case at a time."
+        },
+        {
+          "title": "6. Fair play",
+          "body": "Do not game ducks, reputation, invites, or slots.\nDo not submit low-effort, spam, or insulting reviews.\nViolations may lead to a ban."
+        },
+        {
+          "title": "7. Complaints, reputation, and bans",
+          "body": "Authors can report a specific sheet within the allowed window.\nRepeated violations lower reputation and can block the account.\nDisagreeing with a grade is not a reason to complain."
+        },
+        {
+          "title": "8. Community rules",
+          "body": "Community rules are part of these terms.\nYou can open them from the profile menu, the landing page, and from this screen when a link is shown nearby."
+        },
+        {
+          "title": "9. Liability",
+          "body": "The service is provided as is. We do not guarantee a job, an offer, or a specific grade increase.\nReviews are members’ opinions, not an official certification."
+        },
+        {
+          "title": "10. Changes",
+          "body": "We may update these terms. The current version is this document with its update date.\nIf you keep using the service after an update, you accept the new version."
+        },
+        {
+          "title": "11. Contacts",
+          "body": "Questions about the service — via Contacts in the profile menu or to the community admin on Telegram."
+        }
+      ]
+    }
+  }
+}

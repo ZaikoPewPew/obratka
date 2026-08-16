@@ -9,13 +9,15 @@ Email OTP сейчас **выключен** (`EMAIL_AUTH_ENABLED` в [`src/confi
 2. ~~Email + стрелка submit~~ (скрыто, пока `EMAIL_AUTH_ENABLED === false`)
 3. ~~Разделитель (`authDividerOr`)~~ (скрыт вместе с email)
 4. Кнопки: Telegram / Google
+5. Consent (`authConsent*`): внизу левой колонки (`--auth-screen-consent-inset-bottom` = 16), muted; ссылки — пунктирное подчёркивание, hover синий. Side-panel: `privacy.json` / `terms.json`.
 
 ## Файл
 
-- `AuthScreen.js` — `createAuthScreen({ onSuccess, onAuthStarted?, onAuthFailed?, mode? })` → `{ root, open, close, setMode }`.
+- `AuthScreen.js` — `createAuthScreen({ onSuccess, onAuthStarted?, onAuthFailed?, onLegalOpen?, mode? })` → `{ root, open, close, setMode }`.
   - `onAuthStarted({ provider })` — клик Telegram / Google (до сети).
   - `onAuthFailed({ provider, code })` — ошибка провайдера; **не** вызывается на `telegram_cancelled` / `google_cancelled` / `access_denied`.
-  - Аналитика: колбэки → `track` в `main.js` (`auth_started` / `auth_failed`); SoT — [`ANALYTICS.md`](../../../ANALYTICS.md).
+  - `onLegalOpen({ doc })` — клик ссылки согласия; `doc`: `privacy` \| `terms`.
+  - Аналитика: колбэки → `track` в `main.js` (`auth_started` / `auth_failed` / `auth_legal_opened`); SoT — [`ANALYTICS.md`](../../../ANALYTICS.md).
 
 ## Visual и ошибки
 
@@ -103,4 +105,4 @@ node --env-file=.env scripts/verify-email-otp-setup.mjs
 
 `authWelcomeTitle`, `authEmail*`, `authDividerOr`, `authTelegram`, `authGoogle`,
 `authProviderConnecting`, provider errors, `authOtpSendError` / `authOtpRateLimit` /
-`authOtpNotConfigured` / `authIdentityConflict`.
+`authOtpNotConfigured` / `authIdentityConflict`, `authConsent*` / `authLegalCloseAria`.

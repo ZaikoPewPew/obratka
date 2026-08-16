@@ -19,7 +19,7 @@ referral → auth → (authCode) → onboarding → home
 | Шаг | Экран | Path | Смысл |
 |-----|--------|------|--------|
 | 1 | `referral-screen` | `/referral` | Реферальный код (validate RPC; seed `YTHWKPDWAK`); стек аватаров — random из `founder-avatars.json` |
-| 2 | `auth-screen` | `/registration` | Telegram / Google (Email OTP скрыт: `EMAIL_AUTH_ENABLED = false`) |
+| 2 | `auth-screen` | `/registration` | Telegram / Google (Email OTP скрыт: `EMAIL_AUTH_ENABLED = false`); consent под кнопками → политика / соглашение в side-panel |
 | 2b | `auth-code-screen` | `/registration/code` | 6 ячеек кода из письма; без гейта → `/referral`; с гейтом и email off → `/registration` |
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |
 | 4 | `home-screen` | `/home` + query | Хаб: feed/mine (рейтинг UI off, `?tab=rating` → feed); SWR + intro до claim + mine report gate + tabbar-dock (entrance / glass / `--on-dark`); query хранит активный вид |
@@ -89,7 +89,7 @@ Handoff соседних brand-экранов: `handoff: true` (`brandScreenTran
 
 `home-screen` — полноэкранный слой (absolute topbar поверх ленты); вкладки Чужие/Мои (рейтинг — код/кэш есть, **UI off** `RATING_TAB_ENABLED = false`, `?tab=rating` → feed); SWR `homeListCache` (`feed`/`feedReviewed`/`mine`/`rating`); fixed-чип «Топы в сети» (`legendary-online-panel`, слева снизу, скрыт если никого нет); FAB feedback (`feedback`, Telegram); toast `notification` (нет уток / слот занят); intro до claim (`homeReviewIntro*`); на feed — сегмент «Ждёт ревью / Уже отревьюено» (`tabs-panel`; reviewed → `listReviewedPortfolios`, серое превью + `homeCardReviewedLabel` / `report-sent.svg`, слоты ревьюеров обычные); open-лента без `reviewedByMe`; mine report gate (`homeMineNotReady*`); на mine — «Ещё на ревью / Завершенные»; free-slot «Ещё на ревью» до `MAX_MINE_PENDING` (=1) (`homeMineSlotFree*` / toast `homeNotifySlotTaken`); нет монет → toast `homeNotifyNoDucks` + buzz submit + чип баланса; точка на «Чужие посты» при новом кейсе (`feedSeen` / `homeTabFeedNewAria`); точка на «Мои» и «Завершенные» при непросмотренном 3/3 (`mineReadySeen` / `homeTabMineReadyAria`); tabbar-dock (glass tabs + кнопка submit справа, hide вместе); контраст (`backdropLuminance` → `--on-dark`); entrance cascade на `--open` (`--home-screen-reveal-delay-*`, dock = `motion-reveal-dock` без opacity).
 `account-menu` — поповер под аватаром; identity read-only; «Профиль» / «Пригласить» (copy + меню Telegram / X / Threads / LinkedIn, полный `homeInviteMessage`) / «Сообщество» (`TELEGRAM_COMMUNITY_URL`) / «Правила» / «Выйти».
-`side-panel` — боковая панель справа (home → «Правила», Figma `517:4740`); слот контента; без `history` / `go()`.  
+`side-panel` — боковая панель справа (home / landing / auth → правила, политика ПДн, соглашение; Figma `517:4740`); слот контента; без `history` / `go()`.  
 `settings-screen` — side-panel поверх home на `/settings` (все поля view-only; двухколоночный лейаут; дата создания в description; без Save).
 `url-screen` — split; чип «На главную» (`.url-screen__back` / `urlScreenBack*`, скрыт на done); при URL справа заглушка «Портфолио»; submit → done на том же экране (`setVariant("done")`).  
 `success-screen` — запасной `/done` (deep link); основной submit больше не прыгает сюда (`pendingSuccessPreset` = `generic`).  
@@ -114,7 +114,7 @@ src/components/
   brand-screen-shell/     ← каркас split + visual
   brand-screen-visual/    ← mesh + марка, variants
   app-modal/              ← универсальная модалка (слот + CTA)
-  side-panel/             ← боковая панель справа (слот; «Правила»)
+  side-panel/             ← боковая панель справа (слот; правила / политика / соглашение)
   tabs-panel/             ← сегмент feed/mine (Figma tabspanel)
   referral-screen/
   auth-screen/

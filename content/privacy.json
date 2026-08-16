@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "defaultLocale": "ru",
+  "updatedAt": "2026-08-16",
+  "locales": {
+    "ru": {
+      "title": "Политика обработки персональных данных",
+      "updated": "Последнее обновление 16 августа 2026",
+      "intro": "Политика описывает, какие данные Обратка обрабатывает и зачем. Выбирая способ входа, ты принимаешь эту политику.",
+      "sections": [
+        {
+          "title": "1. Оператор",
+          "body": "Оператор персональных данных: Кургузов Владислав.\nПо вопросам обработки данных напиши через «Контакты» в меню профиля или администратору сообщества в Telegram."
+        },
+        {
+          "title": "2. Какие данные мы обрабатываем",
+          "body": "Идентификаторы входа: Telegram ID и username, email (Google или email-вход), отображаемое имя, аватар.\nПрофиль: специальность, грейд, место работы, ответы онбординга.\nКонтент сервиса: URL портфолио, тексты ревью и советов, опциональная надиктовка (транскрипт речи).\nСлужебные данные: баланс уточек, репутация, статус бана, реферальный код, технические идентификаторы сессии."
+        },
+        {
+          "title": "3. Зачем обрабатываем",
+          "body": "Чтобы создать аккаунт и пустить в закрытое сообщество.\nЧтобы показывать ленту, матчить ревью по грейду, начислять награды и принимать жалобы.\nЧтобы улучшать продукт: смотрим экраны и воронки в аналитике, без текстов советов и надиктовки."
+        },
+        {
+          "title": "4. Правовое основание",
+          "body": "Согласие: ты принимаешь политику, выбирая способ входа через Telegram или Google.\nДоговор: обработка нужна, чтобы оказать услугу по пользовательскому соглашению.\nОтдельная галочка и cookie-баннер не используются."
+        },
+        {
+          "title": "5. Кому передаём",
+          "body": "Supabase — аккаунт, база и серверные функции.\nGoogle — вход через Google.\nTelegram — вход через Telegram и связь с администратором.\nPostHog (США) — продуктовая аналитика по идентификатору профиля, без email и Telegram.\nGitHub Pages — хостинг сайта obratka.net."
+        },
+        {
+          "title": "6. Файлы cookie и аналитика",
+          "body": "Сессионные cookie и localStorage нужны, чтобы оставаться в аккаунте.\nPostHog может сохранить cookie и localStorage для аналитики посещений и воронок.\nЭто не рекламные cookie сторонних сетей. Отдельного баннера согласия на cookie нет: использование описано здесь."
+        },
+        {
+          "title": "7. Надиктовка",
+          "body": "Микрофон включается только если ты сам нажмёшь запись заметок или совета.\nРечь превращается в текст на устройстве и может сохраниться в отчёте.\nАудиофайл на сервер не загружается. Браузерный запрос доступа к микрофону не заменяет это раскрытие."
+        },
+        {
+          "title": "8. Что видят другие",
+          "body": "В ленте и в листе ревью другим участникам могут быть видны имя, аватар, грейд, специальность и тексты, которые ты отправил.\nАвтор портфолио видит лист, но не видит, кто пожаловался на него."
+        },
+        {
+          "title": "9. Срок хранения и удаление",
+          "body": "Данные храним, пока аккаунт нужен для работы сервиса.\nУдалить аккаунт можно по запросу через «Контакты»: самообслуживания в интерфейсе пока нет.\nПосле удаления перестаём использовать данные для сервиса, кроме случаев, где закон требует хранить запись."
+        },
+        {
+          "title": "10. Трансграничная передача",
+          "body": "Часть обработчиков находится за пределами России: Supabase, Google, Telegram, PostHog (США), GitHub Pages.\nПередача нужна, чтобы сервис работал (вход, хранение, аналитика, хостинг)."
+        },
+        {
+          "title": "11. Твои права",
+          "body": "Можно запросить сведения об обработке, уточнение данных и удаление аккаунта.\nМожно отозвать согласие: это может означать, что пользоваться сервисом дальше нельзя.\nЗапрос — через «Контакты» в приложении."
+        },
+        {
+          "title": "12. Контакты",
+          "body": "Вопросы по персональным данным — через «Контакты» в меню профиля.\nАдминистратор сообщества отвечает в Telegram."
+        }
+      ]
+    },
+    "en": {
+      "title": "Personal data processing policy",
+      "updated": "Last updated August 16, 2026",
+      "intro": "This policy describes what data Obratka processes and why. By choosing a sign-in method you accept this policy.",
+      "sections": [
+        {
+          "title": "1. Operator",
+          "body": "Personal data operator: Vladislav Kurguzov.\nFor data-processing questions, write via Contacts in the profile menu or to the community admin on Telegram."
+        },
+        {
+          "title": "2. What data we process",
+          "body": "Sign-in identifiers: Telegram ID and username, email (Google or email sign-in), display name, avatar.\nProfile: specialty, grade, workplace, onboarding answers.\nService content: portfolio URLs, review and advice text, optional dictation (speech transcript).\nService data: duck balance, reputation, ban status, referral code, technical session identifiers."
+        },
+        {
+          "title": "3. Why we process it",
+          "body": "To create an account and let you into the invite-only community.\nTo show the feed, match reviews by grade, grant rewards, and handle complaints.\nTo improve the product: we look at screens and funnels in analytics, without advice or dictation text."
+        },
+        {
+          "title": "4. Legal basis",
+          "body": "Consent: you accept this policy by choosing Telegram or Google sign-in.\nContract: processing is needed to provide the service under the terms of use.\nThere is no separate checkbox or cookie banner."
+        },
+        {
+          "title": "5. Who we share with",
+          "body": "Supabase — account, database, and server functions.\nGoogle — Google sign-in.\nTelegram — Telegram sign-in and admin contact.\nPostHog (US) — product analytics by profile id, without email or Telegram.\nGitHub Pages — hosting for obratka.net."
+        },
+        {
+          "title": "6. Cookies and analytics",
+          "body": "Session cookies and localStorage keep you signed in.\nPostHog may store cookies and localStorage for visit and funnel analytics.\nThese are not third-party ad-network cookies. There is no separate cookie consent banner: this use is described here."
+        },
+        {
+          "title": "7. Dictation",
+          "body": "The microphone turns on only if you start recording notes or advice yourself.\nSpeech becomes text on the device and may be saved in the report.\nAudio is not uploaded to the server. The browser microphone prompt does not replace this disclosure."
+        },
+        {
+          "title": "8. What others can see",
+          "body": "In the feed and on a review sheet, other members may see your name, avatar, grade, specialty, and the texts you submitted.\nThe portfolio author sees the sheet but does not see who reported it."
+        },
+        {
+          "title": "9. Retention and deletion",
+          "body": "We keep data while the account is needed to run the service.\nYou can request account deletion via Contacts: there is no self-serve delete in the UI yet.\nAfter deletion we stop using the data for the service, except where the law requires a record."
+        },
+        {
+          "title": "10. Cross-border transfer",
+          "body": "Some processors are outside Russia: Supabase, Google, Telegram, PostHog (US), GitHub Pages.\nThe transfer is needed for the service to work (sign-in, storage, analytics, hosting)."
+        },
+        {
+          "title": "11. Your rights",
+          "body": "You can request information about processing, correction, and account deletion.\nYou can withdraw consent; that may mean you can no longer use the service.\nSend requests via Contacts in the app."
+        },
+        {
+          "title": "12. Contacts",
+          "body": "Personal-data questions — via Contacts in the profile menu.\nThe community admin replies on Telegram."
+        }
+      ]
+    }
+  }
+}
