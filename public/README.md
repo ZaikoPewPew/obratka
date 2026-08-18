@@ -10,7 +10,7 @@
 - `assets/svg/favicon_timer.svg` — alert-favicon при истечении таймера ревью (мигание вкладки, `tabAttention.js`); часы на том же square.
 - `assets/svg/home-preview-browser-controls.svg` — контролы превью браузера на home-card (`HomeScreen`).
 - `assets/og/og-share.png` — Open Graph / Twitter share image (1200×630); absolute URL в meta через `%SITE_ORIGIN%` / `%SITE_BASE%` (`vite.config.js`).
-- `robots.txt` — Allow лендос `/landing/`, Disallow app-path’ов; Sitemap `https://obratka.net/sitemap.xml`.
-- `sitemap.xml` — одна URL: лендос (prod absolute).
+
+`robots.txt` и `sitemap.xml` **не** лежат здесь: Vite генерит их из `LANDING_ENABLED` ([`src/config/siteCrawl.js`](../src/config/siteCrawl.js), плагин в `vite.config.js`). Dev отдаёт middleware; `npm run build` пишет в `dist/`.
 
 SPA `index.html` — `noindex, nofollow` (пустой shell не в выдаче); OG/Twitter остаются для превью инвайт-ссылок. Лендос — `index, follow` + canonical.

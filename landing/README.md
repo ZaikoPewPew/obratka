@@ -2,7 +2,9 @@
 
 Отдельный Vite entry: свой HTML/CSS/JS. Без `src/api/*`, session, Supabase, claims.
 
-Prod: https://obratka.net/landing/  
+**Сейчас выключен:** `LANDING_ENABLED = false` в [`src/config/landing.js`](../src/config/landing.js). Продукт стартует с корня SPA (`/` → `resolveEntryScreen`). `/landing` редиректит на `/` (`?ref=` сохраняется). Код лендоса на месте; вернуть → `true` + redeploy Pages.
+
+Prod (пока off): https://obratka.net/ → приложение; https://obratka.net/landing/ → редирект.  
 Карта продукта: [`SCREENS.md`](../SCREENS.md). Структура: [`STRUCTURE.md`](../STRUCTURE.md).
 
 ## Локально
@@ -11,7 +13,8 @@ Prod: https://obratka.net/landing/
 npm run dev
 ```
 
-Открыть: [http://localhost:5173/landing/](http://localhost:5173/landing/)
+Корень: [http://localhost:5173/](http://localhost:5173/).  
+`/landing/` при выключенном флаге → 302 на `/`. При `LANDING_ENABLED = true`: [http://localhost:5173/landing/](http://localhost:5173/landing/).
 
 ## Блоки
 
@@ -75,12 +78,19 @@ Closing «В сообщество» и футер «Сообщество» — [
 
 ## SEO (фаза 1)
 
+Пока `LANDING_ENABLED = false`: `robots.txt` Disallow `/landing/`, sitemap пустой; stub редиректа — `noindex`. SPA — `noindex` в корневом `index.html`.
+
+`robots.txt` / `sitemap.xml` **не** правятся в `public/` — их пишет Vite из [`src/config/siteCrawl.js`](../src/config/siteCrawl.js) (тот же флаг). Включить индекс = `true` + redeploy, без ручного sitemap.
+
+При включённом лендосе:
+
 - `index, follow` + `canonical` + OG/Twitter в [`landing/index.html`](index.html).
 - Абсолютные URL: плейсхолдеры `%SITE_ORIGIN%` / `%SITE_BASE%` → `vite.config.js` (`transformIndexHtml`).
 - Картинка шаринга: [`public/assets/og/og-share.png`](../public/assets/og/og-share.png).
-- Crawl: [`public/robots.txt`](../public/robots.txt) + [`public/sitemap.xml`](../public/sitemap.xml) (только лендос). SPA — `noindex` в корневом `index.html`.
+- Crawl: Allow `/landing/` + sitemap с одной `<loc>…/landing/</loc>` (корень `/` остаётся noindex).
 
 ## Сборка / Pages
 
-`vite.config.js` → MPA input `landing` → `dist/landing/index.html`.  
-`npm run build` (CI с `VITE_BASE_PATH=/` для `obratka.net`) кладёт лендос рядом с SPA.
+`LANDING_ENABLED = false` → лендос не в Rollup input; `dist/landing/index.html` — stub-редирект на `/`.  
+`LANDING_ENABLED = true` → MPA input `landing` → полноценный `dist/landing/index.html`.  
+`npm run build` (CI с `VITE_BASE_PATH=/` для `obratka.net`) также пишет `dist/robots.txt` и `dist/sitemap.xml`.

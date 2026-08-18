@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   hrefForRoute,
+  isSpaEntryPath,
   normalizePathname,
   pathForRoute,
   routeIdFromPathname,
@@ -36,6 +37,18 @@ describe("routes", () => {
     assert.equal(routeIdFromPathname("/404"), "notFound");
     assert.equal(routeIdFromPathname("/obratka/", "/obratka/"), null);
     assert.equal(routeIdFromPathname("/unknown"), null);
+    // LANDING_ENABLED = false → /landing is SPA entry, not 404.
+    assert.equal(routeIdFromPathname("/landing"), null);
+    assert.equal(routeIdFromPathname("/landing/"), null);
+  });
+
+  it("treats / and /landing as SPA entry while landing is off", () => {
+    assert.equal(isSpaEntryPath("/"), true);
+    assert.equal(isSpaEntryPath("/landing"), true);
+    assert.equal(isSpaEntryPath("/landing/"), true);
+    assert.equal(isSpaEntryPath("/obratka/landing", "/obratka/"), true);
+    assert.equal(isSpaEntryPath("/referral"), false);
+    assert.equal(isSpaEntryPath("/unknown"), false);
   });
 
   it("normalizes trailing slash and base", () => {

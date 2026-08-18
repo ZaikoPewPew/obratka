@@ -5,6 +5,11 @@
  * @typedef {'referral' | 'auth' | 'authCode' | 'onboarding' | 'home' | 'settings' | 'url' | 'review' | 'quiz' | 'done' | 'success' | 'report' | 'banned' | 'notFound'} AppRouteId
  */
 
+import { LANDING_ENABLED } from "../config/landing.js";
+
+/** Промо MPA; при `LANDING_ENABLED = false` тот же entry, что и `/`. */
+const LANDING_PATH = "/landing";
+
 /** @type {Readonly<Record<AppRouteId, string>>} */
 export const ROUTE_PATHS = Object.freeze({
   referral: "/referral",
@@ -69,13 +74,25 @@ export function normalizePathname(pathname, baseUrl = "/") {
 }
 
 /**
+ * Корень SPA (и `/landing`, пока промо выключено).
+ * @param {string} pathname
+ * @param {string} [baseUrl]
+ * @returns {boolean}
+ */
+export function isSpaEntryPath(pathname, baseUrl = "/") {
+  const path = normalizePathname(pathname, baseUrl);
+  if (path === "/") return true;
+  return !LANDING_ENABLED && path === LANDING_PATH;
+}
+
+/**
  * @param {string} pathname
  * @param {string} [baseUrl]
  * @returns {AppRouteId | null}
  */
 export function routeIdFromPathname(pathname, baseUrl = "/") {
   const path = normalizePathname(pathname, baseUrl);
-  if (path === "/") return null;
+  if (isSpaEntryPath(path, "/")) return null;
   return PATH_TO_ID[path] ?? null;
 }
 

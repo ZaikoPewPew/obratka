@@ -4,6 +4,8 @@
 |------|---------|------------|
 | `auth.js` | `EMAIL_AUTH_ENABLED` (= **false**) | Показывать Email OTP на `/registration` (+ `/registration/code`). Выключено, пока нет стабильного custom SMTP. |
 | `home.js` | `RATING_TAB_ENABLED` (= **false**) | Вкладка «Рейтинг» (топ-50) на `/home`. Учёт reputation / жалобы не зависит от флага. Вернуть → `true`. |
+| `landing.js` | `LANDING_ENABLED` (= **false**) | Промо MPA `/landing/`. Выключено — корень и `/landing` ведут в SPA (`resolveEntryScreen`). Вернуть → `true`. Crawl (`robots.txt` / `sitemap.xml`) включается тем же флагом. |
+| `siteCrawl.js` | `buildRobotsTxt` / `buildSitemapXml` | Генерация crawl-файлов от флага лендоса. Vite пишет в `dist/` и отдаёт в dev; не править в `public/`. |
 | `review.js` | `REVIEW_SESSION_SECONDS` (= **60**) | Таймер просмотра на `/review` + `{seconds}` в copy intro-модалки home. **Не** claim TTL (20 min). iframe — пауза при скрытой вкладке; external — wall-clock без паузы; конец → `Timer-end.wav`. |
 | `contacts.js` | `COMMUNITY_CONTACT_URL` | Telegram админа (FAB `feedback` на home, «Связаться» на `/banned`). |
 | `contacts.js` | `TELEGRAM_COMMUNITY_URL` | Публичный канал (`t.me/obratka_dsgn`): account-menu «Сообщество», CTA лендинга. |

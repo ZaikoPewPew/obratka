@@ -41,8 +41,8 @@ Auth-gated deep link (`home` / `settings` / `onboarding` / `report` / `url` / `s
 
 `document.title` по id: [`documentTitle.js`](../utils/documentTitle.js) (`applyDocumentTitle` из `applyRoute` / `syncRoute`; ключи `metaTitle*` в `locales.json`). Desktop-only — override, не роут.
 
-Корень `/` → `resolveEntryScreen(getSession())`. Query вроде `?ref=` / `?lang=` сохраняются.  
-Неизвестный path (не `/`, не в `ROUTE_PATHS`) → `go("notFound")` → `/404`.  
+Корень `/` (и `/landing` при `LANDING_ENABLED = false`) → `resolveEntryScreen(getSession())`. Query вроде `?ref=` / `?lang=` сохраняются.  
+Неизвестный path (не entry, не в `ROUTE_PATHS`) → `go("notFound")` → `/404`.  
 Google OAuth return обрабатывается в `main.js` до роутинга (`completeOAuthFromUrl`); ошибка → `obratka.authProviderError` → показ на `auth`.  
 `session.banned` синкается из `profiles.banned_at` (`applyProviderUser` / `refreshSessionFromProfile` / `reconcileSessionAccess`); при `true` любой маршрут → `banned` (JWT жив, пока сам не «Выйти»).
 

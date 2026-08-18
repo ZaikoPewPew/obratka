@@ -13,7 +13,7 @@ import {
   resolveEntryScreen,
 } from "./app/flow.js";
 import { createAppRouter } from "./app/router.js";
-import { normalizePathname } from "./app/routes.js";
+import { isSpaEntryPath } from "./app/routes.js";
 import { getSession, setSession, clearSession } from "./app/session.js";
 import { completeOAuthFromUrl, signOut } from "./api/auth.js";
 import { getSupabase, refreshCachedAccessToken } from "./lib/supabaseClient.js";
@@ -2925,8 +2925,7 @@ appRouter = createAppRouter({
 
     if (!location.id) {
       const baseUrl = import.meta.env.BASE_URL || "/";
-      const path = normalizePathname(location.pathname, baseUrl);
-      if (path !== "/") {
+      if (!isSpaEntryPath(location.pathname, baseUrl)) {
         go("notFound", { replace: true });
         return;
       }

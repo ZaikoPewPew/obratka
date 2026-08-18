@@ -17,7 +17,7 @@
 | `mobile.md` | **Desktop-only** гейт (&lt;768px) + архив waitlist / старого adaptive QA |
 | `index.html` | Каркас `.iframe-shell` (`/review`) + CSS entry |
 | `landing/` | Промо-лендос (отдельный Vite entry, без api/session) — [`landing/README.md`](landing/README.md) |
-| `vite.config.js` | Vite, MPA (`index` + `landing`), `VITE_BASE_PATH`, `envPrefix: VITE_*` + allowlist `SUPABASE_URL`/`ANON_KEY`/`TELEGRAM_BOT_*` через `define`; `%SITE_ORIGIN%` / `%SITE_BASE%` → absolute OG/canonical |
+| `vite.config.js` | Vite, MPA (`index` + `landing`), `VITE_BASE_PATH`, `envPrefix: VITE_*` + allowlist `SUPABASE_URL`/`ANON_KEY`/`TELEGRAM_BOT_*` через `define`; `%SITE_ORIGIN%` / `%SITE_BASE%` → absolute OG/canonical; `robots.txt` / `sitemap.xml` из `LANDING_ENABLED` (`siteCrawl.js`) |
 | `package.json` | Скрипты (`build` → ещё `404.html` для SPA) |
 | `.env.example` | Шаблон клиентских env |
 
@@ -59,7 +59,7 @@
 | `src/` | Код: `main.js`, `app/`, `components/` (в т.ч. `desktop-only-screen`), `utils/` (`viewport.js`, consensus/action cards), `data/` (`actionCards.json` + `actionResources.json`), `api/`, `config/` ([README](src/config/README.md)), `lib/` ([README](src/lib/README.md): supabase + **analytics** + **dictation**), `assets/` |
 | `styles/` | Токены + UI. Entry: tokens/base/entrance/app-modal/iframe-shell/home/…; `desktop-only-screen.css` — импорт из фабрики; лендос — `landing/styles/landing.css` + `--landing-*` |
 | `content/` | `locales.json`, onboarding, embed-hosts, founder-avatars, rules |
-| `public/` | Статика по URL: favicon, OG (`assets/og/`), `robots.txt`, `sitemap.xml` (лендос); см. [`public/README.md`](public/README.md) |
+| `public/` | Статика по URL: favicon, OG (`assets/og/`); crawl (`robots.txt` / `sitemap.xml`) генерит Vite, не `public/` — [`public/README.md`](public/README.md), [`src/config/siteCrawl.js`](src/config/siteCrawl.js) |
 | `supabase/` | SQL (`profiles`, `legendary_presence`, `rating_leaderboard`, `wallet`, `portfolios`, `portfolio_submit`, `review_claims`, `review_complaints`, `referrals`, …) + Edge (`telegram-auth`, `portfolio-preview`, `portfolio-embed-probe`, `polish-dictation`); доступы — `SECURITY.md` |
 | `.cursor/` | Правила агента (`rules/*.mdc`) и карта (`.cursor/README.md`) |
 

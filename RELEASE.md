@@ -43,7 +43,7 @@ SoT продукта: [`PROJECT.md`](PROJECT.md) · экраны: [`SCREENS.md`]
 - [ ] Пройти все блоки: шапка → hero → боль → преимущества → закрытие
 - [ ] Копирайт / визуал под финальный месседж invite-only
 - [ ] CTA: `?ref=` → `/referral?ref=…`; invite gate → `/registration`; иначе `/referral`. Шапка «Войти» / hero «Попробовать сервис». Closing и футер — Telegram (см. [`landing/README.md`](landing/README.md))
-- [x] OG/canonical/robots/sitemap ок на prod (`og-share.png`, absolute URLs на `obratka.net`)
+- [x] OG/canonical в HTML лендоса (`og-share.png`, absolute URLs на `obratka.net`); robots/sitemap — из `LANDING_ENABLED` (сейчас off, см. §3 SEO)
 - [ ] Desktop + узкий viewport лендоса читаются (лендос **не** desktop-only гейт SPA)
 - [x] Токены `--landing-*`, без сырых цветов (аудит CSS)
 
@@ -349,9 +349,18 @@ SoT: [`ANALYTICS.md`](ANALYTICS.md)
 
 ### SEO / шаринг (лендос)
 
-- [x] `/landing/` indexable; SPA `noindex` (robots Allow `/landing/` + Disallow SPA; meta noindex в `index.html`)
-- [x] `robots.txt` / `sitemap.xml` только лендос (smoke prod: sitemap = один `…/landing/`)
-- [x] OG preview meta на prod (`og:image` → `og-share.png?v=3`, canonical `/landing/`)
+Crawl (`robots.txt` / `sitemap.xml`) генерится из `LANDING_ENABLED` ([`src/config/siteCrawl.js`](src/config/siteCrawl.js)). Сейчас флаг **false** — `/landing/` Disallow, sitemap пустой, SPA `noindex`. Индекс — **после** `true` + redeploy.
+
+- [ ] `/landing/` indexable; SPA `noindex` (robots Allow `/landing/` + Disallow SPA; meta noindex в `index.html`) — после `LANDING_ENABLED = true`
+- [ ] `robots.txt` / `sitemap.xml` только лендос (smoke prod: sitemap = один `…/landing/`) — после флага
+- [x] OG preview meta в HTML лендоса (`og:image` → `og-share.png?v=3`, canonical `/landing/`)
+
+После включения на prod (не код):
+
+1. [Google Search Console](https://search.google.com/search-console) + [Яндекс Вебмастер](https://webmaster.yandex.ru/) — подтвердить `obratka.net`
+2. Отправить `https://obratka.net/sitemap.xml`
+3. URL Inspection / переобход `https://obratka.net/landing/`
+4. Через 1–2 недели: `site:obratka.net`
 
 ---
 
