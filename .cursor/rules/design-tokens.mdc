@@ -37,6 +37,7 @@ alwaysApply: true
   - Glass: `backdrop-filter` / track-bg живут на `.home-screen__tabbar`, **не** на dock.
 - Home entrance: `--home-screen-reveal-delay-*` (topbar → body → dock → fab).
 - FAB feedback: `--feedback-*` / `--feedback-eye-*` (56×56, глаза 9×10, pad/gap 8, follow + морг); `--motion-feedback-*`.
+- Scroll-top home: `--scroll-top-*` / `--motion-scroll-top-*` (куб 56 из FAB влево, gap 12, goo 23, стрелка 24).
 - Tabs panel (feed/mine на home): `--tabs-panel-*` (`styles/tabs-panel.css`, [`tabs-panel/README.md`](../../src/components/tabs-panel/README.md)); не хардкодить цвета/размеры сегмента.
 - Intro-модалка home: `--home-screen-review-intro-media-*` (видео max 552, Fit по кадру).
 - Auth OTP: `--auth-code-resend-cooldown`.

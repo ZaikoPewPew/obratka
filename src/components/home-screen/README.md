@@ -2,7 +2,7 @@
 
 Path: **`/home`**. После onboarding: шапка (лого, репутация, баланс, аватар) + лента карточек портфолио + нижний док: переключатель **Лента / Мои посты** (вкладка **Рейтинг** сейчас hidden — `RATING_TAB_ENABLED = false`) и кнопка **«Закинуть своё»** (квадрат с плюсом/замком справа от таббара).
 
-Файл: [`HomeScreen.js`](./HomeScreen.js). Стили: [`styles/home-screen.css`](../../../styles/home-screen.css). Токены `--home-screen-*` в [`styles/tokens.css`](../../../styles/tokens.css). Explainer PNG + Lottie (`rotating-ray`, размеры/цвет): [`src/assets/home/modal/README.md`](../../assets/home/modal/README.md). Слева снизу — fixed [`legendary-online-panel`](../legendary-online-panel/) («p4p в сети», poll вместе с home; клик → explainer Figma `492:4009`; скрыт если никого нет). Справа снизу — fixed [`feedback`](../feedback/) (Telegram).
+Файл: [`HomeScreen.js`](./HomeScreen.js). Стили: [`styles/home-screen.css`](../../../styles/home-screen.css). Токены `--home-screen-*` в [`styles/tokens.css`](../../../styles/tokens.css). Explainer PNG + Lottie (`rotating-ray`, размеры/цвет): [`src/assets/home/modal/README.md`](../../assets/home/modal/README.md). Слева снизу — fixed [`legendary-online-panel`](../legendary-online-panel/) («p4p в сети», poll вместе с home; клик → explainer Figma `492:4009`; скрыт если никого нет). Справа снизу — fixed [`feedback`](../feedback/) (Telegram); при скролле вниз из него вылетает [`scroll-top`](../scroll-top/) (наверх).
 
 ## Поведение
 
@@ -16,10 +16,11 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 
 Переключатель: `home-screen__tabbar` внутри дока `home-screen__tabbar-dock` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`). Вкладки: **Лента** / **Мои посты** (Рейтинг в разметке есть, сейчас `hidden`). Справа от таббара в доке (gap 8px, `--home-screen-tabbar-dock-gap`) — кнопка «Закинуть своё» (56×56, r16, Google blue, плюс 24; токены `--home-screen-tabbar-submit-*`).
 
-- Скролл **вниз** по `home-screen__body` → док (таббар + кнопка) уезжает за нижний край (`home-screen__tabbar-dock--hidden`).
-- Скролл **вверх** (любой delta &lt; 0) / у верхнего края / **у низа ленты** → снова виден сразу.
-- Hide — с небольшим порогом (`TABBAR_HIDE_DELTA`), чтобы трекпад не дёргал; низ — `TABBAR_BOTTOM_EPS`.
+- Скролл **вниз** по `home-screen__body` → док (таббар + кнопка) уезжает за нижний край (`home-screen__tabbar-dock--hidden`); кубик [`scroll-top`](../scroll-top/) вылетает влево из FAB (зазор 12px).
+- Скролл **вверх** (любой delta &lt; 0) / у верхнего края / **у низа ленты** → таббар снова виден сразу. Кубик «наверх» прячется при скролле вверх и у верха (у низа остаётся, если пришли вниз).
+- Hide — с небольшим порогом (`TABBAR_HIDE_DELTA`), чтобы трекпад не дёргал; низ — `TABBAR_BOTTOM_EPS`. Тот же порог для показа `scroll-top`.
 - Анимация hide/show: `--home-screen-tabbar-hide-duration` / `--home-screen-tabbar-hide-ease` → `--motion-screen-*`.
+- Клик по кубику → `scrollTo` верха ленты (`homeScrollTopAria`).
 
 ### Сегмент tabs-panel (`feed` и `mine`)
 
@@ -121,7 +122,7 @@ list pending (RLS лига) → filter !reviewedByMe → attachReviewerSlots →
 
 `createdAt` мапится из `portfolios.created_at` в `PortfolioQueueItem` (нужен только tie-break; в UI не показывается).
 
-**Почему не SQL `ORDER BY`:** слоты приходят вторым RPC (`portfolio_reviewer_slots`); финальный порядок после `sortFeedForSlotClosure` (remaining + FIFO). Live не двигает карточку вниз.
+**Почему не SQL `ORDER BY`:** слоты приходят вторым RPC (`portfolio_reviewer_slots`); финальный порядок после `sortFeedForSlotClosure` (remaining + FIFO). Live не двигает карточку вниз. Окно DOM — поверх уже отсортированного массива, не `.limit(10)` по `created_at`.
 
 **Что не меняем этим сортом:** claim TTL, лиги, `target_reviews`. Видимость `reviewedByMe` — отдельный фильтр до сорта. Весов / explainer порядка в UI нет.
 
@@ -129,7 +130,9 @@ list pending (RLS лига) → filter !reviewedByMe → attachReviewerSlots →
 
 SWR: при `open` / смене таба / F5 — если есть **непустой** кэш вкладки (`feed` / `mine` / `rating`, memory + `sessionStorage` по `userId`), карточки сразу; иначе skeleton (cold miss или кэш `[]`). Затем тихий `refresh()` поверх кэша → cards | empty. Пустой `[]` **не** показывают как empty до confirm — иначе flash «шаром покати». Полный сброс кэша — только logout (`clearHomeListCache`); после успешного submit ревью — `removeCachedHomeListItem` из `feed` (без сочинения `feedReviewed`). Порядок feed в кэше = уже отсортированный ответ `listPortfoliosForReview`.
 
-После skeleton данные с `motion-reveal` stagger; после тихого refetch при тех же id — только патч reviewer-слотов (без пересборки DOM / thum.io); новые карточки — full rebuild + reveal только для новых id.
+Данные ленты по-прежнему до `FEED_QUERY_LIMIT` (300) в памяти / кэше — **не** SQL-пагинация, иначе сломается `sortFeedForSlotClosure`. В DOM только окно вокруг вьюпорта (~видимые + overscan 4, см. [`homeListWindow.js`](../../utils/homeListWindow.js)): padding-top/bottom на `.home-screen__list` держат честный `scrollHeight` (таббар у низа, прогресс [`scroll-top`](../scroll-top/README.md)). Скролл пересчитывает окно только при смене `startIndex`; узлы diff по `data-window-key` / `data-portfolio-id`, чтобы не мигали превью. `src` скриншота ставится **после** insert в документ (нативный `loading="lazy"` на отсоединённом `<img>` качал все 1200×620). Skeleton и рейтинг не виртуализируем.
+
+После skeleton данные с `motion-reveal` stagger **в текущем окне**; скролл-ремоунт без анимации. После тихого refetch при тех же id — патч reviewer-слотов **по id среди смонтированных** (без пересборки DOM / thum.io); новые карточки в окне — reveal только для новых id. Off-screen слоты живут в массиве и подставляются при въезде в окно.
 
 Клик по чужой карточке → если уже `reviewsCount >= target` (`isPortfolioOpenForReview`) → `homeNoSlots*` + refresh; иначе intro-модалка: тайтл + описание + видео-слот (max 552, Fit `primer.mp4`, autoplay/loop/muted) → `onReviewIntroOpened` + параллельно `onPreviewPortfolio` (prefetch Edge/Readymag embed-probe) → CTA «Сюдаа его!» → `onReviewIntroCta({ action: 'start' })` → `onOpenPortfolio` → `claimPortfolioReview` → `/review` уже с известным iframe/external. «Не сейчас» / закрытие → `onReviewIntroCta({ action: 'dismiss' })` (один раз на закрытие) — без claim; видео стопается.  
 Аналитика (колбэки → `track` в `main.js`): `review_intro_opened`, `review_intro_cta` — [`ANALYTICS.md`](../../../ANALYTICS.md).  
@@ -205,7 +208,7 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 `createHomeScreen({ onOpenPortfolio, onPreviewPortfolio?, onOpenReport?, onAddPortfolio?, onOpenSettings?, onSignOut?, onViewChange?, onReviewIntroOpened?, onReviewIntroCta?, onHomeSubmitClicked? })` → `{ root, open(view?), close, setItems, setView, getView, refresh, showNotice, showNotification }`.
 
-Внутреннее: `activeTab` `feed` \| `mine` \| `rating`; `feedFilter` / `mineFilter` `active` \| `completed`; `refresh` параллелит wallet∥lists∥online, на feed тянет open + reviewed и фоном prefetch `mine`; на mine / rating — `listMyPortfolios` / `listRatingTop`; на чужих вкладках ещё `listFeedPortfolioIds` для точки; кэш — [`homeListCache.js`](../../utils/homeListCache.js) (`feed`/`feedReviewed`/`mine`/`rating`).
+Внутреннее: `activeTab` `feed` \| `mine` \| `rating`; `feedFilter` / `mineFilter` `active` \| `completed`; `refresh` параллелит wallet∥lists∥online, на feed тянет open + reviewed и фоном prefetch `mine`; на mine / rating — `listMyPortfolios` / `listRatingTop`; на чужих вкладках ещё `listFeedPortfolioIds` для точки; кэш — [`homeListCache.js`](../../utils/homeListCache.js) (`feed`/`feedReviewed`/`mine`/`rating`); DOM ленты — окно [`homeListWindow.js`](../../utils/homeListWindow.js) (padding + diff по id; silent patch слотов только у смонтированных).
 
 ## URL-состояние
 

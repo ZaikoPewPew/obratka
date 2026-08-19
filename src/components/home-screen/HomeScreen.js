@@ -2,6 +2,7 @@ import { formatString, getStrings } from "../../i18n.js";
 import "../../../styles/home-screen.css";
 import "../../../styles/legendary-online-panel.css";
 import "../../../styles/feedback.css";
+import "../../../styles/scroll-top.css";
 import "../../../styles/notification.css";
 import "../../../styles/tabs-panel.css";
 import "../../../styles/account-menu.css";
@@ -60,6 +61,11 @@ import {
   MINE_FILTER_IDS,
   parseHomeView,
 } from "../../utils/homeRoute.js";
+import {
+  emptySlotWindowKey,
+  listWindowPadding,
+  rangeForScroll,
+} from "../../utils/homeListWindow.js";
 import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
 import { fillSidePanelDoc, getLegalDoc } from "../../utils/legalDoc.js";
 import { getMotionControlErrorBuzz } from "../../utils/motionTokens.js";
@@ -69,6 +75,7 @@ import { createAccountMenu } from "../account-menu/AccountMenu.js";
 import { createTabsPanel } from "../tabs-panel/TabsPanel.js";
 import { createLegendaryOnlinePanel } from "../legendary-online-panel/LegendaryOnlinePanel.js";
 import { createFeedback } from "../feedback/Feedback.js";
+import { createScrollTop } from "../scroll-top/ScrollTop.js";
 import { createNotification } from "../notification/Notification.js";
 import { createExplainerMediaRay } from "./explainerMediaRay.js";
 import boneIconUrl from "../../assets/home/bone.svg";
@@ -710,6 +717,7 @@ function isCompletedOwnItem(item) {
  *     blocked?: 'no_ducks' | 'slot_taken';
  *   }) => void;
  *   onInviteShared?: (payload: { method: InviteShareMethod }) => void;
+ *   onScrollTopClicked?: () => void;
  * }} opts
  * @returns {{
  *   root: HTMLElement;
@@ -739,6 +747,7 @@ export function createHomeScreen({
   onReviewIntroCta,
   onHomeSubmitClicked,
   onInviteShared,
+  onScrollTopClicked,
 }) {
   const root = document.createElement("section");
   root.className = "home-screen";
@@ -1295,6 +1304,14 @@ export function createHomeScreen({
   tabbarDock.append(tabbar, addBtn);
 
   const feedback = createFeedback();
+  const scrollTopBtn = createScrollTop({
+    onActivate: () => {
+      onScrollTopClicked?.();
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)")
+        .matches;
+      body.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+    },
+  });
   const notification = createNotification();
 
   root.append(
@@ -1303,6 +1320,7 @@ export function createHomeScreen({
     body,
     tabbarDock,
     legendaryOnlinePanel.root,
+    scrollTopBtn.root,
     feedback.root,
     notification.root,
     noticeModal.root,
@@ -1329,6 +1347,11 @@ export function createHomeScreen({
   let revealItems = false;
   /** Только что показывали skeleton ленты — не fade-in с opacity:0. */
   let wasSkeletonLoading = false;
+  /** Смонтированное окно ленты (индексы + stride), чтобы не diff-ить на каждый пиксель. */
+  let listWindowStart = 0;
+  let listWindowEnd = 0;
+  let listWindowCount = 0;
+  let listStride = 0;
   /** @type {HomeTabId} */
   let activeTab = "feed";
   /** @type {MineFilterId} */
@@ -1483,6 +1506,7 @@ export function createHomeScreen({
 
     legendaryOnlinePanel.syncCopy();
     feedback.syncCopy();
+    scrollTopBtn.syncCopy();
     notification.setCloseAriaLabel(t.notificationCloseAria ?? "");
     syncProfileAvatar();
     scheduleTabThumbSync();
@@ -2097,6 +2121,16 @@ export function createHomeScreen({
     setTabbarHidden(false);
   }
 
+  function resetFeedScroll() {
+    body.scrollTop = 0;
+    lastScrollTop = 0;
+    scrollTopBtn.setVisible(false);
+    scrollTopBtn.syncFromScroller(body);
+    if (!loading && !root.hidden && activeTab !== "rating") {
+      syncListWindow({ animate: false });
+    }
+  }
+
   /**
    * @param {boolean} onDark
    */
@@ -2230,8 +2264,7 @@ export function createHomeScreen({
       if (mineFilter === next) return;
       mineFilter = next;
       listFilterPanel.setActive(next);
-      body.scrollTop = 0;
-      lastScrollTop = 0;
+      resetFeedScroll();
       if (next === "completed") {
         acknowledgeMineReady(readyOwnCardIds(items));
       }
@@ -2246,8 +2279,7 @@ export function createHomeScreen({
     if (feedFilter === next) return;
     feedFilter = next;
     listFilterPanel.setActive(next);
-    body.scrollTop = 0;
-    lastScrollTop = 0;
+    resetFeedScroll();
     syncCopy();
     if (loading) renderSkeleton();
     else renderList();
@@ -2333,8 +2365,7 @@ export function createHomeScreen({
     syncListFilterPanel();
     syncActiveView();
     showTabbar();
-    body.scrollTop = 0;
-    lastScrollTop = 0;
+    resetFeedScroll();
     syncCopy();
     resyncListFilterThumb();
     if (!opts.silent) emitViewChange("tab");
@@ -2350,8 +2381,7 @@ export function createHomeScreen({
   function goToFeedTab() {
     if (activeTab === "feed") {
       showTabbar();
-      body.scrollTop = 0;
-      lastScrollTop = 0;
+      resetFeedScroll();
       return;
     }
     void setActiveTab("feed");
@@ -2507,6 +2537,7 @@ export function createHomeScreen({
   }
 
   function renderSkeleton() {
+    resetListWindowMetrics();
     list.replaceChildren();
     empty.hidden = true;
     const count = skeletonCardCount();
@@ -2731,9 +2762,10 @@ export function createHomeScreen({
 
   /**
    * Placeholder свободного слота (Figma Type=Queue) на «Мои → Мои на ревью».
+   * @param {number} [slotIndex]
    * @returns {HTMLLIElement}
    */
-  function createEmptySlotCard() {
+  function createEmptySlotCard(slotIndex = 0) {
     const t = getStrings();
     const li = document.createElement("li");
     li.className = "home-screen__item home-screen__item--slot-empty";
@@ -2757,6 +2789,7 @@ export function createHomeScreen({
       void tryAddPortfolio();
     });
 
+    li.dataset.windowKey = emptySlotWindowKey(slotIndex);
     li.append(button);
     return li;
   }
@@ -2797,7 +2830,8 @@ export function createHomeScreen({
       Array.isArray(item.previewUrls) && item.previewUrls[0]
         ? item.previewUrls[0]
         : portfolioPreviewUrl(item.url);
-    previewImg.src = previewSrc;
+    /* src после insert в документ — иначе lazy не видит вьюпорт и качает все превью. */
+    previewImg.dataset.previewSrc = previewSrc;
     previewImg.addEventListener("load", () => {
       preview.classList.remove("home-screen__preview--loading");
       preview.classList.add("home-screen__preview--ready");
@@ -2955,8 +2989,279 @@ export function createHomeScreen({
     }
 
     li.dataset.portfolioId = item.id;
+    li.dataset.windowKey = item.id;
     li.append(button);
     return li;
+  }
+
+  /**
+   * Строки виртуальной ленты: карточки сегмента + free-slot на «Мои → Разбор».
+   *
+   * @returns {Array<{
+   *   key: string;
+   *   kind: 'item' | 'empty';
+   *   index: number;
+   *   item?: HomePortfolioItem;
+   *   slotIndex?: number;
+   * }>}
+   */
+  function listWindowRows() {
+    const visible = visibleFor(getActiveItems());
+    const showMineSlots =
+      activeTab === "mine" && mineFilter === "active" && !loading;
+    const emptySlots = showMineSlots
+      ? Math.max(0, MAX_MINE_PENDING - visible.length)
+      : 0;
+    /** @type {Array<{ key: string; kind: 'item' | 'empty'; index: number; item?: HomePortfolioItem; slotIndex?: number }>} */
+    const rows = visible.map((item, index) => ({
+      key: item.id,
+      kind: /** @type {'item'} */ ("item"),
+      index,
+      item,
+    }));
+    for (let i = 0; i < emptySlots; i += 1) {
+      rows.push({
+        key: emptySlotWindowKey(i),
+        kind: "empty",
+        index: visible.length + i,
+        slotIndex: i,
+      });
+    }
+    return rows;
+  }
+
+  function resetListWindowMetrics() {
+    listWindowStart = 0;
+    listWindowEnd = 0;
+    listWindowCount = 0;
+    list.style.paddingTop = "";
+    list.style.paddingBottom = "";
+  }
+
+  /**
+   * @param {{ paddingTop: number; paddingBottom: number }} pad
+   */
+  function applyListWindowPad(pad) {
+    list.style.paddingTop = pad.paddingTop > 0 ? `${pad.paddingTop}px` : "";
+    list.style.paddingBottom =
+      pad.paddingBottom > 0 ? `${pad.paddingBottom}px` : "";
+  }
+
+  /**
+   * Страйд = высота li + flex gap. Пока нет карточки — probe по токену skeleton.
+   * @returns {number}
+   */
+  function measureListStride() {
+    const gap = Number.parseFloat(
+      getComputedStyle(list).rowGap || getComputedStyle(list).gap,
+    );
+    const gapPx = Number.isFinite(gap) ? gap : 0;
+    const mounted = [...list.children].find(
+      (el) =>
+        el instanceof HTMLElement &&
+        el.classList.contains("home-screen__item") &&
+        !el.classList.contains("home-screen__item--skeleton") &&
+        el.offsetHeight > 0,
+    );
+    if (mounted instanceof HTMLElement) {
+      return mounted.offsetHeight + gapPx;
+    }
+    const probe = document.createElement("div");
+    probe.setAttribute("aria-hidden", "true");
+    probe.style.position = "absolute";
+    probe.style.visibility = "hidden";
+    probe.style.pointerEvents = "none";
+    probe.style.height = "var(--home-screen-skeleton-card-height)";
+    list.append(probe);
+    const height = probe.offsetHeight;
+    probe.remove();
+    return height > 0 ? height + gapPx : 0;
+  }
+
+  /**
+   * @returns {number}
+   */
+  function readListStride() {
+    const measured = measureListStride();
+    if (measured > 0) listStride = measured;
+    return listStride;
+  }
+
+  /**
+   * @param {HTMLElement} li
+   */
+  function attachDeferredPreview(li) {
+    const img = li.querySelector(".home-screen__preview-img");
+    if (!(img instanceof HTMLImageElement)) return;
+    if (img.getAttribute("src")) return;
+    const src = img.dataset.previewSrc;
+    if (src) img.src = src;
+  }
+
+  /**
+   * @param {HTMLElement} li
+   * @param {{
+   *   index: number;
+   *   key: string;
+   * }} row
+   * @param {{
+   *   animate?: boolean;
+   *   revealNewOnly?: boolean;
+   *   prevIds?: Set<string> | null;
+   * }} opts
+   */
+  function applyCardReveal(li, row, opts) {
+    if (opts.animate !== true) return;
+    const isNew =
+      opts.revealNewOnly === true &&
+      opts.prevIds != null &&
+      row.key &&
+      !row.key.startsWith("__empty:") &&
+      !opts.prevIds.has(row.key);
+    if ((revealItems && !wasSkeletonLoading) || isNew) {
+      li.classList.add("motion-reveal");
+      li.style.setProperty(
+        "--reveal-delay",
+        `calc(var(--motion-stagger) * ${row.index})`,
+      );
+    }
+  }
+
+  /**
+   * @param {Array<{
+   *   key: string;
+   *   kind: 'item' | 'empty';
+   *   index: number;
+   *   item?: HomePortfolioItem;
+   *   slotIndex?: number;
+   * }>} slice
+   * @param {{
+   *   animate?: boolean;
+   *   revealNewOnly?: boolean;
+   *   prevIds?: Set<string> | null;
+   * }} opts
+   */
+  function diffListWindow(slice, opts) {
+    const wanted = new Set(slice.map((row) => row.key));
+    /** @type {Map<string, HTMLElement>} */
+    const mounted = new Map();
+    for (const el of [...list.children]) {
+      if (!(el instanceof HTMLElement)) continue;
+      if (el.classList.contains("home-screen__item--skeleton")) {
+        el.remove();
+        continue;
+      }
+      const key = el.dataset.windowKey;
+      if (!key || !wanted.has(key)) {
+        el.remove();
+        continue;
+      }
+      mounted.set(key, el);
+    }
+
+    let ref = list.firstElementChild;
+    for (const row of slice) {
+      let el = mounted.get(row.key);
+      const created = !el;
+      if (!el) {
+        el =
+          row.kind === "empty"
+            ? createEmptySlotCard(row.slotIndex ?? 0)
+            : createCard(/** @type {HomePortfolioItem} */ (row.item));
+        el.dataset.windowKey = row.key;
+        applyCardReveal(el, row, opts);
+        mounted.set(row.key, el);
+      }
+      if (el !== ref) {
+        list.insertBefore(el, ref);
+      }
+      if (created) attachDeferredPreview(el);
+      ref = el.nextElementSibling;
+    }
+  }
+
+  /**
+   * Смонтировать окно вокруг текущего scrollTop. `animate` — только renderList
+   * (skeleton → cards / новые id); скролл-ремоунт без stagger.
+   *
+   * @param {{
+   *   animate?: boolean;
+   *   revealNewOnly?: boolean;
+   *   prevIds?: Set<string> | null;
+   * }} [opts]
+   */
+  function syncListWindow(opts = {}) {
+    if (loading || activeTab === "rating") return;
+    const rows = listWindowRows();
+    empty.hidden = rows.length > 0;
+    if (rows.length === 0) {
+      resetListWindowMetrics();
+      diffListWindow([], opts);
+      return;
+    }
+    const stride = readListStride();
+    const range = rangeForScroll(
+      body.scrollTop,
+      body.clientHeight,
+      rows.length,
+      stride,
+    );
+    applyListWindowPad(
+      listWindowPadding(range.start, range.end, rows.length, stride),
+    );
+    listWindowStart = range.start;
+    listWindowEnd = range.end;
+    listWindowCount = rows.length;
+    diffListWindow(rows.slice(range.start, range.end), opts);
+
+    const nextStride = readListStride();
+    if (nextStride > 0 && stride > 0 && Math.abs(nextStride - stride) > 1) {
+      const nextRange = rangeForScroll(
+        body.scrollTop,
+        body.clientHeight,
+        rows.length,
+        nextStride,
+      );
+      applyListWindowPad(
+        listWindowPadding(
+          nextRange.start,
+          nextRange.end,
+          rows.length,
+          nextStride,
+        ),
+      );
+      listWindowStart = nextRange.start;
+      listWindowEnd = nextRange.end;
+      if (
+        nextRange.start !== range.start ||
+        nextRange.end !== range.end
+      ) {
+        diffListWindow(rows.slice(nextRange.start, nextRange.end), opts);
+      }
+    }
+  }
+
+  /**
+   * Пересчёт окна по скроллу / resize — только если сменился диапазон.
+   */
+  function syncListWindowFromScroll() {
+    if (loading || root.hidden || activeTab === "rating") return;
+    const rows = listWindowRows();
+    const stride = readListStride();
+    const range = rangeForScroll(
+      body.scrollTop,
+      body.clientHeight,
+      rows.length,
+      stride,
+    );
+    if (
+      range.start === listWindowStart &&
+      range.end === listWindowEnd &&
+      rows.length === listWindowCount
+    ) {
+      return;
+    }
+    syncListWindow({ animate: false });
   }
 
   /**
@@ -2968,49 +3273,22 @@ export function createHomeScreen({
   function renderList(opts = {}) {
     const revealNewOnly = opts.revealNewOnly === true;
     const prevIds = opts.prevIds instanceof Set ? opts.prevIds : null;
-    const visible = visibleFor(getActiveItems());
-    list.replaceChildren();
-    const showMineSlots =
-      activeTab === "mine" && mineFilter === "active" && !loading;
-    const emptySlots = showMineSlots
-      ? Math.max(0, MAX_MINE_PENDING - visible.length)
-      : 0;
-    empty.hidden = visible.length > 0 || emptySlots > 0;
     const t = getStrings();
     list.setAttribute(
       "aria-label",
       activeTab === "mine" ? t.homeListMineAria : t.homeListAria,
     );
-
-    for (const [index, item] of visible.entries()) {
-      const li = createCard(item);
-      const isNew =
-        revealNewOnly && prevIds != null && item.id && !prevIds.has(item.id);
-      // Не стартуем с opacity:0 после скелетона — иначе гэп/скачок.
-      if ((revealItems && !wasSkeletonLoading) || isNew) {
-        li.classList.add("motion-reveal");
-        li.style.setProperty(
-          "--reveal-delay",
-          `calc(var(--motion-stagger) * ${index})`,
-        );
-      }
-      list.append(li);
-    }
-    for (let i = 0; i < emptySlots; i += 1) {
-      const li = createEmptySlotCard();
-      const index = visible.length + i;
-      if (revealItems && !wasSkeletonLoading) {
-        li.classList.add("motion-reveal");
-        li.style.setProperty(
-          "--reveal-delay",
-          `calc(var(--motion-stagger) * ${index})`,
-        );
-      }
-      list.append(li);
-    }
+    syncListWindow({
+      animate: true,
+      revealNewOnly,
+      prevIds,
+    });
     wasSkeletonLoading = false;
     revealItems = false;
     scheduleTabbarContrastSync();
+    requestAnimationFrame(() => {
+      syncListWindowFromScroll();
+    });
   }
 
   /**
@@ -3018,11 +3296,17 @@ export function createHomeScreen({
    */
   function patchListSlots(nextItems) {
     const visible = visibleFor(nextItems);
-    const children = [...list.children];
-    for (let i = 0; i < visible.length; i += 1) {
-      const li = children[i];
+    /** @type {Map<string, HomePortfolioItem>} */
+    const byId = new Map();
+    for (const item of visible) {
+      if (item.id) byId.set(item.id, item);
+    }
+    for (const li of list.children) {
       if (!(li instanceof HTMLElement)) continue;
-      const item = visible[i];
+      const id = li.dataset.portfolioId;
+      if (!id) continue;
+      const item = byId.get(id);
+      if (!item) continue;
       const slots = li.querySelector(".home-screen__reviewer-slots");
       if (slots instanceof HTMLElement) {
         fillReviewerSlots(slots, item);
@@ -3377,8 +3661,7 @@ export function createHomeScreen({
     syncListFilterPanel();
     syncActiveView();
     showTabbar();
-    lastScrollTop = 0;
-    body.scrollTop = 0;
+    resetFeedScroll();
     syncCopy();
     /* Instant: syncCopy → scheduleTabThumbSync() без instant даёт width 0→N поверх entrance. */
     scheduleTabThumbSync(true);
@@ -3434,6 +3717,7 @@ export function createHomeScreen({
     listFilterPanel.setActive("active", { instant: true });
     syncListFilterPanel();
     showTabbar();
+    scrollTopBtn.setVisible(false);
     closeNoticeModal();
     closeReviewIntroModal();
     closeInviteModal();
@@ -3448,17 +3732,24 @@ export function createHomeScreen({
   body.addEventListener(
     "scroll",
     () => {
-      const scrollTop = body.scrollTop;
-      const delta = scrollTop - lastScrollTop;
+      const y = body.scrollTop;
+      const delta = y - lastScrollTop;
       const atBottom =
-        body.scrollHeight - body.clientHeight - scrollTop <= TABBAR_BOTTOM_EPS;
-      if (scrollTop <= 0 || delta < 0 || atBottom) {
+        body.scrollHeight - body.clientHeight - y <= TABBAR_BOTTOM_EPS;
+      if (y <= 0 || delta < 0 || atBottom) {
         showTabbar();
       } else if (delta > TABBAR_HIDE_DELTA) {
         setTabbarHidden(true);
       }
-      lastScrollTop = scrollTop;
+      if (y <= 0 || delta < 0) {
+        scrollTopBtn.setVisible(false);
+      } else if (delta > TABBAR_HIDE_DELTA) {
+        scrollTopBtn.setVisible(true);
+      }
+      lastScrollTop = y;
+      scrollTopBtn.syncFromScroller(body);
       scheduleTabbarContrastSync();
+      syncListWindowFromScroll();
     },
     { passive: true },
   );
@@ -3476,6 +3767,7 @@ export function createHomeScreen({
   window.addEventListener("resize", () => {
     scheduleTabThumbSync();
     scheduleTabbarContrastSync();
+    syncListWindowFromScroll();
   });
 
   document.addEventListener("visibilitychange", () => {

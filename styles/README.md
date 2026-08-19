@@ -11,6 +11,7 @@
 - `home-screen.css` — главная `/home` (topbar, лента, вкладка рейтинга `.home-screen__rating-list` / плашка `.home-screen__rating-reputation`, tabbar-dock: glass tabs + submit + tab-dot, `--on-dark`).
 - `legendary-online-panel.css` — fixed-чип «Топы в сети» слева снизу на home.
 - `feedback.css` — fixed FAB feedback (Telegram) на home; глаза `--feedback-eye-*` (слежение за курсором + морг).
+- `scroll-top.css` — кубик «наверх» у FAB на home; `--scroll-top-*`.
 - `notification.css` — toast Notification (top-right под аватаром home).
 - `tabs-panel.css` — сегмент feed/mine на home (`createTabsPanel`, `--tabs-panel-*`).
 - `success-screen.css` — `/done` (пресеты успеха).
@@ -22,7 +23,7 @@
 
 ## Что подключено из `index.html`
 
-`tokens.css` → `base.css` → `entrance.css` → `app-modal.css` → `side-panel.css` → `iframe-shell.css` → `success-screen.css` → `report-screen.css` → `ban-screen.css` → `home-screen.css` → `legendary-online-panel.css` → `feedback.css` → `notification.css` → `tabs-panel.css` → `account-menu.css` → `settings-screen.css`.
+`tokens.css` → `base.css` → `entrance.css` → `app-modal.css` → `side-panel.css` → `iframe-shell.css` → `success-screen.css` → `report-screen.css` → `ban-screen.css` → `home-screen.css` → `legendary-online-panel.css` → `feedback.css` → `scroll-top.css` → `notification.css` → `tabs-panel.css` → `account-menu.css` → `settings-screen.css`.
 
 `desktop-only-screen.css` — side-effect import из `desktop-only-screen/`. Лендос — свой HTML entry (`landing/index.html`).
 

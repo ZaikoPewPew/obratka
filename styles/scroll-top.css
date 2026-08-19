@@ -1,0 +1,87 @@
+/* Кубик «наверх»: вылет влево из FAB, стрелка, скролл ленты наверх. */
+
+.scroll-top {
+  box-sizing: border-box;
+  position: absolute;
+  right: var(--scroll-top-offset);
+  bottom: var(--scroll-top-offset);
+  z-index: var(--scroll-top-z-tucked);
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--scroll-top-size);
+  height: var(--scroll-top-size);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--scroll-top-radius);
+  background: var(--scroll-top-bg);
+  color: var(--scroll-top-icon-color);
+  font-family: var(--font-family);
+  appearance: none;
+  cursor: pointer;
+  pointer-events: none;
+  overflow: visible;
+  visibility: hidden;
+  transform: translateX(0);
+  transition:
+    transform var(--motion-scroll-top-duration) var(--motion-scroll-top-ease),
+    visibility 0s linear var(--motion-scroll-top-duration);
+}
+
+.scroll-top--visible {
+  z-index: var(--scroll-top-z);
+  pointer-events: auto;
+  visibility: visible;
+  transform: translateX(var(--scroll-top-shift));
+  transition:
+    transform var(--motion-scroll-top-duration) var(--motion-scroll-top-ease),
+    visibility 0s;
+}
+
+.scroll-top:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.scroll-top__arrow {
+  display: block;
+  flex-shrink: 0;
+  width: var(--scroll-top-arrow-size);
+  height: var(--scroll-top-arrow-size);
+  pointer-events: none;
+}
+
+.scroll-top__goo {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  display: block;
+  width: var(--scroll-top-gap);
+  height: var(--scroll-top-goo-height);
+  color: var(--scroll-top-bg);
+  pointer-events: none;
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--motion-scroll-top-duration)
+    var(--motion-scroll-top-ease);
+}
+
+.scroll-top--visible .scroll-top__goo {
+  transform: translateY(-50%) scaleX(1);
+}
+
+.scroll-top__goo-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-top,
+  .scroll-top--visible,
+  .scroll-top__goo {
+    transition: none;
+  }
+}

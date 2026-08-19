@@ -4,9 +4,9 @@
 
 ## `home/`
 
-Чипы / иконки шапки и карточек ленты (`bone.svg`, `reputation-*.svg`, `plus.svg` для CTA «Закинуть», `report-sent.svg` для статуса «Отчёт отправлен», …).
+Чипы / иконки шапки и карточек ленты (`bone.svg`, `reputation-*.svg`, `plus.svg` для CTA «Закинуть», `report-sent.svg` для статуса «Отчёт отправлен», `scroll-top.svg` для кубика «наверх», …).
 `reputation-*.svg` — inline через `?raw` (группа `.home-screen__reputation-eyes` для анимации взгляда на чипе; в топ-50 на вкладке «Рейтинг» — те же SVG статично, без idle-loop).
-`plus.svg` / `report-sent.svg` — inline через `?raw` (`currentColor`).
+`plus.svg` / `report-sent.svg` / `scroll-top.svg` / `scroll-top-goo.svg` — inline через `?raw` (`currentColor`).
 `report-sent.svg` — галочка в сером превью карточки сегмента «Уже отревьюено» (`--home-screen-card-reviewed-icon-color` → `--color-success`).
 FAB feedback — глаза в [`feedback`](../components/feedback/README.md) (не Lottie и не `feedback.svg`; `cap-lottie.json` пока не используется).
 

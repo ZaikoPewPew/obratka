@@ -56,4 +56,4 @@ await toast.hide();
 | [`src/assets/home/notification-error.svg`](../../assets/home/notification-error.svg) | иконка `!` в круге |
 | `content/locales.json` | `homeNotify*`, `notificationCloseAria` |
 
-Подключение CSS: `index.html` → после `feedback.css`.
+Подключение CSS: side-effect import из `HomeScreen.js` после `scroll-top.css`.

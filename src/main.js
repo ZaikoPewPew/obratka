@@ -2267,6 +2267,9 @@ async function ensureHomeScreen() {
           onInviteShared: ({ method }) => {
             track("invite_shared", { method });
           },
+          onScrollTopClicked: () => {
+            track("home_scroll_top_clicked");
+          },
           onOpenReport: async (item) => {
             if (!item?.isOwn || !item.id) return;
             pendingReportPortfolioId = item.id;

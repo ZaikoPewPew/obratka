@@ -1456,6 +1456,23 @@
   --feedback-tooltip-ease: var(--tooltip-motion-ease);
   --feedback-tooltip-shift: var(--tooltip-motion-shift);
 
+  /* Scroll-top: куб 56 из FAB, стрелка 24 */
+  --scroll-top-size: var(--feedback-size);
+  --scroll-top-offset: var(--feedback-offset);
+  --scroll-top-radius: var(--feedback-radius);
+  --scroll-top-gap: var(--space-3);
+  --scroll-top-goo-height: 23px;
+  --scroll-top-z: var(--feedback-z);
+  --scroll-top-z-tucked: calc(var(--feedback-z) - 1);
+  --scroll-top-bg: var(--feedback-bg);
+  --scroll-top-icon-color: var(--color-on-accent);
+  --scroll-top-arrow-size: 24px;
+  --scroll-top-shift: calc(
+    -1 * (var(--scroll-top-size) + var(--scroll-top-gap))
+  );
+  --motion-scroll-top-duration: var(--motion-screen-duration);
+  --motion-scroll-top-ease: var(--motion-screen-ease);
+
   /* Toast Notification (Figma 542:1153) — top-right под аватаром home */
   --notification-z: calc(var(--home-screen-tabbar-z) + 2);
   --notification-inset-right: var(--space-4);

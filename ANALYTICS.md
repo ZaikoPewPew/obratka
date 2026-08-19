@@ -113,6 +113,7 @@ resetAnalytics(); // logout
 | `review_aborted` | confirm abort / desktop-only gate | `portfolio_id?`, `route_id?`, `reason?` (`desktop_only_gate`) | Уход без награды |
 | `review_next_case_clicked` | «Следующий кейс» | `ok` | Цикл следующего кейса |
 | `home_submit_clicked` | «Закинуть» / gate `/portfolio` | `blocked?`: `no_ducks` \| `slot_taken` | CTA подачи / блок |
+| `home_scroll_top_clicked` | кубик «наверх» у FAB | — | Скролл ленты наверх |
 | `account_community_clicked` | account-menu «Сообщество» | — | Открытие TG-канала |
 | `invite_shared` | copy / share invite | `method`: `copy` \| `telegram` \| `x` \| `threads` \| `linkedin` | Рефералка |
 | `portfolio_submitted` | после `submit_portfolio` | — | Подача своего URL |

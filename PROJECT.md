@@ -221,7 +221,7 @@ SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `p
 | Field errors | [`FIELD_ERROR.md`](src/utils/FIELD_ERROR.md) — текст + обводка; visual `invalid` |
 | App modal | [`app-modal`](src/components/app-modal/README.md) — общий диалог (слот контента + primary/secondary); Figma Modal |
 | Side panel | [`side-panel`](src/components/side-panel/README.md) — панель справа (слот); правила / политика ПДн / соглашение; consent на `/registration` |
-| Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `feedback`; feed/mine (+ кэш `rating`, таб UI off); URL-query; лента SWR (`feed`/`feedReviewed`/`mine`/`rating`); Ждёт/Уже + Ещё/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` / entrance cascade |
+| Home | `home-screen` + `account-menu` + `tabs-panel` + `legendary-online-panel` + `feedback` + `scroll-top`; feed/mine (+ кэш `rating`, таб UI off); URL-query; лента SWR (`feed`/`feedReviewed`/`mine`/`rating`); Ждёт/Уже + Ещё/Завершенные; tabbar-dock (tabs + submit + точки feedSeen / 3/3) / `--on-dark` / entrance cascade |
 | Review | `index.html` `.iframe-shell` + таймер + чип **rec** (заметки → `answers.dictation`; polish off/`POLISH_ENABLED`) в `main.js`; embed: `resolvePortfolioEmbed` / external UI |
 | Quiz | `review-screen` + `review-panel` + [`scale-slider`](src/components/scale-slider/README.md) (context/visual **1–5**; условный `pain`; рыночный `tier`) + mic → `advice`. SoT: [`QUIZ.md`](QUIZ.md) |
 | Success | `success-screen` (`/done`) |
@@ -262,9 +262,9 @@ Visual variants: `default` / `invalid` (рожки без resize) / `done` (logo
 
 **Подключено** (`index.html` + `main.js`):
 
-- CSS: `tokens`, `base`, `entrance`, `app-modal`, `side-panel`, `iframe-shell`, `success-screen`, `home-screen`, `legendary-online-panel`, `feedback`, `tabs-panel`, `account-menu`, `settings-screen`, `ban-screen`, `report-screen` (+ `desktop-only-screen` через импорт фабрики)
+- CSS: `tokens`, `base`, `entrance`, `app-modal`, `side-panel`, `iframe-shell`, `success-screen`, `home-screen`, `legendary-online-panel`, `feedback`, `scroll-top`, `tabs-panel`, `account-menu`, `settings-screen`, `ban-screen`, `report-screen` (+ `desktop-only-screen` через импорт фабрики)
 - Экраны: referral, auth, auth-code, onboarding, home, settings, url, review-shell (+ rec), quiz, success, report, ban, not-found
-- Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `side-panel`, `account-menu`, `tabs-panel`, `legendary-online-panel`, `feedback`, `scale-slider`, `desktop-only-screen` (гейт &lt;768px)
+- Shared UI: `brand-screen-visual`, `brand-screen-shell`, `app-modal`, `side-panel`, `account-menu`, `tabs-panel`, `legendary-online-panel`, `feedback`, `scroll-top`, `scale-slider`, `desktop-only-screen` (гейт &lt;768px)
 - Home state: `src/utils/homeRoute.js` (query) + `homeListCache.js` + `feedSeen.js` + `mineReadySeen.js` (кэши сбрасываются в `exitAuthenticatedSession`)
 - Review timer: `src/config/review.js` (`REVIEW_SESSION_SECONDS`); iframe pause / external wall-clock; end sound `src/assets/audio/Timer-end.wav`
 - Portfolio embed: `src/utils/embedHosts.js` + `portfolioEmbed.js` + Edge `portfolio-embed-probe` (XFO/CSP; Figma/YouTube rewrite; blocklist → external; optimistic iframe + Readymag probe + frame-block fallback). Каталог: [`content/embed-hosts.md`](content/embed-hosts.md)
