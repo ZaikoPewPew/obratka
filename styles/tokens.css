@@ -1456,12 +1456,11 @@
   --feedback-tooltip-ease: var(--tooltip-motion-ease);
   --feedback-tooltip-shift: var(--tooltip-motion-shift);
 
-  /* Scroll-top: куб 56 из FAB, стрелка 24 */
+  /* Scroll-top: куб 56 из FAB вверх, gap 8, стрелка 24 */
   --scroll-top-size: var(--feedback-size);
   --scroll-top-offset: var(--feedback-offset);
   --scroll-top-radius: var(--feedback-radius);
-  --scroll-top-gap: var(--space-3);
-  --scroll-top-goo-height: 23px;
+  --scroll-top-gap: var(--space-2);
   --scroll-top-z: var(--feedback-z);
   --scroll-top-z-tucked: calc(var(--feedback-z) - 1);
   --scroll-top-bg: var(--feedback-bg);

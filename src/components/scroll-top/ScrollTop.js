@@ -1,6 +1,5 @@
 import { getStrings } from "../../i18n.js";
 import scrollTopIconSvg from "../../assets/home/scroll-top.svg?raw";
-import scrollTopGooSvg from "../../assets/home/scroll-top-goo.svg?raw";
 
 /**
  * Стрелка «наверх» — inline SVG, чтобы currentColor наследовал цвет кнопки.
@@ -21,26 +20,7 @@ function createArrowIcon() {
 }
 
 /**
- * Липкий мост между кубиком и FAB — inline SVG, fill через currentColor.
- * @returns {HTMLSpanElement}
- */
-function createGoo() {
-  const wrap = document.createElement("span");
-  wrap.className = "scroll-top__goo";
-  wrap.setAttribute("aria-hidden", "true");
-  wrap.innerHTML = scrollTopGooSvg.trim();
-  const svg = wrap.firstElementChild;
-  if (!(svg instanceof SVGElement)) {
-    throw new Error("scroll-top-goo.svg must be a root <svg>");
-  }
-  svg.classList.add("scroll-top__goo-svg");
-  svg.setAttribute("preserveAspectRatio", "none");
-  svg.setAttribute("aria-hidden", "true");
-  return wrap;
-}
-
-/**
- * Кубик «наверх» у FAB feedback: вылет влево при скролле вниз.
+ * Кубик «наверх» у FAB feedback: вылет вверх при скролле вниз.
  *
  * @param {{ onActivate?: () => void }} [opts]
  * @returns {{
@@ -56,7 +36,7 @@ export function createScrollTop({ onActivate } = {}) {
   root.className = "scroll-top";
   root.setAttribute("aria-hidden", "true");
   root.tabIndex = -1;
-  root.append(createArrowIcon(), createGoo());
+  root.append(createArrowIcon());
 
   let visible = false;
 

@@ -16,7 +16,7 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 
 Переключатель: `home-screen__tabbar` внутри дока `home-screen__tabbar-dock` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`). Вкладки: **Лента** / **Мои посты** (Рейтинг в разметке есть, сейчас `hidden`). Справа от таббара в доке (gap 8px, `--home-screen-tabbar-dock-gap`) — кнопка «Закинуть своё» (56×56, r16, Google blue, плюс 24; токены `--home-screen-tabbar-submit-*`).
 
-- Скролл **вниз** по `home-screen__body` → док (таббар + кнопка) уезжает за нижний край (`home-screen__tabbar-dock--hidden`); кубик [`scroll-top`](../scroll-top/) вылетает влево из FAB (зазор 12px).
+- Скролл **вниз** по `home-screen__body` → док (таббар + кнопка) уезжает за нижний край (`home-screen__tabbar-dock--hidden`); кубик [`scroll-top`](../scroll-top/) вылетает вверх из FAB (зазор 8px).
 - Скролл **вверх** (любой delta &lt; 0) / у верхнего края / **у низа ленты** → таббар снова виден сразу. Кубик «наверх» прячется при скролле вверх и у верха (у низа остаётся, если пришли вниз).
 - Hide — с небольшим порогом (`TABBAR_HIDE_DELTA`), чтобы трекпад не дёргал; низ — `TABBAR_BOTTOM_EPS`. Тот же порог для показа `scroll-top`.
 - Анимация hide/show: `--home-screen-tabbar-hide-duration` / `--home-screen-tabbar-hide-ease` → `--motion-screen-*`.
