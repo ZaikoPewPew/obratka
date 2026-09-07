@@ -67,6 +67,7 @@ import {
   rangeForScroll,
 } from "../../utils/homeListWindow.js";
 import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
+import { applyAvatarLetterTone } from "../../utils/avatarLetterTone.js";
 import { fillSidePanelDoc, getLegalDoc } from "../../utils/legalDoc.js";
 import { getMotionControlErrorBuzz } from "../../utils/motionTokens.js";
 import { createAppModal } from "../app-modal/AppModal.js";
@@ -433,6 +434,38 @@ function initialFromLabel(label) {
 }
 
 /**
+ * Letter-аватар на бейдже карточки (без фото).
+ * @param {HTMLElement} avatar
+ * @param {string} letter
+ * @param {string} seed
+ */
+function mountLetterBadge(avatar, letter, seed) {
+  avatar.classList.add("home-screen__badge--letter");
+  applyAvatarLetterTone(avatar, seed, "home-screen__badge--letter-tone-");
+  const letterEl = document.createElement("span");
+  letterEl.className = "home-screen__badge-letter";
+  letterEl.textContent = letter;
+  letterEl.setAttribute("aria-hidden", "true");
+  avatar.append(letterEl);
+}
+
+/**
+ * Letter-аватар в слоте ревьюера.
+ * @param {HTMLElement} slot
+ * @param {string} letter
+ * @param {string} seed
+ */
+function mountReviewerSlotLetter(slot, letter, seed) {
+  slot.classList.add("home-screen__reviewer-slot--letter");
+  applyAvatarLetterTone(slot, seed, "home-screen__reviewer-slot--letter-tone-");
+  const letterEl = document.createElement("span");
+  letterEl.className = "home-screen__reviewer-slot-letter";
+  letterEl.textContent = letter;
+  letterEl.setAttribute("aria-hidden", "true");
+  slot.append(letterEl);
+}
+
+/**
  * Иконка занятого, но ещё не завершённого анонимного ревью.
  * @returns {SVGSVGElement}
  */
@@ -595,6 +628,8 @@ function fillReviewerSlots(slots, item) {
     const slotLetter = initialFromLabel(
       slotData.displayName || slotData.reviewerId || "?",
     );
+    const slotLetterSeed =
+      slotData.reviewerId || slotData.displayName || "?";
     const gradeKey =
       typeof slotData.grade === "string" ? slotData.grade.trim() : "";
     const gradeLabel = formatPortfolioGrade(gradeKey);
@@ -612,22 +647,12 @@ function fillReviewerSlots(slots, item) {
       slotImg.referrerPolicy = "no-referrer";
       slotImg.addEventListener("error", () => {
         slotImg.remove();
-        slot.classList.add("home-screen__reviewer-slot--letter");
-        const letterEl = document.createElement("span");
-        letterEl.className = "home-screen__reviewer-slot-letter";
-        letterEl.textContent = slotLetter;
-        letterEl.setAttribute("aria-hidden", "true");
-        slot.append(letterEl);
+        mountReviewerSlotLetter(slot, slotLetter, slotLetterSeed);
       });
       slotImg.src = slotAvatar;
       slot.append(slotImg);
     } else {
-      slot.classList.add("home-screen__reviewer-slot--letter");
-      const letterEl = document.createElement("span");
-      letterEl.className = "home-screen__reviewer-slot-letter";
-      letterEl.textContent = slotLetter;
-      letterEl.setAttribute("aria-hidden", "true");
-      slot.append(letterEl);
+      mountReviewerSlotLetter(slot, slotLetter, slotLetterSeed);
     }
     slots.append(slot);
   }
@@ -2913,6 +2938,7 @@ export function createHomeScreen({
     avatar.className = "home-screen__badge home-screen__badge--avatar";
     const personName = item.name || item.url;
     const letter = initialFromLabel(personName);
+    const letterSeed = item.ownerId || item.id || personName;
     const avatarSrc =
       typeof item.avatarUrl === "string" ? item.avatarUrl.trim() : "";
 
@@ -2927,22 +2953,12 @@ export function createHomeScreen({
       avatarImg.referrerPolicy = "no-referrer";
       avatarImg.addEventListener("error", () => {
         avatarImg.remove();
-        avatar.classList.add("home-screen__badge--letter");
-        const letterEl = document.createElement("span");
-        letterEl.className = "home-screen__badge-letter";
-        letterEl.textContent = letter;
-        letterEl.setAttribute("aria-hidden", "true");
-        avatar.append(letterEl);
+        mountLetterBadge(avatar, letter, letterSeed);
       });
       avatarImg.src = avatarSrc;
       avatar.append(avatarImg);
     } else {
-      avatar.classList.add("home-screen__badge--letter");
-      const letterEl = document.createElement("span");
-      letterEl.className = "home-screen__badge-letter";
-      letterEl.textContent = letter;
-      letterEl.setAttribute("aria-hidden", "true");
-      avatar.append(letterEl);
+      mountLetterBadge(avatar, letter, letterSeed);
     }
     if (typeof item.name === "string" && item.name.trim()) {
       attachHomeTooltip(avatar, item.name.trim());

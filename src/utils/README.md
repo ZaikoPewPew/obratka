@@ -15,6 +15,7 @@
 | `urlScreenField.js` | invalid поля: текст + aria + обводка (`--invalid` / OTP cells) |
 | `portfolioMeta.js` | нормализация URL; favicon и имя сайта |
 | `platformBrandIcon.js` | иконка площадки на карточке (Simple Icons / favicon / «www»); размер = 1/3 бейджа (`--home-screen-badge-platform-icon-size`); ≠≠** embed-стратегия |
+| `avatarLetterTone.js` | стабильный tone letter-аватаров на карточках home (`getAvatarLetterToneIndex` / `applyAvatarLetterTone` по seed) |
 | `embedHosts.js` | каталог хостов iframe vs новое окно (см. `content/embed-hosts.md`) |
 | `portfolioEmbed.js` | Figma/YouTube embed / iframe / внешняя вкладка; Readymag HTML-probe; детект blocked iframe |
 | `meshGradientWash.js` | WebGL mesh (Paper Shaders); `transitionToCssColors` |

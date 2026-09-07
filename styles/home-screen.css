@@ -986,6 +986,42 @@
   color: var(--home-screen-avatar-letter-color);
 }
 
+.home-screen__badge--letter .home-screen__badge-letter {
+  font-size: var(--home-screen-badge-avatar-letter-size);
+}
+
+.home-screen__badge--letter-tone-0 {
+  background: var(--home-screen-avatar-letter-tone-0);
+}
+
+.home-screen__badge--letter-tone-1 {
+  background: var(--home-screen-avatar-letter-tone-1);
+}
+
+.home-screen__badge--letter-tone-2 {
+  background: var(--home-screen-avatar-letter-tone-2);
+}
+
+.home-screen__badge--letter-tone-3 {
+  background: var(--home-screen-avatar-letter-tone-3);
+}
+
+.home-screen__badge--letter-tone-4 {
+  background: var(--home-screen-avatar-letter-tone-4);
+}
+
+.home-screen__badge--letter-tone-5 {
+  background: var(--home-screen-avatar-letter-tone-5);
+}
+
+.home-screen__badge--letter-tone-6 {
+  background: var(--home-screen-avatar-letter-tone-6);
+}
+
+.home-screen__badge--letter-tone-7 {
+  background: var(--home-screen-avatar-letter-tone-7);
+}
+
 .home-screen__badge--empty {
   background: var(--home-screen-avatar-letter-bg);
 }
@@ -1209,6 +1245,38 @@
 .home-screen__reviewer-slot--letter {
   background: var(--home-screen-avatar-letter-bg);
   color: var(--home-screen-avatar-letter-color);
+}
+
+.home-screen__reviewer-slot--letter-tone-0 {
+  background: var(--home-screen-avatar-letter-tone-0);
+}
+
+.home-screen__reviewer-slot--letter-tone-1 {
+  background: var(--home-screen-avatar-letter-tone-1);
+}
+
+.home-screen__reviewer-slot--letter-tone-2 {
+  background: var(--home-screen-avatar-letter-tone-2);
+}
+
+.home-screen__reviewer-slot--letter-tone-3 {
+  background: var(--home-screen-avatar-letter-tone-3);
+}
+
+.home-screen__reviewer-slot--letter-tone-4 {
+  background: var(--home-screen-avatar-letter-tone-4);
+}
+
+.home-screen__reviewer-slot--letter-tone-5 {
+  background: var(--home-screen-avatar-letter-tone-5);
+}
+
+.home-screen__reviewer-slot--letter-tone-6 {
+  background: var(--home-screen-avatar-letter-tone-6);
+}
+
+.home-screen__reviewer-slot--letter-tone-7 {
+  background: var(--home-screen-avatar-letter-tone-7);
 }
 
 .home-screen__reviewer-slot-anonymous-icon {

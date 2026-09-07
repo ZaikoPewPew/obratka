@@ -119,6 +119,10 @@
   opacity: var(--opacity-disabled);
 }
 
+.account-menu__action[hidden] {
+  display: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .account-menu,
   .account-menu__action {

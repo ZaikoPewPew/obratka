@@ -62,6 +62,7 @@ export function createAccountMenu(opts = {}) {
   settingsBtn.type = "button";
   settingsBtn.className = "account-menu__action";
   settingsBtn.setAttribute("role", "menuitem");
+  settingsBtn.hidden = !SETTINGS_PROFILE_ENABLED;
 
   const inviteBtn = document.createElement("button");
   inviteBtn.type = "button";
