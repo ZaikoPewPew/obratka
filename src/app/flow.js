@@ -5,6 +5,7 @@
  */
 
 import { EMAIL_AUTH_ENABLED } from "../config/auth.js";
+import { SETTINGS_PROFILE_ENABLED } from "../config/settings.js";
 import { ROUTE_PATHS } from "./routes.js";
 
 /** @type {readonly AppScreenId[]} */
@@ -101,6 +102,10 @@ export function resolveAccessibleRoute(id, state = {}) {
 
   if (id === "banned") {
     return resolveEntryScreen(state);
+  }
+
+  if (id === "settings" && !SETTINGS_PROFILE_ENABLED) {
+    id = "home";
   }
 
   if (id === "authCode") {

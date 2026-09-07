@@ -1002,6 +1002,7 @@
   width: var(--home-screen-badge-platform-icon-size);
   height: var(--home-screen-badge-platform-icon-size);
   object-fit: contain;
+  border-radius: 0;
   filter: var(--home-screen-badge-platform-icon-filter);
 }
 

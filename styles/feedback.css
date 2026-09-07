@@ -74,8 +74,9 @@
 .feedback__tip {
   box-sizing: border-box;
   position: absolute;
-  bottom: calc(100% + var(--feedback-tooltip-offset));
-  right: 0;
+  top: 50%;
+  right: calc(100% + var(--feedback-tooltip-offset));
+  bottom: auto;
   z-index: var(--feedback-tooltip-z);
   display: block;
   padding: var(--feedback-tooltip-padding-y) var(--feedback-tooltip-padding-x);
@@ -90,7 +91,7 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(var(--feedback-tooltip-shift));
+  transform: translateY(-50%) translateX(var(--feedback-tooltip-shift));
   transition:
     opacity var(--feedback-tooltip-duration) var(--feedback-tooltip-ease),
     transform var(--feedback-tooltip-duration) var(--feedback-tooltip-ease),
@@ -100,21 +101,23 @@
 .feedback__tip::after {
   content: "";
   position: absolute;
-  top: 100%;
-  right: calc(var(--feedback-size) / 2);
+  top: 50%;
+  right: auto;
+  left: 100%;
   width: 0;
   height: 0;
-  border-left: var(--feedback-tooltip-tail-size) solid transparent;
-  border-right: var(--feedback-tooltip-tail-size) solid transparent;
-  border-top: var(--feedback-tooltip-tail-size) solid var(--feedback-tooltip-bg);
-  transform: translateX(50%);
+  border-top: var(--feedback-tooltip-tail-size) solid transparent;
+  border-bottom: var(--feedback-tooltip-tail-size) solid transparent;
+  border-left: var(--feedback-tooltip-tail-size) solid var(--feedback-tooltip-bg);
+  border-right: none;
+  transform: translateY(-50%);
 }
 
 .feedback:hover .feedback__tip,
 .feedback:focus-visible .feedback__tip {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translateY(-50%) translateX(0);
   transition:
     opacity var(--feedback-tooltip-duration) var(--feedback-tooltip-ease),
     transform var(--feedback-tooltip-duration) var(--feedback-tooltip-ease),
@@ -130,7 +133,7 @@
   }
 
   .feedback__tip::after {
-    transform: translateX(50%);
+    transform: translateY(-50%);
   }
 
   .feedback--blink .feedback__eye-ball {

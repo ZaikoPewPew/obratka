@@ -1,6 +1,7 @@
 import { getSession } from "../../app/session.js";
 import { getStrings } from "../../i18n.js";
 import { TELEGRAM_COMMUNITY_URL } from "../../config/contacts.js";
+import { SETTINGS_PROFILE_ENABLED } from "../../config/settings.js";
 
 /**
  * Fallback закрытия меню ≈ CSS-duration + небольшой запас.
@@ -105,6 +106,7 @@ export function createAccountMenu(opts = {}) {
     displayName.textContent = name || t.homeAccountNameFallback || "";
     email.textContent = accountEmail || t.homeAccountEmailFallback || "";
     settingsBtn.textContent = t.homeAccountSettings ?? "";
+    settingsBtn.hidden = !SETTINGS_PROFILE_ENABLED;
     inviteBtn.textContent = t.homeAccountInvite ?? "";
     communityLink.textContent = t.homeAccountCommunity ?? "";
     rulesBtn.textContent = t.homeAccountRules ?? "";
@@ -205,7 +207,10 @@ export function createAccountMenu(opts = {}) {
     close,
     toggle,
     isOpen,
-    focusFirst: () => settingsBtn.focus(),
+    focusFirst: () => {
+      if (SETTINGS_PROFILE_ENABLED) settingsBtn.focus();
+      else inviteBtn.focus();
+    },
     syncContent,
   };
 }

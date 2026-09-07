@@ -12,7 +12,6 @@ Fixed-кнопка 56×56 в правом нижнем углу home → `COMMUN
 - Не прячется вместе с tabbar-dock.
 - Сосед: кубик [`scroll-top`](../scroll-top/) вылетает вверх из этой кнопки при скролле ленты вниз (не внутри ссылки Telegram).
 - На `home-screen--open` — entrance `motion-reveal-topbar` с delay `--home-screen-reveal-delay-fab`.
-- Lottie-кепка (`cap-lottie.json`) пока не используется.
 
 ## API
 
