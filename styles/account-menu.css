@@ -97,12 +97,20 @@
   text-align: left;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color var(--account-menu-action-motion-duration)
-    var(--account-menu-action-motion-ease);
+  transition:
+    background-color var(--account-menu-action-motion-duration)
+      var(--account-menu-action-motion-ease),
+    color var(--account-menu-action-motion-duration)
+      var(--account-menu-action-motion-ease);
 }
 
 .account-menu__action:hover {
   background: var(--account-menu-action-bg-hover);
+}
+
+.account-menu__action--sign-out:hover:not(:disabled) {
+  background: var(--account-menu-sign-out-bg-hover);
+  color: var(--account-menu-sign-out-color-hover);
 }
 
 .account-menu__action:active {

@@ -33,6 +33,7 @@
   --palette-ink: #111111;
   --palette-red: #c43c3c;
   --palette-red-soft: #fff8f8;
+  --palette-sign-out: #f3463a;
   --palette-green: #00c023;
   --palette-copied-green: #62c554;
   /* Online presence (Figma legendary chip) */
@@ -954,6 +955,12 @@
   --account-menu-action-size: var(--font-size-base);
   --account-menu-action-bg-hover: var(--color-surface-muted-active);
   --account-menu-action-bg-active: var(--color-border-subtle);
+  --account-menu-sign-out-color-hover: var(--palette-sign-out);
+  --account-menu-sign-out-bg-hover: color-mix(
+    in srgb,
+    var(--palette-sign-out) 10%,
+    transparent
+  );
   --account-menu-motion-duration: 140ms;
   --account-menu-motion-ease: var(--ease-out);
   --account-menu-motion-shift: 4px;
