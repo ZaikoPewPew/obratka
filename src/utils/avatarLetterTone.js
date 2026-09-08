@@ -1,6 +1,9 @@
 /** @type {number} Должно совпадать с --home-screen-avatar-letter-tone-count. */
 export const AVATAR_LETTER_TONE_COUNT = 8;
 
+/** Имя CSS-переменной фона letter-аватара (переопределяется на элементе). */
+export const AVATAR_LETTER_BG_VAR = "--home-screen-avatar-letter-bg";
+
 /**
  * Детерминированная 32-битная строковая хеш-функция (без Math.random()).
  * @param {string} str
@@ -27,12 +30,17 @@ export function getAvatarLetterToneIndex(seed) {
 }
 
 /**
- * Добавляет tone-модификатор на letter-контейнер.
+ * Назначает tone фона letter-аватара через CSS-переменную на элементе.
+ * Надёжнее modifier-классов: `.home-screen__badge--letter` / slot читают
+ * `var(--home-screen-avatar-letter-bg)` без борьбы специфичности с `--completed`.
+ *
  * @param {HTMLElement} el
  * @param {string | null | undefined} seed
- * @param {string} classPrefix например `home-screen__badge--letter-tone-`
  */
-export function applyAvatarLetterTone(el, seed, classPrefix) {
+export function applyAvatarLetterTone(el, seed) {
   const index = getAvatarLetterToneIndex(seed);
-  el.classList.add(`${classPrefix}${index}`);
+  el.style.setProperty(
+    AVATAR_LETTER_BG_VAR,
+    `var(--home-screen-avatar-letter-tone-${index})`,
+  );
 }

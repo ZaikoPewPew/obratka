@@ -441,7 +441,7 @@ function initialFromLabel(label) {
  */
 function mountLetterBadge(avatar, letter, seed) {
   avatar.classList.add("home-screen__badge--letter");
-  applyAvatarLetterTone(avatar, seed, "home-screen__badge--letter-tone-");
+  applyAvatarLetterTone(avatar, seed);
   const letterEl = document.createElement("span");
   letterEl.className = "home-screen__badge-letter";
   letterEl.textContent = letter;
@@ -457,7 +457,7 @@ function mountLetterBadge(avatar, letter, seed) {
  */
 function mountReviewerSlotLetter(slot, letter, seed) {
   slot.classList.add("home-screen__reviewer-slot--letter");
-  applyAvatarLetterTone(slot, seed, "home-screen__reviewer-slot--letter-tone-");
+  applyAvatarLetterTone(slot, seed);
   const letterEl = document.createElement("span");
   letterEl.className = "home-screen__reviewer-slot-letter";
   letterEl.textContent = letter;
@@ -2938,7 +2938,7 @@ export function createHomeScreen({
     avatar.className = "home-screen__badge home-screen__badge--avatar";
     const personName = item.name || item.url;
     const letter = initialFromLabel(personName);
-    const letterSeed = item.ownerId || item.id || personName;
+    const letterSeed = item.id || item.ownerId || personName;
     const avatarSrc =
       typeof item.avatarUrl === "string" ? item.avatarUrl.trim() : "";
 
