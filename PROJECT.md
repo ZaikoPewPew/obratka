@@ -23,7 +23,7 @@
 | Review claim / heartbeat / release | wired (награда только после submit; unload = keepalive + `sessionStorage` reconcile; **overshoot** — см. § Claims) |
 | Review: iframe/external + таймер 60 s + **надиктовка** | wired (embed-hosts + probe/fallback; rec + mic в совете; post-edit `polish-dictation` **клиент off** — `POLISH_ENABLED = false`; SoT [`embed-hosts.md`](content/embed-hosts.md), [`polish-dictation/README`](supabase/functions/polish-dictation/README.md)) |
 | Подача URL + back-chip + done на url-screen | wired |
-| Report: листы + сводка (вердикт / strengths / план) + жалоба + PDF | wired (сводный PDF + action cards — [`ACTION_CARDS.md`](ACTION_CARDS.md)) |
+| Report: листы + жалоба + сводный PDF | wired (сводный PDF + action cards — [`ACTION_CARDS.md`](ACTION_CARDS.md)) |
 | Referrals validate/redeem / share | wired (1 код / 2 слота, seed `YTHWKPDWAK`, без наград) |
 | Analytics (PostHog) | wired — pageviews + core funnel; SoT [`ANALYTICS.md`](ANALYTICS.md) |
 | App modal (shared overlays) | wired |
@@ -203,7 +203,7 @@ SoT: [`content/embed-hosts.md`](content/embed-hosts.md) ← `embedHosts.js` / `p
 
 | Что | Детали |
 |-----|--------|
-| Где UI | `/report` — вердикт / strengths / план + список листов; «Посмотреть» → side-panel → «Пожаловаться» → модалка (1 тег). Без жалобы = ок; окно **6ч от `completed_at`** (момент done); вне окна кнопку жалобы скрывать |
+| Где UI | `/report` — список листов; «Посмотреть» → side-panel → «Пожаловаться» → модалка (1 тег). Без жалобы = ок; окно **6ч от `completed_at`** (момент done); вне окна кнопку жалобы скрывать. Сводка (вердикт / план) — в сводном PDF |
 | Теги v1 | `low_effort`, `spam`, `harassment`, `offensive`, `ai_slop` (веса только в SQL) |
 | Штраф / плюс | жалоба = −20 (1 тег); старт `0`; бан при `<= -100`; +10 после окна без жалобы (settle тоже от done) |
 | Ревьюер | чип = абсолют без плюса (`100` / `0` / `-20`) + explainer **без** таблицы весов |

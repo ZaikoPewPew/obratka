@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { aggregatePortfolioReviews, hasMajority } from "./aggregatePortfolioReviews.js";
 import {
   listResourcesForCard,
@@ -414,5 +415,72 @@ assert.match(
 assert.equal(consensus.adviceList[0].reviewerName, "Bob");
 assert.equal(consensus.adviceList[0].text, "Fix structure first");
 assert.equal(consensus.dictationList[0].text, "I would hide half the artifacts.");
+
+const ru = JSON.parse(
+  readFileSync(new URL("../../content/locales.json", import.meta.url), "utf8"),
+).locales.ru;
+
+const qaPdf = buildConsensusReport(
+  [
+    {
+      answers: answers({
+        grade: "junior",
+        context: 1,
+        structure: "mess",
+        metrics: "none",
+        visual: 4,
+        tier: "early",
+        advice:
+          "Кейсы выглядят как набор экранов: нет задачи, ограничений и цифр.",
+        dictation: "Визуал нравится, но не понял задачу.",
+      }),
+      reviewerName: "Seed Junior",
+    },
+    {
+      answers: answers({
+        grade: "junior",
+        context: 2,
+        structure: "mess",
+        metrics: "none",
+        visual: 5,
+        tier: "early",
+        advice: "Импакта нет: ни одной рабочей метрики.",
+        dictation: "Подача как галерея скринов.",
+      }),
+      reviewerName: "Seed Middle",
+    },
+    {
+      answers: answers({
+        grade: "mid",
+        context: 2,
+        structure: "dump",
+        metrics: "vanity",
+        visual: 4,
+        tier: "early",
+        advice: "Рекрутер не поймёт, что ты сделал и зачем.",
+      }),
+      reviewerName: "username",
+    },
+  ],
+  ru,
+  { sheetLimit: 3 },
+);
+
+assert.equal(qaPdf.aggregate.n, 3);
+assert.ok(qaPdf.verdict?.body);
+assert.ok(qaPdf.strengths.length >= 1);
+assert.ok(qaPdf.actionCards.length >= 1);
+assert.ok(
+  qaPdf.actionCards.every(
+    (card) =>
+      card.title &&
+      card.problem &&
+      card.steps.length >= 1 &&
+      card.links.length >= 1,
+  ),
+);
+assert.ok(qaPdf.sections.length >= 3);
+assert.equal(qaPdf.adviceList.length, 3);
+assert.equal(qaPdf.dictationList.length, 2);
 
 console.log("consensusActionCards: ok");

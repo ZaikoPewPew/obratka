@@ -28,7 +28,7 @@ referral → auth → (authCode) → onboarding → home
 | 5b | `url-screen` | `/portfolio` | Подача URL (баланс); чип «На главную»; done на том же экране |
 | 6 | `review-screen` + `review-panel` + `scale-slider` | `/quiz` → `/quiz/done` | Квиз: grade → context/structure/metrics → visual 1–5 (+ pain если ≤2) → **tier** → advice; финал + улет отчёта. SoT: [`QUIZ.md`](QUIZ.md) |
 | 7 | `success-screen` | `/done` | Успех подачи: тайтл + «Выйти», зелёный mesh справа |
-| 8 | `report-screen` | `/report` | Отчёт автору: вердикт / strengths / план + листы → «Посмотреть» (side-panel) → жалоба (1 тег, окно 6ч от done; вне окна кнопку скрывать) + PDF |
+| 8 | `report-screen` | `/report` | Отчёт автору: листы → «Посмотреть» (side-panel) → жалоба (1 тег, окно 6ч от done; вне окна кнопку скрывать) + сводный PDF |
 | — | `ban-screen` | `/banned` | Аккаунт заблокирован; «Выйти» + «Связаться» (242px); красный mesh; deep link escape-proof |
 | — | `not-found-screen` | `/404` | Неизвестный path; тайтл + «На главную» → `/home` или `/registration` |
 | — | `desktop-only-screen` | *(оверлей)* | Viewport &lt; 768px: «только с компьютера»; не маршрут; см. [`mobile.md`](mobile.md) |
@@ -132,7 +132,7 @@ src/components/
   review-panel/           ← шаги квиза
   scale-slider/           ← шкалы context (1–5) / visual (1–5)
   success-screen/         ← /done (подача портфолио)
-  report-screen/          ← /report (сводка + листы → side-panel → жалоба; сводный PDF)
+  report-screen/          ← /report (листы → side-panel → жалоба; сводный PDF)
   ban-screen/             ← /banned (аккаунт заблокирован)
   not-found-screen/       ← /404 (неизвестный path)
   desktop-only-screen/    ← оверлей <768px (не path; см. mobile.md)

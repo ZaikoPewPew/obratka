@@ -12,8 +12,8 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 - Side-panel / complaint-modal монтируются в `document.body` (не внутрь `.report-screen`: иначе `transform`/`filter` клипают sticky footer)
 - Без жалобы лист считается «ок»; явного чипа «всё ок» нет
 - Одна жалоба на лист (`review_complaints`, RPC `submit_review_complaint`) → штраф репутации ревьюера на сервере (−20); после окна без жалобы ревьюер получает +10 (`settle_review_reputation_rewards`)
-- Справа: дефолт mesh + мокап **сводки** (вердикт / strengths / план), не L2 первого листа; **Скачать PDF** на экране качает **сводный** отчёт; в панели — только открытый лист **без** action cards
-- На экране `/report` — вердикт, «что работает» и план действий (те же данные, что в PDF); список листов ниже. Спека: [`ACTION_CARDS.md`](../../../ACTION_CARDS.md)
+- Справа: дефолт mesh + мокап **первого листа** (`buildReportSections`); **Скачать PDF** на экране качает **сводный** отчёт (вердикт / strengths / план); в панели — только открытый лист **без** action cards
+- Список листов ниже заголовка. Спека сводного PDF: [`ACTION_CARDS.md`](../../../ACTION_CARDS.md)
 - В строке листа — EN Title Case должность ревьюера (`formatPortfolioRole`: Senior Product Designer / Product Design Lead / Head Of Design)
 - Секции листа из `answers` через `buildReportSections` (`mode: "full"`): L2 кросс-сигналы, L1, pain, итог `tier × gradeZone` + `reportSummaryLead`, `advice`, опц. **`dictation`**. Схема полей — [`QUIZ.md`](../../../QUIZ.md). Старые листы с `hire` / visual 1–10 **не** распарсятся.
 - PDF экрана: [`shareConsensusPdf`](../../utils/shareConsensusPdf.js) — один документ. PDF панели: [`shareReviewPdf`](../../utils/shareReviewPdf.js) — 1 ревьюер = 1 страница, без рекомендаций

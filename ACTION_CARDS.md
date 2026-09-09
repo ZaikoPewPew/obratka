@@ -2,7 +2,7 @@
 
 Сводка по **всем** листам с валидными `answers`. Карточки плана — по первым **`target_reviews`** (default 3), чтобы overshoot не ужесточал majority.
 
-На `/report` — вердикт, сильные стороны и план (не только PDF). Личный PDF / side-panel одного ревьюера **без** action cards.
+На `/report` кнопка «Скачать PDF» качает **сводный** документ. Личный PDF / side-panel одного ревьюера **без** action cards.
 
 ## Куда править контент
 
@@ -44,7 +44,7 @@ CV-источник (`hanna_cv`) и др. с пустым `covers` — в баз
 sheets.answers
   → aggregate (все листы) → секции голосов + advice/dictation quotes
   → aggregate (limit = target) → вердикт / strengths / resolveActionCards
-                ↘ buildConsensusReport → /report UI + shareConsensusPdf
+                ↘ buildConsensusReport → shareConsensusPdf
 ```
 
 | Модуль | Роль |
@@ -85,7 +85,7 @@ Tie лучших problem-value (например 1 mess / 1 dump / 1 clear) → 
 
 Dictation — цитаты с лейблом «мнение ревьюера», не факт и не LLM-вердикт.
 
-## Формат сводки в PDF / на `/report`
+## Формат сводки в PDF
 
 1. **Главный вывод** — majority `tier × gradeZone` (тексты `reportSummary*`) или мягкий spread.  
 2. **Что уже работает** — majority позитивных осей.  

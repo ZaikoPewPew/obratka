@@ -178,7 +178,7 @@ commit;
 | [`polish-dictation`](supabase/functions/polish-dictation/README.md) | Z.AI Flash Edge (`glm-4.5-flash` + fallback); клиентский invoke off |
 | [`shareReviewPdf.js`](src/utils/shareReviewPdf.js) | PDF одного листа |
 | [`shareConsensusPdf.js`](src/utils/shareConsensusPdf.js) | сводный PDF (агрегаты + action cards) |
-| [`ACTION_CARDS.md`](ACTION_CARDS.md) | majority + кластеры → до 3 карточек; вердикт/план на `/report` и в PDF |
+| [`ACTION_CARDS.md`](ACTION_CARDS.md) | majority + кластеры → до 3 карточек; вердикт/план в сводном PDF |
 | [`report-screen`](src/components/report-screen/README.md) | авторский `/report` |
 | [`locales.json`](content/locales.json) | все строки |
 

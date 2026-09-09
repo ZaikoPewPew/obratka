@@ -24,7 +24,7 @@ alwaysApply: true
 | `quiz` | `/quiz` (шкалы context/visual 1–5 через `scale-slider`; условный pain; `tier`; микрофон в поле «Главный совет») |
 | `done` | `/quiz/done` |
 | `success` | `/done` (deep link / запасной; submit URL остаётся на url-screen) |
-| `report` | `/report` (вердикт / план + листы → просмотр в side-panel → жалоба; только «Мои») |
+| `report` | `/report` (листы → просмотр в side-panel → жалоба; сводный PDF; только «Мои») |
 | `banned` | `/banned` (escape-proof при `session.banned`) |
 | `notFound` | `/404` (неизвестный path; CTA → `/home` или `/registration`) |
 

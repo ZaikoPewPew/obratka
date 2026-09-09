@@ -15,7 +15,6 @@ import {
 } from "../../utils/motionTokens.js";
 import { fixHangingPrepositions } from "../../utils/hangingPrepositions.js";
 import { buildReportSections } from "../../utils/reviewReport.js";
-import { buildConsensusReport } from "../../utils/buildConsensusReport.js";
 import { shareConsensusPdf } from "../../utils/shareConsensusPdf.js";
 import { shareReviewPdf } from "../../utils/shareReviewPdf.js";
 import { DEFAULT_TARGET_REVIEWS } from "../../api/portfolios.js";
@@ -114,10 +113,6 @@ export function createReportScreen(opts = {}) {
   title.className = "report-screen__title";
   title.id = "report-screen-title";
 
-  const consensus = document.createElement("div");
-  consensus.className = "report-screen__consensus";
-  consensus.hidden = true;
-
   const sheetsList = document.createElement("ul");
   sheetsList.className = "report-screen__sheets";
   sheetsList.hidden = true;
@@ -140,7 +135,7 @@ export function createReportScreen(opts = {}) {
   downloadBtn.append(downloadLabel);
 
   actions.append(homeBtn, downloadBtn);
-  card.append(title, consensus, sheetsList, actions);
+  card.append(title, sheetsList, actions);
   panel.append(card);
 
   const visual = document.createElement("div");
@@ -324,6 +319,39 @@ export function createReportScreen(opts = {}) {
     reportSubtitle.textContent = "";
   }
 
+  /**
+   * @param {import("../../utils/reviewReport.js").ReviewAnswers | null | undefined} answers
+   * @param {string} [subtitle]
+   * @param {string} [seed]
+   */
+  function fillReportSheet(answers, subtitle, seed) {
+    const strings = getStrings();
+    reportEyebrow.textContent = strings.brandName;
+    reportTitle.textContent = strings.reportDocumentTitle;
+    reportSubtitle.textContent =
+      subtitle?.trim() || portfolioName.trim() || strings.brandName;
+
+    reportBody.replaceChildren();
+    if (!answers) return;
+
+    const sections = buildReportSections(answers, strings, { seed });
+    for (const section of sections) {
+      const block = document.createElement("section");
+      block.className = "report-screen__report-section";
+
+      const heading = document.createElement("h3");
+      heading.className = "report-screen__report-section-title";
+      heading.textContent = section.title;
+
+      const bodyEl = document.createElement("p");
+      bodyEl.className = "report-screen__report-section-body";
+      bodyEl.textContent = section.body;
+
+      block.append(heading, bodyEl);
+      reportBody.append(block);
+    }
+  }
+
   function cancelReportLaunch() {
     if (!reportLaunchAnim) return;
     reportLaunchAnim.cancel();
@@ -414,14 +442,27 @@ export function createReportScreen(opts = {}) {
   }
 
   function showReportMockup() {
-    const report = liveConsensus();
-    renderConsensus(report);
-    if (!report) {
+    const firstWithAnswers = sheets.find((sheet) => sheet.answers);
+    const t = getStrings();
+    if (!firstWithAnswers?.answers) {
       root.classList.remove("report-screen--report");
       clearReportSheet();
       return;
     }
-    fillConsensusMockup(report);
+    const name =
+      (firstWithAnswers.reviewerDisplayName &&
+        firstWithAnswers.reviewerDisplayName.trim()) ||
+      t.reportSheetReviewerFallback ||
+      "";
+    const gradeLabel = formatReviewerTitle(
+      firstWithAnswers.reviewerGrade,
+      firstWithAnswers.reviewerRole,
+    );
+    fillReportSheet(
+      firstWithAnswers.answers,
+      [gradeLabel, name].filter(Boolean).join(" · "),
+      firstWithAnswers.id,
+    );
     root.classList.add("report-screen--report");
   }
 
@@ -475,131 +516,6 @@ export function createReportScreen(opts = {}) {
       return Math.max(1, Math.floor(fromSheet.targetReviews));
     }
     return DEFAULT_TARGET_REVIEWS;
-  }
-
-  /**
-   * @returns {import("../../utils/buildConsensusReport.js").ConsensusReport | null}
-   */
-  function liveConsensus() {
-    const inputs = consensusInputs();
-    if (inputs.length === 0) return null;
-    return buildConsensusReport(inputs, getStrings(), {
-      sheetLimit: currentSheetLimit(),
-    });
-  }
-
-  /**
-   * @param {import("../../utils/buildConsensusReport.js").ConsensusReport | null} report
-   */
-  function renderConsensus(report) {
-    consensus.replaceChildren();
-    if (!report || report.aggregate.n <= 0) {
-      consensus.hidden = true;
-      return;
-    }
-    const t = getStrings();
-    consensus.hidden = false;
-
-    if (report.verdict?.body) {
-      const block = document.createElement("section");
-      block.className = "report-screen__consensus-block";
-      const heading = document.createElement("h2");
-      heading.className = "report-screen__consensus-title";
-      heading.textContent = report.verdict.title || t.reportConsensusVerdictTitle || "";
-      const body = document.createElement("p");
-      body.className = "report-screen__consensus-body";
-      body.textContent = fixHangingPrepositions(report.verdict.body);
-      block.append(heading, body);
-      consensus.append(block);
-    }
-
-    if (report.strengths.length > 0) {
-      const block = document.createElement("section");
-      block.className = "report-screen__consensus-block";
-      const heading = document.createElement("h2");
-      heading.className = "report-screen__consensus-title";
-      heading.textContent = t.reportConsensusStrengthsTitle ?? "";
-      const list = document.createElement("ul");
-      list.className = "report-screen__consensus-strengths";
-      for (const item of report.strengths) {
-        const li = document.createElement("li");
-        li.textContent = fixHangingPrepositions(item.label);
-        list.append(li);
-      }
-      block.append(heading, list);
-      consensus.append(block);
-    }
-
-    if (report.actionCards.length > 0) {
-      const block = document.createElement("section");
-      block.className = "report-screen__consensus-block";
-      const heading = document.createElement("h2");
-      heading.className = "report-screen__consensus-title";
-      heading.textContent = t.reportActionPlanTitle ?? "";
-      block.append(heading);
-      for (const card of report.actionCards) {
-        const article = document.createElement("article");
-        article.className = "report-screen__consensus-card";
-        const badge = document.createElement("p");
-        badge.className = "report-screen__consensus-badge";
-        badge.textContent = [card.categoryLabel, card.confirmations]
-          .filter(Boolean)
-          .join(" · ");
-        const cardTitle = document.createElement("p");
-        cardTitle.className = "report-screen__consensus-card-title";
-        cardTitle.textContent = fixHangingPrepositions(card.title);
-        const problem = document.createElement("p");
-        problem.className = "report-screen__consensus-card-problem";
-        problem.textContent = fixHangingPrepositions(card.problem);
-        article.append(badge, cardTitle, problem);
-        block.append(article);
-      }
-      consensus.append(block);
-    }
-  }
-
-  /**
-   * @param {import("../../utils/buildConsensusReport.js").ConsensusReport} report
-   */
-  function fillConsensusMockup(report) {
-    const t = getStrings();
-    reportEyebrow.textContent = t.brandName;
-    reportTitle.textContent = t.reportConsensusDocumentTitle ?? t.reportDocumentTitle;
-    reportSubtitle.textContent = portfolioName.trim() || t.brandName;
-    reportBody.replaceChildren();
-
-    const pushSection = (titleText, bodyText) => {
-      if (!bodyText) return;
-      const block = document.createElement("section");
-      block.className = "report-screen__report-section";
-      const heading = document.createElement("h3");
-      heading.className = "report-screen__report-section-title";
-      heading.textContent = titleText;
-      const bodyEl = document.createElement("p");
-      bodyEl.className = "report-screen__report-section-body";
-      bodyEl.textContent = bodyText;
-      block.append(heading, bodyEl);
-      reportBody.append(block);
-    };
-
-    if (report.verdict?.body) {
-      pushSection(
-        report.verdict.title || t.reportConsensusVerdictTitle || "",
-        report.verdict.body,
-      );
-    }
-    if (report.strengths.length > 0) {
-      pushSection(
-        t.reportConsensusStrengthsTitle ?? "",
-        report.strengths.map((item) => item.label).join("\n"),
-      );
-    }
-    for (const card of report.actionCards) {
-      pushSection(
-        card.title,
-        [card.confirmations, card.problem].filter(Boolean).join("\n"),
-      );
-    }
   }
 
   /**
@@ -1030,8 +946,6 @@ export function createReportScreen(opts = {}) {
     cancelReportLaunch();
     clearDoneMesh();
     clearReportSheet();
-    consensus.hidden = true;
-    consensus.replaceChildren();
     root.classList.remove("report-screen--report");
     portfolioId =
       typeof openOpts.portfolioId === "string" && openOpts.portfolioId.trim()
