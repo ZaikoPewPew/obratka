@@ -54,7 +54,7 @@ sheets.answers
 | [`src/utils/aggregatePortfolioReviews.js`](src/utils/aggregatePortfolioReviews.js) | counts / min–max / `adviceList` / `dictationList`; опц. `limit` |
 | [`src/utils/resolveActionCards.js`](src/utils/resolveActionCards.js) | majority + кластеры + scoring → max 3 cards + resources |
 | [`src/utils/buildConsensusReport.js`](src/utils/buildConsensusReport.js) | вердикт, strengths, голоса, карточки, цитаты |
-| [`src/utils/shareConsensusPdf.js`](src/utils/shareConsensusPdf.js) | print iframe сводного PDF |
+| [`src/utils/shareConsensusPdf.js`](src/utils/shareConsensusPdf.js) | print iframe сводного PDF (Inter; главы h2 / оси h3) |
 
 ## Majority
 
@@ -89,7 +89,7 @@ Dictation — цитаты с лейблом «мнение ревьюера», 
 
 1. **Главный вывод** — majority `tier × gradeZone` (тексты `reportSummary*`) или мягкий spread.  
 2. **Что уже работает** — majority позитивных осей.  
-3. Голоса по осям (все листы, включая overshoot).  
+3. Голоса по осям — глава «Сводка», оси (грейд / структура / …) подразделами меньшим кеглем.  
 4. **План действий** — до 3 карточек (`{count} из {n}` + шаги + ссылки).  
 5. Советы (`advice`) и заметки (`dictation`) списком.
 

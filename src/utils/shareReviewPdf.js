@@ -1,5 +1,11 @@
 import { formatString, getStrings } from "../i18n.js";
 import { buildReportSections } from "./reviewReport.js";
+import {
+  buildReportPdfFontCss,
+  escapeHtml,
+  printReportHtml,
+  readReportTheme,
+} from "./printReport.js";
 
 /**
  * @typedef {{
@@ -32,49 +38,10 @@ export function shareReviewPdf(answersOrPages, options = {}) {
   const portfolioName = options.portfolioName?.trim() || t.brandName;
   const title = `${t.reportDocumentTitle} — ${portfolioName}`;
   const html = buildReportDocumentHtml({ title, portfolioName, pages, t });
-  const onComplete =
-    typeof options.onComplete === "function" ? options.onComplete : null;
-
-  const iframe = document.createElement("iframe");
-  iframe.setAttribute("aria-hidden", "true");
-  iframe.setAttribute("title", title);
-  iframe.style.cssText =
-    "position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;pointer-events:none;";
-  document.body.append(iframe);
-
-  const frameWindow = iframe.contentWindow;
-  const frameDoc = iframe.contentDocument;
-  if (!frameWindow || !frameDoc) {
-    iframe.remove();
-    downloadReportHtml(html, title);
-    onComplete?.();
-    return;
-  }
-
-  frameDoc.open();
-  frameDoc.write(html);
-  frameDoc.close();
-
-  let cleaned = false;
-  const cleanup = () => {
-    if (cleaned) return;
-    cleaned = true;
-    iframe.remove();
-    onComplete?.();
-  };
-
-  frameWindow.addEventListener("afterprint", cleanup);
-  window.setTimeout(() => {
-    try {
-      frameWindow.focus();
-      frameWindow.print();
-    } catch {
-      downloadReportHtml(html, title);
-      cleanup();
-      return;
-    }
-    window.setTimeout(cleanup, 60_000);
-  }, 50);
+  printReportHtml(html, {
+    title,
+    onComplete: options.onComplete,
+  });
 }
 
 /**
@@ -97,56 +64,6 @@ function normalizePdfPages(answersOrPages, t) {
     ];
   }
   return [];
-}
-
-/**
- * @param {string} html
- * @param {string} title
- */
-function downloadReportHtml(html, title) {
-  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  const safeName = title.replace(/[^\p{L}\p{N}\-_ ]+/gu, "").trim() || "report";
-  link.href = url;
-  link.download = `${safeName}.html`;
-  link.rel = "noopener";
-  document.body.append(link);
-  link.click();
-  link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 2_000);
-}
-
-/**
- * @param {string} name
- * @returns {string}
- */
-function readCssToken(name) {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
-
-/**
- * PDF iframe не видит app CSS — подставляем уже вычисленные значения токенов.
- * @returns {{
- *   fontFamily: string;
- *   colorText: string;
- *   colorTextStrong: string;
- *   colorTextMuted: string;
- *   colorBody: string;
- *   colorBg: string;
- *   colorBorder: string;
- * }}
- */
-function readReportTheme() {
-  return {
-    fontFamily: readCssToken("--font-family") || "Montserrat, sans-serif",
-    colorText: readCssToken("--color-text"),
-    colorTextStrong: readCssToken("--color-text-strong"),
-    colorTextMuted: readCssToken("--color-text-muted"),
-    colorBody: readCssToken("--color-text-subtle") || readCssToken("--color-text"),
-    colorBg: readCssToken("--color-surface") || readCssToken("--color-bg"),
-    colorBorder: readCssToken("--color-border"),
-  };
 }
 
 /**
@@ -196,11 +113,13 @@ function buildReportDocumentHtml({ title, portfolioName, pages, t }) {
   <meta charset="UTF-8" />
   <title>${escapeHtml(title)}</title>
   <style>
+    ${buildReportPdfFontCss()}
     @page { margin: 18mm 16mm; }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: ${escapeHtml(theme.fontFamily)};
+      font-synthesis: none;
       color: ${escapeHtml(theme.colorText)};
       background: ${escapeHtml(theme.colorBg)};
       line-height: 1.5;
@@ -218,21 +137,22 @@ function buildReportDocumentHtml({ title, portfolioName, pages, t }) {
     }
     .eyebrow {
       margin: 0 0 8px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: ${escapeHtml(theme.colorTextMuted)};
     }
     h1 {
       margin: 0 0 8px;
-      font-size: 24px;
+      font-size: 28px;
       font-weight: 600;
-      line-height: 1.25;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
       color: ${escapeHtml(theme.colorTextStrong)};
     }
     .subtitle {
-      margin: 0 0 28px;
+      margin: 0 0 32px;
       font-size: 14px;
       color: ${escapeHtml(theme.colorTextMuted)};
     }
@@ -267,16 +187,4 @@ function buildReportDocumentHtml({ title, portfolioName, pages, t }) {
   ${pagesHtml}
 </body>
 </html>`;
-}
-
-/**
- * @param {string} value
- */
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
 }

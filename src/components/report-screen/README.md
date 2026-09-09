@@ -16,7 +16,7 @@ Path: **`/report`** (`report`). Только для **автора** из вкл
 - Список листов ниже заголовка. Спека сводного PDF: [`ACTION_CARDS.md`](../../../ACTION_CARDS.md)
 - В строке листа — EN Title Case должность ревьюера (`formatPortfolioRole`: Senior Product Designer / Product Design Lead / Head Of Design)
 - Секции листа из `answers` через `buildReportSections` (`mode: "full"`): L2 кросс-сигналы, L1, pain, итог `tier × gradeZone` + `reportSummaryLead`, `advice`, опц. **`dictation`**. Схема полей — [`QUIZ.md`](../../../QUIZ.md). Старые листы с `hire` / visual 1–10 **не** распарсятся.
-- PDF экрана: [`shareConsensusPdf`](../../utils/shareConsensusPdf.js) — один документ. PDF панели: [`shareReviewPdf`](../../utils/shareReviewPdf.js) — 1 ревьюер = 1 страница, без рекомендаций
+- PDF экрана: [`shareConsensusPdf`](../../utils/shareConsensusPdf.js) — один документ, Inter, главы крупнее осей. PDF панели: [`shareReviewPdf`](../../utils/shareReviewPdf.js) — 1 ревьюер = 1 страница, без рекомендаций
 - CTA: серая «На главную» + тёмная «Скачать PDF» (пока нет листов — та же тёмная, только `cursor: not-allowed`)
 
 ## Просмотр листа (side-panel)

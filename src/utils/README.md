@@ -20,6 +20,7 @@
 | `portfolioEmbed.js` | Figma/YouTube embed / iframe / внешняя вкладка; Readymag HTML-probe; детект blocked iframe |
 | `meshGradientWash.js` | WebGL mesh (Paper Shaders); `transitionToCssColors` |
 | `reviewReport.js` | сводка квиза → тексты PDF (+ опц. `dictation`); зоны `contextZone` / `visualZone` (visual 1–5); вердикт `tier × gradeZone`. Спека: [`QUIZ.md`](../../QUIZ.md) |
+| `printReport.js` | печать iframe PDF: Inter (не UI), `fonts.ready`, общая тема |
 | `shareReviewPdf.js` | печать PDF-отчёта (1 ревьюер = 1 страница; `onComplete`) |
 | `referralCode.js` | нормализация referral-кода / URL |
 | `inviteGate.js` | device flag `obratka.inviteGatePassed` после validate; переживает logout / `clearSession` |
@@ -37,7 +38,7 @@
 | `aggregatePortfolioReviews.js` | агрегаты листов (counts / min–max / `adviceList` / `dictationList`; опц. `limit`) |
 | `resolveActionCards.js` | majority + кластеры + scoring → max 3 cards + attach `actionResources` по `covers` |
 | `buildConsensusReport.js` | вердикт / strengths / голоса / action cards / цитаты |
-| `shareConsensusPdf.js` | print iframe сводного PDF (`/report`) |
+| `shareConsensusPdf.js` | print iframe сводного PDF (`/report`); главы крупнее осей |
 | `complaintWindow.js` | окно жалобы 6ч от `completed_at` (зеркало SQL) |
 
 Данные карточек: [`src/data/actionCards.json`](../data/actionCards.json) + [`actionResources.json`](../data/actionResources.json). SoT: [`ACTION_CARDS.md`](../../ACTION_CARDS.md).
