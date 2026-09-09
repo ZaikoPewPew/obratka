@@ -2,8 +2,15 @@
   "hanna_cv": {
     "id": "hanna_cv",
     "url": "https://slashdesigner.ru/lib/hanna-guide/cv",
-    "types": ["guide"],
-    "tags": ["cv", "ats", "resume", "product design"],
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "cv",
+      "ats",
+      "resume",
+      "product design"
+    ],
     "covers": [],
     "title": {
       "ru": "Гайд Анны Лесной — CV",
@@ -12,14 +19,26 @@
     "description": {
       "ru": "Руководство по созданию UX/Product Design CV: ATS, структура, формат, подача информации, полезные ресурсы.",
       "en": "Guide to UX/Product Design CVs: ATS, structure, format, presentation, and useful resources."
-    }
+    },
+    "weight": 0
   },
   "hanna_portfolio": {
     "id": "hanna_portfolio",
     "url": "https://slashdesigner.ru/lib/hanna-guide/portfolio",
-    "types": ["guide"],
-    "tags": ["portfolio", "case study", "storytelling", "nda"],
-    "covers": ["structure_mess", "structure_dump", "context_low"],
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "portfolio",
+      "case study",
+      "storytelling",
+      "nda"
+    ],
+    "covers": [
+      "structure_mess",
+      "structure_dump",
+      "context_low"
+    ],
     "title": {
       "ru": "Гайд Анны Лесной — Portfolio",
       "en": "Hanna Lesnaya guide — Portfolio"
@@ -27,14 +46,25 @@
     "description": {
       "ru": "Большой гайд по портфолио: минималистичное портфолио, кейсы, NDA, storytelling, примеры и подборки ресурсов.",
       "en": "Large portfolio guide: minimal portfolio, cases, NDA, storytelling, examples, and resource lists."
-    }
+    },
+    "weight": 85
   },
   "screenshots_not_enough": {
     "id": "screenshots_not_enough",
     "url": "https://dsgners.ru/n1kipetrov/9219-ya-dumal-chto-portfolio-eto-prosto-nabor-skrinshotov-ya-oshibalsya",
-    "types": ["article"],
-    "tags": ["portfolio", "structure", "storytelling", "mistakes"],
-    "covers": ["structure_mess", "structure_dump"],
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "portfolio",
+      "structure",
+      "storytelling",
+      "mistakes"
+    ],
+    "covers": [
+      "structure_mess",
+      "structure_dump"
+    ],
     "title": {
       "ru": "Я думал, что портфолио — это просто набор скриншотов",
       "en": "I thought a portfolio was just a set of screenshots"
@@ -42,14 +72,27 @@
     "description": {
       "ru": "Личный опыт создания портфолио: выбор проектов, структура, тексты, ошибки и выводы.",
       "en": "Personal portfolio journey: project choice, structure, copy, mistakes, and takeaways."
-    }
+    },
+    "weight": 55
   },
   "netology_product_portfolio": {
     "id": "netology_product_portfolio",
     "url": "https://netology.ru/blog/08-2022-portfolio-product-designer",
-    "types": ["article"],
-    "tags": ["portfolio", "hiring", "process", "impact", "role"],
-    "covers": ["structure_mess", "context_low", "metrics_none"],
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "portfolio",
+      "hiring",
+      "process",
+      "impact",
+      "role"
+    ],
+    "covers": [
+      "structure_mess",
+      "context_low",
+      "metrics_none"
+    ],
     "title": {
       "ru": "Каким должно быть портфолио продуктового дизайнера",
       "en": "What a product designer portfolio should look like"
@@ -57,14 +100,28 @@
     "description": {
       "ru": "Как работодатели оценивают портфолио, сколько кейсов показывать, как описывать процесс, роль и результаты.",
       "en": "How employers judge portfolios, how many cases to show, and how to describe process, role, and results."
-    }
+    },
+    "weight": 60
   },
   "ux_portfolio_playbook": {
     "id": "ux_portfolio_playbook",
     "url": "https://uxplaybook.org/portfolio",
-    "types": ["guide", "template"],
-    "tags": ["portfolio", "checklist", "template", "ux"],
-    "covers": ["structure_mess", "structure_dump", "context_low", "metrics_none"],
+    "types": [
+      "guide",
+      "template"
+    ],
+    "tags": [
+      "portfolio",
+      "checklist",
+      "template",
+      "ux"
+    ],
+    "covers": [
+      "structure_mess",
+      "structure_dump",
+      "context_low",
+      "metrics_none"
+    ],
     "title": {
       "ru": "UX Portfolio Playbook",
       "en": "UX Portfolio Playbook"
@@ -72,14 +129,26 @@
     "description": {
       "ru": "Комплексный playbook с шаблонами, чек-листами и рекомендациями по созданию UX-портфолио.",
       "en": "Playbook with templates, checklists, and guidance for building a UX portfolio."
-    }
+    },
+    "weight": 80
   },
   "hirehi_portfolio_unread": {
     "id": "hirehi_portfolio_unread",
     "url": "https://hirehi.ru/blog/portfolio-dizainera-kotoroe-ne-chitaiut-5-oshibok-iz-za-kotorykh-vam-otkazyvaiut",
-    "types": ["article"],
-    "tags": ["portfolio", "mistakes", "structure", "checklist"],
-    "covers": ["structure_mess", "structure_dump", "context_low"],
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "portfolio",
+      "mistakes",
+      "structure",
+      "checklist"
+    ],
+    "covers": [
+      "structure_mess",
+      "structure_dump",
+      "context_low"
+    ],
     "title": {
       "ru": "Портфолио дизайнера, которое не читают",
       "en": "The designer portfolio nobody reads"
@@ -87,14 +156,27 @@
     "description": {
       "ru": "Разбор пяти главных ошибок портфолио, идеальной структуры кейса и чек-листа перед отправкой.",
       "en": "Five portfolio mistakes, an ideal case structure, and a pre-send checklist."
-    }
+    },
+    "weight": 70
   },
   "portfolio_red_flags": {
     "id": "portfolio_red_flags",
     "url": "https://www.linkedin.com/pulse/portfolio-red-flags-what-i-actually-look-when-hiring-ux-tim-huff-udidc/",
-    "types": ["article"],
-    "tags": ["hiring", "red flags", "impact", "strategy", "business"],
-    "covers": ["metrics_none", "metrics_vanity", "context_low"],
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "hiring",
+      "red flags",
+      "impact",
+      "strategy",
+      "business"
+    ],
+    "covers": [
+      "metrics_none",
+      "metrics_vanity",
+      "context_low"
+    ],
     "title": {
       "ru": "Portfolio Red Flags",
       "en": "Portfolio Red Flags"
@@ -102,13 +184,23 @@
     "description": {
       "ru": "Что ищет VP Design при просмотре портфолио: красные флаги, стратегическое мышление и бизнес-ценность.",
       "en": "What a VP Design looks for: red flags, strategic thinking, and business value."
-    }
+    },
+    "weight": 75
   },
   "uxfol_case_template": {
     "id": "uxfol_case_template",
     "url": "https://blog.uxfol.io/ux-case-study-template/",
-    "types": ["guide", "template"],
-    "tags": ["storytelling", "research", "impact", "portfolio", "case study"],
+    "types": [
+      "guide",
+      "template"
+    ],
+    "tags": [
+      "storytelling",
+      "research",
+      "impact",
+      "portfolio",
+      "case study"
+    ],
     "covers": [
       "structure_mess",
       "structure_dump",
@@ -122,14 +214,26 @@
     "description": {
       "ru": "Подробный шаблон UX-кейса: структура, storytelling, impact, альтернативные форматы.",
       "en": "Detailed UX case template: structure, storytelling, impact, and alternative formats."
-    }
+    },
+    "weight": 95
   },
   "product_design_portfolio_cases": {
     "id": "product_design_portfolio_cases",
     "url": "https://uxpilot.ai/blogs/product-design-portfolio-case-studies",
-    "types": ["example"],
-    "tags": ["portfolio", "case study", "examples", "big tech"],
-    "covers": ["structure_mess", "structure_dump", "metrics_none"],
+    "types": [
+      "example"
+    ],
+    "tags": [
+      "portfolio",
+      "case study",
+      "examples",
+      "big tech"
+    ],
+    "covers": [
+      "structure_mess",
+      "structure_dump",
+      "metrics_none"
+    ],
     "title": {
       "ru": "Product Design Portfolio Case Studies",
       "en": "Product Design Portfolio Case Studies"
@@ -137,14 +241,24 @@
     "description": {
       "ru": "Разбор 12 реальных портфолио дизайнеров из Google, Apple, Meta и других компаний.",
       "en": "Breakdown of 12 real designer portfolios from Google, Apple, Meta, and more."
-    }
+    },
+    "weight": 70
   },
   "ixdf_ux_case_studies": {
     "id": "ixdf_ux_case_studies",
     "url": "https://ixdf.org/literature/topics/ux-case-studies",
-    "types": ["guide"],
-    "tags": ["case study", "structure", "fundamentals"],
-    "covers": ["structure_mess", "structure_dump"],
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "case study",
+      "structure",
+      "fundamentals"
+    ],
+    "covers": [
+      "structure_mess",
+      "structure_dump"
+    ],
     "title": {
       "ru": "UX Case Studies (IxDF)",
       "en": "UX Case Studies (IxDF)"
@@ -152,14 +266,25 @@
     "description": {
       "ru": "Базовое руководство по UX Case Study: что входит в кейс и зачем нужен каждый раздел.",
       "en": "Basics of a UX case study: what belongs in a case and why each section matters."
-    }
+    },
+    "weight": 65
   },
   "minto_pyramid_case": {
     "id": "minto_pyramid_case",
     "url": "https://uxplaybook.org/articles/ux-case-study-minto-pyramid-structure-guide",
-    "types": ["guide"],
-    "tags": ["case study", "minto", "storytelling", "structure"],
-    "covers": ["structure_mess", "structure_dump"],
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "case study",
+      "minto",
+      "storytelling",
+      "structure"
+    ],
+    "covers": [
+      "structure_mess",
+      "structure_dump"
+    ],
     "title": {
       "ru": "How to Write UX Case Studies That Land You a Job",
       "en": "How to Write UX Case Studies That Land You a Job"
@@ -167,14 +292,25 @@
     "description": {
       "ru": "Использование принципа Minto Pyramid для построения убедительных UX-кейсов.",
       "en": "Using the Minto Pyramid to build convincing UX case studies."
-    }
+    },
+    "weight": 70
   },
   "structure_hiring_managers": {
     "id": "structure_hiring_managers",
     "url": "https://medium.com/@maxrichy/how-to-structure-a-ux-case-study-that-hiring-managers-notice-4f0e9bf45fa4",
-    "types": ["article"],
-    "tags": ["case study", "hiring", "structure", "role"],
-    "covers": ["structure_mess", "context_low"],
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "case study",
+      "hiring",
+      "structure",
+      "role"
+    ],
+    "covers": [
+      "structure_mess",
+      "context_low"
+    ],
     "title": {
       "ru": "How to Structure a UX Case Study that Hiring Managers Notice",
       "en": "How to Structure a UX Case Study that Hiring Managers Notice"
@@ -182,14 +318,25 @@
     "description": {
       "ru": "Как построить кейс, который отвечает на главные вопросы hiring manager.",
       "en": "How to structure a case that answers a hiring manager’s key questions."
-    }
+    },
+    "weight": 60
   },
   "ux_case_examples_inspire": {
     "id": "ux_case_examples_inspire",
     "url": "https://uiuxdesigning.com/ux-case-study-examples/",
-    "types": ["example"],
-    "tags": ["case study", "examples", "storytelling", "portfolio"],
-    "covers": ["structure_mess", "structure_dump"],
+    "types": [
+      "example"
+    ],
+    "tags": [
+      "case study",
+      "examples",
+      "storytelling",
+      "portfolio"
+    ],
+    "covers": [
+      "structure_mess",
+      "structure_dump"
+    ],
     "title": {
       "ru": "7 Incredible UX Case Study Examples",
       "en": "7 Incredible UX Case Study Examples"
@@ -197,14 +344,26 @@
     "description": {
       "ru": "Подборка и анализ лучших UX-кейсов с разбором структуры и storytelling.",
       "en": "Curated UX case examples with structure and storytelling breakdowns."
-    }
+    },
+    "weight": 55
   },
   "case_study_club": {
     "id": "case_study_club",
     "url": "https://www.casestudy.club/case-studies",
-    "types": ["example"],
-    "tags": ["case study", "library", "examples", "product design"],
-    "covers": ["structure_mess", "structure_dump", "metrics_none"],
+    "types": [
+      "example"
+    ],
+    "tags": [
+      "case study",
+      "library",
+      "examples",
+      "product design"
+    ],
+    "covers": [
+      "structure_mess",
+      "structure_dump",
+      "metrics_none"
+    ],
     "title": {
       "ru": "Case Study Club",
       "en": "Case Study Club"
@@ -212,6 +371,1736 @@
     "description": {
       "ru": "Курируемая библиотека реальных UX/Product Design кейсов по десяткам тематик.",
       "en": "Curated library of real UX/Product Design cases across dozens of topics."
+    },
+    "weight": 75
+  },
+  "sberhealth_design_metrics": {
+    "id": "sberhealth_design_metrics",
+    "url": "https://habr.com/ru/companies/docdoc/articles/701046/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "metrics",
+      "product design",
+      "impact",
+      "healthcare",
+      "case study"
+    ],
+    "covers": [
+      "metrics_none",
+      "metrics_vanity"
+    ],
+    "weight": 80,
+    "title": {
+      "ru": "Как дизайн влияет на метрики",
+      "en": "How design affects metrics"
+    },
+    "description": {
+      "ru": "Кейс личного кабинета врача (СберЗдоровье): связь интерфейсных решений с продуктовыми метриками.",
+      "en": "Doctor cabinet case (SberHealth): linking interface decisions to product metrics."
+    }
+  },
+  "uxfeedback_csat": {
+    "id": "uxfeedback_csat",
+    "url": "https://blog.uxfeedback.ru/vse-ponravilos-zachem-nuzhna-metrika-csat/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "csat",
+      "cx",
+      "metrics",
+      "satisfaction"
+    ],
+    "covers": [
+      "metrics_none",
+      "metrics_vanity"
+    ],
+    "weight": 70,
+    "title": {
+      "ru": "Все понравилось: зачем нужна метрика CSAT",
+      "en": "What CSAT is for"
+    },
+    "description": {
+      "ru": "Что измеряет CSAT, шкалы, формула процента довольных, отличие от CES и NPS.",
+      "en": "What CSAT measures, scales, satisfied-customer formula, and how it differs from CES and NPS."
+    }
+  },
+  "usabilitygeek_usability_metrics": {
+    "id": "usabilitygeek_usability_metrics",
+    "url": "https://usabilitygeek.com/usability-metrics-a-guide-to-quantify-system-usability/",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "usability",
+      "metrics",
+      "effectiveness",
+      "efficiency",
+      "satisfaction",
+      "iso"
+    ],
+    "covers": [
+      "metrics_none",
+      "metrics_vanity"
+    ],
+    "weight": 95,
+    "title": {
+      "ru": "Usability Metrics — гайд по измерению юзабилити",
+      "en": "Usability Metrics — a guide to quantify system usability"
+    },
+    "description": {
+      "ru": "ISO-подход: completion rate, ошибки, время на задачу, SEQ/SUS и другие метрики результативности, эффективности и удовлетворённости.",
+      "en": "ISO approach: completion rate, errors, task time, SEQ/SUS, and other effectiveness, efficiency, and satisfaction metrics."
+    }
+  },
+  "uxfeedback_engagement_metrics": {
+    "id": "uxfeedback_engagement_metrics",
+    "url": "https://blog.uxfeedback.ru/customer-engagement-5-metrik-dlya-izmereniya-vovlechennosti-polzovatelya/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "engagement",
+      "nps",
+      "csat",
+      "clv",
+      "retention",
+      "metrics"
+    ],
+    "covers": [
+      "metrics_none",
+      "metrics_vanity"
+    ],
+    "weight": 75,
+    "title": {
+      "ru": "Customer Engagement: 5 метрик вовлечённости",
+      "en": "Customer Engagement: 5 metrics"
+    },
+    "description": {
+      "ru": "NPS, CSAT, CLV, retention и social listening — как измерять вовлечённость пользователя.",
+      "en": "NPS, CSAT, CLV, retention, and social listening for measuring engagement."
+    }
+  },
+  "vc_ab_product_approach": {
+    "id": "vc_ab_product_approach",
+    "url": "https://vc.ru/542792",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "ab testing",
+      "product",
+      "hypotheses",
+      "metrics",
+      "conversion"
+    ],
+    "covers": [
+      "metrics_none",
+      "metrics_vanity"
+    ],
+    "weight": 55,
+    "title": {
+      "ru": "A/B-тестирование: продуктовый подход",
+      "en": "A/B testing: a product approach"
+    },
+    "description": {
+      "ru": "Гипотезы, УТП, CTA и как читать отклик, чтобы доказывать влияние дизайна.",
+      "en": "Hypotheses, UVP, CTAs, and how to read response to prove design impact."
+    }
+  },
+  "uxpub_confirmation_bias_nng": {
+    "id": "uxpub_confirmation_bias_nng",
+    "url": "https://ux.pub/editorial/priedvziatost-podtvierzhdieniia-v-ux-dizainie-issliedovaniie-nngroup-132k",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "confirmation bias",
+      "ux research",
+      "nngroup"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 75,
+    "title": {
+      "ru": "Предвзятость подтверждения в UX-дизайне (NN/g)",
+      "en": "Confirmation bias in UX design (NN/g)"
+    },
+    "description": {
+      "ru": "Как confirmation bias искажает исследования и решения в UX — разбор NNGroup.",
+      "en": "How confirmation bias warps UX research and decisions — NNGroup overview."
+    }
+  },
+  "uxpub_rounded_corners": {
+    "id": "uxpub_rounded_corners",
+    "url": "https://ux.pub/dinozavrix/pochiemu-my-skrughliaiem-ughly-7ik",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "perception",
+      "ui",
+      "rounded corners",
+      "psychology"
+    ],
+    "covers": [
+      "pain_composition",
+      "pain_components"
+    ],
+    "weight": 50,
+    "title": {
+      "ru": "Почему мы скругляем углы",
+      "en": "Why we round corners"
+    },
+    "description": {
+      "ru": "Восприятие скруглённых углов и влияние на интерфейс.",
+      "en": "How rounded corners are perceived and why they show up in UI."
+    }
+  },
+  "designkontur_biases_research": {
+    "id": "designkontur_biases_research",
+    "url": "https://medium.com/designkontur/%D0%BE%D1%81%D0%BE%D0%B7%D0%BD%D0%B0%D1%82%D1%8C-%D0%B8-%D1%83%D0%BC%D0%B5%D0%BD%D1%8C%D1%88%D0%B8%D1%82%D1%8C-%D0%BA%D0%BE%D0%B3%D0%BD%D0%B8%D1%82%D0%B8%D0%B2%D0%BD%D1%8B%D0%B5-%D0%B8%D1%81%D0%BA%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B2-%D0%B8%D1%81%D1%81%D0%BB%D0%B5%D0%B4%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F%D1%85-%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D0%B5%D0%B9-f59b616dc375",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "cognitive bias",
+      "ux research",
+      "methods"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 80,
+    "title": {
+      "ru": "Осознать и уменьшить когнитивные искажения в исследованиях",
+      "en": "Recognize and reduce cognitive biases in user research"
+    },
+    "description": {
+      "ru": "Какие искажения мешают UX-исследованиям и как их снижать на практике.",
+      "en": "Which biases hurt UX research and how to reduce them in practice."
+    }
+  },
+  "uxjournal_mental_models": {
+    "id": "uxjournal_mental_models",
+    "url": "https://ux-journal.ru/designing-digital-mental-models.html",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "mental models",
+      "ux",
+      "ui",
+      "product"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 85,
+    "title": {
+      "ru": "Ментальные модели в проектировании интерфейсов",
+      "en": "Mental models in interface design"
+    },
+    "description": {
+      "ru": "Как ментальные модели пользователей влияют на UX/UI и проектирование продукта.",
+      "en": "How user mental models shape UX/UI and product design."
+    }
+  },
+  "designspot_sapolsky": {
+    "id": "designspot_sapolsky",
+    "url": "https://medium.com/design-spot/%D0%BA%D1%80%D0%B0%D1%82%D0%BA%D0%B8%D0%B5-%D0%B2%D1%8B%D0%B2%D0%BE%D0%B4%D1%8B-%D0%B8%D0%B7-%D0%B1%D0%B8%D0%BE%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8-%D0%B4%D0%BE%D0%B1%D1%80%D0%B0-%D0%B8-%D0%B7%D0%BB%D0%B0-%D1%80%D0%BE%D0%B1%D0%B5%D1%80%D1%82%D0%B0-%D1%81%D0%B0%D0%BF%D0%BE%D0%BB%D1%8C%D1%81%D0%BA%D0%BE%D0%B3%D0%BE-e4b9bcd9d03a",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "psychology",
+      "behavior",
+      "sapolsky"
+    ],
+    "covers": [],
+    "weight": 0,
+    "title": {
+      "ru": "Краткие выводы из «Биологии добра и зла» Сапольски",
+      "en": "Short takeaways from Sapolsky’s Behave"
+    },
+    "description": {
+      "ru": "Заметки по биологии поведения — общая психология, не привязка к оси кейса.",
+      "en": "Notes on the biology of behavior — general psychology, not case-axis specific."
+    }
+  },
+  "itagency_mom_test": {
+    "id": "itagency_mom_test",
+    "url": "https://www.it-agency.ru/academy/summary-the-mom-test/",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "mom test",
+      "custdev",
+      "interviews",
+      "research"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 95,
+    "title": {
+      "ru": "Конспект книги «Спроси маму»",
+      "en": "The Mom Test — summary"
+    },
+    "description": {
+      "ru": "Как задавать вопросы о реальном опыте, а не о гипотетическом будущем, и фильтровать комплименты.",
+      "en": "How to ask about real past behavior instead of hypothetical futures, and filter compliments."
+    }
+  },
+  "slaylines_cognitive_biases": {
+    "id": "slaylines_cognitive_biases",
+    "url": "https://bias.slaylines.io/",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "cognitive bias",
+      "interactive",
+      "psychology"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 70,
+    "title": {
+      "ru": "Когнитивные искажения (интерактив)",
+      "en": "Cognitive biases (interactive)"
+    },
+    "description": {
+      "ru": "Интерактивный разбор типичных ошибок мышления — учимся замечать и корректировать выводы.",
+      "en": "Interactive tour of common thinking errors — learn to notice and correct conclusions."
+    }
+  },
+  "vc_price_expectations": {
+    "id": "vc_price_expectations",
+    "url": "https://vc.ru/books/318960-esli-lyudi-bolshe-platyat-to-ispytyvayut-osobye-oshchushcheniya-ot-pokupki-kak-ceny-vliyayut-na-ozhidanie-lyudey-ot-produkta",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "pricing",
+      "expectation",
+      "placebo",
+      "psychology"
+    ],
+    "covers": [
+      "metrics_vanity",
+      "context_low"
+    ],
+    "weight": 45,
+    "title": {
+      "ru": "Как цены влияют на ожидания от продукта",
+      "en": "How prices shape product expectations"
+    },
+    "description": {
+      "ru": "Маркетинговый эффект плацебо: цена меняет восприятие качества и даже «объективные» результаты.",
+      "en": "Marketing placebo: price changes perceived quality and even “objective” outcomes."
+    }
+  },
+  "uxpub_10_cognitive_patterns": {
+    "id": "uxpub_10_cognitive_patterns",
+    "url": "https://ux.pub/editorial/10-osnovnykh-koghnitivnykh-i-poviedienchieskikh-pattiernov-ux-dizaina-3knk",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "cognitive patterns",
+      "ux",
+      "behavior",
+      "ui"
+    ],
+    "covers": [
+      "pain_composition",
+      "pain_overloaded",
+      "context_low"
+    ],
+    "weight": 65,
+    "title": {
+      "ru": "10 когнитивных и поведенческих паттернов UX",
+      "en": "10 cognitive and behavioral UX patterns"
+    },
+    "description": {
+      "ru": "Базовые паттерны восприятия и поведения, которые стоит учитывать в интерфейсе.",
+      "en": "Core perception and behavior patterns to account for in interface design."
+    }
+  },
+  "sportmaster_relative_estimates": {
+    "id": "sportmaster_relative_estimates",
+    "url": "https://habr.com/ru/company/sportmaster_lab/blog/700288/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "estimation",
+      "agile",
+      "story points",
+      "product"
+    ],
+    "covers": [],
+    "weight": 0,
+    "title": {
+      "ru": "Относительные оценки в продуктовой команде",
+      "en": "Relative estimates in a product team"
+    },
+    "description": {
+      "ru": "Как SM Lab внедрила оценки «майками» и перешла к прогнозам через velocity.",
+      "en": "How SM Lab adopted T-shirt sizing and forecasted via velocity."
+    }
+  },
+  "usabilitylab_ux_maturity_nng": {
+    "id": "usabilitylab_ux_maturity_nng",
+    "url": "http://usabilitylab.kz/base/ux-maturity-model",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "ux maturity",
+      "nngroup",
+      "design ops"
+    ],
+    "covers": [],
+    "weight": 0,
+    "title": {
+      "ru": "Модель UX-зрелости (NN/g)",
+      "en": "UX maturity model (NN/g)"
+    },
+    "description": {
+      "ru": "Стадии зрелости UX-практик в организации по модели Nielsen Norman Group.",
+      "en": "Organization UX practice maturity stages per Nielsen Norman Group."
+    }
+  },
+  "vc_design_maturity_models": {
+    "id": "vc_design_maturity_models",
+    "url": "https://vc.ru/design/57454-modeli-zrelosti-dizayna",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "design maturity",
+      "design management",
+      "frameworks"
+    ],
+    "covers": [],
+    "weight": 0,
+    "title": {
+      "ru": "Модели зрелости дизайна",
+      "en": "Design maturity models"
+    },
+    "description": {
+      "ru": "Обзор моделей зрелости дизайн-команд: лестницы, луковицы и зачем адаптировать под себя.",
+      "en": "Survey of design-team maturity models: ladders, onions, and why you adapt them."
+    }
+  },
+  "rmr_design_team_leads": {
+    "id": "rmr_design_team_leads",
+    "url": "https://redmadrobot.ru/dizajn-1/sovety-rukovoditelyam-dizajn-komand-kak-razvivat-motivirovat-i-vdohnovlyat-svoih-dizajnerov",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "leadership",
+      "design team",
+      "motivation"
+    ],
+    "covers": [],
+    "weight": 0,
+    "title": {
+      "ru": "Советы руководителям дизайн-команд",
+      "en": "Advice for design team leads"
+    },
+    "description": {
+      "ru": "Как развивать, мотивировать и вдохновлять дизайнеров в команде.",
+      "en": "How to develop, motivate, and inspire designers on a team."
+    }
+  },
+  "designpub_facilitation": {
+    "id": "designpub_facilitation",
+    "url": "https://medium.com/design-pub/%D1%81%D0%B5%D0%BA%D1%80%D0%B5%D1%82%D1%8B-%D1%84%D0%B0%D1%81%D0%B8%D0%BB%D0%B8%D1%82%D0%B0%D1%86%D0%B8%D0%B8-212f971f81fd",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "facilitation",
+      "workshops",
+      "soft skills"
+    ],
+    "covers": [],
+    "weight": 0,
+    "title": {
+      "ru": "Секреты фасилитации",
+      "en": "Facilitation secrets"
+    },
+    "description": {
+      "ru": "Практики фасилитации встреч и воркшопов для продуктовых и дизайн-команд.",
+      "en": "Facilitation practices for product and design workshops."
+    }
+  },
+  "designpub_first_month_abroad": {
+    "id": "designpub_first_month_abroad",
+    "url": "https://medium.com/design-pub/%D0%BE%D1%88%D0%B8%D0%B1%D0%BA%D0%B8-%D0%B4%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD%D0%B5%D1%80%D0%B0-%D0%B2-%D0%BF%D0%B5%D1%80%D0%B2%D1%8B%D0%B9-%D0%BC%D0%B5%D1%81%D1%8F%D1%86-%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D1%8B-%D0%B7%D0%B0-%D1%80%D1%83%D0%B1%D0%B5%D0%B6%D0%BE%D0%BC-8a1fbcd474e2",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "career",
+      "remote",
+      "culture",
+      "soft skills"
+    ],
+    "covers": [],
+    "weight": 0,
+    "title": {
+      "ru": "Ошибки дизайнера в первый месяц работы за рубежом",
+      "en": "Designer mistakes in the first month abroad"
+    },
+    "description": {
+      "ru": "Культурные и рабочие ловушки при выходе на зарубежную роль.",
+      "en": "Cultural and workplace traps when starting a role abroad."
+    }
+  },
+  "vas3k_retro": {
+    "id": "vas3k_retro",
+    "url": "https://vas3k.club/post/10536/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "retro",
+      "team",
+      "process"
+    ],
+    "covers": [],
+    "weight": 0,
+    "title": {
+      "ru": "Коллеги, все на ретро!",
+      "en": "Everyone to the retro!"
+    },
+    "description": {
+      "ru": "Зачем команде ретроспективы и как проводить их осмысленно.",
+      "en": "Why teams need retros and how to run them with intent."
+    }
+  },
+  "nng_ux_pm_overlap": {
+    "id": "nng_ux_pm_overlap",
+    "url": "https://www.nngroup.com/articles/ux-product-managers-overlap/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "ux",
+      "product management",
+      "roles",
+      "collaboration"
+    ],
+    "covers": [],
+    "weight": 0,
+    "title": {
+      "ru": "UX и Product Managers: пересечение зон ответственности",
+      "en": "UXers and Product Managers: overlapping work"
+    },
+    "description": {
+      "ru": "NN/g о том, где UX и PM пересекаются и как снижать трение.",
+      "en": "NN/g on where UX and PM overlap and how to reduce friction."
+    }
+  },
+  "fastcompany_pixar_braintrust": {
+    "id": "fastcompany_pixar_braintrust",
+    "url": "https://www.fastcompany.com/3027135/inside-the-pixar-braintrust",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "critique",
+      "feedback",
+      "pixar",
+      "collaboration"
+    ],
+    "covers": [],
+    "weight": 0,
+    "title": {
+      "ru": "Inside The Pixar Braintrust",
+      "en": "Inside The Pixar Braintrust"
+    },
+    "description": {
+      "ru": "Как Pixar даёт жёсткий фидбек без иерархии и сохраняет доверие.",
+      "en": "How Pixar delivers candid feedback without hierarchy while keeping trust."
+    }
+  },
+  "ibm_grow_t_skills": {
+    "id": "ibm_grow_t_skills",
+    "url": "https://medium.com/design-ibm/how-to-grow-your-t-and-gain-skills-a13c20452046",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "t-shaped",
+      "skills",
+      "career",
+      "growth"
+    ],
+    "covers": [],
+    "weight": 0,
+    "title": {
+      "ru": "How to grow your T and gain skills",
+      "en": "How to grow your T and gain skills"
+    },
+    "description": {
+      "ru": "T-shaped развитие: как наращивать глубину и смежные навыки.",
+      "en": "T-shaped growth: deepening your craft while adding adjacent skills."
+    }
+  },
+  "hashicorp_remote_critique": {
+    "id": "hashicorp_remote_critique",
+    "url": "https://medium.com/hashicorp-design/design-critique-on-a-remote-team-52b175da6cd4",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "critique",
+      "remote",
+      "design team"
+    ],
+    "covers": [],
+    "weight": 0,
+    "title": {
+      "ru": "Design Critique on a Remote Team",
+      "en": "Design Critique on a Remote Team"
+    },
+    "description": {
+      "ru": "Как проводить дизайн-критику в распределённой команде.",
+      "en": "How to run design critiques on a distributed team."
+    }
+  },
+  "habr_complex_bms_interface": {
+    "id": "habr_complex_bms_interface",
+    "url": "https://habr.com/ru/post/713918/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "complex ui",
+      "bms",
+      "research",
+      "mvp",
+      "case study"
+    ],
+    "covers": [
+      "context_low",
+      "structure_mess"
+    ],
+    "weight": 70,
+    "title": {
+      "ru": "Сложный интерфейс, когда никто не знает итог",
+      "en": "Designing a complex UI when nobody knows the outcome"
+    },
+    "description": {
+      "ru": "Кейс BMS: аналитика, сценарии инженеров и итеративное проектирование без аналогов.",
+      "en": "BMS case: analytics, engineer scenarios, and iterative design without analogs."
+    }
+  },
+  "katkov_mvp_poc": {
+    "id": "katkov_mvp_poc",
+    "url": "https://deniskatkov.ru/mvp-i-poc-v-chem-raznitsa-mezhdu-prototipom-i-minimalnym-zhiznesposobnym-produktom/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "mvp",
+      "poc",
+      "prototype",
+      "product"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 60,
+    "title": {
+      "ru": "MVP и PoC: чем отличаются от прототипа",
+      "en": "MVP vs PoC vs prototype"
+    },
+    "description": {
+      "ru": "Разница между прототипом, Proof of Concept и минимально жизнеспособным продуктом.",
+      "en": "Differences between prototype, Proof of Concept, and MVP."
+    }
+  },
+  "habr_foodtech_ux_compare": {
+    "id": "habr_foodtech_ux_compare",
+    "url": "https://habr.com/ru/post/664222/",
+    "types": [
+      "example"
+    ],
+    "tags": [
+      "foodtech",
+      "comparison",
+      "mobile",
+      "ux"
+    ],
+    "covers": [
+      "structure_mess",
+      "structure_dump",
+      "pain_overloaded"
+    ],
+    "weight": 70,
+    "title": {
+      "ru": "Сравнение UX сервисов доставки продуктов",
+      "en": "Grocery delivery UX comparison"
+    },
+    "description": {
+      "ru": "Разбор Лавки, Самоката, Сбермаркета, Ozon Fresh и Утконоса по сценариям покупки.",
+      "en": "Lavka, Samokat, SberMarket, Ozon Fresh, and Utkonos compared on shopping flows."
+    }
+  },
+  "figma_yandex_travel_redesign": {
+    "id": "figma_yandex_travel_redesign",
+    "url": "https://www.figma.com/proto/4rEYVEzeLuyM6xgcZPdHVt/%D0%94%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD-%D0%BA%D0%BE%D0%BC%D1%8C%D1%8E%D0%BD%D0%B8%D1%82%D0%B8?page-id=0%3A1&type=design&node-id=28-42205&scaling=contain&starting-point-node-id=28%3A3506&mode=design",
+    "types": [
+      "example"
+    ],
+    "tags": [
+      "redesign",
+      "travel",
+      "figma",
+      "case study"
+    ],
+    "covers": [
+      "structure_mess",
+      "pain_composition",
+      "pain_overloaded"
+    ],
+    "weight": 55,
+    "title": {
+      "ru": "Редизайн Яндекс Путешествий (Figma)",
+      "en": "Yandex Travel redesign (Figma)"
+    },
+    "description": {
+      "ru": "Интерактивный прототип редизайна Яндекс Путешествий.",
+      "en": "Interactive prototype of the Yandex Travel redesign."
+    }
+  },
+  "vc_sber_eapteka_redesign": {
+    "id": "vc_sber_eapteka_redesign",
+    "url": "https://vc.ru/design/529606-bystree-udobnee-ponyatnee-kak-izmenilos-prilozhenie-sber-eapteka",
+    "types": [
+      "example"
+    ],
+    "tags": [
+      "redesign",
+      "ecommerce",
+      "metrics",
+      "mobile"
+    ],
+    "covers": [
+      "structure_mess",
+      "metrics_none",
+      "pain_overloaded"
+    ],
+    "weight": 75,
+    "title": {
+      "ru": "Редизайн приложения СБЕР ЕАПТЕКА",
+      "en": "Sber Eapteka app redesign"
+    },
+    "description": {
+      "ru": "Как редизайн и A/B кнопки «Купить» подняли конверсию — путь от исследования до раскатки.",
+      "en": "How redesign and Buy-button A/B lifted conversion — from research to rollout."
+    }
+  },
+  "vc_rostelecom_bonus_audit": {
+    "id": "vc_rostelecom_bonus_audit",
+    "url": "https://vc.ru/design/550921-razbor-bonusnoy-programmy-v-prilozhenii-moy-rostelekom",
+    "types": [
+      "example"
+    ],
+    "tags": [
+      "usability audit",
+      "loyalty",
+      "mobile",
+      "overloaded"
+    ],
+    "covers": [
+      "pain_overloaded",
+      "structure_dump"
+    ],
+    "weight": 65,
+    "title": {
+      "ru": "Юзабилити-аудит бонусов «Мой Ростелеком»",
+      "en": "My Rostelecom bonus program usability audit"
+    },
+    "description": {
+      "ru": "Разбор тупиковых сценариев бонусной программы и советы по progressive disclosure.",
+      "en": "Dead-end loyalty flows and progressive disclosure fixes."
+    }
+  },
+  "jvetrov_dark_mode": {
+    "id": "jvetrov_dark_mode",
+    "url": "https://jvetrau.com/darkmode/",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "dark mode",
+      "tokens",
+      "contrast",
+      "platforms"
+    ],
+    "covers": [
+      "pain_contrast",
+      "pain_composition",
+      "pain_components"
+    ],
+    "weight": 90,
+    "title": {
+      "ru": "Тёмная тема оформления (подборка Ветрова)",
+      "en": "Dark theme design (Vetrov digest)"
+    },
+    "description": {
+      "ru": "Гайдлайны платформ, токены, кейсы и статьи по внедрению тёмной темы.",
+      "en": "Platform guidelines, tokens, case studies, and articles on shipping dark theme."
+    }
+  },
+  "skillbox_figma_dark_theme": {
+    "id": "skillbox_figma_dark_theme",
+    "url": "https://skillbox.ru/media/design/kak-sozdat-tyemnuyu-temu-v-figma/",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "figma",
+      "dark mode",
+      "contrast",
+      "wcag"
+    ],
+    "covers": [
+      "pain_contrast",
+      "pain_components"
+    ],
+    "weight": 75,
+    "title": {
+      "ru": "Как создать тёмную тему в Figma",
+      "en": "How to build a dark theme in Figma"
+    },
+    "description": {
+      "ru": "Пошагово: стили, фон, плашки, иконки и проверка контраста в Figma.",
+      "en": "Step-by-step: styles, surfaces, icons, and contrast checks in Figma."
+    }
+  },
+  "medium_colorblind_a11y": {
+    "id": "medium_colorblind_a11y",
+    "url": "https://medium.com/@grifer163/%D0%B4%D0%B0%D0%BB%D1%8C%D1%82%D0%BE%D0%BD%D0%B8%D0%B7%D0%BC-%D0%B2-%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D1%84%D0%B5%D0%B9%D1%81%D0%B0%D1%85-%D0%BA%D0%B0%D0%BA-%D1%81%D0%BE%D0%B7%D0%B4%D0%B0%D0%B2%D0%B0%D1%82%D1%8C-%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%BD%D1%8B%D0%B9-%D0%B4%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD-c1867c5b2954",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "colorblind",
+      "accessibility",
+      "contrast",
+      "ui"
+    ],
+    "covers": [
+      "pain_contrast"
+    ],
+    "weight": 85,
+    "title": {
+      "ru": "Дальтонизм в интерфейсах: доступный дизайн",
+      "en": "Color blindness in interfaces: accessible design"
+    },
+    "description": {
+      "ru": "Как проектировать UI, понятный людям с нарушениями цветовосприятия.",
+      "en": "Designing UI that works for people with color-vision deficiencies."
+    }
+  },
+  "habr_colors_eyes_ignore": {
+    "id": "habr_colors_eyes_ignore",
+    "url": "https://habr.com/ru/post/411561/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "vision",
+      "color",
+      "science"
+    ],
+    "covers": [],
+    "weight": 0,
+    "title": {
+      "ru": "Все цвета, игнорируемые нашими глазами",
+      "en": "Colors our eyes ignore"
+    },
+    "description": {
+      "ru": "Научпоп об эволюции трихроматизма — не про ось кейса портфолио.",
+      "en": "Pop-science on trichromacy evolution — not portfolio case-axis guidance."
+    }
+  },
+  "snapp_design_dark_theme": {
+    "id": "snapp_design_dark_theme",
+    "url": "https://medium.com/snapp-mobile/design-for-the-dark-theme-9a2185bbb1d5",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "dark mode",
+      "mobile",
+      "contrast"
+    ],
+    "covers": [
+      "pain_contrast",
+      "pain_composition"
+    ],
+    "weight": 60,
+    "title": {
+      "ru": "Design for the Dark Theme",
+      "en": "Design for the Dark Theme"
+    },
+    "description": {
+      "ru": "Практические советы по тёмной теме для мобильных продуктов.",
+      "en": "Practical dark-theme guidance for mobile products."
+    }
+  },
+  "colourblind_awareness": {
+    "id": "colourblind_awareness",
+    "url": "http://www.colourblindawareness.org/colour-blindness/",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "colorblind",
+      "accessibility",
+      "awareness"
+    ],
+    "covers": [
+      "pain_contrast"
+    ],
+    "weight": 70,
+    "title": {
+      "ru": "About Colour Blindness",
+      "en": "About Colour Blindness"
+    },
+    "description": {
+      "ru": "База про типы дальтонизма и почему это важно для дизайна.",
+      "en": "Basics of color-blindness types and why design must account for them."
+    }
+  },
+  "habr_a11y_check_tools": {
+    "id": "habr_a11y_check_tools",
+    "url": "https://habr.com/ru/company/aiken/blog/115704/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "accessibility",
+      "tools",
+      "contrast",
+      "wcag"
+    ],
+    "covers": [
+      "pain_contrast"
+    ],
+    "weight": 50,
+    "title": {
+      "ru": "20 инструментов проверки доступности сайта",
+      "en": "20 tools to check site accessibility"
+    },
+    "description": {
+      "ru": "Подборка чекеров контраста, симуляторов дальтонизма и a11y-аудиторов.",
+      "en": "Contrast checkers, color-blind simulators, and a11y auditors."
+    }
+  },
+  "topuser_jtbd_ux": {
+    "id": "topuser_jtbd_ux",
+    "url": "https://topuser.pro/jobs-done-ux/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "jtbd",
+      "ux",
+      "jobs"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 20,
+    "title": {
+      "ru": "Что такое Jobs To Be Done в UX",
+      "en": "What Jobs To Be Done means in UX"
+    },
+    "description": {
+      "ru": "Введение в JTBD для юзабилити и продуктового дизайна (проверить актуальность страницы).",
+      "en": "JTBD intro for usability and product design (verify page still hosts the article)."
+    }
+  },
+  "sense23_cjm_blueprint": {
+    "id": "sense23_cjm_blueprint",
+    "url": "https://sense23.com/post/shematizatsiya-opyta-s-cjm-i-service-blueprint-i-praktika-gibridnoj-notatsii-printsipy-opyt-i-lajfhaki-komandy-byndyusoft",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "cjm",
+      "service blueprint",
+      "journey",
+      "notation"
+    ],
+    "covers": [
+      "context_low",
+      "structure_dump"
+    ],
+    "weight": 85,
+    "title": {
+      "ru": "Схематизация опыта: CJM и Service Blueprint",
+      "en": "Mapping experience: CJM and Service Blueprint"
+    },
+    "description": {
+      "ru": "Гибридная нотация CJM/Blueprint: принципы и лайфхаки команды.",
+      "en": "Hybrid CJM/Blueprint notation: principles and team tips."
+    }
+  },
+  "productstar_jtbd": {
+    "id": "productstar_jtbd",
+    "url": "https://productstar.ru/jtbd",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "jtbd",
+      "product",
+      "jobs"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 75,
+    "title": {
+      "ru": "Метод Jobs To Be Done",
+      "en": "Jobs To Be Done method"
+    },
+    "description": {
+      "ru": "Как решать задачи пользователей через фреймворк JTBD.",
+      "en": "Solving user jobs with the JTBD framework."
+    }
+  },
+  "productstar_job_stories": {
+    "id": "productstar_job_stories",
+    "url": "https://productstar.ru/job-story",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "job stories",
+      "jtbd",
+      "interface"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 70,
+    "title": {
+      "ru": "Как Job Stories помогают в интерфейсе",
+      "en": "How Job Stories help interface design"
+    },
+    "description": {
+      "ru": "Формат Job Story для формулировки задач и сценариев в продукте.",
+      "en": "Job Story format for framing product tasks and scenarios."
+    }
+  },
+  "vc_design_without_designer": {
+    "id": "vc_design_without_designer",
+    "url": "https://vc.ru/u/415061-yuliya-antipova/195837-dizayn-bez-dizaynera",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "jtbd",
+      "cjm",
+      "ui kit",
+      "process"
+    ],
+    "covers": [
+      "context_low",
+      "pain_components"
+    ],
+    "weight": 55,
+    "title": {
+      "ru": "Дизайн без дизайнера",
+      "en": "Design without a designer"
+    },
+    "description": {
+      "ru": "Алгоритм: пользователь → цель → CJM → вайрфреймы → дизайн-система.",
+      "en": "Playbook: user → goal → CJM → wireframes → design system."
+    }
+  },
+  "habr_cjm_big_guide": {
+    "id": "habr_cjm_big_guide",
+    "url": "https://habr.com/ru/post/709772/",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "cjm",
+      "journey",
+      "product",
+      "research"
+    ],
+    "covers": [
+      "context_low",
+      "structure_dump"
+    ],
+    "weight": 90,
+    "title": {
+      "ru": "Большой гайд по CJM",
+      "en": "A big CJM guide"
+    },
+    "description": {
+      "ru": "Зачем, где и как строить карту пути клиента — шаги и смежные схемы.",
+      "en": "Why, where, and how to build a customer journey map — steps and related diagrams."
+    }
+  },
+  "vc_vtem_product_analysis": {
+    "id": "vc_vtem_product_analysis",
+    "url": "https://vc.ru/marketing/306472-v-tem-metodologiya-produktovogo-analiza-ili-pochemu-produkt-ne-prodaetsya",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "vtem",
+      "product analysis",
+      "value",
+      "marketing"
+    ],
+    "covers": [
+      "context_low",
+      "metrics_none"
+    ],
+    "weight": 50,
+    "title": {
+      "ru": "V’TEM-методология продуктового анализа",
+      "en": "V’TEM product analysis methodology"
+    },
+    "description": {
+      "ru": "Value / Technological / Economics / Marketing — почему продукт не продаётся.",
+      "en": "Value / Technological / Economics / Marketing — why a product does not sell."
+    }
+  },
+  "yadisk_tedw_framework": {
+    "id": "yadisk_tedw_framework",
+    "url": "https://disk.yandex.ru/i/yHeONx8afwB5pw",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "tedw",
+      "questions",
+      "framework"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 40,
+    "title": {
+      "ru": "TEDW — фреймворк сильных вопросов",
+      "en": "TEDW — a framework for great questions"
+    },
+    "description": {
+      "ru": "Простой фреймворк, чтобы задавать отличные вопросы (файл на Яндекс.Диске).",
+      "en": "A simple framework for asking better questions (Yandex Disk file)."
+    }
+  },
+  "vc_jtbd_vs_personas": {
+    "id": "vc_jtbd_vs_personas",
+    "url": "https://vc.ru/marketing/82621-job-to-be-done-i-metod-person-chto-vybrat",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "jtbd",
+      "personas",
+      "research"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 65,
+    "title": {
+      "ru": "JTBD и метод персон: что выбрать",
+      "en": "JTBD vs personas: what to choose"
+    },
+    "description": {
+      "ru": "Когда персоны уместны, а когда лучше Jobs To Be Done.",
+      "en": "When personas fit and when Jobs To Be Done is the better lens."
+    }
+  },
+  "uxfeedback_cjm_template": {
+    "id": "uxfeedback_cjm_template",
+    "url": "https://blog.uxfeedback.ru/cjm-kak-sozdat-kartu-polzovatelskogo-puti-shablon/",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "cjm",
+      "template",
+      "journey"
+    ],
+    "covers": [
+      "context_low",
+      "structure_dump"
+    ],
+    "weight": 80,
+    "title": {
+      "ru": "CJM: как создать карту пути (+шаблон)",
+      "en": "CJM: how to build a journey map (+ template)"
+    },
+    "description": {
+      "ru": "Практика построения CJM со шаблоном для команды.",
+      "en": "Practical CJM building with a team template."
+    }
+  },
+  "awdee_product_discovery": {
+    "id": "awdee_product_discovery",
+    "url": "https://awdee.ru/10-principles-of-product-discovery/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "product discovery",
+      "hypotheses",
+      "validation"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 70,
+    "title": {
+      "ru": "10 принципов product discovery",
+      "en": "10 principles of product discovery"
+    },
+    "description": {
+      "ru": "Выйти из здания, проверять гипотезы, итерировать и думать о бизнес-модели.",
+      "en": "Get out of the building, test assumptions, iterate, and think about the business model."
+    }
+  },
+  "telegraph_prio_frameworks": {
+    "id": "telegraph_prio_frameworks",
+    "url": "https://telegra.ph/Frejmvorki-dlya-prioritezacii-produktovyh-fich-03-10-2",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "prioritization",
+      "backlog",
+      "rice"
+    ],
+    "covers": [],
+    "weight": 0,
+    "title": {
+      "ru": "5 фреймворков приоритезации фич",
+      "en": "5 frameworks for feature prioritization"
+    },
+    "description": {
+      "ru": "Краткий указатель на популярные фреймворки приоритезации бэклога.",
+      "en": "Short pointer to popular backlog prioritization frameworks."
+    }
+  },
+  "vk_ux_recruit_respondents": {
+    "id": "vk_ux_recruit_respondents",
+    "url": "https://habr.com/ru/company/vk/blog/304720/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "recruitment",
+      "ux research",
+      "respondents"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 70,
+    "title": {
+      "ru": "Тонкости подбора респондентов (VK)",
+      "en": "Nuances of recruiting UX respondents (VK)"
+    },
+    "description": {
+      "ru": "Как искать и отбирать респондентов для UX-исследований — опыт VK.",
+      "en": "Finding and screening respondents for UX research — VK experience."
+    }
+  },
+  "designkontur_survey_tips": {
+    "id": "designkontur_survey_tips",
+    "url": "https://medium.com/designkontur/%D1%81%D0%BE%D0%B2%D0%B5%D1%82%D1%8B-%D0%B4%D0%BB%D1%8F-%D1%83%D1%81%D0%BF%D0%B5%D1%88%D0%BD%D0%BE%D0%B9-%D0%B0%D0%BD%D0%BA%D0%B5%D1%82%D1%8B-%D1%87%D0%B0%D1%81%D1%82%D1%8C-1-6a55c2ff93f4",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "survey",
+      "questionnaire",
+      "research"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 65,
+    "title": {
+      "ru": "Советы для успешной анкеты",
+      "en": "Tips for a successful questionnaire"
+    },
+    "description": {
+      "ru": "Как составлять анкеты, чтобы получать полезные ответы.",
+      "en": "How to write questionnaires that yield useful answers."
+    }
+  },
+  "uxpub_ux_research_guide": {
+    "id": "uxpub_ux_research_guide",
+    "url": "https://ux.pub/editorial/rukovodstvo-po-ux-issliedovaniiam-dlia-nachinaiushchikh-3png",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "ux research",
+      "beginners",
+      "methods"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 80,
+    "title": {
+      "ru": "Руководство по UX-исследованиям для начинающих",
+      "en": "UX research guide for beginners"
+    },
+    "description": {
+      "ru": "Вводный гайд по видам и этапам UX-исследований.",
+      "en": "Introductory guide to UX research types and stages."
+    }
+  },
+  "vc_metrika_audience": {
+    "id": "vc_metrika_audience",
+    "url": "https://vc.ru/marketing/407414-putevoditel-po-yandeks-metrike-gde-i-kak-iskat-dannye-o-celevoy-auditorii",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "yandex metrika",
+      "audience",
+      "analytics"
+    ],
+    "covers": [
+      "context_low",
+      "metrics_none"
+    ],
+    "weight": 70,
+    "title": {
+      "ru": "Путеводитель по Яндекс.Метрике: ЦА",
+      "en": "Yandex Metrika guide: audience data"
+    },
+    "description": {
+      "ru": "Где в Метрике искать портрет целевой аудитории и как сегментировать по целям.",
+      "en": "Where to find audience portraits in Metrika and how to segment by goals."
+    }
+  },
+  "uplab_benchmarking": {
+    "id": "uplab_benchmarking",
+    "url": "https://www.uplab.ru/blog/benchmarking-poshagovoe-rukovodstvo/",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "benchmarking",
+      "competitive",
+      "research"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 60,
+    "title": {
+      "ru": "Пошаговое руководство по бенчмаркингу",
+      "en": "Step-by-step benchmarking guide"
+    },
+    "description": {
+      "ru": "Как сравнивать продукт с конкурентами системно.",
+      "en": "How to compare your product with competitors systematically."
+    }
+  },
+  "habr_ux_research_methods": {
+    "id": "habr_ux_research_methods",
+    "url": "https://habr.com/ru/post/699062/",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "ux research",
+      "methods",
+      "catalog"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 85,
+    "title": {
+      "ru": "Популярные методы UX-исследований",
+      "en": "Popular UX research methods"
+    },
+    "description": {
+      "ru": "Каталог методов: качественные/количественные, поведенческие и оценочные.",
+      "en": "Method catalog: qualitative/quantitative, behavioral and attitudinal."
+    }
+  },
+  "uxfeedback_nps_mistakes": {
+    "id": "uxfeedback_nps_mistakes",
+    "url": "https://blog.uxfeedback.ru/nps_mistakes/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "nps",
+      "metrics",
+      "mistakes",
+      "cx"
+    ],
+    "covers": [
+      "metrics_none",
+      "metrics_vanity"
+    ],
+    "weight": 80,
+    "title": {
+      "ru": "Основные ошибки при измерении NPS",
+      "en": "Common NPS measurement mistakes"
+    },
+    "description": {
+      "ru": "Как не превратить NPS в vanity-метрику и правильно интерпретировать индекс.",
+      "en": "How to avoid turning NPS into a vanity metric and interpret it correctly."
+    }
+  },
+  "agima_quantitative_research": {
+    "id": "agima_quantitative_research",
+    "url": "https://habr.com/ru/company/agima/blog/710042/",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "quantitative",
+      "surveys",
+      "nps",
+      "csat",
+      "ces"
+    ],
+    "covers": [
+      "context_low",
+      "metrics_none"
+    ],
+    "weight": 85,
+    "title": {
+      "ru": "Количественные исследования: виды и анализ",
+      "en": "Quantitative research: types and analysis"
+    },
+    "description": {
+      "ru": "Выборка, типы вопросов, NPS/CSAT/CES/CSI и типичные ошибки опросов.",
+      "en": "Sampling, question types, NPS/CSAT/CES/CSI, and common survey pitfalls."
+    }
+  },
+  "sense23_diy_research_methods": {
+    "id": "sense23_diy_research_methods",
+    "url": "https://sense23.com/post/diy-gajd-po-metodam-produktovyh-issledovanij-kachestvennye-kolichestvennye-ux-issledovaniya",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "product research",
+      "qualitative",
+      "quantitative",
+      "ux"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 90,
+    "title": {
+      "ru": "DIY-гайд по методам продуктовых исследований",
+      "en": "DIY guide to product research methods"
+    },
+    "description": {
+      "ru": "Качественные, количественные и UX-методы — когда что применять.",
+      "en": "Qualitative, quantitative, and UX methods — when to use which."
+    }
+  },
+  "awdee_choose_ux_method": {
+    "id": "awdee_choose_ux_method",
+    "url": "https://awdee.ru/kakoj-metod-ux-issledovaniya-ispolzovat/",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "ux research",
+      "method selection",
+      "framework"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 88,
+    "title": {
+      "ru": "Какой метод UX-исследования использовать",
+      "en": "Which UX research method to use"
+    },
+    "description": {
+      "ru": "Фреймворк выбора метода по стадии продукта и цели исследования.",
+      "en": "A framework for picking a method by product stage and research goal."
+    }
+  },
+  "vc_lamoda_customer_research": {
+    "id": "vc_lamoda_customer_research",
+    "url": "https://vc.ru/531216",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "customer research",
+      "lamoda",
+      "ops",
+      "insights"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 55,
+    "title": {
+      "ru": "Как устроен Customer Research в Lamoda",
+      "en": "How Customer Research works at Lamoda"
+    },
+    "description": {
+      "ru": "Пилары, in-house подход и влияние исследований на решения бизнеса.",
+      "en": "Pillars, in-house approach, and how research shapes business decisions."
+    }
+  },
+  "vc_speed_qual_research": {
+    "id": "vc_speed_qual_research",
+    "url": "https://vc.ru/189707",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "qualitative",
+      "speed",
+      "interviews",
+      "process"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 60,
+    "title": {
+      "ru": "Как ускорить качественное исследование",
+      "en": "How to speed up qualitative research"
+    },
+    "description": {
+      "ru": "Семь рекомендаций и три барьера: рекрут, поле, аналитика без потери качества.",
+      "en": "Seven tips and three barriers: recruit, field, analysis without tanking quality."
+    }
+  },
+  "avito_ab_tests_part1": {
+    "id": "avito_ab_tests_part1",
+    "url": "https://habr.com/ru/company/avito/blog/571094/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "ab testing",
+      "analytics",
+      "avito",
+      "experiments"
+    ],
+    "covers": [
+      "metrics_none",
+      "metrics_vanity"
+    ],
+    "weight": 75,
+    "title": {
+      "ru": "Как улучшить A/B-тесты: лайфхаки Авито (ч. 1)",
+      "en": "Better A/B tests: Avito analyst tips (part 1)"
+    },
+    "description": {
+      "ru": "Практики постановки и чтения экспериментов от аналитиков Авито.",
+      "en": "Experiment design and readout practices from Avito analysts."
+    }
+  },
+  "uxfeedback_online_survey": {
+    "id": "uxfeedback_online_survey",
+    "url": "https://blog.uxfeedback.ru/kak-zadat-polzovatelyam-vopros-i-ne-oblazhatsya/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "survey",
+      "online",
+      "feedback"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 60,
+    "title": {
+      "ru": "Как создать онлайн-опрос и не облажаться",
+      "en": "How to run an online survey without messing up"
+    },
+    "description": {
+      "ru": "Практика онлайн-опросов пользователей: формулировки и типичные ошибки.",
+      "en": "Online user surveys: wording and common mistakes."
+    }
+  },
+  "sense23_survey_communities": {
+    "id": "sense23_survey_communities",
+    "url": "https://sense23.com/prodakt-otvechaet/kak-pravilno-predlagat-prohodit-oprosy-v-soobshhestvah-i-sotsialnyh-setyah",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "recruitment",
+      "surveys",
+      "communities"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 50,
+    "title": {
+      "ru": "Как предлагать опросы в сообществах",
+      "en": "How to invite surveys in communities"
+    },
+    "description": {
+      "ru": "Мотивы респондентов и тексты приглашений без вреда репутации.",
+      "en": "Respondent motives and invitation copy without burning reputation."
+    }
+  },
+  "vc_avg_check_ux_research": {
+    "id": "vc_avg_check_ux_research",
+    "url": "https://vc.ru/marketing/307958-kak-povysit-sredniy-chek-s-pomoshchyu-ux-issledovaniy-5-prostyh-shagov",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "ux research",
+      "conversion",
+      "average order",
+      "business"
+    ],
+    "covers": [
+      "context_low",
+      "metrics_none"
+    ],
+    "weight": 55,
+    "title": {
+      "ru": "Как повысить средний чек через UX-исследования",
+      "en": "Raise average order value with UX research"
+    },
+    "description": {
+      "ru": "Пять шагов: цель → ТЗ → вовлечение команды → внедрение → измерение эффекта.",
+      "en": "Five steps: goal → brief → team buy-in → ship fixes → measure impact."
+    }
+  },
+  "sense23_remote_ux_tests": {
+    "id": "sense23_remote_ux_tests",
+    "url": "https://sense23.com/post/kak-nahodit-insajty-s-pomoshhyu-udalennyh-moderiruemyh-ux-testov",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "usability testing",
+      "remote",
+      "miro",
+      "moderated"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 75,
+    "title": {
+      "ru": "Инсайты из удалённых модерируемых UX-тестов",
+      "en": "Insights from remote moderated UX tests"
+    },
+    "description": {
+      "ru": "Как Miro тестирует до и после запуска: скрипты, рекрут, RITE.",
+      "en": "How Miro tests before and after launch: scripts, recruit, RITE."
+    }
+  },
+  "dropbox_text_research_method": {
+    "id": "dropbox_text_research_method",
+    "url": "https://www.dropbox.com/s/s2xhda1mm53ldg5/%D0%9A%D0%B0%D0%BA%20%D0%B2%D1%8B%D0%B1%D1%80%D0%B0%D1%82%D1%8C%20%D0%BC%D0%B5%D1%82%D0%BE%D0%B4%20%D0%B8%D1%81%D1%81%D0%BB%D0%B5%D0%B4%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F%20%D0%B4%D0%BB%D1%8F%20%D0%BE%D1%86%D0%B5%D0%BD%D0%BA%D0%B8%20%D1%82%D0%B5%D0%BA%D1%81%D1%82%D0%B0.pdf?dl=0",
+    "types": [
+      "guide"
+    ],
+    "tags": [
+      "copy",
+      "research methods",
+      "text",
+      "pdf"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 45,
+    "title": {
+      "ru": "Как выбрать метод исследования для оценки текста",
+      "en": "Choosing a research method to evaluate copy"
+    },
+    "description": {
+      "ru": "PDF о выборе метода оценки текстов в продукте.",
+      "en": "PDF on picking a method to evaluate product copy."
+    }
+  },
+  "vc_interview_8_mistakes": {
+    "id": "vc_interview_8_mistakes",
+    "url": "https://vc.ru/178315",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "interviews",
+      "qualitative",
+      "mistakes"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 80,
+    "title": {
+      "ru": "Восемь типов ошибок в глубинном интервью",
+      "en": "Eight types of depth-interview mistakes"
+    },
+    "description": {
+      "ru": "Контакт, докручивание, предвзятость, техника и процедурные ловушки интервьюера.",
+      "en": "Rapport, probing, bias, technique, and procedural interviewer traps."
+    }
+  },
+  "uxfeedback_what_to_ask": {
+    "id": "uxfeedback_what_to_ask",
+    "url": "https://blog.uxfeedback.ru/vopros-otvet-o-chyom-sprashivat-polzovatelej/",
+    "types": [
+      "article"
+    ],
+    "tags": [
+      "surveys",
+      "questions",
+      "feedback"
+    ],
+    "covers": [
+      "context_low"
+    ],
+    "weight": 55,
+    "title": {
+      "ru": "О чём спрашивать пользователей",
+      "en": "What to ask users"
+    },
+    "description": {
+      "ru": "Готовые формулировки опросов под цели: навигация, барьеры, контент, корзина.",
+      "en": "Ready survey prompts for navigation, barriers, content, and checkout."
     }
   }
 }

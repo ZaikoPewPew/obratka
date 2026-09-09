@@ -9,7 +9,7 @@
 | Что | Где |
 |-----|-----|
 | Карточки проблем (id / category / trigger / priority) | [`src/data/actionCards.json`](src/data/actionCards.json) — **без** URL |
-| Источники (гайды / шаблоны / примеры) | [`src/data/actionResources.json`](src/data/actionResources.json) — `url`, `types`, `tags`, `covers`, `title` / `description` |
+| Источники (гайды / шаблоны / примеры) | [`src/data/actionResources.json`](src/data/actionResources.json) — `url`, `types`, `tags`, `covers`, опц. `weight`, `title` / `description` |
 | Заголовки, проблемы, шаги карточек | [`content/locales.json`](content/locales.json) — ключи `reportAction*` (ru + en) |
 
 ## Модель источников
@@ -27,13 +27,13 @@ uxfol_case_template
 
 - до **2** обычных ссылок (не `example`);
 - до **1** `example`;
-- порядок: сначала более узкие `covers` (специфичнее), затем id.
+- ранг: **`weight` ↓** (опц., default 0) → длина `covers` ↑ (уже = специфичнее) → **type diversity** (greedy: предпочитать ещё не занятый `types[0]`) → `id`.
 
 Подписи ссылок — из `title.ru` / `title.en` ресурса (не из `locales`).
 
-CV-источник (`hanna_cv`) лежит в базе с пустым `covers` — пока нет card id под CV.
+Ориентир `weight`: 90–100 канон по теме карточки · 60–80 сильный практический · 30–50 вторичный · 0–20 хвост. Пустой `covers` — библиотека (не в PDF), вес не влияет на выдачу.
 
-Pain-карточки пока без ресурсов (добавить новые записи в `actionResources` с `covers: ["pain_*"]`).
+CV-источник (`hanna_cv`) и др. с пустым `covers` — в базе, в сводном PDF не светятся, пока нет card id.
 
 ## Поток
 

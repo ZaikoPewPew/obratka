@@ -2,8 +2,11 @@ import assert from "node:assert/strict";
 import { aggregatePortfolioReviews, hasMajority } from "./aggregatePortfolioReviews.js";
 import {
   listResourcesForCard,
+  pickDiverseResources,
   pickProblemValue,
   resolveActionCards,
+  resourceWeight,
+  sortResourcesByRank,
 } from "./resolveActionCards.js";
 import { buildConsensusReport } from "./buildConsensusReport.js";
 
@@ -117,6 +120,33 @@ assert.ok(
 assert.equal(
   listResourcesForCard("structure_mess").find((r) => r.id === "hanna_cv"),
   undefined,
+);
+
+// --- ranking: weight → covers length → id ---
+const rankedMock = sortResourcesByRank([
+  { id: "b_low", url: "https://a.test/b", types: ["article"], tags: [], covers: ["x"], weight: 10 },
+  { id: "a_high", url: "https://a.test/a", types: ["article"], tags: [], covers: ["x"], weight: 90 },
+  { id: "c_same", url: "https://a.test/c", types: ["guide"], tags: [], covers: ["x", "y"], weight: 90 },
+]);
+assert.deepEqual(
+  rankedMock.map((r) => r.id),
+  ["a_high", "c_same", "b_low"],
+);
+assert.equal(resourceWeight({}), 0);
+assert.equal(resourceWeight({ weight: "nope" }), 0);
+
+// type diversity: prefer unused primary type
+const diverse = pickDiverseResources(
+  [
+    { id: "art1", url: "https://a.test/1", types: ["article"], tags: [], covers: ["x"], weight: 100 },
+    { id: "art2", url: "https://a.test/2", types: ["article"], tags: [], covers: ["x"], weight: 90 },
+    { id: "guide1", url: "https://a.test/3", types: ["guide"], tags: [], covers: ["x"], weight: 80 },
+  ],
+  2,
+);
+assert.deepEqual(
+  diverse.map((r) => r.id),
+  ["art1", "guide1"],
 );
 
 // pain alone when higher axes clean

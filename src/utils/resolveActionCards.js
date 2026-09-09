@@ -3,6 +3,8 @@
  * Ссылки подтягиваются из actionResources по covers.
  * Порядок осей: structure → metrics → context → pain
  * (внутри pain — PAIN_PRIORITY).
+ *
+ * Ранкинг ссылок: weight ↓ → covers length ↑ → type diversity → id.
  */
 
 import actionCardsDb from "../data/actionCards.json" with { type: "json" };
@@ -24,6 +26,7 @@ const MAX_LINKS_PER_CARD = 2;
  *   types: string[];
  *   tags: string[];
  *   covers: string[];
+ *   weight?: number;
  *   title: string | Record<string, string>;
  *   description?: string | Record<string, string>;
  * }} ActionResourceRecord
@@ -108,6 +111,68 @@ export function listResourcesForCard(cardId) {
 }
 
 /**
+ * @param {ActionResourceRecord} resource
+ * @returns {number}
+ */
+export function resourceWeight(resource) {
+  const value = Number(resource?.weight);
+  return Number.isFinite(value) ? value : 0;
+}
+
+/**
+ * Sort: weight ↓ → covers length ↑ → id.
+ * @param {ActionResourceRecord[]} resources
+ * @returns {ActionResourceRecord[]}
+ */
+export function sortResourcesByRank(resources) {
+  return resources.slice().sort((a, b) => {
+    const weightDiff = resourceWeight(b) - resourceWeight(a);
+    if (weightDiff !== 0) return weightDiff;
+    const coversA = Array.isArray(a.covers) ? a.covers.length : 99;
+    const coversB = Array.isArray(b.covers) ? b.covers.length : 99;
+    if (coversA !== coversB) return coversA - coversB;
+    return String(a.id).localeCompare(String(b.id));
+  });
+}
+
+/**
+ * Greedy pick preferring unused primary types.
+ * @param {ActionResourceRecord[]} ranked
+ * @param {number} max
+ * @returns {ActionResourceRecord[]}
+ */
+export function pickDiverseResources(ranked, max) {
+  /** @type {ActionResourceRecord[]} */
+  const picked = [];
+  /** @type {Set<string>} */
+  const usedTypes = new Set();
+  /** @type {Set<string>} */
+  const usedIds = new Set();
+
+  while (picked.length < max) {
+    let next =
+      ranked.find((resource) => {
+        if (usedIds.has(resource.id)) return false;
+        const primary = primaryType(resource);
+        return primary && !usedTypes.has(primary);
+      }) || null;
+
+    if (!next) {
+      next =
+        ranked.find((resource) => !usedIds.has(resource.id)) || null;
+    }
+    if (!next) break;
+
+    picked.push(next);
+    usedIds.add(next.id);
+    const primary = primaryType(next);
+    if (primary) usedTypes.add(primary);
+  }
+
+  return picked;
+}
+
+/**
  * Categorical majority: одиночное problem-value с majority,
  * иначе sum(problem) > N/2 → value с max count среди проблемных.
  *
@@ -172,37 +237,36 @@ function pushCard(selected, id) {
 
 /**
  * На карточку: до MAX_LINKS_PER_CARD обычных источников + 1 example.
- * Сначала более узкие covers (специфичнее), затем порядок в DB.
+ * Ранг: weight ↓ → covers length ↑ → type diversity → id.
  *
  * @param {string} cardId
  * @returns {{ links: ActionCardLink[]; example: ActionCardLink | null }}
  */
 function attachResources(cardId) {
-  const matching = listResourcesForCard(cardId).slice().sort((a, b) => {
-    const coversA = Array.isArray(a.covers) ? a.covers.length : 99;
-    const coversB = Array.isArray(b.covers) ? b.covers.length : 99;
-    if (coversA !== coversB) return coversA - coversB;
-    return String(a.id).localeCompare(String(b.id));
-  });
+  const matching = listResourcesForCard(cardId);
+  const ranked = sortResourcesByRank(matching);
 
-  /** @type {ActionCardLink[]} */
-  const links = [];
-  /** @type {ActionCardLink | null} */
-  let example = null;
+  const nonExamples = ranked.filter((resource) => !isExampleResource(resource));
+  const examples = ranked.filter((resource) => isExampleResource(resource));
 
-  for (const resource of matching) {
-    const link = toCardLink(resource);
-    if (!link) continue;
-    if (isExampleResource(resource)) {
-      if (!example) example = link;
-      continue;
-    }
-    if (links.length < MAX_LINKS_PER_CARD) {
-      links.push(link);
-    }
-  }
+  const links = pickDiverseResources(nonExamples, MAX_LINKS_PER_CARD)
+    .map(toCardLink)
+    .filter(Boolean);
 
-  return { links, example };
+  const exampleResource = examples[0] || null;
+  const example = exampleResource ? toCardLink(exampleResource) : null;
+
+  return { links: /** @type {ActionCardLink[]} */ (links), example };
+}
+
+/**
+ * @param {ActionResourceRecord} resource
+ * @returns {string}
+ */
+function primaryType(resource) {
+  const types = Array.isArray(resource.types) ? resource.types : [];
+  const first = types.find((type) => typeof type === "string" && type);
+  return first || "";
 }
 
 /**
