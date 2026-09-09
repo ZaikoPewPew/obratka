@@ -649,6 +649,48 @@
   display: none;
 }
 
+.home-screen__item--archive-divider {
+  box-sizing: border-box;
+  width: 100%;
+  margin-block: calc(
+    var(--home-screen-archive-section-gap) - var(--home-screen-feed-gap)
+  );
+  list-style: none;
+}
+
+.home-screen__archive-divider {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--home-screen-archive-label-gap);
+  width: 100%;
+  max-width: var(--home-screen-archive-divider-width);
+  height: var(--home-screen-archive-divider-height);
+  margin-inline: auto;
+}
+
+.home-screen__archive-divider-line {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: var(--home-screen-archive-line-width);
+  height: 0;
+  border: none;
+  border-top: var(--home-screen-archive-line-border);
+}
+
+.home-screen__archive-divider-label {
+  flex: 0 0 auto;
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--home-screen-archive-label-size);
+  font-weight: var(--home-screen-archive-label-weight);
+  line-height: var(--line-height-loose);
+  text-align: center;
+  color: var(--home-screen-archive-label-color);
+  white-space: nowrap;
+}
+
 .home-screen__item {
   position: relative;
   overflow: visible;

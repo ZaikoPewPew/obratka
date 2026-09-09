@@ -26,7 +26,7 @@
 | `inviteGate.js` | device flag `obratka.inviteGatePassed` после validate; переживает logout / `clearSession` |
 | `legalDoc.js` | документы side-panel: `getLocalizedDoc` / `getCommunityRules` / `getPrivacyPolicy` / `getTermsOfService` / `getLegalDoc` / `fillSidePanelDoc` (`rules.json` + `privacy.json` + `terms.json`) |
 | `backdropLuminance.js` | яркость фона под элементом (home tabbar → `--on-dark`; не ломать glass blur / entrance dock) |
-| `homeRoute.js` | parse/build/canonical query для `/home`: `feed` / `mine` / `rating`; `filter` (`active`/`completed`) на `feed` и `mine` (`?filter=completed` = «Уже отревьюено») |
+| `homeRoute.js` | parse/build/canonical query для `/home`: `feed` / `mine` / `rating` (`?tab=`; устаревший `?filter=` игнорируется) |
 | `homeListCache.js` | SWR-кэш ленты home (`feed`/`feedReviewed`/`mine`/`rating`, memory + `sessionStorage` `obratka.homeLists.<userId>`); UI-hit только непустой массив (`[]` → skeleton); `removeCachedHomeListItem` после успешного submit ревью (id из `feed`); полный `clearHomeListCache` только на logout |
 | `homeListWindow.js` | окно ленты home: `rangeForScroll` / `listWindowPadding` (DOM ~видимые + overscan, padding как честная высота; данные до `FEED_QUERY_LIMIT` целиком) |
 | `feedSeen.js` | seen id кейсов open-ленты для точки на «Чужие посты» (`localStorage` `obratka.feedSeen.<userId>`); открытие feed гасит; seed baseline; `clearFeedSeen` на logout |

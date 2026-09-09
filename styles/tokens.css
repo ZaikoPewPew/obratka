@@ -1000,6 +1000,17 @@
   --home-screen-body-gap: var(--space-4);
   --home-screen-feed-width: 500px;
   --home-screen-feed-gap: var(--space-4);
+  /* Дивайдер «Архивные» на Моих: 40 вокруг секции, блок 500×20, линии 183, gap 24 */
+  --home-screen-archive-section-gap: var(--space-10);
+  --home-screen-archive-divider-height: 20px;
+  --home-screen-archive-divider-width: var(--home-screen-feed-width);
+  --home-screen-archive-line-width: 183px;
+  --home-screen-archive-line-border: var(--border-width) solid
+    var(--color-surface-muted);
+  --home-screen-archive-label-gap: var(--space-6);
+  --home-screen-archive-label-size: var(--font-size-base);
+  --home-screen-archive-label-weight: var(--font-weight-regular);
+  --home-screen-archive-label-color: var(--color-text);
   --home-screen-empty-radius: var(--radius-xl);
   --home-screen-empty-padding: var(--space-2);
   --home-screen-empty-width: var(--home-screen-feed-width);

@@ -339,13 +339,13 @@ function syncRoute(id, opts = {}) {
 /**
  * Последний вид home — чтобы возврат с `/report` / `/settings` попадал на ту же
  * вкладку (отчёт открывается только с «Мои»).
- * @type {{ tab: import("./utils/homeRoute.js").HomeTabId; filter: import("./utils/homeRoute.js").MineFilterId }}
+ * @type {{ tab: import("./utils/homeRoute.js").HomeTabId }}
  */
-let lastHomeView = { tab: "feed", filter: "active" };
+let lastHomeView = { tab: "feed" };
 
 /**
- * Вкладка / сегмент home из текущего URL (и запомнить в `lastHomeView`).
- * @returns {{ tab: import("./utils/homeRoute.js").HomeTabId; filter: import("./utils/homeRoute.js").MineFilterId }}
+ * Вкладка home из текущего URL (и запомнить в `lastHomeView`).
+ * @returns {{ tab: import("./utils/homeRoute.js").HomeTabId }}
  */
 function currentHomeView() {
   lastHomeView = parseHomeView(
@@ -366,7 +366,7 @@ function currentHomeView() {
  * - Иначе (cold open): URL.
  *
  * @param {{ reason?: 'start' | 'navigate' | 'popstate' }} [opts]
- * @returns {{ tab: import("./utils/homeRoute.js").HomeTabId; filter: import("./utils/homeRoute.js").MineFilterId }}
+ * @returns {{ tab: import("./utils/homeRoute.js").HomeTabId }}
  */
 function resolveHomeView(opts = {}) {
   const fromUrl = parseHomeView(
@@ -387,7 +387,7 @@ function resolveHomeView(opts = {}) {
 
 /**
  * Подчистить `/home` query (мусорный `tab`, дефолты) без записи в history-стек.
- * @param {{ tab?: import("./utils/homeRoute.js").HomeTabId; filter?: import("./utils/homeRoute.js").MineFilterId }} view
+ * @param {{ tab?: import("./utils/homeRoute.js").HomeTabId }} view
  */
 function canonicalizeHomeSearch(view) {
   const search = typeof window !== "undefined" ? window.location.search : "";
@@ -2297,12 +2297,11 @@ async function ensureHomeScreen() {
             }
             await settingsScreen.close();
           },
-          onViewChange: ({ tab, filter, reason }) => {
-            lastHomeView = { tab, filter };
+          onViewChange: ({ tab }) => {
+            lastHomeView = { tab };
             if (activeRouteId !== "home") return;
             appRouter?.navigate("home", {
-              search: buildHomeSearch({ tab, filter }),
-              replace: reason === "filter",
+              search: buildHomeSearch({ tab }),
               silent: true,
             });
           },
@@ -2710,7 +2709,6 @@ async function applyRoute(id, opts = {}) {
     if (id === "home") {
       const view = resolveHomeView({ reason: routeReason });
       pageProps.tab = view.tab;
-      pageProps.filter = view.filter;
     }
     trackPage(id, pageProps);
   }

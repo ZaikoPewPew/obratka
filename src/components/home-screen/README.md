@@ -10,8 +10,8 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 
 | Вкладка | API | Содержимое |
 |---------|-----|------------|
-| **Лента** (`feed`, default) | `listPortfoliosForReview()` + `listReviewedPortfolios()` | Сверху сегмент **Разбор / Разобрано** ([`tabs-panel`](../tabs-panel/README.md)); «Разбор» — чужие `pending` **в лиге** (RLS), без своих и без `reviewedByMe`; «Разобрано» — кейсы с сданным отчётом (`listReviewedPortfolios`, в т.ч. `done` через RLS `exists` review в `portfolios_select_feed`); точка на вкладке при **новом** кейсе только по open-очереди (`listFeedPortfolioIds` + `feedSeen`); лимит `FEED_QUERY_LIMIT` (=300) |
-| **Мои посты** (`mine`) | `listMyPortfolios()` | Все портфолио текущего пользователя (pending / done / …); сверху сегмент **Разбор / Разобрано** ([`tabs-panel`](../tabs-panel/README.md)); точка на вкладке и на «Разобрано» при **непросмотренном** готовом отчёте (`listReadyOwnReportIds` + `mineReadySeen`) |
+| **Лента** (`feed`, default) | `listPortfoliosForReview()` | Только open-queue: чужие `pending` **в лиге** (RLS), без своих и без `reviewedByMe`. После submit карточка исчезает из ленты (повторно не показывается). Точка на вкладке при **новом** кейсе (`listFeedPortfolioIds` + `feedSeen`); лимит `FEED_QUERY_LIMIT` (=300) |
+| **Мои посты** (`mine`) | `listMyPortfolios()` | Единый список: свободный слот (`homeMineSlotFree*`) → pending → дивайдер «Архивные» → completed (`reviewsCount >= target`). Точка на вкладке при **непросмотренном** готовом отчёте (`listReadyOwnReportIds` + `mineReadySeen`); гаснет при входе на «Мои» |
 | **Рейтинг** (`rating`) | `listRatingTop()` | Топ-50 по репутации (Figma `RaitingCard` 482:2123) в `.home-screen__rating-list`: аватар 52 + бейдж места (синий, 20), имя/роль (`formatPortfolioRole`), белая плашка репутации с иконкой positive/neutral/negative (`min-width`/`height` 52px, padding-x 16px — `--home-screen-rating-reputation-*`); skeleton `--skeleton`-модификаторы, 50 карточек (вся длина топа — список скроллится сразу); empty `.home-screen__rating-empty` (`homeRatingEmpty`); кэш вкладки в `homeListCache` (`rating`); снапшот на сервере обновляется раз в сутки (`rating_leaderboard.sql`). **Сейчас UI off** — `RATING_TAB_ENABLED = false` в [`src/config/home.js`](../../config/home.js) (таб скрыт, `?tab=rating` → feed; учёт reputation / чип не зависят от флага) |
 
 Переключатель: `home-screen__tabbar` внутри дока `home-screen__tabbar-dock` — fixed-слой на `home-screen`, **по центру экрана**, `bottom: 16px` (`--home-screen-tabbar-offset` = `--space-4`). Вкладки: **Лента** / **Мои посты** (Рейтинг в разметке есть, сейчас `hidden`). Справа от таббара в доке (gap 8px, `--home-screen-tabbar-dock-gap`) — кнопка «Закинуть своё» (56×56, r16, Google blue, плюс 24; токены `--home-screen-tabbar-submit-*`).
@@ -22,29 +22,18 @@ Path: **`/home`**. После onboarding: шапка (лого, репутаци
 - Анимация hide/show: `--home-screen-tabbar-hide-duration` / `--home-screen-tabbar-hide-ease` → `--motion-screen-*`.
 - Клик по кубику → `scrollTo` верха ленты (`homeScrollTopAria`).
 
-### Сегмент tabs-panel (`feed` и `mine`)
+### Список «Мои» (слот + архив)
 
-Над списком — один [`createTabsPanel`](../tabs-panel/README.md) (трек hug к подписям, по центру колонки карточек). Виден на **Лента** и **Мои**; на `rating` скрыт. Лейблы и стейт фильтра раздельные (`feedFilter` / `mineFilter`); переключение сегмента **без** refetch (на feed оба списка уже в кэше после `refresh`); если ещё `loading` — остаётся skeleton с числом карточек сегмента (лента / «Разобрано» = 5, «Разбор» = 1).
+Сегмент [`tabs-panel`](../tabs-panel/README.md) на home **не монтируется** (компонент в репо остаётся для других экранов).
 
-Thumb: `syncListFilterPanel()` переставляет пилл `instant` **только** при рассинхроне (`getActive() !== currentListFilter()`), иначе `syncCopy()` внутри `setListFilter` обрезал бы анимацию своего же переключения. Мгновенный пересчёт после смены вкладки / открытия home — `resyncListFilterThumb()`.
+Порядок строк:
 
-**Лента**
+1. Свободный слот первым (если pending &lt; `MAX_MINE_PENDING`) — dashed «Твой слот под ревью» (`homeMineSlotFree*`, Figma Type=Queue).
+2. Активные свои карточки (`reviewsCount < targetReviews`).
+3. При наличии completed — отступ 40px → дивайдер «Архивные» (`homeMineArchiveLabel*`, токены `--home-screen-archive-*`) → отступ 40px.
+4. Завершённые (`reviewsCount >= targetReviews`).
 
-| Сегмент | API / критерий |
-|---------|----------------|
-| **Разбор** (`active`, default) | `listPortfoliosForReview()` — open queue |
-| **Разобрано** (`completed`) | `listReviewedPortfolios()` — свои сданные отчёты (**pending и done**); RLS `portfolios_select_feed` пускает через `has_reviewed_portfolio` (security definer; сырой exists по reviews даёт circular RLS — см. [`SECURITY.md`](../../../supabase/SECURITY.md) § инцидент 2026-08-04); карточка `--reviewed`: вместо скриншота — серое превью с галочкой + `homeCardReviewedLabel` («Отчёт отправлен») по центру, слоты ревьюеров и зона автора обычные; **некликабельна** (`div`, `pointer-events: none`, без hover / смены курсора / открытия URL) |
-
-Empty «Разобрано»: `homeEmptyFeedReviewed` (визуал free-slot, `--static`). Кэш: `feed` + `feedReviewed` в [`homeListCache`](../../utils/homeListCache.js). Токены статуса: `--home-screen-card-reviewed-*` (заливка `--color-surface-muted`, галочка `--color-success` из `assets/home/report-sent.svg`).
-
-**Мои посты**
-
-| Сегмент | Критерий |
-|---------|----------|
-| **Разбор** (`active`, default) | `reviewsCount < targetReviews` (ещё собираются ревью, 0…2) |
-| **Разобрано** (`completed`) | `reviewsCount >= targetReviews` (все слоты заполнены, 3/3) |
-
-Empty «Разобрано»: `homeEmptyMineCompleted` (тот же визуал free-slot). На **Разбор** текстового empty нет: всегда до `MAX_MINE_PENDING` (1) слотов — реальная карточка или dashed placeholder «Свободный слот» (`homeMineSlotFree*`, Figma Type=Queue). Cold-miss skeleton там тоже **1** карточка (`MINE_ACTIVE_SKELETON_CARD_COUNT` = `MAX_MINE_PENDING`), не лента из 5. **Разобрано** / feed «Разбор»·«Разобрано» — одинаковые `SKELETON_CARD_COUNT` (5); смена сегмента во время `loading` не сбрасывает skeleton в empty. Клик по свободному слоту / CTA «Закинуть» (с любой вкладки) → если слот занят локально, только flash+buzz submit; если нет монет — buzz submit + чип баланса; иначе сразу `/portfolio` (серверный gate в `applyRoute`). Оба фильтра сбрасываются в `active` на `close()`; при следующем `open()` вид берётся из URL.
+Текстового empty на «Мои» нет: при нуле pending всегда слот. Cold-miss skeleton — **1** карточка (`MINE_ACTIVE_SKELETON_CARD_COUNT`). Лента — `SKELETON_CARD_COUNT` (5). Клик по свободному слоту / CTA «Закинуть» → если слот занят локально, flash+buzz submit; если нет монет — buzz submit + чип баланса; иначе `/portfolio`. Виртуализация DOM на «Мои» отключена (смешанные высоты divider); на ленте — окно [`homeListWindow.js`](../../utils/homeListWindow.js).
 
 ### Индикатор на вкладке «Лента»
 
@@ -60,25 +49,21 @@ Empty «Разобрано»: `homeEmptyMineCompleted` (тот же визуал
 
 Источник на `mine` / `rating`: лёгкий `listFeedPortfolioIds()` на каждом `refresh`. На `feed` — id из загруженного списка. Aria: `homeTabFeedNewAria`.
 
-### Индикатор на «Мои посты» и «Разобрано»
+### Индикатор на «Мои посты»
 
-Красная точка:
+Красная точка на вкладке «Мои посты» — 6×6 (`--home-screen-tabbar-tab-dot-*`, Google red), правый верхний угол, отступ **8px**.
 
-- на вкладке «Мои посты» — 6×6 (`--home-screen-tabbar-tab-dot-*`, Google red), правый верхний угол, отступ **8px**;
-- на сегменте «Разобрано» — 7×7 (`--tabs-panel-tab-dot-*`), после подписи, gap **8px**.
-
-Видна, когда есть **непросмотренный** готовый отчёт: своё портфолио набрало все ревью (`reviewsCount >= targetReviews`), и пользователь ещё не открывал сегмент «Разобрано» после появления этих id.
+Видна, когда есть **непросмотренный** готовый отчёт: своё портфолио набрало все ревью (`reviewsCount >= targetReviews`), и пользователь ещё не открывал вкладку «Мои» после появления этих id.
 
 Поведение:
 
-- открытие сегмента `completed` → текущие готовые id пишутся в `obratka.mineReadySeen.<userId>` (`markMineReadySeen`), **обе** точки гаснут сразу;
-- заход на вкладку `mine` **сам по себе** точку не гасит (иначе не видно, где новинка);
+- открытие вкладки `mine` → текущие готовые id пишутся в `obratka.mineReadySeen.<userId>` (`markMineReadySeen`), точка гаснет;
 - снова загорается, только когда появится **новый** готовый id (ещё не в seen);
 - logout → `clearMineReadySeen`.
 
-Источник состояния на ленте (`feed`): на каждом `refresh` лёгкий `listReadyOwnReportIds()` (только счётчики) + `hasUnseenMineReady`. На `mine` — те же id из списка своих карточек; acknowledge только на `completed`.
+Источник состояния на ленте (`feed`): на каждом `refresh` лёгкий `listReadyOwnReportIds()` (только счётчики) + `hasUnseenMineReady`. На `mine` — те же id из списка своих карточек; acknowledge при входе на вкладку.
 
-Точка декоративная (`aria-hidden`); пока она видна, у кнопки таба «Мои» `aria-label` = `homeTabMineReadyAria`. Текст вкладки живёт в `home-screen__tab-label` / `tabs-panel__tab-label`, чтобы синк копирайта не затирал точку.
+Точка декоративная (`aria-hidden`); пока она видна, у кнопки таба «Мои» `aria-label` = `homeTabMineReadyAria`. Текст вкладки живёт в `home-screen__tab-label`, чтобы синк копирайта не затирал точку.
 
 ### Контраст над тёмным превью
 
@@ -95,7 +80,7 @@ Empty «Разобрано»: `homeEmptyMineCompleted` (тот же визуал
 
 Синхрон позиции thumb: после `open` / смены таба / `syncCopy` (смена языка меняет ширину) / `ResizeObserver` / `window.resize`.
 
-### Порядок ленты «Разбор»
+### Порядок ленты
 
 Цель: ревьюер чаще открывает то, что **быстрее даёт completed и закрывает слот автора** (дойти до `target_reviews`, default 3). Не newest-first.
 
@@ -208,27 +193,26 @@ Own-карточки: cursor наследуется от `.home-screen__card` (p
 
 `createHomeScreen({ onOpenPortfolio, onPreviewPortfolio?, onOpenReport?, onAddPortfolio?, onOpenSettings?, onSignOut?, onViewChange?, onReviewIntroOpened?, onReviewIntroCta?, onHomeSubmitClicked? })` → `{ root, open(view?), close, setItems, setView, getView, refresh, showNotice, showNotification }`.
 
-Внутреннее: `activeTab` `feed` \| `mine` \| `rating`; `feedFilter` / `mineFilter` `active` \| `completed`; `refresh` параллелит wallet∥lists∥online, на feed тянет open + reviewed и фоном prefetch `mine`; на mine / rating — `listMyPortfolios` / `listRatingTop`; на чужих вкладках ещё `listFeedPortfolioIds` для точки; кэш — [`homeListCache.js`](../../utils/homeListCache.js) (`feed`/`feedReviewed`/`mine`/`rating`); DOM ленты — окно [`homeListWindow.js`](../../utils/homeListWindow.js) (padding + diff по id; silent patch слотов только у смонтированных).
+Внутреннее: `activeTab` `feed` \| `mine` \| `rating`; `refresh` параллелит wallet∥lists∥online, на feed тянет open queue и фоном prefetch `mine`; на mine / rating — `listMyPortfolios` / `listRatingTop`; на чужих вкладках ещё `listFeedPortfolioIds` для точки; кэш — [`homeListCache.js`](../../utils/homeListCache.js) (`feed`/`mine`/`rating`; ключ `feedReviewed` может остаться в storage от старых сессий); DOM ленты — окно [`homeListWindow.js`](../../utils/homeListWindow.js) (на mine — полный список без windowing).
 
 ## URL-состояние
 
-Вкладка и фильтр живут в query одного экрана `/home`:
+Вкладка живёт в query одного экрана `/home`:
 
-- `/home` — `feed` + `active` (дефолты в query не пишутся);
-- `/home?filter=completed` — «Лента» / «Разобрано»;
-- `/home?tab=mine` — «Мои посты» / «Разбор»;
-- `/home?tab=mine&filter=completed` — «Мои посты» / «Разобрано»;
+- `/home` — `feed` (дефолт в query не пишется);
+- `/home?tab=mine` — «Мои посты»;
 - `/home?tab=rating` — при `RATING_TAB_ENABLED = false` ремапится в feed; при флаге — топ-50 по репутации.
+- Устаревший `?filter=` игнорируется.
 
-[`homeRoute.js`](../../utils/homeRoute.js) парсит и канонизирует query. Клик по основной вкладке добавляет запись History, смена фильтра заменяет текущую; Back/Forward вызывает `setView()` без повторного монтажа экрана и без эха в URL.
+[`homeRoute.js`](../../utils/homeRoute.js) парсит и канонизирует query. Клик по основной вкладке добавляет запись History; Back/Forward вызывает `setView()` без повторного монтажа экрана и без эха в URL.
 
-- `filter` имеет смысл на `feed` и `mine`; мусорный `tab` / `filter` → дефолт + `replace` на канонический URL.
+- Мусорный `tab` → дефолт + `replace` на канонический URL.
 - Экран history **не** трогает: `onViewChange` наверх → `main.js` пишет URL (silent navigate, без re-open).
 - Возврат с `/report` и `/settings` — на ту же вкладку (`lastHomeView` в `main.js`).
 
 ## Стили / i18n / a11y
 
-Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, translucent track / on-dark track+label, motion hide/thumb/label/contrast) + `--home-screen-tabbar-dock-gap` / `--home-screen-tabbar-submit-*` (кнопка 56×56, r16, Google blue, hover/active через color-mix; error-flash Google red + `bg-duration`/`bg-ease` для transition синий↔красный; плюс 24) + `--home-screen-tabbar-tab-dot-*` (точка 6px, offset 8px, Google red). Точка на сегменте «Разобрано»: `--tabs-panel-tab-dot-*` (7px, после подписи, gap 8px). Статус «Отчёт отправлен» в превью: `--home-screen-card-reviewed-*`.
+Токены `--home-screen-tabbar-*` (высота 56, padding трека 4px, таб 48, offset 16, радиус 16/12, blur 20, translucent track / on-dark track+label, motion hide/thumb/label/contrast) + `--home-screen-tabbar-dock-gap` / `--home-screen-tabbar-submit-*` (кнопка 56×56, r16, Google blue, hover/active через color-mix; error-flash Google red + `bg-duration`/`bg-ease` для transition синий↔красный; плюс 24) + `--home-screen-tabbar-tab-dot-*` (точка 6px, offset 8px, Google red). Архив на Моих: `--home-screen-archive-*`.
 
 Glass track: `background` + `backdrop-filter: blur(var(--home-screen-tabbar-blur))` на **`.home-screen__tabbar`** (не на dock). Свап темы: `backdropLuminance` → `home-screen__tabbar--on-dark` (track / label). Не анимировать `opacity` на предке dock — иначе blur пропадает.
 
@@ -236,7 +220,7 @@ Entrance на `--open`: `--home-screen-reveal-delay-topbar` / `-body` / `-fab` �
 
 Токены intro-модалки: `--home-screen-review-intro-media-*` (max 552, aspect кадра).
 
-Ключи: `homeTitle`, `homeMarkAria`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeEmptyMineActive`, `homeEmptyMineCompleted`, `homeEmptyFeedReviewed`, `homeMineSlotFree`, `homeMineSlotFreeAria`, `homePendingLimit*`, `homeNotifyNoDucks`, `homeNotifySlotTaken`, `notificationCloseAria`, `homeTabFeed`, `homeTabMine`, `homeTabRating`, `homeRatingEmpty`, `homeRatingListAria`, `homeRatingNameFallback`, `homeRatingPlaceAria`, `homeRatingReputationAria`, `homeTabsAria`, `homeFeedFilterActive`, `homeFeedFilterCompleted`, `homeFeedFilterAria`, `homeMineFilterActive`, `homeMineFilterCompleted`, `homeMineFilterAria`, `homeCardReviewedLabel`, `homeAddPortfolio*`, `homeBalance*`, `homeReputation*`, `homeInvite*` (в т.ч. `homeInviteMessage`), `homeTabMineReadyAria`, `homeTabFeedNewAria`, `homeProfileAria`, `homeAccount*`, `homeRulesCloseAria`, `homeFeedback*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeCardMinePendingRole`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `gradeUndefined`, `homePlatformWebLetter`, `homePlatformSite`, `homeSubmitCost`. Правила сообщества: [`content/rules.json`](../../../content/rules.json).
+Ключи: `homeTitle`, `homeMarkAria`, `homeListAria`, `homeListLoadingAria`, `homeListMineAria`, `homeEmpty`, `homeEmptyMine`, `homeEmptyMineActive`, `homeEmptyMineCompleted`, `homeMineSlotFree`, `homeMineSlotFreeAria`, `homeMineArchiveLabel`, `homeMineArchiveAria`, `homePendingLimit*`, `homeNotifyNoDucks`, `homeNotifySlotTaken`, `notificationCloseAria`, `homeTabFeed`, `homeTabMine`, `homeTabRating`, `homeRatingEmpty`, `homeRatingListAria`, `homeRatingNameFallback`, `homeRatingPlaceAria`, `homeRatingReputationAria`, `homeTabsAria`, `homeCardReviewedLabel`, `homeAddPortfolio*`, `homeBalance*`, `homeReputation*`, `homeInvite*` (в т.ч. `homeInviteMessage`), `homeTabMineReadyAria`, `homeTabFeedNewAria`, `homeProfileAria`, `homeAccount*`, `homeRulesCloseAria`, `homeFeedback*`, `homeCardProgress`, `homeCardReportTitle`, `homeCardReportAria`, `homeCardReportPendingTitle`, `homeCardReportPendingAria`, `homeCardMinePendingRole`, `homeReviewIntro*`, `homeMineNotReady*`, `homeDefaultRole`, `gradeUndefined`, `homePlatformWebLetter`, `homePlatformSite`, `homeSubmitCost`. Правила сообщества: [`content/rules.json`](../../../content/rules.json).
 
 `homeCardOwnTitle` / `homeCardOwnAria` / `homeAlreadyReviewed*` в locales — legacy (own-копирайт = `homeCardReport*` / `Pending*`; модалка already-reviewed не показывается — silent refresh).
 

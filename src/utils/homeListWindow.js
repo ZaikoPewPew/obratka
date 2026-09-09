@@ -14,7 +14,7 @@ export const LIST_WINDOW_OVERSCAN = 4;
 export const LIST_WINDOW_FALLBACK_VISIBLE = 10;
 
 /**
- * Ключ free-slot на «Мои → Разбор» (не портфолио id).
+ * Ключ free-slot на «Мои» (не портфолио id).
  * @param {number} index
  * @returns {string}
  */
