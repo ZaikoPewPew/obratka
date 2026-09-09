@@ -48,6 +48,7 @@ export const REPUTATION_FLOOR = -100;
  *   complained: boolean;
  *   canComplain: boolean;
  *   complaintOpenUntil: string | null;
+ *   targetReviews: number;
  *   answers: import("../utils/reviewReport.js").ReviewAnswers | null;
  * }} PortfolioReviewSheet
  */
@@ -328,6 +329,7 @@ export async function listPortfolioReviewSheets(portfolioId) {
           },
           nowMs,
         ),
+        targetReviews,
         answers: parseReviewAnswers(row.answers),
       };
     })

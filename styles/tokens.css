@@ -611,6 +611,14 @@
   --report-screen-btn-icon-size: var(--space-6);
   --report-screen-sheets-gap: var(--space-3);
   --report-screen-sheets-max-height: min(40dvh, 320px);
+  --report-screen-consensus-gap: var(--space-4);
+  --report-screen-consensus-title-size: var(--font-size-base);
+  --report-screen-consensus-title-weight: var(--font-weight-semibold);
+  --report-screen-consensus-body-size: var(--font-size-sm);
+  --report-screen-consensus-card-padding: var(--space-3);
+  --report-screen-consensus-card-radius: var(--radius-md);
+  --report-screen-consensus-card-bg: var(--color-surface-muted);
+  --report-screen-consensus-badge-size: var(--font-size-sm);
   --report-screen-sheet-padding: var(--space-3);
   --report-screen-sheet-gap: var(--space-3);
   --report-screen-sheet-radius: var(--radius-md);

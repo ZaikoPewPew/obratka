@@ -62,11 +62,22 @@ assert.equal(
   agg.adviceList.every((item) => !("dictation" in item)),
   true,
 );
+assert.deepEqual(agg.dictationList, []);
+
+const withNotes = aggregatePortfolioReviews([
+  {
+    answers: answers({ dictation: "Keep the hero, drop the dump." }),
+    reviewerName: "Ada",
+  },
+]);
+assert.equal(withNotes.dictationList.length, 1);
+assert.equal(withNotes.dictationList[0].reviewerName, "Ada");
+assert.equal(withNotes.dictationList[0].text, "Keep the hero, drop the dump.");
 
 // --- categorical majority nuance (mess vs dump) ---
 assert.equal(
   pickProblemValue({ mess: 1, dump: 1, clear: 1 }, ["mess", "dump"], 3),
-  "mess",
+  null,
 );
 assert.equal(
   pickProblemValue({ mess: 2, dump: 0, clear: 1 }, ["mess", "dump"], 3),
@@ -78,6 +89,14 @@ assert.equal(
 );
 assert.equal(
   pickProblemValue({ none: 1, vanity: 1, solid: 1 }, ["none", "vanity"], 3),
+  null,
+);
+assert.equal(
+  pickProblemValue({ none: 1, vanity: 0, solid: 2 }, ["none", "vanity"], 3),
+  null,
+);
+assert.equal(
+  pickProblemValue({ none: 2, vanity: 1, solid: 0 }, ["none", "vanity"], 3),
   "none",
 );
 
@@ -108,10 +127,8 @@ const problemHeavy = aggregatePortfolioReviews([
 
 const cards = resolveActionCards(problemHeavy);
 assert.equal(cards.length, 3);
-assert.deepEqual(
-  cards.map((card) => card.id),
-  ["structure_mess", "metrics_none", "context_low"],
-);
+assert.ok(cards.some((card) => card.id === "cluster_impact"));
+assert.ok(cards.some((card) => card.id.startsWith("pain_")));
 assert.ok(cards[0].links.length >= 1);
 assert.ok(cards[0].links.every((link) => link.url && !link.url.includes("example.com")));
 assert.ok(
@@ -211,6 +228,77 @@ const clean = aggregatePortfolioReviews([
 ]);
 assert.deepEqual(resolveActionCards(clean), []);
 
+// overshoot: cards by first target sheets, tallies see all
+const overshootSheets = [
+  answers({ structure: "mess", metrics: "none", context: 1, visual: 3 }),
+  answers({ structure: "mess", metrics: "none", context: 2, visual: 3 }),
+  answers({ structure: "clear", metrics: "solid", context: 4, visual: 3 }),
+  answers({ structure: "clear", metrics: "solid", context: 5, visual: 3 }),
+];
+assert.deepEqual(
+  resolveActionCards(aggregatePortfolioReviews(overshootSheets)).map((c) => c.id),
+  [],
+);
+const overshootLimited = resolveActionCards(
+  aggregatePortfolioReviews(overshootSheets, { limit: 3 }),
+);
+assert.ok(overshootLimited.length >= 1);
+assert.ok(
+  overshootLimited.some(
+    (card) => card.id === "cluster_impact" || card.id.startsWith("structure_") || card.id.startsWith("metrics_"),
+  ),
+);
+
+const consensusFull = buildConsensusReport(overshootSheets, {}, { sheetLimit: 3 });
+assert.equal(consensusFull.aggregate.n, 4);
+assert.equal(consensusFull.cardAggregate.n, 3);
+assert.ok(resolveActionCards(consensusFull.cardAggregate).length >= 1);
+
+// context_low library cap + blacklist in top-2
+const contextResources = listResourcesForCard("context_low").filter(
+  (resource) => !resource.types?.includes("example"),
+);
+assert.ok(contextResources.length <= 10);
+assert.ok(
+  contextResources.every((resource) => {
+    if ((resource.weight || 0) < 90) return true;
+    return resource.id === "itagency_mom_test" || resource.id === "uxfol_case_template";
+  }),
+);
+const contextTop = pickDiverseResources(sortResourcesByRank(contextResources), 2);
+const CONTEXT_LOW_BLACKLIST = [
+  "designkontur_biases_research",
+  "slaylines_cognitive_biases",
+  "uxpub_confirmation_bias_nng",
+  "uxpub_10_cognitive_patterns",
+];
+assert.ok(contextTop.every((resource) => !CONTEXT_LOW_BLACKLIST.includes(resource.id)));
+
+// example URLs unique across cards in one resolve
+const exampleUrls = cards
+  .map((card) => card.example?.url)
+  .filter(Boolean);
+assert.equal(exampleUrls.length, new Set(exampleUrls).size);
+
+// gradeAboveTier cluster
+const mismatch = aggregatePortfolioReviews([
+  answers({ grade: "senior", tier: "mid", structure: "clear", metrics: "solid", context: 4, visual: 3 }),
+  answers({ grade: "lead", tier: "early", structure: "outline", metrics: "nominal", context: 5, visual: 3 }),
+  answers({ grade: "staff", tier: "mid", structure: "clear", metrics: "solid", context: 4, visual: 3 }),
+]);
+assert.deepEqual(
+  resolveActionCards(mismatch).map((card) => card.id),
+  ["cluster_gradeAboveTier"],
+);
+
+// visual weak without pain
+const weakVisual = aggregatePortfolioReviews([
+  answers({ visual: 1, pain: [], structure: "clear", metrics: "solid", context: 4 }),
+  answers({ visual: 2, pain: [], structure: "outline", metrics: "nominal", context: 5 }),
+  answers({ visual: 1, pain: [], structure: "clear", metrics: "solid", context: 4 }),
+]);
+assert.equal(resolveActionCards(weakVisual)[0]?.id, "visual_weak");
+
 const consensus = buildConsensusReport(
   [
     {
@@ -219,6 +307,7 @@ const consensus = buildConsensusReport(
         metrics: "none",
         context: 1,
         advice: "Fix structure first",
+        dictation: "I would hide half the artifacts.",
       }),
       reviewerName: "Bob",
     },
@@ -281,6 +370,14 @@ const consensus = buildConsensusReport(
     reportActionCategoryMetrics: "Metrics",
     reportActionCategoryContext: "Context",
     reportActionCategoryPain: "Interface",
+    reportActionCategoryCluster: "Diagnosis",
+    reportActionConfirmations: "{count} of {n}",
+    reportActionClusterImpactTitle: "Impact title",
+    reportActionClusterImpactProblem: "Impact problem",
+    reportActionClusterImpactStep1: "Impact step",
+    reportActionClusterStoryLostTitle: "Story title",
+    reportActionClusterStoryLostProblem: "Story problem",
+    reportActionClusterStoryLostStep1: "Story step",
     reportActionStructureMessTitle: "Mess title",
     reportActionStructureMessProblem: "Mess problem",
     reportActionStructureMessStep1: "Step 1",
@@ -290,20 +387,23 @@ const consensus = buildConsensusReport(
     reportActionContextLowTitle: "Context title",
     reportActionContextLowProblem: "Context problem",
     reportActionContextLowStep1: "C step 1",
+    reportSummaryLead: "Lead.",
+    reportSummaryMidMid0: "Mid mid verdict.",
+    reportConsensusVerdictTitle: "Main takeaway",
+    reportConsensusStrengthsTitle: "Working",
+    reportConsensusStrengthVisual: "Strong visual",
   },
   { locale: "en" },
 );
 
 assert.equal(consensus.aggregate.n, 3);
-assert.equal(consensus.actionCards.length, 3);
-assert.deepEqual(
-  consensus.actionCards.map((card) => card.id),
-  ["structure_mess", "metrics_none", "context_low"],
-);
-assert.equal(consensus.actionCards[0].title, "Mess title");
+assert.ok(consensus.actionCards.length >= 1);
+assert.ok(consensus.actionCards.some((card) => card.id === "cluster_impact"));
+assert.ok(consensus.verdict?.body);
+assert.match(consensus.verdict.body, /Mid mid verdict/);
+assert.ok(consensus.actionCards[0].title);
+assert.ok(consensus.actionCards[0].confirmations);
 assert.ok(consensus.actionCards[0].links.length >= 1);
-assert.ok(consensus.actionCards[0].links[0].label);
-assert.ok(consensus.actionCards[0].example?.url);
 assert.ok(consensus.sections.length >= 3);
 const contextSection = consensus.sections.find((s) => s.title === "Context");
 assert.ok(contextSection);
@@ -313,5 +413,6 @@ assert.match(
 );
 assert.equal(consensus.adviceList[0].reviewerName, "Bob");
 assert.equal(consensus.adviceList[0].text, "Fix structure first");
+assert.equal(consensus.dictationList[0].text, "I would hide half the artifacts.");
 
 console.log("consensusActionCards: ok");

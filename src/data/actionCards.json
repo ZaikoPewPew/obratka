@@ -52,5 +52,29 @@
     "category": "pain",
     "trigger": "overloaded",
     "priority": 4
+  },
+  "visual_weak": {
+    "id": "visual_weak",
+    "category": "visual",
+    "trigger": "weak",
+    "priority": 3
+  },
+  "cluster_impact": {
+    "id": "cluster_impact",
+    "category": "cluster",
+    "trigger": "impact",
+    "priority": 0
+  },
+  "cluster_gradeAboveTier": {
+    "id": "cluster_gradeAboveTier",
+    "category": "cluster",
+    "trigger": "gradeAboveTier",
+    "priority": 0
+  },
+  "cluster_storyLost": {
+    "id": "cluster_storyLost",
+    "category": "cluster",
+    "trigger": "storyLost",
+    "priority": 0
   }
 }

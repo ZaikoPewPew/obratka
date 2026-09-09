@@ -5,7 +5,7 @@
 | Файл | Роль |
 |------|------|
 | `actionCards.json` | Карточки проблем: `id`, `category`, `trigger`, `priority`. **Без** URL и строк UI |
-| `actionResources.json` | Источники (гайды / статьи / шаблоны / примеры): `url`, `types`, `tags`, `covers`, `title` / `description` (ru/en) |
+| `actionResources.json` | Источники (гайды / статьи / шаблоны / примеры): `url`, `types`, `tags`, `covers`, опц. `weight`, `title` / `description` (ru/en) |
 
 Резолв: [`resolveActionCards.js`](../utils/resolveActionCards.js) → majority cards + ресурсы с `covers ∋ card.id`.  
 SoT: [`ACTION_CARDS.md`](../../ACTION_CARDS.md).  

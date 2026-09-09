@@ -1,6 +1,6 @@
 /**
  * Агрегация ответов всех листов ревью по портфолио.
- * Dictation в сводку v1 не входит — остаётся в личном листе.
+ * Dictation в сводке — цитаты-мнения, не факты (отдельный список).
  */
 
 import { parseReviewAnswers } from "./reviewReport.js";
@@ -31,15 +31,18 @@ export const GRADE_ORDER = [
  *   tier: { counts: Record<string, number> };
  *   pain: { counts: Record<string, number> };
  *   adviceList: { reviewerName: string; text: string }[];
+ *   dictationList: { reviewerName: string; text: string }[];
  * }} PortfolioReviewAggregate
  */
 
 /**
  * @param {unknown[]} sheetsOrAnswers
  *   Массив `ReviewAnswers`, либо `{ answers, reviewerName? }`, либо сырой jsonb.
+ * @param {{ limit?: number }} [opts]
+ *   `limit` — взять первые N валидных листов (порядок входа / created_at).
  * @returns {PortfolioReviewAggregate}
  */
-export function aggregatePortfolioReviews(sheetsOrAnswers) {
+export function aggregatePortfolioReviews(sheetsOrAnswers, opts = {}) {
   /** @type {import("./reviewReport.js").ReviewAnswers[]} */
   const rows = [];
   /** @type {(string | undefined)[]} */
@@ -65,7 +68,6 @@ export function aggregatePortfolioReviews(sheetsOrAnswers) {
     names.push(undefined);
   }
 
-  const n = rows.length;
   /** @type {PortfolioReviewAggregate} */
   const empty = {
     n: 0,
@@ -77,8 +79,19 @@ export function aggregatePortfolioReviews(sheetsOrAnswers) {
     tier: { counts: {} },
     pain: { counts: {} },
     adviceList: [],
+    dictationList: [],
   };
-  if (n === 0) return empty;
+  const limit =
+    typeof opts.limit === "number" && Number.isFinite(opts.limit)
+      ? Math.max(0, Math.floor(opts.limit))
+      : 0;
+  if (limit > 0 && rows.length > limit) {
+    rows.length = limit;
+    names.length = limit;
+  }
+  const nLimited = rows.length;
+  if (nLimited === 0) return empty;
+  const n = nLimited;
 
   /** @type {Record<string, number>} */
   const gradeCounts = {};
@@ -96,6 +109,8 @@ export function aggregatePortfolioReviews(sheetsOrAnswers) {
   const painCounts = {};
   /** @type {{ reviewerName: string; text: string }[]} */
   const adviceList = [];
+  /** @type {{ reviewerName: string; text: string }[]} */
+  const dictationList = [];
 
   let contextMin = Infinity;
   let contextMax = -Infinity;
@@ -139,14 +154,19 @@ export function aggregatePortfolioReviews(sheetsOrAnswers) {
       bump(painCounts, tag);
     }
 
+    const rawName = names[index];
+    const reviewerName =
+      typeof rawName === "string" && rawName.trim() ? rawName.trim() : "";
+
     const advice = typeof answers.advice === "string" ? answers.advice.trim() : "";
     if (advice) {
-      const rawName = names[index];
-      adviceList.push({
-        reviewerName:
-          typeof rawName === "string" && rawName.trim() ? rawName.trim() : "",
-        text: advice,
-      });
+      adviceList.push({ reviewerName, text: advice });
+    }
+
+    const dictation =
+      typeof answers.dictation === "string" ? answers.dictation.trim() : "";
+    if (dictation) {
+      dictationList.push({ reviewerName, text: dictation });
     }
   });
 
@@ -168,6 +188,7 @@ export function aggregatePortfolioReviews(sheetsOrAnswers) {
     tier: { counts: tierCounts },
     pain: { counts: painCounts },
     adviceList,
+    dictationList,
   };
 }
 

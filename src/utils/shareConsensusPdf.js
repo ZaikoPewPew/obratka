@@ -10,6 +10,7 @@ import { buildConsensusReport } from "./buildConsensusReport.js";
  * @param {unknown[]} sheetsOrAnswers
  * @param {{
  *   portfolioName?: string;
+ *   sheetLimit?: number;
  *   onComplete?: () => void;
  * }} [options]
  */
@@ -17,6 +18,7 @@ export function shareConsensusPdf(sheetsOrAnswers, options = {}) {
   const t = getStrings();
   const report = buildConsensusReport(sheetsOrAnswers, t, {
     locale: getLocale(),
+    sheetLimit: options.sheetLimit,
   });
   if (report.aggregate.n === 0) {
     options.onComplete?.();
@@ -143,6 +145,33 @@ function buildConsensusDocumentHtml({ title, portfolioName, report, t }) {
     { n, name: portfolioName },
   );
 
+  let verdictHtml = "";
+  if (report.verdict?.body) {
+    const bodyHtml = String(report.verdict.body)
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => `<p>${escapeHtml(line)}</p>`)
+      .join("");
+    verdictHtml = `
+    <section class="block">
+      <h2>${escapeHtml(report.verdict.title || t.reportConsensusVerdictTitle || "")}</h2>
+      <div class="section-body">${bodyHtml}</div>
+    </section>`;
+  }
+
+  let strengthsHtml = "";
+  if (report.strengths.length > 0) {
+    const items = report.strengths
+      .map((item) => `<li>${escapeHtml(item.label)}</li>`)
+      .join("");
+    strengthsHtml = `
+    <section class="block">
+      <h2>${escapeHtml(t.reportConsensusStrengthsTitle ?? "")}</h2>
+      <ul class="strengths">${items}</ul>
+    </section>`;
+  }
+
   const summaryHtml = report.sections
     .map((section) => {
       const bodyHtml = String(section.body || "")
@@ -180,6 +209,7 @@ function buildConsensusDocumentHtml({ title, portfolioName, report, t }) {
         return `
       <article class="card">
         <p class="badge">${escapeHtml(card.categoryLabel)}</p>
+        <p class="confirm">${escapeHtml(card.confirmations || "")}</p>
         <h3>${escapeHtml(card.title)}</h3>
         <p class="problem">${escapeHtml(card.problem)}</p>
         ${steps ? `<ol class="steps">${steps}</ol>` : ""}
@@ -213,6 +243,30 @@ function buildConsensusDocumentHtml({ title, portfolioName, report, t }) {
     adviceHtml = `
     <section class="block">
       <h2>${escapeHtml(t.reportConsensusAdviceTitle ?? t.reportAdviceTitle ?? "")}</h2>
+      ${items}
+    </section>`;
+  }
+
+  let dictationHtml = "";
+  if (report.dictationList.length > 0) {
+    const items = report.dictationList
+      .map((item) => {
+        const name =
+          item.reviewerName?.trim() ||
+          t.reportSheetReviewerFallback ||
+          "";
+        return `
+      <section class="section advice">
+        <h3>${escapeHtml(name)}</h3>
+        <p class="opinion">${escapeHtml(t.reportConsensusOpinionLabel ?? "")}</p>
+        <p>${escapeHtml(item.text)}</p>
+        <p class="hint">${escapeHtml(t.reportConsensusOpinionHint ?? "")}</p>
+      </section>`;
+      })
+      .join("");
+    dictationHtml = `
+    <section class="block">
+      <h2>${escapeHtml(t.reportConsensusDictationTitle ?? t.reportDictationTitle ?? "")}</h2>
       ${items}
     </section>`;
   }
@@ -308,6 +362,11 @@ function buildConsensusDocumentHtml({ title, portfolioName, report, t }) {
       text-transform: uppercase;
       color: ${escapeHtml(theme.colorTextMuted)};
     }
+    .confirm {
+      margin: 0 0 8px;
+      font-size: 12px;
+      color: ${escapeHtml(theme.colorTextMuted)};
+    }
     .problem { margin: 0 0 10px; }
     .steps, .links {
       margin: 0;
@@ -328,6 +387,26 @@ function buildConsensusDocumentHtml({ title, portfolioName, report, t }) {
       color: ${escapeHtml(theme.colorTextMuted)};
     }
     .advice h3 { margin-bottom: 4px; }
+    .opinion {
+      margin: 0 0 4px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: ${escapeHtml(theme.colorTextMuted)};
+    }
+    .hint {
+      margin-top: 6px;
+      font-size: 12px;
+      color: ${escapeHtml(theme.colorTextMuted)};
+    }
+    .strengths {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 14px;
+      color: ${escapeHtml(theme.colorBody)};
+    }
+    .strengths li { margin: 0 0 6px; }
     @media print {
       .page { padding: 0; max-width: none; }
     }
@@ -338,12 +417,15 @@ function buildConsensusDocumentHtml({ title, portfolioName, report, t }) {
     <p class="eyebrow">${escapeHtml(t.brandName)}</p>
     <h1>${escapeHtml(t.reportConsensusDocumentTitle ?? t.reportDocumentTitle)}</h1>
     <p class="subtitle">${escapeHtml(subtitle)}</p>
+    ${verdictHtml}
+    ${strengthsHtml}
     <section class="block">
       <h2>${escapeHtml(t.reportConsensusTitle ?? "")}</h2>
       ${summaryHtml}
     </section>
     ${planHtml}
     ${adviceHtml}
+    ${dictationHtml}
   </main>
 </body>
 </html>`;

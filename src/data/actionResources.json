@@ -37,7 +37,8 @@
     "covers": [
       "structure_mess",
       "structure_dump",
-      "context_low"
+      "context_low",
+      "cluster_gradeAboveTier"
     ],
     "title": {
       "ru": "Гайд Анны Лесной — Portfolio",
@@ -63,7 +64,8 @@
     ],
     "covers": [
       "structure_mess",
-      "structure_dump"
+      "structure_dump",
+      "cluster_storyLost"
     ],
     "title": {
       "ru": "Я думал, что портфолио — это просто набор скриншотов",
@@ -91,7 +93,8 @@
     "covers": [
       "structure_mess",
       "context_low",
-      "metrics_none"
+      "metrics_none",
+      "visual_weak"
     ],
     "title": {
       "ru": "Каким должно быть портфолио продуктового дизайнера",
@@ -120,7 +123,8 @@
       "structure_mess",
       "structure_dump",
       "context_low",
-      "metrics_none"
+      "metrics_none",
+      "cluster_gradeAboveTier"
     ],
     "title": {
       "ru": "UX Portfolio Playbook",
@@ -147,7 +151,8 @@
     "covers": [
       "structure_mess",
       "structure_dump",
-      "context_low"
+      "context_low",
+      "cluster_storyLost"
     ],
     "title": {
       "ru": "Портфолио дизайнера, которое не читают",
@@ -175,7 +180,8 @@
     "covers": [
       "metrics_none",
       "metrics_vanity",
-      "context_low"
+      "context_low",
+      "cluster_gradeAboveTier"
     ],
     "title": {
       "ru": "Portfolio Red Flags",
@@ -205,7 +211,9 @@
       "structure_mess",
       "structure_dump",
       "metrics_none",
-      "context_low"
+      "context_low",
+      "cluster_impact",
+      "cluster_storyLost"
     ],
     "title": {
       "ru": "The Ultimate UX Case Study Template",
@@ -389,7 +397,8 @@
     ],
     "covers": [
       "metrics_none",
-      "metrics_vanity"
+      "metrics_vanity",
+      "cluster_impact"
     ],
     "weight": 80,
     "title": {
@@ -443,7 +452,8 @@
     ],
     "covers": [
       "metrics_none",
-      "metrics_vanity"
+      "metrics_vanity",
+      "cluster_impact"
     ],
     "weight": 95,
     "title": {
@@ -521,9 +531,7 @@
       "ux research",
       "nngroup"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 75,
     "title": {
       "ru": "Предвзятость подтверждения в UX-дизайне (NN/g)",
@@ -571,9 +579,7 @@
       "ux research",
       "methods"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 80,
     "title": {
       "ru": "Осознать и уменьшить когнитивные искажения в исследованиях",
@@ -596,9 +602,7 @@
       "ui",
       "product"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 85,
     "title": {
       "ru": "Ментальные модели в проектировании интерфейсов",
@@ -644,7 +648,8 @@
       "research"
     ],
     "covers": [
-      "context_low"
+      "context_low",
+      "cluster_impact"
     ],
     "weight": 95,
     "title": {
@@ -667,9 +672,7 @@
       "interactive",
       "psychology"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 70,
     "title": {
       "ru": "Когнитивные искажения (интерактив)",
@@ -693,8 +696,7 @@
       "psychology"
     ],
     "covers": [
-      "metrics_vanity",
-      "context_low"
+      "metrics_vanity"
     ],
     "weight": 45,
     "title": {
@@ -721,7 +723,7 @@
     "covers": [
       "pain_composition",
       "pain_overloaded",
-      "context_low"
+      "visual_weak"
     ],
     "weight": 65,
     "title": {
@@ -994,7 +996,6 @@
       "case study"
     ],
     "covers": [
-      "context_low",
       "structure_mess"
     ],
     "weight": 70,
@@ -1019,9 +1020,7 @@
       "prototype",
       "product"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 60,
     "title": {
       "ru": "MVP и PoC: чем отличаются от прототипа",
@@ -1101,7 +1100,8 @@
     "covers": [
       "structure_mess",
       "metrics_none",
-      "pain_overloaded"
+      "pain_overloaded",
+      "visual_weak"
     ],
     "weight": 75,
     "title": {
@@ -1324,9 +1324,7 @@
       "ux",
       "jobs"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 20,
     "title": {
       "ru": "Что такое Jobs To Be Done в UX",
@@ -1350,7 +1348,6 @@
       "notation"
     ],
     "covers": [
-      "context_low",
       "structure_dump"
     ],
     "weight": 85,
@@ -1398,9 +1395,7 @@
       "jtbd",
       "interface"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 70,
     "title": {
       "ru": "Как Job Stories помогают в интерфейсе",
@@ -1424,7 +1419,6 @@
       "process"
     ],
     "covers": [
-      "context_low",
       "pain_components"
     ],
     "weight": 55,
@@ -1450,7 +1444,6 @@
       "research"
     ],
     "covers": [
-      "context_low",
       "structure_dump"
     ],
     "weight": 90,
@@ -1476,7 +1469,6 @@
       "marketing"
     ],
     "covers": [
-      "context_low",
       "metrics_none"
     ],
     "weight": 50,
@@ -1500,9 +1492,7 @@
       "questions",
       "framework"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 40,
     "title": {
       "ru": "TEDW — фреймворк сильных вопросов",
@@ -1524,9 +1514,7 @@
       "personas",
       "research"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 65,
     "title": {
       "ru": "JTBD и метод персон: что выбрать",
@@ -1549,7 +1537,6 @@
       "journey"
     ],
     "covers": [
-      "context_low",
       "structure_dump"
     ],
     "weight": 80,
@@ -1573,9 +1560,7 @@
       "hypotheses",
       "validation"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 70,
     "title": {
       "ru": "10 принципов product discovery",
@@ -1619,9 +1604,7 @@
       "ux research",
       "respondents"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 70,
     "title": {
       "ru": "Тонкости подбора респондентов (VK)",
@@ -1643,9 +1626,7 @@
       "questionnaire",
       "research"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 65,
     "title": {
       "ru": "Советы для успешной анкеты",
@@ -1667,9 +1648,7 @@
       "beginners",
       "methods"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 80,
     "title": {
       "ru": "Руководство по UX-исследованиям для начинающих",
@@ -1692,7 +1671,6 @@
       "analytics"
     ],
     "covers": [
-      "context_low",
       "metrics_none"
     ],
     "weight": 70,
@@ -1716,9 +1694,7 @@
       "competitive",
       "research"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 60,
     "title": {
       "ru": "Пошаговое руководство по бенчмаркингу",
@@ -1740,9 +1716,7 @@
       "methods",
       "catalog"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 85,
     "title": {
       "ru": "Популярные методы UX-исследований",
@@ -1793,7 +1767,6 @@
       "ces"
     ],
     "covers": [
-      "context_low",
       "metrics_none"
     ],
     "weight": 85,
@@ -1818,9 +1791,7 @@
       "quantitative",
       "ux"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 90,
     "title": {
       "ru": "DIY-гайд по методам продуктовых исследований",
@@ -1867,9 +1838,7 @@
       "ops",
       "insights"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 55,
     "title": {
       "ru": "Как устроен Customer Research в Lamoda",
@@ -1892,9 +1861,7 @@
       "interviews",
       "process"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 60,
     "title": {
       "ru": "Как ускорить качественное исследование",
@@ -1942,9 +1909,7 @@
       "online",
       "feedback"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 60,
     "title": {
       "ru": "Как создать онлайн-опрос и не облажаться",
@@ -1966,9 +1931,7 @@
       "surveys",
       "communities"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 50,
     "title": {
       "ru": "Как предлагать опросы в сообществах",
@@ -1992,7 +1955,6 @@
       "business"
     ],
     "covers": [
-      "context_low",
       "metrics_none"
     ],
     "weight": 55,
@@ -2017,9 +1979,7 @@
       "miro",
       "moderated"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 75,
     "title": {
       "ru": "Инсайты из удалённых модерируемых UX-тестов",
@@ -2042,9 +2002,7 @@
       "text",
       "pdf"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 45,
     "title": {
       "ru": "Как выбрать метод исследования для оценки текста",
@@ -2066,9 +2024,7 @@
       "qualitative",
       "mistakes"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 80,
     "title": {
       "ru": "Восемь типов ошибок в глубинном интервью",
@@ -2090,9 +2046,7 @@
       "questions",
       "feedback"
     ],
-    "covers": [
-      "context_low"
-    ],
+    "covers": [],
     "weight": 55,
     "title": {
       "ru": "О чём спрашивать пользователей",

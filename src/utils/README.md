@@ -34,9 +34,9 @@
 | `feedbackEyes.js` | позиции глаз FAB feedback (покой 16px сверху, зазор 8 / squeeze до 4 / clamp pad 8 / idle-взгляд) |
 | `tabAttention.js` | мигание `document.title` + favicon при конце таймера ревью (если вкладка скрыта); стоп по `window` focus; ассет `/assets/svg/favicon_timer.svg` |
 | `viewport.js` | desktop-only: `DESKTOP_MIN_WIDTH_PX` (=768), `isDesktopViewport`, `subscribeDesktopViewport` (`matchMedia`) — [`mobile.md`](../../mobile.md) |
-| `aggregatePortfolioReviews.js` | агрегаты листов (counts / min–max / `adviceList`) для сводного PDF |
-| `resolveActionCards.js` | majority → max 3 cards + attach `actionResources` по `covers` |
-| `buildConsensusReport.js` | тексты сводки + локализованные action cards |
+| `aggregatePortfolioReviews.js` | агрегаты листов (counts / min–max / `adviceList` / `dictationList`; опц. `limit`) |
+| `resolveActionCards.js` | majority + кластеры + scoring → max 3 cards + attach `actionResources` по `covers` |
+| `buildConsensusReport.js` | вердикт / strengths / голоса / action cards / цитаты |
 | `shareConsensusPdf.js` | print iframe сводного PDF (`/report`) |
 | `complaintWindow.js` | окно жалобы 6ч от `completed_at` (зеркало SQL) |
 

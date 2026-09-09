@@ -1,15 +1,19 @@
 /**
  * Сводный отчёт: тексты агрегатов осей + модель action cards через i18n.
- * L2/L3 per-reviewer сюда не копируем.
- * Тексты осей многострочные (заголовок диапазона + строки голосов).
+ * Вердикт / strengths / cards считаются по первым `sheetLimit` листам.
+ * Tallies в секциях — по всем листам (overshoot виден в голосах).
  */
 
 import {
   GRADE_ORDER,
   aggregatePortfolioReviews,
+  hasMajority,
 } from "./aggregatePortfolioReviews.js";
 import { formatPlural } from "./plural.js";
-import { resolveActionCards } from "./resolveActionCards.js";
+import {
+  DEFAULT_CARD_SHEET_LIMIT,
+  resolveActionCards,
+} from "./resolveActionCards.js";
 import { PAIN_PRIORITY } from "./reviewReport.js";
 
 /**
@@ -42,37 +46,152 @@ function formatString(template, vars = {}) {
  *   steps: string[];
  *   links: ConsensusCardLink[];
  *   example: ConsensusCardLink | null;
+ *   confirmations: string;
+ *   support: number;
+ *   n: number;
  * }} ConsensusActionCard
  *
  * @typedef {{
+ *   id: string;
+ *   label: string;
+ * }} ConsensusStrength
+ *
+ * @typedef {{
+ *   title: string;
+ *   body: string;
+ * }} ConsensusVerdict
+ *
+ * @typedef {{
  *   aggregate: import("./aggregatePortfolioReviews.js").PortfolioReviewAggregate;
+ *   cardAggregate: import("./aggregatePortfolioReviews.js").PortfolioReviewAggregate;
+ *   verdict: ConsensusVerdict | null;
+ *   strengths: ConsensusStrength[];
  *   sections: ConsensusSection[];
  *   actionCards: ConsensusActionCard[];
  *   adviceList: { reviewerName: string; text: string }[];
+ *   dictationList: { reviewerName: string; text: string }[];
  * }} ConsensusReport
  */
 
 /**
  * @param {unknown[]} sheetsOrAnswers
  * @param {Record<string, string>} t
- * @param {{ locale?: string }} [opts]
+ * @param {{ locale?: string; sheetLimit?: number }} [opts]
  * @returns {ConsensusReport}
  */
 export function buildConsensusReport(sheetsOrAnswers, t, opts = {}) {
   const locale = opts.locale || "ru";
+  const sheetLimit =
+    typeof opts.sheetLimit === "number" && Number.isFinite(opts.sheetLimit)
+      ? Math.max(1, Math.floor(opts.sheetLimit))
+      : DEFAULT_CARD_SHEET_LIMIT;
   const aggregate = aggregatePortfolioReviews(sheetsOrAnswers);
-  const rawCards = resolveActionCards(aggregate);
+  const cardAggregate = aggregatePortfolioReviews(sheetsOrAnswers, {
+    limit: sheetLimit,
+  });
+  const rawCards = resolveActionCards(cardAggregate);
   const sections = buildConsensusSections(aggregate, t, locale);
   const actionCards = rawCards
     .map((card) => localizeActionCard(card, t, locale))
     .filter(Boolean);
+  const diagnosis = buildConsensusDiagnosis(cardAggregate, t);
 
   return {
     aggregate,
+    cardAggregate,
+    verdict: diagnosis.verdict,
+    strengths: diagnosis.strengths,
     sections,
     actionCards: /** @type {ConsensusActionCard[]} */ (actionCards),
     adviceList: aggregate.adviceList.slice(),
+    dictationList: aggregate.dictationList.slice(),
   };
+}
+
+/**
+ * Главный вывод + что работает — по card-aggregate (первые target листы).
+ *
+ * @param {import("./aggregatePortfolioReviews.js").PortfolioReviewAggregate} aggregate
+ * @param {Record<string, string>} t
+ * @returns {{ verdict: ConsensusVerdict | null; strengths: ConsensusStrength[] }}
+ */
+export function buildConsensusDiagnosis(aggregate, t) {
+  if (!aggregate || aggregate.n <= 0) {
+    return { verdict: null, strengths: [] };
+  }
+
+  const n = aggregate.n;
+  const gradeZoneName = majorityGradeZone(aggregate.grade.counts, n);
+  const tierValue = majorityKey(aggregate.tier.counts, n);
+  const title = t.reportConsensusVerdictTitle ?? "";
+  let body = "";
+
+  if (gradeZoneName && tierValue) {
+    const key = `reportSummary${cap(tierValue)}${gradeZoneName}0`;
+    const summary = t[key] ?? "";
+    const lead = t.reportSummaryLead ?? "";
+    body = joinBlockLines([lead, summary]);
+  } else if (
+    aggregate.grade.min &&
+    aggregate.grade.max &&
+    aggregate.grade.min !== aggregate.grade.max
+  ) {
+    body = formatString(t.reportConsensusVerdictSpread ?? "", {
+      from: labelForGrade(aggregate.grade.min, t),
+      to: labelForGrade(aggregate.grade.max, t),
+      n,
+    });
+  } else {
+    body = t.reportConsensusVerdictFallback ?? "";
+  }
+
+  const verdict = body ? { title, body } : null;
+
+  /** @type {ConsensusStrength[]} */
+  const strengths = [];
+  const structureClear = aggregate.structure.counts.clear || 0;
+  if (hasMajority(structureClear, n)) {
+    strengths.push({
+      id: "structure",
+      label: t.reportConsensusStrengthStructure ?? "",
+    });
+  }
+  const metricsGood =
+    (aggregate.metrics.counts.solid || 0) +
+    (aggregate.metrics.counts.strong || 0);
+  if (hasMajority(metricsGood, n)) {
+    strengths.push({
+      id: "metrics",
+      label: t.reportConsensusStrengthMetrics ?? "",
+    });
+  }
+  if (hasMajority(sumScale(aggregate.context.counts, (value) => value >= 4), n)) {
+    strengths.push({
+      id: "context",
+      label: t.reportConsensusStrengthContext ?? "",
+    });
+  }
+  if (hasMajority(sumScale(aggregate.visual.counts, (value) => value >= 4), n)) {
+    strengths.push({
+      id: "visual",
+      label: t.reportConsensusStrengthVisual ?? "",
+    });
+  }
+  const highTier =
+    (aggregate.tier.counts.strong || 0) + (aggregate.tier.counts.top || 0);
+  if (
+    hasMajority(sumScale(aggregate.context.counts, (value) => value >= 4), n) &&
+    hasMajority(aggregate.metrics.counts.strong || 0, n) &&
+    hasMajority(sumScale(aggregate.visual.counts, (value) => value >= 4), n) &&
+    hasMajority(highTier, n)
+  ) {
+    strengths.push({
+      id: "thinking",
+      label: t.reportConsensusStrengthThinking ?? "",
+    });
+  }
+
+  return { verdict, strengths: strengths.filter((item) => item.label) };
 }
 
 /**
@@ -217,6 +336,12 @@ export function localizeActionCard(card, t, locale = "ru") {
     steps,
     links,
     example,
+    confirmations: formatString(
+      t.reportActionConfirmations ?? "{count} из {n}",
+      { count: card.support ?? 0, n: card.n ?? 0 },
+    ),
+    support: card.support ?? 0,
+    n: card.n ?? 0,
   };
 }
 
@@ -511,4 +636,73 @@ function labelForScale(axis, value, t) {
       ? `reviewContextValue${value}`
       : `reviewVisualValue${value}`;
   return t[key] ?? value;
+}
+
+/**
+ * @param {string} value
+ */
+function cap(value) {
+  const text = String(value || "");
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/**
+ * @param {Record<string, number>} counts
+ * @param {number} n
+ * @returns {string | null}
+ */
+function majorityKey(counts, n) {
+  let best = null;
+  let bestCount = 0;
+  let tied = false;
+  for (const [key, count] of Object.entries(counts || {})) {
+    if (count > bestCount) {
+      best = key;
+      bestCount = count;
+      tied = false;
+    } else if (count === bestCount && count > 0) {
+      tied = true;
+    }
+  }
+  if (!best || tied || !hasMajority(bestCount, n)) return null;
+  return best;
+}
+
+/**
+ * @param {string} grade
+ * @returns {"Junior" | "Mid" | "SeniorPlus"}
+ */
+function zoneForGrade(grade) {
+  if (grade === "junior") return "Junior";
+  if (grade === "mid") return "Mid";
+  return "SeniorPlus";
+}
+
+/**
+ * @param {Record<string, number>} counts
+ * @param {number} n
+ * @returns {"Junior" | "Mid" | "SeniorPlus" | null}
+ */
+function majorityGradeZone(counts, n) {
+  /** @type {Record<string, number>} */
+  const zones = { Junior: 0, Mid: 0, SeniorPlus: 0 };
+  for (const [grade, count] of Object.entries(counts || {})) {
+    zones[zoneForGrade(grade)] += count;
+  }
+  const key = majorityKey(zones, n);
+  if (key === "Junior" || key === "Mid" || key === "SeniorPlus") return key;
+  return null;
+}
+
+/**
+ * @param {Record<string, number>} counts
+ * @param {(value: number) => boolean} pred
+ */
+function sumScale(counts, pred) {
+  let sum = 0;
+  for (const [key, count] of Object.entries(counts || {})) {
+    const value = Number(key);
+    if (Number.isFinite(value) && pred(value)) sum += count;
+  }
+  return sum;
 }
