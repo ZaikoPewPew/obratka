@@ -145,10 +145,10 @@ function buildReportDocumentHtml({ title, portfolioName, pages, t }) {
     }
     h1 {
       margin: 0 0 8px;
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 600;
       letter-spacing: -0.03em;
-      line-height: 1.2;
+      line-height: 1.15;
       color: ${escapeHtml(theme.colorTextStrong)};
     }
     .subtitle {

@@ -1,22 +1,23 @@
 /**
  * Общая печать PDF-отчётов: iframe + Inter (не UI-шрифт приложения).
+ * Шрифты вшиваются data-URI: скрытый iframe не успевает скачать woff2,
+ * и Chrome в print подставляет Times.
  */
 
-import interCyrillic400 from "@fontsource/inter/files/inter-cyrillic-400-normal.woff2?url";
-import interCyrillic500 from "@fontsource/inter/files/inter-cyrillic-500-normal.woff2?url";
-import interCyrillic600 from "@fontsource/inter/files/inter-cyrillic-600-normal.woff2?url";
-import interLatin400 from "@fontsource/inter/files/inter-latin-400-normal.woff2?url";
-import interLatin500 from "@fontsource/inter/files/inter-latin-500-normal.woff2?url";
-import interLatin600 from "@fontsource/inter/files/inter-latin-600-normal.woff2?url";
+import interCyrillic400 from "@fontsource/inter/files/inter-cyrillic-400-normal.woff2?inline";
+import interCyrillic500 from "@fontsource/inter/files/inter-cyrillic-500-normal.woff2?inline";
+import interCyrillic600 from "@fontsource/inter/files/inter-cyrillic-600-normal.woff2?inline";
+import interLatin400 from "@fontsource/inter/files/inter-latin-400-normal.woff2?inline";
+import interLatin500 from "@fontsource/inter/files/inter-latin-500-normal.woff2?inline";
+import interLatin600 from "@fontsource/inter/files/inter-latin-600-normal.woff2?inline";
 
 const FONT_RANGE_CYRILLIC =
   "U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116";
 const FONT_RANGE_LATIN =
   "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD";
 
-/** PDF only — UI остаётся на Montserrat. */
-export const REPORT_PDF_FONT_STACK =
-  'Inter, "Helvetica Neue", Helvetica, Arial, sans-serif';
+/** PDF only — UI остаётся на Montserrat. Без кавычек: HTML-escape ломает стек. */
+export const REPORT_PDF_FONT_STACK = "Inter, Helvetica, Arial, sans-serif";
 
 const FONT_FACES = [
   [interCyrillic400, 400, FONT_RANGE_CYRILLIC],
@@ -36,24 +37,16 @@ function readCssToken(name) {
 }
 
 /**
- * @param {string} href
- * @returns {string}
- */
-function absAssetUrl(href) {
-  return new URL(href, window.location.href).href;
-}
-
-/**
  * @returns {string}
  */
 export function buildReportPdfFontCss() {
   return FONT_FACES.map(
-    ([href, weight, range]) => `@font-face {
-      font-family: "Inter";
+    ([src, weight, range]) => `@font-face {
+      font-family: Inter;
       font-style: normal;
-      font-display: swap;
+      font-display: block;
       font-weight: ${weight};
-      src: url("${absAssetUrl(href)}") format("woff2");
+      src: url("${src}") format("woff2");
       unicode-range: ${range};
     }`,
   ).join("\n");
@@ -119,15 +112,23 @@ function downloadReportHtml(html, title) {
  * @param {Window} frameWindow
  * @returns {Promise<void>}
  */
-function waitForFonts(frameWindow) {
+async function waitForFonts(frameWindow) {
   const fonts = frameWindow.document.fonts;
-  if (!fonts?.ready) return Promise.resolve();
-  return Promise.race([
-    fonts.ready.catch(() => {}),
-    new Promise((resolve) => {
-      frameWindow.setTimeout(resolve, 2_000);
-    }),
-  ]);
+  if (!fonts?.load) return;
+  try {
+    await Promise.race([
+      Promise.all([
+        fonts.load("400 16px Inter"),
+        fonts.load("500 16px Inter"),
+        fonts.load("600 32px Inter"),
+      ]),
+      new Promise((resolve) => {
+        frameWindow.setTimeout(resolve, 2_500);
+      }),
+    ]);
+  } catch {
+    /* print anyway */
+  }
 }
 
 /**
@@ -145,22 +146,9 @@ export function printReportHtml(html, options) {
   const iframe = document.createElement("iframe");
   iframe.setAttribute("aria-hidden", "true");
   iframe.setAttribute("title", title);
+  // Реальный A4-размер вне экрана: 0×0 iframe не раскладывает текст и не грузит @font-face.
   iframe.style.cssText =
-    "position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;pointer-events:none;";
-  document.body.append(iframe);
-
-  const frameWindow = iframe.contentWindow;
-  const frameDoc = iframe.contentDocument;
-  if (!frameWindow || !frameDoc) {
-    iframe.remove();
-    downloadReportHtml(html, title);
-    onComplete?.();
-    return;
-  }
-
-  frameDoc.open();
-  frameDoc.write(html);
-  frameDoc.close();
+    "position:fixed;left:-10000px;top:0;width:794px;height:1123px;border:0;opacity:1;pointer-events:none;";
 
   let cleaned = false;
   const cleanup = () => {
@@ -170,9 +158,16 @@ export function printReportHtml(html, options) {
     onComplete?.();
   };
 
-  frameWindow.addEventListener("afterprint", cleanup);
-
-  void waitForFonts(frameWindow).then(() => {
+  const runPrint = async () => {
+    const frameWindow = iframe.contentWindow;
+    if (!frameWindow) {
+      iframe.remove();
+      downloadReportHtml(html, title);
+      onComplete?.();
+      return;
+    }
+    frameWindow.addEventListener("afterprint", cleanup);
+    await waitForFonts(frameWindow);
     try {
       frameWindow.focus();
       frameWindow.print();
@@ -182,5 +177,22 @@ export function printReportHtml(html, options) {
       return;
     }
     window.setTimeout(cleanup, 60_000);
-  });
+  };
+
+  let started = false;
+  const kick = () => {
+    if (started) return;
+    if (!iframe.contentDocument?.querySelector("main, .page")) return;
+    started = true;
+    void runPrint();
+  };
+  iframe.addEventListener("load", kick);
+  document.body.append(iframe);
+  iframe.srcdoc = html;
+  window.setTimeout(kick, 400);
+  window.setTimeout(() => {
+    if (started) return;
+    started = true;
+    void runPrint();
+  }, 2_000);
 }

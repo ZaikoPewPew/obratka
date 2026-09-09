@@ -229,10 +229,10 @@ function buildConsensusDocumentHtml({ title, portfolioName, report, t }) {
     }
     h1 {
       margin: 0 0 8px;
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 600;
       letter-spacing: -0.03em;
-      line-height: 1.2;
+      line-height: 1.15;
       color: ${escapeHtml(theme.colorTextStrong)};
     }
     .subtitle {
@@ -243,10 +243,10 @@ function buildConsensusDocumentHtml({ title, portfolioName, report, t }) {
     .chapter { margin: 0 0 32px; }
     .chapter > h2 {
       margin: 0 0 16px;
-      font-size: 18px;
+      font-size: 22px;
       font-weight: 600;
       letter-spacing: -0.02em;
-      line-height: 1.3;
+      line-height: 1.25;
       color: ${escapeHtml(theme.colorTextStrong)};
     }
     .axis {
@@ -261,10 +261,11 @@ function buildConsensusDocumentHtml({ title, portfolioName, report, t }) {
     }
     .axis h3 {
       margin: 0 0 6px;
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 12px;
+      font-weight: 500;
       line-height: 1.3;
-      color: ${escapeHtml(theme.colorTextStrong)};
+      letter-spacing: 0.02em;
+      color: ${escapeHtml(theme.colorTextMuted)};
     }
     .card h3 {
       margin: 0 0 6px;

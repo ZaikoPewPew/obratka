@@ -20,7 +20,7 @@
 | `portfolioEmbed.js` | Figma/YouTube embed / iframe / внешняя вкладка; Readymag HTML-probe; детект blocked iframe |
 | `meshGradientWash.js` | WebGL mesh (Paper Shaders); `transitionToCssColors` |
 | `reviewReport.js` | сводка квиза → тексты PDF (+ опц. `dictation`); зоны `contextZone` / `visualZone` (visual 1–5); вердикт `tier × gradeZone`. Спека: [`QUIZ.md`](../../QUIZ.md) |
-| `printReport.js` | печать iframe PDF: Inter (не UI), `fonts.ready`, общая тема |
+| `printReport.js` | печать iframe PDF: Inter data-URI (не UI), A4-iframe, `fonts.load` |
 | `shareReviewPdf.js` | печать PDF-отчёта (1 ревьюер = 1 страница; `onComplete`) |
 | `referralCode.js` | нормализация referral-кода / URL |
 | `inviteGate.js` | device flag `obratka.inviteGatePassed` после validate; переживает logout / `clearSession` |
