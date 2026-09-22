@@ -372,6 +372,7 @@ export function createOnboardingScreen({ onComplete }) {
   /** @type {ReturnType<typeof setTimeout> | null} */
   let advanceTimer = null;
   const totalSteps = steps.length;
+  const hasVideoStep = steps.some((item) => item.type === "video");
   const prefersReducedMotion = () =>
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -435,15 +436,20 @@ export function createOnboardingScreen({ onComplete }) {
     const isLast = currentStep === totalSteps - 1;
     const auto = Boolean(steps[currentStep]?.autoAdvance);
     const isVideo = steps[currentStep]?.type === "video";
+    const showFinishInFooter = isLast && !isVideo;
 
     backBtn.hidden = isFirst;
     top.classList.toggle("review-panel__top--first", isFirst);
     nextBtn.hidden = isLast || auto;
     nextBtn.textContent = t.onboardingNext;
-    /* На video CTA живёт под плеером; общий footer только для «Далее». */
-    footer.hidden = isVideo || auto || isLast;
+    /* Video CTA — под плеером; на последнем не-video — «Начать» в footer. */
+    footer.hidden = isVideo || auto;
     if (isVideo) {
       syncVideoCta();
+    } else if (showFinishInFooter) {
+      submit.hidden = false;
+      if (!finishing) submit.disabled = false;
+      submit.tabIndex = 0;
     } else {
       submit.hidden = true;
     }
@@ -672,7 +678,7 @@ export function createOnboardingScreen({ onComplete }) {
 
   async function finish() {
     if (finishing || transitioning) return;
-    if (!videoCtaUnlocked) return;
+    if (hasVideoStep && !videoCtaUnlocked) return;
     finishing = true;
     submit.disabled = true;
     nextBtn.disabled = true;

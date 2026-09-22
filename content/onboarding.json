@@ -118,6 +118,7 @@
       "id": "watch",
       "type": "video",
       "required": false,
+      "hidden": true,
       "video": "welcome"
     }
   ]

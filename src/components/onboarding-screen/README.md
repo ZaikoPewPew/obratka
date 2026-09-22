@@ -6,21 +6,17 @@ Path: **`/onboarding`**. После регистрации; split через [`b
 
 Классы квиза 1:1: `review-panel__top` / `__back` / `__progress` / `__choice` / `__nav` / `__submit`, auto-advance по `single` (radio), кнопка «Далее» на `multi` (checkbox), motion шагов.
 
-Порядок шагов: грейд → домен (multi) → ожидания (multi) → видео.  
-Шаг specialization (`role`) временно `hidden: true` в [`content/onboarding.json`](../../../content/onboarding.json); в профиль пишется `product-designer` (`DEFAULT_ONBOARDING_ROLE`).  
+Порядок шагов: грейд → домен (multi) → ожидания (multi) → **«Начать»**.  
+Шаги specialization (`role`) и video (`watch`) временно `hidden: true` в [`content/onboarding.json`](../../../content/onboarding.json); в профиль для role пишется `product-designer` (`DEFAULT_ONBOARDING_ROLE`).  
 Тексты — `onboarding*` / `videoPlayer*` в `locales.json`.
 
-### Шаг video (4 из 4)
+### Шаг video (скрыт)
 
-Только [`VideoPlayerCard`](../video-player-card/README.md) (**340×602**). Ролик: [`welcome-reels.MOV`](../../assets/video/welcome-reels.MOV) (ключ `welcome` в `onboarding.json`).
+Код и [`VideoPlayerCard`](../video-player-card/README.md) (**340×602**) остаются; ролик [`welcome-reels.MOV`](../../assets/video/welcome-reels.MOV) (ключ `welcome`). Снять `hidden` у `watch` — вернуть шаг.
 
-- **«Начать»** (`onboardingFinish`, **340×76**) по умолчанию нет: лежит под плеером (`translateY` + tuck `--onboarding-video-cta-tuck` = радиус карточки, чтобы углы кнопки не торчали из скругления).
-- После первого `ended` → класс `--open`: слот растёт по `height`, кнопка целиком выезжает снизу (без `overflow: hidden` — «маска» = сам плеер).
-- Токены: `--onboarding-video-cta-*`, gap `--shell-review-advice-footer-gap`.
-- До unlock submit disabled / `tabIndex=-1`; `finish()` тоже гейтится.
+Пока video скрыт, **«Начать»** (`onboardingFinish`) на последнем видимом шаге (`goal`) в обычном footer. Если video снова в UI: CTA под плеером (`--onboarding-video-cta-*`), unlock после первого `ended`, `finish()` гейтится `videoCtaUnlocked`.
 
-Ответ шага не собирается и не пишется в `profiles`. На шаге «ожидания» кнопка — **«Далее»** (`onboardingNext`).
-
+Ответ video-шага не собирается и не пишется в `profiles`.
 ## Shell / visual
 
 Монтируется на `createBrandScreenShell` (`markPending: true` — SVG марки вставляет экран).  

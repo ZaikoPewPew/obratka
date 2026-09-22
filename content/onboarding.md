@@ -38,19 +38,19 @@ UI-кнопки и прогресс: ключи `onboarding*` в `locales.json`.
 
 ## Текущие шаги (v2)
 
-Порядок в UI: грейд → домен → ожидания → видео. Шаг `role` в JSON есть, но **`hidden: true`**.
+Порядок в UI: грейд → домен → ожидания (**«Начать»**). Шаги `role` и `watch` в JSON есть, но **`hidden: true`**.
 
 | # | `id` | `type` | В UI? | Смысл |
 |---|------|--------|-------|--------|
 | — | `role` | single | нет (`hidden`) | Специализация; в профиль пишется `product-designer` (`DEFAULT_ONBOARDING_ROLE` в `src/api/onboarding.js`) |
 | 1 | `grade` | single | да | Грейд (матчинг ревью / лиги) |
 | 2 | `domain` | multi | да | Профиль / домен |
-| 3 | `goal` | multi | да | Ожидания от платформы; кнопка **«Далее»** |
-| 4 | `watch` | video | да | Плеер; **«Начать»** после первого просмотра; ответ **не** пишется |
+| 3 | `goal` | multi | да | Ожидания от платформы; кнопка **«Начать»** (`onboardingFinish`) |
+| — | `watch` | video | нет (`hidden`) | Плеер; код/ролик сохранены; ответ **не** пишется |
 
 ## Связь с экраном
 
-Левая панель onboarding-screen читает видимые `steps` по порядку; правая — brand visual без изменений. `single` — radio + auto-advance; `multi` — checkbox + «Далее»; последний `video` — [`VideoPlayerCard`](../src/components/video-player-card/README.md); **«Начать»** по умолчанию скрыта под плеером и выезжает после первого `ended` (см. [`onboarding-screen/README.md`](../src/components/onboarding-screen/README.md) § video).
+Левая панель onboarding-screen читает видимые `steps` по порядку; правая — brand visual без изменений. `single` — radio + auto-advance; `multi` — checkbox + «Далее»; на последнем видимом шаге — **«Начать»** в footer. Скрытый `video` (`watch`): [`VideoPlayerCard`](../src/components/video-player-card/README.md); при возврате в UI CTA под плеером после `ended` (см. [`onboarding-screen/README.md`](../src/components/onboarding-screen/README.md) § video).
 
 Подробнее: [`onboarding-screen/README.md`](../src/components/onboarding-screen/README.md).  
 События воронки (wired + план): [`ANALYTICS.md`](../ANALYTICS.md).
