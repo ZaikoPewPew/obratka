@@ -95,6 +95,10 @@ begin
     raise exception 'profile_banned';
   end if;
 
+  if not public.profile_has_invite_access(uid) then
+    raise exception 'invite_required';
+  end if;
+
   perform public.purge_expired_review_claims();
   begin
     perform public.settle_review_reputation_rewards();
@@ -385,17 +389,32 @@ begin
   from public.profiles pr
   where pr.id = new.reviewer_id;
 
-  if new.reviewer_avatar_url is null or nullif(trim(new.reviewer_avatar_url), '') is null then
-    new.reviewer_avatar_url := avatar;
-  end if;
-  if new.reviewer_display_name is null or nullif(trim(new.reviewer_display_name), '') is null then
-    new.reviewer_display_name := display;
-  end if;
-  if new.reviewer_grade is null or nullif(trim(new.reviewer_grade), '') is null then
-    new.reviewer_grade := grade;
-  end if;
-  if new.reviewer_role is null or nullif(trim(new.reviewer_role), '') is null then
-    new.reviewer_role := role_slug;
+  -- Always overwrite denorm fields from the authenticated profile (ignore client).
+  new.reviewer_avatar_url := avatar;
+  new.reviewer_display_name := display;
+  new.reviewer_grade := grade;
+  new.reviewer_role := role_slug;
+
+  -- Soft-cap free-text answers (client also caps; bypass via REST).
+  if new.answers is not null and jsonb_typeof(new.answers) = 'object' then
+    if new.answers ? 'advice'
+       and jsonb_typeof(new.answers->'advice') = 'string'
+       and char_length(new.answers->>'advice') > 1000 then
+      new.answers := jsonb_set(
+        new.answers,
+        '{advice}',
+        to_jsonb(left(new.answers->>'advice', 1000))
+      );
+    end if;
+    if new.answers ? 'dictation'
+       and jsonb_typeof(new.answers->'dictation') = 'string'
+       and char_length(new.answers->>'dictation') > 4000 then
+      new.answers := jsonb_set(
+        new.answers,
+        '{dictation}',
+        to_jsonb(left(new.answers->>'dictation', 4000))
+      );
+    end if;
   end if;
 
   update public.portfolios
@@ -456,10 +475,11 @@ create policy "review_claims_select_visible"
     )
   );
 
--- Mutations только через RPC (security definer).
+-- Mutations и чтение слотов — только через RPC (security definer).
+-- Прямой SELECT закрыт: иначе reviewer_id активных claims утекает мимо anonymized slots.
 revoke all on table public.review_claims from anon;
 revoke all on table public.review_claims from authenticated;
-grant select on table public.review_claims to authenticated;
+revoke all on table public.review_claims from public;
 
 -- Автор портфолио читает полученные ревью (для будущего report); ревьюер — свои.
 drop policy if exists "reviews_select_own" on public.reviews;

@@ -947,6 +947,18 @@ async function claimAndStartReview(item, opts = {}) {
       }
       return false;
     }
+    if (code === "invite_required") {
+      if (showNoSlotsNotice) {
+        const t = getStrings();
+        homeScreen?.showNotice({
+          title: t.homeInviteRequiredTitle,
+          body: t.homeInviteRequiredBody,
+          closeLabel: t.homeInviteRequiredClose,
+          closeAria: t.homeInviteRequiredCloseAria,
+        });
+      }
+      return false;
+    }
     if (code === "already_reviewed") {
       if (showNoSlotsNotice) {
         void homeScreen?.refresh();

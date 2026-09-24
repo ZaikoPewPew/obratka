@@ -47,7 +47,7 @@
 
 | Path | Экран |
 |------|--------|
-| `/referral` | Invite-only код (`validate_referral`; seed `YTHWKPDWAK`) |
+| `/referral` | Invite-only код (`validate_referral`; seed ops-only) |
 | `/registration` | Telegram / Google (Email OTP скрыт: `EMAIL_AUTH_ENABLED`) |
 | `/registration/code` | 6 ячеек OTP; без флага → `/registration` |
 | `/onboarding` | Онбординг → `profiles` |
@@ -112,7 +112,7 @@ Entry CSS: `tokens`, `base`, `entrance`, `app-modal`, `iframe-shell`, `home-scre
 
 ## Referrals (шпаргалка)
 
-Validate **до** auth → redeem **после** login; 1 код / 2 слота; seed `YTHWKPDWAK`; **без наград**; шаринг с home (аватар → «Пригласить»): copy + меню Telegram / X / Threads / LinkedIn = полный `homeInviteMessage`. «Сообщество» → `TELEGRAM_COMMUNITY_URL`.  
+Validate **до** auth → redeem **после** login; 1 код / 2 слота; seed ops-only; **без наград**; шаринг с home (аватар → «Пригласить»): copy + меню Telegram / X / Threads / LinkedIn = полный `homeInviteMessage`. «Сообщество» → `TELEGRAM_COMMUNITY_URL`.  
 SQL / API: `supabase/sql/referrals.sql`, `src/api/referrals.js`.
 
 ## Ban (шпаргалка)

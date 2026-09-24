@@ -15,7 +15,7 @@ UI / Dashboard setup: [`src/components/auth-screen/README.md`](../src/components
 | `sql/legendary_presence.sql` | `last_seen_at` + heartbeat/list для legendary online |
 | `sql/rating_leaderboard.sql` | снапшот топ-50 по `reputation` + RPC `list_rating_top` |
 | `sql/wallet.sql` | protect balance + RPC `spend_submit_cost` (legacy, cost 30) |
-| `sql/referrals.sql` | referral-код на профиль (лимит 2), seed `YTHWKPDWAK`, RPC validate/redeem |
+| `sql/referrals.sql` | referral-код на профиль (лимит 2), seed ops-only, RPC validate/redeem |
 | `sql/referral-seed-templates.sql` | ops: список / новая пачка / закрыть exhausted (живые коды не в git) |
 | `sql/portfolios.sql` | portfolios/reviews, лиги; INSERT pending/0/target=3 |
 | `sql/portfolio_submit.sql` | RPC `submit_portfolio` (atomic spend 30 + insert, max 1 pending); revoke client INSERT |
@@ -70,7 +70,7 @@ Google Authorized redirect URI в Cloud Console: `https://<project-ref>.supabase
 |-----------------|------------------|
 | `auth.users` | Supabase Auth (все провайдеры) |
 | `profiles` | `profiles.js`, `onboarding.js`, `wallet.js`, `referrals.js`, `reviewComplaints.js`; автосоздание триггером; `banned_at` → ban-screen; `reputation` (default 0, floor −100) → чип на home (`formatReputation`); `referral_code` (лимит 2) |
-| `referral_seed_codes` | только через RPC (`YTHWKPDWAK` + публичные пачки; живые коды не в git) |
+| `referral_seed_codes` | только через RPC (публичные пачки; живые коды не в git) |
 | `portfolios` / `reviews` | `portfolios.js` (очередь по лигам; INSERT blocked if banned / league mismatch) |
 | `review_complaints` | `reviewComplaints.js` (insert только RPC; select своих жалоб автором) |
 | Storage `portfolio-previews` | `portfolios.js` (`portfolioPreviewUrl` → Edge `portfolio-preview`); публичный read, пишет только Edge Function |

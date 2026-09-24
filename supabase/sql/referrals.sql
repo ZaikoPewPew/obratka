@@ -1,5 +1,6 @@
 -- Referrals: один персональный код на профиль, лимит 2 активации.
--- Seed-код для холодного старта (не привязан к юзеру).
+-- Seed-коды (холодный старт / публичные пачки) — только ops SQL
+-- (referral-seed-templates.sql), живые значения в git не класть.
 -- Применять через migrations / MCP apply_migration / SQL Editor.
 
 -- ---------------------------------------------------------------------------
@@ -52,15 +53,7 @@ revoke all on table public.referral_seed_codes from public;
 revoke all on table public.referral_seed_codes from anon;
 revoke all on table public.referral_seed_codes from authenticated;
 
-insert into public.referral_seed_codes (code, max_uses, uses)
-values ('YTHWKPDWAK', 600, 0)
-on conflict (code) do nothing;
-
--- Раздвинуть потолок на существующих установках (наплыв 200-500 регистраций).
-update public.referral_seed_codes
-set max_uses = 600
-where code = 'YTHWKPDWAK'
-  and max_uses < 600;
+-- Живые seed INSERT сюда не добавлять — только Dashboard / referral-seed-templates.sql.
 
 -- ---------------------------------------------------------------------------
 -- Helpers
@@ -74,6 +67,43 @@ set search_path = public
 as $$
   select nullif(upper(trim(coalesce(raw, ''))), '');
 $$;
+
+-- Accounts created before this instant keep product access without referral_entry_code.
+-- New signups after the cutoff must redeem a valid invite (server-side).
+create or replace function public.invite_access_grandfather_before()
+returns timestamptz
+language sql
+immutable
+set search_path = public
+as $$
+  select timestamptz '2026-09-24 08:00:00+00';
+$$;
+
+create or replace function public.profile_has_invite_access(p_uid uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.profiles pr
+    where pr.id = p_uid
+      and (
+        nullif(trim(coalesce(pr.referral_entry_code, '')), '') is not null
+        or pr.created_at < public.invite_access_grandfather_before()
+      )
+  );
+$$;
+
+revoke all on function public.invite_access_grandfather_before() from public;
+revoke all on function public.invite_access_grandfather_before() from anon;
+revoke all on function public.invite_access_grandfather_before() from authenticated;
+
+revoke all on function public.profile_has_invite_access(uuid) from public;
+revoke all on function public.profile_has_invite_access(uuid) from anon;
+revoke all on function public.profile_has_invite_access(uuid) from authenticated;
 
 create or replace function public.generate_referral_code()
 returns text
@@ -162,8 +192,9 @@ declare
   tg_id bigint;
   new_code text;
 begin
+  -- telegram_id only from app_metadata (Edge / service_role), not user_metadata.
   begin
-    tg_id := nullif(meta->>'telegram_id', '')::bigint;
+    tg_id := nullif(app_meta->>'telegram_id', '')::bigint;
   exception when others then
     tg_id := null;
   end;

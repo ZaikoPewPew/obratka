@@ -40,6 +40,10 @@ const STALE_TTL_SEC = 7 * 24 * 60 * 60;
 const FETCH_TIMEOUT_MS = 20_000;
 const RATE_LIMIT_RETRY_BASE_MS = 500;
 const MAX_TARGET_URL_LENGTH = 2048;
+/** Best-effort per-isolate IP rate limit (img src has no JWT). */
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_PER_WINDOW = 40;
+const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
 
 /**
  * Бакет самоочищается без cron: раз в ~50 запросов (в среднем) фоново
@@ -85,8 +89,8 @@ function redirectToCache(publicUrl: string, ttlSec: number): Response {
 
 /**
  * Только http(s), без явно локальных/служебных хостов (SSRF-подстраховка).
- * Не претендует на исчерпывающий SSRF-фильтр — цель лишь отсечь очевидный
- * мусор, реальный источник url — уже отрендеренная (RLS-защищённая) лента.
+ * Не претендует на исчерпывающий SSRF-фильтр. Дополнительно handler
+ * требует, чтобы url уже существовал в public.portfolios (bind).
  */
 function parseSafeTargetUrl(raw: string): URL | null {
   if (!raw || raw.length > MAX_TARGET_URL_LENGTH) return null;
@@ -97,16 +101,91 @@ function parseSafeTargetUrl(raw: string): URL | null {
     return null;
   }
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
-  const host = parsed.hostname.toLowerCase();
+  const host = parsed.hostname.toLowerCase().replace(/\.$/, "");
   if (!host) return null;
-  if (host === "localhost" || host === "0.0.0.0" || host === "::1") return null;
-  if (host.endsWith(".local")) return null;
+  if (
+    host === "localhost" ||
+    host === "0.0.0.0" ||
+    host === "::1" ||
+    host === "[::1]"
+  ) {
+    return null;
+  }
+  if (host.endsWith(".local") || host.endsWith(".localhost")) return null;
+  if (host.includes(":")) {
+    // IPv6 / IPv4-mapped literals — block (incomplete denylist otherwise).
+    return null;
+  }
   if (/^127\./.test(host)) return null;
   if (/^10\./.test(host)) return null;
   if (/^192\.168\./.test(host)) return null;
   if (/^169\.254\./.test(host)) return null;
   if (/^172\.(1[6-9]|2\d|3[0-1])\./.test(host)) return null;
+  if (
+    host === "metadata.google.internal" ||
+    host.endsWith(".metadata.google.internal") ||
+    host === "metadata" ||
+    host.endsWith(".internal")
+  ) {
+    return null;
+  }
   return parsed;
+}
+
+function clientIp(req: Request): string {
+  const cf = req.headers.get("cf-connecting-ip")?.trim();
+  if (cf) return cf;
+  const xff = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  if (xff) return xff;
+  return "unknown";
+}
+
+function consumeRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const bucket = rateLimitBuckets.get(ip);
+  if (!bucket || now >= bucket.resetAt) {
+    rateLimitBuckets.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  if (bucket.count >= RATE_LIMIT_MAX_PER_WINDOW) return false;
+  bucket.count += 1;
+  return true;
+}
+
+/** URL must already be stored on a portfolio row (exact or common normalize variants). */
+async function portfolioUrlExists(
+  admin: ReturnType<typeof createAdminClient>,
+  href: string,
+): Promise<boolean> {
+  const candidates = new Set<string>([href]);
+  try {
+    const u = new URL(href);
+    const noHash = `${u.origin}${u.pathname}${u.search}`;
+    candidates.add(noHash);
+    if (noHash.endsWith("/") && noHash.length > u.origin.length + 1) {
+      candidates.add(noHash.slice(0, -1));
+    } else {
+      candidates.add(`${noHash}/`);
+    }
+    if (u.protocol === "https:") {
+      candidates.add(noHash.replace(/^https:/, "http:"));
+    } else if (u.protocol === "http:") {
+      candidates.add(noHash.replace(/^http:/, "https:"));
+    }
+  } catch {
+    /* keep href only */
+  }
+  const list = [...candidates];
+  const { data, error } = await admin
+    .from("portfolios")
+    .select("id")
+    .in("url", list)
+    .limit(1);
+  if (error) {
+    console.error("portfolio url bind lookup failed", error);
+    return false;
+  }
+  return Array.isArray(data) && data.length > 0;
 }
 
 async function sha256Hex(input: string): Promise<string> {
@@ -231,6 +310,10 @@ Deno.serve(async (req) => {
     EdgeRuntime.waitUntil(sweepStaleObjects(admin));
   }
 
+  if (!consumeRateLimit(clientIp(req))) {
+    return jsonResponse({ error: "rate_limited" }, 429);
+  }
+
   const requestUrl = new URL(req.url);
   const target = parseSafeTargetUrl(requestUrl.searchParams.get("url") || "");
   if (!target) {
@@ -238,6 +321,9 @@ Deno.serve(async (req) => {
   }
 
   const targetHref = target.toString();
+  if (!(await portfolioUrlExists(admin, targetHref))) {
+    return jsonResponse({ error: "url_not_in_feed" }, 404);
+  }
   const cacheKey = await sha256Hex(targetHref);
   const objectPath = `${cacheKey}.jpg`;
   const { data: publicUrlData } = admin.storage.from(BUCKET).getPublicUrl(objectPath);

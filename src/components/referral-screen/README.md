@@ -2,7 +2,7 @@
 
 Path: **`/referral`**. Визуально 1:1 с `url-screen` (split, mesh, motion).
 
-Invite-only gate: код проверяется через RPC `validate_referral` **до** auth. Seed-код холодного старта: `YTHWKPDWAK` (см. [`supabase/sql/referrals.sql`](../../../supabase/sql/referrals.sql)).
+Invite-only gate: код проверяется через RPC `validate_referral` **до** auth. Seed-коды — только ops ([`referral-seed-templates.sql`](../../../supabase/sql/referral-seed-templates.sql)); в git не класть.
 
 ## Отличия от url-screen
 

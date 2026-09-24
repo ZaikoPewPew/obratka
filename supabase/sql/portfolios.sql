@@ -113,6 +113,8 @@ as $$
     );
 $$;
 
+-- Second arg kept for call-site compatibility; always evaluates auth.uid()
+-- so clients cannot oracle grades for arbitrary reviewer UUIDs.
 create or replace function public.can_review_portfolio(
   portfolio_owner_id uuid,
   reviewer_id uuid default auth.uid()
@@ -125,7 +127,7 @@ set search_path = public
 as $$
   select coalesce(
     public.can_review_grades(
-      public.profile_grade(reviewer_id),
+      public.profile_grade((select auth.uid())),
       public.profile_grade(portfolio_owner_id)
     ),
     false

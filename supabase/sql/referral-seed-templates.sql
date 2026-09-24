@@ -22,3 +22,8 @@ order by created_at;
 -- update public.referral_seed_codes
 -- set max_uses = 200
 -- where code = 'XXXXXXXXXX';
+
+-- --- Исчерпать leaked cold-start seed (подставь code из ops, не из git)
+-- update public.referral_seed_codes
+-- set max_uses = greatest(uses, 1)
+-- where code = '''XXXXXXXXXX''';

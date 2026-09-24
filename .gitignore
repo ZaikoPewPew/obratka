@@ -6,3 +6,6 @@ dist
 .env*.local
 .cursor/debug-*.log
 supabase/.temp/
+
+# Local security-audit skill outputs (not for commit)
+.security-audit-out/

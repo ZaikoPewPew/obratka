@@ -22,7 +22,7 @@ npm run dev
 
 | Path | Экран |
 |------|--------|
-| `/referral` | Invite-only: валидный код → auth (seed `YTHWKPDWAK`) |
+| `/referral` | Invite-only: валидный код → auth (seed только ops, не в git) |
 | `/registration` | Telegram / Google (Email OTP скрыт: `EMAIL_AUTH_ENABLED = false`) |
 | `/registration/code` | Код из письма (6 ячеек); без флага → `/registration` |
 | `/onboarding` | Вопросы профиля |
@@ -79,7 +79,7 @@ npm run dev
 Сессия приложения: `localStorage` `obratka.session` + JWT Supabase Auth. `obratka.session` — только UX-кэш: на boot сохранённый `userId` сверяется с живым Supabase Auth; при отсутствии Auth кэш очищается, а referral-код сохраняется. Auth-gated deep link без логина возвращает в referral/auth, а незавершённый онбординг — в `/onboarding`.
 **Email ↔ Google:** Automatic linking в Supabase (одна verified email = один user). Telegram (`tg{id}@t.me`) не склеивается.  
 Ошибки identity / rate-limit мапятся в `auth.js` → i18n (`authIdentityConflict`, `authOtpRateLimit`).  
-**Рефералы:** validate до auth / redeem после логина; 1 код на юзера, лимит 2; без наград. Seed: `YTHWKPDWAK`. См. [`supabase/sql/referrals.sql`](supabase/sql/referrals.sql), [`src/api/referrals.js`](src/api/referrals.js).  
+**Рефералы:** validate до auth / redeem после логина; 1 код на юзера, лимит 2; без наград. Seed-коды только ops ([`referral-seed-templates.sql`](supabase/sql/referral-seed-templates.sql)). См. [`supabase/sql/referrals.sql`](supabase/sql/referrals.sql), [`src/api/referrals.js`](src/api/referrals.js).  
 **Репутация:** жалоба на лист в `/report` (ровно 1 тег, окно 6ч от `portfolios.completed_at`) → −20; старт `0`, бан при `<= -100`; +10 после окна без жалобы. См. [`supabase/BAN.md`](supabase/BAN.md), [`src/api/reviewComplaints.js`](src/api/reviewComplaints.js).  
 API: [`src/api/README.md`](src/api/README.md). Setup: [`auth-screen/README.md`](src/components/auth-screen/README.md).
 

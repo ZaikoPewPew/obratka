@@ -194,7 +194,7 @@ export function portfolioRpcErrorCode(err) {
         ? err.message
         : String(err || "");
   const match = raw.match(
-    /\b(no_slots|claim_not_found|already_reviewed|review_claim_required|portfolio_not_pending|portfolio_not_found|cannot_review_own_portfolio|review_league_mismatch|profile_banned|not_authenticated|too_many_pending|insufficient_balance|banned|url_required|invalid_url)\b/,
+    /\b(no_slots|claim_not_found|already_reviewed|review_claim_required|portfolio_not_pending|portfolio_not_found|cannot_review_own_portfolio|review_league_mismatch|profile_banned|not_authenticated|too_many_pending|insufficient_balance|banned|url_required|invalid_url|invite_required)\b/,
   );
   return match ? match[1] : raw || "unknown_error";
 }
@@ -292,7 +292,8 @@ function sortSlotsMap(map) {
 }
 
 /**
- * Fallback без RPC (RLS: автор видит все ревью своих кейсов; ревьюер — свои).
+ * Fallback без RPC: только completed reviews.
+ * Active claims — только через portfolio_reviewer_slots (SELECT на review_claims закрыт).
  * @param {import("@supabase/supabase-js").SupabaseClient} supabase
  * @param {string[]} ids
  * @returns {Promise<Map<string, PortfolioReviewerSlot[]>>}
@@ -301,25 +302,15 @@ async function fetchReviewerSlotsFallback(supabase, ids) {
   /** @type {Map<string, PortfolioReviewerSlot[]>} */
   const map = new Map();
 
-  const [reviewsRes, claimsRes] = await Promise.all([
-    supabase
-      .from("reviews")
-      .select(
-        "portfolio_id, reviewer_id, reviewer_avatar_url, reviewer_display_name, reviewer_grade, created_at",
-      )
-      .in("portfolio_id", ids),
-    supabase
-      .from("review_claims")
-      .select("portfolio_id, claimed_at, expires_at")
-      .in("portfolio_id", ids)
-      .gt("expires_at", new Date().toISOString()),
-  ]);
+  const reviewsRes = await supabase
+    .from("reviews")
+    .select(
+      "portfolio_id, reviewer_id, reviewer_avatar_url, reviewer_display_name, reviewer_grade, created_at",
+    )
+    .in("portfolio_id", ids);
 
   if (reviewsRes.error && import.meta.env.DEV) {
     console.warn("[portfolios] slots fallback reviews", reviewsRes.error.message);
-  }
-  if (claimsRes.error && import.meta.env.DEV) {
-    console.warn("[portfolios] slots fallback claims", claimsRes.error.message);
   }
 
   for (const row of reviewsRes.data || []) {
@@ -334,18 +325,6 @@ async function fetchReviewerSlotsFallback(supabase, ids) {
         avatar_url: row.reviewer_avatar_url,
         display_name: row.reviewer_display_name,
         grade: row.reviewer_grade,
-      }),
-    );
-  }
-
-  for (const row of claimsRes.data || []) {
-    const portfolioId =
-      row && typeof row.portfolio_id === "string" ? row.portfolio_id : "";
-    pushSlot(
-      map,
-      portfolioId,
-      mapSlotRow({
-        slot_kind: "active",
       }),
     );
   }

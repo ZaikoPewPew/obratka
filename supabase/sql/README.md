@@ -9,7 +9,7 @@
 | `rating_leaderboard.sql` | снапшот топ-50 по `reputation` + RPC `list_rating_top` (ленивая пересборка раз в 24 ч; после profiles) |
 | `wallet.sql` | `protect_profiles_balance` + RPC `spend_submit_cost` (legacy, cost 30) |
 | `portfolio_submit.sql` | RPC `submit_portfolio` (atomic spend 30 + insert, max 1 pending); revoke client INSERT |
-| `referrals.sql` | персональный `referral_code` (max 2 uses), seed `YTHWKPDWAK`, RPC validate/redeem; без наград |
+| `referrals.sql` | персональный `referral_code` (max 2 uses), seed ops-only, RPC validate/redeem; invite server gate; без наград |
 | `referral-seed-templates.sql` | оператор: список пачек / insert / закрыть exhausted; живые коды не коммитить |
 | `portfolios.sql` | portfolios/reviews, лиги; SELECT only (INSERT через `submit_portfolio`) |
 | `review_claims.sql` | claims + award balance (+10) в `handle_review_inserted`; `portfolio_reviewer_slots` / claim / heartbeat зовут `purge_expired_review_claims` + `settle_review_reputation_rewards` |

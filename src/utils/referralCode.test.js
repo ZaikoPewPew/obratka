@@ -13,8 +13,8 @@ describe("normalizeReferralCode", () => {
 
   it("extracts ?ref= from absolute URL", () => {
     assert.equal(
-      normalizeReferralCode("https://example.com/obratka/referral?ref=YTHWKPDWAK"),
-      "YTHWKPDWAK",
+      normalizeReferralCode("https://example.com/obratka/referral?ref=K7NMPQ3WRA"),
+      "K7NMPQ3WRA",
     );
   });
 

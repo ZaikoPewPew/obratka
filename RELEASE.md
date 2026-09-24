@@ -49,7 +49,7 @@ SoT продукта: [`PROJECT.md`](PROJECT.md) · экраны: [`SCREENS.md`]
 
 ### 0.1b Referral placeholder (invite-only)
 
-- [x] Placeholder инпута — пример формата `K7NMPQ3WRA`, **не** seed `YTHWKPDWAK` (seed только ops / инвайты)
+- [x] Placeholder инпута — пример формата `K7NMPQ3WRA`, **не** seed cold-start seed (ops) (seed только ops / инвайты)
 
 SoT: [`landing/README.md`](landing/README.md)
 
@@ -124,7 +124,7 @@ SoT: [`mobile.md`](mobile.md)
 - [x] `wallet`, `portfolios`, `portfolio_submit`
 - [x] `review_claims` (VOLATILE `portfolio_reviewer_slots`, overshoot, award +10)
 - [x] `review_complaints` (окно от `completed_at`, −20 / +10 settle)
-- [x] `referrals` + seed `YTHWKPDWAK` (prod: `uses` 7 / `max_uses` 600) + **6 пачек × 100** (ops, коды не в git)
+- [x] `referrals` + seed cold-start seed (ops) (prod: `uses` 7 / `max_uses` 600) + **6 пачек × 100** (ops, коды не в git)
 - [x] Edge: `telegram-auth`, `portfolio-preview`, `portfolio-embed-probe` задеплоены
 - [x] Адвайзоры / матрица RPC: [`supabase/SECURITY.md`](supabase/SECURITY.md) — нет лишнего `EXECUTE` у `anon` (только `validate_referral`; Advisors Errors = 0)
 
@@ -149,7 +149,7 @@ SoT: [`mobile.md`](mobile.md)
 
 | | Вход | Реферал | Заметки |
 |---|------|---------|---------|
-| **A** | Telegram | seed `YTHWKPDWAK` | инвайты **2/2** («Твои друзья уже в обратке») |
+| **A** | Telegram | seed cold-start seed (ops) | инвайты **2/2** («Твои друзья уже в обратке») |
 | **B** | Google | код A | middle; портфолио закинуто (ops +утки) |
 | **C** | Google | код A | портфолио закинуто (ops +утки) |
 | **D** | Google | (цепочка после A) | ок |
@@ -209,7 +209,7 @@ Gate: обычный браузер с `inviteGatePassed` → logout на `/regi
 - Identify / reset на logout, PII в props — глазами не смоукали (события «вроде норм»)
 - RPC-автобан; heartbeat 20 min; late overshoot; `already_reviewed`; senior→junior
 - Лендинг / видео — полиш §0
-- Публичные seed: 6 пачек × 100 на prod; раздавать порционно (первая ещё не опубликована). Ops SQL: [`supabase/sql/referral-seed-templates.sql`](supabase/sql/referral-seed-templates.sql). Не публиковать `YTHWKPDWAK`
+- Публичные seed: 6 пачек × 100 на prod; раздавать порционно (первая ещё не опубликована). Ops SQL: [`supabase/sql/referral-seed-templates.sql`](supabase/sql/referral-seed-templates.sql). Не публиковать cold-start seed (ops)
 
 Учитывать лиги: junior ← junior+middle; middle ← middle+senior+; senior ← только senior+.
 
@@ -218,7 +218,7 @@ Gate: обычный браузер с `inviteGatePassed` → logout на `/regi
 | # | Сценарий | Ожидание | QA |
 |---|----------|----------|-----|
 | 1 | Чистый device → `/` или `/referral` | Invite gate | [x] |
-| 2 | Seed `YTHWKPDWAK` | validate ok → auth; `inviteGatePassed` | [x] |
+| 2 | Seed cold-start seed (ops) | validate ok → auth; `inviteGatePassed` | [x] |
 | 3 | Битый / exhausted код | ошибка поля + visual `invalid` | [x] битый; exhausted (A 2/2) |
 | 4 | ~~Email OTP happy path~~ | **skip v1** — email UI скрыт | skip |
 | 5 | ~~Resend OTP~~ | **skip v1** | skip |
@@ -389,7 +389,7 @@ Crawl (`robots.txt` / `sitemap.xml`) генерится из `LANDING_ENABLED` (
 
 ### Ops на старте
 
-- [~] Раздать публичные инвайты — 6 seed-пачек × 100 на prod (2026-08-14); коды только ops, не в git / не `YTHWKPDWAK`. Первая пачка ещё не опубликована. Убить пачку: `max_uses = uses` ([`referral-seed-templates.sql`](supabase/sql/referral-seed-templates.sql))
+- [~] Раздать публичные инвайты — 6 seed-пачек × 100 на prod (2026-08-14); коды только ops, не в git / не cold-start seed (ops). Первая пачка ещё не опубликована. Убить пачку: `max_uses = uses` ([`referral-seed-templates.sql`](supabase/sql/referral-seed-templates.sql))
 - [ ] Мониторить PostHog Live + Supabase Auth errors / Edge logs первые сутки
 - [ ] Шпаргалка бана под рукой: [`supabase/BAN.md`](supabase/BAN.md)
 

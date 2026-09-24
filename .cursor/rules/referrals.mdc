@@ -12,7 +12,7 @@ alwaysApply: true
 1. `/referral` → RPC `validate_referral` (**anon**, до auth) → `session.referralCode` + `obratka.inviteGatePassed` (device flag).
 2. После логина → `redeem_referral` (**один раз** на аккаунт).
 3. Код юзера: `profiles.referral_code`, max **2** (`REFERRAL_MAX_USES`).
-4. Seed холодного старта: `YTHWKPDWAK` в `referral_seed_codes` (только через RPC; **не** публиковать). Публичные волны — отдельные seed × 100, порционно.
+4. Seed холодного старта / публичные волны — только ops в `referral_seed_codes` через RPC (**не** публиковать, **не** коммитить живые коды). Пачки × 100 порционно.
 5. Prefill / share: `?ref=` + `normalizeReferralCode` / `buildReferralShareUrl`.
 6. Deep link `/registration` **или** `/registration/code` без кода, без сессии и без device gate → обратно на `/referral` (`flow.js`).
 7. Logout / мёртвый Auth: при `inviteGatePassed` → `/registration`, иначе → `/referral`. Gate один раз на устройство; `/referral` и `?ref=` остаются доступны.

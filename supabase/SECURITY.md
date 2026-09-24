@@ -18,14 +18,15 @@
 | `heartbeat_portfolio_claim(uuid)` | нет | да | TTL 20 min |
 | `release_portfolio_claim(uuid)` | нет | да | уход без submit |
 | `portfolio_reviewer_slots(uuid[])` | нет | да | слоты home; VOLATILE; в начале `purge_expired_review_claims` |
-| `can_review_portfolio(uuid, uuid)` | нет | да | лиги |
+| `can_review_portfolio(uuid, uuid)` | нет | да | лиги; 2-й аргумент игнорируется — всегда `auth.uid()` |
 | `has_reviewed_portfolio(uuid)` | нет | да | RLS «Уже отревьюено» / done без circular exists |
 | `can_review_grades(text, text)` | нет | да | лиги |
 | `grade_league(text)` | нет | да | лиги |
 | `is_profile_banned(uuid)` | нет | да | self-only |
 | `redeem_referral(text)` | нет | да | один раз на аккаунт |
-| `spend_submit_cost()` | нет | да | legacy списание; подача — `submit_portfolio` |
-| `submit_portfolio(text,text,text,text)` | нет | да | atomic spend + insert, max 1 pending; reject non-http(s) URL (`invalid_url`) |
+| `spend_submit_cost()` | нет | **нет** | legacy; EXECUTE revoked — подача только `submit_portfolio` |
+| `submit_portfolio(text,text,text,text)` | нет | да | atomic spend + insert, max 1 pending; `invite_required` / `invalid_url` |
+| `profile_has_invite_access(uuid)` / `invite_access_grandfather_before()` | нет | нет | internal invite gate (referral_entry_code или created_at < cutoff) |
 | `submit_review_complaint(uuid, text[])` | нет | да | жалоба на лист (1 тег, окно 6ч от done) |
 | `settle_review_reputation_rewards()` | нет | да | lazy +10 за чистые ревью после окна (от completed_at) |
 | `heartbeat_legendary_presence()` | нет | да | ping `last_seen_at` только для `tier=legendary` |
@@ -67,7 +68,7 @@ order by 1;
 | `portfolios` / `reviews` | по RLS (лиги, own); portfolios **без** client INSERT | insert портфолио только RPC `submit_portfolio`; INSERT review требует живой claim |
 | `review_claims` | только `select` | mutations — исключительно через RPC |
 | `review_complaints` | insert только RPC | `reporter_id` ревьюеру не виден |
-| `referral_seed_codes` | нет доступа | seed только через RPC (`YTHWKPDWAK` + пачки ×100; коды не в git) |
+| `referral_seed_codes` | нет доступа | seed только через RPC (пачки ×100; живые коды не в git) |
 | `subscribers` | нет доступа | legacy waitlist; клиент удалён — drop таблицы отдельно |
 | Storage `portfolio-previews` | select (публичный CDN, `public = true`) | insert/update/delete — только Edge `portfolio-preview` через `service_role`; политик на `storage.objects` нет — default-deny для anon/authenticated |
 

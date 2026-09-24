@@ -76,8 +76,10 @@ begin
 end;
 $$;
 
+-- Legacy orphan: spend without portfolio insert. Keep function for ops/history;
+-- clients must use submit_portfolio only.
 revoke all on function public.spend_submit_cost() from public;
 revoke all on function public.spend_submit_cost() from anon;
-grant execute on function public.spend_submit_cost() to authenticated;
+revoke all on function public.spend_submit_cost() from authenticated;
 
 -- temp_credit_balance удалён: клиент не должен начислять balance.

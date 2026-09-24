@@ -18,7 +18,7 @@ referral → auth → (authCode) → onboarding → home
 
 | Шаг | Экран | Path | Смысл |
 |-----|--------|------|--------|
-| 1 | `referral-screen` | `/referral` | Реферальный код (validate RPC; seed `YTHWKPDWAK`); стек аватаров — random из `founder-avatars.json` |
+| 1 | `referral-screen` | `/referral` | Реферальный код (validate RPC; seed только ops); стек аватаров — random из `founder-avatars.json` |
 | 2 | `auth-screen` | `/registration` | Telegram / Google (Email OTP скрыт: `EMAIL_AUTH_ENABLED = false`); consent под кнопками → политика / соглашение в side-panel |
 | 2b | `auth-code-screen` | `/registration/code` | 6 ячеек кода из письма; без гейта → `/referral`; с гейтом и email off → `/registration` |
 | 3 | `onboarding-screen` | `/onboarding` | Вопросы профиля → `profiles` |

@@ -22,6 +22,7 @@ import {
   buildReferralShareUrl,
   REFERRAL_MAX_USES,
 } from "../../utils/referralCode.js";
+import { safeHttpUrl } from "../../utils/safeHttpUrl.js";
 import { fetchMyReferral } from "../../api/referrals.js";
 import {
   canSubmitPortfolio,
@@ -627,20 +628,25 @@ function fillReviewerSlots(slots, item) {
       attachReviewerSlotTooltip(slot, gradeLabel);
     }
     if (slotAvatar) {
-      const slotImg = document.createElement("img");
-      slotImg.className = "home-screen__reviewer-slot-img";
-      slotImg.alt = "";
-      slotImg.width = 32;
-      slotImg.height = 32;
-      slotImg.decoding = "async";
-      slotImg.loading = "lazy";
-      slotImg.referrerPolicy = "no-referrer";
-      slotImg.addEventListener("error", () => {
-        slotImg.remove();
+      const safeAvatar = safeHttpUrl(slotAvatar);
+      if (safeAvatar) {
+        const slotImg = document.createElement("img");
+        slotImg.className = "home-screen__reviewer-slot-img";
+        slotImg.alt = "";
+        slotImg.width = 32;
+        slotImg.height = 32;
+        slotImg.decoding = "async";
+        slotImg.loading = "lazy";
+        slotImg.referrerPolicy = "no-referrer";
+        slotImg.addEventListener("error", () => {
+          slotImg.remove();
+          mountReviewerSlotLetter(slot, slotLetter, slotLetterSeed);
+        });
+        slotImg.src = safeAvatar;
+        slot.append(slotImg);
+      } else {
         mountReviewerSlotLetter(slot, slotLetter, slotLetterSeed);
-      });
-      slotImg.src = slotAvatar;
-      slot.append(slotImg);
+      }
     } else {
       mountReviewerSlotLetter(slot, slotLetter, slotLetterSeed);
     }

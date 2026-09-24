@@ -55,6 +55,10 @@ begin
     raise exception 'banned';
   end if;
 
+  if not public.profile_has_invite_access(uid) then
+    raise exception 'invite_required';
+  end if;
+
   if clean_url = '' then
     raise exception 'url_required';
   end if;

@@ -45,15 +45,31 @@ function parseSafeTargetUrl(raw: string): URL | null {
     return null;
   }
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
-  const host = parsed.hostname.toLowerCase();
+  const host = parsed.hostname.toLowerCase().replace(/\.$/, "");
   if (!host) return null;
-  if (host === "localhost" || host === "0.0.0.0" || host === "::1") return null;
-  if (host.endsWith(".local")) return null;
+  if (
+    host === "localhost" ||
+    host === "0.0.0.0" ||
+    host === "::1" ||
+    host === "[::1]"
+  ) {
+    return null;
+  }
+  if (host.endsWith(".local") || host.endsWith(".localhost")) return null;
+  if (host.includes(":")) return null;
   if (/^127\./.test(host)) return null;
   if (/^10\./.test(host)) return null;
   if (/^192\.168\./.test(host)) return null;
   if (/^169\.254\./.test(host)) return null;
   if (/^172\.(1[6-9]|2\d|3[0-1])\./.test(host)) return null;
+  if (
+    host === "metadata.google.internal" ||
+    host.endsWith(".metadata.google.internal") ||
+    host === "metadata" ||
+    host.endsWith(".internal")
+  ) {
+    return null;
+  }
   return parsed;
 }
 
@@ -168,9 +184,11 @@ Deno.serve(async (req) => {
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
   try {
-    const res = await fetch(target.href, {
+    // Manual redirects: re-validate Location against the denylist (no blind follow).
+    let fetchUrl = target.href;
+    let res = await fetch(fetchUrl, {
       method: "GET",
-      redirect: "follow",
+      redirect: "manual",
       signal: controller.signal,
       headers: {
         Accept: "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
@@ -178,6 +196,43 @@ Deno.serve(async (req) => {
           "Mozilla/5.0 (compatible; ObratkaEmbedProbe/1.0; +https://zaikopewpew.github.io/obratka/)",
       },
     });
+
+    if (res.status >= 300 && res.status < 400) {
+      const location = res.headers.get("location");
+      const next = location ? parseSafeTargetUrl(new URL(location, fetchUrl).href) : null;
+      if (!next) {
+        return jsonResponse({
+          canFrame: null,
+          error: "redirect_blocked",
+          reason: "redirect_blocked",
+          status: res.status,
+        });
+      }
+      try {
+        await res.body?.cancel();
+      } catch {
+        /* ignore */
+      }
+      fetchUrl = next.href;
+      res = await fetch(fetchUrl, {
+        method: "GET",
+        redirect: "manual",
+        signal: controller.signal,
+        headers: {
+          Accept: "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
+          "User-Agent":
+            "Mozilla/5.0 (compatible; ObratkaEmbedProbe/1.0; +https://zaikopewpew.github.io/obratka/)",
+        },
+      });
+      if (res.status >= 300 && res.status < 400) {
+        return jsonResponse({
+          canFrame: null,
+          error: "redirect_blocked",
+          reason: "redirect_blocked",
+          status: res.status,
+        });
+      }
+    }
 
     const policy = resolveFramePolicy(res.headers, embedderOrigin);
     let hostLabel: string | null = null;

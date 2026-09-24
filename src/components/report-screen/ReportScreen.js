@@ -26,6 +26,7 @@ import {
 } from "../../api/reviewComplaints.js";
 import { createAppModal } from "../app-modal/AppModal.js";
 import { createSidePanel } from "../side-panel/SidePanel.js";
+import { safeHttpUrl } from "../../utils/safeHttpUrl.js";
 
 const BRAND_MARK_CLASS = "report-screen__brand-mark";
 const BRAND_MARK_SVG = brandMarkSvg(BRAND_MARK_CLASS);
@@ -825,15 +826,23 @@ export function createReportScreen(opts = {}) {
       "";
 
     if (sheet.reviewerAvatarUrl) {
-      const img = document.createElement("img");
-      img.className = "report-screen__sheet-avatar-img";
-      img.src = sheet.reviewerAvatarUrl;
-      img.alt = "";
-      img.width = 40;
-      img.height = 40;
-      img.decoding = "async";
-      img.referrerPolicy = "no-referrer";
-      avatar.append(img);
+      const safeAvatar = safeHttpUrl(sheet.reviewerAvatarUrl);
+      if (safeAvatar) {
+        const img = document.createElement("img");
+        img.className = "report-screen__sheet-avatar-img";
+        img.src = safeAvatar;
+        img.alt = "";
+        img.width = 40;
+        img.height = 40;
+        img.decoding = "async";
+        img.referrerPolicy = "no-referrer";
+        avatar.append(img);
+      } else {
+        const letter = document.createElement("span");
+        letter.className = "report-screen__sheet-avatar-letter";
+        letter.textContent = (name.charAt(0) || "?").toUpperCase();
+        avatar.append(letter);
+      }
     } else {
       const letter = document.createElement("span");
       letter.className = "report-screen__sheet-avatar-letter";
